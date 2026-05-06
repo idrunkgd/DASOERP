@@ -1,0 +1,1132 @@
+// Dasolabs ERP — Prisma schema
+// PostgreSQL 14+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================
+// ENUMS
+// =============================================================
+
+enum Role {
+  ADMIN
+  MANAGER
+  COMMERCIAL
+  CONSULTANT
+  FINANCE
+}
+
+enum CompanyStatus {
+  PROSPECT
+  CLIENT
+  PARTNER
+  SUPPLIER
+}
+
+enum ContactStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum OfferStatus {
+  DRAFT          // brouillon
+  SENT           // envoyée
+  NEGOTIATION    // en négociation
+  WON            // gagnée
+  LOST           // perdue
+  CANCELLED      // annulée
+}
+
+enum OfferLineType {
+  SERVICE
+  LICENSE
+  HARDWARE
+  SUBCONTRACTING
+  OTHER
+}
+
+enum BillingMilestoneStatus {
+  PLANNED        // prévue
+  READY          // prête à facturer
+  TRANSMITTED    // transmise dans Peppol
+  PAID           // payée
+  CANCELLED      // annulée
+}
+
+enum ProjectStatus {
+  TO_START       // à démarrer
+  ACTIVE         // actif
+  ON_HOLD        // en pause
+  COMPLETED      // terminé
+  CANCELLED      // annulé
+}
+
+enum ActivityType {
+  ANALYSIS
+  DEVELOPMENT
+  PROJECT_MANAGEMENT
+  MEETING
+  SUPPORT
+  TRAINING
+  COMMERCIAL
+  ADMINISTRATIVE
+  OTHER
+}
+
+enum TimesheetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum PurchaseCategory {
+  HARDWARE
+  LICENSE
+  SUBCONTRACTING
+  TRAVEL
+  TRAINING
+  OTHER
+}
+
+enum PurchaseStatus {
+  PLANNED
+  ORDERED
+  RECEIVED
+  PAID
+  CANCELLED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  STATUS_CHANGE
+  OFFER_WON
+  OFFER_LOST
+  PROJECT_CREATED_FROM_OFFER
+  TIMESHEET_SUBMITTED
+  TIMESHEET_APPROVED
+  TIMESHEET_REJECTED
+  MILESTONE_STATUS_CHANGE
+  CSV_IMPORT
+  LOGIN
+  LOGOUT
+}
+
+enum CostCenterKind {
+  SALES
+  LEAVE
+  MEETING
+  ADMIN
+  TRAINING
+  RND
+  OTHER
+}
+
+// PROJECT  : forfait, tranches définies à la signature, complement -CN possible
+// CONSULTING : T&M, profils consultants, facturation depuis timesheet validés
+enum OfferMode {
+  PROJECT
+  CONSULTING
+}
+
+enum ProjectMode {
+  PROJECT
+  CONSULTING
+}
+
+enum MissionStatus {
+  NEW
+  QUALIFYING
+  PRESENTING
+  CONTRACTED
+  LOST
+  CANCELLED
+}
+
+enum CandidateStatus {
+  ACTIVE
+  ENGAGED
+  UNAVAILABLE
+  ARCHIVED
+}
+
+enum ApplicationStatus {
+  PRESENTED
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  SHORTLISTED
+  SELECTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum InterviewKind {
+  PHONE
+  VIDEO
+  ON_SITE
+  TECHNICAL
+  HR
+}
+
+enum InterviewOutcome {
+  PENDING
+  PASSED
+  FAILED
+  CANCELLED
+}
+
+enum BillingFrequency {
+  MONTHLY
+  WEEKLY
+  CUSTOM
+}
+
+// Statut d'exécution d'une Mission (consultance T&M, distinct du statut Projet forfait)
+enum MissionExecutionStatus {
+  PLANNED       // contractualisée mais pas encore commencée
+  ACTIVE        // en cours
+  EXTENDED      // prolongée
+  COMPLETED     // terminée normalement
+  CANCELLED     // annulée
+  ON_HOLD       // suspension temporaire
+}
+
+// Suivi interne des consultants Dasolabs (≠ recrutement de candidats externes)
+enum ConsultantReviewKind {
+  ONBOARDING            // entretien d'arrivée
+  CHECK_IN              // point régulier (mensuel/trimestriel)
+  ANNUAL_REVIEW         // entretien annuel
+  END_OF_MISSION        // bilan fin de mission
+  PERFORMANCE           // performance / feedback
+  CAREER                // évolution carrière
+  OFFBOARDING           // entretien de départ
+  OTHER_REVIEW
+}
+
+enum ConsultantReviewOutcome {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+// =============================================================
+// CORE
+// =============================================================
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  role              Role      @default(CONSULTANT)
+  active            Boolean   @default(true)
+  // Profil personnel (consultant interne)
+  photoUrl          String?
+  phone             String?
+  linkedinUrl       String?
+  city              String?
+  seniority         String?
+  yearsExperience   Int?
+  spokenLanguages   String[]  @default([])
+  // Coûts internes
+  dailyCost         Decimal?  @db.Decimal(10, 2)
+  hourlyCost        Decimal?  @db.Decimal(10, 2)
+  weeklyCapacityH   Decimal   @default(38) @db.Decimal(5, 2)
+  // Compétences (tags simples)
+  skills            String[]  @default([])
+  joinedAt          DateTime?
+  leftAt            DateTime?
+  // Lien si recruté depuis le vivier candidats (back-relation, défini sur Candidate)
+  recruitedFromCandidate Candidate? @relation("CandidatePromotion")
+  // Si l'utilisateur est un candidat à qui on a donné un accès portail
+  candidateProfile       Candidate? @relation("CandidatePortal")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  ownedCompanies      Company[]          @relation("CompanyOwner")
+  ownedContacts       Contact[]          @relation("ContactOwner")
+  ownedOffers         Offer[]            @relation("OfferOwner")
+  managedProjects     Project[]          @relation("ProjectManager")
+  remainingUpdatesOnProjects Project[]   @relation("ProjectRemainingUpdater")
+  salaryScenariosCreated CandidateSalaryScenario[] @relation("ScenarioCreator")
+  projectMemberships  ProjectMember[]
+  timesheetEntries    TimesheetEntry[]   @relation("TimesheetUser")
+  validatedTimesheets TimesheetEntry[]   @relation("TimesheetValidator")
+  planningEntries     PlanningEntry[]
+  purchasesCreated    Purchase[]         @relation("PurchaseCreator")
+  attachmentsUploaded Attachment[]       @relation("AttachmentUploader")
+  auditLogs           ActivityLog[]      @relation("ActivityLogActor")
+  contactInteractions ContactInteraction[]
+  ownedMissions       MissionRequest[]   @relation("MissionOwner")
+  ownedCandidates     Candidate[]        @relation("CandidateOwner")
+  // Missions T&M exécutées par ce consultant (User interne)
+  consultantMissions  Mission[]          @relation("MissionConsultant")
+  // Présentations sur des demandes de mission (consultant interne proposé au client)
+  missionApplications MissionApplication[] @relation("UserApplications")
+  // Entretiens internes (suivi consultant) : "subject" = celui dont on parle
+  reviewsAsSubject    ConsultantReview[] @relation("ReviewSubject")
+  reviewsConducted    ConsultantReview[] @relation("ReviewConductor")
+  // Surcharges fines de permissions au-dessus du rôle/groupe
+  permissionOverrides UserPermissionOverride[]
+  // Groupe d'accès — indépendant du rôle (ex: un consultant peut être Admin)
+  accessGroupId       String?
+  accessGroup         AccessGroup? @relation(fields: [accessGroupId], references: [id], onDelete: SetNull)
+}
+
+// =============================================================
+// SERVICE PROFILES — taux standards utilisés en chiffrage offre
+// =============================================================
+
+model ServiceProfile {
+  id             String   @id @default(cuid())
+  name           String   // ex: "Senior Developer"
+  description    String?
+  active         Boolean  @default(true)
+  // Coûts internes par défaut (peuvent être override par ligne)
+  hourlyCost     Decimal  @db.Decimal(10, 2)
+  dailyCost      Decimal  @db.Decimal(10, 2)
+  // Prix de vente standards
+  hourlySell     Decimal  @db.Decimal(10, 2)
+  dailySell      Decimal  @db.Decimal(10, 2)
+  offerLines     OfferLine[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// =============================================================
+// COST CENTERS — temps non-projet (sales, congé, meeting interne…)
+// =============================================================
+
+model CostCenter {
+  id              String         @id @default(cuid())
+  code            String         @unique          // SALES, LEAVE, MTG…
+  name            String
+  kind            CostCenterKind @default(OTHER)
+  active          Boolean        @default(true)
+  // Si true : compte comme productif (visible dans capacité), sinon non
+  countsAsBillable Boolean       @default(false)
+  description     String?
+  timesheetEntries TimesheetEntry[]
+  planningEntries  PlanningEntry[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+// =============================================================
+// COMPANIES & CONTACTS
+// =============================================================
+
+model Company {
+  id          String        @id @default(cuid())
+  name        String
+  vatNumber   String?       @unique          // BCE / TVA
+  website     String?
+  sector      String?
+  size        String?
+  status      CompanyStatus @default(PROSPECT)
+  source      String?
+  // Adresse
+  street      String?
+  city        String?
+  postalCode  String?
+  country     String?
+  notes       String?
+  ownerId     String?
+  owner       User?         @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  contacts    Contact[]
+  offers      Offer[]
+  projects    Project[]
+  purchases   Purchase[]    @relation("CompanyAsSupplier")
+  attachments Attachment[]  @relation("CompanyAttachments")
+  missions    MissionRequest[]
+  // Missions T&M exécutées chez ce client (consultant placé)
+  executedMissions Mission[] @relation("MissionCompany")
+  // Cas où cette société est l'intermédiaire / société de portage
+  intermediaryRequests   MissionRequest[] @relation("MissionRequestIntermediary")
+  intermediaryMissions   Mission[]        @relation("MissionExecIntermediary")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([name])
+  @@index([status])
+}
+
+model Contact {
+  id           String        @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String?
+  phone        String?
+  jobTitle     String?
+  status       ContactStatus @default(ACTIVE)
+  notes        String?
+  tags         String[]      @default([])
+  companyId    String?
+  company      Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  ownerId      String?
+  owner        User?         @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  interactions ContactInteraction[]
+  // Liaisons
+  offers       OfferContact[]
+  projects     ProjectContact[]
+  missions     MissionRequest[] @relation("MissionContact")
+  // Contact côté société de portage / intermédiaire
+  intermediaryRequests MissionRequest[] @relation("MissionRequestIntermediaryContact")
+  intermediaryMissions Mission[]        @relation("MissionExecIntermediaryContact")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([lastName, firstName])
+  @@index([companyId])
+}
+
+model ContactInteraction {
+  id        String   @id @default(cuid())
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  kind      String   // email, call, meeting, note...
+  subject   String
+  body      String?
+  occurredAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([contactId, occurredAt])
+}
+
+// =============================================================
+// OFFERS
+// =============================================================
+
+model Offer {
+  id                 String              @id @default(cuid())
+  reference          String              @unique
+  title              String
+  mode               OfferMode           @default(PROJECT)
+  status             OfferStatus         @default(DRAFT)
+  probability        Int                 @default(50)
+  description        String?
+  comments           String?
+
+  companyId          String
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contacts           OfferContact[]
+
+  // Compléments d'offre — forme une chaîne père/enfants
+  parentOfferId      String?
+  parentOffer        Offer?              @relation("OfferComplements", fields: [parentOfferId], references: [id], onDelete: SetNull)
+  complements        Offer[]             @relation("OfferComplements")
+
+  // Versioning : V2, V3... d'une offre envoyée que l'on souhaite remettre en chantier.
+  // L'ancienne version garde tous ses statuts/audit, mais devient lecture seule
+  // (et son champ supersededById pointe vers la nouvelle).
+  version            Int                 @default(1)
+  previousVersionId  String?             @unique
+  previousVersion    Offer?              @relation("OfferVersion", fields: [previousVersionId], references: [id], onDelete: SetNull)
+  nextVersion        Offer?              @relation("OfferVersion")
+
+  // Mode CONSULTING : rattachement à une demande de mission
+  missionRequestId   String?
+  missionRequest     MissionRequest?     @relation(fields: [missionRequestId], references: [id], onDelete: SetNull)
+  // Application (candidat) sélectionnée pour cette offre Consulting
+  applicationId      String?             @unique
+  application        MissionApplication? @relation("OfferApplication", fields: [applicationId], references: [id], onDelete: SetNull)
+
+  ownerId            String?
+  owner              User?               @relation("OfferOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  // Dates clés
+  sentAt             DateTime?
+  expectedDecisionAt DateTime?
+  closedAt           DateTime?
+
+  // Cache calculé (totaux)
+  totalSell          Decimal             @default(0) @db.Decimal(12, 2)
+  totalCost          Decimal             @default(0) @db.Decimal(12, 2)
+  marginAmount       Decimal             @default(0) @db.Decimal(12, 2)
+  marginPct          Decimal             @default(0) @db.Decimal(6, 3)
+
+  lines              OfferLine[]
+  milestones         BillingMilestone[]
+  attachments        Attachment[]        @relation("OfferAttachments")
+  project            Project?
+
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+}
+
+model OfferContact {
+  offerId   String
+  contactId String
+  offer     Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@id([offerId, contactId])
+}
+
+model OfferLine {
+  id              String        @id @default(cuid())
+  offerId         String
+  offer           Offer         @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  position        Int           @default(0)
+  description     String
+  type            OfferLineType @default(SERVICE)
+  // Pour les lignes SERVICE : profil applicable (cout & prix de vente standards)
+  profileId       String?
+  profile         ServiceProfile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  // Pour les lignes "OTHER" : marge directe en %
+  marginPctInput  Decimal?      @db.Decimal(5, 2)
+  quantity        Decimal       @db.Decimal(10, 2)
+  unit            String        @default("unit")  // unit, hour, day, license...
+  unitSellPrice   Decimal       @db.Decimal(12, 2)
+  unitCost        Decimal       @default(0) @db.Decimal(12, 2)
+  discountPct     Decimal       @default(0) @db.Decimal(5, 2)
+
+  // Cache calculé
+  totalSell       Decimal       @default(0) @db.Decimal(12, 2)
+  totalCost       Decimal       @default(0) @db.Decimal(12, 2)
+  marginAmount    Decimal       @default(0) @db.Decimal(12, 2)
+  marginPct       Decimal       @default(0) @db.Decimal(6, 3)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([offerId, position])
+}
+
+model BillingMilestone {
+  id          String                  @id @default(cuid())
+  offerId     String?
+  offer       Offer?                  @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  // Tranche T&M générée pour une mission consultance (mensuelle)
+  missionId   String?
+  mission     Mission?                @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  label       String
+  // Soit pourcentage, soit montant fixe — on stocke les deux pour traçabilité
+  percentage  Decimal?                @db.Decimal(5, 2)
+  amount      Decimal                 @db.Decimal(12, 2)   // HTVA
+  expectedAt  DateTime?
+  trigger     String?                 // condition de déclenchement
+  status      BillingMilestoneStatus  @default(PLANNED)
+  comment     String?
+  transmittedAt DateTime?
+  paidAt        DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  @@index([status, expectedAt])
+  @@index([projectId])
+  @@index([offerId])
+  @@index([missionId])
+}
+
+// =============================================================
+// PROJECTS
+// =============================================================
+
+model Project {
+  id                 String         @id @default(cuid())
+  reference          String         @unique
+  name               String
+  mode               ProjectMode    @default(PROJECT)
+  // Pour CONSULTING : facturation périodique (mensuelle par défaut)
+  billingFrequency   BillingFrequency? @default(MONTHLY)
+  status             ProjectStatus  @default(TO_START)
+  description        String?
+  notes              String?
+  risks              String?
+
+  companyId          String
+  company            Company        @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  offerId            String?        @unique
+  sourceOffer        Offer?         @relation(fields: [offerId], references: [id], onDelete: SetNull)
+
+  managerId          String?
+  manager            User?          @relation("ProjectManager", fields: [managerId], references: [id], onDelete: SetNull)
+
+  contacts           ProjectContact[]
+  members            ProjectMember[]
+
+  // Dates
+  plannedStart       DateTime?
+  plannedEnd         DateTime?
+  actualStart        DateTime?
+  actualEnd          DateTime?
+
+  // Budgets
+  budgetSell         Decimal        @default(0) @db.Decimal(12, 2)
+  budgetCost         Decimal        @default(0) @db.Decimal(12, 2)
+  budgetTimeH        Decimal        @default(0) @db.Decimal(8, 2)
+
+  // Cache (recalculé)
+  actualTimeH        Decimal        @default(0) @db.Decimal(10, 2)
+  actualTimeCost     Decimal        @default(0) @db.Decimal(12, 2)
+  actualPurchaseCost Decimal        @default(0) @db.Decimal(12, 2)
+  marginEstimated    Decimal        @default(0) @db.Decimal(12, 2)
+  marginActual       Decimal        @default(0) @db.Decimal(12, 2)
+  progressPct        Decimal        @default(0) @db.Decimal(5, 2)
+
+  // Reste à faire saisi manuellement par l'équipe (heures restantes pour terminer)
+  remainingTimeH     Decimal        @default(0) @db.Decimal(8, 2)
+  remainingUpdatedAt DateTime?
+  remainingUpdatedById String?
+  remainingUpdatedBy User?          @relation("ProjectRemainingUpdater", fields: [remainingUpdatedById], references: [id], onDelete: SetNull)
+
+  milestones         BillingMilestone[]
+  timesheetEntries   TimesheetEntry[]
+  purchases          Purchase[]
+  planningEntries    PlanningEntry[]
+  attachments        Attachment[]   @relation("ProjectAttachments")
+  reviews            ConsultantReview[] @relation("ProjectReviews")
+
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+}
+
+model ProjectContact {
+  projectId String
+  contactId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contact   Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, contactId])
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  roleLabel String?  // ex: "Lead developer", "PM"
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+}
+
+// =============================================================
+// TIMESHEETS
+// =============================================================
+
+model TimesheetEntry {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation("TimesheetUser", fields: [userId], references: [id], onDelete: Cascade)
+  // Une entrée timesheet vise EXACTEMENT UNE cible : projet, mission, ou centre de coût
+  projectId       String?
+  project         Project?        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  missionId       String?
+  mission         Mission?        @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  costCenterId    String?
+  costCenter      CostCenter?     @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
+  date            DateTime        @db.Date
+  hours           Decimal         @db.Decimal(5, 2)
+  activityType    ActivityType    @default(DEVELOPMENT)
+  description     String?
+  status          TimesheetStatus @default(DRAFT)
+  validatorId     String?
+  validator       User?           @relation("TimesheetValidator", fields: [validatorId], references: [id], onDelete: SetNull)
+  validationNote  String?
+  validatedAt     DateTime?
+  // Cache coût (heures × hourlyCost user au moment de la validation)
+  computedCost    Decimal?        @db.Decimal(12, 2)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([userId, date])
+  @@index([projectId, date])
+  @@index([status])
+}
+
+// =============================================================
+// PURCHASES
+// =============================================================
+
+model Purchase {
+  id            String           @id @default(cuid())
+  projectId     String
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  supplierId    String?
+  supplier      Company?         @relation("CompanyAsSupplier", fields: [supplierId], references: [id], onDelete: SetNull)
+  description   String
+  category      PurchaseCategory @default(OTHER)
+  amount        Decimal          @db.Decimal(12, 2)  // HTVA
+  purchaseDate  DateTime         @db.Date
+  status        PurchaseStatus   @default(PLANNED)
+  comment       String?
+  attachments   Attachment[]     @relation("PurchaseAttachments")
+  createdById   String?
+  createdBy     User?            @relation("PurchaseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([projectId])
+  @@index([status])
+}
+
+// =============================================================
+// PLANNING
+// =============================================================
+
+model PlanningEntry {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Cible UNIQUE : projet (forfait), mission (T&M), ou centre de coût (interne)
+  projectId    String?
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  missionId    String?
+  mission      Mission?     @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  costCenterId String?
+  costCenter   CostCenter?  @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
+  startDate    DateTime     @db.Date
+  endDate      DateTime     @db.Date
+  // Soit hoursPerDay, soit pct (0..100)
+  hoursPerDay  Decimal?     @db.Decimal(5, 2)
+  loadPct      Decimal?     @db.Decimal(5, 2)
+  activityType ActivityType @default(DEVELOPMENT)
+  comment      String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([userId, startDate])
+  @@index([projectId, startDate])
+}
+
+// =============================================================
+// ATTACHMENTS (metadata only — fichiers stockés sur disque/S3)
+// =============================================================
+
+model Attachment {
+  id          String   @id @default(cuid())
+  filename    String
+  mimeType    String
+  sizeBytes   Int
+  storagePath String
+  uploadedById String?
+  uploadedBy   User?    @relation("AttachmentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  // Polymorphisme léger via relations optionnelles
+  companyId   String?
+  company     Company? @relation("CompanyAttachments", fields: [companyId], references: [id], onDelete: Cascade)
+  offerId     String?
+  offer       Offer?   @relation("OfferAttachments", fields: [offerId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project? @relation("ProjectAttachments", fields: [projectId], references: [id], onDelete: Cascade)
+  purchaseId  String?
+  purchase    Purchase? @relation("PurchaseAttachments", fields: [purchaseId], references: [id], onDelete: Cascade)
+  candidateId String?
+  candidate   Candidate? @relation("CandidateAttachments", fields: [candidateId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+// =============================================================
+// AUDIT TRAIL
+// =============================================================
+
+model ActivityLog {
+  id         String      @id @default(cuid())
+  actorId    String?
+  actor      User?       @relation("ActivityLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+  action     AuditAction
+  entityType String      // "Offer", "Project", "TimesheetEntry"...
+  entityId   String?
+  message    String
+  diff       Json?
+  createdAt  DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// =============================================================
+// SETTINGS (clé/valeur générique pour paramètres globaux)
+// =============================================================
+
+model Setting {
+  key   String @id
+  value Json
+  updatedAt DateTime @updatedAt
+}
+
+// Expérience professionnelle d'un candidat — alimente son CV interne Dasolabs.
+// Modifiable par le candidat lui-même via le portail (/me) ou par un admin/recruteur.
+model CandidateExperience {
+  id          String    @id @default(cuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  companyName String
+  jobTitle    String?
+  startDate   DateTime  @db.Date
+  endDate     DateTime? @db.Date     // null = poste en cours
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([candidateId, startDate])
+}
+
+// Catalogue de compétences pré-configurées (autocomplete + cases à cocher)
+// Les User.skills et Candidate.skills restent String[] : on peut toujours
+// saisir une compétence hors catalogue (champ libre).
+model Skill {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  category  String?  // "Backend", "Frontend", "Cloud", "Soft skills"...
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category, name])
+}
+
+// Groupe d'accès : ensemble nommé de permissions, indépendant du rôle métier.
+// Le rôle (Consultant, Manager…) reste une étiquette de fonction.
+// Le groupe (Admin, Lecture seule, Manager projet…) définit les vrais droits.
+// Effective = group.permissions (si groupe assigné) OU role defaults, puis overrides.
+model AccessGroup {
+  id          String   @id @default(cuid())
+  name        String   @unique     // "Administrateur", "Lecture seule"…
+  description String?
+  permissions String[]              // liste des codes Permission
+  isSystem    Boolean  @default(false)  // groupes par défaut pré-créés
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Surcharge fine de permissions par utilisateur : grants explicites OU revokes
+// au-dessus du groupe (ou du rôle si pas de groupe).
+model UserPermissionOverride {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission String   // ex: "companies.write"
+  granted    Boolean  // true = ajout explicite, false = retrait explicite
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, permission])
+  @@index([userId])
+}
+
+// =============================================================
+// CONSULTANCE — demandes de mission, candidats, applications, entretiens
+// =============================================================
+
+model MissionRequest {
+  id              String        @id @default(cuid())
+  reference       String        @unique          // DEM-2026-0001
+  title           String
+  description     String?
+  status          MissionStatus @default(NEW)
+
+  companyId       String
+  company         Company       @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contactId       String?
+  contact         Contact?      @relation("MissionContact", fields: [contactId], references: [id], onDelete: SetNull)
+  // Société de portage / intermédiaire (ex: Randstad pour un consultant placé chez UCB)
+  intermediaryCompanyId String?
+  intermediaryCompany   Company? @relation("MissionRequestIntermediary", fields: [intermediaryCompanyId], references: [id], onDelete: SetNull)
+  intermediaryContactId String?
+  intermediaryContact   Contact? @relation("MissionRequestIntermediaryContact", fields: [intermediaryContactId], references: [id], onDelete: SetNull)
+  ownerId         String?
+  owner           User?         @relation("MissionOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  // Profil recherché
+  requiredSkills  String[]      @default([])
+  seniority       String?       // "Junior" | "Senior" | "Lead" | etc.
+  workLocation    String?       // Remote / Hybrid / Onsite + ville
+  startDate       DateTime?     @db.Date
+  endDate         DateTime?     @db.Date
+  estimatedDays   Int?
+  targetDailyRate Decimal?      @db.Decimal(10, 2)
+  maxDailyRate    Decimal?      @db.Decimal(10, 2)
+  notes           String?
+  closedAt        DateTime?
+  lostReason      String?
+
+  applications    MissionApplication[]
+  offers          Offer[]
+  // Si la demande aboutit, une Mission concrète est exécutée
+  executedMissions Mission[]    @relation("MissionRequestExecutions")
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+  @@index([intermediaryCompanyId])
+}
+
+model Candidate {
+  id              String          @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String?
+  phone           String?
+  linkedinUrl     String?
+  // URL externe ou data URI (image base64 pour les uploads <200KB)
+  photoUrl        String?
+  city            String?
+  source          String?         // LinkedIn, recommandation, plateforme...
+
+  skills          String[]        @default([])
+  yearsExperience Int?
+  seniority       String?
+  spokenLanguages String[]        @default([])
+
+  // Tarifs (côté coût pour Dasolabs)
+  dailyCost       Decimal?        @db.Decimal(10, 2)
+  hourlyCost      Decimal?        @db.Decimal(10, 2)
+  // Tarif minimum souhaité par le candidat (pour éviter les présentations à perte)
+  minDailyRate    Decimal?        @db.Decimal(10, 2)
+
+  status          CandidateStatus @default(ACTIVE)
+  availableFrom   DateTime?       @db.Date
+  notes           String?
+
+  ownerId         String?
+  owner           User?           @relation("CandidateOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  // Si le candidat a été recruté → on conserve un lien fort vers son User
+  convertedToUserId String?       @unique
+  convertedToUser   User?         @relation("CandidatePromotion", fields: [convertedToUserId], references: [id], onDelete: SetNull)
+  convertedAt       DateTime?
+
+  // Compte d'accès au portail candidat (Dasolabs leur crée un User pour qu'ils
+  // puissent compléter leur CV en self-service). Distinct de convertedToUserId
+  // qui correspond au recrutement effectif.
+  portalUserId      String?       @unique
+  portalUser        User?         @relation("CandidatePortal", fields: [portalUserId], references: [id], onDelete: SetNull)
+
+  applications    MissionApplication[]
+  attachments     Attachment[]    @relation("CandidateAttachments")
+  // Entretiens d'embauche Dasolabs (préliminaires, sans présentation client)
+  hiringInterviews Interview[]    @relation("CandidateHiringInterviews")
+  // Expériences professionnelles (CV) — alimentées par le candidat ou l'admin
+  experiences     CandidateExperience[]
+  // Simulations de package salarial rattachées à ce candidat
+  salaryScenarios CandidateSalaryScenario[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([lastName, firstName])
+  @@index([status])
+}
+
+// =============================================================
+// SIMULATEUR DE PACKAGE — calcul du coût journalier d'un candidat
+// à partir d'un brut mensuel + avantages (voiture, chèques-repas,
+// éco-chèques, assurance groupe, hospi, GSM, frais nets, etc.).
+// =============================================================
+model CandidateSalaryScenario {
+  id                        String      @id @default(cuid())
+  candidateId               String?
+  candidate                 Candidate?  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  label                     String
+
+  // Inputs salaire
+  grossMonthly              Decimal     @db.Decimal(10, 2)
+  monthsPerYear             Decimal     @default(13.92) @db.Decimal(5, 2)
+  employerChargesPct        Decimal     @default(25)    @db.Decimal(5, 2)
+  /// Régime hebdomadaire (5 = temps plein)
+  workingDaysPerWeek        Decimal     @default(5)     @db.Decimal(3, 1)
+  workingDaysPerYear        Int         @default(220)
+
+  // Avantages
+  carMonthlyTco             Decimal     @default(0) @db.Decimal(10, 2)
+  mealVoucherEmployerPerDay Decimal     @default(0) @db.Decimal(6, 2)
+  ecoVouchersAnnual         Decimal     @default(0) @db.Decimal(8, 2)
+  groupInsurancePct         Decimal     @default(0) @db.Decimal(5, 2)
+  /// Coût mensuel hospi + autres assurances (multiplié par 12 dans le calcul)
+  hospitalInsuranceMonthly  Decimal     @default(0) @db.Decimal(8, 2)
+  /// Coût mensuel GSM + internet (multiplié par 12 dans le calcul)
+  phoneInternetMonthly      Decimal     @default(0) @db.Decimal(8, 2)
+  netExpensesMonthly        Decimal     @default(0) @db.Decimal(8, 2)
+
+  // Marge cible + TJM vendu pour comparaison
+  targetMarginPct           Decimal     @default(35) @db.Decimal(5, 2)
+  /// TJM réellement facturé au client (0 = pas encore vendu)
+  soldDailyRate             Decimal     @default(0)  @db.Decimal(10, 2)
+
+  // Outputs cachés (pour tri/filtrage rapide)
+  totalAnnualCost           Decimal     @db.Decimal(12, 2)
+  costPerDay                Decimal     @db.Decimal(10, 2)
+  billableRate              Decimal     @db.Decimal(10, 2)
+
+  notes                     String?
+  createdById               String?
+  createdBy                 User?       @relation("ScenarioCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+
+  @@index([candidateId])
+  @@index([createdAt])
+}
+
+model MissionApplication {
+  id                 String              @id @default(cuid())
+  missionRequestId   String
+  missionRequest     MissionRequest      @relation(fields: [missionRequestId], references: [id], onDelete: Cascade)
+
+  // Une application référence EXACTEMENT UN sujet : soit un candidat externe,
+  // soit un consultant interne déjà chez Dasolabs.
+  candidateId        String?
+  candidate          Candidate?          @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  consultantId       String?
+  consultant         User?               @relation("UserApplications", fields: [consultantId], references: [id], onDelete: Cascade)
+
+  proposedDailyRate  Decimal?            @db.Decimal(10, 2)   // ce qu'on facturera au client
+  dailyCost          Decimal?            @db.Decimal(10, 2)   // snapshot du coût à la présentation
+
+  status             ApplicationStatus   @default(PRESENTED)
+  presentedAt        DateTime            @default(now())
+  decisionAt         DateTime?
+  rejectedReason     String?
+  notes              String?
+
+  interviews         Interview[]
+  offer              Offer?              @relation("OfferApplication")
+  // Une application SELECTED produit une Mission exécutée
+  mission            Mission?            @relation("ApplicationMission")
+
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  // Unicité au sein d'une demande, séparément par source. NULL ne participe pas
+  // aux contraintes uniques en Postgres, donc on peut avoir candidate ou consultant.
+  @@unique([missionRequestId, candidateId])
+  @@unique([missionRequestId, consultantId])
+  @@index([status])
+}
+
+model Interview {
+  id             String                @id @default(cuid())
+  // Une interview est SOIT rattachée à une présentation client (placement),
+  // SOIT directement à un candidat (entretien d'embauche Dasolabs préliminaire).
+  applicationId  String?
+  application    MissionApplication?   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidateId    String?
+  candidate      Candidate?            @relation("CandidateHiringInterviews", fields: [candidateId], references: [id], onDelete: Cascade)
+  scheduledAt    DateTime
+  kind           InterviewKind         @default(VIDEO)
+  interviewers   String?               // texte libre, plusieurs noms
+  location       String?
+  feedback       String?
+  outcome        InterviewOutcome      @default(PENDING)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@index([applicationId, scheduledAt])
+  @@index([candidateId, scheduledAt])
+  @@index([scheduledAt])
+}
+
+// =============================================================
+// MISSION (T&M / Consultance) — ENTITÉ DISTINCTE D'UN PROJET FORFAIT
+// =============================================================
+// Une Mission représente l'affectation contractualisée d'un consultant chez
+// un client en mode T&M (time & material). Elle est totalement indépendante
+// du modèle Project (qui reste pour le forfait, lignes, équipe, livrables).
+model Mission {
+  id                String                  @id @default(cuid())
+  reference         String                  @unique          // MIS-2026-0001
+  title             String
+
+  // Source : la demande client à l'origine
+  missionRequestId  String
+  missionRequest    MissionRequest          @relation("MissionRequestExecutions", fields: [missionRequestId], references: [id], onDelete: Restrict)
+  // Source : l'application sélectionnée (le candidat retenu)
+  applicationId     String?                 @unique
+  application       MissionApplication?     @relation("ApplicationMission", fields: [applicationId], references: [id], onDelete: SetNull)
+
+  // Le consultant interne qui exécute la mission
+  consultantId      String?
+  consultant        User?                   @relation("MissionConsultant", fields: [consultantId], references: [id], onDelete: SetNull)
+  // Le client final (où le consultant exécute la mission)
+  companyId         String
+  company           Company                 @relation("MissionCompany", fields: [companyId], references: [id], onDelete: Restrict)
+  // Société de portage / intermédiaire (ex: Randstad). Optionnel.
+  intermediaryCompanyId String?
+  intermediaryCompany   Company? @relation("MissionExecIntermediary", fields: [intermediaryCompanyId], references: [id], onDelete: SetNull)
+  intermediaryContactId String?
+  intermediaryContact   Contact? @relation("MissionExecIntermediaryContact", fields: [intermediaryContactId], references: [id], onDelete: SetNull)
+
+  // Conditions contractuelles
+  startDate         DateTime                @db.Date
+  endDate           DateTime                @db.Date
+  actualEndDate     DateTime?               @db.Date
+  estimatedDays     Int?
+  dailyRate         Decimal                 @db.Decimal(10, 2)  // facturé client
+  dailyCost         Decimal                 @db.Decimal(10, 2)  // payé / coût interne
+  workLocation      String?
+  billingFrequency  BillingFrequency        @default(MONTHLY)
+
+  // Statut d'exécution
+  status            MissionExecutionStatus  @default(PLANNED)
+
+  notes             String?
+
+  // Saisies & facturation
+  timesheetEntries  TimesheetEntry[]
+  planningEntries   PlanningEntry[]
+  milestones        BillingMilestone[]
+
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  @@index([consultantId, status])
+  @@index([companyId])
+  @@index([status, endDate])
+  @@index([intermediaryCompanyId])
+}
+
+// =============================================================
+// SUIVI INTERNE DES CONSULTANTS (employés Dasolabs)
+// =============================================================
+// Distinction claire :
+//   - Candidate + MissionApplication + Interview = recrutement externe
+//   - User (rôle CONSULTANT) + ConsultantReview    = suivi interne RH/Manager
+model ConsultantReview {
+  id             String                  @id @default(cuid())
+  subjectId      String
+  subject        User                    @relation("ReviewSubject",  fields: [subjectId],   references: [id], onDelete: Cascade)
+  conductedById  String?
+  conductedBy    User?                   @relation("ReviewConductor", fields: [conductedById], references: [id], onDelete: SetNull)
+  scheduledAt    DateTime
+  kind           ConsultantReviewKind    @default(CHECK_IN)
+  // Mission/Projet rattaché si pertinent (ex: end-of-mission)
+  projectId      String?
+  project        Project?                @relation("ProjectReviews", fields: [projectId], references: [id], onDelete: SetNull)
+  feedback       String?
+  privateNotes   String?    // visible uniquement par les Admin/Manager
+  goals          String?
+  outcome        ConsultantReviewOutcome @default(SCHEDULED)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  @@index([subjectId, scheduledAt])
+}
