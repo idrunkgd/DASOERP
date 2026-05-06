@@ -1,11 +1,27 @@
 "use client";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginSkeleton />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginSkeleton() {
+  return (
+    <div className="w-full max-w-md card p-8">
+      <div className="h-32 animate-pulse" />
+    </div>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") || "/dashboard";
