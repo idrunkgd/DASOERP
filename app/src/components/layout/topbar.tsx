@@ -2,7 +2,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { Search, LogOut, ChevronDown, User as UserIcon } from "lucide-react";
+import { Search, LogOut, ChevronDown, User as UserIcon, Menu } from "lucide-react";
 import Link from "next/link";
 
 type Result = {
@@ -13,7 +13,7 @@ type Result = {
   href: string;
 };
 
-export function Topbar({ accessGroupName }: { accessGroupName: string }) {
+export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: string; onToggleMenu?: () => void }) {
   const { data: session } = useSession();
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Result[]>([]);
@@ -43,14 +43,25 @@ export function Topbar({ accessGroupName }: { accessGroupName: string }) {
   }, []);
 
   return (
-    <header className="h-14 bg-white border-b border-border flex items-center px-4 gap-4 sticky top-0 z-20">
+    <header className="h-14 bg-white border-b border-border flex items-center px-3 md:px-4 gap-2 md:gap-4 sticky top-0 z-20">
+      {/* Hamburger : visible uniquement sur mobile (caché en md+) */}
+      {onToggleMenu && (
+        <button
+          type="button"
+          onClick={onToggleMenu}
+          className="md:hidden p-2 -ml-1 rounded-md hover:bg-midnight-50 text-midnight-700"
+          aria-label="Ouvrir le menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      )}
       <div className="flex-1 max-w-xl relative" ref={ref}>
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-midnight-400" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onFocus={() => results.length && setOpen(true)}
-          placeholder="Rechercher entreprises, contacts, offres, projets..."
+          placeholder="Rechercher..."
           className="w-full h-9 pl-9 pr-3 rounded-md border border-border bg-muted/40 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigoaccent/30"
         />
         {open && results.length > 0 && (

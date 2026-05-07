@@ -7,7 +7,7 @@ import {
   Clock, ShoppingCart, CalendarRange, UserCog, Receipt, Settings,
   MessageSquare, BadgeCheck, Briefcase, History, UserPlus, Headset,
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
-  Gauge, Calculator
+  Gauge, Calculator, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -74,23 +74,55 @@ const SECTIONS: Section[] = [
   }
 ];
 
-export function Sidebar({ role, permissions, restricted = false }: { role: Role; permissions: Permission[]; restricted?: boolean }) {
+export function Sidebar({
+  role,
+  permissions,
+  restricted = false,
+  mobileOpen = false,
+  onMobileClose
+}: {
+  role: Role;
+  permissions: Permission[];
+  restricted?: boolean;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}) {
   const path = usePathname();
   const permSet = new Set(permissions);
+
+  // Classes communes : sticky/visible en md+, drawer fixe en mobile
+  const asideClasses = cn(
+    "w-60 shrink-0 bg-midnight-950 text-midnight-100 flex flex-col z-40",
+    "fixed inset-y-0 left-0 h-screen transition-transform duration-200 ease-out",
+    "md:sticky md:top-0 md:translate-x-0",
+    mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+  );
+
+  const closeButton = onMobileClose && (
+    <button
+      type="button"
+      onClick={onMobileClose}
+      className="md:hidden text-midnight-300 hover:text-white p-1"
+      aria-label="Fermer le menu"
+    >
+      <X className="w-5 h-5" />
+    </button>
+  );
 
   // Visiteur / compte portail : sidebar minimale avec Mon profil uniquement
   if (restricted) {
     const active = path === "/me" || path.startsWith("/me/");
     return (
-      <aside className="w-60 shrink-0 bg-midnight-950 text-midnight-100 flex flex-col h-screen sticky top-0">
+      <aside className={asideClasses}>
         <div className="px-5 py-5 border-b border-white/5 flex items-center gap-3">
           <div className="bg-white rounded-lg p-1.5">
             <Image src="/dasolabs-icon.svg" alt="" width={26} height={32} />
           </div>
-          <div>
+          <div className="flex-1">
             <div className="text-sm font-semibold text-white">Dasolabs</div>
             <div className="text-[11px] text-midnight-300 -mt-0.5">Espace personnel</div>
           </div>
+          {closeButton}
         </div>
         <nav className="flex-1 py-3 px-2">
           <Link
@@ -111,15 +143,16 @@ export function Sidebar({ role, permissions, restricted = false }: { role: Role;
     );
   }
   return (
-    <aside className="w-60 shrink-0 bg-midnight-950 text-midnight-100 flex flex-col h-screen sticky top-0">
+    <aside className={asideClasses}>
       <div className="px-5 py-5 border-b border-white/5 flex items-center gap-3">
         <div className="bg-white rounded-lg p-1.5">
           <Image src="/dasolabs-icon.svg" alt="" width={26} height={32} />
         </div>
-        <div>
+        <div className="flex-1">
           <div className="text-sm font-semibold text-white">Dasolabs</div>
           <div className="text-[11px] text-midnight-300 -mt-0.5">ERP interne</div>
         </div>
+        {closeButton}
       </div>
       <nav className="flex-1 overflow-y-auto py-3 px-2">
         {SECTIONS.map(section => {
