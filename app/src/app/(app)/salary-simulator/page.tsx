@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Calculator } from "lucide-react";
+import { Calculator, ArrowLeftRight } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { DEFAULT_SALARY_INPUTS } from "@/lib/salary-calc";
 import { Simulator } from "./simulator";
@@ -82,6 +82,15 @@ export default async function SalarySimulatorPage({
       <PageHeader
         title="Simulateur de package"
         subtitle="À partir d'un brut demandé, calcule le coût employeur total et le TJM facturable"
+        actions={
+          <Link
+            href="/salary-simulator/brut-net"
+            className="btn-secondary text-sm"
+          >
+            <ArrowLeftRight className="w-4 h-4" />
+            Calculateur Brut ↔ Net
+          </Link>
+        }
       />
 
       <Simulator
