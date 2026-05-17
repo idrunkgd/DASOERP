@@ -45,7 +45,8 @@ const LABELS: Record<string, string> = {
   PAID: "Payée",
   ORDERED: "Commandé", RECEIVED: "Reçu",
   PROSPECT: "Prospect", CLIENT: "Client", PARTNER: "Partenaire", SUPPLIER: "Fournisseur",
-  INACTIVE: "Inactif", ARCHIVED: "Archivé"
+  INACTIVE: "Inactif", ARCHIVED: "Archivé",
+  ACTIVE_CT: "Actif"
 };
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {

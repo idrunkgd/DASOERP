@@ -1,14 +1,24 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { createSkill, updateSkill, deleteSkill } from "@/server/actions/skills";
 import { toast } from "sonner";
 import { Trash2, Plus, Edit3 } from "lucide-react";
+import { CategoryInput } from "./category-input";
 
 type Skill = { id: string; name: string; category: string | null; active: boolean };
 
 export function SkillsManager({ skills }: { skills: Skill[] }) {
   const [pending, start] = useTransition();
   const [filter, setFilter] = useState("");
+
+  // Liste unique des catégories existantes (triée)
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of skills) {
+      if (s.category && s.category.trim()) set.add(s.category.trim());
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [skills]);
 
   const groups = skills.reduce<Record<string, Skill[]>>((acc, s) => {
     const cat = s.category ?? "(sans catégorie)";
@@ -29,9 +39,19 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
           id="new-skill"
           className="grid grid-cols-12 gap-2 items-end"
         >
-          <div className="col-span-5"><label className="label">Nom *</label><input name="name" required className="input" placeholder="ex: react, kubernetes, leadership..." /></div>
-          <div className="col-span-5"><label className="label">Catégorie</label><input name="category" className="input" placeholder="ex: Frontend, Backend, Soft skills..." /></div>
-          <div className="col-span-2"><button disabled={pending} className="btn-primary w-full"><Plus className="w-4 h-4" /> Ajouter</button></div>
+          <div className="col-span-5">
+            <label className="label">Nom *</label>
+            <input name="name" required className="input" placeholder="ex: React, Kubernetes, Leadership..." />
+          </div>
+          <div className="col-span-5">
+            <label className="label">Catégorie</label>
+            <CategoryInput categories={categories} />
+          </div>
+          <div className="col-span-2">
+            <button disabled={pending} className="btn-primary w-full">
+              <Plus className="w-4 h-4" /> Ajouter
+            </button>
+          </div>
         </form>
       </section>
 
@@ -44,7 +64,7 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
           <section key={cat} className="card p-4">
             <h3 className="font-semibold text-sm uppercase tracking-wide text-midnight-500 mb-2">{cat} ({list.length})</h3>
             <div className="flex flex-wrap gap-2">
-              {list.map(s => <SkillRow key={s.id} skill={s} />)}
+              {list.map(s => <SkillRow key={s.id} skill={s} categories={categories} />)}
             </div>
           </section>
         )
@@ -53,20 +73,33 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
   );
 }
 
-function SkillRow({ skill }: { skill: Skill }) {
+function SkillRow({ skill, categories }: { skill: Skill; categories: string[] }) {
   const [pending, start] = useTransition();
   const [edit, setEdit] = useState(false);
   if (edit) {
     return (
       <form
-        action={(fd) => start(async () => { try { await updateSkill(skill.id, fd); setEdit(false); toast.success("Mis à jour"); } catch (e: any) { toast.error(e.message); } })}
-        className="flex items-center gap-1 border border-border rounded-full px-2 py-1 bg-midnight-50/50"
+        action={(fd) => start(async () => {
+          try { await updateSkill(skill.id, fd); setEdit(false); toast.success("Mis à jour"); }
+          catch (e: any) { toast.error(e.message); }
+        })}
+        className="flex items-center gap-2 border border-border rounded-lg px-2 py-1.5 bg-midnight-50/50 min-w-[280px]"
       >
-        <input name="name" defaultValue={skill.name} required className="bg-transparent text-xs w-24 border-none p-0 focus:outline-none" />
-        <span className="text-midnight-400 text-xs">·</span>
-        <input name="category" defaultValue={skill.category ?? ""} placeholder="cat." className="bg-transparent text-xs w-20 border-none p-0 focus:outline-none" />
-        <button disabled={pending} className="text-[10px] text-indigoaccent">OK</button>
-        <button type="button" onClick={() => setEdit(false)} className="text-[10px] text-midnight-500">×</button>
+        <input
+          name="name"
+          defaultValue={skill.name}
+          required
+          className="bg-white text-xs border border-border rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-indigoaccent/40 flex-1 min-w-0"
+        />
+        <div className="flex-1 min-w-0 [&_input]:!text-xs [&_input]:!py-1">
+          <CategoryInput
+            categories={categories}
+            initial={skill.category ?? ""}
+            placeholder="Catégorie"
+          />
+        </div>
+        <button disabled={pending} className="text-[10px] text-indigoaccent font-semibold px-1">OK</button>
+        <button type="button" onClick={() => setEdit(false)} className="text-[10px] text-midnight-500 px-1">×</button>
       </form>
     );
   }
