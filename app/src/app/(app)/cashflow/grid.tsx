@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, useTransition } from "react";
+import { Fragment, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   Check,
@@ -398,6 +398,25 @@ export function CashflowGrid({
 
 // ─────────── Section Block ───────────
 
+/** Palette stable de couleurs pour identifier visuellement chaque catégorie */
+const CATEGORY_COLORS = [
+  "bg-indigo-400", "bg-emerald-400", "bg-amber-400",
+  "bg-pink-400", "bg-cyan-400", "bg-purple-400",
+  "bg-teal-400", "bg-rose-400", "bg-blue-400",
+  "bg-orange-400", "bg-lime-400", "bg-violet-400",
+  "bg-fuchsia-400", "bg-sky-400", "bg-yellow-400"
+];
+
+function colorForCategory(category: string): string {
+  let h = 0;
+  for (let i = 0; i < category.length; i++) {
+    h = (h * 31 + category.charCodeAt(i)) & 0xffffff;
+  }
+  return CATEGORY_COLORS[Math.abs(h) % CATEGORY_COLORS.length];
+}
+
+const NO_CATEGORY = "(sans catégorie)";
+
 function SectionBlock({
   sectionKey,
   rows,
@@ -419,20 +438,50 @@ function SectionBlock({
   setEditingOneOffId: (id: string | null) => void;
   year: number;
 }) {
-  if (rows.length === 0 && (sectionKey === "income" || sectionKey === "recurring_expense" || sectionKey === "oneoff")) {
-    // Show header even if empty for these primary sections
-  }
+  // État des sous-catégories repliées (scope = cette section)
+  const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>({});
+
   if (rows.length === 0 && (sectionKey === "commitment" || sectionKey === "simulation")) {
     return null;
   }
+
+  // Regroupe par catégorie
+  const groupedByCategory = useMemo(() => {
+    const map = new Map<string, CashflowRow[]>();
+    for (const r of rows) {
+      const cat = r.category?.trim() || NO_CATEGORY;
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(r);
+    }
+    // Tri : catégories alphabétiques, "(sans catégorie)" en dernier
+    return Array.from(map.entries()).sort(([a], [b]) => {
+      if (a === NO_CATEGORY) return 1;
+      if (b === NO_CATEGORY) return -1;
+      return a.localeCompare(b);
+    });
+  }, [rows]);
 
   const sectionTotal = rows.reduce(
     (s, r) => s + r.cells.reduce((sm, c) => sm + (c.status === "SKIPPED" ? 0 : c.amount), 0),
     0
   );
 
+  // Sous-totaux mensuels par catégorie (pour affichage dans la ligne header de catégorie)
+  function computeCatCellTotals(catRows: CashflowRow[]): number[] {
+    return Array.from({ length: 12 }, (_, i) =>
+      catRows.reduce(
+        (s, r) => s + (r.cells[i].status === "SKIPPED" ? 0 : r.cells[i].amount),
+        0
+      )
+    );
+  }
+
+  // Doit-on afficher les sous-catégories ? Seulement s'il y en a > 1 (sinon c'est juste du bruit)
+  const showCategories = groupedByCategory.length > 1;
+
   return (
     <>
+      {/* Header de section */}
       <tr
         className={
           "border-t border-midnight-200 cursor-pointer " +
@@ -463,7 +512,104 @@ function SectionBlock({
         <td></td>
       </tr>
 
-      {!isCollapsed &&
+      {!isCollapsed && showCategories &&
+        groupedByCategory.map(([catName, catRows]) => {
+          const isCatCollapsed = collapsedCats[catName] ?? false;
+          const catTotal = catRows.reduce(
+            (s, r) =>
+              s +
+              r.cells.reduce((sm, c) => sm + (c.status === "SKIPPED" ? 0 : c.amount), 0),
+            0
+          );
+          const catCellTotals = computeCatCellTotals(catRows);
+          const isIncome = catRows.every((r) => r.isIncome);
+          const isExpense = catRows.every((r) => !r.isIncome);
+          const dotColor =
+            catName === NO_CATEGORY
+              ? "bg-midnight-300"
+              : colorForCategory(catName);
+
+          return (
+            <Fragment key={`cat-${catName}`}>
+              {/* Sous-header de catégorie */}
+              <tr
+                className="bg-white/60 border-t border-midnight-100 hover:bg-midnight-50/40 cursor-pointer"
+                onClick={() =>
+                  setCollapsedCats((c) => ({ ...c, [catName]: !c[catName] }))
+                }
+              >
+                <td className="px-3 py-1 pl-6 sticky left-0 bg-inherit z-10">
+                  <span className="inline-flex items-center gap-1.5 text-xs">
+                    {isCatCollapsed ? (
+                      <ChevronRight className="w-3 h-3 text-midnight-400" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3 text-midnight-400" />
+                    )}
+                    <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+                    <span className="font-semibold text-midnight-700">
+                      {catName}
+                    </span>
+                    <span className="text-midnight-400">({catRows.length})</span>
+                  </span>
+                </td>
+                {catCellTotals.map((amount, i) => (
+                  <td
+                    key={i}
+                    className={
+                      "text-right px-2 py-0.5 text-[11px] tabular-nums font-medium " +
+                      (amount === 0
+                        ? "text-midnight-300"
+                        : isIncome
+                        ? "text-emerald-700/80"
+                        : isExpense
+                        ? "text-red-700/80"
+                        : "text-midnight-600")
+                    }
+                  >
+                    {amount === 0 ? "—" : fmtShort(amount)}
+                  </td>
+                ))}
+                <td
+                  className={
+                    "text-right tabular-nums px-3 font-semibold text-xs bg-midnight-50/60 " +
+                    (isIncome
+                      ? "text-emerald-700"
+                      : isExpense
+                      ? "text-red-700"
+                      : "text-midnight-700")
+                  }
+                >
+                  {fmtShort(catTotal)}
+                </td>
+                <td></td>
+              </tr>
+
+              {/* Lignes de la catégorie */}
+              {!isCatCollapsed &&
+                catRows.map((row) => (
+                  <RowLine
+                    key={row.id}
+                    row={row}
+                    year={year}
+                    indent
+                    isEditingCell={(idx) =>
+                      editingCell?.rowId === row.id && editingCell.monthIdx === idx
+                    }
+                    onEditCell={(idx) =>
+                      setEditingCell({ rowId: row.id, monthIdx: idx })
+                    }
+                    onEditRow={() => {
+                      if (row.recurringId) setEditingRecId(row.recurringId);
+                      else if (row.oneOffId) setEditingOneOffId(row.oneOffId);
+                    }}
+                  />
+                ))}
+            </Fragment>
+          );
+        })}
+
+      {/* Fallback : 1 seule catégorie ou aucune → on liste directement les lignes sans groupement */}
+      {!isCollapsed && !showCategories &&
         rows.map((row) => (
           <RowLine
             key={row.id}
@@ -492,13 +638,15 @@ function RowLine({
   year,
   isEditingCell,
   onEditCell,
-  onEditRow
+  onEditRow,
+  indent = false
 }: {
   row: CashflowRow;
   year: number;
   isEditingCell: (idx: number) => boolean;
   onEditCell: (idx: number) => void;
   onEditRow: () => void;
+  indent?: boolean;
 }) {
   const [pending, start] = useTransition();
   const editable = row.kind !== "milestones";
@@ -531,18 +679,26 @@ function RowLine({
           : "")
       }
     >
-      <td className="px-3 py-1 sticky left-0 bg-white z-10 hover:bg-midnight-50/40">
+      <td
+        className={
+          "py-1 sticky left-0 bg-white z-10 hover:bg-midnight-50/40 " +
+          (indent ? "pl-10 pr-3" : "px-3")
+        }
+      >
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <div className="truncate font-medium text-midnight-900">
               {row.label}
             </div>
-            {row.category && (
+            {/* Affichage de la fréquence seulement (la catégorie est déjà dans le sous-header) */}
+            {row.frequency && row.frequency !== "MONTHLY" && (
+              <div className="text-[10px] text-midnight-400 truncate">
+                {row.frequency.toLowerCase()}
+              </div>
+            )}
+            {!indent && row.category && (
               <div className="text-[10px] text-midnight-400 truncate">
                 {row.category}
-                {row.frequency && row.frequency !== "MONTHLY"
-                  ? ` · ${row.frequency.toLowerCase()}`
-                  : ""}
               </div>
             )}
           </div>
