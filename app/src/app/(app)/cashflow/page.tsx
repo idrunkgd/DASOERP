@@ -19,7 +19,7 @@ export default async function CashflowPage({
 
   const year =
     parseInt(searchParams.year ?? "", 10) || new Date().getFullYear();
-  const [data, settings, recurringCats, oneOffCats] = await Promise.all([
+  const [data, settings, recurringCats, oneOffCats, missions] = await Promise.all([
     computeCashflowYear(year),
     prisma.cashflowSettings.findUnique({ where: { id: "singleton" } }),
     prisma.recurringExpense.findMany({
@@ -31,6 +31,17 @@ export default async function CashflowPage({
       where: { category: { not: null } },
       select: { category: true },
       distinct: ["category"]
+    }),
+    // Missions actives ou en cours — pour facturation T&M (jours × taux)
+    prisma.mission.findMany({
+      where: {
+        executionStatus: { in: ["ACTIVE", "EXTENDED", "PLANNED"] }
+      },
+      include: {
+        company: { select: { name: true } },
+        consultant: { select: { firstName: true, lastName: true } }
+      },
+      orderBy: { startDate: "desc" }
     })
   ]);
 
@@ -207,6 +218,16 @@ export default async function CashflowPage({
           settings?.startingDate?.toISOString().slice(0, 10) ?? `${year}-01-01`
         }
         categories={categories}
+        missions={missions.map((m) => ({
+          id: m.id,
+          reference: m.reference,
+          title: m.title,
+          dailyRate: Number(m.dailyRate),
+          companyName: m.company?.name ?? null,
+          consultantName: m.consultant
+            ? `${m.consultant.firstName} ${m.consultant.lastName}`
+            : null
+        }))}
       />
     </div>
   );

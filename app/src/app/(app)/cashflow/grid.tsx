@@ -53,16 +53,27 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   simulation: "Simulations (what-if)"
 };
 
+export type MissionForBilling = {
+  id: string;
+  reference: string;
+  title: string;
+  dailyRate: number;
+  companyName: string | null;
+  consultantName: string | null;
+};
+
 export function CashflowGrid({
   data,
   startingBalance,
   startingDate,
-  categories
+  categories,
+  missions
 }: {
   data: CashflowYear;
   startingBalance: number;
   startingDate: string;
   categories: string[];
+  missions: MissionForBilling[];
 }) {
   const [includeSim, setIncludeSim] = useState(true);
   const [editingCell, setEditingCell] = useState<{
@@ -369,6 +380,7 @@ export function CashflowGrid({
       {showNewOneOff.open && (
         <OneOffModal
           categories={categories}
+          missions={missions}
           kind={showNewOneOff.kind}
           year={data.year}
           onClose={() => setShowNewOneOff({ open: false, kind: "EXPENSE" })}
@@ -378,6 +390,7 @@ export function CashflowGrid({
       {editingOneOffId && (
         <OneOffModal
           categories={categories}
+          missions={missions}
           existing={data.rows.find((r) => r.oneOffId === editingOneOffId)}
           year={data.year}
           onClose={() => setEditingOneOffId(null)}
@@ -1049,12 +1062,14 @@ function OneOffModal({
   kind: kindProp,
   year,
   categories,
+  missions,
   onClose
 }: {
   existing?: CashflowRow;
   kind?: "EXPENSE" | "INCOME" | "COMMITMENT" | "SIMULATION";
   year: number;
   categories: string[];
+  missions: MissionForBilling[];
   onClose: () => void;
 }) {
   const [pending, start] = useTransition();
@@ -1080,6 +1095,49 @@ function OneOffModal({
       : existing?.kind === "simulation"
       ? "SIMULATION"
       : kindProp) ?? "EXPENSE";
+
+  // Mode facturation T&M : seulement disponible pour INCOME
+  const canUseTmBilling = initialKind === "INCOME" && missions.length > 0;
+  const [useTmBilling, setUseTmBilling] = useState(false);
+  const [selectedMissionId, setSelectedMissionId] = useState<string>("");
+  const [tmDays, setTmDays] = useState<number>(0);
+  const [tmRate, setTmRate] = useState<number>(0);
+  const [manualAmount, setManualAmount] = useState<number>(existingAmount);
+  const [manualLabel, setManualLabel] = useState<string>(existing?.label ?? "");
+
+  // Quand on sélectionne une mission, on auto-remplit le taux
+  function onMissionChange(missionId: string) {
+    setSelectedMissionId(missionId);
+    const m = missions.find((mm) => mm.id === missionId);
+    if (m) {
+      setTmRate(m.dailyRate);
+      // Suggère un libellé du genre "Facturation MIS-2026-0001 — 5j × 800€"
+      if (tmDays > 0) {
+        setManualLabel(
+          `Facturation ${m.reference} — ${tmDays}j × ${m.dailyRate}€`
+        );
+      } else {
+        setManualLabel(`Facturation ${m.reference}`);
+      }
+    }
+  }
+
+  // Recalcule le libellé suggéré quand jours changent
+  function onDaysChange(d: number) {
+    setTmDays(d);
+    const m = missions.find((mm) => mm.id === selectedMissionId);
+    if (m && d > 0) {
+      setManualLabel(
+        `Facturation ${m.reference} — ${d}j × ${tmRate || m.dailyRate}€`
+      );
+    }
+  }
+
+  const computedAmount = useTmBilling
+    ? Math.round(tmDays * tmRate * 100) / 100
+    : manualAmount;
+  const finalLabel = manualLabel;
+
   return (
     <Modal
       title={isEdit ? "Modifier" : kindLabel[initialKind]}
@@ -1087,6 +1145,20 @@ function OneOffModal({
     >
       <form
         action={(fd) => {
+          // Si mode T&M, on s'assure que le bon montant + libellé sont passés,
+          // et on ajoute la décomposition jours×taux dans les notes pour
+          // traçabilité (utile pour retrouver la base de la facturation plus tard).
+          if (useTmBilling) {
+            fd.set("amount", String(computedAmount));
+            fd.set("label", finalLabel);
+            const mission = missions.find((mm) => mm.id === selectedMissionId);
+            const breakdown = `Facturation T&M : ${tmDays}j × ${tmRate}€/j${mission ? ` — Mission ${mission.reference}` : ""}`;
+            const existingNotes = (fd.get("notes") as string) || "";
+            fd.set(
+              "notes",
+              existingNotes ? `${breakdown}\n${existingNotes}` : breakdown
+            );
+          }
           start(async () => {
             try {
               if (isEdit && existing?.oneOffId) {
@@ -1104,13 +1176,98 @@ function OneOffModal({
         className="space-y-3"
       >
         <input type="hidden" name="kind" value={initialKind} />
+
+        {/* Toggle facturation T&M (seulement pour INCOME) */}
+        {canUseTmBilling && (
+          <label className="flex items-center gap-2 p-2 rounded border border-indigo-200 bg-indigo-50/50 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={useTmBilling}
+              onChange={(e) => setUseTmBilling(e.target.checked)}
+            />
+            <div className="flex-1">
+              <div className="text-sm font-medium text-indigo-900">
+                Calculer depuis une mission (jours × taux)
+              </div>
+              <div className="text-[10px] text-indigo-700">
+                Facturation T&M : sélectionne la mission, tape les jours
+                prestés, le montant se calcule auto.
+              </div>
+            </div>
+          </label>
+        )}
+
+        {/* Mode T&M : sélecteur mission + jours */}
+        {useTmBilling && (
+          <div className="space-y-3 p-3 rounded border border-indigo-200 bg-white">
+            <div>
+              <label className="label">Mission *</label>
+              <select
+                value={selectedMissionId}
+                onChange={(e) => onMissionChange(e.target.value)}
+                className="input"
+                required
+              >
+                <option value="">— Sélectionner —</option>
+                {missions.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.reference} — {m.title}
+                    {m.companyName ? ` · ${m.companyName}` : ""}
+                    {m.consultantName ? ` · ${m.consultantName}` : ""}
+                    {` · ${m.dailyRate}€/j`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Jours prestés *</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={tmDays || ""}
+                  onChange={(e) => onDaysChange(Number(e.target.value) || 0)}
+                  className="input text-right tabular-nums"
+                  required={useTmBilling}
+                />
+              </div>
+              <div>
+                <label className="label">Taux journalier (€)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={tmRate || ""}
+                  onChange={(e) => setTmRate(Number(e.target.value) || 0)}
+                  className="input text-right tabular-nums"
+                  required={useTmBilling}
+                />
+                <div className="text-[10px] text-midnight-400 mt-0.5">
+                  Pré-rempli depuis la mission, modifiable
+                </div>
+              </div>
+            </div>
+            <div className="bg-emerald-50 border border-emerald-200 rounded p-2 text-sm flex items-center justify-between">
+              <span className="text-emerald-800">
+                <strong>{tmDays}j</strong> × <strong>{tmRate}€</strong> =
+              </span>
+              <span className="text-lg font-bold tabular-nums text-emerald-700">
+                {fmtShort(computedAmount)} €
+              </span>
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="label">Libellé *</label>
           <input
             name="label"
-            defaultValue={existing?.label ?? ""}
+            value={finalLabel}
+            onChange={(e) => setManualLabel(e.target.value)}
             required
             className="input"
+            placeholder={useTmBilling ? "Auto-généré depuis la mission" : ""}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -1118,7 +1275,7 @@ function OneOffModal({
             <label className="label">Catégorie</label>
             <CategoryInput
               categories={categories}
-              initial={existing?.category ?? ""}
+              initial={existing?.category ?? (useTmBilling ? "Factures clients" : "")}
               placeholder="ex: Marketing, Hardware…"
             />
           </div>
@@ -1128,10 +1285,17 @@ function OneOffModal({
               name="amount"
               type="number"
               step="0.01"
-              defaultValue={existingAmount}
+              value={useTmBilling ? computedAmount : manualAmount || ""}
+              onChange={(e) => setManualAmount(Number(e.target.value) || 0)}
               className="input"
               required
+              disabled={useTmBilling}
             />
+            {useTmBilling && (
+              <div className="text-[10px] text-midnight-400 mt-0.5">
+                Calculé auto : {tmDays}j × {tmRate}€
+              </div>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
