@@ -90,7 +90,7 @@ export function CashflowGrid({
   categories: string[];
   missions: MissionForBilling[];
 }) {
-  const [includeSim, setIncludeSim] = useState(true);
+  const [includeSim, setIncludeSim] = useState(false);
   const [editingCell, setEditingCell] = useState<{
     rowId: string;
     monthIdx: number;

@@ -274,6 +274,11 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   }
 
   // 2) Lignes individuelles pour les milestones standalone (sans mission) → PROJET
+  // Les BillingMilestones stockent leur amount en HTVA (cf. comment dans schéma).
+  // Dans le cashflow on veut afficher le TVAC = HTVA × 1.21 (21% TVA belge standard)
+  // pour comparer avec le compte bancaire.
+  const STANDALONE_VAT_RATE = 21;
+  const standaloneTvacMultiplier = 1 + STANDALONE_VAT_RATE / 100;
   for (const m of standaloneMilestones) {
     if (!m.expectedAt) continue;
     const monthIdx = m.expectedAt.getUTCMonth();
@@ -285,10 +290,12 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     const labelWithCompany = companyName
       ? `${m.label} (${companyName})`
       : m.label;
+    const amountTvac =
+      Math.round(Number(m.amount) * standaloneTvacMultiplier * 100) / 100;
     const cells: CashflowCell[] = MONTHS.map((i) =>
       i === monthIdx
         ? {
-            amount: Number(m.amount),
+            amount: amountTvac,
             status: (m.status === "PAID"
               ? "PAID"
               : m.status === "CANCELLED"
@@ -304,7 +311,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       category: "PROJET",
       isIncome: true,
       cells,
-      totalYear: Number(m.amount)
+      totalYear: amountTvac
     });
   }
 
