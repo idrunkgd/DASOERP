@@ -7,7 +7,7 @@ import {
   Clock, ShoppingCart, CalendarRange, UserCog, Receipt, Settings,
   MessageSquare, BadgeCheck, Briefcase, History, UserPlus, Headset,
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
-  Gauge, Calculator, X
+  Gauge, Calculator, X, TrendingUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -22,7 +22,8 @@ const SECTIONS: Section[] = [
     items: [
       { href: "/dashboard",         label: "Tableau de bord",      icon: LayoutDashboard },
       { href: "/project-status",    label: "Statut projet",        icon: Gauge },
-      { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" }
+      { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
+      { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" }
     ]
   },
   {

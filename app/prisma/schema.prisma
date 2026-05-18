@@ -261,6 +261,9 @@ model User {
   managedProjects     Project[]          @relation("ProjectManager")
   remainingUpdatesOnProjects Project[]   @relation("ProjectRemainingUpdater")
   salaryScenariosCreated CandidateSalaryScenario[] @relation("ScenarioCreator")
+  cashflowSettingsUpdates CashflowSettings[] @relation("CashflowSettingsUpdater")
+  recurringExpensesCreated RecurringExpense[] @relation("RecurringExpenseCreator")
+  oneOffCashflowEntriesCreated OneOffCashflowEntry[] @relation("OneOffCashflowCreator")
   projectMemberships  ProjectMember[]
   timesheetEntries    TimesheetEntry[]   @relation("TimesheetUser")
   validatedTimesheets TimesheetEntry[]   @relation("TimesheetValidator")
@@ -1129,4 +1132,106 @@ model ConsultantReview {
   updatedAt      DateTime                @updatedAt
 
   @@index([subjectId, scheduledAt])
+}
+
+// =============================================================
+// CASHFLOW — outil de trésorerie prévisionnelle
+// =============================================================
+
+enum RecurringFrequency {
+  MONTHLY         // tous les mois (paymentMonths ignoré)
+  QUARTERLY       // 4 fois/an
+  SEMI_ANNUAL     // 2 fois/an
+  ANNUAL          // 1 fois/an
+  CUSTOM          // mois spécifiques via paymentMonths
+}
+
+enum CashflowStatus {
+  PLANNED         // prévu
+  PAID            // payé / encaissé
+  SKIPPED         // annulé pour ce mois
+}
+
+enum CashflowKind {
+  EXPENSE         // dépense réelle
+  INCOME          // recette manuelle (en plus des BillingMilestones)
+  COMMITMENT      // engagement signé (entre dans le cumul)
+  SIMULATION      // simulation what-if (exclu du cumul par défaut)
+}
+
+/// Singleton settings cashflow (solde initial). 1 seule ligne attendue.
+model CashflowSettings {
+  id              String   @id @default("singleton")
+  startingBalance Decimal  @default(0) @db.Decimal(14, 2)
+  /// Date à laquelle ce solde initial est valable (typiquement 1er jan de l'année courante)
+  startingDate    DateTime @default(now()) @db.Date
+  updatedAt       DateTime @updatedAt
+  updatedById     String?
+  updatedBy       User?    @relation("CashflowSettingsUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+/// Catalogue des dépenses (et revenus) récurrents
+model RecurringExpense {
+  id              String   @id @default(cuid())
+  label           String
+  category        String?
+  /// Montant par défaut (peut être overridé par mois)
+  defaultAmount   Decimal  @db.Decimal(12, 2)
+  /// Si true, c'est une recette récurrente (loyer encaissé, abo SaaS encaissé, etc.) au lieu d'une dépense
+  isIncome        Boolean  @default(false)
+  frequency       RecurringFrequency @default(MONTHLY)
+  /// Pour CUSTOM/QUARTERLY/etc : liste des mois (1-12) où la ligne tombe
+  paymentMonths   Int[]    @default([])
+  isActive        Boolean  @default(true)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdById     String?
+  createdBy       User?    @relation("RecurringExpenseCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  months          RecurringExpenseMonth[]
+
+  @@index([category])
+  @@index([isActive])
+}
+
+/// Entrée mensuelle d'une dépense récurrente : override du montant + statut paiement
+model RecurringExpenseMonth {
+  id                  String   @id @default(cuid())
+  recurringExpenseId  String
+  recurringExpense    RecurringExpense @relation(fields: [recurringExpenseId], references: [id], onDelete: Cascade)
+  year                Int
+  month               Int      // 1-12
+  /// Si null, on utilise defaultAmount du parent
+  amountOverride      Decimal? @db.Decimal(12, 2)
+  status              CashflowStatus @default(PLANNED)
+  paidAt              DateTime?
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([recurringExpenseId, year, month])
+  @@index([year, month])
+  @@index([status])
+}
+
+/// Dépense/revenu ponctuel ou engagement / simulation what-if
+model OneOffCashflowEntry {
+  id          String       @id @default(cuid())
+  label       String
+  category    String?
+  amount      Decimal      @db.Decimal(12, 2)
+  /// Date cible — seul le mois compte pour le cashflow mensuel
+  date        DateTime     @db.Date
+  kind        CashflowKind
+  status      CashflowStatus @default(PLANNED)
+  paidAt      DateTime?
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  createdById String?
+  createdBy   User?        @relation("OneOffCashflowCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([date])
+  @@index([kind, status])
 }
