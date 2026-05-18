@@ -563,6 +563,152 @@ export async function updateBillingMilestone(formData: FormData) {
   revalidatePath("/cashflow");
 }
 
+/**
+ * Récupère toutes les tranches d'une mission sur une année donnée,
+ * indexées par mois (1-12). Inclut le taux journalier de la mission
+ * pour calculer le nombre de jours implicite (amount / dailyRate).
+ */
+export async function getMissionMilestonesYear(missionId: string, year: number) {
+  await requirePermission(PERM);
+  const yearStart = new Date(Date.UTC(year, 0, 1));
+  const yearEnd = new Date(Date.UTC(year, 11, 31, 23, 59, 59));
+  const [mission, milestones] = await Promise.all([
+    prisma.mission.findUniqueOrThrow({
+      where: { id: missionId },
+      include: { company: { select: { name: true } } }
+    }),
+    prisma.billingMilestone.findMany({
+      where: {
+        missionId,
+        expectedAt: { gte: yearStart, lte: yearEnd }
+      },
+      orderBy: { expectedAt: "asc" }
+    })
+  ]);
+  return {
+    mission: {
+      id: mission.id,
+      reference: mission.reference,
+      title: mission.title,
+      dailyRate: Number(mission.dailyRate),
+      companyName: mission.company?.name ?? null,
+      companyId: mission.companyId ?? null
+    },
+    milestones: milestones.map((m) => ({
+      id: m.id,
+      label: m.label,
+      amount: Number(m.amount),
+      status: m.status,
+      expectedAt: m.expectedAt?.toISOString() ?? null,
+      paidAt: m.paidAt?.toISOString() ?? null,
+      comment: m.comment,
+      month: m.expectedAt ? m.expectedAt.getUTCMonth() + 1 : null
+    }))
+  };
+}
+
+/**
+ * Met à jour en bulk les tranches d'une mission pour une année, en
+ * spécifiant uniquement un nombre de jours par mois.
+ * - Si la tranche existe : son montant est mis à jour (= days × dailyRate)
+ *   et le label est régénéré pour inclure les jours.
+ * - Si pas de tranche pour ce mois et days > 0 : on en crée une.
+ * - Si tranche existe et days = 0 : on la supprime (l'utilisateur peut
+ *   aussi le faire individuellement, mais c'est plus pratique en bulk).
+ */
+const BulkUpdateSchema = z.object({
+  missionId: z.string().min(1),
+  year: z.coerce.number().int(),
+  // JSON stringifié : { "1": 20, "2": 18, ... } (mois → jours)
+  daysByMonth: z.string().transform((v) => JSON.parse(v) as Record<string, number>)
+});
+
+export async function updateMissionDaysBulk(formData: FormData) {
+  const session = await requirePermission(PERM_WRITE);
+  const parsed = BulkUpdateSchema.parse(Object.fromEntries(formData));
+  const { missionId, year, daysByMonth } = parsed;
+
+  const mission = await prisma.mission.findUniqueOrThrow({
+    where: { id: missionId }
+  });
+  const dailyRate = Number(mission.dailyRate);
+
+  const MONTH_LABELS = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+
+  let updated = 0;
+  let created = 0;
+  let deleted = 0;
+
+  for (const [monthStr, daysVal] of Object.entries(daysByMonth)) {
+    const month = parseInt(monthStr, 10);
+    if (month < 1 || month > 12) continue;
+    const days = Math.max(0, Number(daysVal) || 0);
+
+    const monthStart = new Date(Date.UTC(year, month - 1, 1));
+    const monthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59));
+    const existing = await prisma.billingMilestone.findFirst({
+      where: {
+        missionId,
+        expectedAt: { gte: monthStart, lte: monthEnd }
+      }
+    });
+
+    // Protection : on ne touche pas aux tranches déjà PAID en bulk
+    if (existing && existing.status === "PAID") {
+      continue;
+    }
+
+    if (days === 0) {
+      if (existing) {
+        await prisma.billingMilestone.delete({ where: { id: existing.id } });
+        deleted++;
+      }
+      continue;
+    }
+
+    const amount = Math.round(days * dailyRate * 100) / 100;
+    const label = `${mission.reference} — ${MONTH_LABELS[month - 1]} ${year} (${days}j)`;
+
+    if (existing) {
+      await prisma.billingMilestone.update({
+        where: { id: existing.id },
+        data: { amount, label }
+      });
+      updated++;
+    } else {
+      const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+      const expectedAt = new Date(Date.UTC(year, month - 1, lastDay));
+      await prisma.billingMilestone.create({
+        data: {
+          label,
+          amount,
+          expectedAt,
+          status: "PLANNED",
+          mission: { connect: { id: missionId } },
+          ...(mission.companyId
+            ? { company: { connect: { id: mission.companyId } } }
+            : {})
+        }
+      });
+      created++;
+    }
+  }
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "BillingMilestone",
+    entityId: missionId,
+    message: `Mission ${mission.reference} — jours bulk update ${year} : ${updated} mises à jour, ${created} créées, ${deleted} supprimées`
+  });
+
+  revalidatePath("/cashflow");
+  return { updated, created, deleted };
+}
+
 export async function getMilestonesByIds(ids: string[]) {
   await requirePermission(PERM);
   if (ids.length === 0) return [];

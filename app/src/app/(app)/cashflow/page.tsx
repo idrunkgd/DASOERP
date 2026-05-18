@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/utils";
 import { prisma } from "@/lib/db";
 import { CashflowGrid } from "./grid";
 import { CurrentMonthPanel } from "./current-month";
+import { EditableBalanceKpi } from "./editable-balance-kpi";
 import { TrendingUp, TrendingDown, Wallet, Activity, Banknote } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -116,15 +117,11 @@ export default async function CashflowPage({
 
       {/* KPIs annuels */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
-        <KpiCard
-          label="Solde initial"
-          value={formatCurrency(data.startingBalance)}
-          hint={
-            settings?.startingDate
-              ? `au ${settings.startingDate.toISOString().slice(0, 10)}`
-              : ""
+        <EditableBalanceKpi
+          initialBalance={data.startingBalance}
+          startingDate={
+            settings?.startingDate?.toISOString().slice(0, 10) ?? `${year}-01-01`
           }
-          icon={Wallet}
         />
         <KpiCard
           label="Solde compte"

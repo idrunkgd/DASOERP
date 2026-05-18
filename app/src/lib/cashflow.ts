@@ -235,7 +235,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       id: `ms-mission-${missionId}`,
       kind: "milestones",
       label,
-      category: "Factures clients",
+      category: "MISSION",
       isIncome: true,
       missionId,
       cells,
@@ -243,7 +243,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     });
   }
 
-  // 2) Lignes individuelles pour les milestones standalone (sans mission)
+  // 2) Lignes individuelles pour les milestones standalone (sans mission) → PROJET
   for (const m of standaloneMilestones) {
     if (!m.expectedAt) continue;
     const monthIdx = m.expectedAt.getUTCMonth();
@@ -271,7 +271,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       id: `ms-${m.id}`,
       kind: "milestones",
       label: labelWithCompany,
-      category: "Factures clients",
+      category: "PROJET",
       isIncome: true,
       cells,
       totalYear: Number(m.amount)

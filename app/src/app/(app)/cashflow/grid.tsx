@@ -42,7 +42,9 @@ import {
   updateBillingMilestone,
   deleteBillingMilestoneFromCashflow,
   addBillingMilestoneToMission,
-  getMilestonesByIds
+  getMilestonesByIds,
+  getMissionMilestonesYear,
+  updateMissionDaysBulk
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
 
@@ -104,6 +106,7 @@ export function CashflowGrid({
   }>({ open: false, kind: "EXPENSE" });
   const [editingRecId, setEditingRecId] = useState<string | null>(null);
   const [editingOneOffId, setEditingOneOffId] = useState<string | null>(null);
+  const [editingMissionId, setEditingMissionId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Record<SectionKey, boolean>>({
     income: false,
     recurring_expense: false,
@@ -276,6 +279,7 @@ export function CashflowGrid({
                   setEditingMilestoneCell={setEditingMilestoneCell}
                   setEditingRecId={setEditingRecId}
                   setEditingOneOffId={setEditingOneOffId}
+                  setEditingMissionId={setEditingMissionId}
                   year={data.year}
                 />
               );
@@ -449,6 +453,14 @@ export function CashflowGrid({
           onClose={() => setEditingMilestoneCell(null)}
         />
       )}
+
+      {editingMissionId && (
+        <MissionYearEditModal
+          missionId={editingMissionId}
+          year={data.year}
+          onClose={() => setEditingMissionId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -483,6 +495,7 @@ function SectionBlock({
   } | null) => void;
   setEditingRecId: (id: string | null) => void;
   setEditingOneOffId: (id: string | null) => void;
+  setEditingMissionId: (id: string | null) => void;
   year: number;
 }) {
   // État des sous-catégories repliées (scope = cette section).
@@ -664,6 +677,7 @@ function SectionBlock({
                     onEditRow={() => {
                       if (row.recurringId) setEditingRecId(row.recurringId);
                       else if (row.oneOffId) setEditingOneOffId(row.oneOffId);
+                      else if (row.missionId) setEditingMissionId(row.missionId);
                     }}
                   />
                 ))}
@@ -1844,6 +1858,221 @@ function CleanupModal({
           >
             <Eraser className="w-4 h-4" />
             {pending ? "Nettoyage…" : "Confirmer"}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ─────────── Modal édition annuelle d'une mission par jours/mois ───────────
+
+type MissionYearData = {
+  mission: {
+    id: string;
+    reference: string;
+    title: string;
+    dailyRate: number;
+    companyName: string | null;
+    companyId: string | null;
+  };
+  milestones: {
+    id: string;
+    label: string;
+    amount: number;
+    status: string;
+    expectedAt: string | null;
+    paidAt: string | null;
+    comment: string | null;
+    month: number | null;
+  }[];
+};
+
+function MissionYearEditModal({
+  missionId,
+  year,
+  onClose
+}: {
+  missionId: string;
+  year: number;
+  onClose: () => void;
+}) {
+  const [data, setData] = useState<MissionYearData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pending, start] = useTransition();
+  // État local des jours par mois (1-12) — initialisé depuis les milestones existants
+  const [daysByMonth, setDaysByMonth] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const result = await getMissionMilestonesYear(missionId, year);
+        setData(result as MissionYearData);
+        // Pré-remplit : pour chaque milestone existant, days = amount / dailyRate
+        const init: Record<number, number> = {};
+        for (const m of result.milestones) {
+          if (m.month && result.mission.dailyRate > 0) {
+            init[m.month] = Math.round((m.amount / result.mission.dailyRate) * 10) / 10;
+          }
+        }
+        setDaysByMonth(init);
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [missionId, year]);
+
+  function setDays(month: number, val: number) {
+    setDaysByMonth((prev) => ({ ...prev, [month]: val }));
+  }
+
+  function save() {
+    if (!data) return;
+    const fd = new FormData();
+    fd.set("missionId", missionId);
+    fd.set("year", String(year));
+    fd.set("daysByMonth", JSON.stringify(daysByMonth));
+    start(async () => {
+      try {
+        const r = await updateMissionDaysBulk(fd);
+        toast.success(
+          `${r.updated} mises à jour, ${r.created} créées, ${r.deleted} supprimées`
+        );
+        onClose();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
+  if (loading) {
+    return (
+      <Modal title="Chargement…" onClose={onClose}>
+        <div className="text-center py-6">
+          <Loader2 className="w-6 h-6 animate-spin text-midnight-400 mx-auto" />
+        </div>
+      </Modal>
+    );
+  }
+  if (!data) return null;
+
+  const { mission, milestones } = data;
+  const milestonesByMonth = new Map<number, typeof milestones[number]>();
+  for (const m of milestones) {
+    if (m.month) milestonesByMonth.set(m.month, m);
+  }
+
+  // Total annuel calculé
+  const totalDays = Object.values(daysByMonth).reduce(
+    (s, d) => s + (d || 0),
+    0
+  );
+  const totalAmount = Math.round(totalDays * mission.dailyRate * 100) / 100;
+
+  return (
+    <Modal
+      title={`${mission.reference} — ${mission.title}${mission.companyName ? ` (${mission.companyName})` : ""}`}
+      onClose={onClose}
+    >
+      <div className="space-y-3">
+        <div className="text-xs text-midnight-600">
+          Taux journalier : <strong>{mission.dailyRate} €</strong>. Tape les
+          jours prestés mois par mois. Le montant est calculé auto. Mettre
+          <strong> 0 jours</strong> supprime la tranche du mois.
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[55vh] overflow-y-auto">
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
+            const existing = milestonesByMonth.get(month);
+            const days = daysByMonth[month] ?? 0;
+            const amount = Math.round(days * mission.dailyRate * 100) / 100;
+            const isPaid = existing?.status === "PAID";
+            return (
+              <div
+                key={month}
+                className={
+                  "rounded border p-2.5 " +
+                  (isPaid
+                    ? "border-emerald-300 bg-emerald-50/40"
+                    : "border-midnight-200 bg-white")
+                }
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-midnight-700">
+                    {MONTH_LABELS[month - 1]} {year}
+                  </span>
+                  {isPaid && (
+                    <span className="badge-success text-[10px]">Payé</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    value={days || ""}
+                    onChange={(e) =>
+                      setDays(month, Number(e.target.value) || 0)
+                    }
+                    placeholder="0"
+                    className="input flex-1 text-right tabular-nums text-sm py-1"
+                    disabled={isPaid}
+                  />
+                  <span className="text-[10px] text-midnight-400">j</span>
+                </div>
+                <div
+                  className={
+                    "text-right text-xs tabular-nums mt-1 " +
+                    (amount > 0
+                      ? "text-emerald-700 font-semibold"
+                      : "text-midnight-300")
+                  }
+                >
+                  {amount > 0 ? fmtShort(amount) + " €" : "—"}
+                </div>
+                {existing?.comment && (
+                  <div className="text-[10px] text-midnight-400 mt-1 truncate">
+                    {existing.comment}
+                  </div>
+                )}
+                {isPaid && (
+                  <div className="text-[10px] text-emerald-600 mt-0.5">
+                    Verrouillé (déjà payé)
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Récap */}
+        <div className="rounded bg-indigo-50 border border-indigo-200 p-2 text-sm flex items-center justify-between">
+          <span className="text-indigo-900">
+            <strong>{totalDays}j</strong> × <strong>{mission.dailyRate}€</strong> =
+          </span>
+          <span className="font-bold tabular-nums text-indigo-700">
+            {fmtShort(totalAmount)} € sur {year}
+          </span>
+        </div>
+
+        <div className="text-[11px] text-midnight-500">
+          💡 Les mois marqués <strong>Payé</strong> sont verrouillés ici. Pour
+          les modifier malgré tout, passe par le clic sur la cellule dans la grille.
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2 border-t border-midnight-200">
+          <button type="button" onClick={onClose} className="btn-secondary">
+            Annuler
+          </button>
+          <button
+            onClick={save}
+            disabled={pending}
+            className="btn-primary disabled:opacity-50"
+          >
+            <Save className="w-4 h-4" />
+            {pending ? "Sauvegarde…" : "Tout sauvegarder"}
           </button>
         </div>
       </div>
