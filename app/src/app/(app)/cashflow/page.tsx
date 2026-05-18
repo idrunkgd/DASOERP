@@ -35,7 +35,7 @@ export default async function CashflowPage({
     // Missions actives ou en cours — pour facturation T&M (jours × taux)
     prisma.mission.findMany({
       where: {
-        executionStatus: { in: ["ACTIVE", "EXTENDED", "PLANNED"] }
+        status: { in: ["ACTIVE", "EXTENDED", "PLANNED"] }
       },
       include: {
         company: { select: { name: true } },
