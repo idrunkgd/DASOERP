@@ -22,6 +22,7 @@ import {
   type CashflowRow,
   MONTH_LABELS
 } from "@/lib/cashflow";
+import { CategoryInput } from "@/components/forms/category-input";
 import {
   upsertCashflowSettings,
   createRecurringExpense,
@@ -53,11 +54,13 @@ const SECTION_LABELS: Record<SectionKey, string> = {
 export function CashflowGrid({
   data,
   startingBalance,
-  startingDate
+  startingDate,
+  categories
 }: {
   data: CashflowYear;
   startingBalance: number;
   startingDate: string;
+  categories: string[];
 }) {
   const [includeSim, setIncludeSim] = useState(true);
   const [editingCell, setEditingCell] = useState<{
@@ -335,12 +338,14 @@ export function CashflowGrid({
 
       {showNewRecurring && (
         <RecurringModal
+          categories={categories}
           onClose={() => setShowNewRecurring(false)}
         />
       )}
 
       {editingRecId && (
         <RecurringModal
+          categories={categories}
           existing={data.rows.find((r) => r.recurringId === editingRecId)}
           onClose={() => setEditingRecId(null)}
         />
@@ -348,6 +353,7 @@ export function CashflowGrid({
 
       {showNewOneOff.open && (
         <OneOffModal
+          categories={categories}
           kind={showNewOneOff.kind}
           year={data.year}
           onClose={() => setShowNewOneOff({ open: false, kind: "EXPENSE" })}
@@ -356,6 +362,7 @@ export function CashflowGrid({
 
       {editingOneOffId && (
         <OneOffModal
+          categories={categories}
           existing={data.rows.find((r) => r.oneOffId === editingOneOffId)}
           year={data.year}
           onClose={() => setEditingOneOffId(null)}
@@ -766,9 +773,11 @@ function SettingsModal({
 
 function RecurringModal({
   existing,
+  categories,
   onClose
 }: {
   existing?: CashflowRow;
+  categories: string[];
   onClose: () => void;
 }) {
   const [pending, start] = useTransition();
@@ -807,11 +816,10 @@ function RecurringModal({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">Catégorie</label>
-            <input
-              name="category"
-              defaultValue={existing?.category ?? ""}
-              className="input"
-              placeholder="ex: Charges fixes, Personnel"
+            <CategoryInput
+              categories={categories}
+              initial={existing?.category ?? ""}
+              placeholder="ex: Charges fixes, Personnel…"
             />
           </div>
           <div>
@@ -886,11 +894,13 @@ function OneOffModal({
   existing,
   kind: kindProp,
   year,
+  categories,
   onClose
 }: {
   existing?: CashflowRow;
   kind?: "EXPENSE" | "INCOME" | "COMMITMENT" | "SIMULATION";
   year: number;
+  categories: string[];
   onClose: () => void;
 }) {
   const [pending, start] = useTransition();
@@ -952,10 +962,10 @@ function OneOffModal({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">Catégorie</label>
-            <input
-              name="category"
-              defaultValue={existing?.category ?? ""}
-              className="input"
+            <CategoryInput
+              categories={categories}
+              initial={existing?.category ?? ""}
+              placeholder="ex: Marketing, Hardware…"
             />
           </div>
           <div>

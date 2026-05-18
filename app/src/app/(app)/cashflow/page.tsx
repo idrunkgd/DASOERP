@@ -17,10 +17,29 @@ export default async function CashflowPage({
   await requirePermission("finance.read");
 
   const year = parseInt(searchParams.year ?? "", 10) || new Date().getFullYear();
-  const [data, settings] = await Promise.all([
+  const [data, settings, recurringCats, oneOffCats] = await Promise.all([
     computeCashflowYear(year),
-    prisma.cashflowSettings.findUnique({ where: { id: "singleton" } })
+    prisma.cashflowSettings.findUnique({ where: { id: "singleton" } }),
+    prisma.recurringExpense.findMany({
+      where: { category: { not: null } },
+      select: { category: true },
+      distinct: ["category"]
+    }),
+    prisma.oneOffCashflowEntry.findMany({
+      where: { category: { not: null } },
+      select: { category: true },
+      distinct: ["category"]
+    })
   ]);
+
+  // Catégories distinctes utilisées (récurrents + ponctuels), triées
+  const categories = Array.from(
+    new Set(
+      [...recurringCats, ...oneOffCats]
+        .map((r) => r.category)
+        .filter((c): c is string => !!c && c.trim().length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b));
 
   const yearsToShow = [year - 1, year, year + 1];
 
@@ -86,6 +105,7 @@ export default async function CashflowPage({
         data={data}
         startingBalance={data.startingBalance}
         startingDate={settings?.startingDate?.toISOString().slice(0, 10) ?? `${year}-01-01`}
+        categories={categories}
       />
     </div>
   );

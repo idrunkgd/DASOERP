@@ -3,7 +3,7 @@ import { useMemo, useState, useTransition } from "react";
 import { createSkill, updateSkill, deleteSkill } from "@/server/actions/skills";
 import { toast } from "sonner";
 import { Trash2, Plus, Edit3 } from "lucide-react";
-import { CategoryInput } from "./category-input";
+import { CategoryInput } from "@/components/forms/category-input";
 
 type Skill = { id: string; name: string; category: string | null; active: boolean };
 
