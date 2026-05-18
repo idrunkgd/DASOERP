@@ -6,7 +6,7 @@ import { formatCurrency } from "@/lib/utils";
 import { prisma } from "@/lib/db";
 import { CashflowGrid } from "./grid";
 import { CurrentMonthPanel } from "./current-month";
-import { TrendingUp, TrendingDown, Wallet, Activity } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Activity, Banknote } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -75,6 +75,7 @@ export default async function CashflowPage({
       prisma.billingMilestone.findMany({
         where: { expectedAt: { gte: focusMonthStart, lte: focusMonthEnd } },
         include: {
+          company: { select: { name: true } },
           offer: { include: { company: { select: { name: true } } } },
           project: { include: { company: { select: { name: true } } } }
         },
@@ -114,7 +115,7 @@ export default async function CashflowPage({
       />
 
       {/* KPIs annuels */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
         <KpiCard
           label="Solde initial"
           value={formatCurrency(data.startingBalance)}
@@ -124,6 +125,13 @@ export default async function CashflowPage({
               : ""
           }
           icon={Wallet}
+        />
+        <KpiCard
+          label="Solde compte"
+          value={formatCurrency(data.yearTotals.realBankBalance)}
+          hint={`+${formatCurrency(data.yearTotals.realPaidInflow)} − ${formatCurrency(data.yearTotals.realPaidOutflow)} marqués payés`}
+          icon={Banknote}
+          tone={data.yearTotals.realBankBalance >= 0 ? "success" : "danger"}
         />
         <KpiCard
           label="Entrées année"
@@ -167,7 +175,10 @@ export default async function CashflowPage({
           expectedAt: m.expectedAt?.toISOString() ?? null,
           paidAt: m.paidAt?.toISOString() ?? null,
           companyName:
-            m.offer?.company?.name ?? m.project?.company?.name ?? null,
+            m.company?.name ??
+            m.offer?.company?.name ??
+            m.project?.company?.name ??
+            null,
           offerId: m.offerId,
           projectId: m.projectId
         }))}

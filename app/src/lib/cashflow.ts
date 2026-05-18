@@ -29,6 +29,8 @@ export type CashflowCell = {
   status: "PLANNED" | "PAID" | "SKIPPED" | "VIRTUAL"; // VIRTUAL = simu/engagement, pas saisi
   // Pour les lignes RecurringExpense : id de l'entrée mensuelle si elle existe
   monthEntryId?: string;
+  // Pour les lignes Milestones agrégées par mission : IDs des milestones de ce mois
+  milestoneIds?: string[];
   // Pour ré-éditer
   notes?: string | null;
 };
@@ -42,6 +44,7 @@ export type CashflowRow = {
   /** Ressources associées pour l'édition */
   recurringId?: string;     // pour kind = recurring_*
   oneOffId?: string;        // pour kind = oneoff_*, commitment, simulation
+  missionId?: string;       // pour kind = milestones, si agrégé par mission
   defaultAmount?: number;   // pour recurring_* : montant par défaut
   paymentMonths?: number[]; // mois où la dépense tombe (1-12)
   frequency?: string;
@@ -72,6 +75,10 @@ export type CashflowYear = {
     netWithSim: number;
     endingBalance: number;
     endingBalanceWithSim: number;
+    /** Solde de compte RÉEL : solde initial + tout ce qui a été marqué payé */
+    realBankBalance: number;
+    realPaidInflow: number;
+    realPaidOutflow: number;
   };
 };
 
@@ -129,8 +136,19 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     prisma.billingMilestone.findMany({
       where: { expectedAt: { gte: yearStart, lte: yearEnd } },
       include: {
+        // Lien direct (milestones standalone)
+        company: { select: { name: true } },
         offer: { include: { company: { select: { name: true } } } },
-        project: { include: { company: { select: { name: true } } } }
+        project: { include: { company: { select: { name: true } } } },
+        // Pour grouper les milestones d'une même mission sur une seule ligne
+        mission: {
+          select: {
+            id: true,
+            reference: true,
+            title: true,
+            company: { select: { name: true } }
+          }
+        }
       }
     })
   ]);
@@ -145,14 +163,95 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
 
   const rows: CashflowRow[] = [];
 
-  // ─── Lignes BillingMilestones : une ligne par milestone individuel ───
-  // (avant on agrégeait tout en 1 ligne — maintenant chaque facture client
-  // a sa propre ligne, avec le nom du client entre parenthèses)
+  // ─── Lignes BillingMilestones ───
+  // Stratégie :
+  //  - Milestones rattachés à une MÊME mission → 1 seule ligne agrégée
+  //    par mission, sommes par mois (typique facturation T&M récurrente)
+  //  - Milestones standalone (sans mission) → 1 ligne par milestone individuel
+  //
+  // Pour la ligne agrégée d'une mission :
+  //  - Le label inclut la référence mission + client
+  //  - Le statut de chaque cellule mensuelle = PAID si tous les milestones
+  //    de ce mois sont payés, SKIPPED si tous annulés, sinon PLANNED
+
+  // Regroupe les milestones par missionId
+  const milestonesByMission = new Map<string, typeof milestones>();
+  const standaloneMilestones: typeof milestones = [];
   for (const m of milestones) {
+    if (m.missionId) {
+      if (!milestonesByMission.has(m.missionId)) {
+        milestonesByMission.set(m.missionId, []);
+      }
+      milestonesByMission.get(m.missionId)!.push(m);
+    } else {
+      standaloneMilestones.push(m);
+    }
+  }
+
+  // 1) Une ligne par mission (agrégée)
+  for (const [missionId, group] of milestonesByMission) {
+    const mission = group[0].mission;
+    const companyName =
+      group[0].company?.name ??
+      group[0].offer?.company?.name ??
+      group[0].project?.company?.name ??
+      mission?.company?.name ??
+      null;
+    const ref = mission?.reference ?? "Mission";
+    const title = mission?.title ?? "";
+    const labelParts = [ref];
+    if (title) labelParts.push(title);
+    let label = labelParts.join(" — ");
+    if (companyName) label = `${label} (${companyName})`;
+
+    // Pour chaque mois, agrège les milestones de cette mission
+    const cells: CashflowCell[] = MONTHS.map((monthIdx) => {
+      const monthMilestones = group.filter(
+        (m) => m.expectedAt && m.expectedAt.getUTCMonth() === monthIdx
+      );
+      if (monthMilestones.length === 0) {
+        return { amount: 0, status: "PLANNED" as const };
+      }
+      const amount = monthMilestones
+        .filter((m) => m.status !== "CANCELLED")
+        .reduce((s, m) => s + Number(m.amount), 0);
+      const allPaid = monthMilestones.every((m) => m.status === "PAID");
+      const allCancelled = monthMilestones.every(
+        (m) => m.status === "CANCELLED"
+      );
+      const status: "PLANNED" | "PAID" | "SKIPPED" = allPaid
+        ? "PAID"
+        : allCancelled
+        ? "SKIPPED"
+        : "PLANNED";
+      return {
+        amount,
+        status,
+        milestoneIds: monthMilestones.map((m) => m.id)
+      };
+    });
+
+    rows.push({
+      id: `ms-mission-${missionId}`,
+      kind: "milestones",
+      label,
+      category: "Factures clients",
+      isIncome: true,
+      missionId,
+      cells,
+      totalYear: cells.reduce((s, c) => s + c.amount, 0)
+    });
+  }
+
+  // 2) Lignes individuelles pour les milestones standalone (sans mission)
+  for (const m of standaloneMilestones) {
     if (!m.expectedAt) continue;
     const monthIdx = m.expectedAt.getUTCMonth();
     const companyName =
-      m.offer?.company?.name ?? m.project?.company?.name ?? null;
+      m.company?.name ??
+      m.offer?.company?.name ??
+      m.project?.company?.name ??
+      null;
     const labelWithCompany = companyName
       ? `${m.label} (${companyName})`
       : m.label;
@@ -290,6 +389,19 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     m.cumulativeBalanceWithSim = runningBalanceSim;
   }
 
+  // Solde réel = solde initial + tout ce qui a été marqué PAID (exclut simulations)
+  let realPaidInflow = 0;
+  let realPaidOutflow = 0;
+  for (const row of rows) {
+    if (row.kind === "simulation") continue;
+    for (const cell of row.cells) {
+      if (cell.status !== "PAID") continue;
+      if (row.isIncome) realPaidInflow += cell.amount;
+      else realPaidOutflow += cell.amount;
+    }
+  }
+  const realBankBalance = startingBalance + realPaidInflow - realPaidOutflow;
+
   const yearTotals = {
     inflow: monthlyTotals.reduce((s, m) => s + m.inflow, 0),
     outflow: monthlyTotals.reduce((s, m) => s + m.outflow, 0),
@@ -298,7 +410,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     outflowWithSim: monthlyTotals.reduce((s, m) => s + m.outflowWithSim, 0),
     netWithSim: monthlyTotals.reduce((s, m) => s + m.netWithSim, 0),
     endingBalance: runningBalance,
-    endingBalanceWithSim: runningBalanceSim
+    endingBalanceWithSim: runningBalanceSim,
+    realBankBalance,
+    realPaidInflow,
+    realPaidOutflow
   };
 
   return {

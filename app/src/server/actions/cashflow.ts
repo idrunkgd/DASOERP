@@ -531,6 +531,124 @@ export async function generateMonthlyMissionInvoices(input: {
   return { created, skipped };
 }
 
+// ─────────────────────────────────────────────────────────────
+// MILESTONES individuels (édition rapide depuis le cashflow)
+// ─────────────────────────────────────────────────────────────
+
+const MilestoneUpdateSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1).max(200),
+  amount: z.coerce.number().min(0),
+  comment: z.string().optional().nullable().transform((v) => v?.trim() || null)
+});
+
+export async function updateBillingMilestone(formData: FormData) {
+  const session = await requirePermission(PERM_WRITE);
+  const data = MilestoneUpdateSchema.parse(Object.fromEntries(formData));
+  await prisma.billingMilestone.update({
+    where: { id: data.id },
+    data: {
+      label: data.label,
+      amount: data.amount,
+      comment: data.comment
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "BillingMilestone",
+    entityId: data.id,
+    message: `Tranche mise à jour depuis cashflow`
+  });
+  revalidatePath("/cashflow");
+}
+
+export async function getMilestonesByIds(ids: string[]) {
+  await requirePermission(PERM);
+  if (ids.length === 0) return [];
+  const list = await prisma.billingMilestone.findMany({
+    where: { id: { in: ids } },
+    select: {
+      id: true,
+      label: true,
+      amount: true,
+      status: true,
+      expectedAt: true,
+      paidAt: true,
+      comment: true,
+      missionId: true
+    },
+    orderBy: { expectedAt: "asc" }
+  });
+  return list.map((m) => ({
+    ...m,
+    amount: Number(m.amount),
+    expectedAt: m.expectedAt?.toISOString() ?? null,
+    paidAt: m.paidAt?.toISOString() ?? null
+  }));
+}
+
+export async function deleteBillingMilestoneFromCashflow(id: string) {
+  const session = await requirePermission(PERM_WRITE);
+  const before = await prisma.billingMilestone.findUniqueOrThrow({
+    where: { id }
+  });
+  await prisma.billingMilestone.delete({ where: { id } });
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "BillingMilestone",
+    entityId: id,
+    message: `Tranche « ${before.label} » supprimée depuis cashflow`
+  });
+  revalidatePath("/cashflow");
+}
+
+/**
+ * Crée une nouvelle tranche pour une mission sur un mois donné.
+ * Utilisé pour ajouter une tranche manquante depuis le cashflow (ex: bonus,
+ * facturation hors barème).
+ */
+const NewMilestoneSchema = z.object({
+  missionId: z.string().min(1),
+  year: z.coerce.number().int(),
+  month: z.coerce.number().int().min(1).max(12),
+  label: z.string().min(1).max(200),
+  amount: z.coerce.number().min(0)
+});
+
+export async function addBillingMilestoneToMission(formData: FormData) {
+  const session = await requirePermission(PERM_WRITE);
+  const data = NewMilestoneSchema.parse(Object.fromEntries(formData));
+  const mission = await prisma.mission.findUniqueOrThrow({
+    where: { id: data.missionId }
+  });
+  // Date de facturation : dernier jour du mois par défaut
+  const lastDay = new Date(Date.UTC(data.year, data.month, 0)).getUTCDate();
+  const expectedAt = new Date(Date.UTC(data.year, data.month - 1, lastDay));
+
+  await prisma.billingMilestone.create({
+    data: {
+      label: data.label,
+      amount: data.amount,
+      expectedAt,
+      status: "PLANNED",
+      mission: { connect: { id: data.missionId } },
+      ...(mission.companyId
+        ? { company: { connect: { id: mission.companyId } } }
+        : {})
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "BillingMilestone",
+    entityId: data.missionId,
+    message: `Tranche « ${data.label} » ajoutée depuis cashflow`
+  });
+  revalidatePath("/cashflow");
+}
+
 export async function toggleOneOffStatus(id: string) {
   await requirePermission(PERM_WRITE);
   const before = await prisma.oneOffCashflowEntry.findUniqueOrThrow({

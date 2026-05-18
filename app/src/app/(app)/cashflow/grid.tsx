@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useMemo, useState, useTransition } from "react";
+import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   Check,
@@ -38,8 +38,13 @@ import {
   deleteOneOffEntry,
   toggleOneOffStatus,
   cleanupCashflowBefore,
-  generateMonthlyMissionInvoices
+  generateMonthlyMissionInvoices,
+  updateBillingMilestone,
+  deleteBillingMilestoneFromCashflow,
+  addBillingMilestoneToMission,
+  getMilestonesByIds
 } from "@/server/actions/cashflow";
+import { setMilestoneStatus } from "@/server/actions/offers";
 
 type SectionKey =
   | "income"
@@ -82,6 +87,12 @@ export function CashflowGrid({
   const [editingCell, setEditingCell] = useState<{
     rowId: string;
     monthIdx: number;
+  } | null>(null);
+  const [editingMilestoneCell, setEditingMilestoneCell] = useState<{
+    rowLabel: string;
+    monthIdx: number;
+    milestoneIds: string[];
+    missionId?: string;
   } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showCleanup, setShowCleanup] = useState(false);
@@ -262,6 +273,7 @@ export function CashflowGrid({
                   }
                   editingCell={editingCell}
                   setEditingCell={setEditingCell}
+                  setEditingMilestoneCell={setEditingMilestoneCell}
                   setEditingRecId={setEditingRecId}
                   setEditingOneOffId={setEditingOneOffId}
                   year={data.year}
@@ -426,6 +438,17 @@ export function CashflowGrid({
           onClose={() => setEditingCell(null)}
         />
       )}
+
+      {editingMilestoneCell && (
+        <MilestoneCellModal
+          rowLabel={editingMilestoneCell.rowLabel}
+          monthIdx={editingMilestoneCell.monthIdx}
+          year={data.year}
+          milestoneIds={editingMilestoneCell.milestoneIds}
+          missionId={editingMilestoneCell.missionId}
+          onClose={() => setEditingMilestoneCell(null)}
+        />
+      )}
     </div>
   );
 }
@@ -441,6 +464,7 @@ function SectionBlock({
   onToggle,
   editingCell,
   setEditingCell,
+  setEditingMilestoneCell,
   setEditingRecId,
   setEditingOneOffId,
   year
@@ -451,6 +475,12 @@ function SectionBlock({
   onToggle: () => void;
   editingCell: { rowId: string; monthIdx: number } | null;
   setEditingCell: (v: { rowId: string; monthIdx: number } | null) => void;
+  setEditingMilestoneCell: (v: {
+    rowLabel: string;
+    monthIdx: number;
+    milestoneIds: string[];
+    missionId?: string;
+  } | null) => void;
   setEditingRecId: (id: string | null) => void;
   setEditingOneOffId: (id: string | null) => void;
   year: number;
@@ -617,9 +647,20 @@ function SectionBlock({
                     isEditingCell={(idx) =>
                       editingCell?.rowId === row.id && editingCell.monthIdx === idx
                     }
-                    onEditCell={(idx) =>
-                      setEditingCell({ rowId: row.id, monthIdx: idx })
-                    }
+                    onEditCell={(idx) => {
+                      const cell = row.cells[idx];
+                      // Si c'est une cellule de milestones agrégés par mission → modal milestones
+                      if (row.kind === "milestones" && cell.milestoneIds && cell.milestoneIds.length > 0) {
+                        setEditingMilestoneCell({
+                          rowLabel: row.label,
+                          monthIdx: idx,
+                          milestoneIds: cell.milestoneIds,
+                          missionId: row.missionId
+                        });
+                      } else {
+                        setEditingCell({ rowId: row.id, monthIdx: idx });
+                      }
+                    }}
                     onEditRow={() => {
                       if (row.recurringId) setEditingRecId(row.recurringId);
                       else if (row.oneOffId) setEditingOneOffId(row.oneOffId);
@@ -671,7 +712,12 @@ function RowLine({
   indent?: boolean;
 }) {
   const [pending, start] = useTransition();
-  const editable = row.kind !== "milestones";
+  // Une ligne est éditable si elle est manipulable directement (récurrent, one-off…)
+  // Pour les milestones agrégés par mission, la cellule l'est uniquement si elle
+  // a des milestoneIds (donc une vraie ligne de mission, pas standalone).
+  const editable =
+    row.kind !== "milestones" ||
+    row.cells.some((c) => c.milestoneIds && c.milestoneIds.length > 0);
   const isSimulation = row.kind === "simulation";
   const isCommitment = row.kind === "commitment";
 
@@ -757,7 +803,8 @@ function RowLine({
           >
             <div className="flex items-center justify-end gap-1 tabular-nums">
               <span>{hasValue ? fmtShort(cell.amount) : "—"}</span>
-              {hasValue && editable && (
+              {/* Toggle inline status : pas pour milestones (multi-statuts possibles) */}
+              {hasValue && editable && row.kind !== "milestones" && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1801,6 +1848,371 @@ function CleanupModal({
         </div>
       </div>
     </Modal>
+  );
+}
+
+// ─────────── Modal d'édition des milestones d'une cellule ───────────
+
+type MilestoneData = {
+  id: string;
+  label: string;
+  amount: number;
+  status: string;
+  expectedAt: string | null;
+  paidAt: string | null;
+  comment: string | null;
+  missionId: string | null;
+};
+
+function MilestoneCellModal({
+  rowLabel,
+  monthIdx,
+  year,
+  milestoneIds,
+  missionId,
+  onClose
+}: {
+  rowLabel: string;
+  monthIdx: number;
+  year: number;
+  milestoneIds: string[];
+  missionId?: string;
+  onClose: () => void;
+}) {
+  const [items, setItems] = useState<MilestoneData[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pending, start] = useTransition();
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  // Fetch initial
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getMilestonesByIds(milestoneIds);
+        setItems(data as MilestoneData[]);
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur de chargement");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [milestoneIds]);
+
+  function refresh() {
+    setLoading(true);
+    getMilestonesByIds(milestoneIds)
+      .then((data) => setItems(data as MilestoneData[]))
+      .finally(() => setLoading(false));
+  }
+
+  return (
+    <Modal
+      title={`${rowLabel} — ${MONTH_LABELS[monthIdx]} ${year}`}
+      onClose={onClose}
+    >
+      <div className="space-y-3">
+        <p className="text-xs text-midnight-500">
+          Édite chaque tranche individuellement : libellé, montant, statut.
+          Utile pour ajuster un mois où il y a eu moins de jours prestés (ex :
+          congés).
+        </p>
+
+        {loading && (
+          <div className="text-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-midnight-400 mx-auto" />
+          </div>
+        )}
+
+        {!loading && items && items.length === 0 && (
+          <p className="text-sm text-midnight-500">
+            Aucune tranche ce mois pour cette mission.
+          </p>
+        )}
+
+        {!loading && items && items.map((m) => (
+          <MilestoneEditCard
+            key={m.id}
+            milestone={m}
+            onSaved={refresh}
+            onDeleted={refresh}
+          />
+        ))}
+
+        {/* Ajouter une tranche pour ce mois (si mission liée) */}
+        {missionId && (
+          showAddForm ? (
+            <AddMilestoneForm
+              missionId={missionId}
+              year={year}
+              month={monthIdx + 1}
+              onSaved={() => {
+                setShowAddForm(false);
+                refresh();
+                // Note : la nouvelle tranche n'est pas dans milestoneIds donc
+                // on suggère un refresh de la page complète pour la voir.
+                toast.info("Recharge la page pour voir la nouvelle tranche dans la grille");
+              }}
+              onCancel={() => setShowAddForm(false)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowAddForm(true)}
+              className="btn-secondary w-full text-sm"
+            >
+              <Plus className="w-4 h-4" /> Ajouter une tranche ce mois
+            </button>
+          )
+        )}
+
+        <div className="flex justify-end pt-2 border-t border-midnight-200">
+          <button type="button" onClick={onClose} className="btn-secondary">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function MilestoneEditCard({
+  milestone,
+  onSaved,
+  onDeleted
+}: {
+  milestone: MilestoneData;
+  onSaved: () => void;
+  onDeleted: () => void;
+}) {
+  const [label, setLabel] = useState(milestone.label);
+  const [amount, setAmount] = useState(milestone.amount);
+  const [comment, setComment] = useState(milestone.comment ?? "");
+  const [pending, start] = useTransition();
+  const isPaid = milestone.status === "PAID";
+  const isCancelled = milestone.status === "CANCELLED";
+  const dirty =
+    label !== milestone.label ||
+    amount !== milestone.amount ||
+    (comment || "") !== (milestone.comment ?? "");
+
+  function save() {
+    const fd = new FormData();
+    fd.set("id", milestone.id);
+    fd.set("label", label);
+    fd.set("amount", String(amount));
+    fd.set("comment", comment);
+    start(async () => {
+      try {
+        await updateBillingMilestone(fd);
+        toast.success("Mise à jour");
+        onSaved();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
+  function togglePaid() {
+    start(async () => {
+      try {
+        await setMilestoneStatus(milestone.id, isPaid ? "READY" : "PAID");
+        toast.success(isPaid ? "Marqué non payé" : "Marqué payé ✓");
+        onSaved();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
+  function del() {
+    if (!confirm(`Supprimer la tranche « ${milestone.label} » ?`)) return;
+    start(async () => {
+      try {
+        await deleteBillingMilestoneFromCashflow(milestone.id);
+        toast.success("Supprimée");
+        onDeleted();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
+  return (
+    <div
+      className={
+        "rounded border p-3 space-y-2 " +
+        (isPaid
+          ? "bg-emerald-50/40 border-emerald-200"
+          : isCancelled
+          ? "bg-midnight-50 border-midnight-200 opacity-60"
+          : "bg-white border-midnight-200")
+      }
+    >
+      <div>
+        <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+          Libellé
+        </label>
+        <input
+          type="text"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          className="input w-full text-sm"
+          disabled={isCancelled}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+            Montant (€)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(Number(e.target.value) || 0)}
+            className="input w-full text-sm text-right tabular-nums"
+            disabled={isCancelled}
+          />
+        </div>
+        <div>
+          <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+            Statut
+          </label>
+          <div className="flex items-center gap-2 h-9">
+            <span
+              className={
+                "badge-" +
+                (isPaid
+                  ? "success"
+                  : isCancelled
+                  ? "neutral"
+                  : "info")
+              }
+            >
+              {milestone.status}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+          Commentaire
+        </label>
+        <input
+          type="text"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="input w-full text-xs"
+          placeholder="Ex: congés en août → 10j au lieu de 20"
+          disabled={isCancelled}
+        />
+      </div>
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-midnight-100">
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={togglePaid}
+            disabled={pending || isCancelled}
+            className={
+              "text-xs px-2 py-1 rounded " +
+              (isPaid
+                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                : "bg-midnight-100 hover:bg-emerald-100 text-midnight-700")
+            }
+          >
+            {pending ? (
+              <Loader2 className="w-3 h-3 inline animate-spin" />
+            ) : isPaid ? (
+              <>
+                <Check className="w-3 h-3 inline" /> Payé
+              </>
+            ) : (
+              "Marquer payé"
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={del}
+            disabled={pending}
+            className="text-xs px-2 py-1 rounded text-red-600 hover:bg-red-50"
+          >
+            <Trash2 className="w-3 h-3 inline" />
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={save}
+          disabled={!dirty || pending || isCancelled}
+          className="btn-primary text-xs px-2 py-1 disabled:opacity-40"
+        >
+          <Save className="w-3 h-3" />
+          {pending ? "..." : "Sauvegarder"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AddMilestoneForm({
+  missionId,
+  year,
+  month,
+  onSaved,
+  onCancel
+}: {
+  missionId: string;
+  year: number;
+  month: number;
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const [pending, start] = useTransition();
+  return (
+    <form
+      action={(fd) => {
+        fd.set("missionId", missionId);
+        fd.set("year", String(year));
+        fd.set("month", String(month));
+        start(async () => {
+          try {
+            await addBillingMilestoneToMission(fd);
+            toast.success("Tranche ajoutée");
+            onSaved();
+          } catch (e: any) {
+            toast.error(e?.message ?? "Erreur");
+          }
+        });
+      }}
+      className="rounded border border-emerald-200 bg-emerald-50/40 p-3 space-y-2"
+    >
+      <div className="text-xs font-semibold text-emerald-900 mb-1">
+        Nouvelle tranche
+      </div>
+      <input
+        name="label"
+        placeholder="Libellé (ex: Bonus, Avance, Régul...)"
+        required
+        className="input text-sm"
+      />
+      <input
+        name="amount"
+        type="number"
+        step="0.01"
+        min="0"
+        placeholder="Montant €"
+        required
+        className="input text-sm text-right tabular-nums"
+      />
+      <div className="flex justify-end gap-2">
+        <button type="button" onClick={onCancel} className="btn-secondary text-xs">
+          Annuler
+        </button>
+        <button disabled={pending} className="btn-primary text-xs">
+          <Plus className="w-3 h-3" />
+          {pending ? "..." : "Créer"}
+        </button>
+      </div>
+    </form>
   );
 }
 
