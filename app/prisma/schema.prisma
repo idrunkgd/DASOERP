@@ -528,6 +528,10 @@ model BillingMilestone {
   /// rattachés à un offer/project/mission, par ex. facturation libre)
   companyId   String?
   company     Company?                @relation("DirectMilestoneCompany", fields: [companyId], references: [id], onDelete: SetNull)
+  /// Snapshot du taux journalier au moment de la création/maj de la tranche.
+  /// Permet de ne PAS recalculer les tranches passées si le rate de la mission
+  /// change plus tard.
+  appliedDailyRate Decimal?           @db.Decimal(10, 2)
   label       String
   // Soit pourcentage, soit montant fixe — on stocke les deux pour traçabilité
   percentage  Decimal?                @db.Decimal(5, 2)

@@ -598,6 +598,7 @@ export async function generateMonthlyMissionInvoices(input: {
         amount,
         expectedAt,
         status: "PLANNED",
+        appliedDailyRate: dailyRate, // snapshot pour ne pas bouger si rate change
         mission: { connect: { id: input.missionId } },
         // Lien direct vers la company pour qu'elle apparaisse dans le cashflow
         ...(mission.companyId
@@ -759,24 +760,43 @@ export async function updateMissionDaysBulk(formData: FormData) {
       continue;
     }
 
-    const amount = Math.round(days * dailyRate * 100) / 100;
+    // Pour les tranches existantes : si elles ont un appliedDailyRate
+    // snapshotté, on l'utilise pour préserver l'historique. Sinon fallback
+    // sur le rate actuel de la mission.
+    const existingSnapshot = (existing as { appliedDailyRate?: any } | null)
+      ?.appliedDailyRate;
+    const effectiveRate =
+      existingSnapshot != null && Number.isFinite(Number(existingSnapshot))
+        ? Number(existingSnapshot)
+        : dailyRate;
+
+    const amount = Math.round(days * effectiveRate * 100) / 100;
     const label = `${mission.reference} — ${MONTH_LABELS[month - 1]} ${year} (${days}j)`;
 
     if (existing) {
       await prisma.billingMilestone.update({
         where: { id: existing.id },
-        data: { amount, label }
+        data: {
+          amount,
+          label,
+          // Pose le snapshot si pas encore défini (rétro-compat)
+          ...(existingSnapshot == null
+            ? { appliedDailyRate: effectiveRate }
+            : {})
+        }
       });
       updated++;
     } else {
       const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
       const expectedAt = new Date(Date.UTC(year, month - 1, lastDay));
+      // Nouvelle tranche : on snapshot le rate actuel de la mission
       await prisma.billingMilestone.create({
         data: {
           label,
-          amount,
+          amount: Math.round(days * dailyRate * 100) / 100,
           expectedAt,
           status: "PLANNED",
+          appliedDailyRate: dailyRate,
           mission: { connect: { id: missionId } },
           ...(mission.companyId
             ? { company: { connect: { id: mission.companyId } } }
@@ -875,8 +895,15 @@ export async function updateMissionMilestoneDays(formData: FormData) {
     revalidatePath("/cashflow");
     return;
   }
-  const dailyRate = Number(existing.mission.dailyRate);
-  const amount = Math.round(days * dailyRate * 100) / 100;
+  // Utilise le snapshot rate de la tranche si présent, sinon fallback au
+  // rate actuel de la mission (rétro-compat pour les tranches sans snapshot)
+  const existingSnapshot = (existing as { appliedDailyRate?: any })
+    ?.appliedDailyRate;
+  const effectiveRate =
+    existingSnapshot != null && Number.isFinite(Number(existingSnapshot))
+      ? Number(existingSnapshot)
+      : Number(existing.mission.dailyRate);
+  const amount = Math.round(days * effectiveRate * 100) / 100;
   const MONTH_LABELS = [
     "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
@@ -886,14 +913,21 @@ export async function updateMissionMilestoneDays(formData: FormData) {
   const label = `${existing.mission.reference} — ${MONTH_LABELS[monthIdx]} ${yr} (${days}j)`;
   await prisma.billingMilestone.update({
     where: { id },
-    data: { amount, label }
+    data: {
+      amount,
+      label,
+      // Pose le snapshot si pas défini
+      ...(existingSnapshot == null
+        ? { appliedDailyRate: effectiveRate }
+        : {})
+    }
   });
   await logActivity({
     actorId: session.user.id,
     action: "UPDATE",
     entityType: "BillingMilestone",
     entityId: id,
-    message: `Tranche mission ajustée : ${days}j × ${dailyRate}€ = ${amount}€`
+    message: `Tranche mission ajustée : ${days}j × ${effectiveRate}€ = ${amount}€`
   });
   revalidatePath("/cashflow");
 }
@@ -943,6 +977,7 @@ export async function addBillingMilestoneToMission(formData: FormData) {
       amount: data.amount,
       expectedAt,
       status: "PLANNED",
+      appliedDailyRate: Number(mission.dailyRate), // snapshot rate mission
       mission: { connect: { id: data.missionId } },
       ...(mission.companyId
         ? { company: { connect: { id: mission.companyId } } }
