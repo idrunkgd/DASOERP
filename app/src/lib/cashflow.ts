@@ -146,7 +146,6 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
             id: true,
             reference: true,
             title: true,
-            vatRate: true,
             company: { select: { name: true } }
           }
         }
@@ -160,6 +159,30 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   const monthIndex = new Map<string, (typeof monthEntries)[number]>();
   for (const m of monthEntries) {
     monthIndex.set(`${m.recurringExpenseId}-${m.month}`, m);
+  }
+
+  // ─── Fetch séparé des vatRate par mission ───
+  // On fait une requête à part (au lieu d'ajouter dans le select du milestone)
+  // pour éviter d'éventuels conflits de typage Prisma observés en prod.
+  const missionIdsSet = new Set<string>();
+  for (const ms of milestones) {
+    if (ms.missionId) missionIdsSet.add(ms.missionId);
+  }
+  const vatRateByMissionId = new Map<string, number>();
+  if (missionIdsSet.size > 0) {
+    try {
+      const missionsWithVat = await prisma.$queryRawUnsafe<
+        { id: string; vatRate: string | number }[]
+      >(
+        `SELECT id, "vatRate" FROM "Mission" WHERE id IN (${Array.from(missionIdsSet).map((id) => `'${id.replace(/'/g, "''")}'`).join(",")})`
+      );
+      for (const r of missionsWithVat) {
+        const v = Number(r.vatRate);
+        if (Number.isFinite(v)) vatRateByMissionId.set(r.id, v);
+      }
+    } catch {
+      // Si la colonne vatRate n'existe pas encore : pas grave, on tombera sur 21%
+    }
   }
 
   const rows: CashflowRow[] = [];
@@ -205,11 +228,9 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     let label = labelParts.join(" — ");
     if (companyName) label = `${label} (${companyName})`;
 
-    // Multiplier TVAC : montant affiché = HTVA × (1 + vatRate/100)
-    // Fallback 21% (taux belge standard) si la valeur n'est pas exploitable
-    const rawVat = (mission as { vatRate?: unknown } | undefined)?.vatRate;
-    const vatNumber =
-      rawVat != null && Number.isFinite(Number(rawVat)) ? Number(rawVat) : 21;
+    // Multiplier TVAC : on prend le vatRate depuis notre map fetched séparément
+    // (fallback 21% — taux belge standard — si pas trouvé)
+    const vatNumber = vatRateByMissionId.get(missionId) ?? 21;
     const tvacMultiplier = 1 + vatNumber / 100;
 
     // Pour chaque mois, agrège les milestones de cette mission (affiché TVAC)
