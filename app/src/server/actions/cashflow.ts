@@ -676,12 +676,30 @@ export async function getMissionMilestonesYear(missionId: string, year: number) 
       orderBy: { expectedAt: "asc" }
     })
   ]);
+
+  // Fetch vatRate séparément (cf. fix dans cashflow.ts pour éviter le bug Prisma)
+  let vatRate = 21;
+  try {
+    const row = await prisma.$queryRawUnsafe<{ vatRate: number | string }[]>(
+      `SELECT "vatRate" FROM "Mission" WHERE id = '${missionId.replace(/'/g, "''")}'`
+    );
+    if (row[0]?.vatRate != null) {
+      const v = Number(row[0].vatRate);
+      if (Number.isFinite(v)) vatRate = v;
+    }
+  } catch {
+    // colonne manquante : fallback 21%
+  }
+
   return {
     mission: {
       id: mission.id,
       reference: mission.reference,
       title: mission.title,
       dailyRate: Number(mission.dailyRate),
+      vatRate,
+      startDate: mission.startDate.toISOString().slice(0, 10),
+      endDate: mission.endDate.toISOString().slice(0, 10),
       companyName: mission.company?.name ?? null,
       companyId: mission.companyId ?? null
     },
@@ -696,6 +714,57 @@ export async function getMissionMilestonesYear(missionId: string, year: number) 
       month: m.expectedAt ? m.expectedAt.getUTCMonth() + 1 : null
     }))
   };
+}
+
+/**
+ * Met à jour rate / dates / vatRate d'une mission depuis le cashflow.
+ * Utilise un raw SQL pour vatRate (évite le bug Prisma observé en prod).
+ */
+const MissionEditSchema = z.object({
+  missionId: z.string().min(1),
+  newDailyRate: z.coerce.number().nonnegative().optional(),
+  newVatRate: z.coerce.number().min(0).max(100).optional(),
+  newStartDate: z.string().optional(),
+  newEndDate: z.string().optional()
+});
+
+export async function updateMissionFromCashflow(formData: FormData) {
+  const session = await requirePermission(PERM_WRITE);
+  const parsed = MissionEditSchema.parse(Object.fromEntries(formData));
+
+  // 1) Updates standard via Prisma (dailyRate, dates)
+  const data: any = {};
+  if (parsed.newDailyRate !== undefined) data.dailyRate = parsed.newDailyRate;
+  if (parsed.newStartDate) data.startDate = new Date(parsed.newStartDate);
+  if (parsed.newEndDate) data.endDate = new Date(parsed.newEndDate);
+  if (Object.keys(data).length > 0) {
+    await prisma.mission.update({
+      where: { id: parsed.missionId },
+      data
+    });
+  }
+
+  // 2) vatRate via raw SQL (évite le souci de typage Prisma sur cette colonne)
+  if (parsed.newVatRate !== undefined) {
+    try {
+      await prisma.$executeRawUnsafe(
+        `UPDATE "Mission" SET "vatRate" = ${parsed.newVatRate} WHERE id = '${parsed.missionId.replace(/'/g, "''")}'`
+      );
+    } catch (e) {
+      // Si colonne manquante : pas grave, on log et on continue
+      console.error("[cashflow] update vatRate raw failed:", e);
+    }
+  }
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Mission",
+    entityId: parsed.missionId,
+    message: `Mission mise à jour depuis cashflow`
+  });
+  revalidatePath("/cashflow");
+  revalidatePath(`/missions/${parsed.missionId}`);
 }
 
 /**

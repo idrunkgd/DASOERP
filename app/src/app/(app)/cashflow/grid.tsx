@@ -45,6 +45,7 @@ import {
   getMilestonesByIds,
   getMissionMilestonesYear,
   updateMissionDaysBulk,
+  updateMissionFromCashflow,
   createRecurringOneOffEntries,
   updateMissionMilestoneDays
 } from "@/server/actions/cashflow";
@@ -1942,6 +1943,9 @@ type MissionYearData = {
     reference: string;
     title: string;
     dailyRate: number;
+    vatRate: number;
+    startDate: string;
+    endDate: string;
     companyName: string | null;
     companyId: string | null;
   };
@@ -1972,26 +1976,61 @@ function MissionYearEditModal({
   // État local des jours par mois (1-12) — initialisé depuis les milestones existants
   const [daysByMonth, setDaysByMonth] = useState<Record<number, number>>({});
 
+  // États d'édition mission — PRÉFIXÉS pour ne PAS shadow mission.dailyRate /
+  // mission.vatRate / mission.startDate / mission.endDate dans les closures
+  const [isEditingMission, setIsEditingMission] = useState(false);
+  const [editedDailyRate, setEditedDailyRate] = useState<number>(0);
+  const [editedVatRate, setEditedVatRate] = useState<number>(21);
+  const [editedStartDate, setEditedStartDate] = useState<string>("");
+  const [editedEndDate, setEditedEndDate] = useState<string>("");
+
   useEffect(() => {
     (async () => {
       try {
         const result = await getMissionMilestonesYear(missionId, year);
         setData(result as MissionYearData);
+        // Pré-remplit les states d'édition mission depuis les valeurs actuelles
+        setEditedDailyRate(result.mission.dailyRate);
+        setEditedVatRate(result.mission.vatRate);
+        setEditedStartDate(result.mission.startDate);
+        setEditedEndDate(result.mission.endDate);
         // Pré-remplit : pour chaque milestone existant, days = amount / dailyRate
         const init: Record<number, number> = {};
-        for (const m of result.milestones) {
-          if (m.month && result.mission.dailyRate > 0) {
-            init[m.month] = Math.round((m.amount / result.mission.dailyRate) * 10) / 10;
+        for (const ms of result.milestones) {
+          if (ms.month && result.mission.dailyRate > 0) {
+            init[ms.month] = Math.round((ms.amount / result.mission.dailyRate) * 10) / 10;
           }
         }
         setDaysByMonth(init);
-      } catch (e: any) {
-        toast.error(e?.message ?? "Erreur");
+      } catch (err: any) {
+        toast.error(err?.message ?? "Erreur");
       } finally {
         setLoading(false);
       }
     })();
   }, [missionId, year]);
+
+  function saveMissionEdits() {
+    if (!data) return;
+    const fd = new FormData();
+    fd.set("missionId", missionId);
+    fd.set("newDailyRate", String(editedDailyRate));
+    fd.set("newVatRate", String(editedVatRate));
+    fd.set("newStartDate", editedStartDate);
+    fd.set("newEndDate", editedEndDate);
+    start(async () => {
+      try {
+        await updateMissionFromCashflow(fd);
+        toast.success("Mission mise à jour");
+        setIsEditingMission(false);
+        // Recharge les données
+        const result = await getMissionMilestonesYear(missionId, year);
+        setData(result as MissionYearData);
+      } catch (err: any) {
+        toast.error(err?.message ?? "Erreur");
+      }
+    });
+  }
 
   function setDays(month: number, val: number) {
     setDaysByMonth((prev) => ({ ...prev, [month]: val }));
@@ -2033,12 +2072,14 @@ function MissionYearEditModal({
     if (m.month) milestonesByMonth.set(m.month, m);
   }
 
-  // Total annuel calculé
+  // Total annuel calculé (HTVA + TVAC pour l'affichage)
   const totalDays = Object.values(daysByMonth).reduce(
     (s, d) => s + (d || 0),
     0
   );
   const totalAmount = Math.round(totalDays * mission.dailyRate * 100) / 100;
+  const totalAmountTvac =
+    Math.round(totalAmount * (1 + mission.vatRate / 100) * 100) / 100;
 
   return (
     <Modal
@@ -2046,9 +2087,137 @@ function MissionYearEditModal({
       onClose={onClose}
     >
       <div className="space-y-3">
+        {/* Bloc Détails mission — éditable */}
+        <div className="rounded border border-indigo-200 bg-indigo-50/40 p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
+              Détails mission
+            </h4>
+            <div className="flex gap-2 text-[11px]">
+              <a
+                href={`/missions/${mission.id}`}
+                target="_blank"
+                className="text-indigoaccent hover:underline"
+              >
+                Page complète ↗
+              </a>
+              {!isEditingMission ? (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingMission(true)}
+                  className="text-indigoaccent hover:underline inline-flex items-center gap-1"
+                >
+                  <Pencil className="w-3 h-3" /> Modifier
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditingMission(false);
+                    setEditedDailyRate(mission.dailyRate);
+                    setEditedVatRate(mission.vatRate);
+                    setEditedStartDate(mission.startDate);
+                    setEditedEndDate(mission.endDate);
+                  }}
+                  className="text-midnight-500 hover:text-midnight-900"
+                >
+                  Annuler
+                </button>
+              )}
+            </div>
+          </div>
+          {!isEditingMission ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              <div>
+                <div className="text-midnight-500">Taux journalier</div>
+                <div className="font-semibold tabular-nums">
+                  {mission.dailyRate} €/j HTVA
+                </div>
+              </div>
+              <div>
+                <div className="text-midnight-500">TVA</div>
+                <div className="font-semibold tabular-nums">{mission.vatRate}%</div>
+              </div>
+              <div>
+                <div className="text-midnight-500">Du</div>
+                <div className="font-semibold">{mission.startDate}</div>
+              </div>
+              <div>
+                <div className="text-midnight-500">Au</div>
+                <div className="font-semibold">{mission.endDate}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div>
+                  <label className="text-[10px] uppercase text-midnight-500">
+                    Taux/j (HTVA)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={editedDailyRate}
+                    onChange={(ev) => setEditedDailyRate(Number(ev.target.value) || 0)}
+                    className="input text-sm text-right tabular-nums"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase text-midnight-500">
+                    TVA %
+                  </label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="100"
+                    value={editedVatRate}
+                    onChange={(ev) => setEditedVatRate(Number(ev.target.value) || 0)}
+                    className="input text-sm text-right tabular-nums"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase text-midnight-500">Du</label>
+                  <input
+                    type="date"
+                    value={editedStartDate}
+                    onChange={(ev) => setEditedStartDate(ev.target.value)}
+                    className="input text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase text-midnight-500">Au</label>
+                  <input
+                    type="date"
+                    value={editedEndDate}
+                    onChange={(ev) => setEditedEndDate(ev.target.value)}
+                    className="input text-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={saveMissionEdits}
+                  disabled={pending}
+                  className="btn-primary text-xs disabled:opacity-50"
+                >
+                  <Save className="w-3 h-3" /> Enregistrer mission
+                </button>
+              </div>
+              <p className="text-[10px] text-midnight-500 italic">
+                💡 Changer le taux ne touche pas les tranches déjà créées
+                (chacune garde son taux d'origine).
+              </p>
+            </div>
+          )}
+        </div>
+
         <div className="text-xs text-midnight-600">
-          Taux journalier : <strong>{mission.dailyRate} €</strong>. Tape les
-          jours prestés mois par mois. Le montant est calculé auto. Mettre
+          Taux journalier : <strong>{mission.dailyRate} €</strong> · TVA{" "}
+          <strong>{mission.vatRate}%</strong>. Tape les jours prestés mois
+          par mois. Le montant TVAC affiché est ce que tu encaisses. Mettre
           <strong> 0 jours</strong> supprime la tranche du mois.
         </div>
 
@@ -2119,10 +2288,10 @@ function MissionYearEditModal({
         {/* Récap */}
         <div className="rounded bg-indigo-50 border border-indigo-200 p-2 text-sm flex items-center justify-between">
           <span className="text-indigo-900">
-            <strong>{totalDays}j</strong> × <strong>{mission.dailyRate}€</strong> =
+            <strong>{totalDays}j</strong> × <strong>{mission.dailyRate}€</strong> = HTVA
           </span>
           <span className="font-bold tabular-nums text-indigo-700">
-            {fmtShort(totalAmount)} € sur {year}
+            {fmtShort(totalAmount)} € · TVAC {fmtShort(totalAmountTvac)}€ sur {year}
           </span>
         </div>
 
