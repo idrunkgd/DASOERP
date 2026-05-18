@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Sparkles,
   FileSignature,
-  Loader2
+  Loader2,
+  Eraser
 } from "lucide-react";
 import {
   type CashflowYear,
@@ -33,7 +34,8 @@ import {
   createOneOffEntry,
   updateOneOffEntry,
   deleteOneOffEntry,
-  toggleOneOffStatus
+  toggleOneOffStatus,
+  cleanupCashflowBefore
 } from "@/server/actions/cashflow";
 
 type SectionKey =
@@ -68,6 +70,7 @@ export function CashflowGrid({
     monthIdx: number;
   } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showCleanup, setShowCleanup] = useState(false);
   const [showNewRecurring, setShowNewRecurring] = useState(false);
   const [showNewOneOff, setShowNewOneOff] = useState<{
     open: boolean;
@@ -136,6 +139,13 @@ export function CashflowGrid({
             className="btn-secondary text-sm"
           >
             <SettingsIcon className="w-4 h-4" /> Solde initial
+          </button>
+          <button
+            onClick={() => setShowCleanup(true)}
+            className="btn-secondary text-sm"
+            title="Marque tous les mois avant une date comme « Sauté » et supprime les one-offs antérieurs"
+          >
+            <Eraser className="w-4 h-4" /> Démarrer à partir de…
           </button>
           <button
             onClick={() => setShowNewRecurring(true)}
@@ -331,6 +341,13 @@ export function CashflowGrid({
           initialBalance={startingBalance}
           initialDate={startingDate}
           onClose={() => setShowSettings(false)}
+        />
+      )}
+
+      {showCleanup && (
+        <CleanupModal
+          year={data.year}
+          onClose={() => setShowCleanup(false)}
         />
       )}
 
@@ -1014,6 +1031,101 @@ function OneOffModal({
           </button>
         </div>
       </form>
+    </Modal>
+  );
+}
+
+function CleanupModal({
+  year,
+  onClose
+}: {
+  year: number;
+  onClose: () => void;
+}) {
+  const [pending, start] = useTransition();
+  // Mois actuel (1-12) ou janvier par défaut
+  const now = new Date();
+  const currentMonth =
+    year === now.getFullYear() ? now.getMonth() + 1 : 1;
+  const [fromMonth, setFromMonth] = useState<number>(currentMonth);
+
+  return (
+    <Modal title="Démarrer l'encodage à partir de…" onClose={onClose}>
+      <div className="space-y-3">
+        <p className="text-sm text-midnight-700">
+          Cette action va :
+        </p>
+        <ul className="text-sm text-midnight-600 list-disc ml-5 space-y-1">
+          <li>
+            Marquer toutes les <strong>dépenses récurrentes</strong> avant
+            le mois choisi comme <strong>« Sauté »</strong> (elles restent
+            visibles, barrées, mais ne comptent plus dans les totaux/cumul)
+          </li>
+          <li>
+            <strong>Supprimer définitivement</strong> toutes les{" "}
+            <strong>dépenses/recettes ponctuelles</strong> antérieures
+          </li>
+          <li>
+            Les <strong>BillingMilestones (factures)</strong> ne sont pas
+            touchés — ils restent intacts car ils viennent d'ailleurs
+          </li>
+        </ul>
+        <div>
+          <label className="label">Démarrer à partir de :</label>
+          <select
+            value={fromMonth}
+            onChange={(e) => setFromMonth(parseInt(e.target.value, 10))}
+            className="input"
+          >
+            {MONTH_LABELS.map((m, i) => (
+              <option key={i} value={i + 1}>
+                {m} {year}
+              </option>
+            ))}
+          </select>
+          {fromMonth === 1 && (
+            <p className="text-[11px] text-midnight-500 mt-1">
+              Janvier sélectionné → rien à effacer.
+            </p>
+          )}
+        </div>
+        <div className="rounded bg-amber-50 border border-amber-200 p-2 text-xs text-amber-900">
+          ⚠️ La suppression des one-offs est <strong>irréversible</strong>.
+          Les récurrents passés en « Sauté » peuvent être annulés cellule
+          par cellule via le modal d'édition.
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className="btn-secondary">
+            Annuler
+          </button>
+          <button
+            disabled={pending || fromMonth === 1}
+            onClick={() => {
+              if (
+                !confirm(
+                  `Tu confirmes vouloir effacer/skipper tout avant ${MONTH_LABELS[fromMonth - 1]} ${year} ?`
+                )
+              )
+                return;
+              start(async () => {
+                try {
+                  const result = await cleanupCashflowBefore(year, fromMonth);
+                  toast.success(
+                    `${result.skippedCount} lignes skippées, ${result.deletedCount} one-offs supprimés`
+                  );
+                  onClose();
+                } catch (e: any) {
+                  toast.error(e?.message ?? "Erreur");
+                }
+              });
+            }}
+            className="btn-primary disabled:opacity-50"
+          >
+            <Eraser className="w-4 h-4" />
+            {pending ? "Nettoyage…" : "Confirmer"}
+          </button>
+        </div>
+      </div>
     </Modal>
   );
 }

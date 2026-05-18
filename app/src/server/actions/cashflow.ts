@@ -170,6 +170,17 @@ const MonthSchema = z.object({
 export async function upsertMonthlyEntry(formData: FormData) {
   await requirePermission(PERM_WRITE);
   const data = MonthSchema.parse(Object.fromEntries(formData));
+
+  // Si l'utilisateur passe en PAID sans saisir d'override explicite,
+  // on snapshot le defaultAmount actuel pour figer l'historique.
+  let finalAmountOverride: number | null = data.amountOverride;
+  if (data.status === "PAID" && finalAmountOverride === null) {
+    const parent = await prisma.recurringExpense.findUniqueOrThrow({
+      where: { id: data.recurringExpenseId }
+    });
+    finalAmountOverride = Number(parent.defaultAmount);
+  }
+
   await prisma.recurringExpenseMonth.upsert({
     where: {
       recurringExpenseId_year_month: {
@@ -179,7 +190,7 @@ export async function upsertMonthlyEntry(formData: FormData) {
       }
     },
     update: {
-      amountOverride: data.amountOverride,
+      amountOverride: finalAmountOverride,
       status: data.status,
       paidAt: data.status === "PAID" ? new Date() : null,
       notes: data.notes
@@ -188,7 +199,7 @@ export async function upsertMonthlyEntry(formData: FormData) {
       recurringExpenseId: data.recurringExpenseId,
       year: data.year,
       month: data.month,
-      amountOverride: data.amountOverride,
+      amountOverride: finalAmountOverride,
       status: data.status,
       paidAt: data.status === "PAID" ? new Date() : null,
       notes: data.notes
@@ -199,8 +210,13 @@ export async function upsertMonthlyEntry(formData: FormData) {
 
 /**
  * Bascule rapide du statut : PLANNED ↔ PAID (toggle 2 états).
- * Le statut SKIPPED reste accessible via le modal d'édition de cellule,
- * pour ne pas le toucher par accident en cliquant trop vite.
+ * Le statut SKIPPED reste accessible via le modal d'édition de cellule.
+ *
+ * IMPORTANT : quand on passe en PAID, on FIGE le montant en copiant
+ * defaultAmount dans amountOverride (sauf si un override existe déjà).
+ * Comme ça, si plus tard on change le defaultAmount du récurrent
+ * (ex: augmentation de salaire), les mois déjà payés gardent leur
+ * montant historique réel.
  */
 export async function cycleMonthlyStatus(
   recurringExpenseId: string,
@@ -208,14 +224,26 @@ export async function cycleMonthlyStatus(
   month: number
 ) {
   await requirePermission(PERM_WRITE);
-  const existing = await prisma.recurringExpenseMonth.findUnique({
-    where: {
-      recurringExpenseId_year_month: { recurringExpenseId, year, month }
-    }
-  });
-  // Si déjà PAID → repasse PLANNED. Sinon (PLANNED, SKIPPED, ou inexistant) → PAID.
-  const next: "PLANNED" | "PAID" =
-    existing?.status === "PAID" ? "PLANNED" : "PAID";
+  const [existing, parent] = await Promise.all([
+    prisma.recurringExpenseMonth.findUnique({
+      where: {
+        recurringExpenseId_year_month: { recurringExpenseId, year, month }
+      }
+    }),
+    prisma.recurringExpense.findUniqueOrThrow({
+      where: { id: recurringExpenseId }
+    })
+  ]);
+
+  const isCurrentlyPaid = existing?.status === "PAID";
+  const next: "PLANNED" | "PAID" = isCurrentlyPaid ? "PLANNED" : "PAID";
+
+  // Snapshot : on fige le montant payé pour qu'il ne bouge plus si
+  // defaultAmount du parent change plus tard.
+  // Si un amountOverride existe déjà, on le garde tel quel.
+  // Sinon, on copie le defaultAmount actuel dans l'override.
+  const shouldSnapshot =
+    next === "PAID" && (!existing || existing.amountOverride === null);
 
   await prisma.recurringExpenseMonth.upsert({
     where: {
@@ -223,14 +251,16 @@ export async function cycleMonthlyStatus(
     },
     update: {
       status: next,
-      paidAt: next === "PAID" ? new Date() : null
+      paidAt: next === "PAID" ? new Date() : null,
+      ...(shouldSnapshot ? { amountOverride: parent.defaultAmount } : {})
     },
     create: {
       recurringExpenseId,
       year,
       month,
       status: next,
-      paidAt: next === "PAID" ? new Date() : null
+      paidAt: next === "PAID" ? new Date() : null,
+      amountOverride: shouldSnapshot ? parent.defaultAmount : null
     }
   });
   revalidatePath("/cashflow");
@@ -317,6 +347,73 @@ export async function deleteOneOffEntry(id: string) {
     message: `Entrée cashflow « ${before.label} » supprimée`
   });
   revalidatePath("/cashflow");
+}
+
+/**
+ * Nettoie le cashflow avant un mois donné :
+ *  - Toutes les RecurringExpenseMonth pour les mois antérieurs sont marquées SKIPPED
+ *    (donc ne comptent pas dans les totaux mais restent visibles, barrées)
+ *  - Toutes les OneOffCashflowEntry datées avant sont SUPPRIMÉES
+ *
+ * Utile quand on commence à encoder son cashflow en cours d'année : on
+ * « démarre » l'encodage à partir d'un mois donné, le reste avant est neutralisé.
+ *
+ * @param year - année concernée (ex: 2026)
+ * @param fromMonth - mois à partir duquel on garde tout (ex: 5 = mai)
+ *                   → tout ce qui est strictement avant ce mois est skipped/supprimé
+ */
+export async function cleanupCashflowBefore(year: number, fromMonth: number) {
+  const session = await requirePermission(PERM_WRITE);
+
+  // 1) Skipper les récurrents avant fromMonth (Jan → fromMonth-1)
+  let skippedCount = 0;
+  if (fromMonth > 1) {
+    const allRecurring = await prisma.recurringExpense.findMany({
+      select: { id: true }
+    });
+    for (const r of allRecurring) {
+      for (let m = 1; m < fromMonth; m++) {
+        await prisma.recurringExpenseMonth.upsert({
+          where: {
+            recurringExpenseId_year_month: {
+              recurringExpenseId: r.id,
+              year,
+              month: m
+            }
+          },
+          update: { status: "SKIPPED" },
+          create: {
+            recurringExpenseId: r.id,
+            year,
+            month: m,
+            status: "SKIPPED"
+          }
+        });
+        skippedCount++;
+      }
+    }
+  }
+
+  // 2) Supprimer les one-offs avant fromMonth de cette année
+  const cutoff = new Date(Date.UTC(year, fromMonth - 1, 1)); // 1er du mois fromMonth
+  const deleted = await prisma.oneOffCashflowEntry.deleteMany({
+    where: {
+      date: {
+        gte: new Date(Date.UTC(year, 0, 1)), // 1er janvier
+        lt: cutoff // strictement avant le mois choisi
+      }
+    }
+  });
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "CashflowSettings",
+    message: `Nettoyage cashflow ${year} avant mois ${fromMonth} : ${skippedCount} récurrents skippés, ${deleted.count} one-offs supprimés`
+  });
+
+  revalidatePath("/cashflow");
+  return { skippedCount, deletedCount: deleted.count };
 }
 
 export async function toggleOneOffStatus(id: string) {
