@@ -47,6 +47,8 @@ import {
   updateMissionDaysBulk,
   updateMissionFromCashflow,
   createRecurringOneOffEntries,
+  getOneOffById,
+  updateOneOffCell,
   updateMissionMilestoneDays
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
@@ -109,6 +111,8 @@ export function CashflowGrid({
   }>({ open: false, kind: "EXPENSE" });
   const [editingRecId, setEditingRecId] = useState<string | null>(null);
   const [editingOneOffId, setEditingOneOffId] = useState<string | null>(null);
+  // ID d'un OneOff précis à éditer en mode "cellule" (montant + statut)
+  const [editingOneOffCellId, setEditingOneOffCellId] = useState<string | null>(null);
   const [editingMissionId, setEditingMissionId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Record<SectionKey, boolean>>({
     income: false,
@@ -283,6 +287,7 @@ export function CashflowGrid({
                   setEditingRecId={setEditingRecId}
                   setEditingOneOffId={setEditingOneOffId}
                   setEditingMissionId={setEditingMissionId}
+                  setEditingOneOffCellId={setEditingOneOffCellId}
                   year={data.year}
                 />
               );
@@ -464,6 +469,13 @@ export function CashflowGrid({
           onClose={() => setEditingMissionId(null)}
         />
       )}
+
+      {editingOneOffCellId && (
+        <OneOffCellEditModal
+          oneOffId={editingOneOffCellId}
+          onClose={() => setEditingOneOffCellId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -482,6 +494,8 @@ function SectionBlock({
   setEditingMilestoneCell,
   setEditingRecId,
   setEditingOneOffId,
+  setEditingMissionId,
+  setEditingOneOffCellId,
   year
 }: {
   sectionKey: SectionKey;
@@ -499,6 +513,7 @@ function SectionBlock({
   setEditingRecId: (id: string | null) => void;
   setEditingOneOffId: (id: string | null) => void;
   setEditingMissionId: (id: string | null) => void;
+  setEditingOneOffCellId: (id: string | null) => void;
   year: number;
 }) {
   // État des sous-catégories repliées (scope = cette section).
@@ -665,14 +680,29 @@ function SectionBlock({
                     }
                     onEditCell={(idx) => {
                       const cell = row.cells[idx];
-                      // Si c'est une cellule de milestones agrégés par mission → modal milestones
-                      if (row.kind === "milestones" && cell.milestoneIds && cell.milestoneIds.length > 0) {
+                      // Cellule de mission agrégée → modal milestone
+                      if (row.kind === "milestones" && row.missionId) {
+                        setEditingMilestoneCell({
+                          rowLabel: row.label,
+                          monthIdx: idx,
+                          milestoneIds: cell.milestoneIds ?? [],
+                          missionId: row.missionId
+                        });
+                      } else if (
+                        row.kind === "milestones" &&
+                        cell.milestoneIds &&
+                        cell.milestoneIds.length > 0
+                      ) {
                         setEditingMilestoneCell({
                           rowLabel: row.label,
                           monthIdx: idx,
                           milestoneIds: cell.milestoneIds,
                           missionId: row.missionId
                         });
+                      } else if (cell.monthEntryId) {
+                        // Cellule d'une sim/engagement/oneoff récurrent groupé
+                        // → modal léger pour ce OneOff précis
+                        setEditingOneOffCellId(cell.monthEntryId);
                       } else {
                         setEditingCell({ rowId: row.id, monthIdx: idx });
                       }
@@ -2776,6 +2806,158 @@ function AddMilestoneForm({
         </button>
       </div>
     </form>
+  );
+}
+
+// ─────────── Modal léger d'édition d'un OneOff (cellule de groupe) ───────────
+
+type OneOffSnapshot = {
+  id: string;
+  label: string;
+  amount: number;
+  status: string;
+  date: string;
+  category: string | null;
+};
+
+function OneOffCellEditModal({
+  oneOffId,
+  onClose
+}: {
+  oneOffId: string;
+  onClose: () => void;
+}) {
+  const [snap, setSnap] = useState<OneOffSnapshot | null>(null);
+  const [loadingData, setLoadingData] = useState(true);
+  const [pending, start] = useTransition();
+  const [editedAmount, setEditedAmount] = useState<number>(0);
+  const [editedStatus, setEditedStatus] = useState<"PLANNED" | "PAID" | "SKIPPED">(
+    "PLANNED"
+  );
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getOneOffById(oneOffId);
+        setSnap(data as OneOffSnapshot);
+        setEditedAmount(data.amount);
+        setEditedStatus(data.status as any);
+      } catch (err: any) {
+        toast.error(err?.message ?? "Erreur de chargement");
+      } finally {
+        setLoadingData(false);
+      }
+    })();
+  }, [oneOffId]);
+
+  function save() {
+    const fd = new FormData();
+    fd.set("id", oneOffId);
+    fd.set("amount", String(editedAmount));
+    fd.set("status", editedStatus);
+    start(async () => {
+      try {
+        await updateOneOffCell(fd);
+        toast.success("Mise à jour");
+        onClose();
+      } catch (err: any) {
+        toast.error(err?.message ?? "Erreur");
+      }
+    });
+  }
+
+  function delEntry() {
+    if (!confirm("Supprimer cette entrée pour ce mois ?")) return;
+    start(async () => {
+      try {
+        await deleteOneOffEntry(oneOffId);
+        toast.success("Supprimée");
+        onClose();
+      } catch (err: any) {
+        toast.error(err?.message ?? "Erreur");
+      }
+    });
+  }
+
+  if (loadingData) {
+    return (
+      <Modal title="Chargement…" onClose={onClose}>
+        <div className="text-center py-6">
+          <Loader2 className="w-6 h-6 animate-spin text-midnight-400 mx-auto" />
+        </div>
+      </Modal>
+    );
+  }
+  if (!snap) return null;
+
+  return (
+    <Modal title={snap.label} onClose={onClose}>
+      <div className="space-y-3">
+        <div className="text-xs text-midnight-500">
+          {snap.category && (
+            <>
+              Catégorie : <strong>{snap.category}</strong> ·{" "}
+            </>
+          )}
+          Date : <strong>{snap.date}</strong>
+        </div>
+
+        <div>
+          <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+            Montant (€)
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={editedAmount}
+            onChange={(ev) => setEditedAmount(Number(ev.target.value) || 0)}
+            className="input w-full text-right tabular-nums text-lg font-semibold"
+            autoFocus
+          />
+        </div>
+
+        <div>
+          <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+            Statut
+          </label>
+          <select
+            value={editedStatus}
+            onChange={(ev) => setEditedStatus(ev.target.value as any)}
+            className="input w-full"
+          >
+            <option value="PLANNED">⏰ Prévu</option>
+            <option value="PAID">✓ Payé / Encaissé</option>
+            <option value="SKIPPED">⊘ Sauté ce mois</option>
+          </select>
+        </div>
+
+        <div className="flex justify-between gap-2 pt-2 border-t border-midnight-200">
+          <button
+            type="button"
+            onClick={delEntry}
+            disabled={pending}
+            className="text-red-600 hover:text-red-700 disabled:opacity-40 text-xs flex items-center gap-1"
+          >
+            <Trash2 className="w-3 h-3" /> Supprimer ce mois
+          </button>
+          <div className="flex gap-2">
+            <button type="button" onClick={onClose} className="btn-secondary text-xs">
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={save}
+              disabled={pending}
+              className="btn-primary text-xs disabled:opacity-50"
+            >
+              <Save className="w-3 h-3" />
+              {pending ? "…" : "Enregistrer"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Modal>
   );
 }
 

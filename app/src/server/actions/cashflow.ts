@@ -339,6 +339,9 @@ export async function createRecurringOneOffEntries(formData: FormData) {
     throw new Error("Aucune occurrence à générer dans la plage");
   }
 
+  // Group ID partagé pour que la grille affiche tout en 1 ligne
+  const groupId = `rg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
   let created = 0;
   for (const date of dates) {
     const monthLabel = MONTH_LABELS[date.getUTCMonth()];
@@ -353,6 +356,7 @@ export async function createRecurringOneOffEntries(formData: FormData) {
         status: data.status,
         paidAt: data.status === "PAID" ? new Date() : null,
         notes: data.notes,
+        recurrenceGroupId: groupId,
         createdBy: { connect: { id: session.user.id } }
       }
     });
@@ -435,6 +439,56 @@ export async function deleteOneOffEntry(id: string) {
     entityType: "OneOffCashflowEntry",
     entityId: id,
     message: `Entrée cashflow « ${before.label} » supprimée`
+  });
+  revalidatePath("/cashflow");
+}
+
+/**
+ * Récupère un OneOff par son id (pour l'édition cellule par cellule).
+ */
+export async function getOneOffById(id: string) {
+  await requirePermission(PERM);
+  const o = await prisma.oneOffCashflowEntry.findUniqueOrThrow({
+    where: { id }
+  });
+  return {
+    id: o.id,
+    label: o.label,
+    category: o.category,
+    amount: Number(o.amount),
+    date: o.date.toISOString().slice(0, 10),
+    kind: o.kind,
+    status: o.status,
+    notes: o.notes
+  };
+}
+
+/**
+ * Met à jour un OneOff précis : amount + status (édition rapide cellule).
+ */
+const OneOffCellUpdateSchema = z.object({
+  id: z.string().min(1),
+  amount: z.coerce.number().nonnegative(),
+  status: z.enum(["PLANNED", "PAID", "SKIPPED"])
+});
+
+export async function updateOneOffCell(formData: FormData) {
+  const session = await requirePermission(PERM_WRITE);
+  const data = OneOffCellUpdateSchema.parse(Object.fromEntries(formData));
+  await prisma.oneOffCashflowEntry.update({
+    where: { id: data.id },
+    data: {
+      amount: data.amount,
+      status: data.status,
+      paidAt: data.status === "PAID" ? new Date() : null
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "OneOffCashflowEntry",
+    entityId: data.id,
+    message: `OneOff cellule mise à jour : ${data.amount}€ / ${data.status}`
   });
   revalidatePath("/cashflow");
 }

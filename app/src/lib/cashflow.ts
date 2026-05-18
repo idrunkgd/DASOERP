@@ -349,8 +349,70 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     });
   }
 
-  // ─── Lignes OneOff (par entrée individuelle, regroupées par type) ───
+  // ─── Lignes OneOff ───
+  // Stratégie :
+  //  - Plusieurs OneOff partageant le même recurrenceGroupId → 1 ligne agrégée
+  //    (récurrence mensuelle, montants éditables individuellement par cellule)
+  //  - Sinon → 1 ligne par OneOff individuel
+  const kindMap: Record<string, CashflowRowKind> = {
+    INCOME: "oneoff_income",
+    EXPENSE: "oneoff_expense",
+    COMMITMENT: "commitment",
+    SIMULATION: "simulation"
+  };
+
+  // On lit recurrenceGroupId via une property optionnelle (idempotent : si la
+  // colonne n'existe pas en runtime, on tombe sur undefined → standalone)
+  const oneOffsByGroup = new Map<string, typeof oneOffs>();
+  const standaloneOneOffs: typeof oneOffs = [];
   for (const o of oneOffs) {
+    const gid = (o as { recurrenceGroupId?: string | null }).recurrenceGroupId;
+    if (gid) {
+      if (!oneOffsByGroup.has(gid)) oneOffsByGroup.set(gid, []);
+      oneOffsByGroup.get(gid)!.push(o);
+    } else {
+      standaloneOneOffs.push(o);
+    }
+  }
+
+  // 1) Groupes récurrents → 1 ligne par groupe
+  for (const [gid, group] of oneOffsByGroup) {
+    const first = group[0];
+    // Label : on retire le suffixe " — Mois Année" pour avoir le label de base
+    const baseLabel = first.label.replace(/\s—\s\w+\s\d{4}$/i, "");
+
+    const cells: CashflowCell[] = MONTHS.map((monthIdx) => {
+      const item = group.find((o) => o.date.getUTCMonth() === monthIdx);
+      if (!item) return { amount: 0, status: "PLANNED" as const };
+      return {
+        amount: Number(item.amount),
+        status: (item.status === "PAID"
+          ? "PAID"
+          : item.status === "SKIPPED"
+          ? "SKIPPED"
+          : "PLANNED") as "PLANNED" | "PAID" | "SKIPPED",
+        notes: item.notes,
+        monthEntryId: item.id // permet d'éditer ce OneOff précis via la cellule
+      };
+    });
+
+    rows.push({
+      id: `one-group-${gid}`,
+      kind: kindMap[first.kind],
+      label: baseLabel,
+      category: first.category,
+      isIncome: first.kind === "INCOME",
+      oneOffId: first.id, // pour le pencil → édite la 1ère
+      cells,
+      totalYear: cells.reduce(
+        (s, c) => s + (c.status === "SKIPPED" ? 0 : c.amount),
+        0
+      )
+    });
+  }
+
+  // 2) OneOffs individuels (sans groupe)
+  for (const o of standaloneOneOffs) {
     const monthIdx = o.date.getUTCMonth();
     const cells: CashflowCell[] = MONTHS.map((i) =>
       i === monthIdx
@@ -361,12 +423,6 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
           }
         : { amount: 0, status: "PLANNED" as const }
     );
-    const kindMap: Record<string, CashflowRowKind> = {
-      INCOME: "oneoff_income",
-      EXPENSE: "oneoff_expense",
-      COMMITMENT: "commitment",
-      SIMULATION: "simulation"
-    };
     rows.push({
       id: `one-${o.id}`,
       kind: kindMap[o.kind],

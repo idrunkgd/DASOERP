@@ -1237,6 +1237,10 @@ model OneOffCashflowEntry {
   status      CashflowStatus @default(PLANNED)
   paidAt      DateTime?
   notes       String?
+  /// Si plusieurs entrées partagent ce groupId, elles ont été créées en
+  /// récurrence mensuelle ensemble — la grille les affiche en une seule
+  /// ligne avec un montant par mois.
+  recurrenceGroupId String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   createdById String?
@@ -1244,4 +1248,5 @@ model OneOffCashflowEntry {
 
   @@index([date])
   @@index([kind, status])
+  @@index([recurrenceGroupId])
 }
