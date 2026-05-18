@@ -146,6 +146,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
             id: true,
             reference: true,
             title: true,
+            vatRate: true,
             company: { select: { name: true } }
           }
         }
@@ -204,7 +205,14 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     let label = labelParts.join(" — ");
     if (companyName) label = `${label} (${companyName})`;
 
-    // Pour chaque mois, agrège les milestones de cette mission
+    // Multiplier TVAC : montant affiché = HTVA × (1 + vatRate/100)
+    // Fallback 21% (taux belge standard) si la valeur n'est pas exploitable
+    const rawVat = (mission as { vatRate?: unknown } | undefined)?.vatRate;
+    const vatNumber =
+      rawVat != null && Number.isFinite(Number(rawVat)) ? Number(rawVat) : 21;
+    const tvacMultiplier = 1 + vatNumber / 100;
+
+    // Pour chaque mois, agrège les milestones de cette mission (affiché TVAC)
     const cells: CashflowCell[] = MONTHS.map((monthIdx) => {
       const monthMilestones = group.filter(
         (m) => m.expectedAt && m.expectedAt.getUTCMonth() === monthIdx
@@ -212,9 +220,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       if (monthMilestones.length === 0) {
         return { amount: 0, status: "PLANNED" as const };
       }
-      const amount = monthMilestones
+      const amountHtva = monthMilestones
         .filter((m) => m.status !== "CANCELLED")
         .reduce((s, m) => s + Number(m.amount), 0);
+      const amount = Math.round(amountHtva * tvacMultiplier * 100) / 100;
       const allPaid = monthMilestones.every((m) => m.status === "PAID");
       const allCancelled = monthMilestones.every(
         (m) => m.status === "CANCELLED"
