@@ -359,6 +359,8 @@ model Company {
   // Cas où cette société est l'intermédiaire / société de portage
   intermediaryRequests   MissionRequest[] @relation("MissionRequestIntermediary")
   intermediaryMissions   Mission[]        @relation("MissionExecIntermediary")
+  // Tranches de facturation rattachées directement (sans offer/project)
+  directBillingMilestones BillingMilestone[] @relation("DirectMilestoneCompany")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -522,6 +524,10 @@ model BillingMilestone {
   // Tranche T&M générée pour une mission consultance (mensuelle)
   missionId   String?
   mission     Mission?                @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  /// Lien direct vers une Company (utile pour les milestones standalone non
+  /// rattachés à un offer/project/mission, par ex. facturation libre)
+  companyId   String?
+  company     Company?                @relation("DirectMilestoneCompany", fields: [companyId], references: [id], onDelete: SetNull)
   label       String
   // Soit pourcentage, soit montant fixe — on stocke les deux pour traçabilité
   percentage  Decimal?                @db.Decimal(5, 2)
