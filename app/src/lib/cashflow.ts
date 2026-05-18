@@ -145,27 +145,39 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
 
   const rows: CashflowRow[] = [];
 
-  // ─── Ligne BillingMilestones (revenu agrégé) ───
-  const milestoneCells: CashflowCell[] = MONTHS.map(() => ({
-    amount: 0,
-    status: "PLANNED"
-  }));
+  // ─── Lignes BillingMilestones : une ligne par milestone individuel ───
+  // (avant on agrégeait tout en 1 ligne — maintenant chaque facture client
+  // a sa propre ligne, avec le nom du client entre parenthèses)
   for (const m of milestones) {
     if (!m.expectedAt) continue;
     const monthIdx = m.expectedAt.getUTCMonth();
-    milestoneCells[monthIdx].amount += Number(m.amount);
-    // Statut basé sur le milestone status
-    if (m.status === "PAID") milestoneCells[monthIdx].status = "PAID";
+    const companyName =
+      m.offer?.company?.name ?? m.project?.company?.name ?? null;
+    const labelWithCompany = companyName
+      ? `${m.label} (${companyName})`
+      : m.label;
+    const cells: CashflowCell[] = MONTHS.map((i) =>
+      i === monthIdx
+        ? {
+            amount: Number(m.amount),
+            status: (m.status === "PAID"
+              ? "PAID"
+              : m.status === "CANCELLED"
+              ? "SKIPPED"
+              : "PLANNED") as "PLANNED" | "PAID" | "SKIPPED"
+          }
+        : { amount: 0, status: "PLANNED" as const }
+    );
+    rows.push({
+      id: `ms-${m.id}`,
+      kind: "milestones",
+      label: labelWithCompany,
+      category: "Factures clients",
+      isIncome: true,
+      cells,
+      totalYear: Number(m.amount)
+    });
   }
-  rows.push({
-    id: "milestones",
-    kind: "milestones",
-    label: "Tranches facturables (BillingMilestones)",
-    category: "Revenus auto",
-    isIncome: true,
-    cells: milestoneCells,
-    totalYear: milestoneCells.reduce((s, c) => s + c.amount, 0)
-  });
 
   // ─── Lignes RecurringExpense ───
   for (const r of recurring) {

@@ -434,7 +434,10 @@ function SectionBlock({
   setEditingOneOffId: (id: string | null) => void;
   year: number;
 }) {
-  // État des sous-catégories repliées (scope = cette section)
+  // État des sous-catégories repliées (scope = cette section).
+  // Par défaut, toutes les catégories sont REPLIÉES (on ne voit que les en-têtes
+  // avec les sous-totaux, pas le détail des lignes). L'utilisateur déplie ce
+  // qu'il veut consulter.
   const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>({});
 
   if (rows.length === 0 && (sectionKey === "commitment" || sectionKey === "simulation")) {
@@ -510,7 +513,9 @@ function SectionBlock({
 
       {!isCollapsed && showCategories &&
         groupedByCategory.map(([catName, catRows]) => {
-          const isCatCollapsed = collapsedCats[catName] ?? false;
+          // Par défaut : catégorie repliée. L'utilisateur déplie ce qu'il
+          // veut voir en détail.
+          const isCatCollapsed = collapsedCats[catName] ?? true;
           const catTotal = catRows.reduce(
             (s, r) =>
               s +
@@ -1111,31 +1116,30 @@ function OneOffModal({
   const [vatRate, setVatRate] = useState<number>(21); // Belgique standard
   const [amountIsHtva, setAmountIsHtva] = useState<boolean>(supportsVat);
 
-  // Quand on sélectionne une mission, on auto-remplit le taux
+  // Construit un libellé "Facturation MIS-2026-0001 (Client X) — 5j × 800€"
+  function buildTmLabel(m: MissionForBilling, days: number, rate: number) {
+    const client = m.companyName ? ` (${m.companyName})` : "";
+    return days > 0
+      ? `Facturation ${m.reference}${client} — ${days}j × ${rate}€`
+      : `Facturation ${m.reference}${client}`;
+  }
+
+  // Quand on sélectionne une mission, on auto-remplit le taux et le libellé
   function onMissionChange(missionId: string) {
     setSelectedMissionId(missionId);
     const m = missions.find((mm) => mm.id === missionId);
     if (m) {
       setTmRate(m.dailyRate);
-      // Suggère un libellé du genre "Facturation MIS-2026-0001 — 5j × 800€"
-      if (tmDays > 0) {
-        setManualLabel(
-          `Facturation ${m.reference} — ${tmDays}j × ${m.dailyRate}€`
-        );
-      } else {
-        setManualLabel(`Facturation ${m.reference}`);
-      }
+      setManualLabel(buildTmLabel(m, tmDays, m.dailyRate));
     }
   }
 
-  // Recalcule le libellé suggéré quand jours changent
+  // Recalcule le libellé suggéré quand les jours changent
   function onDaysChange(d: number) {
     setTmDays(d);
     const m = missions.find((mm) => mm.id === selectedMissionId);
     if (m && d > 0) {
-      setManualLabel(
-        `Facturation ${m.reference} — ${d}j × ${tmRate || m.dailyRate}€`
-      );
+      setManualLabel(buildTmLabel(m, d, tmRate || m.dailyRate));
     }
   }
 
