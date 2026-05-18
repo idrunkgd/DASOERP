@@ -1105,6 +1105,12 @@ function OneOffModal({
   const [manualAmount, setManualAmount] = useState<number>(existingAmount);
   const [manualLabel, setManualLabel] = useState<string>(existing?.label ?? "");
 
+  // TVA : applicable aux recettes (INCOME) et engagements (COMMITMENT, considéré
+  // comme une facture future). Pour les dépenses on garde TVAC direct.
+  const supportsVat = initialKind === "INCOME" || initialKind === "COMMITMENT";
+  const [vatRate, setVatRate] = useState<number>(21); // Belgique standard
+  const [amountIsHtva, setAmountIsHtva] = useState<boolean>(supportsVat);
+
   // Quand on sélectionne une mission, on auto-remplit le taux
   function onMissionChange(missionId: string) {
     setSelectedMissionId(missionId);
@@ -1133,9 +1139,19 @@ function OneOffModal({
     }
   }
 
-  const computedAmount = useTmBilling
+  // Montant HTVA (avant TVA) : depuis le calcul T&M ou la saisie manuelle
+  const baseHtva = useTmBilling
     ? Math.round(tmDays * tmRate * 100) / 100
     : manualAmount;
+
+  // TVA appliquée + TVAC final
+  const vatAmount =
+    supportsVat && amountIsHtva
+      ? Math.round(baseHtva * (vatRate / 100) * 100) / 100
+      : 0;
+  // Le "amount" stocké = TVAC (ce qui arrive sur le compte) si HTVA, sinon le brut tel quel
+  const computedAmount = supportsVat && amountIsHtva ? baseHtva + vatAmount : baseHtva;
+
   const finalLabel = manualLabel;
 
   return (
@@ -1145,20 +1161,36 @@ function OneOffModal({
     >
       <form
         action={(fd) => {
-          // Si mode T&M, on s'assure que le bon montant + libellé sont passés,
-          // et on ajoute la décomposition jours×taux dans les notes pour
-          // traçabilité (utile pour retrouver la base de la facturation plus tard).
+          // On force le montant final (TVAC si HTVA était saisi) et on
+          // ajoute les décompositions dans les notes pour traçabilité.
+          const noteLines: string[] = [];
+
           if (useTmBilling) {
-            fd.set("amount", String(computedAmount));
-            fd.set("label", finalLabel);
             const mission = missions.find((mm) => mm.id === selectedMissionId);
-            const breakdown = `Facturation T&M : ${tmDays}j × ${tmRate}€/j${mission ? ` — Mission ${mission.reference}` : ""}`;
+            noteLines.push(
+              `Facturation T&M : ${tmDays}j × ${tmRate}€/j${mission ? ` — Mission ${mission.reference}` : ""}`
+            );
+            fd.set("label", finalLabel);
+          }
+
+          if (supportsVat && amountIsHtva) {
+            noteLines.push(
+              `HTVA ${baseHtva.toFixed(2)}€ + TVA ${vatRate}% (${vatAmount.toFixed(2)}€) = TVAC ${computedAmount.toFixed(2)}€`
+            );
+          }
+
+          // Stocke toujours le montant final (TVAC si applicable)
+          fd.set("amount", String(computedAmount));
+
+          if (noteLines.length > 0) {
             const existingNotes = (fd.get("notes") as string) || "";
+            const breakdown = noteLines.join("\n");
             fd.set(
               "notes",
               existingNotes ? `${breakdown}\n${existingNotes}` : breakdown
             );
           }
+
           start(async () => {
             try {
               if (isEdit && existing?.oneOffId) {
@@ -1280,12 +1312,29 @@ function OneOffModal({
             />
           </div>
           <div>
-            <label className="label">Montant (€) *</label>
+            <label className="label flex items-center justify-between">
+              <span>
+                Montant {supportsVat && amountIsHtva ? "HTVA" : ""} (€) *
+              </span>
+              {supportsVat && (
+                <span className="text-[10px] font-normal text-midnight-500">
+                  <label className="cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={amountIsHtva}
+                      onChange={(e) => setAmountIsHtva(e.target.checked)}
+                      className="mr-1"
+                    />
+                    HTVA
+                  </label>
+                </span>
+              )}
+            </label>
             <input
               name="amount"
               type="number"
               step="0.01"
-              value={useTmBilling ? computedAmount : manualAmount || ""}
+              value={useTmBilling ? baseHtva : manualAmount || ""}
               onChange={(e) => setManualAmount(Number(e.target.value) || 0)}
               className="input"
               required
@@ -1298,6 +1347,75 @@ function OneOffModal({
             )}
           </div>
         </div>
+
+        {/* TVA — uniquement pour les recettes et engagements futurs */}
+        {supportsVat && amountIsHtva && (
+          <div className="p-3 rounded border border-emerald-200 bg-emerald-50/50 space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <label className="text-xs font-medium text-emerald-900">
+                Taux de TVA
+              </label>
+              <div className="flex gap-1">
+                {[0, 6, 12, 21].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setVatRate(r)}
+                    className={
+                      "text-xs px-2 py-0.5 rounded border " +
+                      (vatRate === r
+                        ? "bg-emerald-600 text-white border-emerald-600 font-semibold"
+                        : "bg-white border-midnight-200 hover:bg-emerald-50")
+                    }
+                  >
+                    {r}%
+                  </button>
+                ))}
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  value={vatRate}
+                  onChange={(e) => setVatRate(Number(e.target.value) || 0)}
+                  className="input w-16 text-right tabular-nums text-xs py-0.5 px-1"
+                />
+                <span className="text-xs text-midnight-500 self-center">%</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1 border-t border-emerald-200">
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-midnight-500">
+                  HTVA
+                </div>
+                <div className="font-semibold tabular-nums">
+                  {fmtShort(baseHtva)} €
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-midnight-500">
+                  TVA {vatRate}%
+                </div>
+                <div className="font-semibold tabular-nums text-amber-700">
+                  +{fmtShort(vatAmount)} €
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-emerald-700">
+                  TVAC (encaissé)
+                </div>
+                <div className="font-bold tabular-nums text-emerald-700">
+                  {fmtShort(computedAmount)} €
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] text-midnight-500">
+              💡 Le cashflow stocke le <strong>TVAC</strong> (ce qui arrive
+              sur ton compte). La décomposition HTVA + TVA est ajoutée aux
+              notes pour ta déclaration TVA.
+            </p>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">Date *</label>
