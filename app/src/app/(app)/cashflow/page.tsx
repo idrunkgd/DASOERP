@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function CashflowPage({
   searchParams
 }: {
-  searchParams: { year?: string };
+  searchParams: { year?: string; month?: string };
 }) {
   await requirePermission("finance.read");
 
@@ -45,11 +45,17 @@ export default async function CashflowPage({
 
   const yearsToShow = [year - 1, year, year + 1];
 
-  // ─── Pour le panneau "Ce mois-ci" : on récupère les détails individuels du mois courant ───
+  // ─── Pour le panneau "Ce mois-ci" : on récupère les détails individuels du mois focus ───
   const now = new Date();
   const isCurrentYear = year === now.getFullYear();
-  // Si on regarde une autre année que la courante, on prend janvier par défaut
-  const focusMonth = isCurrentYear ? now.getMonth() + 1 : 1;
+  // Mois explicitement demandé via URL, ou mois courant si année actuelle, ou janvier sinon
+  const monthFromUrl = parseInt(searchParams.month ?? "", 10);
+  const focusMonth =
+    monthFromUrl >= 1 && monthFromUrl <= 12
+      ? monthFromUrl
+      : isCurrentYear
+      ? now.getMonth() + 1
+      : 1;
   const focusMonthStart = new Date(Date.UTC(year, focusMonth - 1, 1));
   const focusMonthEnd = new Date(Date.UTC(year, focusMonth, 0, 23, 59, 59));
 

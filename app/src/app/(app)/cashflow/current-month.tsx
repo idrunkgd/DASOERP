@@ -11,7 +11,9 @@ import {
   Calendar,
   ChevronDown,
   ChevronRight,
-  AlertCircle
+  ChevronLeft,
+  AlertCircle,
+  CalendarClock
 } from "lucide-react";
 import { MONTH_LABELS } from "@/lib/cashflow";
 import {
@@ -205,26 +207,72 @@ export function CurrentMonthPanel({
     oneOffs.filter((o) => o.status !== "PAID" && o.status !== "SKIPPED" && o.kind !== "SIMULATION")
       .length;
 
+  // Navigation mois précédent/suivant (gère les transitions d'année)
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevYear = month === 1 ? year - 1 : year;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  const now = new Date();
+  const isCurrentMonth =
+    year === now.getFullYear() && month === now.getMonth() + 1;
+
   return (
     <section className="card p-4 mb-6 border-indigo-200 bg-indigo-50/30">
-      <div
-        className="flex items-center justify-between mb-3 cursor-pointer"
-        onClick={() => setCollapsed((c) => !c)}
-      >
-        <h2 className="font-semibold flex items-center gap-2">
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          {/* Toggle expand/collapse */}
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            className="text-midnight-600 hover:text-midnight-900 p-0.5"
+            aria-label={collapsed ? "Déplier" : "Replier"}
+          >
+            {collapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* Navigation mois */}
+          <div className="flex items-center gap-1 bg-white rounded border border-midnight-200 px-1 py-0.5">
+            <Link
+              href={`/cashflow?year=${prevYear}&month=${prevMonth}`}
+              className="p-1 hover:bg-midnight-100 rounded text-midnight-600 hover:text-midnight-900"
+              title={`Mois précédent (${MONTHS_LONG[prevMonth - 1]} ${prevYear})`}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Link>
+            <h2 className="font-semibold text-sm flex items-center gap-1.5 px-1 min-w-[140px] justify-center">
+              <Calendar className="w-4 h-4 text-indigo-600" />
+              {MONTHS_LONG[month - 1]} {year}
+            </h2>
+            <Link
+              href={`/cashflow?year=${nextYear}&month=${nextMonth}`}
+              className="p-1 hover:bg-midnight-100 rounded text-midnight-600 hover:text-midnight-900"
+              title={`Mois suivant (${MONTHS_LONG[nextMonth - 1]} ${nextYear})`}
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {!isCurrentMonth && (
+            <Link
+              href={`/cashflow?year=${now.getFullYear()}&month=${now.getMonth() + 1}`}
+              className="text-[11px] text-indigoaccent hover:underline flex items-center gap-1"
+              title="Revenir au mois courant"
+            >
+              <CalendarClock className="w-3 h-3" />
+              Aujourd'hui
+            </Link>
           )}
-          <Calendar className="w-4 h-4 text-indigo-600" />
-          Ce mois — {MONTHS_LONG[month - 1]} {year}
+
           {totalUnpaidItems > 0 && (
-            <span className="badge-warning ml-2">
+            <span className="badge-warning ml-1">
               {totalUnpaidItems} en attente
             </span>
           )}
-        </h2>
+        </div>
+
         <div className="flex items-center gap-4 text-xs">
           <div className="text-right">
             <div className="text-midnight-500">À encaisser</div>
