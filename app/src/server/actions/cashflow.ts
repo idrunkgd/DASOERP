@@ -416,6 +416,121 @@ export async function cleanupCashflowBefore(year: number, fromMonth: number) {
   return { skippedCount, deletedCount: deleted.count };
 }
 
+/**
+ * Génère N BillingMilestones (1 par mois) pour une mission, entre 2 dates.
+ *
+ * Chaque tranche est créée avec :
+ *  - label = "Facturation MIS-XXX – Mois Année (X jours)"
+ *  - amount = defaultDays × mission.dailyRate
+ *  - expectedAt = jour `billingDay` du mois (par défaut dernier jour)
+ *  - missionId = la mission
+ *  - companyId = client de la mission (pour affichage cashflow)
+ *  - status = PLANNED
+ *
+ * Idempotent : si une tranche existe déjà sur ce mois pour cette mission
+ * (basé sur missionId + mois de expectedAt), on la skip pour ne pas
+ * créer de doublons.
+ *
+ * @returns nombre de tranches effectivement créées
+ */
+export async function generateMonthlyMissionInvoices(input: {
+  missionId: string;
+  defaultDays: number;
+  fromYear: number;
+  fromMonth: number;
+  toYear: number;
+  toMonth: number;
+  billingDay?: number; // 1-28 ou null = dernier jour
+}): Promise<{ created: number; skipped: number }> {
+  const session = await requirePermission(PERM_WRITE);
+
+  const mission = await prisma.mission.findUniqueOrThrow({
+    where: { id: input.missionId },
+    include: { company: { select: { name: true } } }
+  });
+
+  const dailyRate = Number(mission.dailyRate);
+  const days = Math.max(0, Number(input.defaultDays || 0));
+
+  // Listes des (year, month) à parcourir
+  const months: { year: number; month: number }[] = [];
+  let y = input.fromYear;
+  let m = input.fromMonth;
+  while (
+    y < input.toYear ||
+    (y === input.toYear && m <= input.toMonth)
+  ) {
+    months.push({ year: y, month: m });
+    m++;
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
+  }
+
+  let created = 0;
+  let skipped = 0;
+
+  const MONTH_LABELS = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+
+  for (const { year, month } of months) {
+    // Date de facturation : billingDay du mois, ou dernier jour si non spécifié / > 28
+    const lastDayOfMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const day = Math.min(
+      Math.max(input.billingDay ?? lastDayOfMonth, 1),
+      lastDayOfMonth
+    );
+    const expectedAt = new Date(Date.UTC(year, month - 1, day));
+
+    // Idempotence : on cherche un milestone existant pour cette mission ce mois
+    const monthStart = new Date(Date.UTC(year, month - 1, 1));
+    const monthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59));
+    const existing = await prisma.billingMilestone.findFirst({
+      where: {
+        missionId: input.missionId,
+        expectedAt: { gte: monthStart, lte: monthEnd }
+      }
+    });
+    if (existing) {
+      skipped++;
+      continue;
+    }
+
+    const amount = Math.round(days * dailyRate * 100) / 100;
+    const label = `${mission.reference} — ${MONTH_LABELS[month - 1]} ${year} (${days}j)`;
+
+    await prisma.billingMilestone.create({
+      data: {
+        label,
+        amount,
+        expectedAt,
+        status: "PLANNED",
+        mission: { connect: { id: input.missionId } },
+        // Lien direct vers la company pour qu'elle apparaisse dans le cashflow
+        ...(mission.companyId
+          ? { company: { connect: { id: mission.companyId } } }
+          : {}),
+        comment: `Généré auto : ${days}j × ${dailyRate}€`
+      }
+    });
+    created++;
+  }
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "BillingMilestone",
+    entityId: input.missionId,
+    message: `Facturation récurrente générée pour mission ${mission.reference} : ${created} tranches créées, ${skipped} déjà existantes`
+  });
+
+  revalidatePath("/cashflow");
+  return { created, skipped };
+}
+
 export async function toggleOneOffStatus(id: string) {
   await requirePermission(PERM_WRITE);
   const before = await prisma.oneOffCashflowEntry.findUniqueOrThrow({

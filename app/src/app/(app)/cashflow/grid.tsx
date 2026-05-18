@@ -16,7 +16,9 @@ import {
   Sparkles,
   FileSignature,
   Loader2,
-  Eraser
+  Eraser,
+  CalendarRange,
+  Repeat
 } from "lucide-react";
 import {
   type CashflowYear,
@@ -35,7 +37,8 @@ import {
   updateOneOffEntry,
   deleteOneOffEntry,
   toggleOneOffStatus,
-  cleanupCashflowBefore
+  cleanupCashflowBefore,
+  generateMonthlyMissionInvoices
 } from "@/server/actions/cashflow";
 
 type SectionKey =
@@ -83,6 +86,7 @@ export function CashflowGrid({
   const [showSettings, setShowSettings] = useState(false);
   const [showCleanup, setShowCleanup] = useState(false);
   const [showNewRecurring, setShowNewRecurring] = useState(false);
+  const [showMissionGen, setShowMissionGen] = useState(false);
   const [showNewOneOff, setShowNewOneOff] = useState<{
     open: boolean;
     kind: "EXPENSE" | "INCOME" | "COMMITMENT" | "SIMULATION";
@@ -180,6 +184,15 @@ export function CashflowGrid({
           >
             <Plus className="w-4 h-4" /> Recette manuelle
           </button>
+          {missions.length > 0 && (
+            <button
+              onClick={() => setShowMissionGen(true)}
+              className="btn-secondary text-sm"
+              title="Générer N factures mensuelles pour une mission entre 2 dates"
+            >
+              <Repeat className="w-4 h-4" /> Facturation mission récurrente
+            </button>
+          )}
           <button
             onClick={() =>
               setShowNewOneOff({ open: true, kind: "COMMITMENT" })
@@ -359,6 +372,14 @@ export function CashflowGrid({
         <CleanupModal
           year={data.year}
           onClose={() => setShowCleanup(false)}
+        />
+      )}
+
+      {showMissionGen && (
+        <MissionGenModal
+          missions={missions}
+          year={data.year}
+          onClose={() => setShowMissionGen(false)}
         />
       )}
 
@@ -1458,6 +1479,234 @@ function OneOffModal({
       </form>
     </Modal>
   );
+}
+
+function MissionGenModal({
+  missions,
+  year,
+  onClose
+}: {
+  missions: MissionForBilling[];
+  year: number;
+  onClose: () => void;
+}) {
+  const [pending, start] = useTransition();
+  const [missionId, setMissionId] = useState<string>(missions[0]?.id ?? "");
+  const [defaultDays, setDefaultDays] = useState<number>(20);
+  // Plage par défaut : mois courant → fin d'année
+  const now = new Date();
+  const currentMonth = year === now.getFullYear() ? now.getMonth() + 1 : 1;
+  const [fromYear, setFromYear] = useState<number>(year);
+  const [fromMonth, setFromMonth] = useState<number>(currentMonth);
+  const [toYear, setToYear] = useState<number>(year);
+  const [toMonth, setToMonth] = useState<number>(12);
+  const [billingDay, setBillingDay] = useState<number>(0); // 0 = dernier jour du mois
+
+  const selected = missions.find((m) => m.id === missionId);
+  const monthsCount = countMonths(fromYear, fromMonth, toYear, toMonth);
+  const totalAmount = selected
+    ? Math.round(monthsCount * defaultDays * selected.dailyRate * 100) / 100
+    : 0;
+
+  return (
+    <Modal title="Facturation mission récurrente" onClose={onClose}>
+      <form
+        action={() =>
+          start(async () => {
+            try {
+              if (!missionId) {
+                toast.error("Sélectionne une mission");
+                return;
+              }
+              const r = await generateMonthlyMissionInvoices({
+                missionId,
+                defaultDays,
+                fromYear,
+                fromMonth,
+                toYear,
+                toMonth,
+                billingDay: billingDay > 0 ? billingDay : undefined
+              });
+              toast.success(
+                `${r.created} tranche(s) créée(s)${r.skipped > 0 ? `, ${r.skipped} ignorée(s) (déjà existante)` : ""}`
+              );
+              onClose();
+            } catch (e: any) {
+              toast.error(e?.message ?? "Erreur");
+            }
+          })
+        }
+        className="space-y-3"
+      >
+        <p className="text-sm text-midnight-700">
+          Génère une tranche de facturation par mois pour une mission T&M,
+          basée sur <strong>jours estimés × taux journalier</strong>. Tu pourras
+          ensuite ajuster individuellement chaque tranche (ex : moins de jours
+          en juillet/août à cause des congés).
+        </p>
+
+        <div>
+          <label className="label">Mission *</label>
+          <select
+            value={missionId}
+            onChange={(e) => setMissionId(e.target.value)}
+            className="input"
+            required
+          >
+            <option value="">— Sélectionner —</option>
+            {missions.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.reference} — {m.title}
+                {m.companyName ? ` · ${m.companyName}` : ""}
+                {` · ${m.dailyRate}€/j`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="label">Jours estimés / mois *</label>
+            <input
+              type="number"
+              step="0.5"
+              min="0"
+              value={defaultDays}
+              onChange={(e) =>
+                setDefaultDays(Number(e.target.value) || 0)
+              }
+              className="input text-right tabular-nums"
+              required
+            />
+            <p className="text-[10px] text-midnight-500 mt-1">
+              Utilisé pour tous les mois — éditable individuellement après.
+            </p>
+          </div>
+          <div>
+            <label className="label">Jour de facturation</label>
+            <select
+              value={billingDay}
+              onChange={(e) => setBillingDay(parseInt(e.target.value, 10))}
+              className="input"
+            >
+              <option value="0">Dernier jour du mois</option>
+              {[1, 5, 10, 15, 20, 25, 28].map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="label">Du mois</label>
+            <div className="flex gap-1">
+              <select
+                value={fromMonth}
+                onChange={(e) => setFromMonth(parseInt(e.target.value, 10))}
+                className="input flex-1"
+              >
+                {MONTH_LABELS.map((m, i) => (
+                  <option key={i} value={i + 1}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={fromYear}
+                onChange={(e) => setFromYear(parseInt(e.target.value, 10))}
+                className="input w-20"
+                min={2020}
+                max={2099}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="label">Au mois (inclus)</label>
+            <div className="flex gap-1">
+              <select
+                value={toMonth}
+                onChange={(e) => setToMonth(parseInt(e.target.value, 10))}
+                className="input flex-1"
+              >
+                {MONTH_LABELS.map((m, i) => (
+                  <option key={i} value={i + 1}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={toYear}
+                onChange={(e) => setToYear(parseInt(e.target.value, 10))}
+                className="input w-20"
+                min={2020}
+                max={2099}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Récap calcul */}
+        {selected && monthsCount > 0 && (
+          <div className="rounded border border-emerald-200 bg-emerald-50/60 p-3 text-sm">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-emerald-900">Aperçu</span>
+              <CalendarRange className="w-4 h-4 text-emerald-700" />
+            </div>
+            <div className="text-xs text-midnight-700">
+              <strong>{monthsCount}</strong> tranche{monthsCount > 1 ? "s" : ""}{" "}
+              de <strong>{defaultDays}j × {selected.dailyRate}€</strong> ={" "}
+              <strong className="text-emerald-700">
+                {fmtShort(defaultDays * selected.dailyRate)} €
+              </strong>{" "}
+              par mois
+            </div>
+            <div className="text-base font-semibold tabular-nums text-emerald-700 mt-1">
+              Total prévisionnel : {fmtShort(totalAmount)} €
+            </div>
+          </div>
+        )}
+
+        <div className="rounded bg-amber-50 border border-amber-200 p-2 text-xs text-amber-900">
+          ⚠️ Les tranches existantes pour le même mois et la même mission
+          seront <strong>ignorées</strong> (pas de doublons). Pour modifier
+          un mois précis (ex : congés en août), édite la tranche après
+          génération depuis la grille cashflow.
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className="btn-secondary">
+            Annuler
+          </button>
+          <button
+            disabled={pending || !missionId || monthsCount === 0}
+            className="btn-primary disabled:opacity-50"
+          >
+            <Repeat className="w-4 h-4" />
+            {pending
+              ? "Génération…"
+              : `Générer ${monthsCount > 0 ? monthsCount : ""} tranche${monthsCount > 1 ? "s" : ""}`}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function countMonths(
+  fromYear: number,
+  fromMonth: number,
+  toYear: number,
+  toMonth: number
+): number {
+  if (toYear < fromYear || (toYear === fromYear && toMonth < fromMonth)) {
+    return 0;
+  }
+  return (toYear - fromYear) * 12 + (toMonth - fromMonth) + 1;
 }
 
 function CleanupModal({
