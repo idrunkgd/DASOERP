@@ -45,7 +45,8 @@ import {
   getMilestonesByIds,
   getMissionMilestonesYear,
   updateMissionDaysBulk,
-  createRecurringOneOffEntries
+  createRecurringOneOffEntries,
+  updateMissionMilestoneDays
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
 
@@ -2159,6 +2160,11 @@ type MilestoneData = {
   paidAt: string | null;
   comment: string | null;
   missionId: string | null;
+  mission: {
+    id: string;
+    reference: string;
+    dailyRate: number;
+  } | null;
 };
 
 function MilestoneCellModal({
@@ -2281,18 +2287,46 @@ function MilestoneEditCard({
   onSaved: () => void;
   onDeleted: () => void;
 }) {
+  const isPaid = milestone.status === "PAID";
+  const isCancelled = milestone.status === "CANCELLED";
+  const isLinkedToMission = !!milestone.mission;
+
+  // Pour les tranches liées à une mission : édition uniquement des jours,
+  // le label et le taux sont auto-générés à partir de la mission.
+  const initialDays = milestone.mission && milestone.mission.dailyRate > 0
+    ? Math.round((milestone.amount / milestone.mission.dailyRate) * 10) / 10
+    : 0;
+  const [days, setDays] = useState<number>(initialDays);
+
+  // Pour les milestones standalone : édition libre
   const [label, setLabel] = useState(milestone.label);
   const [amount, setAmount] = useState(milestone.amount);
   const [comment, setComment] = useState(milestone.comment ?? "");
   const [pending, start] = useTransition();
-  const isPaid = milestone.status === "PAID";
-  const isCancelled = milestone.status === "CANCELLED";
-  const dirty =
-    label !== milestone.label ||
-    amount !== milestone.amount ||
-    (comment || "") !== (milestone.comment ?? "");
+
+  const dirty = isLinkedToMission
+    ? days !== initialDays
+    : label !== milestone.label ||
+      amount !== milestone.amount ||
+      (comment || "") !== (milestone.comment ?? "");
 
   function save() {
+    if (isLinkedToMission) {
+      const fd = new FormData();
+      fd.set("id", milestone.id);
+      fd.set("days", String(days));
+      start(async () => {
+        try {
+          await updateMissionMilestoneDays(fd);
+          toast.success(days === 0 ? "Tranche supprimée" : "Mise à jour");
+          if (days === 0) onDeleted();
+          else onSaved();
+        } catch (e: any) {
+          toast.error(e?.message ?? "Erreur");
+        }
+      });
+      return;
+    }
     const fd = new FormData();
     fd.set("id", milestone.id);
     fd.set("label", label);
@@ -2334,6 +2368,12 @@ function MilestoneEditCard({
     });
   }
 
+  // Calcul auto pour les missions
+  const dailyRate = milestone.mission?.dailyRate ?? 0;
+  const computedAmount = isLinkedToMission
+    ? Math.round(days * dailyRate * 100) / 100
+    : amount;
+
   return (
     <div
       className={
@@ -2345,65 +2385,122 @@ function MilestoneEditCard({
           : "bg-white border-midnight-200")
       }
     >
-      <div>
-        <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
-          Libellé
-        </label>
-        <input
-          type="text"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          className="input w-full text-sm"
-          disabled={isCancelled}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-2">
+      {/* En-tête : libellé en lecture seule pour mission, éditable sinon */}
+      {isLinkedToMission ? (
+        <div>
+          <div className="text-[10px] uppercase text-midnight-500 tracking-wider mb-0.5">
+            Tranche mission
+          </div>
+          <div className="text-sm font-medium text-midnight-800 truncate">
+            {milestone.label}
+          </div>
+          <div className="text-[10px] text-midnight-500 mt-0.5">
+            Taux : <strong>{dailyRate} €/j</strong> · libellé auto-généré
+          </div>
+        </div>
+      ) : (
         <div>
           <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
-            Montant (€)
+            Libellé
           </label>
           <input
-            type="number"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value) || 0)}
-            className="input w-full text-sm text-right tabular-nums"
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            className="input w-full text-sm"
             disabled={isCancelled}
           />
         </div>
-        <div>
-          <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
-            Statut
-          </label>
-          <div className="flex items-center gap-2 h-9">
-            <span
-              className={
-                "badge-" +
-                (isPaid
-                  ? "success"
-                  : isCancelled
-                  ? "neutral"
-                  : "info")
-              }
-            >
-              {milestone.status}
-            </span>
+      )}
+
+      {/* Édition principale : jours pour mission, montant pour standalone */}
+      {isLinkedToMission ? (
+        <div className="grid grid-cols-3 gap-2 items-end">
+          <div className="col-span-1">
+            <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+              Jours prestés
+            </label>
+            <input
+              type="number"
+              step="0.5"
+              min="0"
+              value={days || ""}
+              onChange={(e) => setDays(Number(e.target.value) || 0)}
+              className="input w-full text-sm text-right tabular-nums"
+              disabled={isCancelled || isPaid}
+              placeholder="0"
+            />
+          </div>
+          <div className="col-span-1 text-center pb-2 text-midnight-400 text-sm">
+            × {dailyRate} =
+          </div>
+          <div className="col-span-1 text-right">
+            <label className="text-[10px] uppercase text-midnight-500 tracking-wider block">
+              Montant
+            </label>
+            <div className="text-base font-bold tabular-nums text-emerald-700">
+              {fmtShort(computedAmount)} €
+            </div>
           </div>
         </div>
-      </div>
-      <div>
-        <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
-          Commentaire
-        </label>
-        <input
-          type="text"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          className="input w-full text-xs"
-          placeholder="Ex: congés en août → 10j au lieu de 20"
-          disabled={isCancelled}
-        />
-      </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+              Montant (€)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value) || 0)}
+              className="input w-full text-sm text-right tabular-nums"
+              disabled={isCancelled}
+            />
+          </div>
+          <div>
+            <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+              Statut
+            </label>
+            <div className="flex items-center gap-2 h-9">
+              <span
+                className={
+                  "badge-" +
+                  (isPaid
+                    ? "success"
+                    : isCancelled
+                    ? "neutral"
+                    : "info")
+                }
+              >
+                {milestone.status}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isLinkedToMission && (
+        <div>
+          <label className="text-[10px] uppercase text-midnight-500 tracking-wider">
+            Commentaire
+          </label>
+          <input
+            type="text"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            className="input w-full text-xs"
+            placeholder="Ex: congés en août → 10j au lieu de 20"
+            disabled={isCancelled}
+          />
+        </div>
+      )}
+      {isPaid && isLinkedToMission && (
+        <div className="text-[10px] text-emerald-700 italic">
+          🔒 Tranche payée, modifications désactivées (annuler le paiement
+          pour changer les jours)
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-midnight-100">
         <div className="flex gap-1">
           <button

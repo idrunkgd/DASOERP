@@ -812,16 +812,90 @@ export async function getMilestonesByIds(ids: string[]) {
       expectedAt: true,
       paidAt: true,
       comment: true,
-      missionId: true
+      missionId: true,
+      mission: {
+        select: { id: true, reference: true, dailyRate: true }
+      }
     },
     orderBy: { expectedAt: "asc" }
   });
   return list.map((m) => ({
-    ...m,
+    id: m.id,
+    label: m.label,
     amount: Number(m.amount),
+    status: m.status,
     expectedAt: m.expectedAt?.toISOString() ?? null,
-    paidAt: m.paidAt?.toISOString() ?? null
+    paidAt: m.paidAt?.toISOString() ?? null,
+    comment: m.comment,
+    missionId: m.missionId,
+    mission: m.mission
+      ? {
+          id: m.mission.id,
+          reference: m.mission.reference,
+          dailyRate: Number(m.mission.dailyRate)
+        }
+      : null
   }));
+}
+
+/**
+ * Met à jour le nombre de jours d'une tranche liée à une mission.
+ * Le montant et le libellé sont régénérés auto depuis le taux de la mission.
+ * Refuse si la tranche est PAID (verrou).
+ */
+const UpdateMissionDaysSchema = z.object({
+  id: z.string().min(1),
+  days: z.coerce.number().min(0)
+});
+
+export async function updateMissionMilestoneDays(formData: FormData) {
+  const session = await requirePermission(PERM_WRITE);
+  const { id, days } = UpdateMissionDaysSchema.parse(
+    Object.fromEntries(formData)
+  );
+  const existing = await prisma.billingMilestone.findUniqueOrThrow({
+    where: { id },
+    include: { mission: true }
+  });
+  if (!existing.mission) {
+    throw new Error("Cette tranche n'est pas liée à une mission");
+  }
+  if (existing.status === "PAID") {
+    throw new Error("Tranche déjà payée — modification refusée");
+  }
+  if (days === 0) {
+    await prisma.billingMilestone.delete({ where: { id } });
+    await logActivity({
+      actorId: session.user.id,
+      action: "DELETE",
+      entityType: "BillingMilestone",
+      entityId: id,
+      message: `Tranche supprimée (0 jours)`
+    });
+    revalidatePath("/cashflow");
+    return;
+  }
+  const dailyRate = Number(existing.mission.dailyRate);
+  const amount = Math.round(days * dailyRate * 100) / 100;
+  const MONTH_LABELS = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+  const monthIdx = existing.expectedAt?.getUTCMonth() ?? 0;
+  const yr = existing.expectedAt?.getUTCFullYear() ?? new Date().getFullYear();
+  const label = `${existing.mission.reference} — ${MONTH_LABELS[monthIdx]} ${yr} (${days}j)`;
+  await prisma.billingMilestone.update({
+    where: { id },
+    data: { amount, label }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "BillingMilestone",
+    entityId: id,
+    message: `Tranche mission ajustée : ${days}j × ${dailyRate}€ = ${amount}€`
+  });
+  revalidatePath("/cashflow");
 }
 
 export async function deleteBillingMilestoneFromCashflow(id: string) {
