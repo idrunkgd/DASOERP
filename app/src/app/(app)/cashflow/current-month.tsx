@@ -145,11 +145,16 @@ export function CurrentMonthPanel({
     const exp: UnifiedItem[] = [];
 
     // Milestones → toujours revenu, catégorie "Factures clients"
+    // Le client est intégré au label entre parenthèses pour cohérence avec
+    // la grille annuelle.
     for (const m of milestones) {
+      const labelWithCompany = m.companyName
+        ? `${m.label} (${m.companyName})`
+        : m.label;
       inc.push({
         key: `m-${m.id}`,
         category: "Factures clients",
-        label: m.label,
+        label: labelWithCompany,
         amount: m.amount,
         isPaid: m.status === "PAID",
         isSkipped: false,
@@ -157,7 +162,7 @@ export function CurrentMonthPanel({
         isIncome: true,
         source: "milestone",
         sourceId: m.id,
-        companyName: m.companyName,
+        companyName: null, // déjà intégré au label
         offerId: m.offerId,
         projectId: m.projectId
       });
@@ -345,6 +350,8 @@ function ColumnByCategory({
   paid: number;
   planned: number;
 }) {
+  // État des sous-catégories : par défaut toutes REPLIÉES (cohérent avec
+  // la grille annuelle). L'utilisateur déplie ce qu'il veut consulter.
   const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>({});
 
   const grouped = useMemo(() => {
@@ -399,7 +406,8 @@ function ColumnByCategory({
           </p>
         )}
         {grouped.map(([cat, catItems]) => {
-          const isCollapsed = collapsedCats[cat] ?? false;
+          // Par défaut replié : on n'affiche que le header avec les sous-totaux.
+          const isCollapsed = collapsedCats[cat] ?? true;
           const catTotal = catItems
             .filter((i) => !i.isCancelled)
             .reduce((s, i) => s + i.amount, 0);
