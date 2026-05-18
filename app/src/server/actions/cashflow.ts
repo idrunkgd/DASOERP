@@ -280,6 +280,96 @@ const OneOffSchema = z.object({
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
 
+/**
+ * Crée plusieurs entrées OneOff en récurrence mensuelle entre 2 dates.
+ * Chaque entrée hérite des mêmes label/category/amount/kind, datée au
+ * même jour du mois (ex: 15 mai, 15 juin, 15 juillet…).
+ * Le libellé inclut le mois pour différencier (ex: "Loyer estimé Mai 2026").
+ */
+const RecurringOneOffSchema = z.object({
+  label: z.string().min(1).max(160),
+  category: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  amount: z.coerce.number(),
+  /** Date de la 1ère occurrence (sera répliquée mensuellement) */
+  startDate: z.string().min(1).transform((v) => new Date(v)),
+  /** Date de fin INCLUSE (dernier mois où on génère une occurrence) */
+  endDate: z.string().min(1).transform((v) => new Date(v)),
+  kind: z.enum(["EXPENSE", "INCOME", "COMMITMENT", "SIMULATION"]),
+  status: z.enum(["PLANNED", "PAID", "SKIPPED"]).default("PLANNED"),
+  notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
+});
+
+export async function createRecurringOneOffEntries(formData: FormData) {
+  const session = await requirePermission(PERM_WRITE);
+  const data = RecurringOneOffSchema.parse(Object.fromEntries(formData));
+
+  if (data.endDate < data.startDate) {
+    throw new Error("La date de fin doit être après la date de début");
+  }
+
+  const MONTH_LABELS = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+
+  // Construit la liste des dates : 1 par mois, même jour du mois que startDate
+  const dates: Date[] = [];
+  const startDay = data.startDate.getUTCDate();
+  let curYear = data.startDate.getUTCFullYear();
+  let curMonth = data.startDate.getUTCMonth(); // 0-11
+  const endYear = data.endDate.getUTCFullYear();
+  const endMonth = data.endDate.getUTCMonth();
+
+  while (
+    curYear < endYear ||
+    (curYear === endYear && curMonth <= endMonth)
+  ) {
+    // Ajuste si le jour n'existe pas dans le mois (ex: 31 février → 28)
+    const lastDay = new Date(Date.UTC(curYear, curMonth + 1, 0)).getUTCDate();
+    const day = Math.min(startDay, lastDay);
+    dates.push(new Date(Date.UTC(curYear, curMonth, day)));
+    curMonth++;
+    if (curMonth > 11) {
+      curMonth = 0;
+      curYear++;
+    }
+  }
+
+  if (dates.length === 0) {
+    throw new Error("Aucune occurrence à générer dans la plage");
+  }
+
+  let created = 0;
+  for (const date of dates) {
+    const monthLabel = MONTH_LABELS[date.getUTCMonth()];
+    const fullLabel = `${data.label} — ${monthLabel} ${date.getUTCFullYear()}`;
+    await prisma.oneOffCashflowEntry.create({
+      data: {
+        label: fullLabel,
+        category: data.category,
+        amount: Math.abs(data.amount),
+        date,
+        kind: data.kind,
+        status: data.status,
+        paidAt: data.status === "PAID" ? new Date() : null,
+        notes: data.notes,
+        createdBy: { connect: { id: session.user.id } }
+      }
+    });
+    created++;
+  }
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "OneOffCashflowEntry",
+    message: `${created} entrées récurrentes (${data.kind}) générées : « ${data.label} » de ${data.startDate.toISOString().slice(0, 10)} à ${data.endDate.toISOString().slice(0, 10)}`
+  });
+
+  revalidatePath("/cashflow");
+  return { created };
+}
+
 export async function createOneOffEntry(formData: FormData) {
   const session = await requirePermission(PERM_WRITE);
   const data = OneOffSchema.parse(Object.fromEntries(formData));

@@ -44,7 +44,8 @@ import {
   addBillingMilestoneToMission,
   getMilestonesByIds,
   getMissionMilestonesYear,
-  updateMissionDaysBulk
+  updateMissionDaysBulk,
+  createRecurringOneOffEntries
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
 
@@ -1198,6 +1199,13 @@ function OneOffModal({
   const [vatRate, setVatRate] = useState<number>(21); // Belgique standard
   const [amountIsHtva, setAmountIsHtva] = useState<boolean>(supportsVat);
 
+  // Récurrence mensuelle (uniquement en création, pas en édition)
+  const supportsRecurrence = !isEdit;
+  const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<string>(
+    `${year}-12-31`
+  );
+
   // Construit un libellé "Facturation MIS-2026-0001 (Client X) — 5j × 800€"
   function buildTmLabel(m: MissionForBilling, days: number, rate: number) {
     const client = m.companyName ? ` (${m.companyName})` : "";
@@ -1275,6 +1283,25 @@ function OneOffModal({
               "notes",
               existingNotes ? `${breakdown}\n${existingNotes}` : breakdown
             );
+          }
+
+          // Si récurrence activée, on appelle le bulk creator
+          if (supportsRecurrence && isRecurring) {
+            const startDate = String(fd.get("date") ?? "");
+            fd.set("startDate", startDate);
+            fd.set("endDate", recurrenceEndDate);
+            // date n'est plus utilisé par l'action récurrente
+            fd.delete("date");
+            start(async () => {
+              try {
+                const r = await createRecurringOneOffEntries(fd);
+                toast.success(`${r.created} entrées récurrentes créées`);
+                onClose();
+              } catch (e: any) {
+                toast.error(e.message);
+              }
+            });
+            return;
           }
 
           start(async () => {
@@ -1433,6 +1460,47 @@ function OneOffModal({
             )}
           </div>
         </div>
+
+        {/* Récurrence mensuelle (création uniquement) */}
+        {supportsRecurrence && (
+          <div className="p-3 rounded border border-purple-200 bg-purple-50/50 space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+              />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-purple-900">
+                  Récurrence mensuelle
+                </div>
+                <div className="text-[10px] text-purple-700">
+                  Génère une entrée par mois entre la date ci-dessous et la date
+                  de fin, avec le même montant. Chaque entrée peut être ajustée
+                  individuellement après.
+                </div>
+              </div>
+            </label>
+            {isRecurring && (
+              <div className="pt-2 border-t border-purple-200">
+                <label className="text-xs font-medium text-purple-900 block mb-1">
+                  Jusqu'au (inclus)
+                </label>
+                <input
+                  type="date"
+                  value={recurrenceEndDate}
+                  onChange={(e) => setRecurrenceEndDate(e.target.value)}
+                  className="input w-full"
+                  required={isRecurring}
+                />
+                <div className="text-[10px] text-purple-700 mt-1">
+                  Le libellé est suffixé avec le mois pour chaque entrée
+                  (ex : <em>« Mon libellé — Juin 2026 »</em>)
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* TVA — uniquement pour les recettes et engagements futurs */}
         {supportsVat && amountIsHtva && (
