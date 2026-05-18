@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { Fragment, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   Check,
@@ -15,12 +15,12 @@ import {
   AlertCircle,
   CalendarClock
 } from "lucide-react";
-import { MONTH_LABELS } from "@/lib/cashflow";
 import {
   cycleMonthlyStatus,
   toggleOneOffStatus
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
+import { colorForCategory, NO_CATEGORY } from "./category-color";
 
 const MONTHS_LONG = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -67,6 +67,29 @@ type OneOff = {
   status: string;
   date: string;
   paidAt: string | null;
+};
+
+/** Type unifié pour l'affichage : tout item (milestone, recurring, oneoff) regroupé par catégorie */
+type UnifiedItem = {
+  key: string;
+  category: string;
+  label: string;
+  amount: number;
+  isPaid: boolean;
+  isSkipped: boolean;
+  isIncome: boolean;
+  // Données pour les actions
+  source: "milestone" | "recurring" | "oneoff";
+  sourceId: string;
+  // Métadonnées d'affichage
+  companyName?: string | null;
+  offerId?: string | null;
+  projectId?: string | null;
+  isCommitment?: boolean;
+  isCancelled?: boolean;
+  // Pour recurring : on a besoin de l'année/mois pour cycleMonthlyStatus
+  year?: number;
+  monthNum?: number;
 };
 
 function falsOnMonth(
@@ -116,96 +139,90 @@ export function CurrentMonthPanel({
     falsOnMonth(r.recurring.frequency, r.recurring.paymentMonths, month)
   );
 
-  // Sépare encaissements vs sorties
-  const incomeMilestones = milestones; // milestones = toujours des revenus
-  const recurringIncomes = recurringForMonth.filter(
-    (r) => r.recurring.isIncome
-  );
-  const recurringExpenses = recurringForMonth.filter(
-    (r) => !r.recurring.isIncome
-  );
-  const oneoffIncomes = oneOffs.filter(
-    (o) => o.kind === "INCOME"
-  );
-  const oneoffExpenses = oneOffs.filter(
-    (o) => o.kind === "EXPENSE" || o.kind === "COMMITMENT"
-  );
-  // Simulations exclues du panneau "ce mois-ci" — c'est du suivi réel
+  // Construction de la liste unifiée d'items
+  const { incomeItems, expenseItems } = useMemo(() => {
+    const inc: UnifiedItem[] = [];
+    const exp: UnifiedItem[] = [];
 
-  // Calcul des totaux
+    // Milestones → toujours revenu, catégorie "Factures clients"
+    for (const m of milestones) {
+      inc.push({
+        key: `m-${m.id}`,
+        category: "Factures clients",
+        label: m.label,
+        amount: m.amount,
+        isPaid: m.status === "PAID",
+        isSkipped: false,
+        isCancelled: m.status === "CANCELLED",
+        isIncome: true,
+        source: "milestone",
+        sourceId: m.id,
+        companyName: m.companyName,
+        offerId: m.offerId,
+        projectId: m.projectId
+      });
+    }
+
+    // Recurring
+    for (const r of recurringForMonth) {
+      const amount = r.entry?.amountOverride ?? r.recurring.defaultAmount;
+      const status = r.entry?.status ?? "PLANNED";
+      if (status === "SKIPPED") continue;
+      const item: UnifiedItem = {
+        key: `r-${r.recurring.id}`,
+        category: r.recurring.category?.trim() || NO_CATEGORY,
+        label: r.recurring.label,
+        amount,
+        isPaid: status === "PAID",
+        isSkipped: false,
+        isIncome: r.recurring.isIncome,
+        source: "recurring",
+        sourceId: r.recurring.id,
+        year,
+        monthNum: month
+      };
+      (r.recurring.isIncome ? inc : exp).push(item);
+    }
+
+    // OneOffs (kind = INCOME, EXPENSE, COMMITMENT — pas SIMULATION car pas suivi réel)
+    for (const o of oneOffs) {
+      if (o.kind === "SIMULATION") continue;
+      if (o.status === "SKIPPED") continue;
+      const item: UnifiedItem = {
+        key: `o-${o.id}`,
+        category: o.category?.trim() || NO_CATEGORY,
+        label: o.label,
+        amount: o.amount,
+        isPaid: o.status === "PAID",
+        isSkipped: false,
+        isIncome: o.kind === "INCOME",
+        isCommitment: o.kind === "COMMITMENT",
+        source: "oneoff",
+        sourceId: o.id
+      };
+      (o.kind === "INCOME" ? inc : exp).push(item);
+    }
+
+    return { incomeItems: inc, expenseItems: exp };
+  }, [milestones, recurringForMonth, oneOffs, year, month]);
+
+  // Totaux
   const totals = useMemo(() => {
-    const sum = (items: number[]) => items.reduce((s, n) => s + n, 0);
-
-    // Encaissements
-    const milestonesPaid = sum(
-      incomeMilestones.filter((m) => m.status === "PAID").map((m) => m.amount)
-    );
-    const milestonesPlanned = sum(
-      incomeMilestones
-        .filter((m) => m.status !== "PAID" && m.status !== "CANCELLED")
-        .map((m) => m.amount)
-    );
-    const recIncomePaid = sum(
-      recurringIncomes
-        .filter((r) => r.entry?.status === "PAID")
-        .map((r) => r.entry?.amountOverride ?? r.recurring.defaultAmount)
-    );
-    const recIncomePlanned = sum(
-      recurringIncomes
-        .filter((r) => r.entry?.status !== "PAID" && r.entry?.status !== "SKIPPED")
-        .map((r) => r.entry?.amountOverride ?? r.recurring.defaultAmount)
-    );
-    const ooIncomePaid = sum(
-      oneoffIncomes.filter((o) => o.status === "PAID").map((o) => o.amount)
-    );
-    const ooIncomePlanned = sum(
-      oneoffIncomes
-        .filter((o) => o.status !== "PAID" && o.status !== "SKIPPED")
-        .map((o) => o.amount)
-    );
-
-    // Sorties
-    const recExpensePaid = sum(
-      recurringExpenses
-        .filter((r) => r.entry?.status === "PAID")
-        .map((r) => r.entry?.amountOverride ?? r.recurring.defaultAmount)
-    );
-    const recExpensePlanned = sum(
-      recurringExpenses
-        .filter((r) => r.entry?.status !== "PAID" && r.entry?.status !== "SKIPPED")
-        .map((r) => r.entry?.amountOverride ?? r.recurring.defaultAmount)
-    );
-    const ooExpensePaid = sum(
-      oneoffExpenses.filter((o) => o.status === "PAID").map((o) => o.amount)
-    );
-    const ooExpensePlanned = sum(
-      oneoffExpenses
-        .filter((o) => o.status !== "PAID" && o.status !== "SKIPPED")
-        .map((o) => o.amount)
-    );
-
+    const sum = (items: UnifiedItem[], paid: boolean) =>
+      items
+        .filter((i) => i.isPaid === paid && !i.isCancelled)
+        .reduce((s, i) => s + i.amount, 0);
     return {
-      incomePaid: milestonesPaid + recIncomePaid + ooIncomePaid,
-      incomeStillToReceive:
-        milestonesPlanned + recIncomePlanned + ooIncomePlanned,
-      expensePaid: recExpensePaid + ooExpensePaid,
-      expenseStillToPay: recExpensePlanned + ooExpensePlanned
+      incomePaid: sum(incomeItems, true),
+      incomeStillToReceive: sum(incomeItems, false),
+      expensePaid: sum(expenseItems, true),
+      expenseStillToPay: sum(expenseItems, false)
     };
-  }, [
-    incomeMilestones,
-    recurringIncomes,
-    recurringExpenses,
-    oneoffIncomes,
-    oneoffExpenses
-  ]);
+  }, [incomeItems, expenseItems]);
 
   const totalUnpaidItems =
-    incomeMilestones.filter((m) => m.status !== "PAID" && m.status !== "CANCELLED").length +
-    recurringForMonth.filter(
-      (r) => r.entry?.status !== "PAID" && r.entry?.status !== "SKIPPED"
-    ).length +
-    oneOffs.filter((o) => o.status !== "PAID" && o.status !== "SKIPPED" && o.kind !== "SIMULATION")
-      .length;
+    incomeItems.filter((i) => !i.isPaid && !i.isCancelled).length +
+    expenseItems.filter((i) => !i.isPaid).length;
 
   // Navigation mois précédent/suivant (gère les transitions d'année)
   const prevMonth = month === 1 ? 12 : month - 1;
@@ -220,7 +237,6 @@ export function CurrentMonthPanel({
     <section className="card p-4 mb-6 border-indigo-200 bg-indigo-50/30">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          {/* Toggle expand/collapse */}
           <button
             onClick={() => setCollapsed((c) => !c)}
             className="text-midnight-600 hover:text-midnight-900 p-0.5"
@@ -233,7 +249,6 @@ export function CurrentMonthPanel({
             )}
           </button>
 
-          {/* Navigation mois */}
           <div className="flex items-center gap-1 bg-white rounded border border-midnight-200 px-1 py-0.5">
             <Link
               href={`/cashflow?year=${prevYear}&month=${prevMonth}`}
@@ -291,283 +306,232 @@ export function CurrentMonthPanel({
 
       {!collapsed && (
         <div className="grid lg:grid-cols-2 gap-4">
-          {/* COLONNE GAUCHE : ENCAISSEMENTS */}
-          <div>
-            <SectionHeader
-              icon={TrendingUp}
-              label="Encaissements"
-              tone="emerald"
-              paid={totals.incomePaid}
-              planned={totals.incomeStillToReceive}
-            />
-            <div className="space-y-1.5 mt-3">
-              {incomeMilestones.length === 0 &&
-                recurringIncomes.length === 0 &&
-                oneoffIncomes.length === 0 && (
-                  <p className="text-xs text-midnight-500 py-2">
-                    Aucun encaissement prévu ce mois.
-                  </p>
-                )}
-              {incomeMilestones.map((m) => (
-                <MilestoneRow key={m.id} milestone={m} />
-              ))}
-              {recurringIncomes.map((r) => (
-                <RecurringRow
-                  key={r.recurring.id}
-                  data={r}
-                  year={year}
-                  month={month}
-                />
-              ))}
-              {oneoffIncomes.map((o) => (
-                <OneOffRow key={o.id} oneoff={o} />
-              ))}
-            </div>
-          </div>
-
-          {/* COLONNE DROITE : SORTIES */}
-          <div>
-            <SectionHeader
-              icon={TrendingDown}
-              label="Sorties"
-              tone="red"
-              paid={totals.expensePaid}
-              planned={totals.expenseStillToPay}
-            />
-            <div className="space-y-1.5 mt-3">
-              {recurringExpenses.length === 0 &&
-                oneoffExpenses.length === 0 && (
-                  <p className="text-xs text-midnight-500 py-2">
-                    Aucune sortie prévue ce mois.
-                  </p>
-                )}
-              {recurringExpenses.map((r) => (
-                <RecurringRow
-                  key={r.recurring.id}
-                  data={r}
-                  year={year}
-                  month={month}
-                />
-              ))}
-              {oneoffExpenses.map((o) => (
-                <OneOffRow key={o.id} oneoff={o} />
-              ))}
-            </div>
-          </div>
+          <ColumnByCategory
+            label="Encaissements"
+            icon={TrendingUp}
+            tone="emerald"
+            items={incomeItems}
+            paid={totals.incomePaid}
+            planned={totals.incomeStillToReceive}
+          />
+          <ColumnByCategory
+            label="Sorties"
+            icon={TrendingDown}
+            tone="red"
+            items={expenseItems}
+            paid={totals.expensePaid}
+            planned={totals.expenseStillToPay}
+          />
         </div>
       )}
     </section>
   );
 }
 
-function SectionHeader({
-  icon: Icon,
+// ─────────── Column avec groupement par catégorie ───────────
+
+function ColumnByCategory({
   label,
+  icon: Icon,
   tone,
+  items,
   paid,
   planned
 }: {
-  icon: any;
   label: string;
+  icon: any;
   tone: "emerald" | "red";
+  items: UnifiedItem[];
   paid: number;
   planned: number;
 }) {
-  const total = paid + planned;
-  const pct = total > 0 ? (paid / total) * 100 : 0;
+  const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>({});
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, UnifiedItem[]>();
+    for (const item of items) {
+      const cat = item.category || NO_CATEGORY;
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push(item);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => {
+      if (a === NO_CATEGORY) return 1;
+      if (b === NO_CATEGORY) return -1;
+      return a.localeCompare(b);
+    });
+  }, [items]);
+
   const textColor = tone === "emerald" ? "text-emerald-700" : "text-red-700";
   const barColor = tone === "emerald" ? "bg-emerald-500" : "bg-red-500";
+  const total = paid + planned;
+  const pct = total > 0 ? (paid / total) * 100 : 0;
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-1">
-        <h3 className={`font-semibold text-sm flex items-center gap-1.5 ${textColor}`}>
-          <Icon className="w-4 h-4" />
-          {label}
-        </h3>
-        <div className="text-xs">
-          <span className={`font-semibold tabular-nums ${textColor}`}>
-            {fmt(paid)}
-          </span>
-          <span className="text-midnight-400 mx-1">/</span>
-          <span className="tabular-nums">{fmt(total)} €</span>
-        </div>
-      </div>
-      <div className="h-1.5 bg-midnight-100 rounded overflow-hidden">
-        <div
-          className={`h-full transition-all ${barColor}`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function MilestoneRow({ milestone: m }: { milestone: Milestone }) {
-  const [pending, start] = useTransition();
-  const isPaid = m.status === "PAID";
-  const isCancelled = m.status === "CANCELLED";
-  return (
-    <div
-      className={
-        "flex items-center justify-between gap-2 px-2 py-1.5 rounded bg-white border border-midnight-200 text-sm " +
-        (isPaid ? "bg-emerald-50/60 border-emerald-200" : "") +
-        (isCancelled ? "opacity-50 line-through" : "")
-      }
-    >
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <Receipt className="w-3 h-3 text-midnight-400 shrink-0" />
-          {(m.offerId || m.projectId) ? (
-            <Link
-              href={m.offerId ? `/offers/${m.offerId}` : `/projects/${m.projectId}`}
-              className="font-medium truncate hover:underline"
-            >
-              {m.label}
-            </Link>
-          ) : (
-            <span className="font-medium truncate">{m.label}</span>
-          )}
-        </div>
-        {m.companyName && (
-          <div className="text-[10px] text-midnight-500 truncate ml-4">
-            {m.companyName}
+      {/* Header colonne */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className={`font-semibold text-sm flex items-center gap-1.5 ${textColor}`}>
+            <Icon className="w-4 h-4" />
+            {label}
+          </h3>
+          <div className="text-xs">
+            <span className={`font-semibold tabular-nums ${textColor}`}>
+              {fmt(paid)}
+            </span>
+            <span className="text-midnight-400 mx-1">/</span>
+            <span className="tabular-nums">{fmt(total)} €</span>
           </div>
-        )}
-      </div>
-      <div className="text-right shrink-0">
-        <div className="font-semibold tabular-nums text-emerald-700 text-sm">
-          {fmt(m.amount)} €
+        </div>
+        <div className="h-1.5 bg-midnight-100 rounded overflow-hidden">
+          <div
+            className={`h-full transition-all ${barColor}`}
+            style={{ width: `${pct}%` }}
+          />
         </div>
       </div>
-      <button
-        onClick={() => {
-          start(async () => {
-            try {
-              await setMilestoneStatus(m.id, isPaid ? "READY" : "PAID");
-              toast.success(isPaid ? "Marqué non encaissé" : "Encaissé ✓");
-            } catch (e: any) {
-              toast.error(e?.message ?? "Erreur");
-            }
-          });
-        }}
-        disabled={pending || isCancelled}
-        className={
-          "p-1.5 rounded transition-colors " +
-          (isPaid
-            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-            : "bg-midnight-100 text-midnight-500 hover:bg-emerald-100 hover:text-emerald-700")
-        }
-        title={isPaid ? "Marquer non encaissé" : "Marquer encaissé"}
-      >
-        {pending ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Check className="w-3.5 h-3.5" />
+
+      {/* Groupes par catégorie */}
+      <div className="space-y-2 mt-3">
+        {grouped.length === 0 && (
+          <p className="text-xs text-midnight-500 py-2">
+            Aucun élément ce mois.
+          </p>
         )}
-      </button>
+        {grouped.map(([cat, catItems]) => {
+          const isCollapsed = collapsedCats[cat] ?? false;
+          const catTotal = catItems
+            .filter((i) => !i.isCancelled)
+            .reduce((s, i) => s + i.amount, 0);
+          const catPaid = catItems
+            .filter((i) => i.isPaid && !i.isCancelled)
+            .reduce((s, i) => s + i.amount, 0);
+          const catRemaining = catTotal - catPaid;
+          const dotColor =
+            cat === NO_CATEGORY ? "bg-midnight-300" : colorForCategory(cat);
+          const allPaid = catRemaining === 0 && catItems.length > 0;
+
+          return (
+            <div key={cat}>
+              <button
+                type="button"
+                onClick={() =>
+                  setCollapsedCats((c) => ({ ...c, [cat]: !c[cat] }))
+                }
+                className="w-full flex items-center justify-between gap-2 px-2 py-1 bg-white/70 hover:bg-white border border-midnight-200 rounded text-xs"
+              >
+                <span className="flex items-center gap-1.5 min-w-0">
+                  {isCollapsed ? (
+                    <ChevronRight className="w-3 h-3 text-midnight-400 shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3 text-midnight-400 shrink-0" />
+                  )}
+                  <span
+                    className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`}
+                  />
+                  <span className="font-semibold text-midnight-700 truncate">
+                    {cat}
+                  </span>
+                  <span className="text-midnight-400 shrink-0">
+                    ({catItems.length})
+                  </span>
+                  {allPaid && (
+                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                  )}
+                </span>
+                <span className="shrink-0 tabular-nums">
+                  {catRemaining > 0 ? (
+                    <>
+                      <span className={`font-semibold ${textColor}`}>
+                        {fmt(catRemaining)}
+                      </span>
+                      <span className="text-midnight-400 mx-0.5">/</span>
+                      <span className="text-midnight-500">{fmt(catTotal)}</span>
+                    </>
+                  ) : (
+                    <span className="text-emerald-700 font-semibold">
+                      {fmt(catTotal)} €
+                    </span>
+                  )}
+                </span>
+              </button>
+              {!isCollapsed && (
+                <div className="space-y-1 mt-1 pl-3">
+                  {catItems.map((item) => (
+                    <UnifiedItemRow key={item.key} item={item} />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function RecurringRow({
-  data,
-  year,
-  month
-}: {
-  data: RecurringWithEntry;
-  year: number;
-  month: number;
-}) {
+// ─────────── Ligne unifiée ───────────
+
+function UnifiedItemRow({ item }: { item: UnifiedItem }) {
   const [pending, start] = useTransition();
-  const amount = data.entry?.amountOverride ?? data.recurring.defaultAmount;
-  const status = data.entry?.status ?? "PLANNED";
-  const isPaid = status === "PAID";
-  const isSkipped = status === "SKIPPED";
-  if (isSkipped) return null; // n'affiche pas les sautés
-  const isIncome = data.recurring.isIncome;
-  return (
-    <div
-      className={
-        "flex items-center justify-between gap-2 px-2 py-1.5 rounded bg-white border border-midnight-200 text-sm " +
-        (isPaid ? "bg-emerald-50/60 border-emerald-200" : "")
+  const { isPaid, isCommitment, isCancelled, isIncome } = item;
+
+  function toggle() {
+    if (isCancelled) return;
+    start(async () => {
+      try {
+        if (item.source === "milestone") {
+          await setMilestoneStatus(item.sourceId, isPaid ? "READY" : "PAID");
+        } else if (item.source === "recurring" && item.year && item.monthNum) {
+          await cycleMonthlyStatus(item.sourceId, item.year, item.monthNum);
+        } else if (item.source === "oneoff") {
+          await toggleOneOffStatus(item.sourceId);
+        }
+        toast.success(isPaid ? "Non payé" : "Payé ✓");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
       }
-    >
-      <div className="min-w-0 flex-1">
-        <div className="font-medium truncate">{data.recurring.label}</div>
-        {data.recurring.category && (
-          <div className="text-[10px] text-midnight-500 truncate">
-            {data.recurring.category}
-          </div>
-        )}
-      </div>
-      <div className="text-right shrink-0">
-        <div
-          className={
-            "font-semibold tabular-nums text-sm " +
-            (isIncome ? "text-emerald-700" : "text-red-700")
-          }
-        >
-          {fmt(amount)} €
-        </div>
-      </div>
-      <button
-        onClick={() => {
-          start(async () => {
-            try {
-              await cycleMonthlyStatus(data.recurring.id, year, month);
-              toast.success(isPaid ? "Non payé" : "Payé ✓");
-            } catch (e: any) {
-              toast.error(e?.message ?? "Erreur");
-            }
-          });
-        }}
-        disabled={pending}
-        className={
-          "p-1.5 rounded transition-colors " +
-          (isPaid
-            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-            : "bg-midnight-100 text-midnight-500 hover:bg-emerald-100 hover:text-emerald-700")
-        }
-        title={isPaid ? "Annuler le paiement" : "Marquer payé"}
-      >
-        {pending ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <Check className="w-3.5 h-3.5" />
-        )}
-      </button>
-    </div>
-  );
-}
+    });
+  }
 
-function OneOffRow({ oneoff: o }: { oneoff: OneOff }) {
-  const [pending, start] = useTransition();
-  const isPaid = o.status === "PAID";
-  const isSkipped = o.status === "SKIPPED";
-  if (isSkipped) return null;
-  const isIncome = o.kind === "INCOME";
-  const isCommitment = o.kind === "COMMITMENT";
   return (
     <div
       className={
-        "flex items-center justify-between gap-2 px-2 py-1.5 rounded bg-white border text-sm " +
+        "flex items-center justify-between gap-2 px-2 py-1.5 rounded text-sm border " +
         (isPaid
           ? "bg-emerald-50/60 border-emerald-200"
           : isCommitment
           ? "border-amber-300 bg-amber-50/40"
-          : "border-midnight-200")
+          : "bg-white border-midnight-200") +
+        (isCancelled ? " opacity-50 line-through" : "")
       }
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
+          {item.source === "milestone" && (
+            <Receipt className="w-3 h-3 text-midnight-400 shrink-0" />
+          )}
           {isCommitment && (
             <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
           )}
-          <span className="font-medium truncate">{o.label}</span>
+          {item.source === "milestone" && (item.offerId || item.projectId) ? (
+            <Link
+              href={
+                item.offerId
+                  ? `/offers/${item.offerId}`
+                  : `/projects/${item.projectId}`
+              }
+              className="font-medium truncate hover:underline"
+            >
+              {item.label}
+            </Link>
+          ) : (
+            <span className="font-medium truncate">{item.label}</span>
+          )}
         </div>
-        {o.category && (
-          <div className="text-[10px] text-midnight-500 truncate">
-            {o.category}
+        {item.companyName && (
+          <div className="text-[10px] text-midnight-500 truncate ml-4">
+            {item.companyName}
           </div>
         )}
       </div>
@@ -578,21 +542,12 @@ function OneOffRow({ oneoff: o }: { oneoff: OneOff }) {
             (isIncome ? "text-emerald-700" : "text-red-700")
           }
         >
-          {fmt(o.amount)} €
+          {fmt(item.amount)} €
         </div>
       </div>
       <button
-        onClick={() => {
-          start(async () => {
-            try {
-              await toggleOneOffStatus(o.id);
-              toast.success(isPaid ? "Non payé" : "Payé ✓");
-            } catch (e: any) {
-              toast.error(e?.message ?? "Erreur");
-            }
-          });
-        }}
-        disabled={pending}
+        onClick={toggle}
+        disabled={pending || isCancelled}
         className={
           "p-1.5 rounded transition-colors " +
           (isPaid
