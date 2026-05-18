@@ -5,6 +5,7 @@ import { computeCashflowYear } from "@/lib/cashflow";
 import { formatCurrency } from "@/lib/utils";
 import { prisma } from "@/lib/db";
 import { CashflowGrid } from "./grid";
+import { CurrentMonthPanel } from "./current-month";
 import { TrendingUp, TrendingDown, Wallet, Activity } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,8 @@ export default async function CashflowPage({
 }) {
   await requirePermission("finance.read");
 
-  const year = parseInt(searchParams.year ?? "", 10) || new Date().getFullYear();
+  const year =
+    parseInt(searchParams.year ?? "", 10) || new Date().getFullYear();
   const [data, settings, recurringCats, oneOffCats] = await Promise.all([
     computeCashflowYear(year),
     prisma.cashflowSettings.findUnique({ where: { id: "singleton" } }),
@@ -32,7 +34,7 @@ export default async function CashflowPage({
     })
   ]);
 
-  // Catégories distinctes utilisées (récurrents + ponctuels), triées
+  // Catégories distinctes utilisées (récurrents + ponctuels)
   const categories = Array.from(
     new Set(
       [...recurringCats, ...oneOffCats]
@@ -42,6 +44,37 @@ export default async function CashflowPage({
   ).sort((a, b) => a.localeCompare(b));
 
   const yearsToShow = [year - 1, year, year + 1];
+
+  // ─── Pour le panneau "Ce mois-ci" : on récupère les détails individuels du mois courant ───
+  const now = new Date();
+  const isCurrentYear = year === now.getFullYear();
+  // Si on regarde une autre année que la courante, on prend janvier par défaut
+  const focusMonth = isCurrentYear ? now.getMonth() + 1 : 1;
+  const focusMonthStart = new Date(Date.UTC(year, focusMonth - 1, 1));
+  const focusMonthEnd = new Date(Date.UTC(year, focusMonth, 0, 23, 59, 59));
+
+  const [milestonesThisMonth, recurringForMonth, recurringMonthEntries, oneOffsThisMonth] =
+    await Promise.all([
+      prisma.billingMilestone.findMany({
+        where: { expectedAt: { gte: focusMonthStart, lte: focusMonthEnd } },
+        include: {
+          offer: { include: { company: { select: { name: true } } } },
+          project: { include: { company: { select: { name: true } } } }
+        },
+        orderBy: { expectedAt: "asc" }
+      }),
+      prisma.recurringExpense.findMany({
+        where: { isActive: true },
+        orderBy: [{ isIncome: "desc" }, { label: "asc" }]
+      }),
+      prisma.recurringExpenseMonth.findMany({
+        where: { year, month: focusMonth }
+      }),
+      prisma.oneOffCashflowEntry.findMany({
+        where: { date: { gte: focusMonthStart, lte: focusMonthEnd } },
+        orderBy: [{ kind: "asc" }, { date: "asc" }]
+      })
+    ]);
 
   return (
     <div>
@@ -68,7 +101,11 @@ export default async function CashflowPage({
         <KpiCard
           label="Solde initial"
           value={formatCurrency(data.startingBalance)}
-          hint={settings?.startingDate ? `au ${settings.startingDate.toISOString().slice(0,10)}` : ""}
+          hint={
+            settings?.startingDate
+              ? `au ${settings.startingDate.toISOString().slice(0, 10)}`
+              : ""
+          }
           icon={Wallet}
         />
         <KpiCard
@@ -101,10 +138,68 @@ export default async function CashflowPage({
         />
       </div>
 
+      {/* Panneau "Ce mois-ci" */}
+      <CurrentMonthPanel
+        year={year}
+        month={focusMonth}
+        milestones={milestonesThisMonth.map((m) => ({
+          id: m.id,
+          label: m.label,
+          amount: Number(m.amount),
+          status: m.status,
+          expectedAt: m.expectedAt?.toISOString() ?? null,
+          paidAt: m.paidAt?.toISOString() ?? null,
+          companyName:
+            m.offer?.company?.name ?? m.project?.company?.name ?? null,
+          offerId: m.offerId,
+          projectId: m.projectId
+        }))}
+        recurring={recurringForMonth
+          .map((r) => {
+            const entry = recurringMonthEntries.find(
+              (e) => e.recurringExpenseId === r.id
+            );
+            return {
+              recurring: {
+                id: r.id,
+                label: r.label,
+                category: r.category,
+                defaultAmount: Number(r.defaultAmount),
+                isIncome: r.isIncome,
+                frequency: r.frequency,
+                paymentMonths: r.paymentMonths
+              },
+              entry: entry
+                ? {
+                    id: entry.id,
+                    amountOverride: entry.amountOverride
+                      ? Number(entry.amountOverride)
+                      : null,
+                    status: entry.status,
+                    paidAt: entry.paidAt?.toISOString() ?? null,
+                    notes: entry.notes
+                  }
+                : null
+            };
+          })}
+        oneOffs={oneOffsThisMonth.map((o) => ({
+          id: o.id,
+          label: o.label,
+          category: o.category,
+          amount: Number(o.amount),
+          kind: o.kind,
+          status: o.status,
+          date: o.date.toISOString(),
+          paidAt: o.paidAt?.toISOString() ?? null
+        }))}
+      />
+
       <CashflowGrid
         data={data}
         startingBalance={data.startingBalance}
-        startingDate={settings?.startingDate?.toISOString().slice(0, 10) ?? `${year}-01-01`}
+        startingDate={
+          settings?.startingDate?.toISOString().slice(0, 10) ?? `${year}-01-01`
+        }
         categories={categories}
       />
     </div>
