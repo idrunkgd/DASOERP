@@ -316,14 +316,12 @@ export function CashflowGrid({
 
       <p className="text-[11px] text-midnight-500 flex items-start gap-1.5">
         <span>
-          💡 Clic sur une cellule pour éditer le montant et le statut.
-          Clic sur l'icône de statut pour cycler{" "}
-          <span className="inline-flex items-center gap-0.5 mx-0.5">⏰</span>
-          Prévu →{" "}
+          💡 Clic sur l'icône pour basculer{" "}
+          <span className="inline-flex items-center gap-0.5 mx-0.5">⏰</span>{" "}
+          Prévu ↔{" "}
           <span className="inline-flex items-center gap-0.5 mx-0.5">✓</span>{" "}
-          Payé →{" "}
-          <span className="inline-flex items-center gap-0.5 mx-0.5">⊘</span>{" "}
-          Sauté.
+          Payé. Clic sur la cellule pour éditer le montant et accéder au
+          statut « Sauté ».
         </span>
       </p>
 
@@ -573,9 +571,9 @@ function RowLine({
                   className="opacity-60 hover:opacity-100"
                   title={
                     isPaid
-                      ? "Payé → Sauté"
+                      ? "Payé → Prévu (annuler le paiement)"
                       : isSkipped
-                      ? "Sauté → Prévu"
+                      ? "Sauté → Payé"
                       : "Prévu → Payé"
                   }
                   disabled={pending}

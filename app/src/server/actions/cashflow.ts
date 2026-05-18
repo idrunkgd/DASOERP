@@ -197,7 +197,11 @@ export async function upsertMonthlyEntry(formData: FormData) {
   revalidatePath("/cashflow");
 }
 
-/** Bascule rapide du statut entre PLANNED → PAID → SKIPPED → PLANNED */
+/**
+ * Bascule rapide du statut : PLANNED ↔ PAID (toggle 2 états).
+ * Le statut SKIPPED reste accessible via le modal d'édition de cellule,
+ * pour ne pas le toucher par accident en cliquant trop vite.
+ */
 export async function cycleMonthlyStatus(
   recurringExpenseId: string,
   year: number,
@@ -209,14 +213,9 @@ export async function cycleMonthlyStatus(
       recurringExpenseId_year_month: { recurringExpenseId, year, month }
     }
   });
-  const next: "PLANNED" | "PAID" | "SKIPPED" =
-    !existing
-      ? "PAID" // si rien → on marque comme payé
-      : existing.status === "PLANNED"
-      ? "PAID"
-      : existing.status === "PAID"
-      ? "SKIPPED"
-      : "PLANNED";
+  // Si déjà PAID → repasse PLANNED. Sinon (PLANNED, SKIPPED, ou inexistant) → PAID.
+  const next: "PLANNED" | "PAID" =
+    existing?.status === "PAID" ? "PLANNED" : "PAID";
 
   await prisma.recurringExpenseMonth.upsert({
     where: {
@@ -325,12 +324,9 @@ export async function toggleOneOffStatus(id: string) {
   const before = await prisma.oneOffCashflowEntry.findUniqueOrThrow({
     where: { id }
   });
-  const next: "PLANNED" | "PAID" | "SKIPPED" =
-    before.status === "PLANNED"
-      ? "PAID"
-      : before.status === "PAID"
-      ? "SKIPPED"
-      : "PLANNED";
+  // Toggle 2 états : PAID ↔ PLANNED. Si SKIPPED, on remet PLANNED.
+  const next: "PLANNED" | "PAID" =
+    before.status === "PAID" ? "PLANNED" : "PAID";
   await prisma.oneOffCashflowEntry.update({
     where: { id },
     data: {
