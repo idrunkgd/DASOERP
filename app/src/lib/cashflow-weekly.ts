@@ -268,7 +268,8 @@ export async function computeCashflowWeeks(
       >(`SELECT id, "vatRate" FROM "Mission" WHERE id IN (${idList})`);
       for (const r of rows) {
         const v = Number(r.vatRate);
-        if (Number.isFinite(v)) vatRateByMissionId.set(r.id, v);
+        // 0 = colonne pas renseignée → fallback 21% via le ?? en aval
+        if (Number.isFinite(v) && v > 0) vatRateByMissionId.set(r.id, v);
       }
     } catch {
       // colonne vatRate absente → fallback 21%

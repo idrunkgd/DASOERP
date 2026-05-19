@@ -215,7 +215,9 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         >(`SELECT id, "vatRate" FROM "Mission" WHERE id IN (${idList})`);
         for (const r of rows) {
           const v = Number(r.vatRate);
-          if (Number.isFinite(v)) priorVatByMissionId.set(r.id, v);
+          // On ignore 0 / NaN / négatif : on veut tomber sur le fallback 21%
+          // (0 en DB = colonne non renseignée par la migration vatRate).
+          if (Number.isFinite(v) && v > 0) priorVatByMissionId.set(r.id, v);
         }
       } catch {
         // colonne absente → fallback 21%
@@ -278,7 +280,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       );
       for (const r of missionsWithVat) {
         const v = Number(r.vatRate);
-        if (Number.isFinite(v)) vatRateByMissionId.set(r.id, v);
+        // Idem : 0 = colonne pas renseignée, on retombe sur le fallback 21%.
+        if (Number.isFinite(v) && v > 0) vatRateByMissionId.set(r.id, v);
       }
     } catch {
       // Si la colonne vatRate n'existe pas encore : pas grave, on tombera sur 21%

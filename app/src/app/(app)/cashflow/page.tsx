@@ -120,7 +120,9 @@ export default async function CashflowPage({
       );
       for (const r of rows) {
         const v = Number(r.vatRate);
-        if (Number.isFinite(v)) vatRateByMissionId.set(r.id, v);
+        // 0 (ou null) = colonne pas renseignée, on retombe sur 21% via le ??
+        // en aval. Sinon une mission sans vatRate afficherait HTVA.
+        if (Number.isFinite(v) && v > 0) vatRateByMissionId.set(r.id, v);
       }
     } catch {
       // Si la colonne vatRate n'existe pas encore : on tombe sur 21% par défaut
