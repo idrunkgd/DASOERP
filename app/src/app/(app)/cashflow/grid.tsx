@@ -846,7 +846,11 @@ function RowLine({
               (isSkipped ? " line-through opacity-50" : "") +
               (editable ? " cursor-pointer hover:bg-midnight-100" : "")
             }
-            onClick={() => editable && hasValue && onEditCell(i)}
+            onClick={() =>
+              editable &&
+              (hasValue || row.kind === "milestones") &&
+              onEditCell(i)
+            }
           >
             <div className="flex items-center justify-end gap-1 tabular-nums">
               <span>{hasValue ? fmtShort(cell.amount) : "—"}</span>
@@ -2382,6 +2386,8 @@ type MilestoneData = {
   paidAt: string | null;
   comment: string | null;
   missionId: string | null;
+  /** Snapshot du taux journalier à la création de la tranche. */
+  appliedDailyRate: number | null;
   mission: {
     id: string;
     reference: string;
@@ -2515,9 +2521,18 @@ function MilestoneEditCard({
 
   // Pour les tranches liées à une mission : édition uniquement des jours,
   // le label et le taux sont auto-générés à partir de la mission.
-  const initialDays = milestone.mission && milestone.mission.dailyRate > 0
-    ? Math.round((milestone.amount / milestone.mission.dailyRate) * 10) / 10
-    : 0;
+  // On utilise PRIORITAIREMENT appliedDailyRate (snapshot du rate au moment
+  // de la création de la tranche), fallback sur mission.dailyRate sinon.
+  // Sans ça, si le rate mission a changé après création de la tranche, le
+  // calcul des jours initiaux serait faux.
+  const effectiveRate =
+    milestone.appliedDailyRate && milestone.appliedDailyRate > 0
+      ? milestone.appliedDailyRate
+      : milestone.mission?.dailyRate ?? 0;
+  const initialDays =
+    effectiveRate > 0
+      ? Math.round((milestone.amount / effectiveRate) * 10) / 10
+      : 0;
   const [days, setDays] = useState<number>(initialDays);
 
   // Pour les milestones standalone : édition libre

@@ -1048,6 +1048,10 @@ export async function getMilestonesByIds(ids: string[]) {
       paidAt: true,
       comment: true,
       missionId: true,
+      // Snapshot du rate au moment de la création — utilisé pour calculer
+      // les jours sans dépendre du rate actuel de la mission (qui peut avoir
+      // changé depuis).
+      appliedDailyRate: true,
       mission: {
         select: { id: true, reference: true, dailyRate: true }
       }
@@ -1063,6 +1067,8 @@ export async function getMilestonesByIds(ids: string[]) {
     paidAt: m.paidAt?.toISOString() ?? null,
     comment: m.comment,
     missionId: m.missionId,
+    appliedDailyRate:
+      m.appliedDailyRate != null ? Number(m.appliedDailyRate) : null,
     mission: m.mission
       ? {
           id: m.mission.id,
