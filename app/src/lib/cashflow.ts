@@ -54,7 +54,13 @@ export type CashflowRow = {
 
 export type CashflowYear = {
   year: number;
+  /** Solde projeté au 1er janvier de l'année affichée (= bootstrap + flux PAID antérieurs). */
   startingBalance: number;
+  /** True si l'année affichée est celle où l'utilisateur a configuré son solde de
+   *  bootstrap. Pour les autres années, le solde initial est *dérivé* (read-only). */
+  isBootstrapYear: boolean;
+  /** Année dans laquelle tombe `settings.startingDate` (utilisée pour le hint). */
+  bootstrapYear: number;
   rows: CashflowRow[];
   monthlyTotals: {
     inflow: number;        // hors simulations
@@ -153,7 +159,82 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     })
   ]);
 
-  const startingBalance = Number(settings?.startingBalance ?? 0);
+  // ─── Solde de départ projeté pour l'année `year` ───
+  // Le bouton "Solde initial" ne sert qu'à *amorcer* le système. Pour les années
+  // suivantes, on dérive automatiquement le solde au 1er janvier en partant du
+  // bootstrap + tous les flux PAID intervenus entre la startingDate et le 1er
+  // janvier de l'année affichée.
+  const bootstrapBalance = Number(settings?.startingBalance ?? 0);
+  const bootstrapDate =
+    settings?.startingDate ?? new Date(Date.UTC(year, 0, 1));
+  const bootstrapYear = bootstrapDate.getUTCFullYear();
+  const isBootstrapYear = year === bootstrapYear;
+
+  let startingBalance = bootstrapBalance;
+  if (year > bootstrapYear) {
+    // Tous les flux PAID entre bootstrapDate et yearStart ajustent le solde
+    const [priorPaidMs, priorPaidOo, priorPaidRm] = await Promise.all([
+      prisma.billingMilestone.findMany({
+        where: {
+          status: "PAID",
+          paidAt: { gte: bootstrapDate, lt: yearStart }
+        },
+        select: { amount: true, missionId: true }
+      }),
+      prisma.oneOffCashflowEntry.findMany({
+        where: {
+          status: "PAID",
+          paidAt: { gte: bootstrapDate, lt: yearStart }
+        },
+        select: { amount: true, kind: true }
+      }),
+      prisma.recurringExpenseMonth.findMany({
+        where: {
+          status: "PAID",
+          paidAt: { gte: bootstrapDate, lt: yearStart }
+        },
+        include: { recurringExpense: true }
+      })
+    ]);
+    // TVAC pour milestones liés à une mission — fetch vatRate en raw SQL
+    const priorMissionIds = new Set<string>();
+    for (const m of priorPaidMs) if (m.missionId) priorMissionIds.add(m.missionId);
+    const priorVatByMissionId = new Map<string, number>();
+    if (priorMissionIds.size > 0) {
+      try {
+        const idList = Array.from(priorMissionIds)
+          .map((id) => `'${id.replace(/'/g, "''")}'`)
+          .join(",");
+        const rows = await prisma.$queryRawUnsafe<
+          { id: string; vatRate: string | number }[]
+        >(`SELECT id, "vatRate" FROM "Mission" WHERE id IN (${idList})`);
+        for (const r of rows) {
+          const v = Number(r.vatRate);
+          if (Number.isFinite(v)) priorVatByMissionId.set(r.id, v);
+        }
+      } catch {
+        // colonne absente → fallback 21%
+      }
+    }
+    for (const m of priorPaidMs) {
+      const vat = m.missionId
+        ? priorVatByMissionId.get(m.missionId) ?? 21
+        : 21;
+      startingBalance += Number(m.amount) * (1 + vat / 100);
+    }
+    for (const o of priorPaidOo) {
+      const a = Number(o.amount);
+      if (o.kind === "INCOME") startingBalance += a;
+      else if (o.kind === "EXPENSE" || o.kind === "COMMITMENT")
+        startingBalance -= a;
+      // SIMULATION : ignoré du réel
+    }
+    for (const rm of priorPaidRm) {
+      const a = Number(rm.amountOverride ?? rm.recurringExpense.defaultAmount);
+      startingBalance += rm.recurringExpense.isIncome ? a : -a;
+    }
+    startingBalance = Math.round(startingBalance * 100) / 100;
+  }
 
   // Index des monthly entries par recurringId/month
   const monthIndex = new Map<string, (typeof monthEntries)[number]>();
@@ -512,6 +593,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   return {
     year,
     startingBalance,
+    isBootstrapYear,
+    bootstrapYear,
     rows,
     monthlyTotals,
     yearTotals

@@ -167,6 +167,9 @@ export default async function CashflowPage({
           startingDate={
             settings?.startingDate?.toISOString().slice(0, 10) ?? `${year}-01-01`
           }
+          isBootstrapYear={data.isBootstrapYear}
+          bootstrapYear={data.bootstrapYear}
+          displayedYear={year}
         />
         <KpiCard
           label="Solde compte"

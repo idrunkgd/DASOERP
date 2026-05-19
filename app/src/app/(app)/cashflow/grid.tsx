@@ -893,7 +893,11 @@ function RowLine({
       </td>
       <td>
         {editable && row.oneOffId && (
-          <DeleteOneOffButton id={row.oneOffId} label={row.label} />
+          <DeleteOneOffButton
+            id={row.oneOffId}
+            label={row.label}
+            isGroup={row.id.startsWith("one-group-")}
+          />
         )}
         {editable && row.recurringId && (
           <DeleteRecurringButton id={row.recurringId} label={row.label} />
@@ -903,16 +907,31 @@ function RowLine({
   );
 }
 
-function DeleteOneOffButton({ id, label }: { id: string; label: string }) {
+function DeleteOneOffButton({
+  id,
+  label,
+  isGroup
+}: {
+  id: string;
+  label: string;
+  isGroup?: boolean;
+}) {
   const [pending, start] = useTransition();
   return (
     <button
       onClick={() => {
-        if (!confirm(`Supprimer « ${label} » ?`)) return;
+        const msg = isGroup
+          ? `Supprimer toute la récurrence « ${label} » (toutes les occurrences mensuelles) ?`
+          : `Supprimer « ${label} » ?`;
+        if (!confirm(msg)) return;
         start(async () => {
           try {
-            await deleteOneOffEntry(id);
-            toast.success("Supprimé");
+            const res = await deleteOneOffEntry(id);
+            toast.success(
+              res?.wasGroup
+                ? `Récurrence supprimée (${res.deletedCount} mois)`
+                : "Supprimé"
+            );
           } catch (e: any) {
             toast.error(e.message);
           }
@@ -2870,7 +2889,8 @@ function OneOffCellEditModal({
     if (!confirm("Supprimer cette entrée pour ce mois ?")) return;
     start(async () => {
       try {
-        await deleteOneOffEntry(oneOffId);
+        // cascadeGroup = false : on ne supprime QUE ce mois, pas tout le groupe
+        await deleteOneOffEntry(oneOffId, false);
         toast.success("Supprimée");
         onClose();
       } catch (err: any) {

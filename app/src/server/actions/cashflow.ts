@@ -427,20 +427,49 @@ export async function updateOneOffEntry(id: string, formData: FormData) {
   revalidatePath("/cashflow");
 }
 
-export async function deleteOneOffEntry(id: string) {
+/**
+ * Supprime une entrée OneOff.
+ *
+ * Par défaut (`cascadeGroup: true`) : si l'entrée appartient à un groupe de
+ * récurrence (recurrenceGroupId non null), supprime *toutes* les entrées du
+ * groupe. Sinon la ligne agrégée réapparaîtrait au refresh avec les 11 autres
+ * mois. Comportement utilisé par le bouton "Supprimer" sur la ligne entière.
+ *
+ * Avec `cascadeGroup: false` : supprime uniquement cette entrée précise. Utilisé
+ * par le modal d'édition cellule par cellule, où l'utilisateur veut juste retirer
+ * un mois précis sans casser le reste de la récurrence.
+ */
+export async function deleteOneOffEntry(
+  id: string,
+  cascadeGroup: boolean = true
+) {
   const session = await requirePermission(PERM_WRITE);
   const before = await prisma.oneOffCashflowEntry.findUniqueOrThrow({
     where: { id }
   });
-  await prisma.oneOffCashflowEntry.delete({ where: { id } });
+  const groupId = (before as { recurrenceGroupId?: string | null })
+    .recurrenceGroupId;
+  let deletedCount = 1;
+  const willCascade = cascadeGroup && !!groupId;
+  if (willCascade) {
+    const result = await prisma.oneOffCashflowEntry.deleteMany({
+      where: { recurrenceGroupId: groupId! }
+    });
+    deletedCount = result.count;
+  } else {
+    await prisma.oneOffCashflowEntry.delete({ where: { id } });
+  }
   await logActivity({
     actorId: session.user.id,
     action: "DELETE",
     entityType: "OneOffCashflowEntry",
     entityId: id,
-    message: `Entrée cashflow « ${before.label} » supprimée`
+    message: willCascade
+      ? `Récurrence cashflow « ${before.label} » supprimée (${deletedCount} entrées)`
+      : `Entrée cashflow « ${before.label} » supprimée`
   });
   revalidatePath("/cashflow");
+  return { deletedCount, wasGroup: willCascade };
 }
 
 /**
