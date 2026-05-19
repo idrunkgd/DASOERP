@@ -95,6 +95,44 @@ export default async function CashflowPage({
       })
     ]);
 
+  // ─── TVAC pour les milestones du mois ───
+  // Les BillingMilestones stockent leur amount en HTVA. Le panneau "Ce mois-ci"
+  // (et donc le résumé "À encaisser / À payer") doivent afficher TVAC pour
+  // matcher le compte bancaire et le tableau annuel.
+  // Pour les milestones liés à une mission : on prend Mission.vatRate (raw SQL
+  // car la colonne n'est pas dans le schéma Prisma — cf. cashflow.ts).
+  // Pour les milestones standalone : fallback 21% TVA belge.
+  const STANDALONE_VAT_RATE = 21;
+  const missionIdsForMonth = Array.from(
+    new Set(
+      milestonesThisMonth
+        .map((m) => m.missionId)
+        .filter((id): id is string => !!id)
+    )
+  );
+  const vatRateByMissionId = new Map<string, number>();
+  if (missionIdsForMonth.length > 0) {
+    try {
+      const rows = await prisma.$queryRawUnsafe<
+        { id: string; vatRate: string | number }[]
+      >(
+        `SELECT id, "vatRate" FROM "Mission" WHERE id IN (${missionIdsForMonth.map((id) => `'${id.replace(/'/g, "''")}'`).join(",")})`
+      );
+      for (const r of rows) {
+        const v = Number(r.vatRate);
+        if (Number.isFinite(v)) vatRateByMissionId.set(r.id, v);
+      }
+    } catch {
+      // Si la colonne vatRate n'existe pas encore : on tombe sur 21% par défaut
+    }
+  }
+  const tvacForMilestone = (m: { amount: any; missionId: string | null }) => {
+    const vat = m.missionId
+      ? vatRateByMissionId.get(m.missionId) ?? STANDALONE_VAT_RATE
+      : STANDALONE_VAT_RATE;
+    return Math.round(Number(m.amount) * (1 + vat / 100) * 100) / 100;
+  };
+
   return (
     <div>
       <PageHeader
@@ -167,7 +205,7 @@ export default async function CashflowPage({
         milestones={milestonesThisMonth.map((m) => ({
           id: m.id,
           label: m.label,
-          amount: Number(m.amount),
+          amount: tvacForMilestone(m),
           status: m.status,
           expectedAt: m.expectedAt?.toISOString() ?? null,
           paidAt: m.paidAt?.toISOString() ?? null,
