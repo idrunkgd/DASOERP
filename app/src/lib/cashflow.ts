@@ -172,33 +172,34 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
 
   let startingBalance = bootstrapBalance;
   if (year > bootstrapYear) {
-    // Tous les flux PAID entre bootstrapDate et yearStart ajustent le solde
-    const [priorPaidMs, priorPaidOo, priorPaidRm] = await Promise.all([
+    // Chaîne année → année : on prend la PROJECTION (PAID + PLANNED, non-SKIPPED,
+    // non-CANCELLED, hors simulations), pas uniquement le réel marqué payé.
+    // Sinon fin 2026 = 120K ≠ début 2027 = 45K (seulement les payés cochés).
+    const [priorMs, priorOo, priorRecurring] = await Promise.all([
       prisma.billingMilestone.findMany({
         where: {
-          status: "PAID",
-          paidAt: { gte: bootstrapDate, lt: yearStart }
+          status: { not: "CANCELLED" },
+          expectedAt: { gte: bootstrapDate, lt: yearStart }
         },
         select: { amount: true, missionId: true }
       }),
       prisma.oneOffCashflowEntry.findMany({
         where: {
-          status: "PAID",
-          paidAt: { gte: bootstrapDate, lt: yearStart }
+          status: { not: "SKIPPED" },
+          kind: { not: "SIMULATION" },
+          date: { gte: bootstrapDate, lt: yearStart }
         },
         select: { amount: true, kind: true }
       }),
-      prisma.recurringExpenseMonth.findMany({
-        where: {
-          status: "PAID",
-          paidAt: { gte: bootstrapDate, lt: yearStart }
-        },
-        include: { recurringExpense: true }
+      prisma.recurringExpense.findMany({
+        where: { isActive: true },
+        include: { months: true }
       })
     ]);
+
     // TVAC pour milestones liés à une mission — fetch vatRate en raw SQL
     const priorMissionIds = new Set<string>();
-    for (const m of priorPaidMs) if (m.missionId) priorMissionIds.add(m.missionId);
+    for (const m of priorMs) if (m.missionId) priorMissionIds.add(m.missionId);
     const priorVatByMissionId = new Map<string, number>();
     if (priorMissionIds.size > 0) {
       try {
@@ -216,22 +217,36 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         // colonne absente → fallback 21%
       }
     }
-    for (const m of priorPaidMs) {
+    for (const m of priorMs) {
       const vat = m.missionId
         ? priorVatByMissionId.get(m.missionId) ?? 21
         : 21;
       startingBalance += Number(m.amount) * (1 + vat / 100);
     }
-    for (const o of priorPaidOo) {
+    for (const o of priorOo) {
       const a = Number(o.amount);
       if (o.kind === "INCOME") startingBalance += a;
       else if (o.kind === "EXPENSE" || o.kind === "COMMITMENT")
         startingBalance -= a;
-      // SIMULATION : ignoré du réel
     }
-    for (const rm of priorPaidRm) {
-      const a = Number(rm.amountOverride ?? rm.recurringExpense.defaultAmount);
-      startingBalance += rm.recurringExpense.isIncome ? a : -a;
+
+    // Récurrents : on itère tous les (year, month) entre bootstrap et yearStart
+    // et on applique falsOnMonth + amountOverride éventuel.
+    const startY = bootstrapDate.getUTCFullYear();
+    const startM = bootstrapDate.getUTCMonth() + 1; // 1..12
+    const monthsInRange: { year: number; month: number }[] = [];
+    for (let y = startY; y < year; y++) {
+      const fromM = y === startY ? startM : 1;
+      for (let m = fromM; m <= 12; m++) monthsInRange.push({ year: y, month: m });
+    }
+    for (const r of priorRecurring) {
+      for (const { year: y, month } of monthsInRange) {
+        if (!falsOnMonth(r.frequency, r.paymentMonths, month)) continue;
+        const me = r.months.find((x) => x.year === y && x.month === month);
+        if (me?.status === "SKIPPED") continue;
+        const a = Number(me?.amountOverride ?? r.defaultAmount);
+        startingBalance += r.isIncome ? a : -a;
+      }
     }
     startingBalance = Math.round(startingBalance * 100) / 100;
   }
