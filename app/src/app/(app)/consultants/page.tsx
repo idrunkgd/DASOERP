@@ -30,8 +30,11 @@ export default async function ConsultantsPage({ searchParams }: { searchParams: 
   ];
   if (searchParams.skill) where.skills = { has: searchParams.skill };
   if (searchParams.role) where.role = searchParams.role;
-  // Par défaut : on montre les rôles "delivery" (Consultants principalement)
-  if (!searchParams.role) where.role = { in: ["CONSULTANT","MANAGER"] };
+  // Par défaut : on n'affiche que les CONSULTANTS sur cette page. Les Managers,
+  // Commerciaux, etc. ont leur propre rôle métier et n'ont pas vocation à
+  // apparaître dans le pool "disponibles pour mission". L'utilisateur peut
+  // explicitement filtrer sur un autre rôle via le select.
+  if (!searchParams.role) where.role = "CONSULTANT";
 
   const list = await prisma.user.findMany({
     where, orderBy: [{ active: "desc" }, { lastName: "asc" }],
