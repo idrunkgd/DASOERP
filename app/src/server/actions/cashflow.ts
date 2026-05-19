@@ -275,7 +275,13 @@ const OneOffSchema = z.object({
   category: z.string().optional().nullable().transform((v) => v?.trim() || null),
   amount: z.coerce.number(),
   date: z.string().min(1).transform((v) => new Date(v)),
-  kind: z.enum(["EXPENSE", "INCOME", "COMMITMENT", "SIMULATION"]),
+  kind: z.enum([
+    "EXPENSE",
+    "INCOME",
+    "COMMITMENT",
+    "SIMULATION",
+    "SIMULATION_INCOME"
+  ]),
   status: z.enum(["PLANNED", "PAID", "SKIPPED"]).default("PLANNED"),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
@@ -294,7 +300,13 @@ const RecurringOneOffSchema = z.object({
   startDate: z.string().min(1).transform((v) => new Date(v)),
   /** Date de fin INCLUSE (dernier mois où on génère une occurrence) */
   endDate: z.string().min(1).transform((v) => new Date(v)),
-  kind: z.enum(["EXPENSE", "INCOME", "COMMITMENT", "SIMULATION"]),
+  kind: z.enum([
+    "EXPENSE",
+    "INCOME",
+    "COMMITMENT",
+    "SIMULATION",
+    "SIMULATION_INCOME"
+  ]),
   status: z.enum(["PLANNED", "PAID", "SKIPPED"]).default("PLANNED"),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });

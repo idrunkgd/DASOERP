@@ -846,12 +846,24 @@ function RowLine({
               (isSkipped ? " line-through opacity-50" : "") +
               (editable ? " cursor-pointer hover:bg-midnight-100" : "")
             }
+            title={
+              row.kind === "milestones" && cell.daysCount && cell.daysCount > 0
+                ? `${cell.daysCount}j prestés ce mois`
+                : undefined
+            }
             onClick={() =>
               editable &&
               (hasValue || row.kind === "milestones") &&
               onEditCell(i)
             }
           >
+            {/* Popup hover : nb de jours sur les cellules mission */}
+            {row.kind === "milestones" && cell.daysCount && cell.daysCount > 0 && (
+              <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 z-30 hidden group-hover:block whitespace-nowrap rounded bg-midnight-900 text-white text-[10px] font-semibold px-2 py-1 shadow-lg">
+                {cell.daysCount}j prestés
+                <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-midnight-900" />
+              </div>
+            )}
             <div className="flex items-center justify-end gap-1 tabular-nums">
               <span>{hasValue ? fmtShort(cell.amount) : "—"}</span>
               {/* Toggle inline status : pas pour milestones (multi-statuts possibles) */}
@@ -1209,7 +1221,7 @@ function OneOffModal({
   onClose
 }: {
   existing?: CashflowRow;
-  kind?: "EXPENSE" | "INCOME" | "COMMITMENT" | "SIMULATION";
+  kind?: "EXPENSE" | "INCOME" | "COMMITMENT" | "SIMULATION" | "SIMULATION_INCOME";
   year: number;
   categories: string[];
   missions: MissionForBilling[];
@@ -1226,8 +1238,12 @@ function OneOffModal({
     EXPENSE: "Dépense ponctuelle",
     INCOME: "Recette manuelle",
     COMMITMENT: "Engagement futur",
-    SIMULATION: "Simulation what-if"
+    SIMULATION: "Simulation dépense",
+    SIMULATION_INCOME: "Simulation recette"
   };
+  // En édition, on reconstruit le kind depuis la row + l'info `isIncome` :
+  // une row de kind "simulation" peut être SIMULATION (dépense) ou
+  // SIMULATION_INCOME (recette).
   const initialKind =
     (existing?.kind === "oneoff_expense"
       ? "EXPENSE"
@@ -1236,11 +1252,30 @@ function OneOffModal({
       : existing?.kind === "commitment"
       ? "COMMITMENT"
       : existing?.kind === "simulation"
-      ? "SIMULATION"
+      ? existing.isIncome
+        ? "SIMULATION_INCOME"
+        : "SIMULATION"
       : kindProp) ?? "EXPENSE";
 
-  // Mode facturation T&M : seulement disponible pour INCOME
-  const canUseTmBilling = initialKind === "INCOME" && missions.length > 0;
+  // Toggle interne pour basculer simulation dépense ⇄ recette dans le modal
+  // (uniquement quand on est en mode SIMULATION).
+  const [simIsIncome, setSimIsIncome] = useState<boolean>(
+    initialKind === "SIMULATION_INCOME"
+  );
+  const isSimulation =
+    initialKind === "SIMULATION" || initialKind === "SIMULATION_INCOME";
+  // Le kind effectif envoyé au serveur (mis à jour si l'utilisateur switch)
+  const effectiveKind = isSimulation
+    ? simIsIncome
+      ? "SIMULATION_INCOME"
+      : "SIMULATION"
+    : initialKind;
+  const isIncomeMode =
+    effectiveKind === "INCOME" || effectiveKind === "SIMULATION_INCOME";
+
+  // Mode facturation T&M : INCOME ou SIMULATION_INCOME (consultant en mission
+  // potentielle pas encore signée)
+  const canUseTmBilling = isIncomeMode && missions.length > 0;
   const [useTmBilling, setUseTmBilling] = useState(false);
   const [selectedMissionId, setSelectedMissionId] = useState<string>("");
   const [tmDays, setTmDays] = useState<number>(0);
@@ -1248,9 +1283,11 @@ function OneOffModal({
   const [manualAmount, setManualAmount] = useState<number>(existingAmount);
   const [manualLabel, setManualLabel] = useState<string>(existing?.label ?? "");
 
-  // TVA : applicable aux recettes (INCOME) et engagements (COMMITMENT, considéré
-  // comme une facture future). Pour les dépenses on garde TVAC direct.
-  const supportsVat = initialKind === "INCOME" || initialKind === "COMMITMENT";
+  // TVA : applicable aux recettes (INCOME / SIMULATION_INCOME) et engagements
+  // (COMMITMENT, considéré comme une facture future). Pour les dépenses on
+  // garde TVAC direct.
+  const supportsVat =
+    isIncomeMode || effectiveKind === "COMMITMENT";
   const [vatRate, setVatRate] = useState<number>(21); // Belgique standard
   const [amountIsHtva, setAmountIsHtva] = useState<boolean>(supportsVat);
 
@@ -1305,7 +1342,7 @@ function OneOffModal({
 
   return (
     <Modal
-      title={isEdit ? "Modifier" : kindLabel[initialKind]}
+      title={isEdit ? "Modifier" : kindLabel[effectiveKind]}
       onClose={onClose}
     >
       <form
@@ -1375,7 +1412,37 @@ function OneOffModal({
         }}
         className="space-y-3"
       >
-        <input type="hidden" name="kind" value={initialKind} />
+        <input type="hidden" name="kind" value={effectiveKind} />
+
+        {/* Toggle simulation dépense ⇄ recette */}
+        {isSimulation && (
+          <div className="flex items-center gap-1 p-1 rounded border border-amber-200 bg-amber-50/50">
+            <button
+              type="button"
+              onClick={() => setSimIsIncome(false)}
+              className={
+                "flex-1 px-3 py-1.5 rounded text-sm font-medium transition " +
+                (!simIsIncome
+                  ? "bg-red-100 text-red-800 shadow-sm"
+                  : "text-midnight-500 hover:bg-white")
+              }
+            >
+              Dépense simulée
+            </button>
+            <button
+              type="button"
+              onClick={() => setSimIsIncome(true)}
+              className={
+                "flex-1 px-3 py-1.5 rounded text-sm font-medium transition " +
+                (simIsIncome
+                  ? "bg-emerald-100 text-emerald-800 shadow-sm"
+                  : "text-midnight-500 hover:bg-white")
+              }
+            >
+              Recette simulée
+            </button>
+          </div>
+        )}
 
         {/* Toggle facturation T&M (seulement pour INCOME) */}
         {canUseTmBilling && (

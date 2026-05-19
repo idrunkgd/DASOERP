@@ -31,6 +31,10 @@ export type CashflowCell = {
   monthEntryId?: string;
   // Pour les lignes Milestones agrégées par mission : IDs des milestones de ce mois
   milestoneIds?: string[];
+  /** Pour les cellules mission : nb de jours prestés cumulés ce mois (somme
+   *  des amount / appliedDailyRate des milestones non annulées). undefined si
+   *  pas applicable. */
+  daysCount?: number;
   // Pour ré-éditer
   notes?: string | null;
 };
@@ -341,6 +345,21 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         .filter((m) => m.status !== "CANCELLED")
         .reduce((s, m) => s + Number(m.amount), 0);
       const amount = Math.round(amountHtva * tvacMultiplier * 100) / 100;
+      // Nb de jours = somme des (amount / appliedDailyRate) pour les tranches non annulées
+      // (fallback : on tente avec le rate actuel de la mission si pas de snapshot)
+      const missionDailyRate = monthMilestones[0]?.mission?.dailyRate
+        ? Number(monthMilestones[0].mission.dailyRate)
+        : 0;
+      const daysRaw = monthMilestones
+        .filter((m) => m.status !== "CANCELLED")
+        .reduce((s, m) => {
+          const snap = (m as { appliedDailyRate?: any }).appliedDailyRate;
+          const rate = snap != null ? Number(snap) : missionDailyRate;
+          if (!rate || rate <= 0) return s;
+          return s + Number(m.amount) / rate;
+        }, 0);
+      const daysCount =
+        daysRaw > 0 ? Math.round(daysRaw * 10) / 10 : undefined;
       const allPaid = monthMilestones.every((m) => m.status === "PAID");
       const allCancelled = monthMilestones.every(
         (m) => m.status === "CANCELLED"
@@ -353,7 +372,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       return {
         amount,
         status,
-        milestoneIds: monthMilestones.map((m) => m.id)
+        milestoneIds: monthMilestones.map((m) => m.id),
+        daysCount
       };
     });
 
@@ -461,8 +481,12 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     INCOME: "oneoff_income",
     EXPENSE: "oneoff_expense",
     COMMITMENT: "commitment",
-    SIMULATION: "simulation"
+    SIMULATION: "simulation",
+    SIMULATION_INCOME: "simulation"
   };
+  // Helper : un OneOff est-il une recette ? (INCOME ou SIMULATION_INCOME)
+  const isIncomeKind = (k: string) =>
+    k === "INCOME" || k === "SIMULATION_INCOME";
 
   // On lit recurrenceGroupId via une property optionnelle (idempotent : si la
   // colonne n'existe pas en runtime, on tombe sur undefined → standalone)
@@ -504,7 +528,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       kind: kindMap[first.kind],
       label: baseLabel,
       category: first.category,
-      isIncome: first.kind === "INCOME",
+      isIncome: isIncomeKind(first.kind),
       oneOffId: first.id, // pour le pencil → édite la 1ère
       cells,
       totalYear: cells.reduce(
@@ -531,7 +555,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       kind: kindMap[o.kind],
       label: o.label,
       category: o.category,
-      isIncome: o.kind === "INCOME",
+      isIncome: isIncomeKind(o.kind),
       oneOffId: o.id,
       cells,
       totalYear: Number(o.amount)

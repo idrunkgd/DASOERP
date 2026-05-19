@@ -1163,10 +1163,11 @@ enum CashflowStatus {
 }
 
 enum CashflowKind {
-  EXPENSE         // dépense réelle
-  INCOME          // recette manuelle (en plus des BillingMilestones)
-  COMMITMENT      // engagement signé (entre dans le cumul)
-  SIMULATION      // simulation what-if (exclu du cumul par défaut)
+  EXPENSE             // dépense réelle
+  INCOME              // recette manuelle (en plus des BillingMilestones)
+  COMMITMENT          // engagement signé (entre dans le cumul)
+  SIMULATION          // simulation what-if DÉPENSE (exclu du cumul par défaut)
+  SIMULATION_INCOME   // simulation what-if RECETTE (ex. mission consultant pas signée)
 }
 
 /// Singleton settings cashflow (solde initial). 1 seule ligne attendue.
