@@ -557,8 +557,15 @@ function SectionBlock({
     );
   }
 
-  // Doit-on afficher les sous-catégories ? Seulement s'il y en a > 1 (sinon c'est juste du bruit)
-  const showCategories = groupedByCategory.length > 1;
+  // Doit-on afficher les sous-catégories ? Pour les Revenus, on les affiche dès
+  // qu'on a au moins une ligne MISSION ou PROJET (cohérence d'affichage entre
+  // 2026 et 2027 : sinon une année qui n'a que des missions perdait le header
+  // "MISSION"). Pour les autres sections, on garde l'ancien comportement (>1
+  // catégorie distincte).
+  const hasMilestoneCat = rows.some((r) => r.kind === "milestones");
+  const showCategories =
+    (sectionKey === "income" && hasMilestoneCat) ||
+    groupedByCategory.length > 1;
 
   return (
     <>
@@ -866,7 +873,7 @@ function RowLine({
             )}
             <div className="flex items-center justify-end gap-1 tabular-nums">
               <span>{hasValue ? fmtShort(cell.amount) : "—"}</span>
-              {/* Toggle inline status : pas pour milestones (multi-statuts possibles) */}
+              {/* Toggle inline status pour recurring / oneoff */}
               {hasValue && editable && row.kind !== "milestones" && (
                 <button
                   onClick={(e) => {
@@ -894,6 +901,19 @@ function RowLine({
                   )}
                 </button>
               )}
+              {/* Toggle inline status pour milestones : marque TOUS les milestones
+                  de la cellule comme PAID ou les remet en READY (n'apparaît que
+                  s'il y a au moins un milestone). */}
+              {hasValue &&
+                editable &&
+                row.kind === "milestones" &&
+                cell.milestoneIds &&
+                cell.milestoneIds.length > 0 && (
+                  <MilestoneCellPayToggle
+                    milestoneIds={cell.milestoneIds}
+                    currentlyAllPaid={isPaid}
+                  />
+                )}
             </div>
           </td>
         );
@@ -920,6 +940,62 @@ function RowLine({
         )}
       </td>
     </tr>
+  );
+}
+
+/**
+ * Toggle inline pour marquer payée(s) une ou plusieurs tranche(s) milestone(s)
+ * en cliquant sur la cellule. Si la cellule a plusieurs milestones (cas mission
+ * agrégée avec plusieurs tranches sur le même mois), on toggle TOUTES les
+ * tranches d'un coup.
+ */
+function MilestoneCellPayToggle({
+  milestoneIds,
+  currentlyAllPaid
+}: {
+  milestoneIds: string[];
+  currentlyAllPaid: boolean;
+}) {
+  const [pending, start] = useTransition();
+  function toggle(e: React.MouseEvent) {
+    e.stopPropagation();
+    const newStatus = currentlyAllPaid ? "READY" : "PAID";
+    start(async () => {
+      try {
+        await Promise.all(
+          milestoneIds.map((id) =>
+            setMilestoneStatus(id, newStatus as any)
+          )
+        );
+        toast.success(
+          currentlyAllPaid
+            ? "Tranche(s) ré-ouverte(s)"
+            : `${milestoneIds.length > 1 ? "Tranches" : "Tranche"} marquée(s) payée(s)`
+        );
+      } catch (err: any) {
+        toast.error(err?.message ?? "Erreur");
+      }
+    });
+  }
+  return (
+    <button
+      onClick={toggle}
+      disabled={pending}
+      className="opacity-60 hover:opacity-100"
+      title={
+        currentlyAllPaid
+          ? "Payé → Ré-ouvrir (annuler le paiement)"
+          : "Marquer payé"
+      }
+    >
+      {pending ? (
+        <Loader2 className="w-3 h-3 animate-spin" />
+      ) : currentlyAllPaid ? (
+        <Check className="w-3 h-3 text-emerald-600" />
+      ) : (
+        <span className="text-[10px]">⏰</span>
+      )}
+    </button>
   );
 }
 
