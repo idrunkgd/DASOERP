@@ -23,7 +23,8 @@ const SECTIONS: Section[] = [
       { href: "/dashboard",         label: "Tableau de bord",      icon: LayoutDashboard },
       { href: "/project-status",    label: "Statut projet",        icon: Gauge },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
-      { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" }
+      { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
+      { href: "/cashflow/13-week",  label: "Cashflow 13 sem.",     icon: CalendarRange, perm: "finance.read" }
     ]
   },
   {

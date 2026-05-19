@@ -139,7 +139,7 @@ export default async function CashflowPage({
         title="Cashflow prévisionnel"
         subtitle={`Vue annuelle ${year} — revenus auto (BillingMilestones) + dépenses récurrentes + ponctuels + simulations`}
         actions={
-          <div className="flex gap-1">
+          <div className="flex gap-1 items-center flex-wrap">
             {yearsToShow.map((y) => (
               <a
                 key={y}
@@ -149,6 +149,13 @@ export default async function CashflowPage({
                 {y}
               </a>
             ))}
+            <a
+              href="/cashflow/13-week"
+              className="btn-secondary text-sm ml-2"
+              title="Vue prévisionnelle 13 semaines glissantes"
+            >
+              Vue 13 sem.
+            </a>
           </div>
         }
       />
