@@ -2069,8 +2069,12 @@ function MissionYearEditModal({
     fd.set("newEndDate", editedEndDate);
     start(async () => {
       try {
-        await updateMissionFromCashflow(fd);
-        toast.success("Mission mise à jour");
+        const res = await updateMissionFromCashflow(fd);
+        toast.success(
+          res?.generated && res.generated > 0
+            ? `Mission mise à jour (+${res.generated} tranches générées pour la prolongation)`
+            : "Mission mise à jour"
+        );
         setIsEditingMission(false);
         // Recharge les données
         const result = await getMissionMilestonesYear(missionId, year);

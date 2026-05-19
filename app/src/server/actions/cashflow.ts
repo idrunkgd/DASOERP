@@ -839,15 +839,78 @@ export async function updateMissionFromCashflow(formData: FormData) {
     }
   }
 
+  // 3) Si la mission a une endDate définie/modifiée, on remplit automatiquement
+  //    toutes les tranches mensuelles manquantes jusqu'à endDate. Idempotent
+  //    via generateMonthlyMissionInvoices : seuls les mois sans tranche existante
+  //    sont créés. Permet aussi de rattraper une prolongation antérieure pour
+  //    laquelle les tranches n'auraient pas été générées (cf. bug pré-fix).
+  let generated = 0;
+  if (parsed.newEndDate) {
+    const newEnd = new Date(parsed.newEndDate);
+
+    // Devine le default days : dernière tranche existante → days = amount / appliedDailyRate
+    const lastMs = await prisma.billingMilestone.findFirst({
+      where: { missionId: parsed.missionId },
+      orderBy: { expectedAt: "desc" }
+    });
+    let defaultDays = 20;
+    if (lastMs?.appliedDailyRate) {
+      const d = Math.round(
+        Number(lastMs.amount) / Number(lastMs.appliedDailyRate)
+      );
+      if (d > 0 && d <= 31) defaultDays = d;
+    }
+
+    // Point de départ : le mois qui suit la dernière tranche existante,
+    // ou à défaut la startDate de la mission.
+    let startY: number, startM: number;
+    if (lastMs?.expectedAt) {
+      const d = new Date(lastMs.expectedAt);
+      startY = d.getUTCFullYear();
+      startM = d.getUTCMonth() + 2; // mois suivant
+    } else {
+      const m = await prisma.mission.findUniqueOrThrow({
+        where: { id: parsed.missionId },
+        select: { startDate: true }
+      });
+      startY = m.startDate.getUTCFullYear();
+      startM = m.startDate.getUTCMonth() + 1;
+    }
+    if (startM > 12) {
+      startM -= 12;
+      startY++;
+    }
+    const toY = newEnd.getUTCFullYear();
+    const toM = newEnd.getUTCMonth() + 1;
+
+    // Délègue à generateMonthlyMissionInvoices qui est idempotent (skip
+    // les mois qui ont déjà une tranche).
+    if (toY > startY || (toY === startY && toM >= startM)) {
+      const result = await generateMonthlyMissionInvoices({
+        missionId: parsed.missionId,
+        defaultDays,
+        fromYear: startY,
+        fromMonth: startM,
+        toYear: toY,
+        toMonth: toM
+      });
+      generated = result.created;
+    }
+  }
+
   await logActivity({
     actorId: session.user.id,
     action: "UPDATE",
     entityType: "Mission",
     entityId: parsed.missionId,
-    message: `Mission mise à jour depuis cashflow`
+    message:
+      generated > 0
+        ? `Mission mise à jour depuis cashflow (+${generated} tranches générées pour la prolongation)`
+        : `Mission mise à jour depuis cashflow`
   });
   revalidatePath("/cashflow");
   revalidatePath(`/missions/${parsed.missionId}`);
+  return { generated };
 }
 
 /**
