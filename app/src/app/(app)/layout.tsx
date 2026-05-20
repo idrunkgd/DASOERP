@@ -12,9 +12,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     getUserEffectivePermissions(session.user.id, session.user.role),
     getUserAccessGroupName(session.user.id)
   ]);
-  // Visiteur ou compte portail = aucune permission OU groupe Visiteur
-  // Le middleware redirige déjà vers /me, ici on adapte juste la sidebar
-  const isRestricted = permissions.length === 0 || groupName === DEFAULT_GROUP_NAME;
+  // Mode restreint = aucune permission effective. Si un user "Visiteur" a reçu
+  // des overrides de permission (grants individuels), il sort du mode restreint
+  // et accède aux modules correspondants. Avant on excluait aussi sur le nom
+  // de groupe, ce qui ignorait les overrides → la sidebar restait vide alors
+  // que les droits étaient bien là.
+  const isRestricted = permissions.length === 0;
 
   return (
     <Providers>
