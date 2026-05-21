@@ -52,6 +52,9 @@ export type CashflowRow = {
   defaultAmount?: number;   // pour recurring_* : montant par défaut
   paymentMonths?: number[]; // mois où la dépense tombe (1-12)
   frequency?: string;
+  /** Bornes temporelles pour récurrents (yyyy-mm-dd, null = illimité). */
+  startDate?: string | null;
+  endDate?: string | null;
   cells: CashflowCell[];    // 12 cellules, index 0 = janvier
   totalYear: number;
 };
@@ -246,7 +249,18 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       for (let m = fromM; m <= 12; m++) monthsInRange.push({ year: y, month: m });
     }
     for (const r of priorRecurring) {
+      const recStart = (r as { startDate?: Date | null }).startDate ?? null;
+      const recEnd = (r as { endDate?: Date | null }).endDate ?? null;
+      const startYM = recStart
+        ? recStart.getUTCFullYear() * 12 + recStart.getUTCMonth()
+        : null;
+      const endYM = recEnd
+        ? recEnd.getUTCFullYear() * 12 + recEnd.getUTCMonth()
+        : null;
       for (const { year: y, month } of monthsInRange) {
+        const ym = y * 12 + (month - 1);
+        if (startYM != null && ym < startYM) continue;
+        if (endYM != null && ym > endYM) continue;
         if (!falsOnMonth(r.frequency, r.paymentMonths, month)) continue;
         const me = r.months.find((x) => x.year === y && x.month === month);
         if (me?.status === "SKIPPED") continue;
@@ -436,8 +450,25 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
 
   // ─── Lignes RecurringExpense ───
   for (const r of recurring) {
+    // Bornes temporelles : on n'affiche la récurrence que dans [startDate, endDate]
+    // (vues comme yyyy-mm pour le bucketing mensuel). Si null, illimité.
+    const recStart = (r as { startDate?: Date | null }).startDate ?? null;
+    const recEnd = (r as { endDate?: Date | null }).endDate ?? null;
+    const startYM = recStart
+      ? recStart.getUTCFullYear() * 12 + recStart.getUTCMonth()
+      : null;
+    const endYM = recEnd
+      ? recEnd.getUTCFullYear() * 12 + recEnd.getUTCMonth()
+      : null;
     const cells: CashflowCell[] = MONTHS.map((monthIdx) => {
       const monthNum = monthIdx + 1; // 1-12
+      const cellYM = year * 12 + monthIdx;
+      if (startYM != null && cellYM < startYM) {
+        return { amount: 0, status: "PLANNED" as const };
+      }
+      if (endYM != null && cellYM > endYM) {
+        return { amount: 0, status: "PLANNED" as const };
+      }
       if (!falsOnMonth(r.frequency, r.paymentMonths, monthNum)) {
         return { amount: 0, status: "PLANNED" as const };
       }
@@ -470,6 +501,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       defaultAmount: Number(r.defaultAmount),
       paymentMonths: r.paymentMonths,
       frequency: r.frequency,
+      startDate: recStart ? recStart.toISOString().slice(0, 10) : null,
+      endDate: recEnd ? recEnd.toISOString().slice(0, 10) : null,
       cells,
       totalYear: cells.reduce((s, c) => s + c.amount, 0)
     });

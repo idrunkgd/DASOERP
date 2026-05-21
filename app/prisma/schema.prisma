@@ -1193,6 +1193,10 @@ model RecurringExpense {
   frequency       RecurringFrequency @default(MONTHLY)
   /// Pour CUSTOM/QUARTERLY/etc : liste des mois (1-12) où la ligne tombe
   paymentMonths   Int[]    @default([])
+  /// Bornes temporelles facultatives : la récurrence ne s'applique que dans
+  /// l'intervalle [startDate, endDate]. Si null, illimité dans cette direction.
+  startDate       DateTime? @db.Date
+  endDate         DateTime? @db.Date
   isActive        Boolean  @default(true)
   notes           String?
   createdAt       DateTime @default(now())

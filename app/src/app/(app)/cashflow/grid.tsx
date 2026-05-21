@@ -1271,6 +1271,32 @@ function RecurringModal({
             />
           </div>
         )}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="label">À partir du</label>
+            <input
+              name="startDate"
+              type="date"
+              defaultValue={existing?.startDate ?? ""}
+              className="input"
+            />
+            <div className="text-[10px] text-midnight-500 mt-0.5">
+              Laisse vide = pas de date de début
+            </div>
+          </div>
+          <div>
+            <label className="label">Jusqu'au</label>
+            <input
+              name="endDate"
+              type="date"
+              defaultValue={existing?.endDate ?? ""}
+              className="input"
+            />
+            <div className="text-[10px] text-midnight-500 mt-0.5">
+              Laisse vide = pas de date de fin
+            </div>
+          </div>
+        </div>
         <div>
           <label className="label">Notes</label>
           <textarea name="notes" rows={2} className="input" />

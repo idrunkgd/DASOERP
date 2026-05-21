@@ -64,6 +64,17 @@ const RecSchema = z.object({
             .map((s) => parseInt(s.trim(), 10))
             .filter((n) => Number.isInteger(n) && n >= 1 && n <= 12)
     ),
+  // Bornes temporelles facultatives. Format YYYY-MM-DD ou vide.
+  startDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(v) : null)),
+  endDate: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(v) : null)),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
 
@@ -78,6 +89,8 @@ export async function createRecurringExpense(formData: FormData) {
       isIncome: data.isIncome ?? false,
       frequency: data.frequency,
       paymentMonths: data.paymentMonths,
+      startDate: data.startDate ?? undefined,
+      endDate: data.endDate ?? undefined,
       notes: data.notes,
       createdBy: { connect: { id: session.user.id } }
     }

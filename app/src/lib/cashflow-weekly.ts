@@ -378,7 +378,18 @@ export async function computeCashflowWeeks(
   for (const r of recurringActive) {
     const cells = emptyCells();
     let total = 0;
+    const recStart = (r as { startDate?: Date | null }).startDate ?? null;
+    const recEnd = (r as { endDate?: Date | null }).endDate ?? null;
+    const startYM = recStart
+      ? recStart.getUTCFullYear() * 12 + recStart.getUTCMonth()
+      : null;
+    const endYM = recEnd
+      ? recEnd.getUTCFullYear() * 12 + recEnd.getUTCMonth()
+      : null;
     for (const { year, month } of monthsInRange) {
+      const ym = year * 12 + (month - 1);
+      if (startYM != null && ym < startYM) continue;
+      if (endYM != null && ym > endYM) continue;
       if (!recurringFallsOnMonth(r.frequency, r.paymentMonths, month)) continue;
       const monthEntry = r.months.find(
         (me) => me.year === year && me.month === month
