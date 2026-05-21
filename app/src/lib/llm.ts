@@ -140,11 +140,35 @@ async function callGemini(p: {
   maxTokens?: number;
   apiKey: string;
 }): Promise<LlmCallResult> {
-  // Gemini 2.0 Flash (free tier généreux) supporte image + PDF en vision.
-  // Pour le parsing CV on prend le même modèle — Flash est très bon sur du texte structuré
-  // et le free tier (15 RPM, 1500 RPD) suffit largement pour notre usage.
-  const model = "gemini-2.0-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(p.apiKey)}`;
+  // Ordre de fallback : 1.5-flash-latest (free tier le plus stable et généreux)
+  // → 1.5-flash-8b (encore plus léger si le précédent renvoie 429)
+  // → 2.0-flash (preview, free tier plus serré)
+  const models = [
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash-8b-latest",
+    "gemini-2.0-flash"
+  ];
+  let lastErr = "";
+  for (const model of models) {
+    const r = await callGeminiModel({ ...p, model });
+    if (r.ok) return r;
+    lastErr = r.error;
+    // Si c'est une erreur de quota (429), on tente le modèle suivant qui a peut-être
+    // son propre quota dans le free tier.
+    if (!r.error.includes("429") && !r.error.includes("404")) return r;
+  }
+  return { ok: false, error: lastErr || "Gemini indisponible sur tous les modèles" };
+}
+
+async function callGeminiModel(p: {
+  prompt: string;
+  mediaType: string;
+  base64: string;
+  maxTokens?: number;
+  apiKey: string;
+  model: string;
+}): Promise<LlmCallResult> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${p.model}:generateContent?key=${encodeURIComponent(p.apiKey)}`;
   try {
     const resp = await fetch(url, {
       method: "POST",
@@ -161,68 +185,22 @@ async function callGemini(p: {
         ],
         generationConfig: {
           maxOutputTokens: p.maxTokens ?? 2000,
-          temperature: 0.1,
-          responseMimeType: "application/json"
+          temperature: 0.1
         }
       })
     });
     if (!resp.ok) {
       const errText = await resp.text();
-      // Si gemini-2.0-flash n'est pas dispo, retomber sur 1.5-flash-latest
-      if (resp.status === 404) {
-        return callGeminiLegacy(p);
-      }
-      return { ok: false, error: `Gemini ${resp.status}: ${errText.slice(0, 300)}` };
+      return { ok: false, error: `Gemini ${p.model} ${resp.status}: ${errText.slice(0, 250)}` };
     }
     const json = (await resp.json()) as any;
     const text: string =
       json?.candidates?.[0]?.content?.parts?.map((x: any) => x.text ?? "").join("") ?? "";
-    if (!text) {
-      return { ok: false, error: "Gemini : réponse vide" };
-    }
+    if (!text) return { ok: false, error: `Gemini ${p.model} : réponse vide` };
     return { ok: true, text, provider: "gemini" };
   } catch (e: any) {
-    return { ok: false, error: `Gemini: ${String(e?.message ?? e)}` };
+    return { ok: false, error: `Gemini ${p.model}: ${String(e?.message ?? e)}` };
   }
-}
-
-async function callGeminiLegacy(p: {
-  prompt: string;
-  mediaType: string;
-  base64: string;
-  maxTokens?: number;
-  apiKey: string;
-}): Promise<LlmCallResult> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${encodeURIComponent(p.apiKey)}`;
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { inlineData: { mimeType: p.mediaType, data: p.base64 } },
-            { text: p.prompt }
-          ]
-        }
-      ],
-      generationConfig: {
-        maxOutputTokens: p.maxTokens ?? 2000,
-        temperature: 0.1,
-        responseMimeType: "application/json"
-      }
-    })
-  });
-  if (!resp.ok) {
-    const errText = await resp.text();
-    return { ok: false, error: `Gemini 1.5 ${resp.status}: ${errText.slice(0, 300)}` };
-  }
-  const json = (await resp.json()) as any;
-  const text: string =
-    json?.candidates?.[0]?.content?.parts?.map((x: any) => x.text ?? "").join("") ?? "";
-  if (!text) return { ok: false, error: "Gemini : réponse vide" };
-  return { ok: true, text, provider: "gemini" };
 }
 
 /**

@@ -11,7 +11,7 @@ import { logActivity } from "@/lib/audit";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-1.5-flash-latest"; // stable, free tier généreux
 const MAX_LOOPS = 5;
 
 const SYSTEM_PROMPT = `Tu es l'assistant IA de Dasolabs, une startup IT/industrielle utilisant un ERP interne.
