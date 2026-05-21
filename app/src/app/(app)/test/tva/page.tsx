@@ -12,10 +12,7 @@ export default async function TvaTrimestriellePage({
 }: {
   searchParams: { year?: string; quarter?: string };
 }) {
-  const session = await requireSession();
-  if (!["ADMIN", "MANAGER", "FINANCE"].includes(session.user.role)) {
-    return <div className="text-sm text-midnight-500">Accès refusé.</div>;
-  }
+  await requireSession();
 
   // Par défaut : trimestre précédent (le délai de déclaration est le 20 du mois suivant)
   const now = new Date();

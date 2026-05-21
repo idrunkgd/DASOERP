@@ -66,11 +66,12 @@ const SECTIONS: Section[] = [
   {
     label: "Test (preview)",
     items: [
-      { href: "/test/tva",        label: "TVA trimestrielle",  icon: Percent,            allowedRoles: ["ADMIN","FINANCE","MANAGER"] },
-      { href: "/test/expenses",   label: "Notes de frais",     icon: Wallet,             allowedRoles: ["ADMIN","FINANCE","MANAGER","CONSULTANT"] },
-      { href: "/test/crm",        label: "CRM pipeline",       icon: Workflow,           allowedRoles: ["ADMIN","COMMERCIAL","MANAGER"] },
-      { href: "/test/cv-parser",  label: "Parser CV",          icon: FileScan,           allowedRoles: ["ADMIN","MANAGER","COMMERCIAL"] },
-      { href: "/test/matching",   label: "Matching mission",   icon: GitCompareArrows,   allowedRoles: ["ADMIN","MANAGER","COMMERCIAL"] }
+      // En preview : visible pour tous les rôles authentifiés (admin déduit le besoin).
+      { href: "/test/tva",        label: "TVA trimestrielle",  icon: Percent,            allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/test/expenses",   label: "Notes de frais",     icon: Wallet,             allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/test/crm",        label: "CRM pipeline",       icon: Workflow,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/test/cv-parser",  label: "Parser CV",          icon: FileScan,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/test/matching",   label: "Matching mission",   icon: GitCompareArrows,   allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
     ]
   },
   {

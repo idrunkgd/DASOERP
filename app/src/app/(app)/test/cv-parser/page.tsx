@@ -5,10 +5,8 @@ import { CvParserClient } from "./client";
 export const dynamic = "force-dynamic";
 
 export default async function CvParserPage() {
-  const session = await requireSession();
-  if (!["ADMIN", "MANAGER", "COMMERCIAL"].includes(session.user.role)) {
-    return <div className="text-sm text-midnight-500">Accès refusé.</div>;
-  }
+  await requireSession();
+
   return (
     <div>
       <PageHeader

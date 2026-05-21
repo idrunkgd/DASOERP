@@ -13,10 +13,7 @@ export default async function MatchingPage({
 }: {
   searchParams: { request?: string; includeCandidates?: string };
 }) {
-  const session = await requireSession();
-  if (!["ADMIN", "MANAGER", "COMMERCIAL"].includes(session.user.role)) {
-    return <div className="text-sm text-midnight-500">Accès refusé.</div>;
-  }
+  await requireSession();
 
   // Demandes ouvertes
   const openRequests = await prisma.missionRequest.findMany({

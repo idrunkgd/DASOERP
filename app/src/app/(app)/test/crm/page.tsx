@@ -18,9 +18,6 @@ const STAGES = [
 
 export default async function CrmPage() {
   const session = await requireSession();
-  if (!["ADMIN", "COMMERCIAL", "MANAGER"].includes(session.user.role)) {
-    return <div className="text-sm text-midnight-500">Accès refusé.</div>;
-  }
 
   const [opportunities, companies, owners] = await Promise.all([
     prisma.opportunity.findMany({
