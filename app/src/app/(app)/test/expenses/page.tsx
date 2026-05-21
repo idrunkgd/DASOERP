@@ -186,10 +186,10 @@ export default async function ExpensesPage({
                         "—"
                       )}
                     </td>
-                    <td className="text-right tabular-nums">{formatCurrency(r.amountHt)}</td>
-                    <td className="text-right tabular-nums">{formatCurrency(r.vatAmount)}</td>
+                    <td className="text-right tabular-nums">{formatCurrency(Number(r.amountHt))}</td>
+                    <td className="text-right tabular-nums">{formatCurrency(Number(r.vatAmount))}</td>
                     <td className="text-right tabular-nums font-medium">
-                      {formatCurrency(r.amountTtc)}
+                      {formatCurrency(Number(r.amountTtc))}
                     </td>
                     <td>
                       <span

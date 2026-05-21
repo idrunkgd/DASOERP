@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
+import { callLlmWithMedia, extractJson } from "@/lib/llm";
 
 const TVA_DEFAULT = 21;
 
@@ -184,16 +185,9 @@ export async function ocrReceipt(dataUri: string): Promise<{
   ok: boolean;
   error?: string;
   data?: z.infer<typeof OcrResponseSchema>;
+  provider?: string;
 }> {
   await requireSession();
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return { ok: false, error: "ANTHROPIC_API_KEY non configurée" };
-
-  // Extraire le mediaType et le base64
-  const match = dataUri.match(/^data:(image\/(png|jpeg|jpg|webp));base64,(.+)$/);
-  if (!match) return { ok: false, error: "Format d'image non supporté (PNG/JPEG/WebP requis)" };
-  const mediaType = match[1] === "image/jpg" ? "image/jpeg" : match[1];
-  const base64 = match[3];
 
   const prompt = `Tu analyses un ticket de caisse ou une facture. Extrais ces champs au format JSON strict :
 {
@@ -208,45 +202,22 @@ export async function ocrReceipt(dataUri: string): Promise<{
 }
 Réponds UNIQUEMENT le JSON, rien d'autre.`;
 
+  const result = await callLlmWithMedia({
+    prompt,
+    dataUri,
+    task: "ocr",
+    maxTokens: 500
+  });
+  if (!result.ok) return { ok: false, error: result.error };
+
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 500,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
-              { type: "text", text: prompt }
-            ]
-          }
-        ]
-      })
-    });
-    if (!resp.ok) {
-      const errText = await resp.text();
-      return { ok: false, error: `API Claude : ${resp.status} ${errText.slice(0, 200)}` };
-    }
-    const json = (await resp.json()) as any;
-    const text: string = json?.content?.[0]?.text ?? "";
-    // Parser le JSON éventuellement entouré de ```json
-    const cleaned = text
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```\s*$/, "")
-      .trim();
-    const parsed = OcrResponseSchema.safeParse(JSON.parse(cleaned));
+    const parsedRaw = JSON.parse(extractJson(result.text));
+    const parsed = OcrResponseSchema.safeParse(parsedRaw);
     if (!parsed.success) {
-      return { ok: false, error: "Réponse Claude non parsable" };
+      return { ok: false, error: `${result.provider} : structure inattendue` };
     }
-    return { ok: true, data: parsed.data };
-  } catch (e: any) {
-    return { ok: false, error: String(e?.message ?? e) };
+    return { ok: true, data: parsed.data, provider: result.provider };
+  } catch {
+    return { ok: false, error: `${result.provider} : JSON invalide` };
   }
 }

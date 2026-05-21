@@ -32,7 +32,9 @@ export function CvParserClient() {
         return;
       }
       setParsed(result.data!);
-      toast.success("CV parsé — vérifie les champs avant de créer le candidat");
+      toast.success(
+        `CV parsé via ${result.provider ?? "LLM"} — vérifie les champs avant de créer le candidat`
+      );
     };
     reader.readAsDataURL(file);
   }

@@ -4,121 +4,215 @@ import { requireSession } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { rankMatches, type MatchableProfile, type MatchResult } from "@/lib/mission-matching";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Check, X, ChevronRight } from "lucide-react";
+import { Check, X, ChevronRight, AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+type SourceKind = "request" | "mission";
 
 export default async function MatchingPage({
   searchParams
 }: {
-  searchParams: { request?: string; includeCandidates?: string };
+  searchParams: { source?: string; includeCandidates?: string };
 }) {
   await requireSession();
 
-  // Demandes ouvertes
-  const openRequests = await prisma.missionRequest.findMany({
-    where: { status: { in: ["NEW", "QUALIFYING", "PRESENTING"] } },
-    include: { company: { select: { name: true } } },
-    orderBy: { createdAt: "desc" }
-  });
+  // Toutes les sources possibles : demandes ouvertes + missions actives/prolongées/on-hold
+  // + demandes contractualisées (au cas où on veut quand même rejouer un matching)
+  const [openRequests, activeMissions] = await Promise.all([
+    prisma.missionRequest.findMany({
+      where: { status: { in: ["NEW", "QUALIFYING", "PRESENTING"] } },
+      include: { company: { select: { name: true } } },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.mission.findMany({
+      where: { status: { in: ["PLANNED", "ACTIVE", "EXTENDED", "ON_HOLD"] } },
+      include: {
+        company: { select: { name: true } },
+        consultant: { select: { id: true, firstName: true, lastName: true } },
+        missionRequest: {
+          select: {
+            id: true,
+            requiredSkills: true,
+            seniority: true,
+            targetDailyRate: true,
+            maxDailyRate: true
+          }
+        }
+      },
+      orderBy: { startDate: "desc" }
+    })
+  ]);
 
-  const requestId = searchParams.request ?? openRequests[0]?.id;
+  // Source par défaut : 1ère demande ouverte, sinon 1ère mission active
+  const defaultSource = openRequests[0]
+    ? `request:${openRequests[0].id}`
+    : activeMissions[0]
+      ? `mission:${activeMissions[0].id}`
+      : "";
+  const sourceRaw = searchParams.source ?? defaultSource;
+  const [sourceKind, sourceId] = sourceRaw.includes(":")
+    ? (sourceRaw.split(":") as [SourceKind, string])
+    : ["request" as SourceKind, sourceRaw];
+
   const includeCandidates = searchParams.includeCandidates !== "0";
 
   let results: MatchResult[] = [];
-  let request: any = null;
+  let header: {
+    title: string;
+    company: string;
+    requiredSkills: string[];
+    seniority: string | null;
+    startDate: Date | null;
+    targetDailyRate: number | null;
+    maxDailyRate: number | null;
+    excludeConsultantId: string | null;
+    excludeConsultantName: string | null;
+    isReplacement: boolean;
+  } | null = null;
 
-  if (requestId) {
-    request = await prisma.missionRequest.findUnique({
-      where: { id: requestId },
-      include: { company: { select: { name: true } } }
-    });
-    if (request) {
-      // Profils : consultants Dasolabs (User CONSULTANT actifs) + optionnel candidats ACTIVE
-      const [consultants, candidates] = await Promise.all([
-        prisma.user.findMany({
-          where: { active: true, role: "CONSULTANT" },
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            skills: true,
-            seniority: true,
-            dailyCost: true
-          }
-        }),
-        includeCandidates
-          ? prisma.candidate.findMany({
-              where: { status: { in: ["ACTIVE"] } },
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                skills: true,
-                seniority: true,
-                dailyCost: true,
-                availableFrom: true,
-                status: true
-              }
-            })
-          : Promise.resolve([])
-      ]);
-
-      const profiles: MatchableProfile[] = [
-        ...consultants.map((u) => ({
-          id: u.id,
-          kind: "user" as const,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          skills: u.skills,
-          seniority: u.seniority,
-          dailyCost: u.dailyCost ? Number(u.dailyCost) : null,
-          availableFrom: null,
-          status: null
-        })),
-        ...candidates.map((c) => ({
-          id: c.id,
-          kind: "candidate" as const,
-          firstName: c.firstName,
-          lastName: c.lastName,
-          skills: c.skills,
-          seniority: c.seniority,
-          dailyCost: c.dailyCost ? Number(c.dailyCost) : null,
-          availableFrom: c.availableFrom,
-          status: c.status
-        }))
-      ];
-
-      results = rankMatches(
-        {
-          requiredSkills: request.requiredSkills,
-          seniority: request.seniority,
-          startDate: request.startDate,
-          targetDailyRate: request.targetDailyRate ? Number(request.targetDailyRate) : null,
-          maxDailyRate: request.maxDailyRate ? Number(request.maxDailyRate) : null
-        },
-        profiles
-      );
+  if (sourceId) {
+    if (sourceKind === "request") {
+      const r = openRequests.find((x) => x.id === sourceId);
+      if (r) {
+        header = {
+          title: `${r.reference} — ${r.title}`,
+          company: r.company.name,
+          requiredSkills: r.requiredSkills,
+          seniority: r.seniority,
+          startDate: r.startDate,
+          targetDailyRate: r.targetDailyRate ? Number(r.targetDailyRate) : null,
+          maxDailyRate: r.maxDailyRate ? Number(r.maxDailyRate) : null,
+          excludeConsultantId: null,
+          excludeConsultantName: null,
+          isReplacement: false
+        };
+      }
+    } else if (sourceKind === "mission") {
+      const m = activeMissions.find((x) => x.id === sourceId);
+      if (m) {
+        header = {
+          title: `${m.reference} — ${m.title}`,
+          company: m.company.name,
+          requiredSkills: m.missionRequest?.requiredSkills ?? [],
+          seniority: m.missionRequest?.seniority ?? null,
+          startDate: m.startDate,
+          targetDailyRate: Number(m.dailyRate), // pour mission en cours, le rate facturé
+          maxDailyRate: m.missionRequest?.maxDailyRate
+            ? Number(m.missionRequest.maxDailyRate)
+            : null,
+          excludeConsultantId: m.consultantId ?? null,
+          excludeConsultantName: m.consultant
+            ? `${m.consultant.firstName} ${m.consultant.lastName}`
+            : null,
+          isReplacement: true
+        };
+      }
     }
+  }
+
+  if (header) {
+    const [consultants, candidates] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          active: true,
+          role: "CONSULTANT",
+          ...(header.excludeConsultantId ? { id: { not: header.excludeConsultantId } } : {})
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          skills: true,
+          seniority: true,
+          dailyCost: true
+        }
+      }),
+      includeCandidates
+        ? prisma.candidate.findMany({
+            where: { status: "ACTIVE" },
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              skills: true,
+              seniority: true,
+              dailyCost: true,
+              availableFrom: true,
+              status: true
+            }
+          })
+        : Promise.resolve([])
+    ]);
+
+    const profiles: MatchableProfile[] = [
+      ...consultants.map((u) => ({
+        id: u.id,
+        kind: "user" as const,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        skills: u.skills,
+        seniority: u.seniority,
+        dailyCost: u.dailyCost ? Number(u.dailyCost) : null,
+        availableFrom: null,
+        status: null
+      })),
+      ...candidates.map((c) => ({
+        id: c.id,
+        kind: "candidate" as const,
+        firstName: c.firstName,
+        lastName: c.lastName,
+        skills: c.skills,
+        seniority: c.seniority,
+        dailyCost: c.dailyCost ? Number(c.dailyCost) : null,
+        availableFrom: c.availableFrom,
+        status: c.status
+      }))
+    ];
+
+    results = rankMatches(
+      {
+        requiredSkills: header.requiredSkills,
+        seniority: header.seniority,
+        startDate: header.startDate,
+        targetDailyRate: header.targetDailyRate,
+        maxDailyRate: header.maxDailyRate
+      },
+      profiles
+    );
   }
 
   return (
     <div>
       <PageHeader
         title="Matching mission ↔ profil"
-        subtitle="Sélectionne une demande de mission et obtiens un classement automatique des consultants & candidats"
+        subtitle="Demande ouverte ou mission en cours (recherche de remplaçant) — classement automatique consultants & candidats"
       />
 
       <form className="card p-4 mb-6 flex flex-wrap gap-3 items-end">
         <div className="flex-1 min-w-[300px]">
-          <label className="label">Demande de mission</label>
-          <select name="request" defaultValue={requestId} className="input">
+          <label className="label">Source à matcher</label>
+          <select name="source" defaultValue={sourceRaw} className="input">
             <option value="">— Sélectionner —</option>
-            {openRequests.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.reference} — {r.title} ({r.company.name})
-              </option>
-            ))}
+            {openRequests.length > 0 && (
+              <optgroup label="Demandes ouvertes">
+                {openRequests.map((r) => (
+                  <option key={`req-${r.id}`} value={`request:${r.id}`}>
+                    {r.reference} — {r.title} ({r.company.name})
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {activeMissions.length > 0 && (
+              <optgroup label="Missions en cours (chercher un remplaçant)">
+                {activeMissions.map((m) => (
+                  <option key={`mis-${m.id}`} value={`mission:${m.id}`}>
+                    {m.reference} — {m.title} ({m.company.name})
+                    {m.consultant && ` · actuellement ${m.consultant.firstName} ${m.consultant.lastName}`}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
         </div>
         <label className="flex items-center gap-1 text-sm">
@@ -133,21 +227,41 @@ export default async function MatchingPage({
         <button className="btn-primary">Matcher</button>
       </form>
 
-      {request ? (
+      {header ? (
         <>
+          {header.isReplacement && (
+            <div className="card mb-4 p-3 bg-amber-50 border-amber-200">
+              <div className="flex items-start gap-2 text-sm">
+                <AlertCircle className="w-4 h-4 text-amber-700 mt-0.5 shrink-0" />
+                <div>
+                  <span className="font-medium text-amber-900">Recherche de remplaçant</span>
+                  {header.excludeConsultantName && (
+                    <span className="text-amber-700">
+                      {" "}
+                      — {header.excludeConsultantName} est actuellement sur cette mission. Il/elle est exclu(e) du classement.
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="card mb-4 p-4">
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-              <Info label="Mission" value={`${request.reference} — ${request.title}`} />
-              <Info label="Client" value={request.company.name} />
-              <Info label="Skills requis" value={request.requiredSkills.join(", ") || "—"} />
-              <Info label="Séniorité" value={request.seniority ?? "—"} />
-              <Info label="Début" value={request.startDate ? formatDate(request.startDate) : "—"} />
+              <Info label="Mission" value={header.title} />
+              <Info label="Client" value={header.company} />
+              <Info label="Skills requis" value={header.requiredSkills.join(", ") || "—"} />
+              <Info label="Séniorité" value={header.seniority ?? "—"} />
               <Info
-                label="TJM cible"
+                label={header.isReplacement ? "Début mission" : "Début"}
+                value={header.startDate ? formatDate(header.startDate) : "—"}
+              />
+              <Info
+                label={header.isReplacement ? "TJM client (facturé)" : "TJM cible"}
                 value={
-                  request.targetDailyRate
-                    ? `${formatCurrency(Number(request.targetDailyRate))}${
-                        request.maxDailyRate ? ` (max ${formatCurrency(Number(request.maxDailyRate))})` : ""
+                  header.targetDailyRate
+                    ? `${formatCurrency(header.targetDailyRate)}${
+                        header.maxDailyRate ? ` (max ${formatCurrency(header.maxDailyRate)})` : ""
                       }`
                     : "—"
                 }
@@ -155,7 +269,6 @@ export default async function MatchingPage({
             </div>
           </div>
 
-          {/* Résultats */}
           <div className="card">
             <div className="card-header flex items-center justify-between">
               <div className="font-semibold">Top profils ({results.length})</div>
@@ -266,7 +379,7 @@ export default async function MatchingPage({
         </>
       ) : (
         <div className="text-sm text-midnight-500">
-          Sélectionne une demande de mission ci-dessus pour lancer le matching.
+          Sélectionne une demande ou une mission ci-dessus pour lancer le matching.
         </div>
       )}
     </div>

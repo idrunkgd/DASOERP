@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
+import { callLlmWithMedia, extractJson } from "@/lib/llm";
 
 // Schéma de retour Claude
 const ExperienceSchema = z.object({
@@ -39,24 +40,9 @@ export async function parseCv(dataUri: string): Promise<{
   ok: boolean;
   error?: string;
   data?: ParsedCv;
+  provider?: string;
 }> {
   await requireSession();
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return { ok: false, error: "ANTHROPIC_API_KEY non configurée" };
-
-  const match = dataUri.match(
-    /^data:(image\/(png|jpeg|jpg|webp)|application\/pdf);base64,(.+)$/
-  );
-  if (!match) {
-    return {
-      ok: false,
-      error: "Format non supporté (PNG/JPEG/WebP/PDF requis)"
-    };
-  }
-  const isImage = match[1].startsWith("image/");
-  const mediaType =
-    match[1] === "image/jpg" ? "image/jpeg" : (match[1] as string);
-  const base64 = match[3];
 
   const prompt = `Tu analyses un CV de candidat IT/consulting (probablement en français). Extrais les informations au format JSON strict :
 {
@@ -82,69 +68,28 @@ export async function parseCv(dataUri: string): Promise<{
 }
 Réponds UNIQUEMENT le JSON, rien d'autre.`;
 
+  const result = await callLlmWithMedia({
+    prompt,
+    dataUri,
+    task: "cv",
+    maxTokens: 4000
+  });
+  if (!result.ok) return { ok: false, error: result.error };
+
+  let parsedRaw: any;
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "anthropic-beta": "pdfs-2024-09-25",
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5",
-        max_tokens: 4000,
-        messages: [
-          {
-            role: "user",
-            content: [
-              isImage
-                ? {
-                    type: "image",
-                    source: {
-                      type: "base64",
-                      media_type: mediaType,
-                      data: base64
-                    }
-                  }
-                : {
-                    type: "document",
-                    source: {
-                      type: "base64",
-                      media_type: "application/pdf",
-                      data: base64
-                    }
-                  },
-              { type: "text", text: prompt }
-            ]
-          }
-        ]
-      })
-    });
-    if (!resp.ok) {
-      const errText = await resp.text();
-      return { ok: false, error: `API Claude : ${resp.status} ${errText.slice(0, 300)}` };
-    }
-    const json = (await resp.json()) as any;
-    const text: string = json?.content?.[0]?.text ?? "";
-    const cleaned = text
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/\s*```\s*$/, "")
-      .trim();
-    let parsedRaw: any;
-    try {
-      parsedRaw = JSON.parse(cleaned);
-    } catch {
-      return { ok: false, error: "Claude a répondu un JSON invalide" };
-    }
-    const parsed = CvSchema.safeParse(parsedRaw);
-    if (!parsed.success) {
-      return { ok: false, error: "Structure inattendue : " + parsed.error.message.slice(0, 200) };
-    }
-    return { ok: true, data: parsed.data };
-  } catch (e: any) {
-    return { ok: false, error: String(e?.message ?? e) };
+    parsedRaw = JSON.parse(extractJson(result.text));
+  } catch {
+    return { ok: false, error: `${result.provider} : JSON invalide` };
   }
+  const parsed = CvSchema.safeParse(parsedRaw);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: `Structure inattendue : ${parsed.error.message.slice(0, 200)}`
+    };
+  }
+  return { ok: true, data: parsed.data, provider: result.provider };
 }
 
 /**
