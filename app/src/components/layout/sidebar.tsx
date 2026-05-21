@@ -7,7 +7,8 @@ import {
   Clock, ShoppingCart, CalendarRange, UserCog, Receipt, Settings,
   MessageSquare, BadgeCheck, Briefcase, History, UserPlus, Headset,
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
-  Gauge, Calculator, X, TrendingUp
+  Gauge, Calculator, X, TrendingUp,
+  FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -60,6 +61,16 @@ const SECTIONS: Section[] = [
     label: "Finances",
     items: [
       { href: "/finance",     label: "Facturations",          icon: Receipt,         perm: "finance.read" }
+    ]
+  },
+  {
+    label: "Test (preview)",
+    items: [
+      { href: "/test/tva",        label: "TVA trimestrielle",  icon: Percent,            allowedRoles: ["ADMIN","FINANCE","MANAGER"] },
+      { href: "/test/expenses",   label: "Notes de frais",     icon: Wallet,             allowedRoles: ["ADMIN","FINANCE","MANAGER","CONSULTANT"] },
+      { href: "/test/crm",        label: "CRM pipeline",       icon: Workflow,           allowedRoles: ["ADMIN","COMMERCIAL","MANAGER"] },
+      { href: "/test/cv-parser",  label: "Parser CV",          icon: FileScan,           allowedRoles: ["ADMIN","MANAGER","COMMERCIAL"] },
+      { href: "/test/matching",   label: "Matching mission",   icon: GitCompareArrows,   allowedRoles: ["ADMIN","MANAGER","COMMERCIAL"] }
     ]
   },
   {

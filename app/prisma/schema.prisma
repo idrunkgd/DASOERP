@@ -286,6 +286,12 @@ model User {
   // Groupe d'accès — indépendant du rôle (ex: un consultant peut être Admin)
   accessGroupId       String?
   accessGroup         AccessGroup? @relation(fields: [accessGroupId], references: [id], onDelete: SetNull)
+  // Notes de frais (test feature)
+  expenseReports      ExpenseReport[]      @relation("ExpenseReportUser")
+  expenseReportsApproved ExpenseReport[]   @relation("ExpenseReportApprover")
+  // CRM pipeline (test feature)
+  opportunities       Opportunity[]         @relation("OpportunityOwner")
+  opportunityActivities OpportunityActivity[] @relation("OpportunityActivityUser")
 }
 
 // =============================================================
@@ -361,6 +367,8 @@ model Company {
   intermediaryMissions   Mission[]        @relation("MissionExecIntermediary")
   // Tranches de facturation rattachées directement (sans offer/project)
   directBillingMilestones BillingMilestone[] @relation("DirectMilestoneCompany")
+  // CRM pipeline (test feature)
+  opportunities Opportunity[]              @relation("CompanyOpportunities")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -610,6 +618,7 @@ model Project {
   planningEntries    PlanningEntry[]
   attachments        Attachment[]   @relation("ProjectAttachments")
   reviews            ConsultantReview[] @relation("ProjectReviews")
+  expenseReports     ExpenseReport[] @relation("ProjectExpenseReports")
 
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
@@ -1107,6 +1116,7 @@ model Mission {
   timesheetEntries  TimesheetEntry[]
   planningEntries   PlanningEntry[]
   milestones        BillingMilestone[]
+  expenseReports    ExpenseReport[]         @relation("MissionExpenseReports")
 
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
@@ -1228,6 +1238,129 @@ model RecurringExpenseMonth {
   @@unique([recurringExpenseId, year, month])
   @@index([year, month])
   @@index([status])
+}
+
+// =============================================================
+// NOTES DE FRAIS — consultants soumettent des dépenses pour remboursement
+// =============================================================
+
+enum ExpenseReportStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum ExpenseReportCategory {
+  TRANSPORT
+  MEAL
+  ACCOMMODATION
+  SUPPLIES
+  SOFTWARE
+  TRAINING
+  OTHER
+}
+
+model ExpenseReport {
+  id              String                @id @default(cuid())
+  /// Auteur de la note (User Dasolabs)
+  userId          String
+  user            User                  @relation("ExpenseReportUser", fields: [userId], references: [id], onDelete: Cascade)
+  /// Mission/Projet rattaché (optionnel — pour refacturation client éventuelle)
+  missionId       String?
+  mission         Mission?              @relation("MissionExpenseReports", fields: [missionId], references: [id], onDelete: SetNull)
+  projectId       String?
+  project         Project?              @relation("ProjectExpenseReports", fields: [projectId], references: [id], onDelete: SetNull)
+  date            DateTime              @db.Date
+  category        ExpenseReportCategory @default(OTHER)
+  description     String
+  amountHt        Decimal               @db.Decimal(10, 2)
+  vatAmount       Decimal               @default(0) @db.Decimal(10, 2)
+  vatRate         Decimal               @default(21) @db.Decimal(5, 2)
+  amountTtc       Decimal               @db.Decimal(10, 2)
+  currency        String                @default("EUR")
+  /// URL ou data URI de la photo du ticket (base64 inline si petit)
+  receiptUrl      String?
+  /// Données extraites par OCR (Claude Vision) — JSON brut pour audit
+  ocrPayload      Json?
+  status          ExpenseReportStatus   @default(DRAFT)
+  submittedAt     DateTime?
+  approvedById    String?
+  approvedBy      User?                 @relation("ExpenseReportApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  rejectionReason String?
+  paidAt          DateTime?
+  notes           String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([userId, date])
+  @@index([status])
+  @@index([missionId])
+  @@index([projectId])
+}
+
+// =============================================================
+// CRM — pipeline de prospection commerciale (avant Offer formelle)
+// =============================================================
+
+enum OpportunityStage {
+  NEW            // identifié, pas encore qualifié
+  QUALIFIED      // qualifié (besoin confirmé, budget pressenti)
+  PROPOSED       // proposition envoyée
+  NEGOTIATING    // en négociation
+  WON            // gagné — transforme en Offer/Project
+  LOST           // perdu
+}
+
+model Opportunity {
+  id              String           @id @default(cuid())
+  title           String
+  description     String?
+  /// Société visée (existante en base ou nouvelle entrée)
+  companyId       String?
+  company         Company?         @relation("CompanyOpportunities", fields: [companyId], references: [id], onDelete: SetNull)
+  /// Si pas encore en base : nom libre + email
+  prospectName    String?
+  prospectEmail   String?
+  prospectPhone   String?
+  /// Owner commercial
+  ownerId         String?
+  owner           User?            @relation("OpportunityOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  stage           OpportunityStage @default(NEW)
+  /// Valeur estimée HTVA (deal complet)
+  estimatedValue  Decimal          @default(0) @db.Decimal(12, 2)
+  /// Probabilité de gain en % (0-100)
+  probability     Int              @default(20)
+  /// Date prévisionnelle de closing
+  expectedCloseAt DateTime?        @db.Date
+  closedAt        DateTime?
+  lostReason      String?
+  notes           String?
+  source          String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  activities      OpportunityActivity[]
+
+  @@index([stage])
+  @@index([ownerId])
+  @@index([expectedCloseAt])
+}
+
+model OpportunityActivity {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?       @relation("OpportunityActivityUser", fields: [userId], references: [id], onDelete: SetNull)
+  kind          String      // call, email, meeting, note, stage_change
+  subject       String
+  body          String?
+  occurredAt    DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+
+  @@index([opportunityId, occurredAt])
 }
 
 /// Dépense/revenu ponctuel ou engagement / simulation what-if

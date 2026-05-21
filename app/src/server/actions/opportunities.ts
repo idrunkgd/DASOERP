@@ -1,0 +1,175 @@
+"use server";
+import { z } from "zod";
+import { prisma } from "@/lib/db";
+import { requireSession } from "@/lib/rbac";
+import { logActivity } from "@/lib/audit";
+import { revalidatePath } from "next/cache";
+
+const Schema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  companyId: z.string().optional().nullable().transform((v) => v || null),
+  prospectName: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  prospectEmail: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  prospectPhone: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  ownerId: z.string().optional().nullable().transform((v) => v || null),
+  estimatedValue: z.coerce.number().nonnegative().default(0),
+  probability: z.coerce.number().min(0).max(100).default(20),
+  expectedCloseAt: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? new Date(v) : null)),
+  source: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
+});
+
+const STAGE_DEFAULT_PROBA: Record<string, number> = {
+  NEW: 10,
+  QUALIFIED: 30,
+  PROPOSED: 50,
+  NEGOTIATING: 75,
+  WON: 100,
+  LOST: 0
+};
+
+export async function createOpportunity(formData: FormData) {
+  const session = await requireSession();
+  const data = Schema.parse(Object.fromEntries(formData));
+  const created = await prisma.opportunity.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      companyId: data.companyId,
+      prospectName: data.prospectName,
+      prospectEmail: data.prospectEmail,
+      prospectPhone: data.prospectPhone,
+      ownerId: data.ownerId ?? session.user.id,
+      estimatedValue: data.estimatedValue,
+      probability: data.probability,
+      expectedCloseAt: data.expectedCloseAt ?? undefined,
+      source: data.source,
+      notes: data.notes
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "Opportunity",
+    entityId: created.id,
+    message: `Opportunité « ${data.title} » créée`
+  });
+  revalidatePath("/test/crm");
+  return { id: created.id };
+}
+
+export async function updateOpportunity(id: string, formData: FormData) {
+  const session = await requireSession();
+  const data = Schema.parse(Object.fromEntries(formData));
+  const before = await prisma.opportunity.findUnique({ where: { id } });
+  if (!before) throw new Error("Opportunité introuvable");
+  const updated = await prisma.opportunity.update({
+    where: { id },
+    data: {
+      title: data.title,
+      description: data.description,
+      companyId: data.companyId,
+      prospectName: data.prospectName,
+      prospectEmail: data.prospectEmail,
+      prospectPhone: data.prospectPhone,
+      ownerId: data.ownerId,
+      estimatedValue: data.estimatedValue,
+      probability: data.probability,
+      expectedCloseAt: data.expectedCloseAt ?? undefined,
+      source: data.source,
+      notes: data.notes
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Opportunity",
+    entityId: id,
+    message: `Opportunité « ${data.title} » mise à jour`,
+    before,
+    after: updated
+  });
+  revalidatePath("/test/crm");
+}
+
+export async function moveOpportunityStage(
+  id: string,
+  newStage: "NEW" | "QUALIFIED" | "PROPOSED" | "NEGOTIATING" | "WON" | "LOST",
+  lostReason?: string
+) {
+  const session = await requireSession();
+  const before = await prisma.opportunity.findUnique({ where: { id } });
+  if (!before) throw new Error("Opportunité introuvable");
+
+  const probability = STAGE_DEFAULT_PROBA[newStage] ?? before.probability;
+  const closedAt = newStage === "WON" || newStage === "LOST" ? new Date() : null;
+
+  await prisma.opportunity.update({
+    where: { id },
+    data: {
+      stage: newStage,
+      probability,
+      closedAt,
+      lostReason: newStage === "LOST" ? (lostReason ?? "Non précisé") : null
+    }
+  });
+  await prisma.opportunityActivity.create({
+    data: {
+      opportunityId: id,
+      userId: session.user.id,
+      kind: "stage_change",
+      subject: `Passage à ${newStage}`,
+      body: lostReason ?? null
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "STATUS_CHANGE",
+    entityType: "Opportunity",
+    entityId: id,
+    message: `Stage : ${before.stage} → ${newStage}${lostReason ? ` (${lostReason})` : ""}`
+  });
+  revalidatePath("/test/crm");
+}
+
+export async function deleteOpportunity(id: string) {
+  const session = await requireSession();
+  if (!["ADMIN", "MANAGER", "COMMERCIAL"].includes(session.user.role)) {
+    throw new Error("Forbidden");
+  }
+  await prisma.opportunity.delete({ where: { id } });
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "Opportunity",
+    entityId: id,
+    message: "Opportunité supprimée"
+  });
+  revalidatePath("/test/crm");
+}
+
+export async function addOpportunityActivity(
+  opportunityId: string,
+  formData: FormData
+) {
+  const session = await requireSession();
+  const kind = String(formData.get("kind") ?? "note");
+  const subject = String(formData.get("subject") ?? "");
+  const body = String(formData.get("body") ?? "");
+  if (!subject.trim()) throw new Error("Sujet requis");
+  await prisma.opportunityActivity.create({
+    data: {
+      opportunityId,
+      userId: session.user.id,
+      kind,
+      subject: subject.trim(),
+      body: body.trim() || null
+    }
+  });
+  revalidatePath("/test/crm");
+}
