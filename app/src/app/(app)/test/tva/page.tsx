@@ -43,7 +43,14 @@ export default async function TvaTrimestriellePage({
     <div>
       <PageHeader
         title="Déclaration TVA trimestrielle"
-        subtitle={`Période : ${formatDate(period.startDate)} → ${formatDate(period.endDate)}`}
+        subtitle={
+          <span>
+            Période : {formatDate(period.startDate)} → {formatDate(period.endDate)}
+            <span className="ml-2 text-[10px] bg-amber-100 text-amber-700 rounded px-1.5 py-0.5">
+              Vision prévisionnelle — inclut PLANNED / READY / TRANSMITTED / PAID
+            </span>
+          </span>
+        }
       />
 
       <form className="mb-6 flex flex-wrap gap-2 items-end">
@@ -170,6 +177,7 @@ export default async function TvaTrimestriellePage({
             <thead>
               <tr>
                 <th>Date</th>
+                <th>Statut</th>
                 <th>Client</th>
                 <th>Libellé</th>
                 <th className="text-right">HTVA</th>
@@ -180,7 +188,7 @@ export default async function TvaTrimestriellePage({
             <tbody>
               {report.salesLines.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center text-midnight-400 py-6">
+                  <td colSpan={7} className="text-center text-midnight-400 py-6">
                     Aucune vente sur cette période.
                   </td>
                 </tr>
@@ -188,6 +196,7 @@ export default async function TvaTrimestriellePage({
                 report.salesLines.map((l) => (
                   <tr key={l.id}>
                     <td className="text-xs whitespace-nowrap">{formatDate(l.date)}</td>
+                    <td><StatusBadge status={l.status} /></td>
                     <td>{l.company ?? "—"}</td>
                     <td className="text-sm">{l.label}</td>
                     <td className="text-right tabular-nums">{formatCurrency(l.amountHt)}</td>
@@ -200,7 +209,7 @@ export default async function TvaTrimestriellePage({
             {report.salesLines.length > 0 && (
               <tfoot>
                 <tr className="font-semibold bg-midnight-50">
-                  <td colSpan={3} className="text-right">
+                  <td colSpan={4} className="text-right">
                     Total
                   </td>
                   <td className="text-right tabular-nums">
@@ -227,6 +236,7 @@ export default async function TvaTrimestriellePage({
             <thead>
               <tr>
                 <th>Date</th>
+                <th>Statut</th>
                 <th>Fournisseur</th>
                 <th>Libellé</th>
                 <th className="text-right">HTVA</th>
@@ -237,7 +247,7 @@ export default async function TvaTrimestriellePage({
             <tbody>
               {report.purchasesLines.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center text-midnight-400 py-6">
+                  <td colSpan={7} className="text-center text-midnight-400 py-6">
                     Aucun achat enregistré sur cette période.
                   </td>
                 </tr>
@@ -245,6 +255,7 @@ export default async function TvaTrimestriellePage({
                 report.purchasesLines.map((l) => (
                   <tr key={l.id}>
                     <td className="text-xs whitespace-nowrap">{formatDate(l.date)}</td>
+                    <td><StatusBadge status={l.status} /></td>
                     <td>{l.company ?? "—"}</td>
                     <td className="text-sm">{l.label}</td>
                     <td className="text-right tabular-nums">{formatCurrency(l.amountHt)}</td>
@@ -257,7 +268,7 @@ export default async function TvaTrimestriellePage({
             {report.purchasesLines.length > 0 && (
               <tfoot>
                 <tr className="font-semibold bg-midnight-50">
-                  <td colSpan={3} className="text-right">
+                  <td colSpan={4} className="text-right">
                     Total
                   </td>
                   <td className="text-right tabular-nums">
@@ -275,9 +286,10 @@ export default async function TvaTrimestriellePage({
       </div>
 
       <div className="mt-6 text-[11px] text-midnight-400">
-        ⚠️ Préview de calcul. À recouper avec ta comptabilité avant déclaration sur Intervat.
-        Ne couvre pas encore : régime cocontractant, opérations intracom, notes de crédit, biens
-        d'investissement. La TVA des achats est supposée à 21% par défaut.
+        ⚠️ Vue prévisionnelle — inclut <b>toutes les factures non annulées</b> (PLANNED + READY + TRANSMITTED + PAID),
+        idem côté achats. Pour la déclaration officielle Intervat, ne garde que les factures réellement
+        émises sur le trimestre (statut TRANSMITTED ou PAID). Ne couvre pas : cocontractant, intracom,
+        notes de crédit, biens d'investissement. TVA achats supposée à 21% par défaut.
       </div>
     </div>
   );
@@ -327,6 +339,25 @@ function GridSection({
       </div>
       <div className="space-y-0.5">{children}</div>
     </div>
+  );
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    // Milestones
+    PLANNED: { label: "Prévu", cls: "bg-midnight-100 text-midnight-700" },
+    READY: { label: "À facturer", cls: "bg-amber-100 text-amber-700" },
+    TRANSMITTED: { label: "Émis", cls: "bg-blue-100 text-blue-700" },
+    PAID: { label: "Payé", cls: "bg-emerald-100 text-emerald-700" },
+    // Purchases
+    ORDERED: { label: "Commandé", cls: "bg-amber-100 text-amber-700" },
+    RECEIVED: { label: "Reçu", cls: "bg-blue-100 text-blue-700" }
+  };
+  const c = map[status] ?? { label: status, cls: "bg-midnight-100 text-midnight-700" };
+  return (
+    <span className={`text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap ${c.cls}`}>
+      {c.label}
+    </span>
   );
 }
 

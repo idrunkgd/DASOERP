@@ -53,6 +53,9 @@ export interface VatLine {
   amountHt: number;
   vatAmount: number;
   vatRate: number;
+  /// Statut original (PLANNED, READY, TRANSMITTED, PAID pour milestones
+  /// ou PLANNED, ORDERED, RECEIVED, PAID pour purchases)
+  status: string;
   // Provenance pour traçabilité
   source: "milestone" | "purchase";
   id: string;
@@ -112,22 +115,22 @@ async function getMissionVatRateMap(missionIds: string[]): Promise<Record<string
 
 /**
  * Agrège les ventes (BillingMilestone) du trimestre.
- * On ne prend QUE les milestones avec statut PAID, TRANSMITTED ou READY
- * et dont expectedAt OU paidAt tombe dans la période.
- * (En Belgique, la TVA est due à la facturation, pas à l'encaissement, pour
- * les prestations B2B — on prend donc tout ce qui est facturé/à facturer.)
+ *
+ * VISION PRÉVISIONNELLE : on prend toutes les tranches NON annulées
+ * (PLANNED + READY + TRANSMITTED + PAID), filtrées sur expectedAt.
+ * Permet d'anticiper la TVA à payer même sur les factures pas encore émises.
+ *
+ * (En Belgique, la TVA est due à l'émission de la facture, pas à
+ * l'encaissement, pour les prestations B2B.)
  */
 export async function computeVatReport(year: number, quarter: Quarter): Promise<VatReport> {
   const period = periodForQuarter(year, quarter);
 
-  // SALES — BillingMilestones de la période
+  // SALES — toutes les tranches non annulées dont l'émission tombe dans la période
   const milestones = await prisma.billingMilestone.findMany({
     where: {
-      status: { in: ["READY", "TRANSMITTED", "PAID"] },
-      OR: [
-        { expectedAt: { gte: period.startDate, lte: period.endDate } },
-        { paidAt: { gte: period.startDate, lte: period.endDate } }
-      ]
+      status: { not: "CANCELLED" },
+      expectedAt: { gte: period.startDate, lte: period.endDate }
     },
     select: {
       id: true,
@@ -135,6 +138,7 @@ export async function computeVatReport(year: number, quarter: Quarter): Promise<
       amount: true,
       expectedAt: true,
       paidAt: true,
+      status: true,
       missionId: true,
       mission: { select: { id: true, company: { select: { name: true } } } },
       offer: { select: { company: { select: { name: true } } } },
@@ -143,10 +147,10 @@ export async function computeVatReport(year: number, quarter: Quarter): Promise<
     }
   });
 
-  // PURCHASES — de la période (status PAID ou RECEIVED) selon purchaseDate
+  // PURCHASES — toutes hors CANCELLED sur la période
   const purchases = await prisma.purchase.findMany({
     where: {
-      status: { in: ["RECEIVED", "PAID"] },
+      status: { not: "CANCELLED" },
       purchaseDate: { gte: period.startDate, lte: period.endDate }
     },
     select: {
@@ -155,6 +159,7 @@ export async function computeVatReport(year: number, quarter: Quarter): Promise<
       amount: true,
       category: true,
       purchaseDate: true,
+      status: true,
       supplier: { select: { name: true } }
     }
   });
@@ -175,12 +180,13 @@ export async function computeVatReport(year: number, quarter: Quarter): Promise<
       m.company?.name ??
       null;
     return {
-      date: m.paidAt ?? m.expectedAt ?? period.startDate,
+      date: m.expectedAt ?? m.paidAt ?? period.startDate,
       label: m.label,
       company,
       amountHt: ht,
       vatAmount: vat,
       vatRate: rate,
+      status: m.status,
       source: "milestone" as const,
       id: m.id
     };
@@ -199,6 +205,7 @@ export async function computeVatReport(year: number, quarter: Quarter): Promise<
       amountHt: ht,
       vatAmount: vat,
       vatRate: rate,
+      status: p.status,
       source: "purchase" as const,
       id: p.id
     };
