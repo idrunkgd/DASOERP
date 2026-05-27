@@ -207,24 +207,45 @@ const styles = StyleSheet.create({
 
 // ─────────────────────────────────────────────────────────────
 // HELPERS
+// IMPORTANT : on N'utilise PAS Intl.NumberFormat car il insère des
+// NARROW NO-BREAK SPACE (U+202F) comme séparateurs de milliers, ce que
+// la font Helvetica de @react-pdf/renderer ne sait pas encoder en WinAnsi
+// (apparaît comme "/" dans le PDF). On formate à la main avec un espace
+// normal ASCII (U+0020) en séparateur.
 // ─────────────────────────────────────────────────────────────
-function fmtEur(n: number | string): string {
+function fmtNumber(n: number | string, digits = 2): string {
   const v = Number(n ?? 0);
-  return v.toLocaleString("fr-BE", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 2
-  });
+  if (!Number.isFinite(v)) return "0,00";
+  const negative = v < 0;
+  const abs = Math.abs(v);
+  const fixed = abs.toFixed(digits);
+  const [intPart, decPart] = fixed.split(".");
+  // Espace ASCII tous les 3 chiffres en partant de la droite
+  const intWithSep = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return `${negative ? "-" : ""}${intWithSep}${decPart ? "," + decPart : ""}`;
+}
+
+function fmtEur(n: number | string): string {
+  return `${fmtNumber(n, 2)} €`;
+}
+
+/** Format quantité : pas de décimale si entier, sinon jusqu'à 2 décimales. */
+function fmtQty(n: number | string): string {
+  const v = Number(n ?? 0);
+  if (Number.isInteger(v)) return fmtNumber(v, 0);
+  // Arrondit à 2 décimales, supprime les zéros inutiles
+  return fmtNumber(v, 2).replace(/,?0+$/, (m) => (m.includes(",") ? "" : m));
 }
 
 function fmtDate(d: Date | string | null | undefined): string {
   if (!d) return "—";
   const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString("fr-BE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
+  if (Number.isNaN(date.getTime())) return "—";
+  // Format DD/MM/YYYY manuellement pour éviter tout NBSP exotique
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -378,7 +399,7 @@ export function OfferPdfDocument({
               style={i % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : styles.tableRow}
             >
               <Text style={styles.colDesc}>{line.description}</Text>
-              <Text style={styles.colQty}>{Number(line.quantity).toLocaleString("fr-BE")}</Text>
+              <Text style={styles.colQty}>{fmtQty(line.quantity)}</Text>
               <Text style={styles.colUnit}>{line.unit}</Text>
               <Text style={styles.colPrice}>{fmtEur(line.unitSellPrice)}</Text>
               <Text style={styles.colTotal}>{fmtEur(line.totalSell)}</Text>
@@ -413,7 +434,7 @@ export function OfferPdfDocument({
                 <Text>
                   {m.label}
                   {m.expectedAt && `  ·  prévu le ${fmtDate(m.expectedAt)}`}
-                  {m.percentage && `  ·  ${Number(m.percentage)}%`}
+                  {m.percentage && `  ·  ${fmtQty(m.percentage)}%`}
                 </Text>
                 <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(m.amount)}</Text>
               </View>
