@@ -5,7 +5,13 @@ import { nextOfferReference, nextProjectReference, nextComplementReference } fro
 import { canCreateNewVersion, OfferLockedError } from "@/lib/offer-rules";
 import type { OfferStatus, Prisma } from "@prisma/client";
 
-/** Recalcule lignes (cache) + totaux offre. À appeler après toute mutation lignes. */
+/** Recalcule lignes (cache) + totaux offre. À appeler après toute mutation lignes.
+ *
+ * Effet bonus : si l'offre a des tranches (BillingMilestone) avec un `percentage`
+ * enregistré, on resync leur `amount` sur la base du nouveau totalSell.
+ * On ne touche PAS les tranches sans % (montant fixe saisi à la main) ni celles
+ * déjà TRANSMITTED/PAID (= déjà facturé, on ne change pas l'historique).
+ */
 export async function recomputeOfferTotals(offerId: string) {
   const lines = await prisma.offerLine.findMany({ where: { offerId } });
   // recalcule ligne par ligne + persist
@@ -42,6 +48,26 @@ export async function recomputeOfferTotals(offerId: string) {
       marginPct: tot.marginPct
     }
   });
+
+  // Re-sync des tranches avec un % stocké
+  const milestones = await prisma.billingMilestone.findMany({
+    where: {
+      offerId,
+      percentage: { not: null },
+      status: { in: ["PLANNED", "READY"] } // pas TRANSMITTED/PAID
+    }
+  });
+  for (const m of milestones) {
+    const pct = Number(m.percentage ?? 0);
+    if (pct <= 0) continue;
+    const newAmount = Math.round((tot.totalSell * pct) / 100 * 100) / 100;
+    if (Number(m.amount) === newAmount) continue;
+    await prisma.billingMilestone.update({
+      where: { id: m.id },
+      data: { amount: newAmount }
+    });
+  }
+
   return tot;
 }
 

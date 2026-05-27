@@ -58,6 +58,18 @@ function ServicesTable({ offerId, lines, profiles, readOnly }: { offerId: string
 function ServiceRow({ line, profiles, readOnly }: { line: Line; profiles: Profile[]; readOnly?: boolean }) {
   const [edit, setEdit] = useState(false);
   const [pending, start] = useTransition();
+  function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!window.confirm(`Supprimer la prestation « ${line.description} » ?`)) return;
+    start(async () => {
+      try {
+        await deleteLine(line.id);
+        toast.success("Prestation supprimée — tranches en % recalculées");
+      } catch (err: any) {
+        toast.error(err.message);
+      }
+    });
+  }
   if (!edit) {
     return (
       <tr onDoubleClick={() => !readOnly && setEdit(true)} className={readOnly ? "" : "cursor-pointer"}>
@@ -71,7 +83,19 @@ function ServiceRow({ line, profiles, readOnly }: { line: Line; profiles: Profil
         <td className="text-right tabular-nums text-midnight-500">{formatCurrency(line.totalCost)}</td>
         <td className="text-right tabular-nums">{formatPercent(line.marginPct)}</td>
         <td className="text-right">
-          {!readOnly && <button onClick={() => setEdit(true)} className="text-xs text-indigoaccent hover:underline">Éditer</button>}
+          {!readOnly && (
+            <div className="flex items-center gap-2 justify-end">
+              <button onClick={() => setEdit(true)} className="text-xs text-indigoaccent hover:underline">Éditer</button>
+              <button
+                onClick={handleDelete}
+                disabled={pending}
+                className="text-midnight-400 hover:text-red-600 disabled:opacity-50"
+                title="Supprimer la ligne"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </td>
       </tr>
     );
@@ -177,6 +201,18 @@ function OthersTable({ offerId, lines, readOnly }: { offerId: string; lines: Lin
 function OtherRow({ line, readOnly }: { line: Line; readOnly?: boolean }) {
   const [edit, setEdit] = useState(false);
   const [pending, start] = useTransition();
+  function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!window.confirm(`Supprimer le poste « ${line.description} » ?`)) return;
+    start(async () => {
+      try {
+        await deleteLine(line.id);
+        toast.success("Ligne supprimée — tranches en % recalculées");
+      } catch (err: any) {
+        toast.error(err.message);
+      }
+    });
+  }
   if (!edit) {
     return (
       <tr onDoubleClick={() => !readOnly && setEdit(true)} className={readOnly ? "" : "cursor-pointer"}>
@@ -189,7 +225,19 @@ function OtherRow({ line, readOnly }: { line: Line; readOnly?: boolean }) {
         <td className="text-right tabular-nums text-midnight-500">{formatCurrency(line.totalCost)}</td>
         <td className="text-right tabular-nums">{formatCurrency(line.marginAmount)}</td>
         <td className="text-right">
-          {!readOnly && <button onClick={() => setEdit(true)} className="text-xs text-indigoaccent hover:underline">Éditer</button>}
+          {!readOnly && (
+            <div className="flex items-center gap-2 justify-end">
+              <button onClick={() => setEdit(true)} className="text-xs text-indigoaccent hover:underline">Éditer</button>
+              <button
+                onClick={handleDelete}
+                disabled={pending}
+                className="text-midnight-400 hover:text-red-600 disabled:opacity-50"
+                title="Supprimer la ligne"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </td>
       </tr>
     );
