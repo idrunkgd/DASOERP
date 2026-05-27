@@ -171,13 +171,6 @@ export default async function CashflowPage({
                 {y}
               </a>
             ))}
-            <a
-              href="/cashflow/13-week"
-              className="btn-secondary text-sm ml-2"
-              title="Vue prévisionnelle 13 semaines glissantes"
-            >
-              Vue 13 sem.
-            </a>
           </div>
         }
       />

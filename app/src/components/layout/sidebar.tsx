@@ -25,7 +25,7 @@ const SECTIONS: Section[] = [
       { href: "/project-status",    label: "Statut projet",        icon: Gauge },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
-      { href: "/cashflow/13-week",  label: "Cashflow 13 sem.",     icon: CalendarRange, perm: "finance.read" }
+      { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
     ]
   },
   {
@@ -43,6 +43,7 @@ const SECTIONS: Section[] = [
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },
       { href: "/missions",         label: "Missions",             icon: Plane,           perm: "consulting.read" },
+      { href: "/test/matching",    label: "Matching mission",     icon: GitCompareArrows, allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
       { href: "/reviews",          label: "Entretiens",           icon: ClipboardCheck,  allowedRoles: ["ADMIN","MANAGER","CONSULTANT"] },
       { href: "/calendar",         label: "Calendrier",           icon: CalendarDays,    perm: "consulting.read" }
     ]
@@ -67,11 +68,9 @@ const SECTIONS: Section[] = [
     label: "Test (preview)",
     items: [
       // En preview : visible pour tous les rôles authentifiés (admin déduit le besoin).
-      { href: "/test/tva",        label: "TVA trimestrielle",  icon: Percent,            allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
       { href: "/test/expenses",   label: "Notes de frais",     icon: Wallet,             allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
       { href: "/test/crm",        label: "CRM pipeline",       icon: Workflow,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/test/cv-parser",  label: "Parser CV",          icon: FileScan,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/test/matching",   label: "Matching mission",   icon: GitCompareArrows,   allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+      { href: "/test/cv-parser",  label: "Parser CV",          icon: FileScan,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
     ]
   },
   {
