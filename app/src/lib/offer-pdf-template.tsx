@@ -1,0 +1,451 @@
+// Template React PDF — devis Dasolabs. Utilise @react-pdf/renderer (unicode safe).
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet
+} from "@react-pdf/renderer";
+import React from "react";
+
+// ─────────────────────────────────────────────────────────────
+// COMPANY INFO — à externaliser plus tard dans Settings
+// ─────────────────────────────────────────────────────────────
+const DASOLABS = {
+  legalName: "DASOLABS SRL",
+  street: "Adresse à compléter",
+  postalCode: "1000",
+  city: "Bruxelles",
+  country: "Belgique",
+  vatNumber: "BE0123456789",
+  bceNumber: "0123.456.789",
+  email: "contact@dasolabs.com",
+  phone: "",
+  iban: "BE00 0000 0000 0000",
+  website: "www.dasolabs.com"
+};
+
+const VAT_RATE_DEFAULT = 21;
+
+// ─────────────────────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────────────────────
+const colors = {
+  ink: "#1a1d35",
+  indigo: "#3a3d75",
+  grey: "#6b7080",
+  light: "#f5f5fa",
+  border: "#dcdce4",
+  accent: "#5a5fc4"
+};
+
+const styles = StyleSheet.create({
+  page: {
+    paddingTop: 40,
+    paddingBottom: 60,
+    paddingHorizontal: 40,
+    fontSize: 9,
+    fontFamily: "Helvetica",
+    color: colors.ink
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 30,
+    borderBottom: `2 solid ${colors.indigo}`,
+    paddingBottom: 12
+  },
+  brand: {
+    fontSize: 24,
+    fontFamily: "Helvetica-Bold",
+    color: colors.indigo
+  },
+  brandTagline: {
+    fontSize: 8,
+    color: colors.grey,
+    marginTop: 2
+  },
+  docTitle: {
+    fontSize: 22,
+    fontFamily: "Helvetica-Bold",
+    color: colors.indigo,
+    textAlign: "right"
+  },
+  docMeta: {
+    fontSize: 9,
+    color: colors.grey,
+    textAlign: "right",
+    marginTop: 2
+  },
+  twoCol: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 22,
+    gap: 30
+  },
+  block: {
+    flex: 1
+  },
+  blockLabel: {
+    fontSize: 8,
+    color: colors.grey,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 4
+  },
+  blockName: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+    marginBottom: 3
+  },
+  blockLine: {
+    fontSize: 9,
+    color: colors.ink,
+    marginBottom: 1
+  },
+  infoBox: {
+    backgroundColor: colors.light,
+    padding: 10,
+    marginBottom: 18,
+    borderLeft: `3 solid ${colors.indigo}`,
+    flexDirection: "row",
+    gap: 24
+  },
+  infoCol: {
+    flex: 1
+  },
+  infoLabel: {
+    fontSize: 7,
+    color: colors.grey,
+    textTransform: "uppercase",
+    letterSpacing: 0.5
+  },
+  infoValue: {
+    fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    color: colors.ink,
+    marginTop: 1
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+    color: colors.indigo,
+    marginTop: 8,
+    marginBottom: 8
+  },
+  table: {
+    marginBottom: 14
+  },
+  tableHeader: {
+    flexDirection: "row",
+    backgroundColor: colors.indigo,
+    color: "white",
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold"
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottom: `0.5 solid ${colors.border}`,
+    paddingVertical: 5,
+    paddingHorizontal: 4,
+    fontSize: 9
+  },
+  tableRowAlt: {
+    backgroundColor: "#fafafc"
+  },
+  colDesc: { flex: 4 },
+  colQty: { flex: 1, textAlign: "right" },
+  colUnit: { flex: 0.7, textAlign: "right" },
+  colPrice: { flex: 1.3, textAlign: "right" },
+  colTotal: { flex: 1.3, textAlign: "right" },
+  totalsBlock: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 22
+  },
+  totalsBox: {
+    width: 240,
+    borderTop: `1 solid ${colors.border}`,
+    paddingTop: 6
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 3,
+    fontSize: 10
+  },
+  totalRowGrand: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 6,
+    paddingBottom: 4,
+    marginTop: 4,
+    borderTop: `1 solid ${colors.indigo}`,
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: colors.indigo
+  },
+  milestoneRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 3,
+    fontSize: 9,
+    borderBottom: `0.5 solid ${colors.border}`
+  },
+  legalBlock: {
+    marginTop: 16,
+    padding: 10,
+    fontSize: 7.5,
+    color: colors.grey,
+    backgroundColor: colors.light,
+    lineHeight: 1.4
+  },
+  footer: {
+    position: "absolute",
+    bottom: 24,
+    left: 40,
+    right: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    fontSize: 7,
+    color: colors.grey,
+    borderTop: `0.5 solid ${colors.border}`,
+    paddingTop: 6
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
+function fmtEur(n: number | string): string {
+  const v = Number(n ?? 0);
+  return v.toLocaleString("fr-BE", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2
+  });
+}
+
+function fmtDate(d: Date | string | null | undefined): string {
+  if (!d) return "—";
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleDateString("fr-BE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// PROPS
+// ─────────────────────────────────────────────────────────────
+export interface OfferPdfData {
+  reference: string;
+  title: string;
+  description?: string | null;
+  totalSell: number;
+  vatRate?: number;
+  sentAt?: Date | null;
+  expectedDecisionAt?: Date | null;
+  company: {
+    name: string;
+    vatNumber?: string | null;
+    street?: string | null;
+    postalCode?: string | null;
+    city?: string | null;
+    country?: string | null;
+  };
+  contacts?: { firstName: string; lastName: string; email?: string | null }[];
+  lines: {
+    description: string;
+    quantity: number | string;
+    unit: string;
+    unitSellPrice: number | string;
+    totalSell: number | string;
+  }[];
+  milestones: {
+    label: string;
+    amount: number | string;
+    expectedAt?: Date | null;
+    percentage?: number | string | null;
+  }[];
+  owner?: { firstName: string; lastName: string; email?: string | null } | null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// DOCUMENT
+// ─────────────────────────────────────────────────────────────
+export function OfferPdfDocument({ data }: { data: OfferPdfData }) {
+  const vatRate = data.vatRate ?? VAT_RATE_DEFAULT;
+  const totalHt = Number(data.totalSell);
+  const vatAmount = (totalHt * vatRate) / 100;
+  const totalTtc = totalHt + vatAmount;
+  const validityDate = data.expectedDecisionAt
+    ? fmtDate(data.expectedDecisionAt)
+    : "30 jours à compter de l'émission";
+
+  return (
+    <Document
+      title={`Devis ${data.reference}`}
+      author={DASOLABS.legalName}
+      creator="Dasolabs ERP"
+      producer="Dasolabs ERP"
+    >
+      <Page size="A4" style={styles.page}>
+        {/* HEADER */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.brand}>DASOLABS</Text>
+            <Text style={styles.brandTagline}>IT & industrial consulting</Text>
+          </View>
+          <View>
+            <Text style={styles.docTitle}>DEVIS</Text>
+            <Text style={styles.docMeta}>{data.reference}</Text>
+            <Text style={styles.docMeta}>Émis le {fmtDate(data.sentAt ?? new Date())}</Text>
+          </View>
+        </View>
+
+        {/* EMETTEUR / CLIENT */}
+        <View style={styles.twoCol}>
+          <View style={styles.block}>
+            <Text style={styles.blockLabel}>Émetteur</Text>
+            <Text style={styles.blockName}>{DASOLABS.legalName}</Text>
+            <Text style={styles.blockLine}>{DASOLABS.street}</Text>
+            <Text style={styles.blockLine}>
+              {DASOLABS.postalCode} {DASOLABS.city}, {DASOLABS.country}
+            </Text>
+            <Text style={styles.blockLine}>TVA : {DASOLABS.vatNumber}</Text>
+            <Text style={styles.blockLine}>BCE : {DASOLABS.bceNumber}</Text>
+            <Text style={styles.blockLine}>{DASOLABS.email}</Text>
+          </View>
+          <View style={styles.block}>
+            <Text style={styles.blockLabel}>Destinataire</Text>
+            <Text style={styles.blockName}>{data.company.name}</Text>
+            {data.company.street && <Text style={styles.blockLine}>{data.company.street}</Text>}
+            {(data.company.postalCode || data.company.city) && (
+              <Text style={styles.blockLine}>
+                {data.company.postalCode ?? ""} {data.company.city ?? ""}
+              </Text>
+            )}
+            {data.company.country && <Text style={styles.blockLine}>{data.company.country}</Text>}
+            {data.company.vatNumber && (
+              <Text style={styles.blockLine}>TVA : {data.company.vatNumber}</Text>
+            )}
+            {data.contacts && data.contacts.length > 0 && (
+              <Text style={[styles.blockLine, { marginTop: 4 }]}>
+                À l'attention de : {data.contacts[0].firstName} {data.contacts[0].lastName}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* INFO BAR */}
+        <View style={styles.infoBox}>
+          <View style={styles.infoCol}>
+            <Text style={styles.infoLabel}>Objet</Text>
+            <Text style={styles.infoValue}>{data.title}</Text>
+          </View>
+          <View style={styles.infoCol}>
+            <Text style={styles.infoLabel}>Validité</Text>
+            <Text style={styles.infoValue}>{validityDate}</Text>
+          </View>
+        </View>
+
+        {data.description && (
+          <View style={{ marginBottom: 14 }}>
+            <Text style={styles.sectionTitle}>Description de la prestation</Text>
+            <Text style={{ fontSize: 9, lineHeight: 1.5, color: colors.ink }}>
+              {data.description}
+            </Text>
+          </View>
+        )}
+
+        {/* LIGNES */}
+        <Text style={styles.sectionTitle}>Détail du devis</Text>
+        <View style={styles.table}>
+          <View style={styles.tableHeader}>
+            <Text style={styles.colDesc}>Description</Text>
+            <Text style={styles.colQty}>Qté</Text>
+            <Text style={styles.colUnit}>Unité</Text>
+            <Text style={styles.colPrice}>PU HTVA</Text>
+            <Text style={styles.colTotal}>Total HTVA</Text>
+          </View>
+          {data.lines.map((line, i) => (
+            <View
+              key={i}
+              style={i % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : styles.tableRow}
+            >
+              <Text style={styles.colDesc}>{line.description}</Text>
+              <Text style={styles.colQty}>{Number(line.quantity).toLocaleString("fr-BE")}</Text>
+              <Text style={styles.colUnit}>{line.unit}</Text>
+              <Text style={styles.colPrice}>{fmtEur(line.unitSellPrice)}</Text>
+              <Text style={styles.colTotal}>{fmtEur(line.totalSell)}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* TOTAUX */}
+        <View style={styles.totalsBlock}>
+          <View style={styles.totalsBox}>
+            <View style={styles.totalRow}>
+              <Text>Total HTVA</Text>
+              <Text>{fmtEur(totalHt)}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text>TVA ({vatRate}%)</Text>
+              <Text>{fmtEur(vatAmount)}</Text>
+            </View>
+            <View style={styles.totalRowGrand}>
+              <Text>Total TTC</Text>
+              <Text>{fmtEur(totalTtc)}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* TRANCHES */}
+        {data.milestones.length > 0 && (
+          <View style={{ marginBottom: 14 }}>
+            <Text style={styles.sectionTitle}>Modalités de facturation</Text>
+            {data.milestones.map((m, i) => (
+              <View key={i} style={styles.milestoneRow}>
+                <Text>
+                  {m.label}
+                  {m.expectedAt && `  ·  prévu le ${fmtDate(m.expectedAt)}`}
+                  {m.percentage && `  ·  ${Number(m.percentage)}%`}
+                </Text>
+                <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(m.amount)}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* MENTIONS LÉGALES */}
+        <View style={styles.legalBlock}>
+          <Text style={{ fontFamily: "Helvetica-Bold", marginBottom: 3, color: colors.ink }}>
+            Conditions
+          </Text>
+          <Text>
+            • Devis valable {data.expectedDecisionAt ? `jusqu'au ${fmtDate(data.expectedDecisionAt)}` : "30 jours"} à compter de la date d'émission.{"\n"}
+            • Acceptation : bon pour accord daté et signé à renvoyer par email à {DASOLABS.email}.{"\n"}
+            • Paiement : 30 jours fin de mois à compter de la date de facture, par virement sur IBAN {DASOLABS.iban}.{"\n"}
+            • Pénalités de retard : taux légal belge (loi du 02/08/2002), sans mise en demeure préalable.{"\n"}
+            • Litiges : tribunaux de l'arrondissement de Bruxelles, droit belge applicable.
+          </Text>
+        </View>
+
+        {/* FOOTER */}
+        <View style={styles.footer} fixed>
+          <Text>
+            {DASOLABS.legalName} · {DASOLABS.vatNumber} · {DASOLABS.iban}
+          </Text>
+          <Text
+            render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`}
+          />
+        </View>
+      </Page>
+    </Document>
+  );
+}
