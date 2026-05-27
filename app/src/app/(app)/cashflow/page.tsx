@@ -83,7 +83,27 @@ export default async function CashflowPage({
         orderBy: { expectedAt: "asc" }
       }),
       prisma.recurringExpense.findMany({
-        where: { isActive: true },
+        where: {
+          isActive: true,
+          // Bornes temporelles : on ne montre que les récurrents dont l'intervalle
+          // [startDate, endDate] inclut au moins une partie du mois affiché.
+          // - startDate null  → applicable sans limite inférieure
+          // - endDate   null  → applicable sans limite supérieure
+          AND: [
+            {
+              OR: [
+                { startDate: null },
+                { startDate: { lte: focusMonthEnd } }
+              ]
+            },
+            {
+              OR: [
+                { endDate: null },
+                { endDate: { gte: focusMonthStart } }
+              ]
+            }
+          ]
+        },
         orderBy: [{ isIncome: "desc" }, { label: "asc" }]
       }),
       prisma.recurringExpenseMonth.findMany({
