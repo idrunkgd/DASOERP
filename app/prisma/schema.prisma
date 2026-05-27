@@ -398,6 +398,8 @@ model Contact {
   // Contact côté société de portage / intermédiaire
   intermediaryRequests MissionRequest[] @relation("MissionRequestIntermediaryContact")
   intermediaryMissions Mission[]        @relation("MissionExecIntermediaryContact")
+  // CRM
+  opportunities Opportunity[]  @relation("ContactOpportunities")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -1312,16 +1314,23 @@ enum OpportunityStage {
   NEGOTIATING    // en négociation
   WON            // gagné — transforme en Offer/Project
   LOST           // perdu
+  CANCELLED      // annulé (par nous ou le client), pas un "vrai" perdu — masqué par défaut
 }
 
 model Opportunity {
   id              String           @id @default(cuid())
   title           String
   description     String?
-  /// Société visée (existante en base ou nouvelle entrée)
+  /// Type d'opportunité : CONSULTING (T&M) ou PROJECT (forfait).
+  /// Réutilise l'enum OfferMode existant pour rester aligné avec l'aval (Offer/Project).
+  kind            OfferMode        @default(CONSULTING)
+  /// Société visée — désormais OBLIGATOIRE (doit exister en base avant)
   companyId       String?
   company         Company?         @relation("CompanyOpportunities", fields: [companyId], references: [id], onDelete: SetNull)
-  /// Si pas encore en base : nom libre + email
+  /// Contact référent (du Company) — optionnel mais recommandé
+  contactId       String?
+  contact         Contact?         @relation("ContactOpportunities", fields: [contactId], references: [id], onDelete: SetNull)
+  /// Champs libres conservés pour compatibilité (anciennes opps) — non saisis en UI
   prospectName    String?
   prospectEmail   String?
   prospectPhone   String?

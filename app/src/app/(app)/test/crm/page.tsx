@@ -10,12 +10,14 @@ import { Lightbulb, Headset, FolderKanban, ChevronRight } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 const STAGES = [
-  { key: "NEW", label: "Identifié", color: "bg-midnight-100" },
-  { key: "QUALIFIED", label: "Qualifié", color: "bg-blue-50" },
-  { key: "PROPOSED", label: "Proposé", color: "bg-amber-50" },
-  { key: "NEGOTIATING", label: "Négociation", color: "bg-purple-50" },
-  { key: "WON", label: "Gagné", color: "bg-emerald-50" },
-  { key: "LOST", label: "Perdu", color: "bg-red-50" }
+  { key: "NEW", label: "Identifié", color: "bg-midnight-100", hiddenByDefault: false },
+  { key: "QUALIFIED", label: "Qualifié", color: "bg-blue-50", hiddenByDefault: false },
+  { key: "PROPOSED", label: "Proposé", color: "bg-amber-50", hiddenByDefault: false },
+  { key: "NEGOTIATING", label: "Négociation", color: "bg-purple-50", hiddenByDefault: false },
+  { key: "WON", label: "Gagné", color: "bg-emerald-50", hiddenByDefault: false },
+  { key: "LOST", label: "Perdu", color: "bg-red-50", hiddenByDefault: false },
+  // Annulé : masqué par défaut (besoin disparu, projet gelé… différent de "perdu")
+  { key: "CANCELLED", label: "Annulé", color: "bg-midnight-200", hiddenByDefault: true }
 ] as const;
 
 type Stage = (typeof STAGES)[number]["key"];
@@ -24,6 +26,8 @@ type Stage = (typeof STAGES)[number]["key"];
 type UnifiedItem = {
   id: string;
   kind: "opportunity" | "mission-request" | "project";
+  /// Pour les opportunities : CONSULTING ou PROJECT. Pour les autres : non utilisé.
+  oppType?: "CONSULTING" | "PROJECT" | null;
   title: string;
   companyName: string | null;
   ownerName: string | null;
@@ -32,7 +36,7 @@ type UnifiedItem = {
   stage: Stage;
   expectedCloseAt: string | null;
   lostReason: string | null;
-  href: string; // lien direct vers le détail (mission-request, project) ou null pour opp (édité inline)
+  href: string;
 };
 
 // Mapping : statut MissionRequest → stage CRM
@@ -49,13 +53,13 @@ function missionRequestToStage(status: string): Stage | null {
     case "LOST":
       return "LOST";
     case "CANCELLED":
-      return "LOST";
+      return "CANCELLED";
     default:
       return null;
   }
 }
 
-// Mapping : statut Project → stage CRM (les projets sont déjà engagés, donc WON ou LOST)
+// Mapping : statut Project → stage CRM (les projets sont déjà engagés, donc WON ou CANCELLED)
 function projectToStage(status: string): Stage | null {
   switch (status) {
     case "TO_START":
@@ -64,16 +68,21 @@ function projectToStage(status: string): Stage | null {
     case "COMPLETED":
       return "WON";
     case "CANCELLED":
-      return "LOST";
+      return "CANCELLED";
     default:
       return null;
   }
 }
 
-export default async function CrmPage() {
+export default async function CrmPage({
+  searchParams
+}: {
+  searchParams: { showCancelled?: string };
+}) {
   const session = await requireSession();
+  const showCancelled = searchParams.showCancelled === "1";
 
-  const [opportunities, missionRequests, projects, companies, owners] = await Promise.all([
+  const [opportunities, missionRequests, projects, companies, contacts, owners] = await Promise.all([
     prisma.opportunity.findMany({
       include: {
         company: { select: { id: true, name: true } },
@@ -99,10 +108,25 @@ export default async function CrmPage() {
       orderBy: { name: "asc" },
       select: { id: true, name: true }
     }),
+    prisma.contact.findMany({
+      where: { status: "ACTIVE" },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+      select: {
+        id: true,
+        companyId: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        jobTitle: true
+      }
+    }),
+    // Tous les users actifs (pas seulement ADMIN/COMMERCIAL/MANAGER) — un consultant
+    // impliqué peut tout à fait être owner d'une opportunité
     prisma.user.findMany({
-      where: { active: true, role: { in: ["ADMIN", "COMMERCIAL", "MANAGER"] } },
-      orderBy: { lastName: "asc" },
-      select: { id: true, firstName: true, lastName: true }
+      where: { active: true },
+      orderBy: [{ role: "asc" }, { lastName: "asc" }],
+      select: { id: true, firstName: true, lastName: true, role: true }
     })
   ]);
 
@@ -113,7 +137,9 @@ export default async function CrmPage() {
     unified.push({
       id: o.id,
       kind: "opportunity",
+      oppType: (o as any).kind ?? "CONSULTING",
       title: o.title,
+      // Société sélectionnée OU fallback sur l'ancien champ libre (compat anciennes opps)
       companyName: o.company?.name ?? o.prospectName ?? null,
       ownerName: o.owner ? `${o.owner.firstName} ${o.owner.lastName}` : null,
       estimatedValue: Number(o.estimatedValue),
@@ -166,9 +192,12 @@ export default async function CrmPage() {
     });
   }
 
-  // KPIs : carnet pondéré (pipeline value) hors WON/LOST — sur les opportunities pures
+  // KPIs : carnet pondéré (pipeline value) hors WON/LOST/CANCELLED — sur les opportunities pures
   // car les MissionRequest/Project ont leur propre cycle de vie
-  const openOpps = opportunities.filter((o) => o.stage !== "WON" && o.stage !== "LOST");
+  const openOpps = opportunities.filter((o) => {
+    const s = o.stage as string;
+    return s !== "WON" && s !== "LOST" && s !== "CANCELLED";
+  });
   const weightedValue = openOpps.reduce(
     (s, o) => s + (Number(o.estimatedValue) * o.probability) / 100,
     0
@@ -245,18 +274,40 @@ export default async function CrmPage() {
         <div className="p-4">
           <NewOpportunityForm
             companies={companies}
-            owners={owners.map((u) => ({
-              id: u.id,
-              label: `${u.firstName} ${u.lastName}`
-            }))}
+            contacts={contacts}
+            owners={owners}
             defaultOwnerId={session.user.id}
           />
         </div>
       </div>
 
+      {/* Toggle affichage du stage CANCELLED */}
+      <div className="flex justify-end mb-2">
+        {showCancelled ? (
+          <Link
+            href="/test/crm"
+            className="text-xs text-midnight-500 hover:text-midnight-900 underline"
+          >
+            Masquer la colonne « Annulé »
+          </Link>
+        ) : (
+          <Link
+            href="/test/crm?showCancelled=1"
+            className="text-xs text-midnight-500 hover:text-midnight-900 underline"
+          >
+            Afficher la colonne « Annulé »
+            {unified.filter((u) => u.stage === "CANCELLED").length > 0 && (
+              <span className="ml-1 text-midnight-400">
+                ({unified.filter((u) => u.stage === "CANCELLED").length})
+              </span>
+            )}
+          </Link>
+        )}
+      </div>
+
       {/* Kanban */}
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        {STAGES.map((s) => {
+      <div className={`grid grid-cols-1 md:grid-cols-3 ${showCancelled ? "xl:grid-cols-7" : "xl:grid-cols-6"} gap-3`}>
+        {STAGES.filter((s) => showCancelled || !s.hiddenByDefault).map((s) => {
           const items = unified.filter((u) => u.stage === s.key);
           const subTotal = items.reduce((acc, u) => acc + u.estimatedValue, 0);
           return (
@@ -274,7 +325,7 @@ export default async function CrmPage() {
                   items.map((item) =>
                     item.kind === "opportunity" ? (
                       <div key={`opp-${item.id}`} className="relative">
-                        <KindBadge kind={item.kind} />
+                        <KindBadge kind={item.kind} oppType={item.oppType ?? "CONSULTING"} />
                         <OpportunityCard
                           opp={{
                             id: item.id,
@@ -303,19 +354,32 @@ export default async function CrmPage() {
   );
 }
 
-// Badge en haut à droite des cartes Opportunity (icône Lightbulb)
-function KindBadge({ kind }: { kind: UnifiedItem["kind"] }) {
-  const Icon = kind === "opportunity" ? Lightbulb : kind === "mission-request" ? Headset : FolderKanban;
-  const color =
-    kind === "opportunity"
-      ? "text-amber-500"
-      : kind === "mission-request"
-        ? "text-blue-500"
-        : "text-violet-500";
+// Badge en haut à droite des cartes Opportunity — change selon le type (Consultance/Projet)
+function KindBadge({
+  kind,
+  oppType
+}: {
+  kind: UnifiedItem["kind"];
+  oppType: "CONSULTING" | "PROJECT";
+}) {
+  // Pour les opportunities : icône qui matche le type (Headset pour consultance, FolderKanban pour projet)
+  // Pour les autres : icône liée à leur nature
+  let Icon: any;
+  let color: string;
+  if (kind === "opportunity") {
+    Icon = oppType === "CONSULTING" ? Headset : FolderKanban;
+    color = oppType === "CONSULTING" ? "text-blue-500" : "text-violet-500";
+  } else if (kind === "mission-request") {
+    Icon = Headset;
+    color = "text-blue-500";
+  } else {
+    Icon = FolderKanban;
+    color = "text-violet-500";
+  }
   return (
     <Icon
       className={`absolute top-1.5 right-1.5 w-3.5 h-3.5 ${color} z-10`}
-      aria-label={kind}
+      aria-label={kind === "opportunity" ? `opportunity-${oppType.toLowerCase()}` : kind}
     />
   );
 }

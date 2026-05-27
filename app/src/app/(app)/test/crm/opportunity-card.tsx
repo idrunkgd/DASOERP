@@ -2,10 +2,10 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { moveOpportunityStage, deleteOpportunity } from "@/server/actions/opportunities";
-import { ChevronRight, ChevronLeft, X, Trash2, Loader2 } from "lucide-react";
+import { ChevronRight, ChevronLeft, X, Trash2, Loader2, Ban } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-type Stage = "NEW" | "QUALIFIED" | "PROPOSED" | "NEGOTIATING" | "WON" | "LOST";
+type Stage = "NEW" | "QUALIFIED" | "PROPOSED" | "NEGOTIATING" | "WON" | "LOST" | "CANCELLED";
 
 const STAGE_ORDER: Stage[] = ["NEW", "QUALIFIED", "PROPOSED", "NEGOTIATING", "WON"];
 
@@ -52,7 +52,8 @@ export function OpportunityCard({
   const idx = STAGE_ORDER.indexOf(opp.stage);
   const canForward = idx >= 0 && idx < STAGE_ORDER.length - 1;
   const canBack = idx > 0;
-  const isClosed = opp.stage === "WON" || opp.stage === "LOST";
+  const isClosed =
+    opp.stage === "WON" || opp.stage === "LOST" || opp.stage === "CANCELLED";
 
   return (
     <div className="bg-white rounded-md shadow-sm border border-midnight-100 p-2.5 text-xs space-y-1.5">
@@ -67,7 +68,13 @@ export function OpportunityCard({
       )}
       {opp.ownerName && <div className="text-[10px] text-midnight-500">Owner : {opp.ownerName}</div>}
       {opp.lostReason && (
-        <div className="text-[10px] text-red-600">Perdu : {opp.lostReason}</div>
+        <div
+          className={`text-[10px] ${
+            opp.stage === "CANCELLED" ? "text-midnight-500" : "text-red-600"
+          }`}
+        >
+          {opp.stage === "CANCELLED" ? "Annulé" : "Perdu"} : {opp.lostReason}
+        </div>
       )}
 
       <div className="flex items-center justify-between pt-1 border-t border-midnight-100">
@@ -93,17 +100,30 @@ export function OpportunityCard({
             </button>
           )}
           {!isClosed && (
-            <button
-              className="p-1 rounded hover:bg-red-50 text-red-600 ml-1"
-              title="Marquer comme perdu"
-              disabled={pending}
-              onClick={() => {
-                const r = prompt("Raison de la perte ?");
-                if (r !== null) move("LOST", r);
-              }}
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+            <>
+              <button
+                className="p-1 rounded hover:bg-red-50 text-red-600 ml-1"
+                title="Marquer comme perdu (le client a choisi un concurrent, etc.)"
+                disabled={pending}
+                onClick={() => {
+                  const r = prompt("Raison de la perte ?");
+                  if (r !== null) move("LOST", r);
+                }}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+              <button
+                className="p-1 rounded hover:bg-midnight-200 text-midnight-500"
+                title="Annuler (besoin disparu, budget gelé… — différent de perdu)"
+                disabled={pending}
+                onClick={() => {
+                  const r = prompt("Motif de l'annulation ?");
+                  if (r !== null) move("CANCELLED", r);
+                }}
+              >
+                <Ban className="w-3.5 h-3.5" />
+              </button>
+            </>
           )}
         </div>
         <button

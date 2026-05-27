@@ -8,10 +8,18 @@ import { revalidatePath } from "next/cache";
 const Schema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().optional().nullable().transform((v) => v?.trim() || null),
-  companyId: z.string().optional().nullable().transform((v) => v || null),
-  prospectName: z.string().optional().nullable().transform((v) => v?.trim() || null),
-  prospectEmail: z.string().optional().nullable().transform((v) => v?.trim() || null),
-  prospectPhone: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  // Type : CONSULTING (T&M) ou PROJECT (forfait) — uniquement ces deux valeurs
+  kind: z.enum(["CONSULTING", "PROJECT"]).default("CONSULTING"),
+  // Société OBLIGATOIRE (sélectionnée dans la dropdown — créée au préalable si manquante)
+  companyId: z
+    .string()
+    .min(1, "Sélectionne une société (crée-la d'abord si elle n'existe pas)"),
+  // Contact référent OPTIONNEL mais recommandé
+  contactId: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => v || null),
   ownerId: z.string().optional().nullable().transform((v) => v || null),
   estimatedValue: z.coerce.number().nonnegative().default(0),
   probability: z.coerce.number().min(0).max(100).default(20),
@@ -30,7 +38,8 @@ const STAGE_DEFAULT_PROBA: Record<string, number> = {
   PROPOSED: 50,
   NEGOTIATING: 75,
   WON: 100,
-  LOST: 0
+  LOST: 0,
+  CANCELLED: 0
 };
 
 export async function createOpportunity(formData: FormData) {
@@ -40,10 +49,9 @@ export async function createOpportunity(formData: FormData) {
     data: {
       title: data.title,
       description: data.description,
+      kind: data.kind,
       companyId: data.companyId,
-      prospectName: data.prospectName,
-      prospectEmail: data.prospectEmail,
-      prospectPhone: data.prospectPhone,
+      contactId: data.contactId,
       ownerId: data.ownerId ?? session.user.id,
       estimatedValue: data.estimatedValue,
       probability: data.probability,
@@ -73,10 +81,9 @@ export async function updateOpportunity(id: string, formData: FormData) {
     data: {
       title: data.title,
       description: data.description,
+      kind: data.kind,
       companyId: data.companyId,
-      prospectName: data.prospectName,
-      prospectEmail: data.prospectEmail,
-      prospectPhone: data.prospectPhone,
+      contactId: data.contactId,
       ownerId: data.ownerId,
       estimatedValue: data.estimatedValue,
       probability: data.probability,
@@ -99,7 +106,7 @@ export async function updateOpportunity(id: string, formData: FormData) {
 
 export async function moveOpportunityStage(
   id: string,
-  newStage: "NEW" | "QUALIFIED" | "PROPOSED" | "NEGOTIATING" | "WON" | "LOST",
+  newStage: "NEW" | "QUALIFIED" | "PROPOSED" | "NEGOTIATING" | "WON" | "LOST" | "CANCELLED",
   lostReason?: string
 ) {
   const session = await requireSession();
