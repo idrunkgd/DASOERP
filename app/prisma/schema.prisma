@@ -292,6 +292,8 @@ model User {
   // CRM pipeline (test feature)
   opportunities       Opportunity[]         @relation("OpportunityOwner")
   opportunityActivities OpportunityActivity[] @relation("OpportunityActivityUser")
+  // Factures fournisseurs (mirror Skwarel — test feature)
+  supplierInvoicesCreated SupplierInvoice[] @relation("SupplierInvoiceCreator")
 }
 
 // =============================================================
@@ -369,6 +371,8 @@ model Company {
   directBillingMilestones BillingMilestone[] @relation("DirectMilestoneCompany")
   // CRM pipeline (test feature)
   opportunities Opportunity[]              @relation("CompanyOpportunities")
+  // Factures fournisseurs reçues de cette société (test feature)
+  supplierInvoicesIssued SupplierInvoice[] @relation("CompanySupplierInvoices")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -1180,6 +1184,55 @@ enum CashflowKind {
   COMMITMENT          // engagement signé (entre dans le cumul)
   SIMULATION          // simulation what-if DÉPENSE (exclu du cumul par défaut)
   SIMULATION_INCOME   // simulation what-if RECETTE (ex. mission consultant pas signée)
+}
+
+// =============================================================
+// SUPPLIER INVOICES — mirror des factures fournisseurs reçues
+// (via Peppol dans Skwarel) avec OCR pour pré-remplissage.
+// =============================================================
+
+enum SupplierInvoiceStatus {
+  DRAFT          // OCR fait, pas encore validé par l'utilisateur
+  PENDING        // validé, en attente de paiement
+  PAID           // payé
+  DISPUTED       // litige
+  CANCELLED      // annulé
+}
+
+model SupplierInvoice {
+  id              String                @id @default(cuid())
+  /// Fournisseur — soit un Company existant (FK), soit juste le nom (free text)
+  supplierCompanyId String?
+  supplierCompany   Company?            @relation("CompanySupplierInvoices", fields: [supplierCompanyId], references: [id], onDelete: SetNull)
+  supplierName    String                // Nom tel qu'extrait du PDF (toujours rempli)
+  /// Numéro de facture du fournisseur
+  invoiceNumber   String?
+  /// Date de facture
+  invoiceDate     DateTime              @db.Date
+  /// Date d'échéance
+  dueDate         DateTime?             @db.Date
+  amountHt        Decimal               @db.Decimal(12, 2)
+  vatRate         Decimal               @default(21) @db.Decimal(5, 2)
+  vatAmount       Decimal               @db.Decimal(12, 2)
+  amountTtc       Decimal               @db.Decimal(12, 2)
+  currency        String                @default("EUR")
+  /// PDF source (data URI base64 inline ou URL)
+  pdfUrl          String?
+  /// Payload OCR brut pour audit/debug
+  ocrPayload      Json?
+  status          SupplierInvoiceStatus @default(DRAFT)
+  paidAt          DateTime?
+  notes           String?
+  /// Source d'import : "manual" (drop PDF) | "email" (webhook Mailgun) | "api"
+  source          String                @default("manual")
+  createdById     String?
+  createdBy       User?                 @relation("SupplierInvoiceCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([status])
+  @@index([invoiceDate])
+  @@index([supplierCompanyId])
 }
 
 /// Singleton settings cashflow (solde initial). 1 seule ligne attendue.

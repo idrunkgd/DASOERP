@@ -8,7 +8,7 @@ import {
   MessageSquare, BadgeCheck, Briefcase, History, UserPlus, Headset,
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
-  FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows
+  FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -68,9 +68,10 @@ const SECTIONS: Section[] = [
     label: "Test (preview)",
     items: [
       // En preview : visible pour tous les rôles authentifiés (admin déduit le besoin).
-      { href: "/test/expenses",   label: "Notes de frais",     icon: Wallet,             allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/test/crm",        label: "CRM pipeline",       icon: Workflow,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/test/cv-parser",  label: "Parser CV",          icon: FileScan,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+      { href: "/test/expenses",          label: "Notes de frais",      icon: Wallet,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/test/supplier-invoices", label: "Factures fournisseurs", icon: Inbox,          allowedRoles: ["ADMIN","FINANCE","MANAGER"] },
+      { href: "/test/crm",               label: "CRM pipeline",        icon: Workflow,         allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/test/cv-parser",         label: "Parser CV",           icon: FileScan,         allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
     ]
   },
   {
