@@ -33,7 +33,8 @@ const SECTIONS: Section[] = [
     items: [
       { href: "/companies",   label: "Entreprises",          icon: Building2,       perm: "companies.read" },
       { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" },
-      { href: "/commercial",  label: "Activités commerciales", icon: MessageSquare, perm: "contacts.read" }
+      { href: "/commercial",  label: "Activités commerciales", icon: MessageSquare, perm: "contacts.read" },
+      { href: "/test/crm",    label: "CRM pipeline",         icon: Workflow,        allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
     ]
   },
   {
@@ -64,16 +65,9 @@ const SECTIONS: Section[] = [
       { href: "/finance",     label: "Facturations",          icon: Receipt,         perm: "finance.read" }
     ]
   },
-  {
-    label: "Test (preview)",
-    items: [
-      // En preview : visible pour tous les rôles authentifiés (admin déduit le besoin).
-      { href: "/test/expenses",          label: "Notes de frais",      icon: Wallet,           allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/test/supplier-invoices", label: "Factures fournisseurs", icon: Inbox,          allowedRoles: ["ADMIN","FINANCE","MANAGER"] },
-      { href: "/test/crm",               label: "CRM pipeline",        icon: Workflow,         allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/test/cv-parser",         label: "Parser CV",           icon: FileScan,         allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
-    ]
-  },
+  // Section "Test (preview)" masquée — les pages restent accessibles par URL directe
+  // (/test/expenses, /test/supplier-invoices, /test/cv-parser, /test/tva, /test/matching)
+  // mais ne sont plus dans la navigation. CRM a été déplacé dans "Commerciale".
   {
     label: "Configuration",
     items: [
