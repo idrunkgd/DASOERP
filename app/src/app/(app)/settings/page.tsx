@@ -1,23 +1,35 @@
+import Link from "next/link";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
+import { getCompanyInfo } from "@/lib/company-info";
+import { ChevronRight, Building2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   await requirePermission("settings.manage");
+  const company = await getCompanyInfo();
   return (
     <div>
       <PageHeader title="Paramètres" subtitle="Configuration globale Dasolabs ERP" />
       <div className="grid lg:grid-cols-2 gap-6">
-        <section className="card p-5">
-          <h2 className="font-semibold mb-3">Entreprise Dasolabs</h2>
+        <Link href="/settings/company" className="card p-5 hover:border-indigoaccent transition-colors group">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-indigoaccent" />
+              <h2 className="font-semibold">Informations légales</h2>
+            </div>
+            <ChevronRight className="w-4 h-4 text-midnight-400 group-hover:text-indigoaccent" />
+          </div>
           <dl className="text-sm space-y-1.5">
-            <div className="flex justify-between"><dt className="text-midnight-500">Nom légal</dt><dd>Dasolabs SRL</dd></div>
-            <div className="flex justify-between"><dt className="text-midnight-500">Email</dt><dd>contact@dasolabs.com</dd></div>
-            <div className="flex justify-between"><dt className="text-midnight-500">Outil de facturation</dt><dd>Peppol (externe)</dd></div>
+            <div className="flex justify-between"><dt className="text-midnight-500">Raison sociale</dt><dd>{company.legalName}</dd></div>
+            <div className="flex justify-between"><dt className="text-midnight-500">TVA</dt><dd className="font-mono">{company.vatNumber}</dd></div>
+            <div className="flex justify-between"><dt className="text-midnight-500">Adresse</dt><dd>{company.postalCode} {company.city}</dd></div>
+            <div className="flex justify-between"><dt className="text-midnight-500">Email</dt><dd>{company.email}</dd></div>
+            <div className="flex justify-between"><dt className="text-midnight-500">IBAN</dt><dd className="font-mono text-xs">{company.iban}</dd></div>
           </dl>
-          <p className="text-xs text-midnight-500 mt-3">Ces valeurs sont configurables via la table <code>Setting</code> (Prisma).</p>
-        </section>
+          <p className="text-xs text-indigoaccent mt-3 group-hover:underline">Modifier →</p>
+        </Link>
         <section className="card p-5">
           <h2 className="font-semibold mb-3">Numérotation</h2>
           <dl className="text-sm space-y-1.5">

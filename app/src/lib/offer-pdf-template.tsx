@@ -4,26 +4,33 @@ import {
   Page,
   Text,
   View,
-  StyleSheet
+  StyleSheet,
+  Font
 } from "@react-pdf/renderer";
 import React from "react";
+import type { CompanyInfo } from "./company-info";
+import { DEFAULT_COMPANY_INFO } from "./company-info";
 
 // ─────────────────────────────────────────────────────────────
-// COMPANY INFO — à externaliser plus tard dans Settings
+// FONT REGISTRATION
+// La Helvetica par défaut de @react-pdf/renderer 4.x bug en serverless
+// ("Cannot read properties of undefined (reading 'unitsPerEm')").
+// On enregistre Roboto via le CDN jsDelivr (TTF), qui supporte unicode
+// (€, é, à, ê...) sans souci.
 // ─────────────────────────────────────────────────────────────
-const DASOLABS = {
-  legalName: "DASOLABS SRL",
-  street: "Adresse à compléter",
-  postalCode: "1000",
-  city: "Bruxelles",
-  country: "Belgique",
-  vatNumber: "BE0123456789",
-  bceNumber: "0123.456.789",
-  email: "contact@dasolabs.com",
-  phone: "",
-  iban: "BE00 0000 0000 0000",
-  website: "www.dasolabs.com"
-};
+Font.register({
+  family: "Roboto",
+  fonts: [
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.0.13/files/roboto-latin-400-normal.ttf",
+      fontWeight: 400
+    },
+    {
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.0.13/files/roboto-latin-700-normal.ttf",
+      fontWeight: 700
+    }
+  ]
+});
 
 const VAT_RATE_DEFAULT = 21;
 
@@ -45,7 +52,7 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
     paddingHorizontal: 40,
     fontSize: 9,
-    fontFamily: "Helvetica",
+    fontFamily: "Roboto",
     color: colors.ink
   },
   header: {
@@ -58,7 +65,7 @@ const styles = StyleSheet.create({
   },
   brand: {
     fontSize: 24,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Roboto", fontWeight: 700,
     color: colors.indigo
   },
   brandTagline: {
@@ -68,7 +75,7 @@ const styles = StyleSheet.create({
   },
   docTitle: {
     fontSize: 22,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Roboto", fontWeight: 700,
     color: colors.indigo,
     textAlign: "right"
   },
@@ -96,7 +103,7 @@ const styles = StyleSheet.create({
   },
   blockName: {
     fontSize: 11,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Roboto", fontWeight: 700,
     marginBottom: 3
   },
   blockLine: {
@@ -123,13 +130,13 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Roboto", fontWeight: 700,
     color: colors.ink,
     marginTop: 1
   },
   sectionTitle: {
     fontSize: 11,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Roboto", fontWeight: 700,
     color: colors.indigo,
     marginTop: 8,
     marginBottom: 8
@@ -144,7 +151,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
     fontSize: 8,
-    fontFamily: "Helvetica-Bold"
+    fontFamily: "Roboto", fontWeight: 700
   },
   tableRow: {
     flexDirection: "row",
@@ -185,7 +192,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     borderTop: `1 solid ${colors.indigo}`,
     fontSize: 12,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Roboto", fontWeight: 700,
     color: colors.indigo
   },
   milestoneRow: {
@@ -278,19 +285,29 @@ export interface OfferPdfData {
 // ─────────────────────────────────────────────────────────────
 // DOCUMENT
 // ─────────────────────────────────────────────────────────────
-export function OfferPdfDocument({ data }: { data: OfferPdfData }) {
+export function OfferPdfDocument({
+  data,
+  companyInfo
+}: {
+  data: OfferPdfData;
+  companyInfo?: CompanyInfo;
+}) {
+  // companyInfo = données de l'émetteur (Dasolabs) configurables dans /settings/company
+  const company = companyInfo ?? DEFAULT_COMPANY_INFO;
   const vatRate = data.vatRate ?? VAT_RATE_DEFAULT;
   const totalHt = Number(data.totalSell);
   const vatAmount = (totalHt * vatRate) / 100;
   const totalTtc = totalHt + vatAmount;
+  const validityDays = company.offerValidityDays ?? 30;
   const validityDate = data.expectedDecisionAt
     ? fmtDate(data.expectedDecisionAt)
-    : "30 jours à compter de l'émission";
+    : `${validityDays} jours à compter de l'émission`;
+  const paymentDays = company.paymentTermsDays ?? 30;
 
   return (
     <Document
       title={`Devis ${data.reference}`}
-      author={DASOLABS.legalName}
+      author={company.legalName}
       creator="Dasolabs ERP"
       producer="Dasolabs ERP"
     >
@@ -298,7 +315,7 @@ export function OfferPdfDocument({ data }: { data: OfferPdfData }) {
         {/* HEADER */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.brand}>DASOLABS</Text>
+            <Text style={styles.brand}>{company.legalName.split(" ")[0] || "DASOLABS"}</Text>
             <Text style={styles.brandTagline}>IT & industrial consulting</Text>
           </View>
           <View>
@@ -312,14 +329,15 @@ export function OfferPdfDocument({ data }: { data: OfferPdfData }) {
         <View style={styles.twoCol}>
           <View style={styles.block}>
             <Text style={styles.blockLabel}>Émetteur</Text>
-            <Text style={styles.blockName}>{DASOLABS.legalName}</Text>
-            <Text style={styles.blockLine}>{DASOLABS.street}</Text>
+            <Text style={styles.blockName}>{company.legalName}</Text>
+            <Text style={styles.blockLine}>{company.street}</Text>
             <Text style={styles.blockLine}>
-              {DASOLABS.postalCode} {DASOLABS.city}, {DASOLABS.country}
+              {company.postalCode} {company.city}, {company.country}
             </Text>
-            <Text style={styles.blockLine}>TVA : {DASOLABS.vatNumber}</Text>
-            <Text style={styles.blockLine}>BCE : {DASOLABS.bceNumber}</Text>
-            <Text style={styles.blockLine}>{DASOLABS.email}</Text>
+            <Text style={styles.blockLine}>TVA : {company.vatNumber}</Text>
+            {company.bceNumber && <Text style={styles.blockLine}>BCE : {company.bceNumber}</Text>}
+            <Text style={styles.blockLine}>{company.email}</Text>
+            {company.phone && <Text style={styles.blockLine}>{company.phone}</Text>}
           </View>
           <View style={styles.block}>
             <Text style={styles.blockLabel}>Destinataire</Text>
@@ -416,7 +434,7 @@ export function OfferPdfDocument({ data }: { data: OfferPdfData }) {
                   {m.expectedAt && `  ·  prévu le ${fmtDate(m.expectedAt)}`}
                   {m.percentage && `  ·  ${Number(m.percentage)}%`}
                 </Text>
-                <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(m.amount)}</Text>
+                <Text style={{ fontFamily: "Roboto", fontWeight: 700 }}>{fmtEur(m.amount)}</Text>
               </View>
             ))}
           </View>
@@ -424,22 +442,26 @@ export function OfferPdfDocument({ data }: { data: OfferPdfData }) {
 
         {/* MENTIONS LÉGALES */}
         <View style={styles.legalBlock}>
-          <Text style={{ fontFamily: "Helvetica-Bold", marginBottom: 3, color: colors.ink }}>
+          <Text style={{ fontFamily: "Roboto", fontWeight: 700, marginBottom: 3, color: colors.ink }}>
             Conditions
           </Text>
-          <Text>
-            • Devis valable {data.expectedDecisionAt ? `jusqu'au ${fmtDate(data.expectedDecisionAt)}` : "30 jours"} à compter de la date d'émission.{"\n"}
-            • Acceptation : bon pour accord daté et signé à renvoyer par email à {DASOLABS.email}.{"\n"}
-            • Paiement : 30 jours fin de mois à compter de la date de facture, par virement sur IBAN {DASOLABS.iban}.{"\n"}
-            • Pénalités de retard : taux légal belge (loi du 02/08/2002), sans mise en demeure préalable.{"\n"}
-            • Litiges : tribunaux de l'arrondissement de Bruxelles, droit belge applicable.
-          </Text>
+          {company.legalNotice && company.legalNotice.trim() ? (
+            <Text>{company.legalNotice}</Text>
+          ) : (
+            <Text>
+              • Devis valable {data.expectedDecisionAt ? `jusqu'au ${fmtDate(data.expectedDecisionAt)}` : `${validityDays} jours`} à compter de la date d'émission.{"\n"}
+              • Acceptation : bon pour accord daté et signé à renvoyer par email à {company.email}.{"\n"}
+              • Paiement : {paymentDays} jours fin de mois à compter de la date de facture, par virement sur IBAN {company.iban}{company.bic ? ` (BIC ${company.bic})` : ""}.{"\n"}
+              • Pénalités de retard : taux légal belge (loi du 02/08/2002), sans mise en demeure préalable.{"\n"}
+              • Litiges : tribunaux compétents, droit belge applicable.
+            </Text>
+          )}
         </View>
 
         {/* FOOTER */}
         <View style={styles.footer} fixed>
           <Text>
-            {DASOLABS.legalName} · {DASOLABS.vatNumber} · {DASOLABS.iban}
+            {company.legalName} · {company.vatNumber} · {company.iban}
           </Text>
           <Text
             render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`}

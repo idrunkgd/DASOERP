@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/rbac";
 import { NextRequest } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { OfferPdfDocument, type OfferPdfData } from "@/lib/offer-pdf-template";
+import { getCompanyInfo } from "@/lib/company-info";
 import React from "react";
 
 export const dynamic = "force-dynamic";
@@ -70,9 +71,12 @@ export async function GET(req: NextRequest) {
       : null
   };
 
+  // Fetch company info from settings (configurable in /settings/company)
+  const companyInfo = await getCompanyInfo();
+
   try {
     const buffer = await renderToBuffer(
-      React.createElement(OfferPdfDocument, { data })
+      React.createElement(OfferPdfDocument, { data, companyInfo })
     );
     return new Response(buffer, {
       headers: {
