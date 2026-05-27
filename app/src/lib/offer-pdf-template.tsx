@@ -1,36 +1,17 @@
-// Template React PDF — devis Dasolabs. Utilise @react-pdf/renderer (unicode safe).
+// Template React PDF — devis Dasolabs.
+// On utilise @react-pdf/renderer 3.4.5 (v4 a un bug 'unitsPerEm' en serverless).
+// La Helvetica built-in de v3 supporte le WinAnsi qui inclut € (0x80), é (0xE9),
+// à (0xE0), etc. — largement suffisant pour des devis BE/FR.
 import {
   Document,
   Page,
   Text,
   View,
-  StyleSheet,
-  Font
+  StyleSheet
 } from "@react-pdf/renderer";
 import React from "react";
 import type { CompanyInfo } from "./company-info";
 import { DEFAULT_COMPANY_INFO } from "./company-info";
-
-// ─────────────────────────────────────────────────────────────
-// FONT REGISTRATION
-// La Helvetica par défaut de @react-pdf/renderer 4.x bug en serverless
-// ("Cannot read properties of undefined (reading 'unitsPerEm')").
-// On enregistre Roboto via le CDN jsDelivr (TTF), qui supporte unicode
-// (€, é, à, ê...) sans souci.
-// ─────────────────────────────────────────────────────────────
-Font.register({
-  family: "Roboto",
-  fonts: [
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.0.13/files/roboto-latin-400-normal.ttf",
-      fontWeight: 400
-    },
-    {
-      src: "https://cdn.jsdelivr.net/npm/@fontsource/roboto@5.0.13/files/roboto-latin-700-normal.ttf",
-      fontWeight: 700
-    }
-  ]
-});
 
 const VAT_RATE_DEFAULT = 21;
 
@@ -52,7 +33,7 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
     paddingHorizontal: 40,
     fontSize: 9,
-    fontFamily: "Roboto",
+    fontFamily: "Helvetica",
     color: colors.ink
   },
   header: {
@@ -65,7 +46,7 @@ const styles = StyleSheet.create({
   },
   brand: {
     fontSize: 24,
-    fontFamily: "Roboto", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: colors.indigo
   },
   brandTagline: {
@@ -75,7 +56,7 @@ const styles = StyleSheet.create({
   },
   docTitle: {
     fontSize: 22,
-    fontFamily: "Roboto", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: colors.indigo,
     textAlign: "right"
   },
@@ -103,7 +84,7 @@ const styles = StyleSheet.create({
   },
   blockName: {
     fontSize: 11,
-    fontFamily: "Roboto", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     marginBottom: 3
   },
   blockLine: {
@@ -130,13 +111,13 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 10,
-    fontFamily: "Roboto", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: colors.ink,
     marginTop: 1
   },
   sectionTitle: {
     fontSize: 11,
-    fontFamily: "Roboto", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: colors.indigo,
     marginTop: 8,
     marginBottom: 8
@@ -151,7 +132,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
     fontSize: 8,
-    fontFamily: "Roboto", fontWeight: 700
+    fontFamily: "Helvetica-Bold"
   },
   tableRow: {
     flexDirection: "row",
@@ -192,7 +173,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     borderTop: `1 solid ${colors.indigo}`,
     fontSize: 12,
-    fontFamily: "Roboto", fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     color: colors.indigo
   },
   milestoneRow: {
@@ -434,7 +415,7 @@ export function OfferPdfDocument({
                   {m.expectedAt && `  ·  prévu le ${fmtDate(m.expectedAt)}`}
                   {m.percentage && `  ·  ${Number(m.percentage)}%`}
                 </Text>
-                <Text style={{ fontFamily: "Roboto", fontWeight: 700 }}>{fmtEur(m.amount)}</Text>
+                <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(m.amount)}</Text>
               </View>
             ))}
           </View>
@@ -442,7 +423,7 @@ export function OfferPdfDocument({
 
         {/* MENTIONS LÉGALES */}
         <View style={styles.legalBlock}>
-          <Text style={{ fontFamily: "Roboto", fontWeight: 700, marginBottom: 3, color: colors.ink }}>
+          <Text style={{ fontFamily: "Helvetica-Bold", marginBottom: 3, color: colors.ink }}>
             Conditions
           </Text>
           {company.legalNotice && company.legalNotice.trim() ? (
