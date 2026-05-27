@@ -7,7 +7,10 @@ import {
   Page,
   Text,
   View,
-  StyleSheet
+  StyleSheet,
+  Svg,
+  Path,
+  G
 } from "@react-pdf/renderer";
 import React from "react";
 import type { CompanyInfo } from "./company-info";
@@ -16,15 +19,39 @@ import { DEFAULT_COMPANY_INFO } from "./company-info";
 const VAT_RATE_DEFAULT = 21;
 
 // ─────────────────────────────────────────────────────────────
+// LOGO — reproduction inline du fichier dasolabs-icon.svg
+// (couleur #202037 = midnight de la charte ERP)
+// ─────────────────────────────────────────────────────────────
+function DasolabsIcon({ size = 40, color = "#202037" }: { size?: number; color?: string }) {
+  // viewBox d'origine 400×500 → on garde le ratio
+  const height = (size * 500) / 400;
+  return (
+    <Svg viewBox="0 0 400 500" width={size} height={height}>
+      <G>
+        <Path
+          fill={color}
+          d="M208.6,352.8c29.2-4.7,48.9-32.2,44.2-61.4c-4.7-29.2-32.2-48.9-61.4-44.2s-48.9,32.2-44.2,61.4 C152,337.7,179.4,357.5,208.6,352.8z"
+        />
+        <Path
+          fill={color}
+          d="M400,301.6c0-0.5,0-1.1,0-1.6s0-1.1,0-1.6V14.2c0-11.7-13.2-18.3-22.6-11.4c-40,29.2-68.7,72.9-78.4,123.4 c-29.2-16.6-63-26.2-99-26.2C89.5,100,0,189.5,0,300s89.5,200,200,200s194.5-84.1,199.8-189.9c0.2-1,0.2-1.9,0.2-3V301.6z M200,413.5c-62.7,0-113.5-50.8-113.5-113.5S137.3,186.5,200,186.5S313.5,237.3,313.5,300S262.7,413.5,200,413.5z"
+        />
+      </G>
+    </Svg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 // STYLES
 // ─────────────────────────────────────────────────────────────
+// Couleurs alignées sur la charte ERP (tailwind.config.ts)
 const colors = {
-  ink: "#1a1d35",
-  indigo: "#3a3d75",
-  grey: "#6b7080",
-  light: "#f5f5fa",
-  border: "#dcdce4",
-  accent: "#5a5fc4"
+  ink: "#202037",      // midnight-900 / midnight DEFAULT
+  indigo: "#202037",   // utilisé pour les éléments principaux du PDF (sombre)
+  accent: "#5b5fd6",   // indigoaccent — pour les highlights
+  grey: "#727496",     // midnight-400
+  light: "#f3f3f7",    // midnight-50
+  border: "#e1e1ec"    // midnight-100
 };
 
 const styles = StyleSheet.create({
@@ -314,11 +341,14 @@ export function OfferPdfDocument({
       producer="Dasolabs ERP"
     >
       <Page size="A4" style={styles.page}>
-        {/* HEADER */}
+        {/* HEADER : logo + nom à gauche, titre devis à droite */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.brand}>{company.legalName.split(" ")[0] || "DASOLABS"}</Text>
-            <Text style={styles.brandTagline}>IT & industrial consulting</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <DasolabsIcon size={36} color={colors.ink} />
+            <View>
+              <Text style={styles.brand}>{company.legalName.split(" ")[0] || "DASOLABS"}</Text>
+              <Text style={styles.brandTagline}>IT & industrial consulting</Text>
+            </View>
           </View>
           <View>
             <Text style={styles.docTitle}>DEVIS</Text>
