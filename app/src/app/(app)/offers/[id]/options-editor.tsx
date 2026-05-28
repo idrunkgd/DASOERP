@@ -9,6 +9,8 @@ import {
   deleteOfferOption,
   addOptionServiceLine,
   addOptionOtherLine,
+  updateServiceLine,
+  updateOtherLine,
   deleteLine
 } from "@/server/actions/offers";
 
@@ -277,28 +279,15 @@ function OptionBlock({
               </thead>
               <tbody>
                 {option.lines.map((l) => (
-                  <tr key={l.id}>
-                    <td>
-                      <span className={l.type === "SERVICE" ? "badge-info" : "badge-warning"}>
-                        {l.type === "SERVICE" ? "Service" : "Matériel"}
-                      </span>
-                    </td>
-                    <td className="font-medium">{l.description}</td>
-                    <td className="text-right tabular-nums">{Number(l.quantity)} {l.unit}</td>
-                    <td className="text-right tabular-nums">{formatCurrency(l.unitSellPrice)}</td>
-                    <td className="text-right tabular-nums font-medium">{formatCurrency(l.totalSell)}</td>
-                    <td>
-                      {!readOnly && (
-                        <button
-                          onClick={() => handleDeleteLine(l.id)}
-                          className="text-midnight-400 hover:text-red-600"
-                          disabled={pending}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
+                  <OptionLineRow
+                    key={l.id}
+                    line={l}
+                    profiles={profiles}
+                    readOnly={readOnly}
+                    pending={pending}
+                    startTransition={startTransition}
+                    onDelete={() => handleDeleteLine(l.id)}
+                  />
                 ))}
               </tbody>
             </table>
@@ -342,6 +331,246 @@ function OptionBlock({
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Ligne d'option : affichage en lecture par défaut, double-clic ou bouton "Éditer"
+ * pour passer en mode édition inline. Dispatch entre form service ou form matériel
+ * selon le type de la ligne.
+ */
+function OptionLineRow({
+  line,
+  profiles,
+  readOnly,
+  pending,
+  startTransition,
+  onDelete
+}: {
+  line: Line;
+  profiles: Profile[];
+  readOnly: boolean;
+  pending: boolean;
+  startTransition: React.TransitionStartFunction;
+  onDelete: () => void;
+}) {
+  const [edit, setEdit] = useState(false);
+
+  if (edit) {
+    if (line.type === "SERVICE") {
+      return (
+        <EditOptionServiceForm
+          line={line}
+          profiles={profiles}
+          onDone={() => setEdit(false)}
+          startTransition={startTransition}
+        />
+      );
+    }
+    return (
+      <EditOptionOtherForm
+        line={line}
+        onDone={() => setEdit(false)}
+        startTransition={startTransition}
+      />
+    );
+  }
+
+  return (
+    <tr onDoubleClick={() => !readOnly && setEdit(true)} className={readOnly ? "" : "cursor-pointer"}>
+      <td>
+        <span className={line.type === "SERVICE" ? "badge-info" : "badge-warning"}>
+          {line.type === "SERVICE" ? "Service" : "Matériel"}
+        </span>
+      </td>
+      <td className="font-medium">{line.description}</td>
+      <td className="text-right tabular-nums">{Number(line.quantity)} {line.unit}</td>
+      <td className="text-right tabular-nums">{formatCurrency(line.unitSellPrice)}</td>
+      <td className="text-right tabular-nums font-medium">{formatCurrency(line.totalSell)}</td>
+      <td>
+        {!readOnly && (
+          <div className="flex items-center gap-1 justify-end">
+            <button
+              onClick={() => setEdit(true)}
+              className="text-[10px] text-indigoaccent hover:underline"
+              disabled={pending}
+            >
+              Éditer
+            </button>
+            <button
+              onClick={onDelete}
+              className="text-midnight-400 hover:text-red-600 p-0.5"
+              disabled={pending}
+              title="Supprimer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+function EditOptionServiceForm({
+  line,
+  profiles,
+  onDone,
+  startTransition
+}: {
+  line: Line;
+  profiles: Profile[];
+  onDone: () => void;
+  startTransition: React.TransitionStartFunction;
+}) {
+  function submit(fd: FormData) {
+    startTransition(async () => {
+      try {
+        await updateServiceLine(line.id, fd);
+        toast.success("Ligne mise à jour");
+        onDone();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+  return (
+    <tr className="bg-midnight-50/40">
+      <td colSpan={6}>
+        <form action={submit} className="grid grid-cols-12 gap-2 items-end p-2">
+          <div className="col-span-3">
+            <label className="label text-[10px]">Description</label>
+            <input name="description" defaultValue={line.description} required className="input text-xs" />
+          </div>
+          <div className="col-span-2">
+            <label className="label text-[10px]">Profil</label>
+            <select
+              name="profileId"
+              defaultValue={line.profileId ?? ""}
+              required
+              className="input text-xs"
+            >
+              <option value="">—</option>
+              {profiles.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Qté</label>
+            <input name="quantity" type="number" step="0.5" defaultValue={String(line.quantity)} required className="input text-xs" />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Unité</label>
+            <select name="unit" defaultValue={line.unit} className="input text-xs">
+              <option value="day">jour</option>
+              <option value="hour">heure</option>
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label className="label text-[10px]">PU vente</label>
+            <input name="unitSellPrice" type="number" step="0.01" defaultValue={String(line.unitSellPrice)} required className="input text-xs" />
+          </div>
+          <div className="col-span-2">
+            <label className="label text-[10px]">PU coût</label>
+            <input name="unitCost" type="number" step="0.01" defaultValue={String(line.unitCost)} required className="input text-xs" />
+          </div>
+          <input type="hidden" name="discountPct" value="0" />
+          <div className="col-span-1 flex gap-1">
+            <button className="btn-primary btn-sm">OK</button>
+            <button type="button" onClick={onDone} className="btn-ghost btn-sm">×</button>
+          </div>
+        </form>
+      </td>
+    </tr>
+  );
+}
+
+function EditOptionOtherForm({
+  line,
+  onDone,
+  startTransition
+}: {
+  line: Line;
+  onDone: () => void;
+  startTransition: React.TransitionStartFunction;
+}) {
+  const [cost, setCost] = useState(String(line.unitCost));
+  const [margin, setMargin] = useState(String(line.marginPctInput ?? 20));
+  const sell = (() => {
+    const c = Number(cost || 0);
+    const m = Number(margin || 0);
+    if (c > 0 && m >= 0 && m < 100) return Math.round((c / (1 - m / 100)) * 100) / 100;
+    return 0;
+  })();
+  function submit(fd: FormData) {
+    startTransition(async () => {
+      try {
+        await updateOtherLine(line.id, fd);
+        toast.success("Ligne mise à jour");
+        onDone();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+  return (
+    <tr className="bg-midnight-50/40">
+      <td colSpan={6}>
+        <form action={submit} className="grid grid-cols-12 gap-2 items-end p-2">
+          <div className="col-span-4">
+            <label className="label text-[10px]">Description</label>
+            <input name="description" defaultValue={line.description} required className="input text-xs" />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Qté</label>
+            <input name="quantity" type="number" step="0.5" defaultValue={String(line.quantity)} required className="input text-xs" />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Unité</label>
+            <input name="unit" defaultValue={line.unit} className="input text-xs" />
+          </div>
+          <div className="col-span-2">
+            <label className="label text-[10px]">Prix achat</label>
+            <input
+              name="unitCost"
+              type="number"
+              step="0.01"
+              required
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              className="input text-xs"
+            />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Marge %</label>
+            <input
+              name="marginPctInput"
+              type="number"
+              step="0.5"
+              value={margin}
+              onChange={(e) => setMargin(e.target.value)}
+              className="input text-xs"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="label text-[10px]">PU vente</label>
+            <input
+              type="text"
+              readOnly
+              value={sell > 0 ? sell.toFixed(2) : "—"}
+              className="input text-xs bg-emerald-50 text-emerald-800 font-medium"
+              tabIndex={-1}
+            />
+          </div>
+          <input type="hidden" name="discountPct" value="0" />
+          <div className="col-span-1 flex gap-1">
+            <button className="btn-primary btn-sm">OK</button>
+            <button type="button" onClick={onDone} className="btn-ghost btn-sm">×</button>
+          </div>
+        </form>
+      </td>
+    </tr>
   );
 }
 

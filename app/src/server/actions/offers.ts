@@ -176,7 +176,12 @@ export async function updateServiceLine(lineId: string, formData: FormData) {
   const before = await prisma.offerLine.findUniqueOrThrow({ where: { id: lineId } });
   const data = ServiceLineSchema.parse(Object.fromEntries(formData));
   const after = await prisma.offerLine.update({ where: { id: lineId }, data: { ...data, type: "SERVICE", marginPctInput: null } });
-  await recomputeOfferTotals(after.offerId);
+  // Si la ligne est dans une option → recompute option ; sinon → recompute total offer
+  if (after.optionId) {
+    await recomputeOfferOption(after.optionId);
+  } else {
+    await recomputeOfferTotals(after.offerId);
+  }
   await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "OfferLine", entityId: lineId, message: "Ligne service modifiée", before, after });
   revalidatePath(`/offers/${after.offerId}`);
 }
@@ -201,7 +206,11 @@ export async function updateOtherLine(lineId: string, formData: FormData) {
       marginPctInput: data.marginPctInput
     }
   });
-  await recomputeOfferTotals(after.offerId);
+  if (after.optionId) {
+    await recomputeOfferOption(after.optionId);
+  } else {
+    await recomputeOfferTotals(after.offerId);
+  }
   await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "OfferLine", entityId: lineId, message: "Ligne diverse modifiée", before, after });
   revalidatePath(`/offers/${after.offerId}`);
 }
@@ -400,7 +409,11 @@ export async function deleteLine(lineId: string) {
   await assertLineEditable(lineId);
   const before = await prisma.offerLine.findUniqueOrThrow({ where: { id: lineId } });
   const line = await prisma.offerLine.delete({ where: { id: lineId } });
-  await recomputeOfferTotals(line.offerId);
+  if (line.optionId) {
+    await recomputeOfferOption(line.optionId);
+  } else {
+    await recomputeOfferTotals(line.offerId);
+  }
   await logActivity({ actorId: session.user.id, action: "DELETE", entityType: "OfferLine", entityId: lineId, message: "Ligne supprimée", before });
   revalidatePath(`/offers/${line.offerId}`);
 }
