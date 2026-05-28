@@ -189,9 +189,12 @@ export function CurrentMonthPanel({
       (r.recurring.isIncome ? inc : exp).push(item);
     }
 
-    // OneOffs (kind = INCOME, EXPENSE, COMMITMENT — pas SIMULATION car pas suivi réel)
+    // OneOffs : seules les entrées RÉELLES apparaissent dans la vue mensuelle.
+    // Les simulations (SIMULATION = dépense what-if, SIMULATION_INCOME = recette
+    // hypothétique) sont strictement réservées à la grille annuelle, où elles
+    // peuvent être togglées via "Inclure simulations". Ici on ne les voit jamais.
     for (const o of oneOffs) {
-      if (o.kind === "SIMULATION") continue;
+      if (o.kind === "SIMULATION" || o.kind === "SIMULATION_INCOME") continue;
       if (o.status === "SKIPPED") continue;
       const item: UnifiedItem = {
         key: `o-${o.id}`,
