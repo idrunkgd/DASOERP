@@ -3,8 +3,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Dasolabs ERP",
-  description: "Outil interne Dasolabs - gestion commerciale, projets, temps et charge"
+  title: "Dasohub",
+  description: "Dasohub — pilotage commercial, projets, temps et trésorerie"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

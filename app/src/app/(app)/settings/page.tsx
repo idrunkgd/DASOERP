@@ -11,7 +11,7 @@ export default async function SettingsPage() {
   const company = await getCompanyInfo();
   return (
     <div>
-      <PageHeader title="Paramètres" subtitle="Configuration globale Dasolabs ERP" />
+      <PageHeader title="Paramètres" subtitle="Configuration globale Dasohub" />
       <div className="grid lg:grid-cols-2 gap-6">
         <Link href="/settings/company" className="card p-5 hover:border-indigoaccent transition-colors group">
           <div className="flex items-start justify-between mb-3">

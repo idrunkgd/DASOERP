@@ -46,7 +46,7 @@ function LoginForm() {
     <div className="w-full max-w-md card p-8">
       <div className="flex flex-col items-center mb-6">
         <Image src="/dasolabs-icon.svg" alt="Dasolabs" width={56} height={70} priority />
-        <h1 className="mt-4 text-xl font-semibold text-midnight-900">Dasolabs ERP</h1>
+        <h1 className="mt-4 text-xl font-semibold text-midnight-900">Dasohub</h1>
         <p className="text-sm text-midnight-500 mt-1">Connexion à votre espace</p>
       </div>
       <form onSubmit={onSubmit} className="space-y-4">

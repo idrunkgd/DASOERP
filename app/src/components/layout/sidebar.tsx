@@ -127,7 +127,7 @@ export function Sidebar({
             <Image src="/dasolabs-icon.svg" alt="" width={26} height={32} />
           </div>
           <div className="flex-1">
-            <div className="text-sm font-semibold text-white">Dasolabs</div>
+            <div className="text-sm font-semibold text-white">Dasohub</div>
             <div className="text-[11px] text-midnight-300 -mt-0.5">Espace personnel</div>
           </div>
           {closeButton}
@@ -157,8 +157,8 @@ export function Sidebar({
           <Image src="/dasolabs-icon.svg" alt="" width={26} height={32} />
         </div>
         <div className="flex-1">
-          <div className="text-sm font-semibold text-white">Dasolabs</div>
-          <div className="text-[11px] text-midnight-300 -mt-0.5">ERP interne</div>
+          <div className="text-sm font-semibold text-white">Dasohub</div>
+          <div className="text-[11px] text-midnight-300 -mt-0.5">Pilotage Dasolabs</div>
         </div>
         {closeButton}
       </div>

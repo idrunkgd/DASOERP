@@ -378,8 +378,8 @@ export function OfferPdfDocument({
     <Document
       title={`Devis ${data.reference}`}
       author={company.legalName}
-      creator="Dasolabs ERP"
-      producer="Dasolabs ERP"
+      creator="Dasohub"
+      producer="Dasohub"
     >
       {/* ═════════════════════════════════════════════════════════
           PAGE 1 — Introduction + Description
