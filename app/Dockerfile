@@ -58,5 +58,7 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1
 
-# Appliquer migrations Prisma au démarrage puis lancer Next standalone
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+# Appliquer migrations Prisma au démarrage puis lancer Next standalone.
+# IMPORTANT : pin de la version 5.22 — sans ça, npx télécharge la dernière
+# (Prisma 7+) qui a une API incompatible avec notre schema (url = env(...)).
+CMD ["sh", "-c", "npx prisma@5.22.0 migrate deploy && node server.js"]
