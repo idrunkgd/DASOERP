@@ -14,6 +14,8 @@ export async function GET(req: NextRequest) {
   await requirePermission("offers.read");
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return new Response("Missing id", { status: 400 });
+  // ?inline=1 → afficher dans le navigateur ; sinon → forcer téléchargement
+  const inline = req.nextUrl.searchParams.get("inline") === "1";
 
   const offer = await prisma.offer.findUnique({
     where: { id },
@@ -78,16 +80,23 @@ export async function GET(req: NextRequest) {
     const buffer = await renderToBuffer(
       React.createElement(OfferPdfDocument, { data, companyInfo })
     );
-    return new Response(buffer, {
+    // Conversion en Uint8Array pour que Next.js / fetch streame correctement
+    // le binaire (sinon certains navigateurs reçoivent le Buffer mal encodé).
+    const uint8 = new Uint8Array(buffer);
+    const disposition = inline ? "inline" : "attachment";
+    return new Response(uint8, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${offer.reference}.pdf"`
+        "Content-Disposition": `${disposition}; filename="${offer.reference}.pdf"`,
+        "Content-Length": String(uint8.length),
+        "Cache-Control": "private, no-store"
       }
     });
   } catch (e: any) {
     console.error("PDF generation failed", e);
     return new Response(`PDF generation failed: ${String(e?.message ?? e)}`, {
-      status: 500
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8" }
     });
   }
 }

@@ -129,8 +129,22 @@ export default async function OfferDetail({ params }: { params: { id: string } }
           </div>
           <div className="card p-5 space-y-2 text-sm">
             <h3 className="font-semibold mb-2">Documents</h3>
-            <a href={`/api/exports/offer-pdf?id=${offer.id}`} className="btn-secondary w-full justify-center" target="_blank" rel="noopener noreferrer">Exporter le devis PDF</a>
-            <a href={`/api/exports/offer-csv?id=${offer.id}`} className="btn-ghost w-full justify-center">Export CSV lignes</a>
+            <a
+              href={`/api/exports/offer-pdf?id=${offer.id}`}
+              download={`${offer.reference}.pdf`}
+              className="btn-primary w-full justify-center"
+            >
+              Télécharger le devis PDF
+            </a>
+            <a
+              href={`/api/exports/offer-pdf?id=${offer.id}&inline=1`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost w-full justify-center text-xs"
+            >
+              Aperçu PDF (nouvel onglet)
+            </a>
+            <a href={`/api/exports/offer-csv?id=${offer.id}`} className="btn-ghost w-full justify-center text-xs">Export CSV lignes</a>
           </div>
         </aside>
       </div>
