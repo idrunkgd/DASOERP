@@ -22,7 +22,8 @@ type Result = {
     | "mission"
     | "candidate"
     | "consultant"
-    | "onboarding";
+    | "onboarding"
+    | "document";
   id: string;
   title: string;
   subtitle?: string;
@@ -358,6 +359,43 @@ export async function GET(req: NextRequest) {
       })
     );
   }
+
+  // ── Documents (tout user connecté peut chercher) ─────────────────────────
+  // On ne renvoie que les "anchors" (V1 racine) — les versions ultérieures
+  // se trouvent via la fiche.
+  const whereDoc = buildAndOfOr(words, (w) => [
+    { title: { contains: w, mode: "insensitive" as const } },
+    { originalName: { contains: w, mode: "insensitive" as const } },
+    { description: { contains: w, mode: "insensitive" as const } },
+    { tags: { has: w } }
+  ]);
+  const docs = await prisma.document.findMany({
+    where: { AND: [whereDoc, { parentDocumentId: null }] },
+    take: LIMIT,
+    orderBy: { createdAt: "desc" },
+    include: {
+      company: { select: { name: true } },
+      project: { select: { reference: true } },
+      offer: { select: { reference: true } }
+    }
+  });
+  docs.forEach((d) => {
+    const sub = [
+      d.tags.slice(0, 2).join(" · "),
+      d.company?.name,
+      d.project?.reference,
+      d.offer?.reference
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    results.push({
+      type: "document",
+      id: d.id,
+      title: d.title,
+      subtitle: sub || d.originalName,
+      href: `/documents/${d.id}`
+    });
+  });
 
   // ── Onboardings actifs (par nom du user) ─────────────────────────────────
   if (has("users.manage") || has("consulting.read")) {

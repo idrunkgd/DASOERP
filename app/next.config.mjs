@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: { serverActions: { bodySizeLimit: '4mb' } },
+  // 50mb : nécessaire pour le module Documents qui accepte des uploads
+  // jusqu'à 50 MB côté server action. Check fin aussi dans l'action.
+  experimental: { serverActions: { bodySizeLimit: '50mb' } },
 
   // 'standalone' : Next produit un dossier .next/standalone autonome
   // avec server.js + node_modules nécessaires uniquement. Permet une image

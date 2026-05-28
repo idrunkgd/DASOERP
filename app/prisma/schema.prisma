@@ -270,6 +270,9 @@ model User {
   onboardingsCreated     Onboarding[]     @relation("OnboardingCreator")
   onboardingItemsOwned   OnboardingItem[] @relation("OnboardingItemOwner")
   onboardingItemsDone    OnboardingItem[] @relation("OnboardingItemDoneBy")
+  // Documents
+  documentsUploaded      Document[]       @relation("DocumentUploader")
+  documentsAsConsultant  Document[]       @relation("DocumentConsultant")
   projectMemberships  ProjectMember[]
   timesheetEntries    TimesheetEntry[]   @relation("TimesheetUser")
   validatedTimesheets TimesheetEntry[]   @relation("TimesheetValidator")
@@ -379,6 +382,8 @@ model Company {
   opportunities Opportunity[]              @relation("CompanyOpportunities")
   // Factures fournisseurs reçues de cette société (test feature)
   supplierInvoicesIssued SupplierInvoice[] @relation("CompanySupplierInvoices")
+  // Documents rattachés à cette entreprise (contrats, NDAs, ...)
+  documents              Document[]        @relation("DocumentCompany")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -493,6 +498,8 @@ model Offer {
   milestones         BillingMilestone[]
   attachments        Attachment[]        @relation("OfferAttachments")
   project            Project?
+  // Documents rattachés à cette offre (proposition signée, annexes...)
+  documents          Document[]          @relation("DocumentOffer")
 
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
@@ -662,6 +669,8 @@ model Project {
   attachments        Attachment[]   @relation("ProjectAttachments")
   reviews            ConsultantReview[] @relation("ProjectReviews")
   expenseReports     ExpenseReport[] @relation("ProjectExpenseReports")
+  // Documents rattachés au projet (livrables signés, spécifications, ...)
+  documents          Document[]     @relation("DocumentProject")
 
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
@@ -1594,3 +1603,56 @@ model OnboardingItem {
   @@index([ownerId, done])
 }
 
+// =============================================================
+// DOCUMENTS — DMS interne avec tags, expiration, versioning, liens entités
+// =============================================================
+//
+// Stockage physique : disque local du VPS, monté en volume Docker sur
+// /data/documents (override via env DOCS_STORAGE_PATH si besoin).
+// Chaque fichier vit dans /data/documents/<documentId>/<originalName>.
+// On stocke le chemin RELATIF dans storagePath ("<documentId>/<originalName>")
+// — comme ça on peut bouger la racine sans casser les liens.
+//
+// Versioning : V1 a parentDocumentId=null, V2/V3/Vn pointent vers V1.id.
+// La liste principale ne montre que les "anchors" (V1) — la fiche détail
+// affiche toutes les versions.
+model Document {
+  id            String   @id @default(cuid())
+  title         String
+  originalName  String
+  mimeType      String
+  size          Int      // octets
+  storagePath   String   // chemin relatif depuis DOCS_STORAGE_PATH
+  description   String?
+  tags          String[] @default([])
+  expiresAt     DateTime? @db.Date
+
+  // Liens optionnels vers entités
+  companyId    String?
+  company      Company? @relation("DocumentCompany", fields: [companyId], references: [id], onDelete: SetNull)
+  projectId    String?
+  project      Project? @relation("DocumentProject", fields: [projectId], references: [id], onDelete: SetNull)
+  offerId      String?
+  offer        Offer?   @relation("DocumentOffer",   fields: [offerId],   references: [id], onDelete: SetNull)
+  consultantId String?
+  consultant   User?    @relation("DocumentConsultant", fields: [consultantId], references: [id], onDelete: SetNull)
+
+  // Versioning : V1 = parent=null, V2/V3/Vn = parent=V1.id
+  parentDocumentId String?
+  parentDocument   Document?  @relation("DocumentVersions", fields: [parentDocumentId], references: [id], onDelete: SetNull)
+  versions         Document[] @relation("DocumentVersions")
+  version          Int        @default(1)
+
+  uploadedById String?
+  uploadedBy   User?    @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([projectId])
+  @@index([offerId])
+  @@index([consultantId])
+  @@index([parentDocumentId])
+  @@index([expiresAt])
+  @@index([createdAt])
+}

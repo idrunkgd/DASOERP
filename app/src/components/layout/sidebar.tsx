@@ -9,7 +9,7 @@ import {
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
-  AppWindow, GraduationCap
+  AppWindow, GraduationCap, Files
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -71,9 +71,10 @@ const SECTIONS: Section[] = [
   // (/test/expenses, /test/supplier-invoices, /test/cv-parser, /test/tva, /test/matching)
   // mais ne sont plus dans la navigation. CRM a été déplacé dans "Commerciale".
   {
-    label: "RH",
+    label: "RH & Documents",
     items: [
-      { href: "/onboarding", label: "Onboarding",     icon: GraduationCap, allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+      { href: "/onboarding", label: "Onboarding",     icon: GraduationCap, allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/documents",  label: "Documents",      icon: Files,         allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
     ]
   },
   {
