@@ -55,7 +55,10 @@ USER nextjs
 EXPOSE 3000
 
 # Healthcheck pour Coolify
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+# IMPORTANT : start-period long (3 min) parce qu'au démarrage on doit
+# télécharger Prisma 5.22 (npx), appliquer les migrations puis démarrer Next.
+# Avec 20s on tombait en timeout avant que Next soit prêt → rollback Coolify.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=180s --retries=5 \
   CMD wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 # Appliquer migrations Prisma au démarrage puis lancer Next standalone.
