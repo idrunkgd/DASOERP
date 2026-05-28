@@ -9,7 +9,7 @@ import {
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
-  AppWindow
+  AppWindow, GraduationCap, BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -70,6 +70,13 @@ const SECTIONS: Section[] = [
   // Section "Test (preview)" masquée — les pages restent accessibles par URL directe
   // (/test/expenses, /test/supplier-invoices, /test/cv-parser, /test/tva, /test/matching)
   // mais ne sont plus dans la navigation. CRM a été déplacé dans "Commerciale".
+  {
+    label: "RH & Knowledge",
+    items: [
+      { href: "/onboarding", label: "Onboarding",     icon: GraduationCap, allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/knowledge",  label: "Wiki interne",    icon: BookOpen,      allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+    ]
+  },
   {
     label: "Configuration",
     items: [

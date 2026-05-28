@@ -18,7 +18,9 @@ import {
   Headset,
   Plane,
   UserPlus,
-  Briefcase
+  Briefcase,
+  BookOpen,
+  GraduationCap
 } from "lucide-react";
 
 type Result = {
@@ -42,7 +44,9 @@ const TYPE_META: Record<
   demande:    { label: "Demandes",     icon: Headset,      color: "text-sky-500" },
   mission:    { label: "Missions",     icon: Plane,        color: "text-indigo-500" },
   candidate:  { label: "Candidats",    icon: UserPlus,     color: "text-pink-500" },
-  consultant: { label: "Consultants",  icon: Briefcase,    color: "text-indigoaccent" }
+  consultant: { label: "Consultants",  icon: Briefcase,    color: "text-indigoaccent" },
+  wiki:       { label: "Wiki",         icon: BookOpen,     color: "text-teal-500" },
+  onboarding: { label: "Onboarding",   icon: GraduationCap, color: "text-rose-500" }
 };
 
 // Ordre d'affichage des groupes (les types absents sont mis à la fin)
@@ -55,6 +59,8 @@ const TYPE_ORDER = [
   "mission",
   "candidate",
   "consultant",
+  "onboarding",
+  "wiki",
   "purchase",
   "user"
 ];

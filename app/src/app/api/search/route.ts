@@ -21,7 +21,9 @@ type Result = {
     | "demande"
     | "mission"
     | "candidate"
-    | "consultant";
+    | "consultant"
+    | "wiki"
+    | "onboarding";
   id: string;
   title: string;
   subtitle?: string;
@@ -354,6 +356,50 @@ export async function GET(req: NextRequest) {
           u.seniority ??
           (u.skills.length > 0 ? u.skills.slice(0, 3).join(" · ") : u.email),
         href: `/consultants/${u.id}`
+      })
+    );
+  }
+
+  // ── Wiki pages (accessibles à tout user connecté) ────────────────────────
+  const whereWiki = buildAndOfOr(words, (w) => [
+    { title: { contains: w, mode: "insensitive" as const } },
+    { body: { contains: w, mode: "insensitive" as const } },
+    { category: { contains: w, mode: "insensitive" as const } }
+  ]);
+  const wikis = await prisma.wikiPage.findMany({
+    where: whereWiki,
+    take: LIMIT,
+    orderBy: [{ pinned: "desc" }, { updatedAt: "desc" }]
+  });
+  wikis.forEach((p) =>
+    results.push({
+      type: "wiki",
+      id: p.id,
+      title: p.title,
+      subtitle: p.category ?? "Wiki",
+      href: `/knowledge/${p.slug}`
+    })
+  );
+
+  // ── Onboardings actifs (par nom du user) ─────────────────────────────────
+  if (has("users.manage") || has("consulting.read")) {
+    const whereOnb = buildAndOfOr(words, (w) => [
+      { user: { firstName: { contains: w, mode: "insensitive" as const } } },
+      { user: { lastName: { contains: w, mode: "insensitive" as const } } }
+    ]);
+    const obs = await prisma.onboarding.findMany({
+      where: { AND: [whereOnb, { status: { in: ["IN_PROGRESS", "DONE"] } }] },
+      include: { user: { select: { firstName: true, lastName: true, role: true } } },
+      take: LIMIT,
+      orderBy: { startDate: "desc" }
+    });
+    obs.forEach((ob) =>
+      results.push({
+        type: "onboarding",
+        id: ob.id,
+        title: `${ob.user.firstName} ${ob.user.lastName}`,
+        subtitle: `Onboarding · ${ob.user.role}${ob.status === "DONE" ? " · terminé" : ""}`,
+        href: `/onboarding/${ob.userId}`
       })
     );
   }

@@ -265,6 +265,14 @@ model User {
   recurringExpensesCreated RecurringExpense[] @relation("RecurringExpenseCreator")
   oneOffCashflowEntriesCreated OneOffCashflowEntry[] @relation("OneOffCashflowCreator")
   appLinksCreated     AppLink[]          @relation("AppLinkCreator")
+  // Onboarding (l'instance de ce user, si présente)
+  onboarding             Onboarding?      @relation("UserOnboarding")
+  onboardingsCreated     Onboarding[]     @relation("OnboardingCreator")
+  onboardingItemsOwned   OnboardingItem[] @relation("OnboardingItemOwner")
+  onboardingItemsDone    OnboardingItem[] @relation("OnboardingItemDoneBy")
+  // Wiki
+  wikiPagesAuthored      WikiPage[]       @relation("WikiPageAuthor")
+  wikiPagesUpdated       WikiPage[]       @relation("WikiPageUpdater")
   projectMemberships  ProjectMember[]
   timesheetEntries    TimesheetEntry[]   @relation("TimesheetUser")
   validatedTimesheets TimesheetEntry[]   @relation("TimesheetValidator")
@@ -1502,4 +1510,117 @@ model AppLink {
   createdBy   User?    @relation("AppLinkCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([position])
+}
+
+// =============================================================
+// ONBOARDING — checklists d'arrivée par user, templatables par rôle
+// =============================================================
+
+/// Template de checklist d'onboarding. Plusieurs peuvent coexister, on choisit
+/// celui correspondant au rôle du nouvel user (sinon le générique sans rôle).
+model OnboardingTemplate {
+  id            String                   @id @default(cuid())
+  name          String                   @unique
+  /// Rôle ciblé (null = template générique pour tout rôle non couvert)
+  role          Role?
+  description   String?
+  active        Boolean                  @default(true)
+  /// Décalages en jours des entretiens auto-créés depuis la startDate.
+  /// Défaut [1, 30, 90, 180] = kick-off, mois 1, trimestre, semestre.
+  reviewOffsets Int[]                    @default([1, 30, 90, 180])
+  items         OnboardingTemplateItem[]
+  onboardings   Onboarding[]
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+}
+
+model OnboardingTemplateItem {
+  id               String             @id @default(cuid())
+  templateId       String
+  template         OnboardingTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  category         String             // "Administratif" / "IT" / "Formation" / "Intégration équipe"
+  title            String
+  description      String?
+  /// Rôle "responsable par défaut" de l'item (qui doit le faire). Sera
+  /// résolu à un user concret lors de l'instanciation si possible.
+  defaultOwnerRole Role?
+  /// Décalage en jours par rapport à la startDate de l'onboarding.
+  /// Négatif = avant l'arrivée (ex: J-7 pour commander le laptop).
+  daysOffset       Int                @default(0)
+  position         Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([templateId, position])
+}
+
+/// Instance d'onboarding pour un user concret. Créée auto à la création
+/// du user (si un template matchant son rôle existe) ou manuellement.
+model Onboarding {
+  id          String             @id @default(cuid())
+  /// Un seul onboarding actif par user — d'où le @unique.
+  userId      String             @unique
+  user        User               @relation("UserOnboarding", fields: [userId], references: [id], onDelete: Cascade)
+  templateId  String?
+  template    OnboardingTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  startDate   DateTime           @db.Date
+  status      String             @default("IN_PROGRESS") // IN_PROGRESS / DONE / ARCHIVED
+  notes       String?
+  items       OnboardingItem[]
+  createdById String?
+  createdBy   User?              @relation("OnboardingCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([status])
+}
+
+model OnboardingItem {
+  id           String     @id @default(cuid())
+  onboardingId String
+  onboarding   Onboarding @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  category     String
+  title        String
+  description  String?
+  position     Int        @default(0)
+  ownerId      String?
+  owner        User?      @relation("OnboardingItemOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  dueDate      DateTime?  @db.Date
+  done         Boolean    @default(false)
+  doneAt       DateTime?
+  doneById     String?
+  doneBy       User?      @relation("OnboardingItemDoneBy", fields: [doneById], references: [id], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([onboardingId, position])
+  @@index([ownerId, done])
+}
+
+// =============================================================
+// WIKI / KNOWLEDGE BASE — pages markdown internes
+// =============================================================
+
+/// Page de wiki interne (procédures, méthodes, templates RH/IT).
+/// Stocké en markdown brut, rendu côté client. Recherchable via Cmd+K.
+model WikiPage {
+  id          String   @id @default(cuid())
+  /// Slug URL-friendly unique (généré depuis le titre, modifiable).
+  slug        String   @unique
+  title       String
+  /// Corps markdown brut.
+  body        String
+  /// Tag catégorie libre — "Process RH", "Procédures IT", "Méthodes"…
+  category    String?
+  /// Épinglée en haut de la liste.
+  pinned      Boolean  @default(false)
+  authorId    String?
+  author      User?    @relation("WikiPageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?    @relation("WikiPageUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([pinned, updatedAt])
 }
