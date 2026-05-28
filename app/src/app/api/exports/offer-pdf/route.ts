@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
         include: { lines: { orderBy: { position: "asc" } } },
         orderBy: { position: "asc" }
       },
-      milestones: { orderBy: { expectedAt: "asc" } },
+      // Même ordre que sur la page offre (par date de création = ordre de saisie)
+      milestones: { orderBy: { createdAt: "asc" } },
       owner: true,
       contacts: {
         include: { contact: true }

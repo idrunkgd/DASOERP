@@ -24,7 +24,8 @@ export default async function OfferDetail({ params }: { params: { id: string } }
         include: { lines: { orderBy: { position: "asc" } } },
         orderBy: { position: "asc" }
       },
-      milestones: { orderBy: { expectedAt: "asc" } },
+      // Tri par createdAt pour respecter l'ordre de saisie par l'utilisateur
+      milestones: { orderBy: { createdAt: "asc" } },
       project: true,
       parentOffer: { select: { id: true, reference: true, title: true } },
       complements: { select: { id: true, reference: true, title: true, status: true, totalSell: true }, orderBy: { reference: "asc" } },
