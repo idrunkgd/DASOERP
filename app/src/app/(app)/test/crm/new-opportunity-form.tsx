@@ -58,7 +58,7 @@ export function NewOpportunityForm({
     start(async () => {
       try {
         await createOpportunity(formData);
-        toast.success("Opportunité créée");
+        toast.success("Affaire créée");
         setOpen(false);
         setKind("CONSULTING");
         setCompanyId("");
@@ -73,7 +73,7 @@ export function NewOpportunityForm({
     return (
       <button onClick={() => setOpen(true)} className="btn-primary text-sm">
         <Plus className="w-4 h-4" />
-        Ajouter une opportunité
+        Ajouter une affaire
       </button>
     );
   }

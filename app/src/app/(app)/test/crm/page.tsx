@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { NewOpportunityForm } from "./new-opportunity-form";
 import { OpportunityCard } from "./opportunity-card";
-import { Lightbulb, Headset, FolderKanban, ChevronRight } from "lucide-react";
+import { Headset, FolderKanban, ChevronRight, FileText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,18 +16,27 @@ const STAGES = [
   { key: "NEGOTIATING", label: "Négociation", color: "bg-purple-50", hiddenByDefault: false },
   { key: "WON", label: "Gagné", color: "bg-emerald-50", hiddenByDefault: false },
   { key: "LOST", label: "Perdu", color: "bg-red-50", hiddenByDefault: false },
-  // Annulé : masqué par défaut (besoin disparu, projet gelé… différent de "perdu")
   { key: "CANCELLED", label: "Annulé", color: "bg-midnight-200", hiddenByDefault: true }
 ] as const;
 
 type Stage = (typeof STAGES)[number]["key"];
+type BusinessType = "CONSULTING" | "PROJECT";
 
-// Item unifié pour le kanban — opportunity, mission request, ou project
+/**
+ * Source d'une carte du pipeline. Plusieurs entités peuvent peupler le pipeline :
+ *  - "opportunity" : prospect en cours de qualification (table Opportunity)
+ *  - "mission-request" : demande client de consultance (table MissionRequest)
+ *  - "offer" : devis envoyé/négocié (table Offer)
+ *  - "project" : projet en exécution (table Project, mode forfait)
+ */
+type SourceKind = "opportunity" | "mission-request" | "offer" | "project";
+
+// Item unifié pour le kanban
 type UnifiedItem = {
   id: string;
-  kind: "opportunity" | "mission-request" | "project";
-  /// Pour les opportunities : CONSULTING ou PROJECT. Pour les autres : non utilisé.
-  oppType?: "CONSULTING" | "PROJECT" | null;
+  source: SourceKind;
+  /// Type de business : Consultance (T&M) ou Projet (forfait) — c'est l'info montrée à l'utilisateur
+  businessType: BusinessType;
   title: string;
   companyName: string | null;
   ownerName: string | null;
@@ -36,30 +45,37 @@ type UnifiedItem = {
   stage: Stage;
   expectedCloseAt: string | null;
   lostReason: string | null;
+  /// Lien vers la page de détail (vide pour les opportunités qui sont éditées inline)
   href: string;
 };
 
 // Mapping : statut MissionRequest → stage CRM
 function missionRequestToStage(status: string): Stage | null {
   switch (status) {
-    case "NEW":
-      return "NEW";
-    case "QUALIFYING":
-      return "QUALIFIED";
-    case "PRESENTING":
-      return "PROPOSED";
-    case "CONTRACTED":
-      return "WON";
-    case "LOST":
-      return "LOST";
-    case "CANCELLED":
-      return "CANCELLED";
-    default:
-      return null;
+    case "NEW": return "NEW";
+    case "QUALIFYING": return "QUALIFIED";
+    case "PRESENTING": return "PROPOSED";
+    case "CONTRACTED": return "WON";
+    case "LOST": return "LOST";
+    case "CANCELLED": return "CANCELLED";
+    default: return null;
   }
 }
 
-// Mapping : statut Project → stage CRM (les projets sont déjà engagés, donc WON ou CANCELLED)
+// Mapping : statut Offer → stage CRM (DRAFT/SENT/NEGOTIATION/WON/LOST/CANCELLED)
+function offerToStage(status: string): Stage | null {
+  switch (status) {
+    case "DRAFT": return "NEW";
+    case "SENT": return "PROPOSED";
+    case "NEGOTIATION": return "NEGOTIATING";
+    case "WON": return "WON";
+    case "LOST": return "LOST";
+    case "CANCELLED": return "CANCELLED";
+    default: return null;
+  }
+}
+
+// Mapping : statut Project → stage CRM (les projets sont déjà engagés)
 function projectToStage(status: string): Stage | null {
   switch (status) {
     case "TO_START":
@@ -82,7 +98,7 @@ export default async function CrmPage({
   const session = await requireSession();
   const showCancelled = searchParams.showCancelled === "1";
 
-  const [opportunities, missionRequests, projects, companies, contacts, owners] = await Promise.all([
+  const [opportunities, missionRequests, offers, projects, companies, contacts, owners] = await Promise.all([
     prisma.opportunity.findMany({
       include: {
         company: { select: { id: true, name: true } },
@@ -91,6 +107,15 @@ export default async function CrmPage({
       orderBy: [{ stage: "asc" }, { updatedAt: "desc" }]
     }),
     prisma.missionRequest.findMany({
+      include: {
+        company: { select: { id: true, name: true } },
+        owner: { select: { id: true, firstName: true, lastName: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.offer.findMany({
+      // On exclut les complements/anciennes versions pour ne pas dupliquer
+      where: { parentOfferId: null, nextVersion: null },
       include: {
         company: { select: { id: true, name: true } },
         owner: { select: { id: true, firstName: true, lastName: true } }
@@ -112,17 +137,11 @@ export default async function CrmPage({
       where: { status: "ACTIVE" },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
       select: {
-        id: true,
-        companyId: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        jobTitle: true
+        id: true, companyId: true,
+        firstName: true, lastName: true,
+        email: true, phone: true, jobTitle: true
       }
     }),
-    // Tous les users actifs (pas seulement ADMIN/COMMERCIAL/MANAGER) — un consultant
-    // impliqué peut tout à fait être owner d'une opportunité
     prisma.user.findMany({
       where: { active: true },
       orderBy: [{ role: "asc" }, { lastName: "asc" }],
@@ -136,10 +155,9 @@ export default async function CrmPage({
   for (const o of opportunities) {
     unified.push({
       id: o.id,
-      kind: "opportunity",
-      oppType: (o as any).kind ?? "CONSULTING",
+      source: "opportunity",
+      businessType: ((o as any).kind ?? "CONSULTING") as BusinessType,
       title: o.title,
-      // Société sélectionnée OU fallback sur l'ancien champ libre (compat anciennes opps)
       companyName: o.company?.name ?? o.prospectName ?? null,
       ownerName: o.owner ? `${o.owner.firstName} ${o.owner.lastName}` : null,
       estimatedValue: Number(o.estimatedValue),
@@ -154,14 +172,14 @@ export default async function CrmPage({
   for (const r of missionRequests) {
     const stage = missionRequestToStage(r.status);
     if (!stage) continue;
-    // Valeur estimée = TJM × jours estimés
     const value =
       r.targetDailyRate && r.estimatedDays
         ? Number(r.targetDailyRate) * r.estimatedDays
         : 0;
     unified.push({
       id: r.id,
-      kind: "mission-request",
+      source: "mission-request",
+      businessType: "CONSULTING",
       title: `${r.reference} — ${r.title}`,
       companyName: r.company?.name ?? null,
       ownerName: r.owner ? `${r.owner.firstName} ${r.owner.lastName}` : null,
@@ -174,12 +192,35 @@ export default async function CrmPage({
     });
   }
 
+  for (const offer of offers) {
+    const stage = offerToStage(offer.status);
+    if (!stage) continue;
+    unified.push({
+      id: offer.id,
+      source: "offer",
+      businessType: (offer.mode as BusinessType) ?? "PROJECT",
+      title: `${offer.reference} — ${offer.title}`,
+      companyName: offer.company?.name ?? null,
+      ownerName: offer.owner ? `${offer.owner.firstName} ${offer.owner.lastName}` : null,
+      estimatedValue: Number(offer.totalSell),
+      probability:
+        stage === "WON" ? 100 : stage === "LOST" || stage === "CANCELLED" ? 0 : offer.probability,
+      stage,
+      expectedCloseAt: offer.expectedDecisionAt ? formatDate(offer.expectedDecisionAt) : null,
+      lostReason: null,
+      href: `/offers/${offer.id}`
+    });
+  }
+
   for (const p of projects) {
     const stage = projectToStage(p.status);
     if (!stage) continue;
+    // On évite de doubler avec Offer si le project est lié à un offer déjà compté
+    if (p.offerId && offers.some((o) => o.id === p.offerId)) continue;
     unified.push({
       id: p.id,
-      kind: "project",
+      source: "project",
+      businessType: (p.mode as BusinessType) ?? "PROJECT",
       title: `${p.reference} — ${p.name}`,
       companyName: p.company?.name ?? null,
       ownerName: p.manager ? `${p.manager.firstName} ${p.manager.lastName}` : null,
@@ -192,85 +233,79 @@ export default async function CrmPage({
     });
   }
 
-  // KPIs : carnet pondéré (pipeline value) hors WON/LOST/CANCELLED — sur les opportunities pures
-  // car les MissionRequest/Project ont leur propre cycle de vie
-  const openOpps = opportunities.filter((o) => {
-    const s = o.stage as string;
-    return s !== "WON" && s !== "LOST" && s !== "CANCELLED";
-  });
-  const weightedValue = openOpps.reduce(
-    (s, o) => s + (Number(o.estimatedValue) * o.probability) / 100,
+  // KPIs sur l'ensemble unifié (hors WON/LOST/CANCELLED)
+  const openItems = unified.filter((u) => !["WON", "LOST", "CANCELLED"].includes(u.stage));
+  const weightedValue = openItems.reduce(
+    (s, u) => s + (u.estimatedValue * u.probability) / 100,
     0
   );
-  const grossPipeline = openOpps.reduce((s, o) => s + Number(o.estimatedValue), 0);
+  const grossPipeline = openItems.reduce((s, u) => s + u.estimatedValue, 0);
+  const currentYear = new Date().getUTCFullYear();
   const wonYtd = unified
-    .filter(
-      (u) =>
-        u.stage === "WON" &&
-        // pour les opportunities, on filtre par closedAt ; pour les autres, on prend tout
-        (u.kind !== "opportunity" ||
-          opportunities.find(
-            (o) => o.id === u.id && o.closedAt && o.closedAt.getUTCFullYear() === new Date().getUTCFullYear()
-          ))
-    )
+    .filter((u) => u.stage === "WON")
     .reduce((s, u) => s + u.estimatedValue, 0);
   const winRate = (() => {
-    const closedOpps = opportunities.filter((o) => o.stage === "WON" || o.stage === "LOST");
-    if (closedOpps.length === 0) return 0;
-    const won = closedOpps.filter((o) => o.stage === "WON").length;
-    return (won / closedOpps.length) * 100;
+    const closed = unified.filter((u) => u.stage === "WON" || u.stage === "LOST");
+    if (closed.length === 0) return 0;
+    const won = closed.filter((u) => u.stage === "WON").length;
+    return (won / closed.length) * 100;
   })();
 
-  // Compteurs par type pour info
-  const counts = {
-    opportunity: unified.filter((u) => u.kind === "opportunity").length,
-    "mission-request": unified.filter((u) => u.kind === "mission-request").length,
-    project: unified.filter((u) => u.kind === "project").length
-  };
+  // Compteurs par type d'affaire (Consultance / Projet)
+  const consultingCount = unified.filter((u) => u.businessType === "CONSULTING").length;
+  const projectCount = unified.filter((u) => u.businessType === "PROJECT").length;
 
   return (
     <div>
       <PageHeader
-        title="CRM — pipeline global"
-        subtitle="Opportunités, demandes de mission (consultance) et projets (forfait) dans un seul tableau"
+        title="CRM — pipeline commercial"
+        subtitle="Affaires de consultance (T&M) et projets (forfait) — toutes sources confondues"
       />
 
       <div className="grid md:grid-cols-4 gap-3 mb-6">
         <Kpi
-          label="Pipeline brut (opps)"
+          label="Pipeline brut"
           value={formatCurrency(grossPipeline)}
-          sub={`${openOpps.length} opps ouvertes`}
+          sub={`${openItems.length} affaires ouvertes`}
         />
         <Kpi
-          label="Carnet pondéré (opps)"
+          label="Carnet pondéré"
           value={formatCurrency(weightedValue)}
           sub="Σ (valeur × proba)"
           tone="ok"
         />
-        <Kpi label="Gagné YTD" value={formatCurrency(wonYtd)} sub="Tous types confondus" tone="ok" />
-        <Kpi label="Taux conversion opps" value={`${winRate.toFixed(0)}%`} sub="WON / (WON+LOST)" />
+        <Kpi
+          label="Gagné YTD"
+          value={formatCurrency(wonYtd)}
+          sub="Tous types confondus"
+          tone="ok"
+        />
+        <Kpi
+          label="Taux de conversion"
+          value={`${winRate.toFixed(0)}%`}
+          sub="WON / (WON+LOST)"
+        />
       </div>
 
-      {/* Légende */}
+      {/* Légende — uniquement les deux types business */}
       <div className="card p-3 mb-6 flex flex-wrap gap-x-6 gap-y-1 text-xs">
         <span className="text-midnight-500 font-medium">Légende :</span>
         <span className="flex items-center gap-1">
-          <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-          Opportunité ({counts.opportunity})
-        </span>
-        <span className="flex items-center gap-1">
           <Headset className="w-3.5 h-3.5 text-blue-500" />
-          Demande mission ({counts["mission-request"]})
+          Consultance (T&M) — {consultingCount}
         </span>
         <span className="flex items-center gap-1">
           <FolderKanban className="w-3.5 h-3.5 text-violet-500" />
-          Projet forfait ({counts.project})
+          Projet (forfait) — {projectCount}
+        </span>
+        <span className="ml-auto text-[10px] text-midnight-400">
+          Sources : prospects + demandes de mission + devis + projets
         </span>
       </div>
 
-      {/* Formulaire de création d'opportunité */}
+      {/* Formulaire de création — affaire commerciale (Consultance ou Projet) */}
       <div className="card mb-6">
-        <div className="card-header font-semibold">Nouvelle opportunité</div>
+        <div className="card-header font-semibold">Nouvelle affaire</div>
         <div className="p-4">
           <NewOpportunityForm
             companies={companies}
@@ -284,17 +319,11 @@ export default async function CrmPage({
       {/* Toggle affichage du stage CANCELLED */}
       <div className="flex justify-end mb-2">
         {showCancelled ? (
-          <Link
-            href="/test/crm"
-            className="text-xs text-midnight-500 hover:text-midnight-900 underline"
-          >
+          <Link href="/test/crm" className="text-xs text-midnight-500 hover:text-midnight-900 underline">
             Masquer la colonne « Annulé »
           </Link>
         ) : (
-          <Link
-            href="/test/crm?showCancelled=1"
-            className="text-xs text-midnight-500 hover:text-midnight-900 underline"
-          >
+          <Link href="/test/crm?showCancelled=1" className="text-xs text-midnight-500 hover:text-midnight-900 underline">
             Afficher la colonne « Annulé »
             {unified.filter((u) => u.stage === "CANCELLED").length > 0 && (
               <span className="ml-1 text-midnight-400">
@@ -323,9 +352,9 @@ export default async function CrmPage({
                   <div className="text-center text-xs text-midnight-400 py-4">—</div>
                 ) : (
                   items.map((item) =>
-                    item.kind === "opportunity" ? (
+                    item.source === "opportunity" ? (
                       <div key={`opp-${item.id}`} className="relative">
-                        <KindBadge kind={item.kind} oppType={item.oppType ?? "CONSULTING"} />
+                        <TypeBadge businessType={item.businessType} source={item.source} />
                         <OpportunityCard
                           opp={{
                             id: item.id,
@@ -341,7 +370,7 @@ export default async function CrmPage({
                         />
                       </div>
                     ) : (
-                      <ReadOnlyCard key={`${item.kind}-${item.id}`} item={item} />
+                      <ReadOnlyCard key={`${item.source}-${item.id}`} item={item} />
                     )
                   )
                 )}
@@ -354,65 +383,53 @@ export default async function CrmPage({
   );
 }
 
-// Badge en haut à droite des cartes Opportunity — change selon le type (Consultance/Projet)
-function KindBadge({
-  kind,
-  oppType
+// Badge en haut à droite des cartes — basé sur le type d'affaire
+function TypeBadge({
+  businessType,
+  source
 }: {
-  kind: UnifiedItem["kind"];
-  oppType: "CONSULTING" | "PROJECT";
+  businessType: BusinessType;
+  source: SourceKind;
 }) {
-  // Pour les opportunities : icône qui matche le type (Headset pour consultance, FolderKanban pour projet)
-  // Pour les autres : icône liée à leur nature
-  let Icon: any;
-  let color: string;
-  if (kind === "opportunity") {
-    Icon = oppType === "CONSULTING" ? Headset : FolderKanban;
-    color = oppType === "CONSULTING" ? "text-blue-500" : "text-violet-500";
-  } else if (kind === "mission-request") {
-    Icon = Headset;
-    color = "text-blue-500";
-  } else {
-    Icon = FolderKanban;
-    color = "text-violet-500";
-  }
+  const Icon = businessType === "CONSULTING" ? Headset : FolderKanban;
+  const color = businessType === "CONSULTING" ? "text-blue-500" : "text-violet-500";
   return (
     <Icon
       className={`absolute top-1.5 right-1.5 w-3.5 h-3.5 ${color} z-10`}
-      aria-label={kind === "opportunity" ? `opportunity-${oppType.toLowerCase()}` : kind}
+      aria-label={`${businessType.toLowerCase()}-${source}`}
     />
   );
 }
 
-// Carte read-only pour MissionRequest / Project — pas de boutons d'avancement
-// (l'utilisateur les édite sur leur page propre)
+// Carte read-only pour MissionRequest / Offer / Project — pas de boutons d'avancement
 function ReadOnlyCard({ item }: { item: UnifiedItem }) {
-  const Icon =
-    item.kind === "mission-request" ? Headset : FolderKanban;
-  const color =
-    item.kind === "mission-request" ? "text-blue-500" : "text-violet-500";
-  const borderColor =
-    item.kind === "mission-request"
-      ? "border-blue-200"
-      : "border-violet-200";
+  const Icon = item.businessType === "CONSULTING" ? Headset : FolderKanban;
+  const color = item.businessType === "CONSULTING" ? "text-blue-500" : "text-violet-500";
+  const borderColor = item.businessType === "CONSULTING" ? "border-blue-200" : "border-violet-200";
+  // Petit badge texte pour identifier la source (Demande / Devis / Projet)
+  const sourceLabel =
+    item.source === "mission-request"
+      ? "Demande"
+      : item.source === "offer"
+        ? "Devis"
+        : "Projet";
   return (
     <Link
       href={item.href}
       className={`block bg-white rounded-md shadow-sm border ${borderColor} p-2.5 text-xs space-y-1.5 hover:shadow-md transition-shadow relative`}
     >
-      <Icon
-        className={`absolute top-1.5 right-1.5 w-3.5 h-3.5 ${color}`}
-        aria-label={item.kind}
-      />
+      <Icon className={`absolute top-1.5 right-1.5 w-3.5 h-3.5 ${color}`} aria-label={item.businessType} />
+      <div className="flex items-baseline gap-2 pr-4">
+        <span className="text-[9px] uppercase tracking-wider text-midnight-400 font-semibold">
+          {sourceLabel}
+        </span>
+        {item.source === "offer" && <FileText className="w-3 h-3 text-midnight-400" />}
+      </div>
       <div className="font-medium text-midnight-900 pr-4">{item.title}</div>
       {item.companyName && <div className="text-[11px] text-midnight-600">{item.companyName}</div>}
       <div className="flex items-baseline justify-between text-[11px]">
-        <span className="font-semibold text-midnight-800">
-          {formatCurrency(item.estimatedValue)}
-        </span>
-        {item.expectedCloseAt && (
-          <span className="text-midnight-500">{item.expectedCloseAt}</span>
-        )}
+        <span className="font-semibold text-midnight-800">{formatCurrency(item.estimatedValue)}</span>
+        {item.expectedCloseAt && <span className="text-midnight-500">{item.expectedCloseAt}</span>}
       </div>
       {item.ownerName && (
         <div className="text-[10px] text-midnight-500">Owner : {item.ownerName}</div>
