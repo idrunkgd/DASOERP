@@ -264,6 +264,7 @@ model User {
   cashflowSettingsUpdates CashflowSettings[] @relation("CashflowSettingsUpdater")
   recurringExpensesCreated RecurringExpense[] @relation("RecurringExpenseCreator")
   oneOffCashflowEntriesCreated OneOffCashflowEntry[] @relation("OneOffCashflowCreator")
+  appLinksCreated     AppLink[]          @relation("AppLinkCreator")
   projectMemberships  ProjectMember[]
   timesheetEntries    TimesheetEntry[]   @relation("TimesheetUser")
   validatedTimesheets TimesheetEntry[]   @relation("TimesheetValidator")
@@ -1473,4 +1474,22 @@ model OneOffCashflowEntry {
   @@index([date])
   @@index([kind, status])
   @@index([recurrenceGroupId])
+}
+
+/// Lien vers une application externe utilisée par Dasolabs (Hetzner, Vercel, GitHub, etc.).
+/// Affichée sous forme de dalle cliquable dans la page /app-links.
+/// L'édition (ajout/modif/suppression) est réservée aux admins.
+model AppLink {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  description String?
+  /// Position d'affichage (plus petit = plus haut dans la grille).
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String?
+  createdBy   User?    @relation("AppLinkCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([position])
 }

@@ -8,7 +8,8 @@ import {
   MessageSquare, BadgeCheck, Briefcase, History, UserPlus, Headset,
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
-  FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox
+  FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
+  AppWindow
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -25,7 +26,8 @@ const SECTIONS: Section[] = [
       { href: "/project-status",    label: "Statut projet",        icon: Gauge },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
-      { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+      { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
+      { href: "/app-links",         label: "Outils & apps",        icon: AppWindow,     allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
     ]
   },
   {
