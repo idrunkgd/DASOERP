@@ -109,14 +109,28 @@ const ServiceLineSchema = z.object({
   discountPct: z.coerce.number().min(0).max(100).default(0)
 });
 
+// Modèle de saisie OTHER (matériel/licences/sous-traitance…) :
+// - L'utilisateur saisit prix d'achat (`unitCost`) + marge attendue % (`marginPctInput`, défaut 20)
+// - On calcule `unitSellPrice = unitCost / (1 - margin/100)` (marge sur prix de vente)
+//   ex: cost=100, marge=20% → sell = 100 / 0.8 = 125 €
+// - Si la marge = 0 et unitSellPrice fourni → utilisé tel quel (fallback)
 const OtherLineSchema = z.object({
   description: z.string().min(1),
   quantity: z.coerce.number().nonnegative(),
   unit: z.string().default("unit"),
-  unitSellPrice: z.coerce.number().nonnegative(),
-  marginPctInput: z.coerce.number().min(0).max(100).default(0),
+  unitCost: z.coerce.number().nonnegative().default(0),
+  unitSellPrice: z.coerce.number().nonnegative().optional().default(0),
+  marginPctInput: z.coerce.number().min(0).max(99.9).default(20),
   discountPct: z.coerce.number().min(0).max(100).default(0)
 });
+
+/** Calcule unitSellPrice à partir de unitCost + marginPctInput (marge sur prix de vente). */
+function deriveSellPrice(cost: number, marginPct: number, fallback?: number): number {
+  if (cost > 0 && marginPct >= 0 && marginPct < 100) {
+    return Math.round((cost / (1 - marginPct / 100)) * 100) / 100;
+  }
+  return fallback ?? 0;
+}
 
 export async function addServiceLine(offerId: string, formData: FormData) {
   const session = await requirePermission("offers.write");
@@ -134,6 +148,7 @@ export async function addOtherLine(offerId: string, formData: FormData) {
   await assertOfferEditable(offerId);
   const data = OtherLineSchema.parse(Object.fromEntries(formData));
   const last = await prisma.offerLine.findFirst({ where: { offerId }, orderBy: { position: "desc" } });
+  const computedSell = deriveSellPrice(data.unitCost, data.marginPctInput, data.unitSellPrice);
   const created = await prisma.offerLine.create({
     data: {
       offerId,
@@ -142,8 +157,8 @@ export async function addOtherLine(offerId: string, formData: FormData) {
       description: data.description,
       quantity: data.quantity,
       unit: data.unit,
-      unitSellPrice: data.unitSellPrice,
-      unitCost: 0, // recalculé via marginPctInput
+      unitCost: data.unitCost, // vrai prix d'achat saisi par le user
+      unitSellPrice: computedSell, // calculé depuis cost + marge
       discountPct: data.discountPct,
       marginPctInput: data.marginPctInput,
       position: (last?.position ?? 0) + 1
@@ -170,9 +185,20 @@ export async function updateOtherLine(lineId: string, formData: FormData) {
   await assertLineEditable(lineId);
   const before = await prisma.offerLine.findUniqueOrThrow({ where: { id: lineId } });
   const data = OtherLineSchema.parse(Object.fromEntries(formData));
+  const computedSell = deriveSellPrice(data.unitCost, data.marginPctInput, data.unitSellPrice);
   const after = await prisma.offerLine.update({
     where: { id: lineId },
-    data: { ...data, type: "OTHER", profileId: null, unitCost: 0 }
+    data: {
+      type: "OTHER",
+      profileId: null,
+      description: data.description,
+      quantity: data.quantity,
+      unit: data.unit,
+      unitCost: data.unitCost,
+      unitSellPrice: computedSell,
+      discountPct: data.discountPct,
+      marginPctInput: data.marginPctInput
+    }
   });
   await recomputeOfferTotals(after.offerId);
   await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "OfferLine", entityId: lineId, message: "Ligne diverse modifiée", before, after });

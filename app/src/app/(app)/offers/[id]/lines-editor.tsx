@@ -39,11 +39,16 @@ function ServicesTable({ offerId, lines, profiles, readOnly }: { offerId: string
       <div className="overflow-x-auto">
         <table className="table-base">
           <thead><tr>
-            <th>Description</th><th>Profil</th>
-            <th className="text-right">Qté</th><th>Unité</th>
-            <th className="text-right">PU vente</th><th className="text-right">PU coût</th>
-            <th className="text-right">Total HT</th><th className="text-right">Cout</th><th className="text-right">Marge</th>
-            <th></th>
+            <th>Description</th>
+            <th>Profil</th>
+            <th className="text-right">Qté</th>
+            <th>Unité</th>
+            <th className="text-right">PU vente</th>
+            <th className="text-right">PU coût</th>
+            <th className="text-right">Total HT</th>
+            <th className="text-right">Coût total</th>
+            <th className="text-right">Marge %</th>
+            <th>Actions</th>
           </tr></thead>
           <tbody>
             {lines.map(l => <ServiceRow key={l.id} line={l} profiles={profiles} readOnly={readOnly} />)}
@@ -175,18 +180,22 @@ function OthersTable({ offerId, lines, readOnly }: { offerId: string; lines: Lin
   const [pending, start] = useTransition();
   return (
     <section className="card p-5">
-      <h2 className="font-semibold mb-3">Autres postes (matériel, licences, sous-traitance, frais...)</h2>
+      <h2 className="font-semibold mb-3">Autres postes (matériel, licences, sous-traitance, frais…)</h2>
+      <p className="text-[11px] text-midnight-500 mb-3">
+        Saisis le <b>prix d'achat</b> et la <b>marge attendue (%)</b>. Le prix de vente client est calculé automatiquement.
+      </p>
       <div className="overflow-x-auto">
         <table className="table-base">
           <thead><tr>
             <th>Description</th>
             <th className="text-right">Qté</th><th>Unité</th>
-            <th className="text-right">PU vente</th>
+            <th className="text-right">Prix achat</th>
             <th className="text-right">Marge %</th>
+            <th className="text-right">PU vente</th>
             <th className="text-right">Total HT</th>
-            <th className="text-right">Cout</th>
+            <th className="text-right">Coût total</th>
             <th className="text-right">Marge €</th>
-            <th></th>
+            <th>Actions</th>
           </tr></thead>
           <tbody>
             {lines.map(l => <OtherRow key={l.id} line={l} readOnly={readOnly} />)}
@@ -219,8 +228,9 @@ function OtherRow({ line, readOnly }: { line: Line; readOnly?: boolean }) {
         <td className="font-medium">{line.description}</td>
         <td className="text-right tabular-nums">{Number(line.quantity)}</td>
         <td>{line.unit}</td>
-        <td className="text-right tabular-nums">{formatCurrency(line.unitSellPrice)}</td>
+        <td className="text-right tabular-nums text-midnight-700">{formatCurrency(line.unitCost)}</td>
         <td className="text-right tabular-nums">{Number(line.marginPctInput ?? 0).toFixed(1)}%</td>
+        <td className="text-right tabular-nums">{formatCurrency(line.unitSellPrice)}</td>
         <td className="text-right tabular-nums font-medium">{formatCurrency(line.totalSell)}</td>
         <td className="text-right tabular-nums text-midnight-500">{formatCurrency(line.totalCost)}</td>
         <td className="text-right tabular-nums">{formatCurrency(line.marginAmount)}</td>
@@ -257,16 +267,58 @@ function OtherRow({ line, readOnly }: { line: Line; readOnly?: boolean }) {
 }
 
 function OtherEditRow({ line, onSubmit, onCancel, onDelete, pending }: any) {
+  const [cost, setCost] = useState<string>(String(line?.unitCost ?? ""));
+  const [margin, setMargin] = useState<string>(String(line?.marginPctInput ?? 20));
+  const sell = (() => {
+    const c = Number(cost || 0);
+    const m = Number(margin || 0);
+    if (c > 0 && m >= 0 && m < 100) {
+      return Math.round((c / (1 - m / 100)) * 100) / 100;
+    }
+    return 0;
+  })();
   return (
     <tr className="bg-midnight-50/40">
-      <td colSpan={9}>
+      <td colSpan={10}>
         <form action={onSubmit} className="grid grid-cols-12 gap-2 items-end">
-          <input name="description" defaultValue={line?.description ?? ""} placeholder="Description" required className="input col-span-4" />
-          <input name="quantity" type="number" step="0.5" defaultValue={String(line?.quantity ?? 1)} required className="input col-span-1" />
-          <input name="unit" defaultValue={line?.unit ?? "unit"} className="input col-span-1" />
-          <input name="unitSellPrice" type="number" step="0.01" defaultValue={String(line?.unitSellPrice ?? "")} required className="input col-span-2" placeholder="PU vente" />
-          <input name="marginPctInput" type="number" step="0.5" defaultValue={String(line?.marginPctInput ?? 20)} className="input col-span-1" placeholder="%" />
-          <input name="discountPct" type="number" step="0.5" defaultValue={String(line?.discountPct ?? 0)} className="input col-span-1" placeholder="Rem%" />
+          <div className="col-span-4">
+            <label className="label text-[10px]">Description</label>
+            <input name="description" defaultValue={line?.description ?? ""} placeholder="ex: Licence Office 365" required className="input" />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Qté</label>
+            <input name="quantity" type="number" step="0.5" defaultValue={String(line?.quantity ?? 1)} required className="input" />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Unité</label>
+            <input name="unit" defaultValue={line?.unit ?? "unit"} className="input" />
+          </div>
+          <div className="col-span-2">
+            <label className="label text-[10px]">Prix achat HT</label>
+            <input
+              name="unitCost" type="number" step="0.01"
+              value={cost} onChange={(e) => setCost(e.target.value)}
+              required className="input" placeholder="0,00"
+            />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">Marge %</label>
+            <input
+              name="marginPctInput" type="number" step="0.5"
+              value={margin} onChange={(e) => setMargin(e.target.value)}
+              className="input" placeholder="20"
+            />
+          </div>
+          <div className="col-span-1">
+            <label className="label text-[10px]">PU vente</label>
+            <input
+              type="text" readOnly value={sell > 0 ? sell.toFixed(2) : "—"}
+              className="input bg-emerald-50 text-emerald-800 font-medium"
+              tabIndex={-1}
+            />
+          </div>
+          {/* Hidden discountPct (rarement utilisé sur OTHER) */}
+          <input type="hidden" name="discountPct" value={String(line?.discountPct ?? 0)} />
           <div className="col-span-2 flex gap-1 justify-end">
             <button disabled={pending} className="btn-primary btn-sm">OK</button>
             {onCancel && <button type="button" onClick={onCancel} className="btn-ghost btn-sm">×</button>}
