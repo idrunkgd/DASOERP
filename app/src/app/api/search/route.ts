@@ -7,7 +7,7 @@
 //      tableau String[] est faite via une jointure sur la table Skill
 //      pour avoir le case-insensitive partial match.
 import { prisma } from "@/lib/db";
-import { requireSession, can } from "@/lib/rbac";
+import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { NextRequest } from "next/server";
 
 type Result = {
@@ -53,7 +53,12 @@ function buildAndOfOr<T>(words: string[], builder: (w: string) => T[]): any {
 
 export async function GET(req: NextRequest) {
   const session = await requireSession();
-  const role = session.user.role;
+  // IMPORTANT : on lit les permissions EFFECTIVES (groupe d'accès + overrides),
+  // pas le rôle brut. Le rôle n'a plus d'impact dans cette codebase, seul le
+  // groupe d'accès compte. Voir lib/rbac.ts.
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const has = (p: string) => perms.includes(p as any);
+
   const raw = (req.nextUrl.searchParams.get("q") || "").trim();
   if (raw.length < 2) return Response.json({ results: [] });
 
@@ -64,7 +69,7 @@ export async function GET(req: NextRequest) {
   const results: Result[] = [];
 
   // ── Entreprises ──────────────────────────────────────────────────────────
-  if (can(role, "companies.read")) {
+  if (has("companies.read")) {
     const where = buildAndOfOr(words, (w) => [
       { name: { contains: w, mode: "insensitive" as const } },
       { vatNumber: { contains: w, mode: "insensitive" as const } },
@@ -87,7 +92,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Contacts ─────────────────────────────────────────────────────────────
-  if (can(role, "contacts.read")) {
+  if (has("contacts.read")) {
     const where = buildAndOfOr(words, (w) => [
       { firstName: { contains: w, mode: "insensitive" as const } },
       { lastName: { contains: w, mode: "insensitive" as const } },
@@ -113,7 +118,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Offres ───────────────────────────────────────────────────────────────
-  if (can(role, "offers.read")) {
+  if (has("offers.read")) {
     const where = buildAndOfOr(words, (w) => [
       { title: { contains: w, mode: "insensitive" as const } },
       { reference: { contains: w, mode: "insensitive" as const } },
@@ -138,7 +143,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Projets ──────────────────────────────────────────────────────────────
-  if (can(role, "projects.read")) {
+  if (has("projects.read")) {
     const where = buildAndOfOr(words, (w) => [
       { name: { contains: w, mode: "insensitive" as const } },
       { reference: { contains: w, mode: "insensitive" as const } },
@@ -163,7 +168,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Achats ───────────────────────────────────────────────────────────────
-  if (can(role, "purchases.read")) {
+  if (has("purchases.read")) {
     const where = buildAndOfOr(words, (w) => [
       { description: { contains: w, mode: "insensitive" as const } },
       { project: { reference: { contains: w, mode: "insensitive" as const } } },
@@ -187,7 +192,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Utilisateurs (gestion only) ──────────────────────────────────────────
-  if (can(role, "users.manage")) {
+  if (has("users.manage")) {
     const where = buildAndOfOr(words, (w) => [
       { firstName: { contains: w, mode: "insensitive" as const } },
       { lastName: { contains: w, mode: "insensitive" as const } },
@@ -210,7 +215,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Consultance : demandes, missions, candidats, consultants ────────────
-  if (can(role, "consulting.read")) {
+  if (has("consulting.read")) {
     // Demandes de mission
     const whereDemandes = buildAndOfOr(words, (w) => [
       { title: { contains: w, mode: "insensitive" as const } },
