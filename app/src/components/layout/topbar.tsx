@@ -1,46 +1,22 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Search, LogOut, ChevronDown, User as UserIcon, Menu } from "lucide-react";
 import Link from "next/link";
 
-type Result = {
-  type: "company" | "contact" | "offer" | "project" | "purchase" | "user";
-  id: string;
-  title: string;
-  subtitle?: string;
-  href: string;
-};
-
 export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: string; onToggleMenu?: () => void }) {
   const { data: session } = useSession();
-  const [q, setQ] = useState("");
-  const [results, setResults] = useState<Result[]>([]);
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
-  const ref = useRef<HTMLDivElement>(null);
-
+  // On détecte la plateforme pour afficher ⌘ (Mac) ou Ctrl (Windows/Linux).
+  const [isMac, setIsMac] = useState(false);
   useEffect(() => {
-    const t = setTimeout(async () => {
-      if (q.trim().length < 2) { setResults([]); return; }
-      const r = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      if (r.ok) {
-        const data = await r.json();
-        setResults(data.results ?? []);
-        setOpen(true);
-      }
-    }, 200);
-    return () => clearTimeout(t);
-  }, [q]);
-
-  useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    if (typeof navigator !== "undefined") {
+      setIsMac(/Mac|iPhone|iPad/i.test(navigator.platform));
     }
-    window.addEventListener("click", onClick);
-    return () => window.removeEventListener("click", onClick);
   }, []);
+
+  function openPalette() {
+    window.dispatchEvent(new CustomEvent("cowork:open-palette"));
+  }
 
   return (
     <header className="h-14 bg-white border-b border-border flex items-center px-3 md:px-4 gap-2 md:gap-4 sticky top-0 z-20">
@@ -55,32 +31,23 @@ export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: str
           <Menu className="w-5 h-5" />
         </button>
       )}
-      <div className="flex-1 max-w-xl relative" ref={ref}>
+      {/* Trigger du palet de recherche globale (Cmd+K). Visuellement c'est
+          un faux input pour la familiarité ; au clic ça ouvre le modal. */}
+      <button
+        type="button"
+        onClick={openPalette}
+        className="flex-1 max-w-xl h-9 pl-9 pr-3 rounded-md border border-border bg-muted/40 text-sm text-left text-midnight-400 hover:bg-white hover:border-midnight-300 transition-colors relative flex items-center"
+        aria-label="Rechercher (Cmd+K)"
+      >
         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-midnight-400" />
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onFocus={() => results.length && setOpen(true)}
-          placeholder="Rechercher..."
-          className="w-full h-9 pl-9 pr-3 rounded-md border border-border bg-muted/40 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigoaccent/30"
-        />
-        {open && results.length > 0 && (
-          <div className="absolute mt-1 w-full bg-white border border-border rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
-            {results.map((r) => (
-              <Link
-                key={`${r.type}-${r.id}`}
-                href={r.href}
-                onClick={() => { setOpen(false); setQ(""); }}
-                className="flex items-center gap-3 px-3 py-2 hover:bg-midnight-50 text-sm"
-              >
-                <span className="badge-info uppercase">{r.type}</span>
-                <span className="font-medium text-midnight-900">{r.title}</span>
-                {r.subtitle && <span className="text-midnight-500 truncate">— {r.subtitle}</span>}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+        <span className="flex-1">Rechercher…</span>
+        <span className="hidden md:inline-flex items-center gap-1 text-[10px] text-midnight-400 font-mono">
+          <kbd className="border border-midnight-200 rounded px-1 py-0.5 bg-white">
+            {isMac ? "⌘" : "Ctrl"}
+          </kbd>
+          <kbd className="border border-midnight-200 rounded px-1 py-0.5 bg-white">K</kbd>
+        </span>
+      </button>
       <UserMenu name={session?.user?.name ?? ""} accessGroupName={accessGroupName} />
     </header>
   );

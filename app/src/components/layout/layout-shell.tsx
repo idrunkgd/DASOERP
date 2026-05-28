@@ -6,6 +6,7 @@ import type { Permission } from "@/lib/rbac";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { ChatWidget } from "./chat-widget";
+import { CommandPalette } from "./command-palette";
 
 /**
  * Shell client qui gère l'état d'ouverture de la sidebar sur mobile.
@@ -74,6 +75,7 @@ export function LayoutShell({
       </div>
 
       {!restricted && <ChatWidget />}
+      {!restricted && <CommandPalette />}
     </div>
   );
 }
