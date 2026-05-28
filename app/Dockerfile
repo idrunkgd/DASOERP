@@ -49,6 +49,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # Client Prisma + schéma pour les migrations runtime
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# CLI Prisma bundled dans l'image → plus de `npx prisma@5.22.0` qui télécharge
+# le binaire à chaque démarrage. Gain : ~30s par boot + start-period plus court.
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 USER nextjs
@@ -56,12 +59,12 @@ EXPOSE 3000
 
 # Healthcheck pour Coolify
 # - 127.0.0.1 (pas localhost) pour éviter résolution IPv6 (::1) où Next n'écoute pas.
-# - -O - --server-response : récupère le body et le code HTTP, plus parlant en logs.
-# - start-period 180s : laisse à `npx prisma@5.22.0 migrate deploy` le temps de tourner.
-HEALTHCHECK --interval=15s --timeout=5s --start-period=180s --retries=5 \
+# - start-period 60s : maintenant que le CLI Prisma est bundled, le démarrage
+#   prend ~20-30s au lieu de 110s. On garde une marge de sécurité.
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=5 \
   CMD wget --quiet --tries=1 -O /dev/null http://127.0.0.1:3000/api/health || exit 1
 
 # Appliquer migrations Prisma au démarrage puis lancer Next standalone.
-# IMPORTANT : pin de la version 5.22 — sans ça, npx télécharge la dernière
-# (Prisma 7+) qui a une API incompatible avec notre schema (url = env(...)).
-CMD ["sh", "-c", "npx prisma@5.22.0 migrate deploy && node server.js"]
+# On utilise le CLI bundled dans l'image (pas `npx`) → pas de download au boot,
+# et garantie que la version utilisée est exactement celle de package.json (5.22).
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]
