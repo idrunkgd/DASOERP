@@ -154,7 +154,9 @@ export default async function CrmPage({
   }
 
   for (const r of missionRequests) {
-    const stage = missionRequestToStage(r.status);
+    // Priorité au crmStage stocké explicitement (édité via kanban). Sinon on
+    // dérive du status pour les anciennes lignes pas encore migrées.
+    const stage = (r.crmStage as Stage) ?? missionRequestToStage(r.status);
     if (!stage) continue;
     const value =
       r.targetDailyRate && r.estimatedDays
@@ -177,7 +179,8 @@ export default async function CrmPage({
   }
 
   for (const offer of offers) {
-    const stage = offerToStage(offer.status);
+    // crmStage prend la main sur le status mappé (granularité kanban > granularité enum).
+    const stage = (offer.crmStage as Stage) ?? offerToStage(offer.status);
     if (!stage) continue;
     unified.push({
       id: offer.id,
@@ -197,7 +200,8 @@ export default async function CrmPage({
   }
 
   for (const p of projects) {
-    const stage = projectToStage(p.status);
+    // crmStage prime (kanban a 7 stages, status n'en a que 5).
+    const stage = (p.crmStage as Stage) ?? projectToStage(p.status);
     if (!stage) continue;
     // On évite de doubler avec Offer si le project est lié à un offer déjà compté
     if (p.offerId && offers.some((o) => o.id === p.offerId)) continue;

@@ -437,6 +437,10 @@ model Offer {
   title              String
   mode               OfferMode           @default(PROJECT)
   status             OfferStatus         @default(DRAFT)
+  /// Stage CRM affiché dans le kanban. Distinct du status métier car le
+  /// kanban a plus de granularité (NEW/QUALIFIED tous deux mappés vers DRAFT
+  /// côté statut, mais on veut pouvoir les distinguer visuellement).
+  crmStage           String              @default("NEW")
   probability        Int                 @default(50)
   description        String?
   comments           String?
@@ -602,6 +606,9 @@ model Project {
   // Pour CONSULTING : facturation périodique (mensuelle par défaut)
   billingFrequency   BillingFrequency? @default(MONTHLY)
   status             ProjectStatus  @default(TO_START)
+  /// Stage CRM dans le kanban (WON par défaut puisqu'un projet est déjà signé).
+  /// Permet d'afficher un projet annulé en CANCELLED sans changer son status métier.
+  crmStage           String         @default("WON")
   description        String?
   notes              String?
   risks              String?
@@ -894,6 +901,9 @@ model MissionRequest {
   title           String
   description     String?
   status          MissionStatus @default(NEW)
+  /// Stage CRM dans le kanban (NEW/QUALIFIED/PROPOSED/NEGOTIATING/WON/LOST/CANCELLED).
+  /// Distinct du status métier MissionStatus qui n'a pas la même granularité.
+  crmStage        String        @default("NEW")
 
   companyId       String
   company         Company       @relation(fields: [companyId], references: [id], onDelete: Restrict)

@@ -197,11 +197,14 @@ export async function moveCardStage(
       };
       const before = await prisma.missionRequest.findUnique({
         where: { id },
-        select: { status: true }
+        select: { status: true, crmStage: true }
       });
       await prisma.missionRequest.update({
         where: { id },
         data: {
+          // crmStage est la source de vérité pour le kanban (granularité 7 stages).
+          // status reste à jour pour la logique métier (notif, dashboard, etc.).
+          crmStage: newStage,
           status: map[newStage] as any,
           closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
         }
@@ -211,11 +214,11 @@ export async function moveCardStage(
         action: "STATUS_CHANGE",
         entityType: "MissionRequest",
         entityId: id,
-        message: `[CRM] ${before?.status} → ${map[newStage]}`
+        message: `[CRM] ${before?.crmStage ?? before?.status} → ${newStage} (status: ${map[newStage]})`
       });
       revalidatePath("/test/crm");
       revalidatePath(`/mission-requests/${id}`);
-      return { ok: true, before: before?.status ?? "?", after: map[newStage] };
+      return { ok: true, before: before?.crmStage ?? before?.status ?? "?", after: newStage };
     }
 
     if (source === "offer") {
@@ -230,7 +233,7 @@ export async function moveCardStage(
       };
       const before = await prisma.offer.findUnique({
         where: { id },
-        select: { status: true }
+        select: { status: true, crmStage: true }
       });
       const targetStatus = map[newStage];
       // Update direct sans cascade — moveCardStage ne crée pas de Project automatiquement.
@@ -238,6 +241,9 @@ export async function moveCardStage(
       await prisma.offer.update({
         where: { id },
         data: {
+          // crmStage est la source de vérité pour le kanban.
+          // status reste cohérent pour les flows métier (envoi, signature, etc.).
+          crmStage: newStage,
           status: targetStatus as any,
           closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
         }
@@ -247,12 +253,12 @@ export async function moveCardStage(
         action: "STATUS_CHANGE",
         entityType: "Offer",
         entityId: id,
-        message: `[CRM] ${before?.status} → ${targetStatus}`
+        message: `[CRM] ${before?.crmStage ?? before?.status} → ${newStage} (status: ${targetStatus})`
       });
       revalidatePath("/test/crm");
       revalidatePath(`/offers/${id}`);
       revalidatePath("/offers");
-      return { ok: true, before: before?.status ?? "?", after: targetStatus };
+      return { ok: true, before: before?.crmStage ?? before?.status ?? "?", after: newStage };
     }
 
     if (source === "project") {
@@ -267,23 +273,28 @@ export async function moveCardStage(
       };
       const before = await prisma.project.findUnique({
         where: { id },
-        select: { status: true }
+        select: { status: true, crmStage: true }
       });
       await prisma.project.update({
         where: { id },
-        data: { status: map[newStage] as any }
+        data: {
+          // crmStage gouverne la position kanban (granularité 7 stages).
+          // status garde la sémantique projet (TO_START → ACTIVE → COMPLETED).
+          crmStage: newStage,
+          status: map[newStage] as any
+        }
       });
       await logActivity({
         actorId: session.user.id,
         action: "STATUS_CHANGE",
         entityType: "Project",
         entityId: id,
-        message: `[CRM] ${before?.status} → ${map[newStage]}`
+        message: `[CRM] ${before?.crmStage ?? before?.status} → ${newStage} (status: ${map[newStage]})`
       });
       revalidatePath("/test/crm");
       revalidatePath(`/projects/${id}`);
       revalidatePath("/projects");
-      return { ok: true, before: before?.status ?? "?", after: map[newStage] };
+      return { ok: true, before: before?.crmStage ?? before?.status ?? "?", after: newStage };
     }
 
     return { ok: false, error: `Source inconnue : ${source}` };
