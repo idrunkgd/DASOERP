@@ -23,6 +23,8 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/((?!login|api/auth|_next/static|_next/image|favicon.ico|dasolabs-icon.svg|dasolabs-logo.svg).*)"
+    // IMPORTANT : `api/health` exclu pour que Docker/Coolify puisse pinger
+    // sans cookie de session (sinon redirect vers /login = healthcheck fail).
+    "/((?!login|api/auth|api/health|_next/static|_next/image|favicon.ico|dasolabs-icon.svg|dasolabs-logo.svg).*)"
   ]
 };
