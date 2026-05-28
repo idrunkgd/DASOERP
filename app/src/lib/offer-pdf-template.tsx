@@ -308,6 +308,19 @@ export interface OfferPdfData {
     expectedAt?: Date | null;
     percentage?: number | string | null;
   }[];
+  /// Options du devis (page 2bis du PDF si non vide)
+  options?: {
+    name: string;
+    description?: string | null;
+    totalSell: number | string;
+    lines: {
+      description: string;
+      quantity: number | string;
+      unit: string;
+      unitSellPrice: number | string;
+      totalSell: number | string;
+    }[];
+  }[];
   owner?: { firstName: string; lastName: string; email?: string | null } | null;
 }
 
@@ -340,10 +353,7 @@ export function OfferPdfDocument({
     <View style={styles.header}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <DasolabsIcon size={32} color={colors.ink} />
-        <View>
-          <Text style={styles.brand}>{company.legalName.split(" ")[0] || "DASOLABS"}</Text>
-          <Text style={styles.brandTagline}>IT & industrial consulting</Text>
-        </View>
+        <Text style={styles.brand}>{company.legalName.split(" ")[0] || "DASOLABS"}</Text>
       </View>
       <View>
         <Text style={styles.docTitle}>DEVIS</Text>
@@ -512,6 +522,74 @@ export function OfferPdfDocument({
 
         <PageFooter />
       </Page>
+
+      {/* ═════════════════════════════════════════════════════════
+          PAGE 2bis — Options (uniquement si présentes)
+          ═════════════════════════════════════════════════════════ */}
+      {data.options && data.options.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <PageHeader subtitle="Options & suppléments" />
+
+          <Text style={styles.sectionTitle}>Options proposées</Text>
+          <Text style={{ fontSize: 9, color: colors.grey, lineHeight: 1.5, marginBottom: 14 }}>
+            Les options ci-dessous sont proposées en supplément du devis principal et ne sont pas
+            incluses dans le total HTVA de la page précédente. Chaque option peut être commandée
+            indépendamment lors de la confirmation du devis.
+          </Text>
+
+          {data.options.map((opt, i) => (
+            <View key={i} style={{ marginBottom: 18 }} wrap={false}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  backgroundColor: colors.light,
+                  padding: 6,
+                  borderLeft: `3 solid ${colors.accent}`
+                }}
+              >
+                <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold", color: colors.ink }}>
+                  {i + 1}. {opt.name}
+                </Text>
+                <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold", color: colors.indigo }}>
+                  {fmtEur(opt.totalSell)} HTVA
+                </Text>
+              </View>
+              {opt.description && (
+                <Text style={{ fontSize: 9, color: colors.ink, marginTop: 4, lineHeight: 1.4 }}>
+                  {opt.description}
+                </Text>
+              )}
+              {opt.lines.length > 0 && (
+                <View style={[styles.table, { marginTop: 6 }]}>
+                  <View style={styles.tableHeader}>
+                    <Text style={styles.colDesc}>Description</Text>
+                    <Text style={styles.colQty}>Qté</Text>
+                    <Text style={styles.colUnit}>Unité</Text>
+                    <Text style={styles.colPrice}>PU HTVA</Text>
+                    <Text style={styles.colTotal}>Total HTVA</Text>
+                  </View>
+                  {opt.lines.map((line, j) => (
+                    <View
+                      key={j}
+                      style={j % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : styles.tableRow}
+                    >
+                      <Text style={styles.colDesc}>{line.description}</Text>
+                      <Text style={styles.colQty}>{fmtQty(line.quantity)}</Text>
+                      <Text style={styles.colUnit}>{line.unit}</Text>
+                      <Text style={styles.colPrice}>{fmtEur(line.unitSellPrice)}</Text>
+                      <Text style={styles.colTotal}>{fmtEur(line.totalSell)}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          ))}
+
+          <PageFooter />
+        </Page>
+      )}
 
       {/* ═════════════════════════════════════════════════════════
           PAGE 3 — Modalités de facturation + Conditions

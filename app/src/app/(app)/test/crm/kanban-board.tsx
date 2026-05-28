@@ -88,17 +88,27 @@ export function KanbanBoard({
     setOptimistic((o) => ({ ...o, [key]: newStage }));
     start(async () => {
       try {
-        await moveCardStage(item.source, item.id, newStage);
-        toast.success(`→ ${STAGES.find((s) => s.key === newStage)?.label ?? newStage}`);
+        const result = await moveCardStage(item.source, item.id, newStage);
+        if (!result.ok) {
+          // Rollback explicite : la DB n'a pas accepté le changement
+          setOptimistic((o) => {
+            const c = { ...o };
+            delete c[key];
+            return c;
+          });
+          toast.error(`Échec : ${result.error}`);
+          return;
+        }
+        const stageLabel = STAGES.find((s) => s.key === newStage)?.label ?? newStage;
+        toast.success(`${item.title.slice(0, 30)} → ${stageLabel} (${result.after})`);
         router.refresh();
       } catch (e: any) {
-        // rollback optimistic
         setOptimistic((o) => {
           const c = { ...o };
           delete c[key];
           return c;
         });
-        toast.error(e?.message ?? "Erreur lors du déplacement");
+        toast.error(e?.message ?? "Erreur réseau");
       }
     });
   }

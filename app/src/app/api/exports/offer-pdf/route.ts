@@ -21,7 +21,11 @@ export async function GET(req: NextRequest) {
     where: { id },
     include: {
       company: true,
-      lines: { orderBy: { position: "asc" } },
+      lines: { where: { optionId: null }, orderBy: { position: "asc" } },
+      options: {
+        include: { lines: { orderBy: { position: "asc" } } },
+        orderBy: { position: "asc" }
+      },
       milestones: { orderBy: { expectedAt: "asc" } },
       owner: true,
       contacts: {
@@ -63,6 +67,18 @@ export async function GET(req: NextRequest) {
       amount: Number(m.amount),
       expectedAt: m.expectedAt,
       percentage: m.percentage ? Number(m.percentage) : null
+    })),
+    options: offer.options.map((opt) => ({
+      name: opt.name,
+      description: opt.description,
+      totalSell: Number(opt.totalSell),
+      lines: opt.lines.map((l) => ({
+        description: l.description,
+        quantity: Number(l.quantity),
+        unit: l.unit,
+        unitSellPrice: Number(l.unitSellPrice),
+        totalSell: Number(l.totalSell)
+      }))
     })),
     owner: offer.owner
       ? {

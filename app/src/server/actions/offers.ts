@@ -205,6 +205,173 @@ export async function updateOtherLine(lineId: string, formData: FormData) {
   revalidatePath(`/offers/${after.offerId}`);
 }
 
+// ---- OPTIONS ---------------------------------------------------
+
+const OfferOptionSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().optional().nullable().transform((v) => v?.trim() || null)
+});
+
+export async function addOfferOption(offerId: string, formData: FormData) {
+  const session = await requirePermission("offers.write");
+  await assertOfferEditable(offerId);
+  const data = OfferOptionSchema.parse(Object.fromEntries(formData));
+  const last = await prisma.offerOption.findFirst({
+    where: { offerId },
+    orderBy: { position: "desc" }
+  });
+  const created = await prisma.offerOption.create({
+    data: {
+      offerId,
+      name: data.name,
+      description: data.description,
+      position: (last?.position ?? 0) + 1
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "OfferOption",
+    entityId: created.id,
+    message: `Option « ${data.name} » créée`
+  });
+  revalidatePath(`/offers/${offerId}`);
+  return { id: created.id };
+}
+
+export async function updateOfferOption(optionId: string, formData: FormData) {
+  const session = await requirePermission("offers.write");
+  const before = await prisma.offerOption.findUniqueOrThrow({
+    where: { id: optionId },
+    include: { offer: { select: { status: true } } }
+  });
+  if (!isOfferEditable(before.offer.status)) throw new OfferLockedError(before.offer.status);
+  const data = OfferOptionSchema.parse(Object.fromEntries(formData));
+  await prisma.offerOption.update({
+    where: { id: optionId },
+    data: { name: data.name, description: data.description }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "OfferOption",
+    entityId: optionId,
+    message: `Option « ${data.name} » mise à jour`
+  });
+  revalidatePath(`/offers/${before.offerId}`);
+}
+
+export async function deleteOfferOption(optionId: string) {
+  const session = await requirePermission("offers.write");
+  const before = await prisma.offerOption.findUniqueOrThrow({
+    where: { id: optionId },
+    include: { offer: { select: { status: true } } }
+  });
+  if (!isOfferEditable(before.offer.status)) throw new OfferLockedError(before.offer.status);
+  await prisma.offerOption.delete({ where: { id: optionId } });
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "OfferOption",
+    entityId: optionId,
+    message: `Option « ${before.name} » supprimée`
+  });
+  revalidatePath(`/offers/${before.offerId}`);
+}
+
+/** Ajoute une ligne SERVICE à une option (au lieu du devis principal). */
+export async function addOptionServiceLine(optionId: string, formData: FormData) {
+  const session = await requirePermission("offers.write");
+  const option = await prisma.offerOption.findUniqueOrThrow({
+    where: { id: optionId },
+    include: { offer: { select: { id: true, status: true } } }
+  });
+  if (!isOfferEditable(option.offer.status)) throw new OfferLockedError(option.offer.status);
+  const data = ServiceLineSchema.parse(Object.fromEntries(formData));
+  const last = await prisma.offerLine.findFirst({
+    where: { optionId },
+    orderBy: { position: "desc" }
+  });
+  const created = await prisma.offerLine.create({
+    data: {
+      ...data,
+      type: "SERVICE",
+      offerId: option.offer.id,
+      optionId,
+      position: (last?.position ?? 0) + 1,
+      marginPctInput: null
+    }
+  });
+  await recomputeOfferOption(optionId);
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "OfferLine",
+    entityId: created.id,
+    message: `Ligne service ajoutée à l'option « ${option.name} »`
+  });
+  revalidatePath(`/offers/${option.offer.id}`);
+}
+
+/** Ajoute une ligne OTHER (matériel) à une option. */
+export async function addOptionOtherLine(optionId: string, formData: FormData) {
+  const session = await requirePermission("offers.write");
+  const option = await prisma.offerOption.findUniqueOrThrow({
+    where: { id: optionId },
+    include: { offer: { select: { id: true, status: true } } }
+  });
+  if (!isOfferEditable(option.offer.status)) throw new OfferLockedError(option.offer.status);
+  const data = OtherLineSchema.parse(Object.fromEntries(formData));
+  const last = await prisma.offerLine.findFirst({
+    where: { optionId },
+    orderBy: { position: "desc" }
+  });
+  const computedSell = deriveSellPrice(data.unitCost, data.marginPctInput, data.unitSellPrice);
+  const created = await prisma.offerLine.create({
+    data: {
+      offerId: option.offer.id,
+      optionId,
+      type: "OTHER",
+      profileId: null,
+      description: data.description,
+      quantity: data.quantity,
+      unit: data.unit,
+      unitCost: data.unitCost,
+      unitSellPrice: computedSell,
+      discountPct: data.discountPct,
+      marginPctInput: data.marginPctInput,
+      position: (last?.position ?? 0) + 1
+    }
+  });
+  await recomputeOfferOption(optionId);
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "OfferLine",
+    entityId: created.id,
+    message: `Ligne matériel ajoutée à l'option « ${option.name} »`
+  });
+  revalidatePath(`/offers/${option.offer.id}`);
+}
+
+/**
+ * Recalcule les totaux d'une option (à partir de ses lignes).
+ * Appelé après chaque mutation d'une ligne d'option.
+ */
+async function recomputeOfferOption(optionId: string) {
+  const lines = await prisma.offerLine.findMany({ where: { optionId } });
+  let totalSell = 0;
+  let totalCost = 0;
+  for (const l of lines) {
+    totalSell += Number(l.totalSell);
+    totalCost += Number(l.totalCost);
+  }
+  await prisma.offerOption.update({
+    where: { id: optionId },
+    data: { totalSell, totalCost }
+  });
+}
+
 export async function deleteLine(lineId: string) {
   const session = await requirePermission("offers.write");
   await assertLineEditable(lineId);

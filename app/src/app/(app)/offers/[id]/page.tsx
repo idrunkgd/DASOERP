@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { OfferHeaderForm } from "../offer-header-form";
 import { OfferLinesEditor } from "./lines-editor";
 import { MilestonesEditor } from "./milestones-editor";
+import { OptionsEditor } from "./options-editor";
 import { OfferActions } from "./offer-actions";
 import { formatCurrency, formatPercent, formatDate } from "@/lib/utils";
 import { isOfferEditable, canCreateNewVersion, isOfferFinal, offerLockMessage } from "@/lib/offer-rules";
@@ -19,6 +20,10 @@ export default async function OfferDetail({ params }: { params: { id: string } }
     include: {
       company: true, owner: true,
       lines: { orderBy: { position: "asc" } },
+      options: {
+        include: { lines: { orderBy: { position: "asc" } } },
+        orderBy: { position: "asc" }
+      },
       milestones: { orderBy: { expectedAt: "asc" } },
       project: true,
       parentOffer: { select: { id: true, reference: true, title: true } },
@@ -88,7 +93,8 @@ export default async function OfferDetail({ params }: { params: { id: string } }
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <OfferHeaderForm initial={offer as any} companies={companies} users={users} readOnly={!isOfferEditable(offer.status)} />
-          <OfferLinesEditor offerId={offer.id} lines={offer.lines as any} profiles={profiles as any} readOnly={!isOfferEditable(offer.status)} />
+          <OfferLinesEditor offerId={offer.id} lines={offer.lines.filter((l: any) => !l.optionId) as any} profiles={profiles as any} readOnly={!isOfferEditable(offer.status)} />
+          <OptionsEditor offerId={offer.id} options={offer.options as any} profiles={profiles as any} readOnly={!isOfferEditable(offer.status)} />
           <MilestonesEditor offerId={offer.id} milestones={offer.milestones as any} totalSell={Number(offer.totalSell)} readOnly={!isOfferEditable(offer.status)} />
           {offer.complements.length > 0 && (
             <section className="card p-5">

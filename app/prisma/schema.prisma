@@ -479,6 +479,7 @@ model Offer {
   marginPct          Decimal             @default(0) @db.Decimal(6, 3)
 
   lines              OfferLine[]
+  options            OfferOption[]
   milestones         BillingMilestone[]
   attachments        Attachment[]        @relation("OfferAttachments")
   project            Project?
@@ -499,10 +500,33 @@ model OfferContact {
   @@id([offerId, contactId])
 }
 
+/// Option d'une offre — bloc nommé contenant des lignes (services + matériel)
+/// proposées en supplément du devis principal. Affichées en page 2bis du PDF.
+model OfferOption {
+  id          String   @id @default(cuid())
+  offerId     String
+  offer       Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  position    Int      @default(0)
+  name        String                              // ex: "Hébergement 1 an"
+  description String?
+  /// Cache des totaux de l'option (somme des lignes rattachées)
+  totalSell   Decimal  @default(0) @db.Decimal(12, 2)
+  totalCost   Decimal  @default(0) @db.Decimal(12, 2)
+  lines       OfferLine[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([offerId, position])
+}
+
 model OfferLine {
   id              String        @id @default(cuid())
   offerId         String
   offer           Offer         @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  /// Si renseigné, la ligne appartient à une option (et n'est PAS dans le total
+  /// principal du devis). Sinon, ligne du devis de base.
+  optionId        String?
+  option          OfferOption?  @relation(fields: [optionId], references: [id], onDelete: Cascade)
   position        Int           @default(0)
   description     String
   type            OfferLineType @default(SERVICE)

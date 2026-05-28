@@ -164,78 +164,133 @@ export async function deleteOpportunity(id: string) {
  * Déplace n'importe quelle carte du kanban CRM (Opportunity / MissionRequest /
  * Offer / Project) vers un nouveau stage. Chaque entité a son propre enum
  * de statut — on mappe le stage kanban vers le statut natif.
+ *
+ * Renvoie { ok, before, after } pour debug. Le caller front log l'erreur si !ok.
  */
 export async function moveCardStage(
   source: "opportunity" | "mission-request" | "offer" | "project",
   id: string,
   newStage: "NEW" | "QUALIFIED" | "PROPOSED" | "NEGOTIATING" | "WON" | "LOST" | "CANCELLED"
-) {
+): Promise<{ ok: true; before: string; after: string } | { ok: false; error: string }> {
   const session = await requireSession();
 
-  if (source === "opportunity") {
-    // Utilise la logique existante
-    await moveOpportunityStage(id, newStage);
-    return;
-  }
+  try {
+    if (source === "opportunity") {
+      const before = await prisma.opportunity.findUnique({
+        where: { id },
+        select: { stage: true }
+      });
+      await moveOpportunityStage(id, newStage);
+      revalidatePath("/test/crm");
+      return { ok: true, before: before?.stage ?? "?", after: newStage };
+    }
 
-  if (source === "mission-request") {
-    const map: Record<typeof newStage, string> = {
-      NEW: "NEW",
-      QUALIFIED: "QUALIFYING",
-      PROPOSED: "PRESENTING",
-      NEGOTIATING: "PRESENTING",
-      WON: "CONTRACTED",
-      LOST: "LOST",
-      CANCELLED: "CANCELLED"
-    };
-    await prisma.missionRequest.update({
-      where: { id },
-      data: {
-        status: map[newStage] as any,
-        closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
-      }
-    });
-  } else if (source === "offer") {
-    const map: Record<typeof newStage, string> = {
-      NEW: "DRAFT",
-      QUALIFIED: "DRAFT",
-      PROPOSED: "SENT",
-      NEGOTIATING: "NEGOTIATION",
-      WON: "WON",
-      LOST: "LOST",
-      CANCELLED: "CANCELLED"
-    };
-    await prisma.offer.update({
-      where: { id },
-      data: {
-        status: map[newStage] as any,
-        closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
-      }
-    });
-  } else if (source === "project") {
-    const map: Record<typeof newStage, string> = {
-      NEW: "TO_START",
-      QUALIFIED: "TO_START",
-      PROPOSED: "TO_START",
-      NEGOTIATING: "TO_START",
-      WON: "ACTIVE",
-      LOST: "CANCELLED",
-      CANCELLED: "CANCELLED"
-    };
-    await prisma.project.update({
-      where: { id },
-      data: { status: map[newStage] as any }
-    });
-  }
+    if (source === "mission-request") {
+      const map: Record<typeof newStage, string> = {
+        NEW: "NEW",
+        QUALIFIED: "QUALIFYING",
+        PROPOSED: "PRESENTING",
+        NEGOTIATING: "PRESENTING",
+        WON: "CONTRACTED",
+        LOST: "LOST",
+        CANCELLED: "CANCELLED"
+      };
+      const before = await prisma.missionRequest.findUnique({
+        where: { id },
+        select: { status: true }
+      });
+      await prisma.missionRequest.update({
+        where: { id },
+        data: {
+          status: map[newStage] as any,
+          closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
+        }
+      });
+      await logActivity({
+        actorId: session.user.id,
+        action: "STATUS_CHANGE",
+        entityType: "MissionRequest",
+        entityId: id,
+        message: `[CRM] ${before?.status} → ${map[newStage]}`
+      });
+      revalidatePath("/test/crm");
+      revalidatePath(`/mission-requests/${id}`);
+      return { ok: true, before: before?.status ?? "?", after: map[newStage] };
+    }
 
-  await logActivity({
-    actorId: session.user.id,
-    action: "STATUS_CHANGE",
-    entityType: source,
-    entityId: id,
-    message: `[CRM] ${source} déplacée → ${newStage}`
-  });
-  revalidatePath("/test/crm");
+    if (source === "offer") {
+      const map: Record<typeof newStage, string> = {
+        NEW: "DRAFT",
+        QUALIFIED: "DRAFT",
+        PROPOSED: "SENT",
+        NEGOTIATING: "NEGOTIATION",
+        WON: "WON",
+        LOST: "LOST",
+        CANCELLED: "CANCELLED"
+      };
+      const before = await prisma.offer.findUnique({
+        where: { id },
+        select: { status: true }
+      });
+      const targetStatus = map[newStage];
+      // Update direct sans cascade — moveCardStage ne crée pas de Project automatiquement.
+      // Pour transformer un devis en projet, passer par /offers/[id] "Marquer gagnée".
+      await prisma.offer.update({
+        where: { id },
+        data: {
+          status: targetStatus as any,
+          closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
+        }
+      });
+      await logActivity({
+        actorId: session.user.id,
+        action: "STATUS_CHANGE",
+        entityType: "Offer",
+        entityId: id,
+        message: `[CRM] ${before?.status} → ${targetStatus}`
+      });
+      revalidatePath("/test/crm");
+      revalidatePath(`/offers/${id}`);
+      revalidatePath("/offers");
+      return { ok: true, before: before?.status ?? "?", after: targetStatus };
+    }
+
+    if (source === "project") {
+      const map: Record<typeof newStage, string> = {
+        NEW: "TO_START",
+        QUALIFIED: "TO_START",
+        PROPOSED: "TO_START",
+        NEGOTIATING: "TO_START",
+        WON: "ACTIVE",
+        LOST: "CANCELLED",
+        CANCELLED: "CANCELLED"
+      };
+      const before = await prisma.project.findUnique({
+        where: { id },
+        select: { status: true }
+      });
+      await prisma.project.update({
+        where: { id },
+        data: { status: map[newStage] as any }
+      });
+      await logActivity({
+        actorId: session.user.id,
+        action: "STATUS_CHANGE",
+        entityType: "Project",
+        entityId: id,
+        message: `[CRM] ${before?.status} → ${map[newStage]}`
+      });
+      revalidatePath("/test/crm");
+      revalidatePath(`/projects/${id}`);
+      revalidatePath("/projects");
+      return { ok: true, before: before?.status ?? "?", after: map[newStage] };
+    }
+
+    return { ok: false, error: `Source inconnue : ${source}` };
+  } catch (e: any) {
+    console.error("[moveCardStage] erreur", { source, id, newStage, error: e?.message });
+    return { ok: false, error: e?.message ?? "Erreur DB" };
+  }
 }
 
 export async function addOpportunityActivity(

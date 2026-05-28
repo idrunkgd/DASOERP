@@ -13,7 +13,13 @@ import type { OfferStatus, Prisma } from "@prisma/client";
  * déjà TRANSMITTED/PAID (= déjà facturé, on ne change pas l'historique).
  */
 export async function recomputeOfferTotals(offerId: string) {
-  const lines = await prisma.offerLine.findMany({ where: { offerId } });
+  // IMPORTANT : on ne prend QUE les lignes principales (optionId = null).
+  // Les lignes d'options sont calculées séparément via recomputeOfferOption,
+  // et n'entrent PAS dans le total HT du devis principal (présentées au client
+  // en "supplément possible" via la page 2bis du PDF).
+  const lines = await prisma.offerLine.findMany({
+    where: { offerId, optionId: null }
+  });
   // recalcule ligne par ligne + persist
   for (const l of lines) {
     const t = computeOfferLineTotals({
@@ -32,7 +38,9 @@ export async function recomputeOfferTotals(offerId: string) {
       }
     });
   }
-  const fresh = await prisma.offerLine.findMany({ where: { offerId } });
+  const fresh = await prisma.offerLine.findMany({
+    where: { offerId, optionId: null }
+  });
   const tot = aggregateOfferTotals(fresh.map(l => ({
     totalSell: Number(l.totalSell),
     totalCost: Number(l.totalCost),
