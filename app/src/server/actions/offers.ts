@@ -6,6 +6,7 @@ import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { changeOfferStatus, createOffer, duplicateOffer, recomputeOfferTotals, createComplement, createNewVersion } from "@/server/services/offer-service";
+import { computeOfferLineTotals } from "@/lib/calc";
 import { isOfferEditable, isOfferFinal, OfferLockedError } from "@/lib/offer-rules";
 import type { OfferStatus, BillingMilestoneStatus } from "@prisma/client";
 
@@ -355,16 +356,38 @@ export async function addOptionOtherLine(optionId: string, formData: FormData) {
 }
 
 /**
- * Recalcule les totaux d'une option (à partir de ses lignes).
- * Appelé après chaque mutation d'une ligne d'option.
+ * Recalcule les totaux d'une option : pour CHAQUE ligne, on recalcule
+ * totalSell/totalCost depuis ses inputs (qty × prix etc.), on persiste,
+ * puis on somme.
+ *
+ * IMPORTANT : les lignes viennent d'être créées avec totalSell=0 (default
+ * Prisma) — il faut donc impérativement les recalculer ici, sinon le total
+ * de l'option reste à 0 €.
  */
 async function recomputeOfferOption(optionId: string) {
   const lines = await prisma.offerLine.findMany({ where: { optionId } });
   let totalSell = 0;
   let totalCost = 0;
   for (const l of lines) {
-    totalSell += Number(l.totalSell);
-    totalCost += Number(l.totalCost);
+    const t = computeOfferLineTotals({
+      quantity: l.quantity.toString(),
+      unitSellPrice: l.unitSellPrice.toString(),
+      unitCost: l.unitCost.toString(),
+      discountPct: l.discountPct.toString(),
+      marginPctInput:
+        l.marginPctInput != null ? l.marginPctInput.toString() : null
+    });
+    await prisma.offerLine.update({
+      where: { id: l.id },
+      data: {
+        totalSell: t.totalSell,
+        totalCost: t.totalCost,
+        marginAmount: t.marginAmount,
+        marginPct: t.marginPct
+      }
+    });
+    totalSell += t.totalSell;
+    totalCost += t.totalCost;
   }
   await prisma.offerOption.update({
     where: { id: optionId },
