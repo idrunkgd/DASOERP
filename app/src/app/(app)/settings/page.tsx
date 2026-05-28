@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { getCompanyInfo } from "@/lib/company-info";
-import { ChevronRight, Building2 } from "lucide-react";
+import { ChevronRight, Building2, GraduationCap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +29,20 @@ export default async function SettingsPage() {
             <div className="flex justify-between"><dt className="text-midnight-500">IBAN</dt><dd className="font-mono text-xs">{company.iban}</dd></div>
           </dl>
           <p className="text-xs text-indigoaccent mt-3 group-hover:underline">Modifier →</p>
+        </Link>
+        <Link href="/settings/onboarding-templates" className="card p-5 hover:border-indigoaccent transition-colors group">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 text-indigoaccent" />
+              <h2 className="font-semibold">Templates d'onboarding</h2>
+            </div>
+            <ChevronRight className="w-4 h-4 text-midnight-400 group-hover:text-indigoaccent" />
+          </div>
+          <p className="text-sm text-midnight-500">
+            Modèles de checklists appliqués à chaque nouvel arrivant (consultant, manager, commercial…).
+            Définissez les items par catégorie, les responsables par défaut et le rythme des entretiens.
+          </p>
+          <p className="text-xs text-indigoaccent mt-3 group-hover:underline">Gérer les templates →</p>
         </Link>
         <section className="card p-5">
           <h2 className="font-semibold mb-3">Numérotation</h2>

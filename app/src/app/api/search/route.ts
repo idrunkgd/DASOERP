@@ -22,7 +22,6 @@ type Result = {
     | "mission"
     | "candidate"
     | "consultant"
-    | "wiki"
     | "onboarding";
   id: string;
   title: string;
@@ -359,27 +358,6 @@ export async function GET(req: NextRequest) {
       })
     );
   }
-
-  // ── Wiki pages (accessibles à tout user connecté) ────────────────────────
-  const whereWiki = buildAndOfOr(words, (w) => [
-    { title: { contains: w, mode: "insensitive" as const } },
-    { body: { contains: w, mode: "insensitive" as const } },
-    { category: { contains: w, mode: "insensitive" as const } }
-  ]);
-  const wikis = await prisma.wikiPage.findMany({
-    where: whereWiki,
-    take: LIMIT,
-    orderBy: [{ pinned: "desc" }, { updatedAt: "desc" }]
-  });
-  wikis.forEach((p) =>
-    results.push({
-      type: "wiki",
-      id: p.id,
-      title: p.title,
-      subtitle: p.category ?? "Wiki",
-      href: `/knowledge/${p.slug}`
-    })
-  );
 
   // ── Onboardings actifs (par nom du user) ─────────────────────────────────
   if (has("users.manage") || has("consulting.read")) {

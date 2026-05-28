@@ -19,7 +19,6 @@ import {
   Plane,
   UserPlus,
   Briefcase,
-  BookOpen,
   GraduationCap
 } from "lucide-react";
 
@@ -45,7 +44,6 @@ const TYPE_META: Record<
   mission:    { label: "Missions",     icon: Plane,        color: "text-indigo-500" },
   candidate:  { label: "Candidats",    icon: UserPlus,     color: "text-pink-500" },
   consultant: { label: "Consultants",  icon: Briefcase,    color: "text-indigoaccent" },
-  wiki:       { label: "Wiki",         icon: BookOpen,     color: "text-teal-500" },
   onboarding: { label: "Onboarding",   icon: GraduationCap, color: "text-rose-500" }
 };
 
@@ -60,7 +58,6 @@ const TYPE_ORDER = [
   "candidate",
   "consultant",
   "onboarding",
-  "wiki",
   "purchase",
   "user"
 ];
