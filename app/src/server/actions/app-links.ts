@@ -21,8 +21,14 @@ const Schema = z.object({
 
 async function requireAdmin() {
   const session = await requireSession();
-  if (session.user.role !== "ADMIN") {
-    throw new Error("Forbidden: réservé aux administrateurs");
+  // On relit le rôle depuis la DB (le JWT peut être obsolète) et on accepte
+  // ADMIN ou MANAGER — c'est suffisant pour cette liste interne.
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true }
+  });
+  if (!dbUser || !["ADMIN", "MANAGER"].includes(dbUser.role)) {
+    throw new Error("Forbidden: réservé aux administrateurs et managers");
   }
   return session;
 }

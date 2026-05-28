@@ -12,7 +12,15 @@ export const dynamic = "force-dynamic";
 
 export default async function AppLinksPage() {
   const session = await requireSession();
-  const isAdmin = session.user.role === "ADMIN";
+
+  // On relit le rôle depuis la DB plutôt que de faire confiance au JWT
+  // (qui peut être en cache si l'utilisateur n'a pas reconnecté). En plus
+  // on autorise MANAGER en plus d'ADMIN pour pouvoir éditer la liste.
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true }
+  });
+  const isAdmin = !!dbUser && ["ADMIN", "MANAGER"].includes(dbUser.role);
 
   const links = await prisma.appLink.findMany({
     orderBy: [{ position: "asc" }, { name: "asc" }]
