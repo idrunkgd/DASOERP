@@ -11,16 +11,11 @@ import { AppLinksManager } from "./manager";
 export const dynamic = "force-dynamic";
 
 export default async function AppLinksPage() {
-  const session = await requireSession();
+  await requireSession();
 
-  // On relit le rôle depuis la DB plutôt que de faire confiance au JWT
-  // (qui peut être en cache si l'utilisateur n'a pas reconnecté). En plus
-  // on autorise MANAGER en plus d'ADMIN pour pouvoir éditer la liste.
-  const dbUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true }
-  });
-  const isAdmin = !!dbUser && ["ADMIN", "MANAGER"].includes(dbUser.role);
+  // Édition ouverte à tout user connecté — c'est une liste interne, équipe
+  // petite, pas d'enjeu de sécurité. On pourra restreindre plus tard si besoin.
+  const canEdit = true;
 
   const links = await prisma.appLink.findMany({
     orderBy: [{ position: "asc" }, { name: "asc" }]
@@ -32,7 +27,7 @@ export default async function AppLinksPage() {
         title="Outils & apps"
         subtitle="Raccourcis vers les applications externes utilisées pour Dasolabs."
         actions={
-          isAdmin ? (
+          canEdit ? (
             <AppLinksManager mode="create" />
           ) : null
         }
@@ -44,7 +39,7 @@ export default async function AppLinksPage() {
             icon={AppWindow}
             title="Aucun lien pour l'instant"
             description={
-              isAdmin
+              canEdit
                 ? "Cliquez sur « Ajouter une app » pour créer la première dalle."
                 : "Aucune app n'a encore été référencée. Demandez à un admin d'en ajouter."
             }
@@ -56,7 +51,7 @@ export default async function AppLinksPage() {
             <Tile
               key={link.id}
               link={link}
-              isAdmin={isAdmin}
+              canEdit={canEdit}
             />
           ))}
         </div>
@@ -67,10 +62,10 @@ export default async function AppLinksPage() {
 
 function Tile({
   link,
-  isAdmin
+  canEdit
 }: {
   link: { id: string; name: string; url: string; description: string | null };
-  isAdmin: boolean;
+  canEdit: boolean;
 }) {
   // Domaine extrait de l'URL pour afficher proprement sous le titre.
   let host = "";
@@ -104,7 +99,7 @@ function Tile({
           </p>
         )}
       </a>
-      {isAdmin && (
+      {canEdit && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <AppLinksManager mode="edit" link={link} />
         </div>

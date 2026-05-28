@@ -19,18 +19,11 @@ const Schema = z.object({
   position: z.coerce.number().int().default(0)
 });
 
+// On garde la fonction sous ce nom pour la sémantique, mais aujourd'hui
+// elle accepte tout utilisateur authentifié. Si on veut re-restreindre plus
+// tard, c'est ici qu'on rajoute le check de rôle.
 async function requireAdmin() {
-  const session = await requireSession();
-  // On relit le rôle depuis la DB (le JWT peut être obsolète) et on accepte
-  // ADMIN ou MANAGER — c'est suffisant pour cette liste interne.
-  const dbUser = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true }
-  });
-  if (!dbUser || !["ADMIN", "MANAGER"].includes(dbUser.role)) {
-    throw new Error("Forbidden: réservé aux administrateurs et managers");
-  }
-  return session;
+  return requireSession();
 }
 
 export async function createAppLink(formData: FormData) {
