@@ -600,17 +600,48 @@ export function OfferPdfDocument({
         <Text style={styles.sectionTitle}>Modalités de facturation</Text>
         {data.milestones.length > 0 ? (
           <View style={{ marginBottom: 18 }}>
-            {data.milestones.map((m, i) => (
-              <View key={i} style={styles.milestoneRow} wrap={false}>
-                <Text>
-                  {m.label}
-                  {m.expectedAt && `  ·  prévu le ${fmtDate(m.expectedAt)}`}
-                  {m.percentage && `  ·  ${fmtQty(m.percentage)}%`}
-                </Text>
-                <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(m.amount)}</Text>
-              </View>
-            ))}
-            <View style={{ flexDirection: "row", justifyContent: "space-between", paddingTop: 6, marginTop: 4, borderTop: `1 solid ${colors.indigo}` }}>
+            {/* Header tableau identique à celui du MilestonesEditor sur la page offre */}
+            <View style={styles.tableHeader}>
+              <Text style={{ flex: 4 }}>Libellé</Text>
+              <Text style={{ flex: 1.6, textAlign: "right" }}>Montant HT</Text>
+              <Text style={{ flex: 0.9, textAlign: "right" }}>%</Text>
+              <Text style={{ flex: 1.6, textAlign: "right" }}>Date prévue</Text>
+            </View>
+            {data.milestones.map((m, i) => {
+              const pct =
+                m.percentage != null && Number(m.percentage) > 0
+                  ? Number(m.percentage)
+                  : totalHt > 0
+                    ? (Number(m.amount) / totalHt) * 100
+                    : 0;
+              return (
+                <View
+                  key={i}
+                  style={i % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : styles.tableRow}
+                  wrap={false}
+                >
+                  <Text style={{ flex: 4 }}>{m.label}</Text>
+                  <Text style={{ flex: 1.6, textAlign: "right", fontFamily: "Helvetica-Bold" }}>
+                    {fmtEur(m.amount)}
+                  </Text>
+                  <Text style={{ flex: 0.9, textAlign: "right" }}>
+                    {pct > 0 ? `${pct.toFixed(1)}%` : "—"}
+                  </Text>
+                  <Text style={{ flex: 1.6, textAlign: "right" }}>
+                    {m.expectedAt ? fmtDate(m.expectedAt) : "—"}
+                  </Text>
+                </View>
+              );
+            })}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingTop: 6,
+                marginTop: 4,
+                borderTop: `1 solid ${colors.indigo}`
+              }}
+            >
               <Text style={{ fontFamily: "Helvetica-Bold" }}>Total à facturer</Text>
               <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(totalHt)} HTVA</Text>
             </View>

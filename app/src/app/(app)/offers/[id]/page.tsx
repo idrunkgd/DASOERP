@@ -123,6 +123,24 @@ export default async function OfferDetail({ params }: { params: { id: string } }
             <Row k="Total coût" v={formatCurrency(offer.totalCost)} />
             <Row k="Marge €" v={formatCurrency(offer.marginAmount)} />
             <Row k="Marge %" v={formatPercent(offer.marginPct)} />
+            {offer.options.length > 0 && (
+              <>
+                <div className="border-t border-border my-2" />
+                <Row
+                  k={`Options (${offer.options.length})`}
+                  v={
+                    <span className="text-indigoaccent font-semibold">
+                      + {formatCurrency(
+                        offer.options.reduce((s: number, o: any) => s + Number(o.totalSell), 0)
+                      )}
+                    </span>
+                  }
+                />
+                <div className="text-[10px] text-midnight-400 text-right -mt-1">
+                  Hors total principal — au choix du client
+                </div>
+              </>
+            )}
           </div>
           <div className="card p-5 space-y-2 text-sm">
             <h3 className="font-semibold mb-2">Suivi</h3>
