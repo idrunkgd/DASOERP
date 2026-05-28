@@ -160,6 +160,84 @@ export async function deleteOpportunity(id: string) {
   revalidatePath("/test/crm");
 }
 
+/**
+ * Déplace n'importe quelle carte du kanban CRM (Opportunity / MissionRequest /
+ * Offer / Project) vers un nouveau stage. Chaque entité a son propre enum
+ * de statut — on mappe le stage kanban vers le statut natif.
+ */
+export async function moveCardStage(
+  source: "opportunity" | "mission-request" | "offer" | "project",
+  id: string,
+  newStage: "NEW" | "QUALIFIED" | "PROPOSED" | "NEGOTIATING" | "WON" | "LOST" | "CANCELLED"
+) {
+  const session = await requireSession();
+
+  if (source === "opportunity") {
+    // Utilise la logique existante
+    await moveOpportunityStage(id, newStage);
+    return;
+  }
+
+  if (source === "mission-request") {
+    const map: Record<typeof newStage, string> = {
+      NEW: "NEW",
+      QUALIFIED: "QUALIFYING",
+      PROPOSED: "PRESENTING",
+      NEGOTIATING: "PRESENTING",
+      WON: "CONTRACTED",
+      LOST: "LOST",
+      CANCELLED: "CANCELLED"
+    };
+    await prisma.missionRequest.update({
+      where: { id },
+      data: {
+        status: map[newStage] as any,
+        closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
+      }
+    });
+  } else if (source === "offer") {
+    const map: Record<typeof newStage, string> = {
+      NEW: "DRAFT",
+      QUALIFIED: "DRAFT",
+      PROPOSED: "SENT",
+      NEGOTIATING: "NEGOTIATION",
+      WON: "WON",
+      LOST: "LOST",
+      CANCELLED: "CANCELLED"
+    };
+    await prisma.offer.update({
+      where: { id },
+      data: {
+        status: map[newStage] as any,
+        closedAt: ["WON", "LOST", "CANCELLED"].includes(newStage) ? new Date() : null
+      }
+    });
+  } else if (source === "project") {
+    const map: Record<typeof newStage, string> = {
+      NEW: "TO_START",
+      QUALIFIED: "TO_START",
+      PROPOSED: "TO_START",
+      NEGOTIATING: "TO_START",
+      WON: "ACTIVE",
+      LOST: "CANCELLED",
+      CANCELLED: "CANCELLED"
+    };
+    await prisma.project.update({
+      where: { id },
+      data: { status: map[newStage] as any }
+    });
+  }
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "STATUS_CHANGE",
+    entityType: source,
+    entityId: id,
+    message: `[CRM] ${source} déplacée → ${newStage}`
+  });
+  revalidatePath("/test/crm");
+}
+
 export async function addOpportunityActivity(
   opportunityId: string,
   formData: FormData

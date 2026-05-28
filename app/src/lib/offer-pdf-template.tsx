@@ -333,6 +333,37 @@ export function OfferPdfDocument({
     : `${validityDays} jours à compter de l'émission`;
   const paymentDays = company.paymentTermsDays ?? 30;
 
+  // ───────────────────────────────────────────────────────────
+  // HEADER + FOOTER réutilisés sur les 3 pages
+  // ───────────────────────────────────────────────────────────
+  const PageHeader = ({ subtitle }: { subtitle: string }) => (
+    <View style={styles.header}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <DasolabsIcon size={32} color={colors.ink} />
+        <View>
+          <Text style={styles.brand}>{company.legalName.split(" ")[0] || "DASOLABS"}</Text>
+          <Text style={styles.brandTagline}>IT & industrial consulting</Text>
+        </View>
+      </View>
+      <View>
+        <Text style={styles.docTitle}>DEVIS</Text>
+        <Text style={styles.docMeta}>{data.reference}</Text>
+        <Text style={styles.docMeta}>{subtitle}</Text>
+      </View>
+    </View>
+  );
+
+  const PageFooter = () => (
+    <View style={styles.footer} fixed>
+      <Text>
+        {company.legalName} · {company.vatNumber} · {company.iban}
+      </Text>
+      <Text
+        render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`}
+      />
+    </View>
+  );
+
   return (
     <Document
       title={`Devis ${data.reference}`}
@@ -340,24 +371,13 @@ export function OfferPdfDocument({
       creator="Dasolabs ERP"
       producer="Dasolabs ERP"
     >
+      {/* ═════════════════════════════════════════════════════════
+          PAGE 1 — Introduction + Description
+          ═════════════════════════════════════════════════════════ */}
       <Page size="A4" style={styles.page}>
-        {/* HEADER : logo + nom à gauche, titre devis à droite */}
-        <View style={styles.header}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-            <DasolabsIcon size={36} color={colors.ink} />
-            <View>
-              <Text style={styles.brand}>{company.legalName.split(" ")[0] || "DASOLABS"}</Text>
-              <Text style={styles.brandTagline}>IT & industrial consulting</Text>
-            </View>
-          </View>
-          <View>
-            <Text style={styles.docTitle}>DEVIS</Text>
-            <Text style={styles.docMeta}>{data.reference}</Text>
-            <Text style={styles.docMeta}>Émis le {fmtDate(data.sentAt ?? new Date())}</Text>
-          </View>
-        </View>
+        <PageHeader subtitle={`Émis le ${fmtDate(data.sentAt ?? new Date())}`} />
 
-        {/* EMETTEUR / CLIENT */}
+        {/* Émetteur / Destinataire */}
         <View style={styles.twoCol}>
           <View style={styles.block}>
             <Text style={styles.blockLabel}>Émetteur</Text>
@@ -392,7 +412,7 @@ export function OfferPdfDocument({
           </View>
         </View>
 
-        {/* INFO BAR */}
+        {/* Info bar */}
         <View style={styles.infoBox}>
           <View style={styles.infoCol}>
             <Text style={styles.infoLabel}>Objet</Text>
@@ -404,40 +424,75 @@ export function OfferPdfDocument({
           </View>
         </View>
 
-        {data.description && (
-          <View style={{ marginBottom: 14 }}>
-            <Text style={styles.sectionTitle}>Description de la prestation</Text>
-            <Text style={{ fontSize: 9, lineHeight: 1.5, color: colors.ink }}>
-              {data.description}
-            </Text>
-          </View>
+        {/* Description — toujours présente sur la page 1 */}
+        <Text style={styles.sectionTitle}>Description de la prestation</Text>
+        {data.description ? (
+          <Text style={{ fontSize: 10, lineHeight: 1.5, color: colors.ink }}>
+            {data.description}
+          </Text>
+        ) : (
+          <Text style={{ fontSize: 9, lineHeight: 1.5, color: colors.grey, fontStyle: "italic" }}>
+            Le présent devis détaille l'ensemble des prestations proposées à {data.company.name}
+            dans le cadre de « {data.title} ». Le détail des lignes et postes est précisé en page
+            suivante, et les modalités de facturation ainsi que les conditions générales sont
+            détaillées en page 3.
+          </Text>
         )}
 
-        {/* LIGNES */}
+        <View style={{ marginTop: 18, padding: 10, backgroundColor: colors.light, borderLeft: `3 solid ${colors.accent}` }}>
+          <Text style={{ fontSize: 9, color: colors.ink, lineHeight: 1.5 }}>
+            <Text style={{ fontFamily: "Helvetica-Bold" }}>Synthèse :</Text>
+            {" "}Montant total HTVA{" "}
+            <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(totalHt)}</Text>
+            {" "}— TTC{" "}
+            <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(totalTtc)}</Text>
+            {" · "}{data.lines.length} ligne(s) au devis
+            {data.milestones.length > 0 ? ` · ${data.milestones.length} tranche(s) de facturation` : ""}.
+          </Text>
+        </View>
+
+        <PageFooter />
+      </Page>
+
+      {/* ═════════════════════════════════════════════════════════
+          PAGE 2 — Détail des lignes + totaux
+          ═════════════════════════════════════════════════════════ */}
+      <Page size="A4" style={styles.page}>
+        <PageHeader subtitle="Détail du devis" />
+
         <Text style={styles.sectionTitle}>Détail du devis</Text>
         <View style={styles.table}>
-          <View style={styles.tableHeader}>
+          <View style={styles.tableHeader} fixed>
             <Text style={styles.colDesc}>Description</Text>
             <Text style={styles.colQty}>Qté</Text>
             <Text style={styles.colUnit}>Unité</Text>
             <Text style={styles.colPrice}>PU HTVA</Text>
             <Text style={styles.colTotal}>Total HTVA</Text>
           </View>
-          {data.lines.map((line, i) => (
-            <View
-              key={i}
-              style={i % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : styles.tableRow}
-            >
-              <Text style={styles.colDesc}>{line.description}</Text>
-              <Text style={styles.colQty}>{fmtQty(line.quantity)}</Text>
-              <Text style={styles.colUnit}>{line.unit}</Text>
-              <Text style={styles.colPrice}>{fmtEur(line.unitSellPrice)}</Text>
-              <Text style={styles.colTotal}>{fmtEur(line.totalSell)}</Text>
+          {data.lines.length === 0 ? (
+            <View style={styles.tableRow}>
+              <Text style={{ fontStyle: "italic", color: colors.grey, textAlign: "center", flex: 1 }}>
+                Aucune ligne au devis.
+              </Text>
             </View>
-          ))}
+          ) : (
+            data.lines.map((line, i) => (
+              <View
+                key={i}
+                style={i % 2 === 1 ? [styles.tableRow, styles.tableRowAlt] : styles.tableRow}
+                wrap={false}
+              >
+                <Text style={styles.colDesc}>{line.description}</Text>
+                <Text style={styles.colQty}>{fmtQty(line.quantity)}</Text>
+                <Text style={styles.colUnit}>{line.unit}</Text>
+                <Text style={styles.colPrice}>{fmtEur(line.unitSellPrice)}</Text>
+                <Text style={styles.colTotal}>{fmtEur(line.totalSell)}</Text>
+              </View>
+            ))
+          )}
         </View>
 
-        {/* TOTAUX */}
+        {/* Totaux */}
         <View style={styles.totalsBlock}>
           <View style={styles.totalsBox}>
             <View style={styles.totalRow}>
@@ -455,12 +510,20 @@ export function OfferPdfDocument({
           </View>
         </View>
 
-        {/* TRANCHES */}
-        {data.milestones.length > 0 && (
-          <View style={{ marginBottom: 14 }}>
-            <Text style={styles.sectionTitle}>Modalités de facturation</Text>
+        <PageFooter />
+      </Page>
+
+      {/* ═════════════════════════════════════════════════════════
+          PAGE 3 — Modalités de facturation + Conditions
+          ═════════════════════════════════════════════════════════ */}
+      <Page size="A4" style={styles.page}>
+        <PageHeader subtitle="Modalités & conditions" />
+
+        <Text style={styles.sectionTitle}>Modalités de facturation</Text>
+        {data.milestones.length > 0 ? (
+          <View style={{ marginBottom: 18 }}>
             {data.milestones.map((m, i) => (
-              <View key={i} style={styles.milestoneRow}>
+              <View key={i} style={styles.milestoneRow} wrap={false}>
                 <Text>
                   {m.label}
                   {m.expectedAt && `  ·  prévu le ${fmtDate(m.expectedAt)}`}
@@ -469,36 +532,66 @@ export function OfferPdfDocument({
                 <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(m.amount)}</Text>
               </View>
             ))}
+            <View style={{ flexDirection: "row", justifyContent: "space-between", paddingTop: 6, marginTop: 4, borderTop: `1 solid ${colors.indigo}` }}>
+              <Text style={{ fontFamily: "Helvetica-Bold" }}>Total à facturer</Text>
+              <Text style={{ fontFamily: "Helvetica-Bold" }}>{fmtEur(totalHt)} HTVA</Text>
+            </View>
           </View>
+        ) : (
+          <Text style={{ fontSize: 9, color: colors.grey, fontStyle: "italic", marginBottom: 18 }}>
+            Facturation à terme à la livraison de la prestation, sauf accord spécifique.
+          </Text>
         )}
 
-        {/* MENTIONS LÉGALES */}
+        <Text style={styles.sectionTitle}>Conditions générales</Text>
         <View style={styles.legalBlock}>
-          <Text style={{ fontFamily: "Helvetica-Bold", marginBottom: 3, color: colors.ink }}>
-            Conditions
-          </Text>
           {company.legalNotice && company.legalNotice.trim() ? (
             <Text>{company.legalNotice}</Text>
           ) : (
             <Text>
-              • Devis valable {data.expectedDecisionAt ? `jusqu'au ${fmtDate(data.expectedDecisionAt)}` : `${validityDays} jours`} à compter de la date d'émission.{"\n"}
-              • Acceptation : bon pour accord daté et signé à renvoyer par email à {company.email}.{"\n"}
-              • Paiement : {paymentDays} jours fin de mois à compter de la date de facture, par virement sur IBAN {company.iban}{company.bic ? ` (BIC ${company.bic})` : ""}.{"\n"}
-              • Pénalités de retard : taux légal belge (loi du 02/08/2002), sans mise en demeure préalable.{"\n"}
-              • Litiges : tribunaux compétents, droit belge applicable.
+              <Text style={{ fontFamily: "Helvetica-Bold", color: colors.ink }}>Validité du devis</Text>{"\n"}
+              Devis valable {data.expectedDecisionAt ? `jusqu'au ${fmtDate(data.expectedDecisionAt)}` : `${validityDays} jours`} à compter de la date d'émission.{"\n"}{"\n"}
+
+              <Text style={{ fontFamily: "Helvetica-Bold", color: colors.ink }}>Acceptation</Text>{"\n"}
+              Bon pour accord daté et signé à renvoyer par email à {company.email}, ou par courrier postal à l'adresse du siège.{"\n"}{"\n"}
+
+              <Text style={{ fontFamily: "Helvetica-Bold", color: colors.ink }}>Modalités de paiement</Text>{"\n"}
+              Paiement à {paymentDays} jours fin de mois à compter de la date de facture, par virement sur le compte IBAN {company.iban}{company.bic ? ` (BIC ${company.bic})` : ""}.{"\n"}{"\n"}
+
+              <Text style={{ fontFamily: "Helvetica-Bold", color: colors.ink }}>Pénalités de retard</Text>{"\n"}
+              En cas de retard de paiement, des intérêts au taux légal belge (loi du 02/08/2002) seront appliqués sans mise en demeure préalable, ainsi qu'une indemnité forfaitaire pour frais de recouvrement.{"\n"}{"\n"}
+
+              <Text style={{ fontFamily: "Helvetica-Bold", color: colors.ink }}>Litiges</Text>{"\n"}
+              Tout litige sera soumis aux tribunaux compétents de l'arrondissement du siège du prestataire. Le droit belge est seul applicable.{"\n"}{"\n"}
+
+              <Text style={{ fontFamily: "Helvetica-Bold", color: colors.ink }}>Propriété intellectuelle</Text>{"\n"}
+              Les livrables restent la propriété de {company.legalName} jusqu'au paiement intégral du devis. Une fois payés, ils sont transférés au client sauf accord contraire écrit.
             </Text>
           )}
         </View>
 
-        {/* FOOTER */}
-        <View style={styles.footer} fixed>
-          <Text>
-            {company.legalName} · {company.vatNumber} · {company.iban}
-          </Text>
-          <Text
-            render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`}
-          />
+        {/* Bloc signature */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 22, gap: 30 }}>
+          <View style={{ flex: 1, borderTop: `1 solid ${colors.border}`, paddingTop: 8 }}>
+            <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: colors.ink }}>
+              Bon pour accord
+            </Text>
+            <Text style={{ fontSize: 8, color: colors.grey, marginTop: 2 }}>
+              Nom, fonction, date et signature du client
+            </Text>
+            <View style={{ height: 50 }} />
+          </View>
+          <View style={{ flex: 1, borderTop: `1 solid ${colors.border}`, paddingTop: 8 }}>
+            <Text style={{ fontSize: 9, fontFamily: "Helvetica-Bold", color: colors.ink }}>
+              Le prestataire
+            </Text>
+            <Text style={{ fontSize: 8, color: colors.grey, marginTop: 2 }}>
+              {company.legalName} · {fmtDate(new Date())}
+            </Text>
+          </View>
         </View>
+
+        <PageFooter />
       </Page>
     </Document>
   );

@@ -4,8 +4,8 @@ import { requireSession } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { NewOpportunityForm } from "./new-opportunity-form";
-import { OpportunityCard } from "./opportunity-card";
-import { Headset, FolderKanban, ChevronRight, FileText } from "lucide-react";
+import { KanbanBoard, type KanbanItem } from "./kanban-board";
+import { Headset, FolderKanban } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -31,23 +31,7 @@ type BusinessType = "CONSULTING" | "PROJECT";
  */
 type SourceKind = "opportunity" | "mission-request" | "offer" | "project";
 
-// Item unifié pour le kanban
-type UnifiedItem = {
-  id: string;
-  source: SourceKind;
-  /// Type de business : Consultance (T&M) ou Projet (forfait) — c'est l'info montrée à l'utilisateur
-  businessType: BusinessType;
-  title: string;
-  companyName: string | null;
-  ownerName: string | null;
-  estimatedValue: number;
-  probability: number;
-  stage: Stage;
-  expectedCloseAt: string | null;
-  lostReason: string | null;
-  /// Lien vers la page de détail (vide pour les opportunités qui sont éditées inline)
-  href: string;
-};
+type UnifiedItem = KanbanItem;
 
 // Mapping : statut MissionRequest → stage CRM
 function missionRequestToStage(status: string): Stage | null {
@@ -334,110 +318,9 @@ export default async function CrmPage({
         )}
       </div>
 
-      {/* Kanban */}
-      <div className={`grid grid-cols-1 md:grid-cols-3 ${showCancelled ? "xl:grid-cols-7" : "xl:grid-cols-6"} gap-3`}>
-        {STAGES.filter((s) => showCancelled || !s.hiddenByDefault).map((s) => {
-          const items = unified.filter((u) => u.stage === s.key);
-          const subTotal = items.reduce((acc, u) => acc + u.estimatedValue, 0);
-          return (
-            <div key={s.key} className={`rounded-lg ${s.color} flex flex-col min-h-[400px]`}>
-              <div className="p-3 border-b border-black/5 flex items-baseline justify-between">
-                <div className="font-semibold text-sm">{s.label}</div>
-                <div className="text-[10px] text-midnight-500">
-                  {items.length} · {formatCurrency(subTotal)}
-                </div>
-              </div>
-              <div className="p-2 space-y-2 flex-1">
-                {items.length === 0 ? (
-                  <div className="text-center text-xs text-midnight-400 py-4">—</div>
-                ) : (
-                  items.map((item) =>
-                    item.source === "opportunity" ? (
-                      <div key={`opp-${item.id}`} className="relative">
-                        <TypeBadge businessType={item.businessType} source={item.source} />
-                        <OpportunityCard
-                          opp={{
-                            id: item.id,
-                            title: item.title,
-                            stage: item.stage,
-                            estimatedValue: item.estimatedValue,
-                            probability: item.probability,
-                            companyName: item.companyName,
-                            ownerName: item.ownerName,
-                            expectedCloseAt: item.expectedCloseAt,
-                            lostReason: item.lostReason
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <ReadOnlyCard key={`${item.source}-${item.id}`} item={item} />
-                    )
-                  )
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Kanban (client component avec drag & drop + flèches mobiles) */}
+      <KanbanBoard items={unified} showCancelled={showCancelled} />
     </div>
-  );
-}
-
-// Badge en haut à droite des cartes — basé sur le type d'affaire
-function TypeBadge({
-  businessType,
-  source
-}: {
-  businessType: BusinessType;
-  source: SourceKind;
-}) {
-  const Icon = businessType === "CONSULTING" ? Headset : FolderKanban;
-  const color = businessType === "CONSULTING" ? "text-blue-500" : "text-violet-500";
-  return (
-    <Icon
-      className={`absolute top-1.5 right-1.5 w-3.5 h-3.5 ${color} z-10`}
-      aria-label={`${businessType.toLowerCase()}-${source}`}
-    />
-  );
-}
-
-// Carte read-only pour MissionRequest / Offer / Project — pas de boutons d'avancement
-function ReadOnlyCard({ item }: { item: UnifiedItem }) {
-  const Icon = item.businessType === "CONSULTING" ? Headset : FolderKanban;
-  const color = item.businessType === "CONSULTING" ? "text-blue-500" : "text-violet-500";
-  const borderColor = item.businessType === "CONSULTING" ? "border-blue-200" : "border-violet-200";
-  // Petit badge texte pour identifier la source (Demande / Devis / Projet)
-  const sourceLabel =
-    item.source === "mission-request"
-      ? "Demande"
-      : item.source === "offer"
-        ? "Devis"
-        : "Projet";
-  return (
-    <Link
-      href={item.href}
-      className={`block bg-white rounded-md shadow-sm border ${borderColor} p-2.5 text-xs space-y-1.5 hover:shadow-md transition-shadow relative`}
-    >
-      <Icon className={`absolute top-1.5 right-1.5 w-3.5 h-3.5 ${color}`} aria-label={item.businessType} />
-      <div className="flex items-baseline gap-2 pr-4">
-        <span className="text-[9px] uppercase tracking-wider text-midnight-400 font-semibold">
-          {sourceLabel}
-        </span>
-        {item.source === "offer" && <FileText className="w-3 h-3 text-midnight-400" />}
-      </div>
-      <div className="font-medium text-midnight-900 pr-4">{item.title}</div>
-      {item.companyName && <div className="text-[11px] text-midnight-600">{item.companyName}</div>}
-      <div className="flex items-baseline justify-between text-[11px]">
-        <span className="font-semibold text-midnight-800">{formatCurrency(item.estimatedValue)}</span>
-        {item.expectedCloseAt && <span className="text-midnight-500">{item.expectedCloseAt}</span>}
-      </div>
-      {item.ownerName && (
-        <div className="text-[10px] text-midnight-500">Owner : {item.ownerName}</div>
-      )}
-      <div className="flex items-center justify-end text-[10px] text-midnight-400 pt-1 border-t border-midnight-100">
-        Voir <ChevronRight className="w-3 h-3" />
-      </div>
-    </Link>
   );
 }
 
