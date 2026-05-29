@@ -80,7 +80,7 @@ export async function winOfferAndCreateProject(
       });
     }
 
-    // 2) Création du projet
+    // 2) Création du projet — hérite vatRate de l'offre
     const reference = await nextProjectReference();
     const proj = await tx.project.create({
       data: {
@@ -94,6 +94,7 @@ export async function winOfferAndCreateProject(
         budgetSell: offer.totalSell,
         budgetCost: offer.totalCost,
         marginEstimated: offer.marginAmount,
+        vatRate: offer.vatRate,
         plannedStart: project.plannedStart ? new Date(project.plannedStart) : undefined,
         plannedEnd: project.plannedEnd ? new Date(project.plannedEnd) : undefined,
         notes: project.notes || undefined,

@@ -451,6 +451,10 @@ model Offer {
   /// kanban a plus de granularité (NEW/QUALIFIED tous deux mappés vers DRAFT
   /// côté statut, mais on veut pouvoir les distinguer visuellement).
   crmStage           String              @default("NEW")
+  /// Taux de TVA applicable à toute l'offre (uniforme, pas par ligne).
+  /// 21 = Belgique standard, 0 = client export ou exonéré, 6/12 = taux réduits.
+  /// Hérité à la création du projet et utilisé pour calculer le TVAC du cashflow.
+  vatRate            Decimal             @default(21) @db.Decimal(5, 2)
   probability        Int                 @default(50)
   description        String?
   comments           String?
@@ -621,6 +625,9 @@ model Project {
   /// Stage CRM dans le kanban (WON par défaut puisqu'un projet est déjà signé).
   /// Permet d'afficher un projet annulé en CANCELLED sans changer son status métier.
   crmStage           String         @default("WON")
+  /// Taux de TVA applicable au projet (hérité de l'offre à la création).
+  /// 21 = Belgique standard, 0 = client export/exonéré. Utilisé par cashflow.
+  vatRate            Decimal        @default(21) @db.Decimal(5, 2)
   description        String?
   notes              String?
   risks              String?

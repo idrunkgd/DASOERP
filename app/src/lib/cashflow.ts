@@ -161,8 +161,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       include: {
         // Lien direct (milestones standalone)
         company: { select: { name: true } },
-        offer: { include: { company: { select: { name: true } } } },
-        project: { include: { company: { select: { name: true } } } },
+        offer: { select: { vatRate: true, company: { select: { name: true } } } },
+        project: { select: { vatRate: true, company: { select: { name: true } } } },
         // Pour grouper les milestones d'une même mission sur une seule ligne
         mission: {
           select: {
@@ -436,16 +436,22 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
 
   // 2) Lignes individuelles pour les milestones standalone (sans mission) → PROJET
   // Les BillingMilestones stockent leur amount en HTVA (cf. comment dans schéma).
-  // Dans le cashflow on veut afficher le TVAC = HTVA × 1.21 (21% TVA belge standard)
-  // pour comparer avec le compte bancaire.
-  const STANDALONE_VAT_RATE = 21;
-  const standaloneTvacMultiplier = 1 + STANDALONE_VAT_RATE / 100;
+  // Dans le cashflow on veut afficher le TVAC = HTVA × (1 + vatRate/100). Le
+  // vatRate vient du projet (priorité) ou de l'offre rattachée — défaut 21%.
   for (const m of standaloneMilestones) {
     if (!m.expectedAt) continue;
     // On utilise la date d'encaissement (facture + délai), pas la date facture
     const pm = payMonthOf(m.expectedAt);
     if (pm.year !== year) continue;
     const monthIdx = pm.month;
+    // Taux TVA effectif : priorité projet > offre > 21%
+    const standaloneVatRate =
+      m.project?.vatRate != null
+        ? Number(m.project.vatRate)
+        : m.offer?.vatRate != null
+          ? Number(m.offer.vatRate)
+          : 21;
+    const standaloneTvacMultiplier = 1 + standaloneVatRate / 100;
     const companyName =
       m.company?.name ??
       m.offer?.company?.name ??

@@ -16,6 +16,8 @@ type Offer = {
   mode: string;
   ownerId: string | null;
   totalSell: number;
+  /// Taux TVA en %, par ex. 21 ou 0
+  vatRate: number;
   milestones: {
     id: string;
     label: string;
@@ -27,8 +29,6 @@ type Offer = {
 
 type User = { id: string; firstName: string; lastName: string };
 
-const VAT_RATE = 0.21;
-
 export function WinWizardForm({
   offer,
   users,
@@ -38,6 +38,7 @@ export function WinWizardForm({
   users: User[];
   paymentTermsDays: number;
 }) {
+  const vatRatio = offer.vatRate / 100;
   const [name, setName] = useState(offer.title);
   const [managerId, setManagerId] = useState(offer.ownerId ?? "");
   const [plannedStart, setPlannedStart] = useState("");
@@ -175,7 +176,7 @@ export function WinWizardForm({
             Échéances de facturation ({offer.milestones.length})
           </h2>
           <p className="text-xs text-midnight-500">
-            Délai de paiement client : {paymentTermsDays} jours fin de mois
+            TVA {offer.vatRate}% · délai paiement : {paymentTermsDays} jours fin de mois
           </p>
         </div>
         {offer.milestones.length === 0 ? (
@@ -198,7 +199,7 @@ export function WinWizardForm({
               {offer.milestones.map((m) => {
                 const invoiceDate = milestoneDates[m.id] || "";
                 const cashDate = expectedPaymentISO(invoiceDate);
-                const tvac = Math.round(m.amount * (1 + VAT_RATE) * 100) / 100;
+                const tvac = Math.round(m.amount * (1 + vatRatio) * 100) / 100;
                 return (
                   <tr key={m.id}>
                     <td>

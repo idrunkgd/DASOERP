@@ -36,7 +36,8 @@ const HeaderSchema = z.object({
   description: z.string().optional().nullable(),
   comments: z.string().optional().nullable(),
   sentAt: z.string().optional().nullable().transform(v => v ? new Date(v) : null),
-  expectedDecisionAt: z.string().optional().nullable().transform(v => v ? new Date(v) : null)
+  expectedDecisionAt: z.string().optional().nullable().transform(v => v ? new Date(v) : null),
+  vatRate: z.coerce.number().min(0).max(50).default(21)
 });
 
 export async function createOfferAction(formData: FormData) {

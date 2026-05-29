@@ -8,6 +8,7 @@ type Initial = {
   id?: string; title?: string; mode?: string; companyId?: string; ownerId?: string | null; status?: string;
   probability?: number; description?: string | null; comments?: string | null;
   sentAt?: Date | string | null; expectedDecisionAt?: Date | string | null;
+  vatRate?: number | string | null;
 };
 
 function dateInput(d?: Date | string | null) {
@@ -57,6 +58,19 @@ export function OfferHeaderForm({
         <div className="col-span-6 md:col-span-2">
           <label className="label">Probabilité (%)</label>
           <input name="probability" type="number" min={0} max={100} defaultValue={initial?.probability ?? 50} className="input" />
+        </div>
+        <div className="col-span-6 md:col-span-2">
+          <label className="label">TVA (%)</label>
+          <input
+            name="vatRate"
+            type="number"
+            min={0}
+            max={50}
+            step={0.5}
+            defaultValue={initial?.vatRate != null ? Number(initial.vatRate) : 21}
+            className="input"
+            title="0 = client exonéré (export, intra-EU reverse charge). 21 = BE standard."
+          />
         </div>
         <div className="col-span-6 md:col-span-2">
           <label className="label">Statut</label>

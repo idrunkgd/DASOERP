@@ -65,6 +65,7 @@ export default async function WinOfferPage({ params }: { params: { id: string } 
           mode: offer.mode,
           ownerId: offer.ownerId,
           totalSell: Number(offer.totalSell),
+          vatRate: Number(offer.vatRate),
           milestones: offer.milestones.map((m) => ({
             id: m.id,
             label: m.label,

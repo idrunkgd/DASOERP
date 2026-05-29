@@ -149,6 +149,7 @@ export async function changeOfferStatus(opts: {
             budgetSell: offer.totalSell,
             budgetCost: offer.totalCost,
             marginEstimated: offer.marginAmount,
+            vatRate: offer.vatRate,
             contacts: { create: offer.contacts.map((c) => ({ contactId: c.contactId })) }
           }
         });
@@ -217,6 +218,7 @@ export async function createNewVersion(actorId: string, sourceOfferId: string) {
         ownerId: actorId,
         version: newVersion,
         previousVersionId: src.id,
+        vatRate: src.vatRate, // clone du taux TVA pour conserver la configuration
         // Lignes directes uniquement (pas celles attachées à une option)
         lines: { create: directLines.map(l => ({
           position: l.position,
