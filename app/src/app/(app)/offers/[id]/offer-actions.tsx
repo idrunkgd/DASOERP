@@ -1,5 +1,6 @@
 "use client";
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   setOfferStatus, duplicateOfferAction, deleteOfferAction,
   createComplementAction, createNewVersionAction
@@ -18,6 +19,7 @@ const TRANSITIONS: Record<string, { value: string; label: string }[]> = {
 
 export function OfferActions({ offer }: { offer: { id: string; status: string; projectId: string | null; isComplement?: boolean; hasNextVersion?: boolean } }) {
   const [pending, start] = useTransition();
+  const router = useRouter();
   const opts = TRANSITIONS[offer.status] ?? [];
   const isFinal = ["WON", "LOST", "CANCELLED"].includes(offer.status);
   const isLocked = offer.status !== "DRAFT";
@@ -51,9 +53,29 @@ export function OfferActions({ offer }: { offer: { id: string; status: string; p
           onChange={(e) => {
             const v = e.target.value;
             if (!v) return;
-            const confirmMsg = v === "WON"
-              ? "Confirmer ? Un projet sera créé automatiquement, les tranches y seront rattachées et l'offre sera figée définitivement."
-              : v === "LOST" ? "Marquer cette offre comme perdue ? Elle deviendra figée."
+            // WON : on redirige vers le wizard de création de projet plutôt
+            // que d'utiliser le flow auto. Sauf si c'est un complément avec
+            // un projet parent existant — dans ce cas le flow auto fusionne
+            // dans le projet parent.
+            if (v === "WON") {
+              if (offer.isComplement) {
+                // Complément : on garde le flow auto (merge dans projet parent)
+                if (!window.confirm("Marquer ce complément comme gagné ? Les tranches seront fusionnées dans le projet parent.")) {
+                  e.target.value = "";
+                  return;
+                }
+                start(async () => {
+                  try { await setOfferStatus(offer.id, "WON" as any); toast.success("Complément gagné"); }
+                  catch (err: any) { toast.error(err.message); }
+                });
+              } else {
+                // Offre racine : on va sur le wizard
+                router.push(`/offers/${offer.id}/win`);
+              }
+              e.target.value = "";
+              return;
+            }
+            const confirmMsg = v === "LOST" ? "Marquer cette offre comme perdue ? Elle deviendra figée."
               : v === "SENT" ? "Marquer comme envoyée ? Toute modification ultérieure devra passer par une nouvelle version."
               : `Changer le statut vers "${v}" ?`;
             if (!window.confirm(confirmMsg)) { e.target.value = ""; return; }
