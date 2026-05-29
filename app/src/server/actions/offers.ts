@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { changeOfferStatus, createOffer, duplicateOffer, recomputeOfferTotals, createComplement, createNewVersion } from "@/server/services/offer-service";
 import { computeOfferLineTotals } from "@/lib/calc";
-import { isOfferEditable, isOfferFinal, OfferLockedError } from "@/lib/offer-rules";
+import { isOfferEditable, isOfferFinal, isOfferHeaderEditable, OfferLockedError } from "@/lib/offer-rules";
 import type { OfferStatus, BillingMilestoneStatus } from "@prisma/client";
 
 /** Garde-fou : refuse toute mutation sur offre non-DRAFT. */
@@ -50,8 +50,18 @@ export async function createOfferAction(formData: FormData) {
 export async function updateOfferHeader(id: string, formData: FormData) {
   const session = await requirePermission("offers.write");
   const before = await prisma.offer.findUniqueOrThrow({ where: { id } });
-  if (!isOfferEditable(before.status)) throw new OfferLockedError(before.status);
+  // Verrou : pas modifiable après WON/LOST/CANCELLED. Les statuts intermédiaires
+  // (SENT, NEGOTIATION) gardent le header éditable pour ajuster owner, dates,
+  // probabilité, description, etc.
+  if (!isOfferHeaderEditable(before.status)) throw new OfferLockedError(before.status);
   const data = HeaderSchema.parse(Object.fromEntries(formData));
+  // Sécurité : on refuse les transitions terminales (WON/LOST/CANCELLED) via
+  // le header form — elles passent par les boutons dédiés (wizard, etc.).
+  if (data.status !== before.status && isOfferFinal(data.status as any)) {
+    throw new Error(
+      `Pour passer cette offre en ${data.status}, utilisez le bouton dédié (« Marquer gagnée / perdue / annuler ») au lieu du formulaire.`
+    );
+  }
   const after = await prisma.offer.update({ where: { id }, data });
   await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "Offer", entityId: id, message: "Offre mise à jour", before, after });
   revalidatePath(`/offers/${id}`);

@@ -84,6 +84,13 @@ export function KanbanBoard({
 
   function move(item: KanbanItem, newStage: Stage, reason?: string) {
     if (effectiveStage(item) === newStage) return;
+    // CAS SPÉCIAL : passage en WON d'une offre racine → on ouvre le wizard
+    // de création de projet plutôt que de marquer en silence. Les compléments
+    // utilisent le flow auto via moveCardStage (merge dans projet parent).
+    if (item.source === "offer" && newStage === "WON") {
+      router.push(`/offers/${item.id}/win`);
+      return;
+    }
     const key = `${item.source}:${item.id}`;
     setOptimistic((o) => ({ ...o, [key]: newStage }));
     start(async () => {

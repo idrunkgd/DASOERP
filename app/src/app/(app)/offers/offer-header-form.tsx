@@ -64,10 +64,9 @@ export function OfferHeaderForm({
             <option value="DRAFT">Brouillon</option>
             <option value="SENT">Envoyée</option>
             <option value="NEGOTIATION">En négociation</option>
-            <option value="WON">Gagnée</option>
-            <option value="LOST">Perdue</option>
-            <option value="CANCELLED">Annulée</option>
           </select>
+          {/* Les transitions terminales (Gagnée/Perdue/Annulée) passent par
+              les boutons dédiés en haut de la fiche, pas par le formulaire. */}
         </div>
         <div className="col-span-12 md:col-span-6">
           <label className="label">Client *</label>

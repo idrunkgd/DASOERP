@@ -10,7 +10,7 @@ import { MilestonesEditor } from "./milestones-editor";
 import { OptionsEditor } from "./options-editor";
 import { OfferActions } from "./offer-actions";
 import { formatCurrency, formatPercent, formatDate } from "@/lib/utils";
-import { isOfferEditable, canCreateNewVersion, isOfferFinal, offerLockMessage } from "@/lib/offer-rules";
+import { isOfferEditable, isOfferHeaderEditable, canCreateNewVersion, isOfferFinal, offerLockMessage } from "@/lib/offer-rules";
 import { Lock } from "lucide-react";
 
 export default async function OfferDetail({ params }: { params: { id: string } }) {
@@ -93,7 +93,7 @@ export default async function OfferDetail({ params }: { params: { id: string } }
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <OfferHeaderForm initial={offer as any} companies={companies} users={users} readOnly={!isOfferEditable(offer.status)} />
+          <OfferHeaderForm initial={offer as any} companies={companies} users={users} readOnly={!isOfferHeaderEditable(offer.status)} />
           <OfferLinesEditor offerId={offer.id} lines={offer.lines.filter((l: any) => !l.optionId) as any} profiles={profiles as any} readOnly={!isOfferEditable(offer.status)} />
           <OptionsEditor offerId={offer.id} options={offer.options as any} profiles={profiles as any} readOnly={!isOfferEditable(offer.status)} />
           <MilestonesEditor offerId={offer.id} milestones={offer.milestones as any} totalSell={Number(offer.totalSell)} readOnly={!isOfferEditable(offer.status)} />

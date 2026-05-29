@@ -1,12 +1,22 @@
 import type { OfferStatus } from "@prisma/client";
 
 /**
- * Une offre est modifiable seulement en statut DRAFT.
- * - SENT / NEGOTIATION : lecture seule (l'utilisateur doit créer une nouvelle version pour modifier)
- * - WON / LOST / CANCELLED : figé définitivement (aucune modification possible)
+ * Substance commerciale (lignes, tranches, options) modifiable seulement en DRAFT.
+ * - SENT / NEGOTIATION : verrouillé (pour modifier la substance il faut une nouvelle version)
+ * - WON / LOST / CANCELLED : figé définitivement
  */
 export function isOfferEditable(status: OfferStatus): boolean {
   return status === "DRAFT";
+}
+
+/**
+ * Header (titre, statut, probabilité, dates, description, comments, owner, client)
+ * éditable tant que l'offre n'est pas dans un statut terminal.
+ * Permet aux commerciaux d'ajuster les informations même après envoi sans devoir
+ * créer une V2 pour un simple changement d'owner ou de date.
+ */
+export function isOfferHeaderEditable(status: OfferStatus): boolean {
+  return !isOfferFinal(status);
 }
 
 /**

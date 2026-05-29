@@ -25,9 +25,12 @@ export default async function Dashboard() {
     upcomingMilestones, overdueMilestones,
     openMissions, candidatesAvailable
   ] = await Promise.all([
-    prisma.offer.findMany({ where: { status: { in: ["DRAFT","SENT","NEGOTIATION"] } } }),
-    prisma.offer.count({ where: { status: "WON", closedAt: { gte: new Date(new Date().getFullYear(), 0, 1) } } }),
-    prisma.offer.count({ where: { status: "LOST", closedAt: { gte: new Date(new Date().getFullYear(), 0, 1) } } }),
+    // Offres en cours : on n'affiche que la VERSION COURANTE de chaque chaîne
+    // (nextVersion = null) ET on exclut les compléments (parentOfferId = null)
+    // pour ne pas compter une V1 quand sa V2 existe déjà.
+    prisma.offer.findMany({ where: { status: { in: ["DRAFT","SENT","NEGOTIATION"] }, nextVersion: null, parentOfferId: null } }),
+    prisma.offer.count({ where: { status: "WON", closedAt: { gte: new Date(new Date().getFullYear(), 0, 1) }, nextVersion: null, parentOfferId: null } }),
+    prisma.offer.count({ where: { status: "LOST", closedAt: { gte: new Date(new Date().getFullYear(), 0, 1) }, nextVersion: null, parentOfferId: null } }),
     prisma.project.findMany({ where: { status: { in: ["TO_START","ACTIVE"] } } }),
     prisma.user.findMany({ where: { active: true, candidateProfile: { is: null } } }),
     prisma.timesheetEntry.aggregate({ _sum: { hours: true }, where: { date: { gte: weekStart() } } }),
