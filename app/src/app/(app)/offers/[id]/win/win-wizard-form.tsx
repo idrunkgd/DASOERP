@@ -88,9 +88,12 @@ export function WinWizardForm({
             plannedEnd: plannedEnd || null,
             notes: notes || null
           },
+          // On stocke la date d'ENCAISSEMENT (facture + 30j fin de mois), pas
+          // la date facture. C'est cette date qui pilote le cashflow. La date
+          // facture est juste un input pour aider à la calculer.
           offer.milestones.map((m) => ({
             id: m.id,
-            expectedAt: milestoneDates[m.id]
+            expectedAt: expectedPaymentISO(milestoneDates[m.id])
           }))
         );
         // redirect géré côté serveur

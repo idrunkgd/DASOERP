@@ -14,8 +14,6 @@
  */
 
 import { prisma } from "@/lib/db";
-import { expectedPaymentDate } from "@/lib/payment-terms";
-import { getCompanyInfo } from "@/lib/company-info";
 
 export type CashflowRowKind =
   | "milestones"           // ligne agrégée des BillingMilestones
@@ -130,12 +128,10 @@ function falsOnMonth(
 export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   const yearStart = new Date(Date.UTC(year, 0, 1));
   const yearEnd = new Date(Date.UTC(year, 11, 31, 23, 59, 59));
-  // Fenêtre élargie pour les milestones : une facture émise en N-1 mais payable
-  // en N (à cause du décalage "30 jours fin de mois") doit apparaître dans la
-  // grille de l'année N. On élargit de 2 mois avant le début et on coupe à yearEnd
-  // côté droit (les milestones de fin d'année N dont le paiement tombe en N+1
-  // sont filtrés naturellement par le bucketing).
-  const milestoneFetchStart = new Date(Date.UTC(year - 1, 10, 1)); // 1er novembre N-1
+  // Note historique : on a temporairement élargi la fenêtre pour gérer un
+  // calcul "+30j fin de mois" automatique. On est revenu à un schéma où
+  // expectedAt EST la date d'encaissement, donc la fenêtre stricte suffit.
+  const milestoneFetchStart = yearStart;
   const milestoneFetchEnd = yearEnd;
 
   const [
@@ -143,8 +139,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     recurring,
     monthEntries,
     oneOffs,
-    milestones,
-    companyInfo
+    milestones
   ] = await Promise.all([
     prisma.cashflowSettings.findUnique({ where: { id: "singleton" } }),
     prisma.recurringExpense.findMany({
@@ -173,21 +168,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
           }
         }
       }
-    }),
-    getCompanyInfo()
+    })
   ]);
-
-  // Délai de paiement Dasolabs (défaut 30 jours fin de mois).
-  const paymentTermsDays = companyInfo.paymentTermsDays ?? 30;
-
-  /**
-   * Pour une facture émise à `invoiceDate`, renvoie l'année + le mois (0-11 UTC)
-   * où l'encaissement est attendu (= invoiceDate + paymentTermsDays, snap fin de mois).
-   */
-  function payMonthOf(invoiceDate: Date): { year: number; month: number } {
-    const pay = expectedPaymentDate(invoiceDate, paymentTermsDays);
-    return { year: pay.getUTCFullYear(), month: pay.getUTCMonth() };
-  }
 
   // ─── Solde de départ projeté pour l'année `year` ───
   // Le bouton "Solde initial" ne sert qu'à *amorcer* le système. Pour les années
@@ -374,15 +356,13 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     const tvacMultiplier = 1 + vatNumber / 100;
 
     // Pour chaque mois, agrège les milestones de cette mission (affiché TVAC).
-    // Le mois cible n'est PAS celui de la facture mais celui de l'encaissement
-    // attendu (facture + délai paiement, snap fin de mois) — c'est ce qui sort
-    // sur le compte bancaire.
+    // expectedAt = date d'encaissement attendu (== celle qui apparaît sur le
+    // compte bancaire). Pour les milestones créés via le wizard d'offre, ce
+    // calcul est fait côté wizard à partir de la date facture + délai paiement.
     const cells: CashflowCell[] = MONTHS.map((monthIdx) => {
-      const monthMilestones = group.filter((m) => {
-        if (!m.expectedAt) return false;
-        const pm = payMonthOf(m.expectedAt);
-        return pm.year === year && pm.month === monthIdx;
-      });
+      const monthMilestones = group.filter(
+        (m) => m.expectedAt && m.expectedAt.getUTCMonth() === monthIdx
+      );
       if (monthMilestones.length === 0) {
         return { amount: 0, status: "PLANNED" as const };
       }
@@ -440,10 +420,11 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   // vatRate vient du projet (priorité) ou de l'offre rattachée — défaut 21%.
   for (const m of standaloneMilestones) {
     if (!m.expectedAt) continue;
-    // On utilise la date d'encaissement (facture + délai), pas la date facture
-    const pm = payMonthOf(m.expectedAt);
-    if (pm.year !== year) continue;
-    const monthIdx = pm.month;
+    // expectedAt = date d'encaissement attendu (== sur le compte bancaire)
+    const monthIdx = m.expectedAt.getUTCMonth();
+    // Filtre l'année : la fenêtre de fetch est élargie pour les missions
+    // (anciens cas), mais les standalones n'ont pas besoin de cette latitude.
+    if (m.expectedAt.getUTCFullYear() !== year) continue;
     // Taux TVA effectif : priorité projet > offre > 21%
     const standaloneVatRate =
       m.project?.vatRate != null

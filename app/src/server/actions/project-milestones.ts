@@ -25,3 +25,35 @@ export async function deleteMilestoneFromProject(milestoneId: string, projectId:
   await prisma.billingMilestone.delete({ where: { id: milestoneId } });
   revalidatePath(`/projects/${projectId}`);
 }
+
+/**
+ * Met à jour la date d'encaissement attendu d'une tranche.
+ * expectedAt = date où on attend le cash sur le compte bancaire (pas la date
+ * facture). Pour caler une date "à 30 jours fin de mois plus tard que la
+ * facture", c'est au caller de faire le calcul avant d'envoyer.
+ */
+export async function updateMilestoneDate(milestoneId: string, expectedAt: string | null) {
+  const session = await requirePermission("finance.write");
+  const before = await prisma.billingMilestone.findUniqueOrThrow({
+    where: { id: milestoneId },
+    select: { id: true, label: true, expectedAt: true, projectId: true, missionId: true, offerId: true }
+  });
+  const newDate = expectedAt ? new Date(expectedAt) : null;
+  await prisma.billingMilestone.update({
+    where: { id: milestoneId },
+    data: { expectedAt: newDate }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "BillingMilestone",
+    entityId: milestoneId,
+    message: `Tranche '${before.label}' : date d'encaissement ${before.expectedAt?.toISOString().slice(0, 10) ?? "—"} → ${expectedAt ?? "—"}`
+  });
+  // Revalide les pages concernées : projet, mission, offre, cashflow, dashboard
+  if (before.projectId) revalidatePath(`/projects/${before.projectId}`);
+  if (before.missionId) revalidatePath(`/missions/${before.missionId}`);
+  if (before.offerId) revalidatePath(`/offers/${before.offerId}`);
+  revalidatePath("/cashflow");
+  revalidatePath("/dashboard");
+}
