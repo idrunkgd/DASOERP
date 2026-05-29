@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { NewOpportunityForm } from "./new-opportunity-form";
@@ -79,7 +79,7 @@ export default async function CrmPage({
 }: {
   searchParams: { showCancelled?: string };
 }) {
-  const session = await requirePermission("crm.read");
+  const session = await requirePermissionOrRedirect("crm.read");
   const showCancelled = searchParams.showCancelled === "1";
 
   const [opportunities, missionRequests, offers, projects, companies, contacts, owners] = await Promise.all([

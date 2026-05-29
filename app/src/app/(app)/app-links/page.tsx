@@ -2,7 +2,7 @@
 // externes utilisées par Dasolabs. Les admins peuvent ajouter/modifier/supprimer
 // les entrées via un modal. Les autres users consultent uniquement.
 import { prisma } from "@/lib/db";
-import { requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
+import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ExternalLink, AppWindow } from "lucide-react";
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AppLinksPage() {
   // Permissions explicites : lecture seule pour les viewers, écriture pour les admins.
-  const session = await requirePermission("applinks.read");
+  const session = await requirePermissionOrRedirect("applinks.read");
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canEdit = perms.includes("applinks.write");
 

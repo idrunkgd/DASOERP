@@ -3,7 +3,7 @@
 // regroupées sous la fiche détail.
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -28,7 +28,7 @@ export default async function DocumentsPage({
 }: {
   searchParams: { q?: string; tag?: string; expiring?: string };
 }) {
-  await requirePermission("documents.read");
+  await requirePermissionOrRedirect("documents.read");
 
   const q = (searchParams.q || "").trim();
   const tag = (searchParams.tag || "").trim();

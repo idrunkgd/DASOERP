@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { CalendarClock, ChevronLeft, MessageSquare } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
@@ -17,7 +17,7 @@ export default async function OnboardingDetailPage({
 }: {
   params: { userId: string };
 }) {
-  await requirePermission("onboarding.read");
+  await requirePermissionOrRedirect("onboarding.read");
 
   const onboarding = await prisma.onboarding.findUnique({
     where: { userId: params.userId },

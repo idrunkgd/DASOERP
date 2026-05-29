@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
 
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
 
 export default async function AuditPage({ searchParams }: { searchParams: { entity?: string; action?: string; actor?: string; q?: string; page?: string } }) {
-  await requirePermission("audit.read");
+  await requirePermissionOrRedirect("audit.read");
   const page = Math.max(1, Number(searchParams.page ?? 1));
   const where: any = {};
   if (searchParams.entity) where.entityType = searchParams.entity;

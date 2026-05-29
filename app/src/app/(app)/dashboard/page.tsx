@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requirePermission, getUserAccessGroupName, DEFAULT_GROUP_NAME } from "@/lib/rbac";
+import { requirePermissionOrRedirect, getUserAccessGroupName, DEFAULT_GROUP_NAME } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   // Requiert dashboard.read explicitement (la perm est dans les groupes par défaut).
-  const session = await requirePermission("dashboard.read");
+  const session = await requirePermissionOrRedirect("dashboard.read");
   // Le getUserAccessGroupName est aussi gardé pour la suite (titre user).
   const groupName = await getUserAccessGroupName(session.user.id);
   if (groupName === DEFAULT_GROUP_NAME) redirect("/me");

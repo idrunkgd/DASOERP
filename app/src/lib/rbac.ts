@@ -189,6 +189,8 @@ export async function requireSession() {
 /**
  * Vérifie une permission en tenant compte des surcharges fines de l'utilisateur.
  * Si l'utilisateur n'a pas la permission (ni par rôle, ni par grant), throw.
+ * À utiliser dans les SERVER ACTIONS (l'erreur remonte au client qui peut
+ * afficher un toast).
  */
 export async function requirePermission(perm: Permission) {
   const session = await requireSession();
@@ -196,6 +198,19 @@ export async function requirePermission(perm: Permission) {
   if (!perms.includes(perm)) {
     throw new Error(`Forbidden: missing permission ${perm}`);
   }
+  return session;
+}
+
+/**
+ * Variante pour les PAGES : si l'utilisateur n'a pas la permission, on
+ * redirige vers /me (ou vers `fallback`) plutôt que de throw. Évite de
+ * faire afficher une page d'erreur à un user qui tape une URL hors de
+ * ses droits — il atterrit silencieusement sur son profil.
+ */
+export async function requirePermissionOrRedirect(perm: Permission, fallback = "/me") {
+  const session = await requireSession();
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  if (!perms.includes(perm)) redirect(fallback);
   return session;
 }
 
