@@ -18,7 +18,7 @@ import {
 import { formatDate } from "@/lib/utils";
 import { DocumentMetaForm } from "./meta-form";
 import { VersionsPanel } from "./versions-panel";
-import { deleteDocument } from "@/server/actions/documents";
+import { DeleteDocumentButton } from "./delete-button";
 
 export const dynamic = "force-dynamic";
 
@@ -199,24 +199,11 @@ export default async function DocumentDetail({
           />
 
           <div className="card mt-4 p-4">
-            <form
-              action={async () => {
-                "use server";
-                await deleteDocument(doc.id);
-                redirect("/documents");
-              }}
-            >
-              <button
-                type="submit"
-                className="text-xs text-red-700 hover:text-red-900 w-full text-left"
-                onClick={(e: any) => {
-                  if (!confirm(`Supprimer définitivement « ${doc.title} » et toutes ses versions ?`))
-                    e.preventDefault();
-                }}
-              >
-                Supprimer ce document (et ses {doc.versions.length} version(s))
-              </button>
-            </form>
+            <DeleteDocumentButton
+              documentId={doc.id}
+              title={doc.title}
+              versionCount={doc.versions.length}
+            />
           </div>
         </div>
       </div>
