@@ -8,8 +8,6 @@ import { requireSession } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import {
   ChevronLeft,
-  Download,
-  FileIcon,
   Building2,
   FolderKanban,
   FileText,
@@ -83,18 +81,9 @@ export default async function DocumentDetail({
         title={doc.title}
         subtitle={`${doc.originalName} · ${humanSize(doc.size)} · ${doc.mimeType}`}
         actions={
-          <div className="flex items-center gap-2">
-            <Link href="/documents" className="btn-secondary text-xs">
-              <ChevronLeft className="w-3 h-3" /> Retour
-            </Link>
-            <a
-              href={`/api/documents/${doc.id}/download`}
-              className="btn-primary text-xs"
-            >
-              <Download className="w-3 h-3" />
-              Télécharger V{doc.version}
-            </a>
-          </div>
+          <Link href="/documents" className="btn-secondary text-xs">
+            <ChevronLeft className="w-3 h-3" /> Retour
+          </Link>
         }
       />
 

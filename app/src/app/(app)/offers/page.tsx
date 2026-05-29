@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic";
 
 export default async function OffersPage({ searchParams }: { searchParams: { q?: string; status?: string } }) {
   await requirePermission("offers.read");
-  const where: any = {};
+  // On n'affiche que la version courante de chaque offre :
+  //   - nextVersion = null : c'est la dernière version (V1 sans V2, ou la V2 d'une chaîne)
+  //   - parentOfferId = null : on exclut aussi les compléments d'offres
+  // Les versions précédentes sont accessibles depuis la fiche détail.
+  const where: any = { nextVersion: null, parentOfferId: null };
   if (searchParams.q) where.OR = [
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }

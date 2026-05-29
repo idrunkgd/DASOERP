@@ -181,7 +181,14 @@ export async function changeOfferStatus(opts: {
 export async function createNewVersion(actorId: string, sourceOfferId: string) {
   const src = await prisma.offer.findUniqueOrThrow({
     where: { id: sourceOfferId },
-    include: { lines: true, milestones: true, contacts: true, nextVersion: true }
+    include: {
+      lines: true,
+      milestones: true,
+      contacts: true,
+      nextVersion: true,
+      // On a besoin des options ET de leurs lignes pour les cloner aussi.
+      options: { include: { lines: true } }
+    }
   });
   if (!canCreateNewVersion(src.status)) throw new OfferLockedError(src.status);
   if (src.nextVersion) throw new Error(`Une version V${src.version + 1} existe déjà : ${src.nextVersion.reference}`);
@@ -190,6 +197,11 @@ export async function createNewVersion(actorId: string, sourceOfferId: string) {
   const baseRef = src.reference.replace(/-V\d+$/, "");
   const newVersion = src.version + 1;
   const newRef = `${baseRef}-V${newVersion}`;
+
+  // IMPORTANT : seules les lignes DIRECTES (sans optionId) sont des lignes
+  // principales du devis. Sinon on ramassait les lignes d'options et on les
+  // recreait comme lignes principales de V2 → options "fantôme" dans le devis.
+  const directLines = src.lines.filter((l) => !l.optionId);
 
   return prisma.$transaction(async (tx) => {
     const created = await tx.offer.create({
@@ -205,8 +217,8 @@ export async function createNewVersion(actorId: string, sourceOfferId: string) {
         ownerId: actorId,
         version: newVersion,
         previousVersionId: src.id,
-        // Pas de duplication des liens parent/mission ; on conserve les clones de structure
-        lines: { create: src.lines.map(l => ({
+        // Lignes directes uniquement (pas celles attachées à une option)
+        lines: { create: directLines.map(l => ({
           position: l.position,
           description: l.description,
           type: l.type,
@@ -229,14 +241,85 @@ export async function createNewVersion(actorId: string, sourceOfferId: string) {
         contacts: { create: src.contacts.map(c => ({ contactId: c.contactId })) }
       }
     });
+
+    // Clonage des options + leurs propres lignes (deuxième passe).
+    // Pour chaque option : on la crée sur le nouveau devis, puis on attache
+    // ses lignes en utilisant le bon optionId nouvellement généré.
+    for (const opt of src.options) {
+      const newOpt = await tx.offerOption.create({
+        data: {
+          offerId: created.id,
+          position: opt.position,
+          name: opt.name,
+          description: opt.description
+          // totalSell/totalCost recalculés à la fin
+        }
+      });
+      if (opt.lines.length > 0) {
+        await tx.offerLine.createMany({
+          data: opt.lines.map((l) => ({
+            offerId: created.id,
+            optionId: newOpt.id,
+            position: l.position,
+            description: l.description,
+            type: l.type,
+            profileId: l.profileId,
+            marginPctInput: l.marginPctInput,
+            quantity: l.quantity,
+            unit: l.unit,
+            unitSellPrice: l.unitSellPrice,
+            unitCost: l.unitCost,
+            discountPct: l.discountPct
+          }))
+        });
+      }
+    }
+
     await logActivity({
       actorId, action: "CREATE", entityType: "Offer", entityId: created.id,
-      message: `Nouvelle version ${newRef} créée à partir de ${src.reference}`
+      message: `Nouvelle version ${newRef} créée à partir de ${src.reference}${
+        src.options.length > 0 ? ` (${src.options.length} option(s) clonée(s))` : ""
+      }`
     });
     return created;
   }).then(async (created) => {
     // Recalcule à l'extérieur de la transaction (évite les contentions)
     await recomputeOfferTotals(created.id);
+    // Recalcule aussi le total de chaque option clonée — inline pour éviter
+    // l'import circulaire avec actions/offers.ts.
+    const opts = await prisma.offerOption.findMany({
+      where: { offerId: created.id },
+      select: { id: true }
+    });
+    for (const o of opts) {
+      const lines = await prisma.offerLine.findMany({ where: { optionId: o.id } });
+      let optTotalSell = 0;
+      let optTotalCost = 0;
+      for (const l of lines) {
+        const t = computeOfferLineTotals({
+          quantity: l.quantity.toString(),
+          unitSellPrice: l.unitSellPrice.toString(),
+          unitCost: l.unitCost.toString(),
+          discountPct: l.discountPct.toString(),
+          marginPctInput: l.marginPctInput != null ? l.marginPctInput.toString() : null
+        });
+        await prisma.offerLine.update({
+          where: { id: l.id },
+          data: {
+            totalSell: t.totalSell,
+            totalCost: t.totalCost,
+            marginAmount: t.marginAmount,
+            marginPct: t.marginPct
+          }
+        });
+        optTotalSell += t.totalSell;
+        optTotalCost += t.totalCost;
+      }
+      await prisma.offerOption.update({
+        where: { id: o.id },
+        data: { totalSell: optTotalSell, totalCost: optTotalCost }
+      });
+    }
     return created;
   });
 }
