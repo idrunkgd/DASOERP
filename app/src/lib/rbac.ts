@@ -16,7 +16,15 @@ export type Permission =
   | "purchases.read" | "purchases.write"
   | "planning.read"  | "planning.write"
   | "finance.read"   | "finance.write"
-  | "consulting.read"| "consulting.write";
+  | "consulting.read"| "consulting.write"
+  // ── nouvelles permissions (suppression des "ouvert à tous") ──
+  | "dashboard.read"
+  | "applinks.read"   | "applinks.write"
+  | "crm.read"        | "crm.write"
+  | "reviews.read"    | "reviews.write"
+  | "onboarding.read" | "onboarding.write"
+  | "documents.read"  | "documents.write"
+  | "audit.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
   ADMIN: [
@@ -29,7 +37,14 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "purchases.read","purchases.write",
     "planning.read","planning.write",
     "finance.read","finance.write",
-    "consulting.read","consulting.write"
+    "consulting.read","consulting.write",
+    "dashboard.read",
+    "applinks.read","applinks.write",
+    "crm.read","crm.write",
+    "reviews.read","reviews.write",
+    "onboarding.read","onboarding.write",
+    "documents.read","documents.write",
+    "audit.read"
   ],
   MANAGER: [
     "companies.read","companies.write",
@@ -40,7 +55,14 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "purchases.read","purchases.write",
     "planning.read","planning.write",
     "finance.read",
-    "consulting.read","consulting.write"
+    "consulting.read","consulting.write",
+    "dashboard.read",
+    "applinks.read",
+    "crm.read","crm.write",
+    "reviews.read","reviews.write",
+    "onboarding.read","onboarding.write",
+    "documents.read","documents.write",
+    "audit.read"
   ],
   COMMERCIAL: [
     "companies.read","companies.write",
@@ -50,7 +72,11 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "timesheet.self.write",
     "planning.read",
     "finance.read",
-    "consulting.read","consulting.write"
+    "consulting.read","consulting.write",
+    "dashboard.read",
+    "applinks.read",
+    "crm.read","crm.write",
+    "documents.read","documents.write"
   ],
   CONSULTANT: [
     "companies.read",
@@ -58,7 +84,11 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "projects.read",
     "timesheet.self.write",
     "planning.read",
-    "purchases.read"
+    "purchases.read",
+    "dashboard.read",
+    "applinks.read",
+    "reviews.read",
+    "documents.read"
   ],
   FINANCE: [
     "companies.read",
@@ -68,7 +98,11 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "purchases.read","purchases.write",
     "finance.read","finance.write",
     "planning.read",
-    "timesheet.self.write"
+    "timesheet.self.write",
+    "dashboard.read",
+    "applinks.read",
+    "documents.read","documents.write",
+    "audit.read"
   ]
 };
 
@@ -207,7 +241,27 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
   ]},
   { label: "Configuration", permissions: [
     { value: "users.manage",    label: "Utilisateurs & accès" },
-    { value: "settings.manage", label: "Paramètres globaux" }
+    { value: "settings.manage", label: "Paramètres globaux" },
+    { value: "audit.read",      label: "Audit trail (lecture)" }
+  ]},
+  { label: "Pilotage", permissions: [
+    { value: "dashboard.read", label: "Tableau de bord" },
+    { value: "applinks.read",  label: "Outils & apps (lecture)" },
+    { value: "applinks.write", label: "Outils & apps (écriture)" }
+  ]},
+  { label: "CRM", permissions: [
+    { value: "crm.read",  label: "Pipeline CRM (lecture)" },
+    { value: "crm.write", label: "Pipeline CRM (écriture)" }
+  ]},
+  { label: "RH", permissions: [
+    { value: "reviews.read",     label: "Entretiens (lecture)" },
+    { value: "reviews.write",    label: "Entretiens (écriture)" },
+    { value: "onboarding.read",  label: "Onboarding (lecture)" },
+    { value: "onboarding.write", label: "Onboarding (écriture)" }
+  ]},
+  { label: "Documents", permissions: [
+    { value: "documents.read",  label: "Documents (lecture)" },
+    { value: "documents.write", label: "Documents (écriture)" }
   ]}
 ];
 
@@ -235,8 +289,12 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
   {
     section: "Pilotage",
     entries: [
-      { menuLabel: "Tableau de bord",  href: "/dashboard",        perms: [], note: "Ouvert à tout user connecté" },
-      { menuLabel: "Statut projet",    href: "/project-status",   perms: [], note: "Ouvert à tout user connecté" },
+      { menuLabel: "Tableau de bord",   href: "/dashboard", perms: [
+        { value: "dashboard.read", label: "Voir le tableau de bord" }
+      ]},
+      { menuLabel: "Statut projet",     href: "/project-status", perms: [
+        { value: "projects.read", label: "Voir le statut projet" }
+      ]},
       { menuLabel: "Simulateur package", href: "/salary-simulator", perms: [
         { value: "consulting.read", label: "Accès au simulateur" }
       ]},
@@ -244,8 +302,13 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
         { value: "finance.read",  label: "Voir le cashflow" },
         { value: "finance.write", label: "Modifier le cashflow" }
       ]},
-      { menuLabel: "TVA trimestrielle", href: "/test/tva",         perms: [], note: "Ouvert à tout user connecté" },
-      { menuLabel: "Outils & apps",    href: "/app-links",        perms: [], note: "Ouvert à tout user connecté" }
+      { menuLabel: "TVA trimestrielle", href: "/test/tva", perms: [
+        { value: "finance.read", label: "Voir la TVA trimestrielle" }
+      ]},
+      { menuLabel: "Outils & apps",    href: "/app-links", perms: [
+        { value: "applinks.read",  label: "Voir les outils & apps" },
+        { value: "applinks.write", label: "Ajouter / modifier des entrées" }
+      ]}
     ]
   },
   {
@@ -262,7 +325,10 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Activités commerciales", href: "/commercial", perms: [
         { value: "contacts.read",  label: "Voir les activités" }
       ]},
-      { menuLabel: "CRM pipeline", href: "/test/crm", perms: [], note: "Ouvert à tout user connecté" }
+      { menuLabel: "CRM pipeline", href: "/test/crm", perms: [
+        { value: "crm.read",  label: "Voir le pipeline CRM" },
+        { value: "crm.write", label: "Déplacer / créer des cartes" }
+      ]}
     ]
   },
   {
@@ -284,8 +350,13 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
         { value: "consulting.read",  label: "Voir les missions" },
         { value: "consulting.write", label: "Modifier les missions" }
       ]},
-      { menuLabel: "Matching mission", href: "/test/matching", perms: [], note: "Ouvert à tout user connecté" },
-      { menuLabel: "Entretiens",       href: "/reviews",        perms: [], note: "Ouvert aux Admin/Manager/Consultant" },
+      { menuLabel: "Matching mission", href: "/test/matching", perms: [
+        { value: "consulting.read", label: "Accès au matching" }
+      ]},
+      { menuLabel: "Entretiens",       href: "/reviews",  perms: [
+        { value: "reviews.read",  label: "Voir les entretiens" },
+        { value: "reviews.write", label: "Créer / modifier des entretiens" }
+      ]},
       { menuLabel: "Calendrier",       href: "/calendar",       perms: [
         { value: "consulting.read", label: "Voir le calendrier" }
       ]}
@@ -328,8 +399,14 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
   {
     section: "RH & Documents",
     entries: [
-      { menuLabel: "Onboarding", href: "/onboarding", perms: [], note: "Ouvert à tout user connecté" },
-      { menuLabel: "Documents",  href: "/documents",  perms: [], note: "Ouvert à tout user connecté" }
+      { menuLabel: "Onboarding", href: "/onboarding", perms: [
+        { value: "onboarding.read",  label: "Voir les onboardings" },
+        { value: "onboarding.write", label: "Créer / éditer des onboardings" }
+      ]},
+      { menuLabel: "Documents",  href: "/documents",  perms: [
+        { value: "documents.read",  label: "Consulter et télécharger" },
+        { value: "documents.write", label: "Uploader / modifier / supprimer" }
+      ]}
     ]
   },
   {
@@ -350,7 +427,9 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Accès",             href: "/access",        perms: [
         { value: "users.manage", label: "Gérer les groupes d'accès" }
       ]},
-      { menuLabel: "Audit trail",       href: "/audit",         perms: [], note: "Ouvert aux Admin/Manager/Finance" },
+      { menuLabel: "Audit trail",       href: "/audit", perms: [
+        { value: "audit.read", label: "Consulter l'audit trail" }
+      ]},
       { menuLabel: "Paramètres",        href: "/settings",      perms: [
         { value: "settings.manage", label: "Modifier les paramètres globaux" }
       ]}

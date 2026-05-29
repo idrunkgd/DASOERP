@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
-import { requireSession } from "@/lib/rbac";
+import { requirePermission } from "@/lib/rbac";
 import { computeVatReport, getQuarter, periodForQuarter, type Quarter } from "@/lib/tva";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CopyButton } from "./copy-button";
@@ -12,7 +12,7 @@ export default async function TvaTrimestriellePage({
 }: {
   searchParams: { year?: string; quarter?: string };
 }) {
-  await requireSession();
+  await requirePermission("finance.read");
 
   // Par défaut : trimestre précédent (le délai de déclaration est le 20 du mois suivant)
   const now = new Date();

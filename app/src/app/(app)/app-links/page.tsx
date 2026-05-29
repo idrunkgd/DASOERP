@@ -2,7 +2,7 @@
 // externes utilisées par Dasolabs. Les admins peuvent ajouter/modifier/supprimer
 // les entrées via un modal. Les autres users consultent uniquement.
 import { prisma } from "@/lib/db";
-import { requireSession } from "@/lib/rbac";
+import { requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ExternalLink, AppWindow } from "lucide-react";
@@ -11,11 +11,10 @@ import { AppLinksManager } from "./manager";
 export const dynamic = "force-dynamic";
 
 export default async function AppLinksPage() {
-  await requireSession();
-
-  // Édition ouverte à tout user connecté — c'est une liste interne, équipe
-  // petite, pas d'enjeu de sécurité. On pourra restreindre plus tard si besoin.
-  const canEdit = true;
+  // Permissions explicites : lecture seule pour les viewers, écriture pour les admins.
+  const session = await requirePermission("applinks.read");
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canEdit = perms.includes("applinks.write");
 
   const links = await prisma.appLink.findMany({
     orderBy: [{ position: "asc" }, { name: "asc" }]

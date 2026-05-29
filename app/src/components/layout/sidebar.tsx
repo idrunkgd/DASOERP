@@ -22,12 +22,12 @@ const SECTIONS: Section[] = [
   {
     label: "Pilotage",
     items: [
-      { href: "/dashboard",         label: "Tableau de bord",      icon: LayoutDashboard },
-      { href: "/project-status",    label: "Statut projet",        icon: Gauge },
+      { href: "/dashboard",         label: "Tableau de bord",      icon: LayoutDashboard, perm: "dashboard.read" },
+      { href: "/project-status",    label: "Statut projet",        icon: Gauge,         perm: "projects.read" },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
-      { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/app-links",         label: "Outils & apps",        icon: AppWindow,     allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+      { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       perm: "finance.read" },
+      { href: "/app-links",         label: "Outils & apps",        icon: AppWindow,     perm: "applinks.read" }
     ]
   },
   {
@@ -36,7 +36,7 @@ const SECTIONS: Section[] = [
       { href: "/companies",   label: "Entreprises",          icon: Building2,       perm: "companies.read" },
       { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" },
       { href: "/commercial",  label: "Activités commerciales", icon: MessageSquare, perm: "contacts.read" },
-      { href: "/test/crm",    label: "CRM pipeline",         icon: Workflow,        allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+      { href: "/test/crm",    label: "CRM pipeline",         icon: Workflow,        perm: "crm.read" }
     ]
   },
   {
@@ -46,8 +46,8 @@ const SECTIONS: Section[] = [
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },
       { href: "/missions",         label: "Missions",             icon: Plane,           perm: "consulting.read" },
-      { href: "/test/matching",    label: "Matching mission",     icon: GitCompareArrows, allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/reviews",          label: "Entretiens",           icon: ClipboardCheck,  allowedRoles: ["ADMIN","MANAGER","CONSULTANT"] },
+      { href: "/test/matching",    label: "Matching mission",     icon: GitCompareArrows, perm: "consulting.read" },
+      { href: "/reviews",          label: "Entretiens",           icon: ClipboardCheck,  perm: "reviews.read" },
       { href: "/calendar",         label: "Calendrier",           icon: CalendarDays,    perm: "consulting.read" }
     ]
   },
@@ -73,8 +73,8 @@ const SECTIONS: Section[] = [
   {
     label: "RH & Documents",
     items: [
-      { href: "/onboarding", label: "Onboarding",     icon: GraduationCap, allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] },
-      { href: "/documents",  label: "Documents",      icon: Files,         allowedRoles: ["ADMIN","FINANCE","MANAGER","COMMERCIAL","CONSULTANT"] }
+      { href: "/onboarding", label: "Onboarding",     icon: GraduationCap, perm: "onboarding.read" },
+      { href: "/documents",  label: "Documents",      icon: Files,         perm: "documents.read" }
     ]
   },
   {
@@ -85,7 +85,7 @@ const SECTIONS: Section[] = [
       { href: "/cost-centers",     label: "Centres de coûts", icon: Briefcase,       perm: "settings.manage" },
       { href: "/users",            label: "Utilisateurs",     icon: UserCog,         perm: "users.manage" },
       { href: "/access",           label: "Accès",            icon: ShieldCheck,     perm: "users.manage" },
-      { href: "/audit",            label: "Audit trail",      icon: History,         allowedRoles: ["ADMIN","MANAGER","FINANCE"] },
+      { href: "/audit",            label: "Audit trail",      icon: History,         perm: "audit.read" },
       { href: "/settings",         label: "Paramètres",       icon: Settings,        perm: "settings.manage" }
     ]
   }

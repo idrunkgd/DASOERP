@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requireSession } from "@/lib/rbac";
+import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -18,7 +18,7 @@ export default async function ProjectStatusPage({
 }) {
   // Page accessible à tout utilisateur authentifié non-Visiteur.
   // Le layout (app)/layout.tsx redirige déjà les Visiteurs vers /me.
-  await requireSession();
+  await requirePermission("projects.read");
 
   const showAll = searchParams.all === "1";
   const where: any = showAll

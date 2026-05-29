@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requireSession } from "@/lib/rbac";
+import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import {
   ChevronLeft,
@@ -25,7 +25,7 @@ export default async function DocumentDetail({
 }: {
   params: { id: string };
 }) {
-  await requireSession();
+  await requirePermission("documents.read");
 
   const doc = await prisma.document.findUnique({
     where: { id: params.id },

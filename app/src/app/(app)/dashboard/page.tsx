@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requireSession, getUserEffectivePermissions, getUserAccessGroupName, DEFAULT_GROUP_NAME } from "@/lib/rbac";
+import { requirePermission, getUserAccessGroupName, DEFAULT_GROUP_NAME } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -13,15 +13,11 @@ import { Briefcase, FolderKanban, Users as UsersIcon, AlertTriangle, Clock, Shop
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  const session = await requireSession();
-  // Garde-fou défense en profondeur : un Visiteur ou compte portail qui taperait
-  // /dashboard directement est renvoyé sur son profil (le middleware le fait
-  // déjà mais on protège la page elle-même).
-  const [perms, groupName] = await Promise.all([
-    getUserEffectivePermissions(session.user.id, session.user.role),
-    getUserAccessGroupName(session.user.id)
-  ]);
-  if (perms.length === 0 || groupName === DEFAULT_GROUP_NAME) redirect("/me");
+  // Requiert dashboard.read explicitement (la perm est dans les groupes par défaut).
+  const session = await requirePermission("dashboard.read");
+  // Le getUserAccessGroupName est aussi gardé pour la suite (titre user).
+  const groupName = await getUserAccessGroupName(session.user.id);
+  if (groupName === DEFAULT_GROUP_NAME) redirect("/me");
 
   const [
     offersOpen, offersWonYear, offersLostYear,

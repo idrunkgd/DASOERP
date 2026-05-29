@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
+import { requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ const OUTCOME_TONE: Record<string, string> = {
 };
 
 export default async function ReviewsPage({ searchParams }: { searchParams: { subject?: string; kind?: string; outcome?: string } }) {
-  const session = await requireSession();
+  const session = await requirePermission("reviews.read");
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   // Lecture : Admin / Manager voient tout. Les autres ne voient que leurs propres reviews.
   const canSeeAll = sessionPerms.includes("users.manage") || sessionPerms.includes("timesheet.validate");

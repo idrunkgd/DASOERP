@@ -2,7 +2,7 @@
 // Permet aussi de lancer un onboarding manuel pour un user qui n'en a pas.
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requireSession } from "@/lib/rbac";
+import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GraduationCap, CheckCircle2, Circle, ArrowRight } from "lucide-react";
@@ -12,7 +12,7 @@ import { NewOnboardingForm } from "./new-onboarding-form";
 export const dynamic = "force-dynamic";
 
 export default async function OnboardingListPage() {
-  await requireSession();
+  await requirePermission("onboarding.read");
 
   const [onboardings, usersWithoutOnboarding, templates] = await Promise.all([
     prisma.onboarding.findMany({

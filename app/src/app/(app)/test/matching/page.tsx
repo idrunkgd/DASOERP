@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requireSession } from "@/lib/rbac";
+import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { rankMatches, type MatchableProfile, type MatchResult } from "@/lib/mission-matching";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -15,7 +15,7 @@ export default async function MatchingPage({
 }: {
   searchParams: { source?: string; includeCandidates?: string };
 }) {
-  await requireSession();
+  await requirePermission("consulting.read");
 
   // Toutes les sources possibles : demandes ouvertes + missions actives/prolongées/on-hold
   // + demandes contractualisées (au cas où on veut quand même rejouer un matching)
