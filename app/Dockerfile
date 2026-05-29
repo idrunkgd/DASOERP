@@ -37,10 +37,17 @@ RUN apk add --no-cache libc6-compat openssl wget
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
+# Pré-création du dossier de stockage des documents avec les bonnes permissions.
+# Si un volume Docker est monté ici, Docker préserve ces ownership pour les
+# volumes nommés ; pour les bind mounts hôtes il faut aussi chown côté VPS.
+RUN mkdir -p /data/documents && chown -R nextjs:nodejs /data
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+# Chemin du stockage documents (override possible via env Coolify si besoin)
+ENV DOCS_STORAGE_PATH=/data/documents
 
 # Output standalone Next.js
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
