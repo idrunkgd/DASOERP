@@ -212,3 +212,148 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
 ];
 
 export const ALL_PERMISSIONS: Permission[] = PERMISSION_GROUPS.flatMap(g => g.permissions.map(p => p.value));
+
+// =============================================================================
+// MENU_PERMISSIONS — vue alternative organisée comme la sidebar.
+// Chaque section = un groupe de menu, chaque entrée = une page. Les pages sans
+// permission requise sont listées avec un `perms: []` pour la transparence.
+// Utilisée par la page d'édition d'un groupe d'accès pour une UX intuitive.
+// =============================================================================
+export type MenuEntryPerm = {
+  /** Libellé du menu tel qu'affiché dans la sidebar */
+  menuLabel: string;
+  /** URL de la page concernée (informationnel) */
+  href: string;
+  /** Permissions associées à cette entrée. Vide = page ouverte à tout user connecté. */
+  perms: { value: Permission; label: string }[];
+  /** Note libre (ex: "ouvert à tout user connecté", "réservé admin") */
+  note?: string;
+};
+export type MenuPermSection = { section: string; entries: MenuEntryPerm[] };
+
+export const MENU_PERMISSIONS: MenuPermSection[] = [
+  {
+    section: "Pilotage",
+    entries: [
+      { menuLabel: "Tableau de bord",  href: "/dashboard",        perms: [], note: "Ouvert à tout user connecté" },
+      { menuLabel: "Statut projet",    href: "/project-status",   perms: [], note: "Ouvert à tout user connecté" },
+      { menuLabel: "Simulateur package", href: "/salary-simulator", perms: [
+        { value: "consulting.read", label: "Accès au simulateur" }
+      ]},
+      { menuLabel: "Cashflow",         href: "/cashflow",         perms: [
+        { value: "finance.read",  label: "Voir le cashflow" },
+        { value: "finance.write", label: "Modifier le cashflow" }
+      ]},
+      { menuLabel: "TVA trimestrielle", href: "/test/tva",         perms: [], note: "Ouvert à tout user connecté" },
+      { menuLabel: "Outils & apps",    href: "/app-links",        perms: [], note: "Ouvert à tout user connecté" }
+    ]
+  },
+  {
+    section: "Commerciale",
+    entries: [
+      { menuLabel: "Entreprises", href: "/companies", perms: [
+        { value: "companies.read",  label: "Voir les entreprises" },
+        { value: "companies.write", label: "Modifier les entreprises" }
+      ]},
+      { menuLabel: "Contacts", href: "/contacts", perms: [
+        { value: "contacts.read",  label: "Voir les contacts" },
+        { value: "contacts.write", label: "Modifier les contacts" }
+      ]},
+      { menuLabel: "Activités commerciales", href: "/commercial", perms: [
+        { value: "contacts.read",  label: "Voir les activités" }
+      ]},
+      { menuLabel: "CRM pipeline", href: "/test/crm", perms: [], note: "Ouvert à tout user connecté" }
+    ]
+  },
+  {
+    section: "Consultance",
+    entries: [
+      { menuLabel: "Candidats", href: "/candidates", perms: [
+        { value: "consulting.read",  label: "Voir les candidats" },
+        { value: "consulting.write", label: "Modifier les candidats" }
+      ]},
+      { menuLabel: "Consultants", href: "/consultants", perms: [
+        { value: "consulting.read",  label: "Voir les consultants" },
+        { value: "consulting.write", label: "Modifier les consultants" }
+      ]},
+      { menuLabel: "Demandes de mission", href: "/mission-requests", perms: [
+        { value: "consulting.read",  label: "Voir les demandes" },
+        { value: "consulting.write", label: "Modifier les demandes" }
+      ]},
+      { menuLabel: "Missions", href: "/missions", perms: [
+        { value: "consulting.read",  label: "Voir les missions" },
+        { value: "consulting.write", label: "Modifier les missions" }
+      ]},
+      { menuLabel: "Matching mission", href: "/test/matching", perms: [], note: "Ouvert à tout user connecté" },
+      { menuLabel: "Entretiens",       href: "/reviews",        perms: [], note: "Ouvert aux Admin/Manager/Consultant" },
+      { menuLabel: "Calendrier",       href: "/calendar",       perms: [
+        { value: "consulting.read", label: "Voir le calendrier" }
+      ]}
+    ]
+  },
+  {
+    section: "Projet",
+    entries: [
+      { menuLabel: "Offres", href: "/offers", perms: [
+        { value: "offers.read",  label: "Voir les offres" },
+        { value: "offers.write", label: "Créer & modifier les offres" }
+      ]},
+      { menuLabel: "Projets", href: "/projects", perms: [
+        { value: "projects.read",  label: "Voir les projets" },
+        { value: "projects.write", label: "Modifier les projets" }
+      ]},
+      { menuLabel: "Timesheets", href: "/timesheet", perms: [
+        { value: "timesheet.self.write", label: "Saisir ses heures" },
+        { value: "timesheet.validate",   label: "Valider les timesheets" }
+      ]},
+      { menuLabel: "Achats", href: "/purchases", perms: [
+        { value: "purchases.read",  label: "Voir les achats" },
+        { value: "purchases.write", label: "Créer & modifier les achats" }
+      ]},
+      { menuLabel: "Planning", href: "/planning", perms: [
+        { value: "planning.read",  label: "Voir le planning" },
+        { value: "planning.write", label: "Modifier le planning" }
+      ]}
+    ]
+  },
+  {
+    section: "Finances",
+    entries: [
+      { menuLabel: "Facturations", href: "/finance", perms: [
+        { value: "finance.read",  label: "Voir les facturations" },
+        { value: "finance.write", label: "Émettre & modifier les factures" }
+      ]}
+    ]
+  },
+  {
+    section: "RH & Documents",
+    entries: [
+      { menuLabel: "Onboarding", href: "/onboarding", perms: [], note: "Ouvert à tout user connecté" },
+      { menuLabel: "Documents",  href: "/documents",  perms: [], note: "Ouvert à tout user connecté" }
+    ]
+  },
+  {
+    section: "Configuration",
+    entries: [
+      { menuLabel: "Profils",           href: "/service-profiles", perms: [
+        { value: "offers.write", label: "Gérer les profils de prestation" }
+      ]},
+      { menuLabel: "Compétences",       href: "/skills",        perms: [
+        { value: "settings.manage", label: "Gérer la liste des compétences" }
+      ]},
+      { menuLabel: "Centres de coûts",  href: "/cost-centers",  perms: [
+        { value: "settings.manage", label: "Gérer les centres de coûts" }
+      ]},
+      { menuLabel: "Utilisateurs",      href: "/users",         perms: [
+        { value: "users.manage", label: "Gérer les utilisateurs" }
+      ]},
+      { menuLabel: "Accès",             href: "/access",        perms: [
+        { value: "users.manage", label: "Gérer les groupes d'accès" }
+      ]},
+      { menuLabel: "Audit trail",       href: "/audit",         perms: [], note: "Ouvert aux Admin/Manager/Finance" },
+      { menuLabel: "Paramètres",        href: "/settings",      perms: [
+        { value: "settings.manage", label: "Modifier les paramètres globaux" }
+      ]}
+    ]
+  }
+];
