@@ -706,11 +706,20 @@ function SectionBlock({
                           milestoneIds: cell.milestoneIds,
                           missionId: row.missionId
                         });
-                      } else if (cell.monthEntryId) {
-                        // Cellule d'une sim/engagement/oneoff récurrent groupé
-                        // → modal léger pour ce OneOff précis
+                      } else if (
+                        cell.monthEntryId &&
+                        (row.kind === "oneoff_income" ||
+                          row.kind === "oneoff_expense" ||
+                          row.kind === "commitment" ||
+                          row.kind === "simulation")
+                      ) {
+                        // OneOff (incl. sim/engagement/oneoff récurrent groupé) :
+                        // monthEntryId = OneOffCashflowEntry.id → modal OneOff
                         setEditingOneOffCellId(cell.monthEntryId);
                       } else {
+                        // Récurrence (recurring_income/expense) : monthEntryId
+                        // référence un RecurringExpenseMonth (pas un OneOff).
+                        // → on passe par l'éditeur inline rowId+monthIdx.
                         setEditingCell({ rowId: row.id, monthIdx: idx });
                       }
                     }}
