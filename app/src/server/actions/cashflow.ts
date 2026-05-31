@@ -511,9 +511,13 @@ export async function deleteOneOffEntry(
  */
 export async function getOneOffById(id: string) {
   await requirePermission(PERM);
-  const o = await prisma.oneOffCashflowEntry.findUniqueOrThrow({
+  // Defensive : findUnique au lieu de findUniqueOrThrow. Si l'entrée a été
+  // supprimée ou regénérée entre le rendu et le clic, on renvoie null et le
+  // modal côté client doit afficher un message clair plutôt que crasher.
+  const o = await prisma.oneOffCashflowEntry.findUnique({
     where: { id }
   });
+  if (!o) return null;
   return {
     id: o.id,
     label: o.label,

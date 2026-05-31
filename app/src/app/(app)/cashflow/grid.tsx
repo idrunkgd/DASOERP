@@ -3046,6 +3046,16 @@ function OneOffCellEditModal({
     (async () => {
       try {
         const data = await getOneOffById(oneOffId);
+        if (!data) {
+          // L'entrée n'existe plus en DB (orphan UI state, sim regénérée…)
+          toast.error(
+            "Cette entrée n'existe plus en base. La page va se rafraîchir."
+          );
+          onClose();
+          // Force un refresh pour éliminer les références orphelines
+          if (typeof window !== "undefined") window.location.reload();
+          return;
+        }
         setSnap(data as OneOffSnapshot);
         setEditedAmount(data.amount);
         setEditedStatus(data.status as any);
@@ -3055,7 +3065,7 @@ function OneOffCellEditModal({
         setLoadingData(false);
       }
     })();
-  }, [oneOffId]);
+  }, [oneOffId, onClose]);
 
   function save() {
     const fd = new FormData();
