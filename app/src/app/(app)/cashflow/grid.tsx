@@ -3042,30 +3042,63 @@ function OneOffCellEditModal({
     "PLANNED"
   );
 
+  // État local pour afficher un message INLINE au lieu d'un toast fugitif
+  const [orphanError, setOrphanError] = useState<string | null>(null);
   useEffect(() => {
     (async () => {
       try {
         const data = await getOneOffById(oneOffId);
         if (!data) {
-          // L'entrée n'existe plus en DB (orphan UI state, sim regénérée…)
-          toast.error(
-            "Cette entrée n'existe plus en base. La page va se rafraîchir."
+          // L'entrée n'existe plus en DB. On reste dans le modal pour laisser
+          // l'utilisateur LIRE le message + cliquer sur "Rafraîchir la page".
+          setOrphanError(
+            "Cette entrée a été supprimée ou regénérée. Clique 'Rafraîchir la page' pour synchroniser."
           );
-          onClose();
-          // Force un refresh pour éliminer les références orphelines
-          if (typeof window !== "undefined") window.location.reload();
           return;
         }
         setSnap(data as OneOffSnapshot);
         setEditedAmount(data.amount);
         setEditedStatus(data.status as any);
       } catch (err: any) {
-        toast.error(err?.message ?? "Erreur de chargement");
+        setOrphanError(err?.message ?? "Erreur de chargement");
       } finally {
         setLoadingData(false);
       }
     })();
-  }, [oneOffId, onClose]);
+  }, [oneOffId]);
+
+  // Si on a une erreur d'entrée orpheline, on affiche un mini bandeau dans le modal
+  if (orphanError) {
+    return (
+      <div className="fixed inset-0 z-50 bg-midnight-900/40 grid place-items-center p-4">
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-5 space-y-3">
+          <h3 className="text-base font-semibold text-midnight-900">
+            Entrée introuvable
+          </h3>
+          <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-3 py-2">
+            {orphanError}
+          </div>
+          <p className="text-[11px] text-midnight-500">
+            Ça arrive parfois après un changement de simulation ou un deploy
+            récent : ton onglet a un état périmé. Un refresh suffit.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button onClick={onClose} className="btn-secondary text-xs">
+              Fermer
+            </button>
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") window.location.reload();
+              }}
+              className="btn-primary text-xs"
+            >
+              Rafraîchir la page
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   function save() {
     const fd = new FormData();
