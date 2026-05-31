@@ -429,6 +429,15 @@ export async function createOneOffEntry(formData: FormData) {
 export async function updateOneOffEntry(id: string, formData: FormData) {
   const session = await requirePermission(PERM_WRITE);
   const data = OneOffSchema.parse(Object.fromEntries(formData));
+  const exists = await prisma.oneOffCashflowEntry.findUnique({
+    where: { id },
+    select: { id: true }
+  });
+  if (!exists) {
+    throw new Error(
+      "Cette entrée n'existe plus (peut-être déjà supprimée). Recharge la page."
+    );
+  }
   await prisma.oneOffCashflowEntry.update({
     where: { id },
     data: {
@@ -529,6 +538,17 @@ const OneOffCellUpdateSchema = z.object({
 export async function updateOneOffCell(formData: FormData) {
   const session = await requirePermission(PERM_WRITE);
   const data = OneOffCellUpdateSchema.parse(Object.fromEntries(formData));
+  // Garde-fou : si l'entrée a été supprimée entre temps (sim regénérée, autre
+  // user qui a delete, etc.), on évite le P2025 silencieux qui plante la page.
+  const exists = await prisma.oneOffCashflowEntry.findUnique({
+    where: { id: data.id },
+    select: { id: true }
+  });
+  if (!exists) {
+    throw new Error(
+      "Cette entrée n'existe plus (peut-être déjà supprimée ou simulation regénérée). Recharge la page."
+    );
+  }
   await prisma.oneOffCashflowEntry.update({
     where: { id: data.id },
     data: {
