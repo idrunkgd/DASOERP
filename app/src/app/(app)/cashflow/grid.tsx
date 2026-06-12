@@ -2770,6 +2770,22 @@ function MilestoneEditCard({
     });
   }
 
+  // Statut INVOICED = facture émise et envoyée au client, en attente de
+  // paiement. Toggle vers/depuis READY. (Pas vers PLANNED — INVOICED suppose
+  // que la tranche était déjà prête à facturer.)
+  function toggleInvoiced() {
+    const isInvoiced = milestone.status === "INVOICED";
+    start(async () => {
+      try {
+        await setMilestoneStatus(milestone.id, isInvoiced ? "READY" : "INVOICED" as any);
+        toast.success(isInvoiced ? "Revenu en prêt à facturer" : "Marqué facturé ✓");
+        onSaved();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
   function del() {
     if (!confirm(`Supprimer la tranche « ${milestone.label} » ?`)) return;
     start(async () => {
@@ -2918,6 +2934,28 @@ function MilestoneEditCard({
       )}
       <div className="flex items-center justify-between gap-2 pt-2 border-t border-midnight-100">
         <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={toggleInvoiced}
+            disabled={pending || isCancelled || isPaid}
+            className={
+              "text-xs px-2 py-1 rounded " +
+              (milestone.status === "INVOICED"
+                ? "bg-indigoaccent/20 text-indigoaccent hover:bg-indigoaccent/30"
+                : "bg-midnight-100 hover:bg-indigoaccent/20 text-midnight-700")
+            }
+            title="Facture émise et envoyée au client, en attente de paiement"
+          >
+            {pending ? (
+              <Loader2 className="w-3 h-3 inline animate-spin" />
+            ) : milestone.status === "INVOICED" ? (
+              <>
+                <Check className="w-3 h-3 inline" /> Facturé
+              </>
+            ) : (
+              "Marquer facturé"
+            )}
+          </button>
           <button
             type="button"
             onClick={togglePaid}
