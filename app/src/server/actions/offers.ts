@@ -478,4 +478,12 @@ export async function setMilestoneStatus(milestoneId: string, newStatus: Billing
   if (m.offerId) revalidatePath(`/offers/${m.offerId}`);
   if (m.projectId) revalidatePath(`/projects/${m.projectId}`);
   revalidatePath("/finance");
+  // Important : le KPI "En cours" et la grille mensuelle vivent sur /cashflow.
+  // Sans ce revalidate, le compteur restait figé après un changement
+  // INVOICED ↔ PAID (le statut était bien écrit en base mais l'UI ne le
+  // reflétait qu'après un refresh manuel).
+  revalidatePath("/cashflow");
+  // Le dashboard agrège aussi les milestones (Tranches à venir 30j + Alertes
+  // milestones en retard). On le revalide pour rester cohérent.
+  revalidatePath("/dashboard");
 }

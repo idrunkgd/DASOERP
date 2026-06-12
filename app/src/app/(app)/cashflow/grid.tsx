@@ -968,7 +968,9 @@ function MilestoneCellPayToggle({
   const [pending, start] = useTransition();
   function toggle(e: React.MouseEvent) {
     e.stopPropagation();
-    const newStatus = currentlyAllPaid ? "READY" : "PAID";
+    // Dé-payer → retour à INVOICED (la facture existe toujours), pas READY.
+    // Sinon la ligne sortait du KPI "En cours" qui ne compte que INVOICED.
+    const newStatus = currentlyAllPaid ? "INVOICED" : "PAID";
     start(async () => {
       try {
         await Promise.all(
@@ -978,7 +980,7 @@ function MilestoneCellPayToggle({
         );
         toast.success(
           currentlyAllPaid
-            ? "Tranche(s) ré-ouverte(s)"
+            ? "Tranche(s) ré-ouverte(s) (retour à facturé)"
             : `${milestoneIds.length > 1 ? "Tranches" : "Tranche"} marquée(s) payée(s)`
         );
       } catch (err: any) {
@@ -2758,11 +2760,17 @@ function MilestoneEditCard({
     });
   }
 
+  // Flux normal : PLANNED → READY → INVOICED → PAID.
+  // Dé-payer une facture déjà émise = retour à INVOICED (la facture existe
+  // toujours côté client, elle n'est juste pas encore encaissée), pas à READY.
+  // Avant le fix on retombait à READY, ce qui sortait la ligne du KPI
+  // "En cours" (qui somme uniquement les INVOICED), créant l'impression que
+  // le KPI ne remontait pas.
   function togglePaid() {
     start(async () => {
       try {
-        await setMilestoneStatus(milestone.id, isPaid ? "READY" : "PAID");
-        toast.success(isPaid ? "Marqué non payé" : "Marqué payé ✓");
+        await setMilestoneStatus(milestone.id, isPaid ? ("INVOICED" as any) : "PAID");
+        toast.success(isPaid ? "Marqué non payé (retour à facturé)" : "Marqué payé ✓");
         onSaved();
       } catch (e: any) {
         toast.error(e?.message ?? "Erreur");
