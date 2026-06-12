@@ -26,7 +26,13 @@ export type CashflowRowKind =
 
 export type CashflowCell = {
   amount: number;          // 0 si rien ce mois-là pour cette ligne
-  status: "PLANNED" | "PAID" | "SKIPPED" | "VIRTUAL"; // VIRTUAL = simu/engagement, pas saisi
+  // Statuts visibles dans la grille :
+  // - PLANNED  = prévue / encodée (READY côté milestone aussi) → bleu
+  // - INVOICED = facture émise au client, en attente paiement → ambre/orange
+  // - PAID     = encaissée                                      → vert
+  // - SKIPPED  = annulée pour ce mois                           → barré
+  // - VIRTUAL  = simulation / engagement, pas saisi en vrai     → gris
+  status: "PLANNED" | "INVOICED" | "PAID" | "SKIPPED" | "VIRTUAL";
   // Pour les lignes RecurringExpense : id de l'entrée mensuelle si elle existe
   monthEntryId?: string;
   // Pour les lignes Milestones agrégées par mission : IDs des milestones de ce mois
@@ -392,10 +398,18 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       const allCancelled = monthMilestones.every(
         (m) => m.status === "CANCELLED"
       );
-      const status: "PLANNED" | "PAID" | "SKIPPED" = allPaid
+      // INVOICED visible si TOUTES les tranches sont émises (INVOICED ou
+      // TRANSMITTED) mais aucune encore payée. Sinon on retombe sur PLANNED
+      // (bleu) qui couvre PLANNED + READY + cas mixtes.
+      const allInvoicedOrPaid = monthMilestones.every(
+        (m) => m.status === "INVOICED" || m.status === "TRANSMITTED" || m.status === "PAID"
+      );
+      const status: "PLANNED" | "INVOICED" | "PAID" | "SKIPPED" = allPaid
         ? "PAID"
         : allCancelled
         ? "SKIPPED"
+        : allInvoicedOrPaid
+        ? "INVOICED"
         : "PLANNED";
       return {
         amount,
@@ -454,7 +468,9 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
               ? "PAID"
               : m.status === "CANCELLED"
               ? "SKIPPED"
-              : "PLANNED") as "PLANNED" | "PAID" | "SKIPPED",
+              : m.status === "INVOICED" || m.status === "TRANSMITTED"
+              ? "INVOICED"
+              : "PLANNED") as "PLANNED" | "INVOICED" | "PAID" | "SKIPPED",
             // milestoneIds : nécessaire pour que le clic sur la cellule
             // ouvre la modal d'édition avec les boutons "Marquer facturé" et
             // "Marquer payé" (même mécanisme que pour les missions).

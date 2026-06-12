@@ -383,6 +383,27 @@ export function CashflowGrid({
         </span>
       </p>
 
+      {/* Légende code couleur des cellules — aligné sur le code dans la table */}
+      <div className="text-[11px] text-midnight-500 flex flex-wrap items-center gap-3 mt-1">
+        <span className="font-medium text-midnight-600">Code couleur :</span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded bg-blue-50 border border-blue-200"></span>
+          Prévue / encodée
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded bg-amber-50 border border-amber-200"></span>
+          Facturée (en attente paiement)
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded bg-emerald-50 border border-emerald-200"></span>
+          Payée / encaissée
+        </span>
+        <span className="inline-flex items-center gap-1.5 opacity-60">
+          <span className="inline-block w-3 h-3 rounded border border-midnight-200 line-through"></span>
+          Sautée / annulée
+        </span>
+      </div>
+
       {/* MODALS */}
       {showSettings && (
         <SettingsModal
@@ -847,7 +868,20 @@ function RowLine({
       {row.cells.map((cell, i) => {
         const hasValue = cell.amount > 0;
         const isPaid = cell.status === "PAID";
+        const isInvoiced = cell.status === "INVOICED";
         const isSkipped = cell.status === "SKIPPED";
+        // Code couleur statut (visible uniquement si la cellule a une valeur) :
+        //   vert    → encaissée                (PAID)
+        //   orange  → facture émise, en attente (INVOICED, INVOICED+TRANSMITTED)
+        //   bleu    → juste encodée / prévue   (PLANNED, READY)
+        //   (rien)  → 0 ou cellule vide
+        const statusBg = hasValue && !isSkipped
+          ? isPaid
+            ? " bg-emerald-50/70"
+            : isInvoiced
+              ? " bg-amber-50/70"
+              : " bg-blue-50/60"
+          : "";
         return (
           <td
             key={i}
@@ -858,7 +892,7 @@ function RowLine({
                   ? "text-emerald-700"
                   : "text-red-700"
                 : "text-midnight-300") +
-              (isPaid ? " bg-emerald-50/70" : "") +
+              statusBg +
               (isSkipped ? " line-through opacity-50" : "") +
               (editable ? " cursor-pointer hover:bg-midnight-100" : "")
             }

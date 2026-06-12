@@ -492,13 +492,16 @@ function UnifiedItemRow({ item }: { item: UnifiedItem }) {
     start(async () => {
       try {
         if (item.source === "milestone") {
-          await setMilestoneStatus(item.sourceId, isPaid ? "READY" : "PAID");
+          // Dé-payer une tranche déjà émise = retour à INVOICED (facture
+          // existe toujours côté client), pas READY. Sinon la ligne sort
+          // du KPI "En cours" qui ne somme que les INVOICED.
+          await setMilestoneStatus(item.sourceId, isPaid ? ("INVOICED" as any) : "PAID");
         } else if (item.source === "recurring" && item.year && item.monthNum) {
           await cycleMonthlyStatus(item.sourceId, item.year, item.monthNum);
         } else if (item.source === "oneoff") {
           await toggleOneOffStatus(item.sourceId);
         }
-        toast.success(isPaid ? "Non payé" : "Payé ✓");
+        toast.success(isPaid ? "Non payé (retour à facturé)" : "Payé ✓");
       } catch (e: any) {
         toast.error(e?.message ?? "Erreur");
       }
