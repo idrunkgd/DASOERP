@@ -20,6 +20,7 @@ const VARIANTS: Record<string, string> = {
   // Milestone
   PLANNED:      "badge-neutral",
   READY:        "badge-warning",
+  INVOICED:     "badge-info",
   TRANSMITTED:  "badge-info",
   PAID:         "badge-success",
   // Purchase
@@ -41,7 +42,8 @@ const LABELS: Record<string, string> = {
   TO_START: "À démarrer", ACTIVE: "Actif", ON_HOLD: "En pause",
   COMPLETED: "Terminé",
   SUBMITTED: "Soumis", APPROVED: "Validé", REJECTED: "Refusé",
-  PLANNED: "Prévue", READY: "Prête à facturer", TRANSMITTED: "Transmise Peppol",
+  PLANNED: "Prévue", READY: "Prête à facturer", INVOICED: "Facturée",
+  TRANSMITTED: "Transmise Peppol",
   PAID: "Payée",
   ORDERED: "Commandé", RECEIVED: "Reçu",
   PROSPECT: "Prospect", CLIENT: "Client", PARTNER: "Partenaire", SUPPLIER: "Fournisseur",

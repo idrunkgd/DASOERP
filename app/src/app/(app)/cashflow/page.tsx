@@ -6,8 +6,7 @@ import { formatCurrency } from "@/lib/utils";
 import { prisma } from "@/lib/db";
 import { CashflowGrid } from "./grid";
 import { CurrentMonthPanel } from "./current-month";
-import { EditableBalanceKpi } from "./editable-balance-kpi";
-import { TrendingUp, TrendingDown, Wallet, Activity, Banknote } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Activity, Banknote, Hourglass } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -177,14 +176,16 @@ export default async function CashflowPage({
 
       {/* KPIs annuels */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
-        <EditableBalanceKpi
-          initialBalance={data.startingBalance}
-          startingDate={
-            settings?.startingDate?.toISOString().slice(0, 10) ?? `${year}-01-01`
+        <KpiCard
+          label="En cours"
+          value={formatCurrency(data.yearTotals.inProgressAmount)}
+          hint={
+            data.yearTotals.inProgressCount > 0
+              ? `${data.yearTotals.inProgressCount} facture${data.yearTotals.inProgressCount > 1 ? "s" : ""} émise${data.yearTotals.inProgressCount > 1 ? "s" : ""} non payée${data.yearTotals.inProgressCount > 1 ? "s" : ""}`
+              : "Aucune facture en attente"
           }
-          isBootstrapYear={data.isBootstrapYear}
-          bootstrapYear={data.bootstrapYear}
-          displayedYear={year}
+          icon={Hourglass}
+          tone={data.yearTotals.inProgressAmount > 0 ? "warning" : "info"}
         />
         <KpiCard
           label="Solde compte"

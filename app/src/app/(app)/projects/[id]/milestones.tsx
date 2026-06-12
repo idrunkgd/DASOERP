@@ -18,6 +18,7 @@ type M = {
 const STATUSES = [
   { value: "PLANNED", label: "Prévue" },
   { value: "READY", label: "Prête" },
+  { value: "INVOICED", label: "Facturée" },
   { value: "TRANSMITTED", label: "Transmise Peppol" },
   { value: "PAID", label: "Payée" },
   { value: "CANCELLED", label: "Annulée" }

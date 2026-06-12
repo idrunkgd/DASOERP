@@ -92,6 +92,9 @@ export type CashflowYear = {
     realBankBalance: number;
     realPaidInflow: number;
     realPaidOutflow: number;
+    /** Total des factures émises et en attente de paiement (status=INVOICED), TVAC, toutes années. */
+    inProgressAmount: number;
+    inProgressCount: number;
   };
 };
 
@@ -669,6 +672,56 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   }
   const realBankBalance = startingBalance + realPaidInflow - realPaidOutflow;
 
+  // ─── "En cours" : factures émises (INVOICED) en attente de paiement ───
+  // On veut le total des outstanding receivables, indépendamment de l'année
+  // affichée. C'est l'argent qu'on doit recevoir mais qu'on n'a pas encore.
+  // TVAC car c'est ce qui arrivera sur le compte bancaire.
+  const inProgressMilestones = await prisma.billingMilestone.findMany({
+    where: { status: "INVOICED" as any },
+    include: {
+      mission: { select: { id: true } },
+      project: { select: { vatRate: true } },
+      offer: { select: { vatRate: true } }
+    }
+  });
+  // Mission vatRate via raw SQL pour gérer la colonne absente
+  let missionVatById = new Map<string, number>();
+  const missionIdsInProgress = Array.from(
+    new Set(
+      inProgressMilestones.map((m) => m.missionId).filter((x): x is string => !!x)
+    )
+  );
+  if (missionIdsInProgress.length > 0) {
+    try {
+      const rows = await prisma.$queryRawUnsafe<
+        { id: string; vatRate: string | number }[]
+      >(
+        `SELECT id, "vatRate" FROM "Mission" WHERE id IN (${missionIdsInProgress
+          .map((id) => `'${id.replace(/'/g, "''")}'`)
+          .join(",")})`
+      );
+      for (const r of rows) {
+        const v = Number(r.vatRate);
+        if (Number.isFinite(v) && v > 0) missionVatById.set(r.id, v);
+      }
+    } catch {
+      // Colonne absente → fallback 21% dans la boucle
+    }
+  }
+  let inProgressAmount = 0;
+  for (const m of inProgressMilestones) {
+    const vat =
+      missionVatById.get(m.missionId ?? "") ??
+      (m.project?.vatRate != null
+        ? Number(m.project.vatRate)
+        : m.offer?.vatRate != null
+          ? Number(m.offer.vatRate)
+          : 21);
+    inProgressAmount += Number(m.amount) * (1 + vat / 100);
+  }
+  inProgressAmount = Math.round(inProgressAmount * 100) / 100;
+  const inProgressCount = inProgressMilestones.length;
+
   const yearTotals = {
     inflow: monthlyTotals.reduce((s, m) => s + m.inflow, 0),
     outflow: monthlyTotals.reduce((s, m) => s + m.outflow, 0),
@@ -680,7 +733,9 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     endingBalanceWithSim: runningBalanceSim,
     realBankBalance,
     realPaidInflow,
-    realPaidOutflow
+    realPaidOutflow,
+    inProgressAmount,
+    inProgressCount
   };
 
   return {

@@ -53,9 +53,10 @@ enum OfferLineType {
 }
 
 enum BillingMilestoneStatus {
-  PLANNED        // prévue
-  READY          // prête à facturer
-  TRANSMITTED    // transmise dans Peppol
+  PLANNED        // prévue (date connue, pas encore prête)
+  READY          // prête à facturer (livrable validé, on peut émettre)
+  INVOICED       // facturée (envoyée au client, en attente de paiement)
+  TRANSMITTED    // transmise via Peppol (variante électronique d'INVOICED)
   PAID           // payée
   CANCELLED      // annulée
 }
