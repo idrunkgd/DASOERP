@@ -14,6 +14,18 @@ import {
   createSupplierInvoice,
   type ParsedSupplierInvoice
 } from "@/server/actions/supplier-invoices";
+import { SUPPLIER_INVOICE_VAT_RULES } from "@/lib/belgian-vat-rules";
+
+// Ordre d'affichage groupé pour la déclaration TVA — voitures en haut car
+// c'est le piège classique (50 % automatique), puis non-déductibles, puis
+// le reste.
+const CATEGORY_ORDER: { group: string; keys: string[] }[] = [
+  { group: "Voiture (50 %)", keys: ["CAR_PURCHASE", "CAR_LEASE", "CAR_FUEL", "CAR_MAINTENANCE", "CAR_INSURANCE"] },
+  { group: "Non déductibles (0 %)", keys: ["RESTAURANT", "HOTEL", "GIFT_HIGH", "REPRESENTATION"] },
+  { group: "Services (100 %)", keys: ["SOFTWARE_SAAS", "SUBCONTRACTING", "TELECOM", "PROFESSIONAL_SERVICES", "TRAINING", "UTILITIES", "OFFICE_RENT", "GIFT_LOW"] },
+  { group: "Biens & matériel (100 %)", keys: ["OFFICE_SUPPLIES", "HARDWARE_SMALL", "HARDWARE_INVESTMENT"] },
+  { group: "Autre", keys: ["OTHER"] }
+];
 
 type Company = { id: string; name: string };
 
@@ -32,7 +44,9 @@ export function UploadAndCreate({ companies }: { companies: Company[] }) {
     amountHt: "",
     vatRate: "21",
     vatAmount: "",
-    amountTtc: ""
+    amountTtc: "",
+    category: "OTHER",
+    vatDeductibleRateOverride: ""
   });
 
   function reset() {
@@ -48,7 +62,9 @@ export function UploadAndCreate({ companies }: { companies: Company[] }) {
       amountHt: "",
       vatRate: "21",
       vatAmount: "",
-      amountTtc: ""
+      amountTtc: "",
+      category: "OTHER",
+      vatDeductibleRateOverride: ""
     });
   }
 
@@ -126,6 +142,10 @@ export function UploadAndCreate({ companies }: { companies: Company[] }) {
     fd.set("vatRate", form.vatRate);
     fd.set("vatAmount", form.vatAmount || String(computedVat.toFixed(2)));
     fd.set("amountTtc", form.amountTtc || String(computedTtc.toFixed(2)));
+    fd.set("category", form.category);
+    if (form.vatDeductibleRateOverride.trim() !== "") {
+      fd.set("vatDeductibleRateOverride", form.vatDeductibleRateOverride);
+    }
     if (dataUri) fd.set("pdfUrl", dataUri);
     if (parsed) fd.set("ocrPayload", JSON.stringify(parsed));
     fd.set("source", "manual");
@@ -292,6 +312,73 @@ export function UploadAndCreate({ companies }: { companies: Company[] }) {
             />
           </div>
         </div>
+
+        {/* Catégorie TVA belge : pilote la déduction (voiture = 50 %, restau = 0 %, etc.)
+            et la case de la grille (81 biens, 82 services, 83 investissements). */}
+        <div>
+          <label className="label">Catégorie TVA</label>
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value, vatDeductibleRateOverride: "" })}
+            className="input"
+          >
+            {CATEGORY_ORDER.map((g) => (
+              <optgroup key={g.group} label={g.group}>
+                {g.keys.map((k) => (
+                  <option key={k} value={k}>
+                    {SUPPLIER_INVOICE_VAT_RULES[k].label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          {(() => {
+            const rule = SUPPLIER_INVOICE_VAT_RULES[form.category] ?? SUPPLIER_INVOICE_VAT_RULES.OTHER;
+            const override = form.vatDeductibleRateOverride.trim() !== ""
+              ? Math.max(0, Math.min(1, Number(form.vatDeductibleRateOverride) || 0))
+              : null;
+            const effective = override !== null ? override : rule.deductibleRate;
+            const vatNum = Number(form.vatAmount || computedVat.toFixed(2));
+            const deductible = vatNum * effective;
+            return (
+              <div className="mt-1.5 text-[11px] text-midnight-500 flex items-center gap-2">
+                <span>
+                  Case <strong>{rule.vatBox}</strong> · Déduction par défaut{" "}
+                  <strong>{Math.round(rule.deductibleRate * 100)} %</strong>
+                </span>
+                {override !== null && (
+                  <span className="text-amber-700">
+                    · Override : <strong>{Math.round(override * 100)} %</strong>
+                  </span>
+                )}
+                <span className="ml-auto font-medium text-midnight-700">
+                  TVA déductible effective : {deductible.toFixed(2)} €
+                </span>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Override manuel : champ avancé, vide par défaut → on applique la règle.
+            Mets 1 sur une voiture 100 % pro (carnet de bord), 0 sur un truc atypique. */}
+        <details className="text-xs">
+          <summary className="cursor-pointer text-midnight-500 hover:text-midnight-900">
+            Override du taux de déduction (cas particuliers)
+          </summary>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="number"
+              min="0"
+              max="1"
+              step="0.05"
+              placeholder="Ex. 1 pour voiture 100 % pro"
+              value={form.vatDeductibleRateOverride}
+              onChange={(e) => setForm({ ...form, vatDeductibleRateOverride: e.target.value })}
+              className="input max-w-[180px]"
+            />
+            <span className="text-midnight-400">de 0 à 1 — laisse vide pour appliquer la règle</span>
+          </div>
+        </details>
 
         <button
           onClick={submit}

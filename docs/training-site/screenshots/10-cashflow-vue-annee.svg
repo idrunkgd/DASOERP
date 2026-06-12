@@ -1,0 +1,322 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 920" width="1440" height="920" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+  <rect width="1440" height="920" fill="#fafafc"/>
+  <rect x="0" y="0" width="240" height="920" fill="#13131f"/>
+  <rect x="20" y="16" width="36" height="36" fill="white" rx="6"/>
+  <text x="38" y="41" font-size="22" fill="#13131f" font-weight="800" text-anchor="middle">d</text>
+  <text x="66" y="33" font-size="13" fill="white" font-weight="600" text-anchor="start">Dasohub</text>
+  <text x="66" y="48" font-size="10" fill="#9b9cb8" font-weight="400" text-anchor="start">Pilotage Dasolabs</text>
+  <line x1="20" y1="66" x2="224" y2="66" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="28" y="90" font-size="9" fill="#727496" font-weight="600" text-anchor="start">PILOTAGE</text>
+  <g transform="translate(22,107) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></g>
+  <text x="46" y="120" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Tableau de bord</text>
+  <g transform="translate(22,141) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></g>
+  <text x="46" y="154" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Statut projet</text>
+  <g transform="translate(22,175) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18"/></g>
+  <text x="46" y="188" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Simulateur package</text>
+  <rect x="12" y="202" width="216" height="30" fill="rgba(91,95,214,0.20)" rx="6"/>
+  <g transform="translate(22,209) scale(0.6666666666666666)" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></g>
+  <text x="46" y="222" font-size="12" fill="white" font-weight="500" text-anchor="start">Cashflow</text>
+  <g transform="translate(22,243) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></g>
+  <text x="46" y="256" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">TVA trimestrielle</text>
+  <g transform="translate(22,277) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/><path d="M6 7h.01"/><path d="M9 7h.01"/></g>
+  <text x="46" y="290" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Outils &amp; apps</text>
+  <text x="28" y="320" font-size="9" fill="#727496" font-weight="600" text-anchor="start">COMMERCIALE</text>
+  <g transform="translate(22,337) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></g>
+  <text x="46" y="350" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Entreprises</text>
+  <g transform="translate(22,371) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g>
+  <text x="46" y="384" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Contacts</text>
+  <g transform="translate(22,405) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></g>
+  <text x="46" y="418" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Activités commerciales</text>
+  <g transform="translate(22,439) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M21 6h-7a2 2 0 0 0-2 2v8a2 2 0 0 1-2 2H3"/></g>
+  <text x="46" y="452" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">CRM pipeline</text>
+  <text x="28" y="482" font-size="9" fill="#727496" font-weight="600" text-anchor="start">CONSULTANCE</text>
+  <g transform="translate(22,499) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></g>
+  <text x="46" y="512" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Candidats</text>
+  <g transform="translate(22,533) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g>
+  <text x="46" y="546" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Consultants</text>
+  <g transform="translate(22,567) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h3v8H4a1 1 0 0 1-1-1z"/><path d="M21 11h-3v8h2a1 1 0 0 0 1-1z"/><path d="M3 11a9 9 0 0 1 18 0"/></g>
+  <text x="46" y="580" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Demandes de mission</text>
+  <g transform="translate(22,601) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></g>
+  <text x="46" y="614" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Missions</text>
+  <g transform="translate(22,635) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="3"/><circle cx="19" cy="18" r="3"/><path d="M12 6h5a2 2 0 0 1 2 2v7"/><path d="M12 18H7a2 2 0 0 1-2-2V9"/></g>
+  <text x="46" y="648" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Matching mission</text>
+  <g transform="translate(22,669) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></g>
+  <text x="46" y="682" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Entretiens</text>
+  <g transform="translate(22,703) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></g>
+  <text x="46" y="716" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Calendrier</text>
+  <text x="28" y="746" font-size="9" fill="#727496" font-weight="600" text-anchor="start">PROJET</text>
+  <g transform="translate(22,763) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></g>
+  <text x="46" y="776" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Offres</text>
+  <g transform="translate(22,797) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><line x1="8" y1="10" x2="8" y2="17"/><line x1="12" y1="10" x2="12" y2="14"/><line x1="16" y1="10" x2="16" y2="16"/></g>
+  <text x="46" y="810" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Projets</text>
+  <g transform="translate(22,831) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></g>
+  <text x="46" y="844" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Timesheets</text>
+  <g transform="translate(22,865) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></g>
+  <text x="46" y="878" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Achats</text>
+  <g transform="translate(22,899) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01"/></g>
+  <text x="46" y="912" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Planning</text>
+  <text x="28" y="942" font-size="9" fill="#727496" font-weight="600" text-anchor="start">FINANCES</text>
+  <g transform="translate(22,959) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></g>
+  <text x="46" y="972" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Facturations</text>
+  <text x="28" y="1002" font-size="9" fill="#727496" font-weight="600" text-anchor="start">RH &amp; DOCUMENTS</text>
+  <g transform="translate(22,1019) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6"/><path d="M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></g>
+  <text x="46" y="1032" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Onboarding</text>
+  <g transform="translate(22,1053) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><polyline points="15 2 15 7 20 7"/></g>
+  <text x="46" y="1066" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Documents</text>
+  <text x="28" y="1096" font-size="9" fill="#727496" font-weight="600" text-anchor="start">CONFIGURATION</text>
+  <g transform="translate(22,1113) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76z"/><polyline points="9 12 11 14 15 10"/></g>
+  <text x="46" y="1126" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Profils</text>
+  <g transform="translate(22,1147) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></g>
+  <text x="46" y="1160" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Compétences</text>
+  <g transform="translate(22,1181) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></g>
+  <text x="46" y="1194" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Centres de coûts</text>
+  <g transform="translate(22,1215) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h5"/><circle cx="19" cy="14" r="2"/><path d="M22.5 14.5l-1.4 .8M16.9 13.7l-1.4 .8M17.4 16.7l-1.4 -.8M22.1 14.5l-1.4 -.8M19 11.5v1.5M19 16v1.5"/></g>
+  <text x="46" y="1228" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Utilisateurs</text>
+  <g transform="translate(22,1249) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9.4-8 10-4.5-.6-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></g>
+  <text x="46" y="1262" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Accès</text>
+  <g transform="translate(22,1283) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/><path d="M12 7v5l4 2"/></g>
+  <text x="46" y="1296" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Audit trail</text>
+  <g transform="translate(22,1317) scale(0.6666666666666666)" fill="none" stroke="#c2c3d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></g>
+  <text x="46" y="1330" font-size="12" fill="#c2c3d6" font-weight="400" text-anchor="start">Paramètres</text>
+  <line x1="20" y1="886" x2="224" y2="886" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <text x="28" y="906" font-size="10" fill="#9b9cb8" font-weight="400" text-anchor="start">v0.2 · 2026</text>
+  <rect x="240" y="0" width="1200" height="56" fill="white"/>
+  <line x1="240" y1="56" x2="1440" y2="56" stroke="#e4e4ec" stroke-width="1"/>
+  <rect x="256" y="10" width="576" height="36" fill="rgba(245,245,249,0.4)" stroke="#e4e4ec" stroke-width="1" rx="6"/>
+  <g transform="translate(266,20) scale(0.6666666666666666)" fill="none" stroke="#727496" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g>
+  <text x="292" y="33" font-size="13" fill="#727496" font-weight="400" text-anchor="start">Rechercher…</text>
+  <rect x="772" y="18" width="22" height="20" fill="white" stroke="#c2c3d6" stroke-width="1" rx="3"/>
+  <text x="783" y="32" font-size="11" fill="#535679" font-weight="400" text-anchor="middle" font-family="ui-monospace, monospace">⌘</text>
+  <rect x="798" y="18" width="22" height="20" fill="white" stroke="#c2c3d6" stroke-width="1" rx="3"/>
+  <text x="809" y="32" font-size="11" fill="#535679" font-weight="400" text-anchor="middle" font-family="ui-monospace, monospace">K</text>
+  <circle cx="1216" cy="28" r="16" fill="#202037"/>
+  <text x="1216" y="33" font-size="11" fill="white" font-weight="600" text-anchor="middle">GD</text>
+  <text x="1242" y="24" font-size="13" fill="#202037" font-weight="500" text-anchor="start">Gérald Devestele</text>
+  <text x="1242" y="39" font-size="10" fill="#5b5fd6" font-weight="400" text-anchor="start">Admin</text>
+  <g transform="translate(1380,22) scale(0.5833333333333334)" fill="none" stroke="#535679" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></g>
+  <text x="264" y="104" font-size="22" fill="#202037" font-weight="600" text-anchor="start">Cashflow prévisionnel</text>
+  <text x="264" y="124" font-size="12" fill="#535679" font-weight="400" text-anchor="start">Vue annuelle 2026 — revenus auto (BillingMilestones) + dépenses récurrentes + ponctuels + simulations</text>
+  <rect x="1232" y="96" width="56" height="32" fill="white" stroke="#e4e4ec" stroke-width="1" rx="6"/>
+  <text x="1260" y="116" font-size="12" fill="#202037" font-weight="400" text-anchor="middle">2025</text>
+  <rect x="1292" y="96" width="56" height="32" fill="rgba(91,95,214,0.20)" stroke="#5b5fd6" stroke-width="1" rx="6"/>
+  <text x="1320" y="116" font-size="12" fill="#5b5fd6" font-weight="500" text-anchor="middle">2026</text>
+  <rect x="1352" y="96" width="56" height="32" fill="white" stroke="#e4e4ec" stroke-width="1" rx="6"/>
+  <text x="1380" y="116" font-size="12" fill="#202037" font-weight="400" text-anchor="middle">2027</text>
+  <rect x="264.0" y="156" width="182.0" height="100" fill="white" stroke="#e4e4ec" stroke-width="1" rx="12"/>
+  <text x="284.0" y="188" font-size="10" fill="#535679" font-weight="500" text-anchor="start">EN COURS</text>
+  <g transform="translate(410.0,174) scale(0.6666666666666666)" fill="none" stroke="#727496" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></g>
+  <text x="284.0" y="220" font-size="24" fill="#b45309" font-weight="600" text-anchor="start">67 400 €</text>
+  <text x="284.0" y="240" font-size="11" fill="#535679" font-weight="400" text-anchor="start">5 factures émises non payées</text>
+  <rect x="458.0" y="156" width="182.0" height="100" fill="white" stroke="#e4e4ec" stroke-width="1" rx="12"/>
+  <text x="478.0" y="188" font-size="10" fill="#535679" font-weight="500" text-anchor="start">SOLDE COMPTE</text>
+  <g transform="translate(604.0,174) scale(0.6666666666666666)" fill="none" stroke="#727496" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></g>
+  <text x="478.0" y="220" font-size="24" fill="#047857" font-weight="600" text-anchor="start">42 820 €</text>
+  <text x="478.0" y="240" font-size="11" fill="#535679" font-weight="400" text-anchor="start">+184 200 € − 141 380 € marqués payés</text>
+  <rect x="652.0" y="156" width="182.0" height="100" fill="white" stroke="#e4e4ec" stroke-width="1" rx="12"/>
+  <text x="672.0" y="188" font-size="10" fill="#535679" font-weight="500" text-anchor="start">ENTRÉES ANNÉE</text>
+  <g transform="translate(798.0,174) scale(0.6666666666666666)" fill="none" stroke="#727496" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></g>
+  <text x="672.0" y="220" font-size="24" fill="#4338ca" font-weight="600" text-anchor="start">284 600 €</text>
+  <text x="672.0" y="240" font-size="11" fill="#535679" font-weight="400" text-anchor="start">+12 000 € avec sim.</text>
+  <rect x="846.0" y="156" width="182.0" height="100" fill="white" stroke="#e4e4ec" stroke-width="1" rx="12"/>
+  <text x="866.0" y="188" font-size="10" fill="#535679" font-weight="500" text-anchor="start">SORTIES ANNÉE</text>
+  <g transform="translate(992.0,174) scale(0.6666666666666666)" fill="none" stroke="#727496" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></g>
+  <text x="866.0" y="220" font-size="24" fill="#b91c1c" font-weight="600" text-anchor="start">−112 300 €</text>
+  <text x="866.0" y="240" font-size="11" fill="#535679" font-weight="400" text-anchor="start">récurrents + ponctuels</text>
+  <rect x="1040.0" y="156" width="182.0" height="100" fill="white" stroke="#e4e4ec" stroke-width="1" rx="12"/>
+  <text x="1060.0" y="188" font-size="10" fill="#535679" font-weight="500" text-anchor="start">NET</text>
+  <g transform="translate(1186.0,174) scale(0.6666666666666666)" fill="none" stroke="#727496" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></g>
+  <text x="1060.0" y="220" font-size="24" fill="#047857" font-weight="600" text-anchor="start">172 300 €</text>
+  <text x="1060.0" y="240" font-size="11" fill="#535679" font-weight="400" text-anchor="start">recettes − dépenses</text>
+  <rect x="1234.0" y="156" width="182.0" height="100" fill="white" stroke="#e4e4ec" stroke-width="1" rx="12"/>
+  <text x="1254.0" y="188" font-size="10" fill="#535679" font-weight="500" text-anchor="start">NET CUMULÉ</text>
+  <g transform="translate(1380.0,174) scale(0.6666666666666666)" fill="none" stroke="#727496" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></g>
+  <text x="1254.0" y="220" font-size="24" fill="#4338ca" font-weight="600" text-anchor="start">215 120 €</text>
+  <text x="1254.0" y="240" font-size="11" fill="#535679" font-weight="400" text-anchor="start">solde + net 2026</text>
+  <rect x="264" y="272" width="1152" height="624" fill="white" stroke="#e4e4ec" stroke-width="1" rx="12"/>
+  <rect x="264" y="272" width="1152" height="36" fill="#f5f5f9" rx="12"/>
+  <text x="280" y="294" font-size="10" fill="#535679" font-weight="500" text-anchor="start">LIGNE</text>
+  <text x="580.3333333333334" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Jan</text>
+  <text x="653.0" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Fév</text>
+  <text x="725.6666666666667" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Mar</text>
+  <text x="798.3333333333334" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Avr</text>
+  <text x="871.0000000000001" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Mai</text>
+  <text x="943.6666666666667" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Jun</text>
+  <text x="1016.3333333333334" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Jul</text>
+  <text x="1089.0" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Aoû</text>
+  <text x="1161.6666666666667" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Sep</text>
+  <text x="1234.3333333333333" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Oct</text>
+  <text x="1307.0" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Nov</text>
+  <text x="1379.6666666666667" y="294" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">Déc</text>
+  <text x="1400" y="294" font-size="10" fill="#535679" font-weight="500" text-anchor="end">TOTAL</text>
+  <line x1="264" y1="308" x2="1416" y2="308" stroke="#e4e4ec" stroke-width="1"/>
+  <rect x="264" y="308" width="1152" height="30" fill="#f3f3f7"/>
+  <text x="280" y="328" font-size="12" fill="#202037" font-weight="600" text-anchor="start">▾ Revenus</text>
+  <text x="1400" y="328" font-size="12" fill="#34354c" font-weight="600" text-anchor="end">+ 284,6 k€</text>
+  <rect x="272" y="350" width="4" height="28" fill="#5b5fd6" rx="2"/>
+  <text x="284" y="360" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Acme — Refonte CRM</text>
+  <text x="284" y="376" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Tranche 1 · OFF-026</text>
+  <rect x="620.6666666666666" y="352" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="653.0" y="368" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">28.0k</text>
+  <text x="1400" y="368" font-size="12" fill="#065f46" font-weight="600" text-anchor="end">+28.0 k€</text>
+  <line x1="284" y1="382" x2="1396" y2="382" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="272" y="398" width="4" height="28" fill="#5b5fd6" rx="2"/>
+  <text x="284" y="408" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Contoso — Phase 1</text>
+  <text x="284" y="424" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Mensuel · Mission C-021</text>
+  <rect x="548.0" y="400" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="580.3333333333334" y="416" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">12.0k</text>
+  <rect x="620.6666666666666" y="400" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="653.0" y="416" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">12.0k</text>
+  <rect x="693.3333333333334" y="400" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="725.6666666666667" y="416" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">12.0k</text>
+  <rect x="766.0" y="400" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="798.3333333333334" y="416" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">12.0k</text>
+  <rect x="838.6666666666667" y="400" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="871.0000000000001" y="416" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">12.0k</text>
+  <rect x="911.3333333333334" y="400" width="64.66666666666667" height="24" fill="#fef3c7" rx="4"/>
+  <text x="943.6666666666667" y="416" font-size="11" fill="#92400e" font-weight="500" text-anchor="middle">12.0k</text>
+  <rect x="984.0" y="400" width="64.66666666666667" height="24" fill="#fef3c7" rx="4"/>
+  <text x="1016.3333333333334" y="416" font-size="11" fill="#92400e" font-weight="500" text-anchor="middle">12.0k</text>
+  <text x="1089.0" y="416" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">12.0k</text>
+  <text x="1161.6666666666667" y="416" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">12.0k</text>
+  <text x="1234.3333333333333" y="416" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">12.0k</text>
+  <text x="1307.0" y="416" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">12.0k</text>
+  <text x="1379.6666666666667" y="416" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">12.0k</text>
+  <text x="1400" y="416" font-size="12" fill="#065f46" font-weight="600" text-anchor="end">+144.0 k€</text>
+  <line x1="284" y1="430" x2="1396" y2="430" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="272" y="446" width="4" height="28" fill="#5b5fd6" rx="2"/>
+  <text x="284" y="456" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Globex — Audit</text>
+  <text x="284" y="472" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Phase 1 · Sophie Leroy</text>
+  <rect x="766.0" y="448" width="64.66666666666667" height="24" fill="#fef3c7" rx="4"/>
+  <text x="798.3333333333334" y="464" font-size="11" fill="#92400e" font-weight="500" text-anchor="middle">18.0k</text>
+  <text x="1400" y="464" font-size="12" fill="#065f46" font-weight="600" text-anchor="end">+18.0 k€</text>
+  <line x1="284" y1="478" x2="1396" y2="478" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="272" y="494" width="4" height="28" fill="#5b5fd6" rx="2"/>
+  <text x="284" y="504" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Wayne — Mobile</text>
+  <text x="284" y="520" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Final · OFF-023</text>
+  <text x="1234.3333333333333" y="512" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">28.0k</text>
+  <text x="1400" y="512" font-size="12" fill="#065f46" font-weight="600" text-anchor="end">+28.0 k€</text>
+  <line x1="284" y1="526" x2="1396" y2="526" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="272" y="542" width="4" height="28" fill="#5b5fd6" rx="2"/>
+  <text x="284" y="552" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Stark — API</text>
+  <text x="284" y="568" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Initial · OFF-022</text>
+  <rect x="911.3333333333334" y="544" width="64.66666666666667" height="24" fill="#fef3c7" rx="4"/>
+  <text x="943.6666666666667" y="560" font-size="11" fill="#92400e" font-weight="500" text-anchor="middle">12.0k</text>
+  <rect x="1056.6666666666667" y="544" width="64.66666666666667" height="24" fill="#fef3c7" rx="4"/>
+  <text x="1089.0" y="560" font-size="11" fill="#92400e" font-weight="500" text-anchor="middle">12.0k</text>
+  <text x="1400" y="560" font-size="12" fill="#065f46" font-weight="600" text-anchor="end">+24.0 k€</text>
+  <line x1="284" y1="574" x2="1396" y2="574" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="272" y="590" width="4" height="28" fill="#5b5fd6" rx="2"/>
+  <text x="284" y="600" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Initech — Sprint</text>
+  <text x="284" y="616" font-size="10" fill="#535679" font-weight="400" text-anchor="start">OFF-021 · 4 sprints</text>
+  <rect x="620.6666666666666" y="592" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="653.0" y="608" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">15.0k</text>
+  <rect x="838.6666666666667" y="592" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="871.0000000000001" y="608" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">15.0k</text>
+  <rect x="1056.6666666666667" y="592" width="64.66666666666667" height="24" fill="#fef3c7" rx="4"/>
+  <text x="1089.0" y="608" font-size="11" fill="#92400e" font-weight="500" text-anchor="middle">15.0k</text>
+  <text x="1307.0" y="608" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">15.0k</text>
+  <text x="1400" y="608" font-size="12" fill="#065f46" font-weight="600" text-anchor="end">+60.0 k€</text>
+  <line x1="284" y1="622" x2="1396" y2="622" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="264" y="626" width="1152" height="30" fill="#f3f3f7"/>
+  <text x="280" y="646" font-size="12" fill="#202037" font-weight="600" text-anchor="start">▾ Dépenses récurrentes</text>
+  <text x="1400" y="646" font-size="12" fill="#34354c" font-weight="600" text-anchor="end">− 96,5 k€</text>
+  <rect x="272" y="668" width="4" height="28" fill="#b91c1c" rx="2"/>
+  <text x="284" y="678" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Salaires consultants</text>
+  <text x="284" y="694" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Récurrent · 4 personnes</text>
+  <rect x="548.0" y="670" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="580.3333333333334" y="686" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−8.5k</text>
+  <rect x="620.6666666666666" y="670" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="653.0" y="686" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−8.5k</text>
+  <rect x="693.3333333333334" y="670" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="725.6666666666667" y="686" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−8.5k</text>
+  <rect x="766.0" y="670" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="798.3333333333334" y="686" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−8.5k</text>
+  <rect x="838.6666666666667" y="670" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="871.0000000000001" y="686" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−8.5k</text>
+  <rect x="911.3333333333334" y="670" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="943.6666666666667" y="686" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−8.5k</text>
+  <text x="1016.3333333333334" y="686" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−8.5k</text>
+  <text x="1089.0" y="686" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−8.5k</text>
+  <text x="1161.6666666666667" y="686" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−8.5k</text>
+  <text x="1234.3333333333333" y="686" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−8.5k</text>
+  <text x="1307.0" y="686" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−8.5k</text>
+  <text x="1379.6666666666667" y="686" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−8.5k</text>
+  <text x="1400" y="686" font-size="12" fill="#b91c1c" font-weight="600" text-anchor="end">-102.0 k€</text>
+  <line x1="284" y1="700" x2="1396" y2="700" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="272" y="716" width="4" height="28" fill="#b91c1c" rx="2"/>
+  <text x="284" y="726" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Loyer bureaux</text>
+  <text x="284" y="742" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Récurrent · Anderlecht</text>
+  <rect x="548.0" y="718" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="580.3333333333334" y="734" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−1.8k</text>
+  <rect x="620.6666666666666" y="718" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="653.0" y="734" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−1.8k</text>
+  <rect x="693.3333333333334" y="718" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="725.6666666666667" y="734" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−1.8k</text>
+  <rect x="766.0" y="718" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="798.3333333333334" y="734" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−1.8k</text>
+  <rect x="838.6666666666667" y="718" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="871.0000000000001" y="734" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−1.8k</text>
+  <rect x="911.3333333333334" y="718" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="943.6666666666667" y="734" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−1.8k</text>
+  <text x="1016.3333333333334" y="734" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−1.8k</text>
+  <text x="1089.0" y="734" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−1.8k</text>
+  <text x="1161.6666666666667" y="734" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−1.8k</text>
+  <text x="1234.3333333333333" y="734" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−1.8k</text>
+  <text x="1307.0" y="734" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−1.8k</text>
+  <text x="1379.6666666666667" y="734" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−1.8k</text>
+  <text x="1400" y="734" font-size="12" fill="#b91c1c" font-weight="600" text-anchor="end">-21.6 k€</text>
+  <line x1="284" y1="748" x2="1396" y2="748" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="272" y="764" width="4" height="28" fill="#b91c1c" rx="2"/>
+  <text x="284" y="774" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Coolify + Scaleway</text>
+  <text x="284" y="790" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Récurrent · infra</text>
+  <rect x="548.0" y="766" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="580.3333333333334" y="782" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−0.3k</text>
+  <rect x="620.6666666666666" y="766" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="653.0" y="782" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−0.3k</text>
+  <rect x="693.3333333333334" y="766" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="725.6666666666667" y="782" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−0.3k</text>
+  <rect x="766.0" y="766" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="798.3333333333334" y="782" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−0.3k</text>
+  <rect x="838.6666666666667" y="766" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="871.0000000000001" y="782" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−0.3k</text>
+  <rect x="911.3333333333334" y="766" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="943.6666666666667" y="782" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−0.3k</text>
+  <text x="1016.3333333333334" y="782" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−0.3k</text>
+  <text x="1089.0" y="782" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−0.3k</text>
+  <text x="1161.6666666666667" y="782" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−0.3k</text>
+  <text x="1234.3333333333333" y="782" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−0.3k</text>
+  <text x="1307.0" y="782" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−0.3k</text>
+  <text x="1379.6666666666667" y="782" font-size="11" fill="#535679" font-weight="500" text-anchor="middle">−0.3k</text>
+  <text x="1400" y="782" font-size="12" fill="#b91c1c" font-weight="600" text-anchor="end">-4.1 k€</text>
+  <line x1="284" y1="796" x2="1396" y2="796" stroke="rgba(228,228,236,0.5)" stroke-width="1"/>
+  <rect x="264" y="800" width="1152" height="30" fill="#f3f3f7"/>
+  <text x="280" y="820" font-size="12" fill="#202037" font-weight="600" text-anchor="start">▾ Dépenses ponctuelles</text>
+  <text x="1400" y="820" font-size="12" fill="#34354c" font-weight="600" text-anchor="end">− 24,3 k€</text>
+  <rect x="272" y="842" width="4" height="28" fill="#b91c1c" rx="2"/>
+  <text x="284" y="852" font-size="12" fill="#202037" font-weight="500" text-anchor="start">TVA T1 2026</text>
+  <text x="284" y="868" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Ponctuel · 20/04</text>
+  <rect x="766.0" y="844" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="798.3333333333334" y="860" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−12.4k</text>
+  <text x="1400" y="860" font-size="12" fill="#b91c1c" font-weight="600" text-anchor="end">-12.4 k€</text>
+  <rect x="272" y="890" width="4" height="28" fill="#b91c1c" rx="2"/>
+  <text x="284" y="900" font-size="12" fill="#202037" font-weight="500" text-anchor="start">Laptops M3</text>
+  <text x="284" y="916" font-size="10" fill="#535679" font-weight="400" text-anchor="start">Ponctuel · achat</text>
+  <rect x="548.0" y="892" width="64.66666666666667" height="24" fill="#d1fae5" rx="4"/>
+  <text x="580.3333333333334" y="908" font-size="11" fill="#065f46" font-weight="500" text-anchor="middle">−8.4k</text>
+  <text x="1400" y="908" font-size="12" fill="#b91c1c" font-weight="600" text-anchor="end">-8.4 k€</text>
+  <rect x="264" y="930" width="1152" height="36" fill="#202037"/>
+  <text x="280" y="952" font-size="11" fill="white" font-weight="600" text-anchor="start">TOTAL MENSUEL NET</text>
+  <text x="580.3333333333334" y="952" font-size="11" fill="#fda4af" font-weight="600" text-anchor="middle">-4.1k</text>
+  <text x="653.0" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+17.6k</text>
+  <text x="725.6666666666667" y="952" font-size="11" fill="#fda4af" font-weight="600" text-anchor="middle">-1.8k</text>
+  <text x="798.3333333333334" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+4.5k</text>
+  <text x="871.0000000000001" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+17.6k</text>
+  <text x="943.6666666666667" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+21.7k</text>
+  <text x="1016.3333333333334" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+1.7k</text>
+  <text x="1089.0" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+19.4k</text>
+  <text x="1161.6666666666667" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+1.7k</text>
+  <text x="1234.3333333333333" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+17.8k</text>
+  <text x="1307.0" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+7.2k</text>
+  <text x="1379.6666666666667" y="952" font-size="11" fill="#86efac" font-weight="600" text-anchor="middle">+9.7k</text>
+  <text x="1400" y="952" font-size="12" fill="#86efac" font-weight="700" text-anchor="end">+ 112,8 k€</text>
+</svg>

@@ -76,8 +76,9 @@ export default async function TvaTrimestriellePage({
         <button className="btn-primary">Recalculer</button>
       </form>
 
-      {/* Synthèse */}
-      <div className="grid md:grid-cols-4 gap-3 mb-6">
+      {/* Synthèse — 5 KPIs : on distingue TVA achats brute (info) vs effectivement
+          déductible (la seule qui compte pour case 59 et la grille). */}
+      <div className="grid md:grid-cols-5 gap-3 mb-6">
         <Kpi
           label="Ventes HTVA"
           value={formatCurrency(report.totalSalesHt)}
@@ -93,7 +94,13 @@ export default async function TvaTrimestriellePage({
         <Kpi
           label="Achats HTVA"
           value={formatCurrency(report.totalPurchasesHt)}
-          sub={`${report.purchasesLines.length} ligne(s)`}
+          sub={`${report.purchasesLines.length} ligne(s) — 3 sources`}
+        />
+        <Kpi
+          label="TVA déductible"
+          value={formatCurrency(report.totalDeductibleVat)}
+          sub={`sur ${formatCurrency(report.totalPurchasesVat)} brut`}
+          tone="ok"
         />
         <Kpi
           label={report.netDueOrCredit >= 0 ? "À payer (case 71)" : "Crédit (case 72)"}
@@ -126,8 +133,10 @@ export default async function TvaTrimestriellePage({
             <GridRow code="54" label="TVA due sur opérations" value={report.grid.case54} highlight />
           </GridSection>
           <GridSection title="Opérations à l'entrée (achats)">
-            <GridRow code="81" label="Biens & services HTVA" value={report.grid.case81} highlight />
-            <GridRow code="59" label="TVA déductible" value={report.grid.case59} highlight />
+            <GridRow code="81" label="Biens & services HTVA (marchandises, fournitures)" value={report.grid.case81} highlight />
+            <GridRow code="82" label="Services divers HTVA (SaaS, sous-traitance, télécom…)" value={report.grid.case82} highlight />
+            <GridRow code="83" label="Biens d'investissement HTVA (laptop, voiture)" value={report.grid.case83} highlight />
+            <GridRow code="59" label="TVA déductible (après règles 50 % voiture, 0 % restau, etc.)" value={report.grid.case59} highlight />
           </GridSection>
           <GridSection title="Soldes" full>
             <GridRow
@@ -152,8 +161,10 @@ export default async function TvaTrimestriellePage({
               "",
               `Case 03 : ${report.grid.case03.toFixed(2)} €  (HTVA 21%)`,
               `Case 54 : ${report.grid.case54.toFixed(2)} €  (TVA due)`,
-              `Case 81 : ${report.grid.case81.toFixed(2)} €  (Achats HTVA)`,
-              `Case 59 : ${report.grid.case59.toFixed(2)} €  (TVA déductible)`,
+              `Case 81 : ${report.grid.case81.toFixed(2)} €  (Biens & services HTVA)`,
+              `Case 82 : ${report.grid.case82.toFixed(2)} €  (Services divers HTVA)`,
+              `Case 83 : ${report.grid.case83.toFixed(2)} €  (Investissements HTVA)`,
+              `Case 59 : ${report.grid.case59.toFixed(2)} €  (TVA déductible effective)`,
               `Case 71 : ${report.grid.case71.toFixed(2)} €  (à payer)`,
               `Case 72 : ${report.grid.case72.toFixed(2)} €  (à récupérer)`
             ].join("\n")}
@@ -226,41 +237,60 @@ export default async function TvaTrimestriellePage({
         </div>
       </div>
 
-      {/* Détail des achats */}
+      {/* Détail des achats — 3 sources cumulées : Purchase (achats projet) +
+          SupplierInvoice (factures fournisseurs drag-drop) + ExpenseReport
+          (notes de frais consultants APPROVED/PAID). Colonnes ajoutées :
+          Source, Catégorie, Déduction (= colonne qui dit pourquoi un restau
+          déduit 0 % et une voiture 50 %), TVA effective (= ce qui entre case 59). */}
       <div className="card">
         <div className="card-header">
           <div className="font-semibold">Achats du trimestre ({report.purchasesLines.length})</div>
+          <div className="text-xs text-midnight-500 mt-0.5">
+            Cumul Purchase + Factures fournisseurs (PENDING/PAID) + Notes de frais (APPROVED/PAID).
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="table-base">
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Statut</th>
+                <th>Source</th>
+                <th>Catégorie</th>
                 <th>Fournisseur</th>
                 <th>Libellé</th>
+                <th className="text-right">Case</th>
                 <th className="text-right">HTVA</th>
                 <th className="text-right">TVA</th>
-                <th className="text-right">Taux</th>
+                <th className="text-right">Déd.</th>
+                <th className="text-right">TVA déductible</th>
               </tr>
             </thead>
             <tbody>
               {report.purchasesLines.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center text-midnight-400 py-6">
+                  <td colSpan={10} className="text-center text-midnight-400 py-6">
                     Aucun achat enregistré sur cette période.
                   </td>
                 </tr>
               ) : (
                 report.purchasesLines.map((l) => (
-                  <tr key={l.id}>
+                  <tr key={`${l.source}-${l.id}`}>
                     <td className="text-xs whitespace-nowrap">{formatDate(l.date)}</td>
-                    <td><StatusBadge status={l.status} /></td>
+                    <td><SourceBadge source={l.source} /></td>
+                    <td className="text-[11px] text-midnight-600 whitespace-nowrap">{l.category ?? "—"}</td>
                     <td>{l.company ?? "—"}</td>
                     <td className="text-sm">{l.label}</td>
+                    <td className="text-right">
+                      <span className="font-mono text-[10px] bg-midnight-100 text-midnight-700 rounded px-1.5 py-0.5">
+                        {l.vatBox}
+                      </span>
+                    </td>
                     <td className="text-right tabular-nums">{formatCurrency(l.amountHt)}</td>
-                    <td className="text-right tabular-nums">{formatCurrency(l.vatAmount)}</td>
-                    <td className="text-right text-xs">{l.vatRate}%</td>
+                    <td className="text-right tabular-nums text-midnight-500">{formatCurrency(l.vatAmount)}</td>
+                    <td className={`text-right text-xs ${l.deductibleRate < 1 ? "text-amber-700 font-medium" : "text-midnight-500"}`}>
+                      {Math.round(l.deductibleRate * 100)}%
+                    </td>
+                    <td className="text-right tabular-nums font-medium">{formatCurrency(l.deductibleVat)}</td>
                   </tr>
                 ))
               )}
@@ -268,16 +298,11 @@ export default async function TvaTrimestriellePage({
             {report.purchasesLines.length > 0 && (
               <tfoot>
                 <tr className="font-semibold bg-midnight-50">
-                  <td colSpan={4} className="text-right">
-                    Total
-                  </td>
-                  <td className="text-right tabular-nums">
-                    {formatCurrency(report.totalPurchasesHt)}
-                  </td>
-                  <td className="text-right tabular-nums">
-                    {formatCurrency(report.totalPurchasesVat)}
-                  </td>
+                  <td colSpan={6} className="text-right">Total</td>
+                  <td className="text-right tabular-nums">{formatCurrency(report.totalPurchasesHt)}</td>
+                  <td className="text-right tabular-nums text-midnight-500">{formatCurrency(report.totalPurchasesVat)}</td>
                   <td />
+                  <td className="text-right tabular-nums">{formatCurrency(report.totalDeductibleVat)}</td>
                 </tr>
               </tfoot>
             )}
@@ -285,11 +310,20 @@ export default async function TvaTrimestriellePage({
         </div>
       </div>
 
-      <div className="mt-6 text-[11px] text-midnight-400">
-        ⚠️ Vue prévisionnelle — inclut <b>toutes les factures non annulées</b> (PLANNED + READY + TRANSMITTED + PAID),
-        idem côté achats. Pour la déclaration officielle Intervat, ne garde que les factures réellement
-        émises sur le trimestre (statut TRANSMITTED ou PAID). Ne couvre pas : cocontractant, intracom,
-        notes de crédit, biens d'investissement. TVA achats supposée à 21% par défaut.
+      <div className="mt-6 text-[11px] text-midnight-400 space-y-1">
+        <div>
+          ⚠️ <b>Vue prévisionnelle</b> — côté ventes : inclut toutes les BillingMilestones non annulées
+          (PLANNED + READY + INVOICED + TRANSMITTED + PAID). Côté achats : Purchase non annulés + factures
+          fournisseurs (PENDING / PAID) + notes de frais (APPROVED / PAID). Pour la déclaration officielle
+          Intervat, restreins aux statuts émis (TRANSMITTED / PAID).
+        </div>
+        <div>
+          💡 <b>Déduction TVA</b> appliquée selon la catégorie de chaque ligne (lib/belgian-vat-rules.ts) :
+          50 % pour voitures (achat, leasing, carburant, entretien, assurance) — 0 % pour restaurants, hôtels,
+          frais de représentation et gros cadeaux — 100 % pour le reste. Override possible par ligne.
+          Ne couvre pas : cocontractant (case 55/87), acquisitions intracomm. (case 56/86), importations (57),
+          notes de crédit (48/85).
+        </div>
       </div>
     </div>
   );
@@ -339,6 +373,21 @@ function GridSection({
       </div>
       <div className="space-y-0.5">{children}</div>
     </div>
+  );
+}
+
+function SourceBadge({ source }: { source: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    milestone:        { label: "Vente",          cls: "bg-emerald-100 text-emerald-700" },
+    purchase:         { label: "Achat projet",   cls: "bg-blue-100 text-blue-700" },
+    supplier_invoice: { label: "Facture fourn.", cls: "bg-violet-100 text-violet-700" },
+    expense_report:   { label: "Note de frais",  cls: "bg-rose-100 text-rose-700" }
+  };
+  const c = map[source] ?? { label: source, cls: "bg-midnight-100 text-midnight-700" };
+  return (
+    <span className={`text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap ${c.cls}`}>
+      {c.label}
+    </span>
   );
 }
 

@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manuel de formation Dasohub</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ════════════ SIDEBAR ════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Manuel Dasohub</div>
+      <div class="sidebar-subtitle">Formation utilisateurs</div>
+    </div>
+
+    <div class="search-box">
+      <input type="search" id="search" placeholder="Rechercher dans le manuel..." aria-label="Recherche">
+    </div>
+
+    <nav id="nav">
+      <div class="nav-section">
+        <a href="#bienvenue" class="nav-link active">Bienvenue</a>
+        <a href="#premiers-pas" class="nav-link">Premiers pas</a>
+        <a href="#recherche" class="nav-link">Recherche Cmd+K</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Pilotage</div>
+        <a href="#dashboard" class="nav-link">Tableau de bord</a>
+        <a href="#project-status" class="nav-link">Statut projet</a>
+        <a href="#cashflow" class="nav-link">Cashflow</a>
+        <a href="#tva" class="nav-link">TVA trimestrielle</a>
+        <a href="#app-links" class="nav-link">Outils &amp; apps</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Commerciale</div>
+        <a href="#companies" class="nav-link">Entreprises</a>
+        <a href="#contacts" class="nav-link">Contacts</a>
+        <a href="#crm" class="nav-link">CRM pipeline</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Consultance</div>
+        <a href="#candidates" class="nav-link">Candidats</a>
+        <a href="#consultants" class="nav-link">Consultants</a>
+        <a href="#missions" class="nav-link">Demandes &amp; Missions</a>
+        <a href="#reviews" class="nav-link">Entretiens</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Projet</div>
+        <a href="#offers" class="nav-link">Offres</a>
+        <a href="#win-wizard" class="nav-link">Wizard "Marquer gagnée"</a>
+        <a href="#projects" class="nav-link">Projets</a>
+        <a href="#timesheet" class="nav-link">Timesheets</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Finances</div>
+        <a href="#finance" class="nav-link">Facturations</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">RH &amp; Documents</div>
+        <a href="#onboarding" class="nav-link">Onboarding</a>
+        <a href="#documents" class="nav-link">Documents</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Aide</div>
+        <a href="#faq" class="nav-link">FAQ</a>
+        <a href="#raccourcis" class="nav-link">Raccourcis clavier</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ════════════ MAIN ════════════ -->
+  <main class="main">
+
+    <!-- ════ BIENVENUE ════ -->
+    <section class="section" id="bienvenue">
+      <h1>Bienvenue dans Dasohub 👋</h1>
+      <p class="lead">
+        Ce manuel te forme aux fonctions principales de Dasohub, l'outil interne de pilotage de Dasolabs.
+        Navigue via la sidebar à gauche ou utilise la recherche en haut pour trouver une fonctionnalité précise.
+      </p>
+
+      <div class="intro-cards">
+        <a href="#premiers-pas" class="intro-card">
+          <div class="intro-card-icon">🚀</div>
+          <div class="intro-card-title">Premiers pas</div>
+          <div class="intro-card-desc">Connexion, navigation, profil personnel</div>
+        </a>
+        <a href="#dashboard" class="intro-card">
+          <div class="intro-card-icon">📊</div>
+          <div class="intro-card-title">Pilotage</div>
+          <div class="intro-card-desc">Dashboard, cashflow, statut projets</div>
+        </a>
+        <a href="#crm" class="intro-card">
+          <div class="intro-card-icon">💼</div>
+          <div class="intro-card-title">Commerciale</div>
+          <div class="intro-card-desc">CRM, entreprises, contacts</div>
+        </a>
+        <a href="#offers" class="intro-card">
+          <div class="intro-card-icon">📝</div>
+          <div class="intro-card-title">Offres &amp; Projets</div>
+          <div class="intro-card-desc">Devis, wizard gagné, facturation</div>
+        </a>
+        <a href="#missions" class="intro-card">
+          <div class="intro-card-icon">🎯</div>
+          <div class="intro-card-title">Consultance</div>
+          <div class="intro-card-desc">Candidats, missions, entretiens</div>
+        </a>
+        <a href="#documents" class="intro-card">
+          <div class="intro-card-icon">📁</div>
+          <div class="intro-card-title">Documents</div>
+          <div class="intro-card-desc">DMS interne avec versioning</div>
+        </a>
+      </div>
+
+      <h2>À qui s'adresse ce manuel</h2>
+      <p>
+        Ce manuel couvre l'ensemble des fonctions de Dasohub. Selon ton rôle (Administrateur, Manager, Commercial, Consultant, Finance),
+        tu n'auras pas accès à toutes les sections. Si une entrée de menu décrite ici n'apparaît pas chez toi, c'est que ton groupe d'accès
+        n'a pas la permission correspondante — contacte l'administrateur.
+      </p>
+
+      <div class="callout">
+        <strong>💡 Astuce</strong>
+        Le raccourci clavier <span class="kbd">⌘</span> + <span class="kbd">K</span> (ou <span class="kbd">Ctrl</span> + <span class="kbd">K</span> sur Windows) ouvre la recherche globale depuis n'importe quelle page. C'est le moyen le plus rapide de naviguer.
+      </div>
+    </section>
+
+    <!-- ════ PREMIERS PAS ════ -->
+    <section class="section" id="premiers-pas">
+      <h1>Premiers pas</h1>
+      <p class="lead">Connexion, navigation générale, profil personnel.</p>
+
+      <h2>Se connecter</h2>
+      <p>Ouvre ton navigateur sur <code>https://hub.dasolabs.be</code>. Tu arrives sur la page de login.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/01-login.svg" alt="Page de connexion Dasohub" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/01-login.svg</code><br><small>Page de login Dasohub avec le formulaire vide</small></div>
+        <div class="screenshot-caption">Page de connexion — entre ton email et ton mot de passe</div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Renseigne ton email</h4>
+          <p>Celui que l'administrateur t'a communiqué (généralement ton email pro).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Renseigne ton mot de passe</h4>
+          <p>Si c'est ta première connexion, change-le immédiatement depuis ton profil <code>/me</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Clique sur "Se connecter"</h4>
+          <p>Tu arrives sur le tableau de bord (ou ton profil personnel si tu n'as pas les droits dashboard).</p>
+        </div>
+      </div>
+
+      <div class="callout warning">
+        <strong>⚠️ Mot de passe oublié</strong>
+        Il n'y a pas de bouton "Mot de passe oublié". Contacte l'administrateur Gérald qui le réinitialise depuis la page utilisateurs.
+      </div>
+
+      <h2>Vue d'ensemble de l'interface</h2>
+      <p>Une fois connecté, l'écran est divisé en 3 zones :</p>
+
+      <div class="screenshot">
+        <img src="screenshots/04-sidebar-deroulee.svg" alt="Vue de la sidebar de Dasohub" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/04-sidebar-deroulee.svg</code></div>
+        <div class="screenshot-caption">Sidebar à gauche, topbar en haut, contenu au centre</div>
+      </div>
+
+      <ul>
+        <li><strong>Sidebar à gauche</strong> : navigation entre les modules (Pilotage, Commerciale, Consultance, Projet, Finances, RH &amp; Documents)</li>
+        <li><strong>Topbar en haut</strong> : barre de recherche au centre (raccourci <span class="kbd">⌘</span><span class="kbd">K</span>), avatar/menu à droite</li>
+        <li><strong>Zone centrale</strong> : le contenu de la page en cours</li>
+      </ul>
+
+      <h2>Ton profil personnel (<code>/me</code>)</h2>
+      <p>Accessible via :</p>
+      <ul>
+        <li>L'<strong>avatar</strong> en haut à droite → "Mon profil"</li>
+        <li>Ou en tapant <code>/me</code> dans la barre d'URL</li>
+      </ul>
+
+      <p>Sur cette page tu peux :</p>
+      <ul>
+        <li>Modifier ton nom, prénom, email, photo</li>
+        <li>Changer ton mot de passe</li>
+        <li>Voir ton groupe d'accès et tes permissions</li>
+      </ul>
+
+      <div class="callout success">
+        <strong>✓ Toujours accessible</strong>
+        Tout utilisateur connecté a accès à son <code>/me</code>, peu importe ses autres permissions.
+      </div>
+    </section>
+
+    <!-- ════ RECHERCHE CMD+K ════ -->
+    <section class="section" id="recherche">
+      <h1>Recherche globale (Cmd+K)</h1>
+      <p class="lead">Le moyen le plus rapide de naviguer dans Dasohub.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/06-palette-cmd-k.svg" alt="Palette de recherche Cmd+K" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/06-palette-cmd-k.svg</code></div>
+        <div class="screenshot-caption">La palette de recherche ouverte (Cmd+K)</div>
+      </div>
+
+      <h2>Ouvrir la palette</h2>
+      <ul>
+        <li><strong>Raccourci</strong> : <span class="kbd">⌘</span> + <span class="kbd">K</span> sur Mac, <span class="kbd">Ctrl</span> + <span class="kbd">K</span> sur Windows</li>
+        <li><strong>Souris</strong> : clic sur la barre de recherche dans la topbar</li>
+      </ul>
+
+      <h2>Utilisation</h2>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Tape au moins 2 caractères</h4>
+          <p>Les résultats apparaissent groupés par type : Entreprises, Contacts, Offres, Projets, Missions, etc.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Navigue avec <span class="kbd">↑</span> <span class="kbd">↓</span></h4>
+          <p>Les flèches déplacent la sélection dans la liste.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Valide avec <span class="kbd">Entrée</span></h4>
+          <p>Tu es immédiatement navigué vers la fiche correspondante.</p>
+        </div>
+      </div>
+
+      <h2>Recherches malines</h2>
+
+      <h3>Multi-mots</h3>
+      <p>Tape plusieurs mots séparés par des espaces : <strong>Zoetis offre janvier</strong>. Le système trouve les offres qui matchent tous les mots, dans n'importe quel champ (titre, référence, description, nom client).</p>
+
+      <h3>Cross-entité</h3>
+      <p>Taper "<strong>Zoetis</strong>" retourne non seulement la fiche entreprise Zoetis, mais aussi :</p>
+      <ul>
+        <li>Ses contacts</li>
+        <li>Ses offres en cours et passées</li>
+        <li>Ses projets actifs</li>
+        <li>Ses missions</li>
+        <li>Ses demandes de mission</li>
+        <li>Ses documents</li>
+      </ul>
+
+      <h3>Par compétence</h3>
+      <p>Tape une compétence (<strong>Java</strong>, <strong>SCADA</strong>, etc.) → tu vois tous les candidats et consultants qui l'ont dans leur profil.</p>
+
+      <div class="callout">
+        <strong>💡 Astuce gain de temps</strong>
+        Habitue-toi à utiliser <span class="kbd">⌘</span><span class="kbd">K</span> au lieu de naviguer via la sidebar. Une fois rodé, tu navigues en 2 secondes au lieu de 5 clics.
+      </div>
+    </section>
+
+    <!-- ════ DASHBOARD ════ -->
+    <section class="section" id="dashboard">
+      <h1>Tableau de bord</h1>
+      <p class="lead">Vue synthétique de l'état de la boîte. C'est ta page d'atterrissage après connexion.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/03-dashboard-vue-globale.svg" alt="Tableau de bord Dasohub" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/03-dashboard-vue-globale.svg</code></div>
+        <div class="screenshot-caption">Le dashboard avec ses KPIs et les sections Offres / Tranches</div>
+      </div>
+
+      <h2>KPIs principaux</h2>
+      <table>
+        <thead><tr><th>KPI</th><th>Que mesure-t-il</th></tr></thead>
+        <tbody>
+          <tr><td>Pipeline pondéré</td><td>Σ (valeur des affaires ouvertes × probabilité de gain)</td></tr>
+          <tr><td>Offres en cours</td><td>Brouillons + envoyées + en négociation (uniquement V courante)</td></tr>
+          <tr><td>Projets actifs</td><td>Projets en TO_START + ACTIVE</td></tr>
+          <tr><td>Marge réelle cumulée</td><td>Marge sur projets terminés (PAID)</td></tr>
+          <tr><td>Heures cette semaine</td><td>Total timesheets saisis dans la semaine en cours</td></tr>
+          <tr><td>Tranches à venir (30j)</td><td>Milestones à émettre dans les 30 prochains jours</td></tr>
+          <tr><td>Missions ouvertes</td><td>Missions consultance actives</td></tr>
+          <tr><td>Candidats disponibles</td><td>Candidats avec statut ACTIVE prêts à être proposés</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Sections détaillées</h2>
+      <ul>
+        <li><strong>Offres en cours</strong> : top 5 par valeur, avec référence, titre, client, statut, montant</li>
+        <li><strong>Tranches à facturer (30 prochains jours)</strong> : milestones à émettre prochainement</li>
+        <li><strong>Projets en alerte</strong> : projets en dépassement budgétaire (rouge) ou approchant le seuil (orange)</li>
+      </ul>
+
+      <p>Chaque ligne est cliquable et navigue vers la fiche détail.</p>
+    </section>
+
+    <!-- ════ STATUT PROJET ════ -->
+    <section class="section" id="project-status">
+      <h1>Statut projet</h1>
+      <p class="lead">Suivi des heures vendues vs heures consommées pour chaque projet, avec saisie du "reste à faire".</p>
+
+      <div class="screenshot">
+        <img src="screenshots/09-project-status.svg" alt="Page statut projet" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/09-project-status.svg</code></div>
+        <div class="screenshot-caption">Tableau des projets avec leur consommation</div>
+      </div>
+
+      <h2>Colonnes du tableau</h2>
+      <ul>
+        <li><strong>Réf, Projet, Client, Statut</strong> : identification</li>
+        <li><strong>Vendu</strong> : heures vendues au client</li>
+        <li><strong>Passé</strong> : heures consommées (timesheets validés + en attente)</li>
+        <li><strong>Reste à faire</strong> : estimation restante saisie par l'équipe (éditable inline)</li>
+        <li><strong>Total estimé</strong> : Passé + Reste à faire</li>
+        <li><strong>Avancement</strong> : barre de progression visuelle</li>
+      </ul>
+
+      <h2>Code couleur</h2>
+      <ul>
+        <li><span class="badge badge-danger">Rouge</span> Total estimé &gt; heures vendues → dépassement budgétaire</li>
+        <li><span class="badge badge-warning">Orange</span> Total estimé ≥ 90% du vendu → à surveiller</li>
+        <li><span class="badge badge-success">Vert</span> Sous le seuil → tout va bien</li>
+      </ul>
+
+      <h2>Mettre à jour "Reste à faire"</h2>
+      <p>Clique directement dans la cellule du projet concerné, tape la nouvelle valeur, valide. Sauvegardé automatiquement.</p>
+    </section>
+
+    <!-- ════ CASHFLOW ════ -->
+    <section class="section" id="cashflow">
+      <h1>Cashflow prévisionnel</h1>
+      <p class="lead">Trésorerie prévisionnelle annuelle, organisée en grille 12 mois × N lignes.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/10-cashflow-vue-annee.svg" alt="Vue annuelle du cashflow" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/10-cashflow-vue-annee.svg</code></div>
+        <div class="screenshot-caption">Cashflow année 2026 avec KPIs et grille mensuelle</div>
+      </div>
+
+      <h2>KPIs en haut de page</h2>
+      <table>
+        <thead><tr><th>KPI</th><th>Calcul</th></tr></thead>
+        <tbody>
+          <tr><td><strong>En cours</strong></td><td>Σ TVAC des milestones INVOICED (factures émises non payées)</td></tr>
+          <tr><td>Solde compte</td><td>Solde initial + paiements marqués PAID</td></tr>
+          <tr><td>Entrées année</td><td>Σ des recettes prévues (hors simulations)</td></tr>
+          <tr><td>Sorties année</td><td>Σ des dépenses prévues</td></tr>
+          <tr><td>Net année</td><td>Entrées − Sorties</td></tr>
+          <tr><td>Solde fin d'année</td><td>Projection du solde au 31/12</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Vue mensuelle "Ce mois-ci"</h2>
+      <p>Le panneau supérieur affiche les encaissements et sorties du mois en cours, avec :</p>
+      <ul>
+        <li>Sélecteur de mois (flèches gauche/droite)</li>
+        <li>Indicateur "à encaisser" / "à payer"</li>
+        <li>Catégorisation des sorties (Assurances, Salaires, Taxes, etc.)</li>
+      </ul>
+
+      <h2>Grille annuelle</h2>
+      <p>Lignes organisées en sections :</p>
+      <ul>
+        <li><strong>Revenus</strong> : factures clients (BillingMilestones), revenus récurrents, recettes ponctuelles</li>
+        <li><strong>Dépenses récurrentes</strong> : salaires, loyers, abonnements, assurances</li>
+        <li><strong>Dépenses ponctuelles</strong> : achats, frais exceptionnels</li>
+        <li><strong>Engagements</strong> : contrats signés à venir</li>
+        <li><strong>Simulations</strong> : what-if (toggle pour les afficher)</li>
+      </ul>
+
+      <h2>Workflow facture émise → payée</h2>
+      <p>Quand tu émets une facture client, voici le workflow recommandé :</p>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Clique sur la cellule de la tranche</h4>
+          <p>Dans la grille, clique sur le mois où la facture doit être encaissée.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Clique "Marquer facturé"</h4>
+          <p>La tranche passe en statut <span class="badge badge-info">INVOICED</span> et entre dans le KPI <strong>"En cours"</strong> en haut de page.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Plus tard : clique "Marquer payé"</h4>
+          <p>Une fois le paiement reçu sur le compte, repasse en mode édition et clique <strong>Marquer payé</strong>. La tranche sort de "En cours" et entre dans le "Solde compte".</p>
+        </div>
+      </div>
+
+      <div class="screenshot">
+        <img src="screenshots/41-cashflow-modal-milestone.svg" alt="Modal d'édition de tranche dans le cashflow" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/41-cashflow-modal-milestone.svg</code></div>
+        <div class="screenshot-caption">Modal avec boutons "Marquer facturé" et "Marquer payé"</div>
+      </div>
+
+      <h2>Statuts de tranche (BillingMilestone)</h2>
+      <table>
+        <thead><tr><th>Statut</th><th>Quand l'utiliser</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-neutral">Prévue</span> PLANNED</td><td>Date connue, livrable pas terminé</td></tr>
+          <tr><td><span class="badge badge-warning">Prête</span> READY</td><td>Livrable validé, OK pour émettre la facture</td></tr>
+          <tr><td><span class="badge badge-info">Facturée</span> INVOICED</td><td>Facture émise et envoyée (PDF/email)</td></tr>
+          <tr><td><span class="badge badge-info">Transmise</span> TRANSMITTED</td><td>Envoyée électroniquement via Peppol</td></tr>
+          <tr><td><span class="badge badge-success">Payée</span> PAID</td><td>Argent reçu sur le compte</td></tr>
+          <tr><td><span class="badge badge-neutral">Annulée</span> CANCELLED</td><td>Caduque</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <strong>💡 Pourquoi le statut "Facturée"</strong>
+        Avant qu'un client paye, tu as quand même envoyé la facture. En la marquant "Facturée", tu suis combien tu attends en outstanding receivables — c'est le KPI "En cours" du cashflow.
+      </div>
+    </section>
+
+    <!-- ════ TVA ════ -->
+    <section class="section" id="tva">
+      <h1>TVA trimestrielle</h1>
+      <p class="lead">Aide à la déclaration TVA trimestrielle belge.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/40-tva-trimestrielle.svg" alt="Page TVA trimestrielle" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/40-tva-trimestrielle.svg</code></div>
+        <div class="screenshot-caption">Récapitulatif d'un trimestre TVA</div>
+      </div>
+
+      <h2>Utilisation</h2>
+      <ol>
+        <li>Sélectionne le trimestre (Q1/Q2/Q3/Q4) et l'année</li>
+        <li>Le système affiche : TVA collectée (sur ventes), TVA déductible (sur achats), TVA due (net à reverser)</li>
+        <li>Tableau détaillé par facture</li>
+        <li>Bouton <strong>"Copier le récapitulatif"</strong> pour collage dans IntervAT ou ton expert-comptable</li>
+      </ol>
+    </section>
+
+    <!-- ════ APP LINKS ════ -->
+    <section class="section" id="app-links">
+      <h1>Outils &amp; apps</h1>
+      <p class="lead">Raccourcis vers les applications externes utilisées par Dasolabs.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/12-app-links.svg" alt="Page Outils et apps" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/12-app-links.svg</code></div>
+        <div class="screenshot-caption">Grille de dalles cliquables</div>
+      </div>
+
+      <p>Page Pilotage → Outils &amp; apps : grille de "dalles" cliquables (Scaleway, Coolify, GitHub, Slack, Anthropic Console, Groq Console, etc.). Clic → ouvre l'app dans un nouvel onglet.</p>
+
+      <p>Si tu as la permission <code>applinks.write</code>, bouton <strong>"Ajouter une app"</strong> en haut à droite pour ajouter de nouveaux liens.</p>
+    </section>
+
+    <!-- ════ COMPANIES ════ -->
+    <section class="section" id="companies">
+      <h1>Entreprises</h1>
+      <p class="lead">Base de tous les clients, prospects, partenaires, fournisseurs.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/13-companies-liste.svg" alt="Liste des entreprises" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/13-companies-liste.svg</code></div>
+        <div class="screenshot-caption">Liste avec filtres</div>
+      </div>
+
+      <h2>Filtres</h2>
+      <ul>
+        <li>Statut : PROSPECT, CLIENT, PARTNER, SUPPLIER, INACTIVE, ARCHIVED</li>
+        <li>Recherche par nom, numéro TVA, ville</li>
+      </ul>
+
+      <h2>Fiche entreprise</h2>
+      <p>Clic sur une ligne → vue détail avec :</p>
+      <ul>
+        <li>Informations légales (nom, n° TVA, adresse, IBAN, conditions de paiement)</li>
+        <li>Contacts associés</li>
+        <li>Offres en cours et passées</li>
+        <li>Projets actifs et terminés</li>
+        <li>Missions</li>
+        <li>Achats vers cette entreprise (si fournisseur)</li>
+        <li>Documents rattachés</li>
+        <li>Historique d'activités commerciales</li>
+      </ul>
+
+      <h2>Créer une entreprise</h2>
+      <p>Bouton <strong>"Nouvelle entreprise"</strong> en haut à droite. Ou bouton <strong>"Import CSV"</strong> pour ajout en masse.</p>
+    </section>
+
+    <!-- ════ CONTACTS ════ -->
+    <section class="section" id="contacts">
+      <h1>Contacts</h1>
+      <p class="lead">Personnes physiques rattachées aux entreprises (interlocuteurs commerciaux).</p>
+
+      <div class="screenshot">
+        <img src="screenshots/15-contacts-liste.svg" alt="Liste des contacts" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/15-contacts-liste.svg</code></div>
+        <div class="screenshot-caption">Liste filtrable</div>
+      </div>
+
+      <p>Mêmes fonctionnalités que les entreprises : filtres, import CSV, fiche détail avec coordonnées, entreprise rattachée, activités commerciales liées, documents.</p>
+    </section>
+
+    <!-- ════ CRM ════ -->
+    <section class="section" id="crm">
+      <h1>CRM pipeline</h1>
+      <p class="lead">Tableau Kanban du pipeline commercial — visualisation par stade.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/17-crm-kanban.svg" alt="Kanban du CRM pipeline" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/17-crm-kanban.svg</code></div>
+        <div class="screenshot-caption">Vue Kanban avec colonnes Identifié → Gagné</div>
+      </div>
+
+      <h2>Colonnes</h2>
+      <ol>
+        <li><strong>Identifié</strong> : opportunité détectée, pas qualifiée</li>
+        <li><strong>Qualifié</strong> : besoin confirmé</li>
+        <li><strong>Proposé</strong> : devis envoyé</li>
+        <li><strong>Négociation</strong> : en discussion</li>
+        <li><strong>Gagné</strong> : signé</li>
+        <li><strong>Perdu</strong> : refusé</li>
+        <li><strong>Annulé</strong> : toggle pour afficher/masquer</li>
+      </ol>
+
+      <h2>Cartes affichées</h2>
+      <p>Les cartes du Kanban représentent toutes les opportunités, quelle que soit leur source : <strong>Opportunités</strong>, <strong>Demandes de mission</strong>, <strong>Offres</strong> et <strong>Projets</strong>.</p>
+
+      <p>Chaque carte affiche : titre, montant estimé, probabilité, client, owner, date de décision attendue.</p>
+
+      <h2>Déplacer une carte</h2>
+      <ul>
+        <li><strong>Drag-and-drop</strong> entre colonnes (desktop)</li>
+        <li><strong>Flèches gauche/droite</strong> sur la carte (mobile)</li>
+        <li><strong>Bouton ✕</strong> pour "Perdre" avec saisie d'une raison</li>
+        <li><strong>Bouton 🚫</strong> pour "Annuler"</li>
+      </ul>
+
+      <div class="callout warning">
+        <strong>⚠️ Cas particulier : carte Offre vers "Gagné"</strong>
+        Quand tu déplaces une <strong>offre</strong> vers la colonne "Gagné", tu n'es pas directement marqué WON. Tu es redirigé vers le <a href="#win-wizard">wizard de création de projet</a> qui te demande de configurer le projet et les dates de facturation.
+      </div>
+
+      <h2>KPIs en haut</h2>
+      <ul>
+        <li><strong>Pipeline brut</strong> : Σ valeurs des affaires ouvertes</li>
+        <li><strong>Carnet pondéré</strong> : Σ (valeur × probabilité)</li>
+        <li><strong>Gagné YTD</strong> : montant gagné depuis le 1er janvier</li>
+        <li><strong>Taux de conversion</strong> : WON / (WON + LOST)</li>
+      </ul>
+
+      <h2>Créer une nouvelle affaire</h2>
+      <p>Formulaire <strong>"Ajouter une affaire"</strong> en haut de la page Kanban. Choisis type Consultance (T&amp;M) ou Projet (forfait), saisis titre, client, valeur estimée, owner.</p>
+    </section>
+
+    <!-- ════ CANDIDATES ════ -->
+    <section class="section" id="candidates">
+      <h1>Candidats</h1>
+      <p class="lead">Base de données des candidats consultants — personnes pas encore embauchées mais identifiées pour de futures missions.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/19-candidates-liste.svg" alt="Liste des candidats" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/19-candidates-liste.svg</code></div>
+        <div class="screenshot-caption">Liste avec filtres skills/séniorité/dispo</div>
+      </div>
+
+      <h2>Fiche candidat</h2>
+      <ul>
+        <li>Identité (nom, email, téléphone, LinkedIn, photo)</li>
+        <li>Compétences techniques</li>
+        <li>Langues parlées</li>
+        <li>Tarifs (coût journalier, horaire, tarif min souhaité)</li>
+        <li>Disponibilité (date)</li>
+        <li>Source (LinkedIn, recommandation, plateforme...)</li>
+        <li>Owner (recruteur référent)</li>
+        <li>Expériences professionnelles</li>
+        <li>CV (upload PDF avec parsing IA)</li>
+        <li>Scénarios de package salarial sauvegardés</li>
+      </ul>
+
+      <h2>Parser CV automatique</h2>
+      <p>Page <strong><code>/test/cv-parser</code></strong> : drop un PDF de CV, l'IA extrait nom, email, compétences, expériences. Tu valides et crées le candidat.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/21-cv-parser.svg" alt="Parser de CV" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/21-cv-parser.svg</code></div>
+        <div class="screenshot-caption">Drop d'un CV PDF et résultat parsé</div>
+      </div>
+    </section>
+
+    <!-- ════ CONSULTANTS ════ -->
+    <section class="section" id="consultants">
+      <h1>Consultants</h1>
+      <p class="lead">Consultants internes Dasolabs (= utilisateurs avec rôle CONSULTANT).</p>
+
+      <p>Mêmes informations qu'un candidat, mais avec en plus :</p>
+      <ul>
+        <li>Missions actuelles et passées</li>
+        <li>Timesheets associés</li>
+        <li>Notes de frais</li>
+        <li>Entretiens (reviews)</li>
+        <li>Documents (contrat de travail, etc.)</li>
+        <li>Onboarding (si présent)</li>
+      </ul>
+    </section>
+
+    <!-- ════ MISSIONS ════ -->
+    <section class="section" id="missions">
+      <h1>Demandes de mission &amp; Missions</h1>
+      <p class="lead">Cycle de vie complet d'une mission consultance : du besoin client à l'exécution.</p>
+
+      <h2>1. Demande de mission</h2>
+      <p>Une <strong>demande</strong> est un besoin entrant d'un client : "j'ai besoin d'un consultant Java senior pendant 3 mois".</p>
+
+      <p><strong>Statuts</strong> : NEW → QUALIFYING → PRESENTING → CONTRACTED (ou LOST/CANCELLED)</p>
+
+      <h2>2. Application (candidat proposé)</h2>
+      <p>Depuis la fiche d'une demande, tu présentes 1 à 3 candidats au client. Chaque candidat proposé est une <strong>application</strong>.</p>
+
+      <h2>3. Matching automatique</h2>
+      <p>Page <code>/test/matching</code> : algorithme qui calcule un score de match entre une demande et tes candidats/consultants en fonction des skills, séniorité, dispo et tarif.</p>
+
+      <h2>4. Offre signée → Mission exécutée</h2>
+      <p>Quand l'offre liée est signée, une <strong>Mission</strong> est créée. C'est l'exécution effective : le consultant Dasolabs est en place chez le client.</p>
+
+      <h2>Fiche mission</h2>
+      <ul>
+        <li>Référence MIS-AAAA-NNNN + titre</li>
+        <li>Demande source + Application sélectionnée (candidat retenu)</li>
+        <li>Consultant assigné</li>
+        <li>Client final + société intermédiaire (Randstad, etc.)</li>
+        <li>Période : startDate, endDate</li>
+        <li>Jours estimés</li>
+        <li>Tarif journalier facturé client + coût journalier consultant</li>
+        <li>TVA applicable</li>
+        <li>Timesheets associés</li>
+        <li>Milestones de facturation (générés mensuellement)</li>
+      </ul>
+
+      <h2>Générer les factures mensuelles</h2>
+      <p>Sur la fiche mission, bouton <strong>"Générer factures mensuelles"</strong> crée des <code>BillingMilestone</code> pour chaque mois entre startDate et endDate. Tu peux ensuite éditer le nombre de jours par mois.</p>
+    </section>
+
+    <!-- ════ REVIEWS ════ -->
+    <section class="section" id="reviews">
+      <h1>Entretiens</h1>
+      <p class="lead">Entretiens des consultants : onboarding, check-in, annuel, fin de mission, performance, carrière, offboarding.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/26-reviews-liste.svg" alt="Liste des entretiens" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/26-reviews-liste.svg</code></div>
+        <div class="screenshot-caption">Liste avec filtres sujet / type / statut</div>
+      </div>
+
+      <h2>Types d'entretien</h2>
+      <ul>
+        <li><strong>ONBOARDING</strong> : entretien d'arrivée</li>
+        <li><strong>CHECK_IN</strong> : point régulier (mensuel, trimestriel)</li>
+        <li><strong>ANNUAL_REVIEW</strong> : entretien annuel</li>
+        <li><strong>END_OF_MISSION</strong> : bilan fin de mission</li>
+        <li><strong>PERFORMANCE</strong> : feedback performance</li>
+        <li><strong>CAREER</strong> : évolution carrière</li>
+        <li><strong>OFFBOARDING</strong> : entretien de départ</li>
+      </ul>
+
+      <h2>Saisie après entretien</h2>
+      <p>Sur la fiche d'un entretien : feedback, objectifs, notes privées (visibles uniquement admin/manager), statut.</p>
+
+      <div class="callout">
+        <strong>💡 Auto-création depuis onboarding</strong>
+        Quand tu lances un onboarding (section RH), 4 entretiens sont auto-planifiés à J+1, J+30, J+90, J+180.
+      </div>
+    </section>
+
+    <!-- ════ OFFERS ════ -->
+    <section class="section" id="offers">
+      <h1>Offres</h1>
+      <p class="lead">Gestion des devis commerciaux : création, options, versioning, statuts.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/27-offers-liste.svg" alt="Liste des offres" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/27-offers-liste.svg</code></div>
+        <div class="screenshot-caption">Liste filtrable, uniquement les versions courantes</div>
+      </div>
+
+      <h2>Statuts</h2>
+      <table>
+        <thead><tr><th>Statut</th><th>Modifiable ?</th><th>Actions possibles</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-neutral">Brouillon</span></td><td>Oui (tout)</td><td>Toutes</td></tr>
+          <tr><td><span class="badge badge-info">Envoyée</span></td><td>Header seulement</td><td>Passer en négo, marquer gagnée, perdue, nouvelle version</td></tr>
+          <tr><td><span class="badge badge-warning">En négociation</span></td><td>Header seulement</td><td>Marquer gagnée, perdue, nouvelle version</td></tr>
+          <tr><td><span class="badge badge-success">Gagnée</span></td><td>Non (figée)</td><td>Voir le projet</td></tr>
+          <tr><td><span class="badge badge-danger">Perdue</span></td><td>Non</td><td>Dupliquer</td></tr>
+          <tr><td><span class="badge badge-neutral">Annulée</span></td><td>Non</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Créer une offre</h2>
+      <p>Bouton <strong>"Nouvelle offre"</strong> en haut à droite. Saisis :</p>
+      <ul>
+        <li>Titre</li>
+        <li>Mode : Projet (forfait) ou Consultance (T&amp;M)</li>
+        <li>Client</li>
+        <li>Responsable commercial</li>
+        <li>Probabilité (par défaut 50%)</li>
+        <li><strong>TVA</strong> applicable (par défaut 21%, mettre 0% pour client exonéré)</li>
+      </ul>
+
+      <div class="callout warning">
+        <strong>⚠️ TVA à 0%</strong>
+        Pour un client exonéré de TVA (export, intra-EU reverse charge), mets <strong>TVA = 0%</strong> dès la création de l'offre. Le projet créé héritera de ce taux et le cashflow affichera des montants HT (pas TVAC artificiel).
+      </div>
+
+      <h2>Sections de la fiche offre</h2>
+
+      <h3>Header</h3>
+      <p>Titre, statut, probabilité, client, responsable, dates, description, commentaires, TVA. Éditable sauf si statut terminal (WON/LOST/CANCELLED).</p>
+
+      <h3>Lignes de devis</h3>
+      <p>Prestations/livrables avec description, type, profil de prestation, quantité, prix unitaire, marge. Totaux calculés automatiquement.</p>
+
+      <h3>Options</h3>
+      <p>Blocs séparés présentés au client en plus du devis principal. Chacune a son nom, sa description et ses propres lignes. Apparaissent dans le PDF en page 2bis.</p>
+
+      <h3>Tranches de facturation</h3>
+      <p>Découpage du montant total en jalons :</p>
+      <ul>
+        <li>Libellé (ex. "Acompte 30%")</li>
+        <li>Pourcentage ou montant fixe</li>
+        <li>Date d'encaissement attendue</li>
+        <li>Déclencheur ("à la signature", "à la livraison module X"...)</li>
+      </ul>
+
+      <h2>Versioning</h2>
+      <p>Une offre <strong>Envoyée</strong> ou <strong>En négociation</strong> peut être versionnée si le client demande des modifications de substance :</p>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Bouton "+ Nouvelle version"</h4>
+          <p>Crée une V+1 en statut Brouillon, avec lignes, options et tranches clonées.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>L'ancienne version est figée</h4>
+          <p>V1 reste consultable mais en lecture seule. Référence : <code>OFF-XXXX-V2</code>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Modifie la V2 puis envoie-la</h4>
+          <p>Le marquage gagné se fait sur la V2, pas la V1.</p>
+        </div>
+      </div>
+
+      <h2>Compléments d'offre</h2>
+      <p>Pour ajouter une prestation à une offre <strong>déjà signée</strong> (sans créer une V2) : bouton <strong>"+ Complément"</strong>. Référence <code>OFF-XXXX-C1</code>, statut Brouillon, sans lignes (à saisir). Quand le complément est marqué Gagné, ses tranches sont fusionnées dans le projet parent.</p>
+
+      <h2>PDF d'offre</h2>
+      <p>Bouton <strong>"Exporter PDF"</strong>. PDF 3 pages : Garde+intro / Détails (lignes+tranches) / Conditions. Plus page 2bis (optionnel) si l'offre a des options. Branding Dasohub appliqué (logo, couleurs).</p>
+    </section>
+
+    <!-- ════ WIN WIZARD ════ -->
+    <section class="section" id="win-wizard">
+      <h1>Wizard "Marquer gagnée"</h1>
+      <p class="lead">Étape clé : convertir une offre en projet avec configuration des dates de facturation.</p>
+
+      <h2>Comment l'ouvrir</h2>
+      <ul>
+        <li>Sur la fiche d'une offre → sélecteur <strong>"Changer de statut..."</strong> → <strong>"Marquer gagnée"</strong></li>
+        <li>OU drag de la carte vers la colonne "Gagné" dans le CRM Kanban</li>
+      </ul>
+
+      <p>Dans les deux cas, tu es redirigé vers <code>/offers/[id]/win</code> qui te guide en 2 sections.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/34-wizard-win-step1.svg" alt="Wizard step 1 - configuration du projet" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/34-wizard-win-step1.svg</code></div>
+        <div class="screenshot-caption">Section 1 : configuration du projet</div>
+      </div>
+
+      <h2>Section 1 — Configuration du projet</h2>
+      <ul>
+        <li><strong>Nom du projet</strong> : pré-rempli depuis le titre offre, éditable</li>
+        <li><strong>Manager</strong> : qui pilote le projet</li>
+        <li><strong>Date de démarrage prévu</strong></li>
+        <li><strong>Date de fin prévue</strong></li>
+        <li><strong>Notes/rappels</strong></li>
+      </ul>
+
+      <div class="screenshot">
+        <img src="screenshots/35-wizard-win-step2.svg" alt="Wizard step 2 - dates de facturation" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/35-wizard-win-step2.svg</code></div>
+        <div class="screenshot-caption">Section 2 : tableau des tranches avec date facture et encaissement attendu</div>
+      </div>
+
+      <h2>Section 2 — Échéances de facturation</h2>
+      <p>Pour chaque tranche, tu confirmes/ajustes la <strong>date d'émission de la facture</strong>. Le système calcule automatiquement la <strong>date d'encaissement attendu</strong> (= facture + 30 jours fin de mois selon ton délai de paiement) et le <strong>montant TVAC</strong>.</p>
+
+      <p>Colonnes du tableau :</p>
+      <table>
+        <thead><tr><th>Colonne</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Tranche</td><td>Libellé + % si défini</td></tr>
+          <tr><td>Montant HT</td><td>Du devis</td></tr>
+          <tr><td>Date émission facture</td><td>Éditable — quand tu prévois d'envoyer la facture</td></tr>
+          <tr><td>Encaissement attendu</td><td>Calculé : émission + 30j fin de mois</td></tr>
+          <tr><td>Montant TVAC</td><td>HT × (1 + vatRate/100)</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Clic "Créer le projet et marquer gagnée"</h2>
+      <p>En transaction atomique :</p>
+      <ul>
+        <li>Création du projet avec sa référence (<code>PRJ-AAAA-NNNN</code>)</li>
+        <li>Rattachement des tranches au projet</li>
+        <li>Stockage de la <strong>date d'encaissement</strong> comme <code>expectedAt</code> (= ce qui apparaît dans le cashflow)</li>
+        <li>Marquage de l'offre <strong>Gagnée</strong></li>
+      </ul>
+
+      <p>Tu es redirigé sur la fiche du nouveau projet.</p>
+
+      <div class="callout success">
+        <strong>✓ TVA héritée</strong>
+        Le projet hérite du <strong>vatRate</strong> de l'offre. Si l'offre a TVA = 0% (client exonéré), le projet aussi. Le cashflow affiche correctement HT pur.
+      </div>
+    </section>
+
+    <!-- ════ PROJECTS ════ -->
+    <section class="section" id="projects">
+      <h1>Projets</h1>
+      <p class="lead">Suivi opérationnel des projets gagnés.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/36-project-fiche.svg" alt="Fiche d'un projet" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/36-project-fiche.svg</code></div>
+        <div class="screenshot-caption">Fiche projet avec sections et tranches</div>
+      </div>
+
+      <h2>Statuts</h2>
+      <ul>
+        <li><span class="badge badge-neutral">À démarrer</span> TO_START</li>
+        <li><span class="badge badge-success">Actif</span> ACTIVE</li>
+        <li><span class="badge badge-warning">En pause</span> ON_HOLD</li>
+        <li><span class="badge badge-info">Terminé</span> COMPLETED</li>
+        <li><span class="badge badge-danger">Annulé</span> CANCELLED</li>
+      </ul>
+
+      <h2>Sections de la fiche</h2>
+      <ul>
+        <li><strong>Header</strong> : référence, nom, mode (forfait/T&amp;M), statut, client, manager, dates</li>
+        <li><strong>Budget</strong> : heures vendues, heures consommées, marge estimée</li>
+        <li><strong>Membres</strong> : consultants assignés</li>
+        <li><strong>Tranches de facturation</strong> : voir ci-dessous</li>
+        <li><strong>Timesheets liés</strong></li>
+        <li><strong>Achats liés</strong></li>
+        <li><strong>Entretiens liés</strong></li>
+        <li><strong>Documents</strong></li>
+      </ul>
+
+      <h2>Modifier une date d'encaissement</h2>
+      <p>Quand la facturation est confirmée ou décalée, tu modifies la date :</p>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Va sur la fiche projet</h4>
+          <p>Section "Tranches de facturation".</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Clique le champ date d'encaissement</h4>
+          <p>Tape la nouvelle date.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Auto-sauvegardé</h4>
+          <p>Le toast "Date mise à jour" confirme. Le cashflow et le dashboard se rafraîchissent.</p>
+        </div>
+      </div>
+
+      <h2>Modifier le statut d'une tranche</h2>
+      <p>Dropdown statut dans le tableau des tranches. Workflow recommandé :</p>
+      <p><span class="badge badge-neutral">Prévue</span> → <span class="badge badge-warning">Prête</span> → <span class="badge badge-info">Facturée</span> → <span class="badge badge-success">Payée</span></p>
+    </section>
+
+    <!-- ════ TIMESHEET ════ -->
+    <section class="section" id="timesheet">
+      <h1>Timesheets</h1>
+      <p class="lead">Saisie quotidienne du temps consultant.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/38-timesheet-saisie.svg" alt="Saisie de timesheet" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/38-timesheet-saisie.svg</code></div>
+        <div class="screenshot-caption">Grille semaine × projets</div>
+      </div>
+
+      <h2>Saisie hebdomadaire</h2>
+      <ul>
+        <li>Grille <strong>semaine (lun-dim) × projets/missions/centres de coût</strong></li>
+        <li>Pour chaque cellule : tape le nombre d'heures travaillées</li>
+        <li>Auto-sauvegardé en brouillon</li>
+        <li><strong>Type d'activité</strong> par cellule : DEVELOPMENT, ANALYSIS, MEETING, SUPPORT, TRAINING, COMMERCIAL, ADMIN, OTHER</li>
+        <li>Bouton <strong>"+ Ajouter projet/mission/centre de coût"</strong> en bas pour ajouter une cible</li>
+      </ul>
+
+      <h2>Statuts</h2>
+      <ul>
+        <li><strong>DRAFT</strong> : brouillon (modifiable)</li>
+        <li><strong>SUBMITTED</strong> : soumis pour validation</li>
+        <li><strong>APPROVED</strong> : validé par le manager</li>
+        <li><strong>REJECTED</strong> : refusé avec note</li>
+      </ul>
+
+      <p>Bouton <strong>"Soumettre la semaine"</strong> : passe toutes les saisies DRAFT en SUBMITTED en une fois.</p>
+
+      <h2>Validation par les managers</h2>
+      <p>Page <code>/timesheet/validation</code> : liste des timesheets SUBMITTED en attente. Pour chaque entrée, boutons <strong>Approuver</strong> / <strong>Rejeter (avec note)</strong>.</p>
+    </section>
+
+    <!-- ════ FINANCE ════ -->
+    <section class="section" id="finance">
+      <h1>Facturations</h1>
+      <p class="lead">Vue d'ensemble des tranches de facturation, tous projets et missions confondus.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/39-finance-vue.svg" alt="Page facturations" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/39-finance-vue.svg</code></div>
+        <div class="screenshot-caption">Liste de toutes les tranches</div>
+      </div>
+
+      <h2>Filtres</h2>
+      <ul>
+        <li>Client</li>
+        <li>Projet/Mission</li>
+        <li>Statut (PLANNED, READY, INVOICED, TRANSMITTED, PAID, CANCELLED)</li>
+        <li>Période</li>
+      </ul>
+
+      <h2>Actions</h2>
+      <ul>
+        <li>Modifier le statut directement dans le dropdown du tableau</li>
+        <li>Cliquer pour naviguer vers le projet/mission</li>
+        <li>Récap mensuel : total facturé / payé / en attente par mois</li>
+      </ul>
+    </section>
+
+    <!-- ════ ONBOARDING ════ -->
+    <section class="section" id="onboarding">
+      <h1>Onboarding</h1>
+      <p class="lead">Checklist d'arrivée pour chaque nouvel utilisateur Dasolabs.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/42-onboarding-liste.svg" alt="Liste des onboardings" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/42-onboarding-liste.svg</code></div>
+        <div class="screenshot-caption">Grille des onboardings en cours avec progression</div>
+      </div>
+
+      <h2>Lancer un onboarding</h2>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Formulaire en haut de la page</h4>
+          <p>Sélecteur user, date d'arrivée, template (auto-sélectionné selon rôle).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Clic "Lancer"</h4>
+          <p>Tous les items du template sont copiés dans une nouvelle instance.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Auto-création de 4 entretiens</h4>
+          <p>Planifiés à J+1, J+30, J+90, J+180 dans le module Entretiens.</p>
+        </div>
+      </div>
+
+      <h2>Suivi d'un onboarding</h2>
+      <p>Page <code>/onboarding/[userId]</code> : checklist groupée par catégorie (Administratif, IT, Formation, Intégration équipe). Coche les items au fur et à mesure. Possible d'ajouter des items à la volée.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/43-onboarding-fiche.svg" alt="Fiche d'un onboarding" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/43-onboarding-fiche.svg</code></div>
+        <div class="screenshot-caption">Checklist avec catégories et entretiens planifiés</div>
+      </div>
+    </section>
+
+    <!-- ════ DOCUMENTS ════ -->
+    <section class="section" id="documents">
+      <h1>Documents</h1>
+      <p class="lead">DMS interne pour stocker contrats, NDA, procédures, livrables, CVs signés.</p>
+
+      <div class="screenshot">
+        <img src="screenshots/44-documents-liste.svg" alt="Liste des documents" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/44-documents-liste.svg</code></div>
+        <div class="screenshot-caption">Liste avec filtres et formulaire d'upload</div>
+      </div>
+
+      <h2>Uploader un document</h2>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Drop zone en haut de page</h4>
+          <p>Glisse un fichier ou clique pour parcourir (max 50 MB).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Renseigne les métadonnées</h4>
+          <p>Titre, tags (CSV : "Contrat, NDA, RH"), expiration, description.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>(Optionnel) lie à une entité</h4>
+          <p>Entreprise / projet / offre / consultant — le doc apparaîtra sur leur fiche.</p>
+        </div>
+      </div>
+
+      <h2>Filtres de la liste</h2>
+      <ul>
+        <li>Texte libre (titre, nom fichier, description)</li>
+        <li>Tag</li>
+        <li><strong>Expire dans 30 jours</strong> — alertes d'échéance NDA/contrats</li>
+      </ul>
+
+      <h2>Versioning</h2>
+      <p>Sur la fiche d'un document, panneau "Versions" à droite :</p>
+      <ul>
+        <li>Version actuelle en vert + bouton télécharger</li>
+        <li>Versions précédentes avec leur propre bouton télécharger</li>
+        <li>Bouton <strong>"Nouvelle version"</strong> : drop d'un fichier qui devient V+1</li>
+      </ul>
+
+      <div class="screenshot">
+        <img src="screenshots/46-document-fiche.svg" alt="Fiche détail d'un document" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <div class="screenshot-placeholder" style="display:none;">Screenshot à ajouter : <code>screenshots/46-document-fiche.svg</code></div>
+        <div class="screenshot-caption">Fiche avec métadonnées éditables et panneau Versions</div>
+      </div>
+
+      <div class="callout">
+        <strong>💡 Recherche</strong>
+        Les documents sont indexés dans la recherche globale <span class="kbd">⌘</span><span class="kbd">K</span>. Tape un mot-clé pour les retrouver.
+      </div>
+    </section>
+
+    <!-- ════ FAQ ════ -->
+    <section class="section" id="faq">
+      <h1>FAQ</h1>
+
+      <h3>Je ne vois pas une entrée de menu</h3>
+      <p>Ton groupe d'accès n'a pas la permission. Demande à l'administrateur.</p>
+
+      <h3>Mon mot de passe ne fonctionne plus</h3>
+      <p>Pas de reset self-service. Demande à l'administrateur de le réinitialiser.</p>
+
+      <h3>Je vois "Application error" après une action</h3>
+      <p>Note l'heure exacte et envoie un screenshot à l'admin. Souvent un rafraîchissement (<span class="kbd">⌘</span> + <span class="kbd">R</span>) résout.</p>
+
+      <h3>Pourquoi mon offre apparaît deux fois dans la liste ?</h3>
+      <p>Tu en as créé deux versions (V1 + V2). Seule la plus récente devrait apparaître. Si les deux apparaissent, contact admin.</p>
+
+      <h3>Le cashflow ne reflète pas ma facture émise</h3>
+      <p>Vérifie sur la fiche projet/mission que le milestone a bien sa date à la date d'<strong>encaissement attendu</strong> (pas la date facture). Ajuste si besoin.</p>
+
+      <h3>Un client est exonéré de TVA, comment configurer ?</h3>
+      <p>Sur l'offre, mets <code>TVA = 0%</code>. Lors du passage en gagné, le projet héritera de ce taux. Le cashflow affichera des montants HT.</p>
+
+      <h3>Comment marquer une facture comme émise mais pas encore payée ?</h3>
+      <p>Cashflow → clique sur la cellule de la tranche → bouton <strong>"Marquer facturé"</strong>. Le KPI "En cours" la comptera.</p>
+
+      <h3>Une entrée de cashflow plante quand je clique ?</h3>
+      <p>Probablement un état périmé du navigateur. La modal "Entrée introuvable" propose "Rafraîchir la page" — clique dessus.</p>
+
+      <h3>Comment retrouver une ancienne version d'un document ?</h3>
+      <p>Ouvre la fiche du document → panneau "Versions" à droite → clique l'icône télécharger de la version voulue.</p>
+
+      <h3>Comment retrouver une ancienne version d'une offre ?</h3>
+      <p>Ouvre la version actuelle → en haut, lien vers "précédente : OFF-XXXX-V1".</p>
+    </section>
+
+    <!-- ════ RACCOURCIS ════ -->
+    <section class="section" id="raccourcis">
+      <h1>Raccourcis clavier</h1>
+      <table>
+        <thead><tr><th>Raccourci</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><span class="kbd">⌘</span> + <span class="kbd">K</span> (Mac) / <span class="kbd">Ctrl</span> + <span class="kbd">K</span> (Win)</td><td>Ouvrir la palette de recherche globale</td></tr>
+          <tr><td><span class="kbd">Esc</span></td><td>Fermer modal/palette</td></tr>
+          <tr><td><span class="kbd">↑</span> <span class="kbd">↓</span></td><td>Naviguer dans la palette de recherche</td></tr>
+          <tr><td><span class="kbd">Entrée</span></td><td>Valider sélection palette</td></tr>
+          <tr><td><span class="kbd">Tab</span></td><td>Naviguer entre champs de formulaire</td></tr>
+          <tr><td><span class="kbd">⌘</span> + <span class="kbd">R</span></td><td>Rafraîchir la page</td></tr>
+          <tr><td><span class="kbd">⌘</span> + <span class="kbd">Shift</span> + <span class="kbd">R</span></td><td>Hard refresh (ignore le cache)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="footer">
+      Manuel de formation Dasohub — v1.0 — Dasolabs
+    </div>
+  </main>
+</div>
+
+<script>
+  // Navigation : highlight la section visible
+  const links = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('.section');
+
+  function updateActive() {
+    let current = '';
+    sections.forEach(sec => {
+      const top = sec.getBoundingClientRect().top;
+      if (top < 200) current = sec.id;
+    });
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+  }
+  window.addEventListener('scroll', updateActive);
+  updateActive();
+
+  // Recherche : filtre les sections par contenu textuel
+  const search = document.getElementById('search');
+  search.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    if (!q) {
+      sections.forEach(s => s.classList.remove('hidden'));
+      links.forEach(l => l.style.display = '');
+      return;
+    }
+    sections.forEach(sec => {
+      const txt = sec.textContent.toLowerCase();
+      sec.classList.toggle('hidden', !txt.includes(q));
+    });
+    // Cache aussi les liens nav qui ne pointent vers aucune section visible
+    links.forEach(l => {
+      const id = l.getAttribute('href').slice(1);
+      const sec = document.getElementById(id);
+      l.style.display = sec && !sec.classList.contains('hidden') ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>

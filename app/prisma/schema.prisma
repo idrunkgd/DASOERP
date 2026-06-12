@@ -755,6 +755,12 @@ model Purchase {
   description   String
   category      PurchaseCategory @default(OTHER)
   amount        Decimal          @db.Decimal(12, 2)  // HTVA
+  vatRate       Decimal          @default(21) @db.Decimal(5, 2)
+  vatAmount     Decimal          @default(0) @db.Decimal(12, 2)
+  /// Override manuel du taux de déduction TVA (0.0 à 1.0). Par défaut, la règle
+  /// belge déduite de la category s'applique. Mets 1.0 sur une voiture 100 %
+  /// pro (avec carnet de bord) ou 0 sur un truc non déductible.
+  vatDeductibleRateOverride Decimal? @db.Decimal(5, 2)
   purchaseDate  DateTime         @db.Date
   status        PurchaseStatus   @default(PLANNED)
   comment       String?
@@ -1256,6 +1262,37 @@ enum SupplierInvoiceStatus {
   CANCELLED      // annulé
 }
 
+/// Catégorisation belge pour le calcul de la TVA déductible.
+/// Le mapping (taux de déduction, case 81/82/83) est dans lib/belgian-vat-rules.ts.
+/// CAR_xxx → 50 % par défaut (règle bénéfique PME, override possible)
+/// RESTAURANT / HOTEL / REPRESENTATION / GIFT_HIGH → 0 % (non déductible)
+/// HARDWARE_INVESTMENT / CAR_PURCHASE → case 83 (biens d'investissement)
+/// SOFTWARE_SAAS / SUBCONTRACTING / TELECOM / PROFESSIONAL_SERVICES → case 82 (services divers)
+/// OFFICE_SUPPLIES / HARDWARE_SMALL → case 81 (biens et services courants)
+enum SupplierInvoiceCategory {
+  CAR_PURCHASE
+  CAR_LEASE
+  CAR_FUEL
+  CAR_MAINTENANCE
+  CAR_INSURANCE
+  RESTAURANT
+  HOTEL
+  OFFICE_RENT
+  UTILITIES
+  SOFTWARE_SAAS
+  SUBCONTRACTING
+  OFFICE_SUPPLIES
+  HARDWARE_SMALL
+  HARDWARE_INVESTMENT
+  PROFESSIONAL_SERVICES
+  TRAINING
+  TELECOM
+  GIFT_LOW
+  GIFT_HIGH
+  REPRESENTATION
+  OTHER
+}
+
 model SupplierInvoice {
   id              String                @id @default(cuid())
   /// Fournisseur — soit un Company existant (FK), soit juste le nom (free text)
@@ -1273,6 +1310,11 @@ model SupplierInvoice {
   vatAmount       Decimal               @db.Decimal(12, 2)
   amountTtc       Decimal               @db.Decimal(12, 2)
   currency        String                @default("EUR")
+  /// Catégorie d'achat pour la déduction TVA belge.
+  /// La règle (taux de déduction, case 81/82/83) est dérivée dans lib/belgian-vat-rules.ts.
+  category        SupplierInvoiceCategory @default(OTHER)
+  /// Override du taux de déduction (0.0 à 1.0). Si null, la règle de category s'applique.
+  vatDeductibleRateOverride Decimal? @db.Decimal(5, 2)
   /// PDF source (data URI base64 inline ou URL)
   pdfUrl          String?
   /// Payload OCR brut pour audit/debug
@@ -1392,6 +1434,9 @@ model ExpenseReport {
   vatRate         Decimal               @default(21) @db.Decimal(5, 2)
   amountTtc       Decimal               @db.Decimal(10, 2)
   currency        String                @default("EUR")
+  /// Override du taux de déduction TVA (0.0 à 1.0). Si null, on applique la règle
+  /// belge selon la category (lib/belgian-vat-rules.ts).
+  vatDeductibleRateOverride Decimal? @db.Decimal(5, 2)
   /// URL ou data URI de la photo du ticket (base64 inline si petit)
   receiptUrl      String?
   /// Données extraites par OCR (Claude Vision) — JSON brut pour audit

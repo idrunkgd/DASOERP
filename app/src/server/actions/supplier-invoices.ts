@@ -96,6 +96,17 @@ const CreateSchema = z.object({
   /// Si fourni, override. Sinon amountHt + vatAmount.
   amountTtc: z.coerce.number().optional().nullable(),
   currency: z.string().default("EUR"),
+  /// Catégorie TVA belge — pilote la déduction (50 % voitures, 0 % restau, etc.)
+  /// et la ventilation 81/82/83 dans la grille. Voir lib/belgian-vat-rules.ts.
+  category: z.enum([
+    "CAR_PURCHASE","CAR_LEASE","CAR_FUEL","CAR_MAINTENANCE","CAR_INSURANCE",
+    "RESTAURANT","HOTEL","OFFICE_RENT","UTILITIES","SOFTWARE_SAAS",
+    "SUBCONTRACTING","OFFICE_SUPPLIES","HARDWARE_SMALL","HARDWARE_INVESTMENT",
+    "PROFESSIONAL_SERVICES","TRAINING","TELECOM","GIFT_LOW","GIFT_HIGH",
+    "REPRESENTATION","OTHER"
+  ]).default("OTHER"),
+  /// Override du taux de déduction (0 à 1) — vide = règle de catégorie.
+  vatDeductibleRateOverride: z.coerce.number().min(0).max(1).optional().nullable(),
   pdfUrl: z.string().optional().nullable().transform((v) => v || null),
   ocrPayload: z.string().optional().nullable(),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null),
@@ -134,6 +145,8 @@ export async function createSupplierInvoice(formData: FormData) {
       vatAmount,
       amountTtc,
       currency: data.currency,
+      category: data.category,
+      vatDeductibleRateOverride: data.vatDeductibleRateOverride ?? null,
       pdfUrl: data.pdfUrl,
       ocrPayload: data.ocrPayload ? (JSON.parse(data.ocrPayload) as any) : undefined,
       status: "PENDING",
