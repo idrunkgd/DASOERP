@@ -454,7 +454,11 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
               ? "PAID"
               : m.status === "CANCELLED"
               ? "SKIPPED"
-              : "PLANNED") as "PLANNED" | "PAID" | "SKIPPED"
+              : "PLANNED") as "PLANNED" | "PAID" | "SKIPPED",
+            // milestoneIds : nécessaire pour que le clic sur la cellule
+            // ouvre la modal d'édition avec les boutons "Marquer facturé" et
+            // "Marquer payé" (même mécanisme que pour les missions).
+            milestoneIds: [m.id]
           }
         : { amount: 0, status: "PLANNED" as const }
     );
