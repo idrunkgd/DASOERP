@@ -44,6 +44,11 @@ export default async function TestDetailPage({ params }: { params: { id: string 
         title={test.title}
         subtitle={`${domainLabel(test.domain)} · ${test.questions.length} questions dont ${scenarioCount} mise${scenarioCount > 1 ? "s" : ""} en situation`}
         breadcrumb={[{ label: "Tests", href: "/tests" }, { label: test.title }]}
+        actions={
+          <Link href={`/tests/${test.id}/edit`} className="btn-secondary">
+            ✏️ Éditer les questions
+          </Link>
+        }
       />
 
       {test.description && (
@@ -167,7 +172,7 @@ export default async function TestDetailPage({ params }: { params: { id: string 
                         Assigné le {formatDate(a.assignedAt)}
                         {a.expiresAt && <> · expire le {formatDate(a.expiresAt)}</>}
                       </div>
-                      {/* Score visible uniquement admin */}
+                      {/* Score visible uniquement admin + lien vers détail */}
                       {a.submission?.completedAt && (
                         <div className="mt-2 p-2 rounded bg-midnight-50 text-xs space-y-1">
                           <div className="flex items-center justify-between">
@@ -177,6 +182,12 @@ export default async function TestDetailPage({ params }: { params: { id: string 
                             <span className="text-indigoaccent font-medium">{profile}</span>
                           </div>
                           <ScoreBreakdown s={a.submission} />
+                          <Link
+                            href={`/tests/submissions/${a.submission.id}`}
+                            className="inline-block mt-1.5 text-[11px] text-indigoaccent hover:underline"
+                          >
+                            → Voir détail des réponses
+                          </Link>
                         </div>
                       )}
                       {/* Lien magique pour candidat externe */}

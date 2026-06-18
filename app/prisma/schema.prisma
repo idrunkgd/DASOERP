@@ -1838,7 +1838,13 @@ model TestSubmission {
   maxSenior    Int            @default(0)
   scoreExpert  Int            @default(0)
   maxExpert    Int            @default(0)
-  answers      TestAnswer[]
+  /// Snapshot JSON des questions et choix au moment où le test a été
+  /// commencé (premier saveAnswer). Permet d'afficher les bonnes réponses
+  /// telles qu'à l'époque même si l'admin a édité les questions depuis.
+  /// Structure : { questions: [{ id, position, text, difficulty, isScenario,
+  /// points, choices: [{ id, position, text, isCorrect }] }] }
+  questionsSnapshot Json?
+  answers           TestAnswer[]
 }
 
 model TestAnswer {

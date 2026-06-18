@@ -246,11 +246,40 @@ export async function saveAnswer(input: { token: string; questionId: string; cho
     throw new Error("Réponse invalide pour ce test");
   }
 
-  // Crée la submission si absente, sinon passe en IN_PROGRESS
+  // Crée la submission si absente, sinon passe en IN_PROGRESS.
+  // À la création, on capture un snapshot complet des questions + choix +
+  // isCorrect tels qu'ils existent à l'instant t. Ce snapshot sert ensuite
+  // à la page de détail submission : on affiche la version qui était
+  // posée au candidat, même si l'admin édite les questions ensuite.
   let submission = assignment.submission;
   if (!submission) {
+    const snapshotQuestions = await prisma.testQuestion.findMany({
+      where: { testId: assignment.testId },
+      orderBy: { position: "asc" },
+      include: { choices: { orderBy: { position: "asc" } } }
+    });
+    const snapshot = {
+      capturedAt: new Date().toISOString(),
+      questions: snapshotQuestions.map((q) => ({
+        id: q.id,
+        position: q.position,
+        text: q.text,
+        difficulty: q.difficulty,
+        isScenario: q.isScenario,
+        points: q.points,
+        choices: q.choices.map((c) => ({
+          id: c.id,
+          position: c.position,
+          text: c.text,
+          isCorrect: c.isCorrect
+        }))
+      }))
+    };
     submission = await prisma.testSubmission.create({
-      data: { assignmentId: assignment.id }
+      data: {
+        assignmentId: assignment.id,
+        questionsSnapshot: snapshot as any
+      }
     });
     await prisma.testAssignment.update({
       where: { id: assignment.id },
@@ -293,13 +322,28 @@ export async function submitTest(token: string) {
   if (assignment.status === "COMPLETED") throw new Error("Ce test a déjà été soumis");
   if (!assignment.submission) throw new Error("Aucune réponse enregistrée");
 
-  // Build maps pour calcul score
+  // Build maps pour calcul score. On privilégie le snapshot pris au
+  // démarrage : si l'admin a édité une question entre temps (changé la
+  // bonne réponse), le candidat est scoré sur ce qu'il a réellement vu.
+  const snapshot = assignment.submission.questionsSnapshot as
+    | { questions: { id: string; difficulty: string; points: number; choices: { id: string; isCorrect: boolean }[] }[] }
+    | null;
   const choiceById = new Map<string, { isCorrect: boolean; questionId: string }>();
   const questionById = new Map<string, { difficulty: TestDifficulty; points: number }>();
-  for (const qst of assignment.test.questions) {
-    questionById.set(qst.id, { difficulty: qst.difficulty, points: qst.points });
-    for (const ch of qst.choices) {
-      choiceById.set(ch.id, { isCorrect: ch.isCorrect, questionId: qst.id });
+  if (snapshot?.questions) {
+    for (const qst of snapshot.questions) {
+      questionById.set(qst.id, { difficulty: qst.difficulty as TestDifficulty, points: qst.points });
+      for (const ch of qst.choices) {
+        choiceById.set(ch.id, { isCorrect: ch.isCorrect, questionId: qst.id });
+      }
+    }
+  } else {
+    // Fallback (legacy submissions sans snapshot) : on prend la version live
+    for (const qst of assignment.test.questions) {
+      questionById.set(qst.id, { difficulty: qst.difficulty, points: qst.points });
+      for (const ch of qst.choices) {
+        choiceById.set(ch.id, { isCorrect: ch.isCorrect, questionId: qst.id });
+      }
     }
   }
 
@@ -310,8 +354,12 @@ export async function submitTest(token: string) {
     SENIOR: { score: 0, max: 0 },
     EXPERT: { score: 0, max: 0 }
   };
-  // Max : on compte sur TOUTES les questions du test, même non répondues
-  for (const qst of assignment.test.questions) {
+  // Max : on compte sur TOUTES les questions du test, même non répondues.
+  // Source : snapshot prioritaire (la version réellement présentée).
+  const allQuestionsForMax = snapshot?.questions
+    ? snapshot.questions.map((q) => ({ difficulty: q.difficulty as TestDifficulty, points: q.points }))
+    : assignment.test.questions.map((q) => ({ difficulty: q.difficulty, points: q.points }));
+  for (const qst of allQuestionsForMax) {
     maxScore += qst.points;
     buckets[qst.difficulty].max += qst.points;
   }
@@ -371,6 +419,167 @@ export async function getAssignmentsForCandidate(candidateId: string) {
       submission: true
     }
   });
+}
+
+// ─── Détail d'une submission (admin) ───────────────────────────────────
+// Renvoie chaque question avec la réponse donnée vs la bonne réponse,
+// en utilisant le snapshot si disponible.
+
+export async function getSubmissionDetail(submissionId: string) {
+  await requirePermission("tests.manage");
+  const submission = await prisma.testSubmission.findUnique({
+    where: { id: submissionId },
+    include: {
+      assignment: {
+        include: {
+          test: { include: { questions: { include: { choices: true }, orderBy: { position: "asc" } } } },
+          user: { select: { id: true, firstName: true, lastName: true } },
+          candidate: { select: { id: true, firstName: true, lastName: true } }
+        }
+      },
+      answers: true
+    }
+  });
+  if (!submission) return null;
+
+  const answersByQid = new Map(submission.answers.map((a) => [a.questionId, a.choiceId]));
+
+  // Source des questions : snapshot prioritaire, fallback sur live test
+  const snap = submission.questionsSnapshot as
+    | { questions: Array<{
+        id: string; position: number; text: string; difficulty: string;
+        isScenario: boolean; points: number;
+        choices: Array<{ id: string; position: number; text: string; isCorrect: boolean }>;
+      }> }
+    | null;
+
+  type DetailQuestion = {
+    id: string;
+    position: number;
+    text: string;
+    difficulty: TestDifficulty;
+    isScenario: boolean;
+    points: number;
+    choices: Array<{ id: string; position: number; text: string; isCorrect: boolean }>;
+    selectedChoiceId: string | null;
+    isCorrect: boolean;
+    isAnswered: boolean;
+  };
+
+  let detailQuestions: DetailQuestion[];
+
+  if (snap?.questions) {
+    detailQuestions = snap.questions.map((q) => {
+      const selected = answersByQid.get(q.id) ?? null;
+      const correctChoice = q.choices.find((c) => c.isCorrect);
+      return {
+        id: q.id,
+        position: q.position,
+        text: q.text,
+        difficulty: q.difficulty as TestDifficulty,
+        isScenario: q.isScenario,
+        points: q.points,
+        choices: q.choices,
+        selectedChoiceId: selected,
+        isCorrect: !!selected && selected === correctChoice?.id,
+        isAnswered: !!selected
+      };
+    });
+  } else {
+    // Legacy : pas de snapshot, on prend la version live
+    detailQuestions = submission.assignment.test.questions.map((q) => {
+      const selected = answersByQid.get(q.id) ?? null;
+      const correctChoice = q.choices.find((c) => c.isCorrect);
+      return {
+        id: q.id,
+        position: q.position,
+        text: q.text,
+        difficulty: q.difficulty,
+        isScenario: q.isScenario,
+        points: q.points,
+        choices: q.choices.map((c) => ({
+          id: c.id, position: c.position, text: c.text, isCorrect: c.isCorrect
+        })),
+        selectedChoiceId: selected,
+        isCorrect: !!selected && selected === correctChoice?.id,
+        isAnswered: !!selected
+      };
+    });
+  }
+
+  return {
+    submission,
+    questions: detailQuestions,
+    snapshotted: !!snap,
+    test: submission.assignment.test,
+    person: submission.assignment.user ?? submission.assignment.candidate,
+    personType: submission.assignment.user ? "user" : "candidate"
+  };
+}
+
+// ─── Édition des questions et choix (admin) ─────────────────────────────
+
+const UpdateQuestionSchema = z.object({
+  questionId: z.string().min(1),
+  text: z.string().min(5),
+  difficulty: z.enum(["JUNIOR", "MEDIOR", "SENIOR", "EXPERT"]),
+  isScenario: z.coerce.boolean().default(false),
+  points: z.coerce.number().int().min(1).max(10).default(1),
+  /// Indices des 4 textes des choix dans l'ordre (A, B, C, D)
+  choices: z.array(z.object({
+    id: z.string().min(1),
+    text: z.string().min(1),
+    isCorrect: z.boolean()
+  })).length(4)
+});
+
+export async function updateQuestion(input: z.infer<typeof UpdateQuestionSchema>) {
+  const session = await requirePermission("tests.manage");
+  const data = UpdateQuestionSchema.parse(input);
+  const correctCount = data.choices.filter((c) => c.isCorrect).length;
+  if (correctCount !== 1) {
+    throw new Error("Exactement une bonne réponse doit être marquée");
+  }
+
+  // Vérifie que les choix appartiennent bien à cette question
+  const existing = await prisma.testQuestion.findUnique({
+    where: { id: data.questionId },
+    include: { choices: { select: { id: true } } }
+  });
+  if (!existing) throw new Error("Question introuvable");
+  const validIds = new Set(existing.choices.map((c) => c.id));
+  for (const c of data.choices) {
+    if (!validIds.has(c.id)) throw new Error("Choix invalide");
+  }
+
+  await prisma.$transaction([
+    prisma.testQuestion.update({
+      where: { id: data.questionId },
+      data: {
+        text: data.text,
+        difficulty: data.difficulty,
+        isScenario: data.isScenario,
+        points: data.points
+      }
+    }),
+    ...data.choices.map((c) =>
+      prisma.testChoice.update({
+        where: { id: c.id },
+        data: { text: c.text, isCorrect: c.isCorrect }
+      })
+    )
+  ]);
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "TestQuestion",
+    entityId: data.questionId,
+    message: `Question ${data.questionId} mise à jour`
+  });
+  revalidatePath(`/tests/${existing.testId}`);
+  revalidatePath(`/tests/${existing.testId}/edit`);
+  return { ok: true };
 }
 
 export async function getAssignmentsForUser(userId: string) {
