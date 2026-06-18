@@ -1735,6 +1735,7 @@ enum TestDomain {
   DATA_MANAGER
   IT_INDUSTRIAL
   CYBERSEC_INDUSTRIAL
+  OTHER
 }
 
 enum TestDifficulty {
@@ -1753,7 +1754,10 @@ enum TestAssignmentStatus {
 
 model Test {
   id          String         @id @default(cuid())
-  domain      TestDomain     @unique
+  /// Plus @unique : on autorise plusieurs tests par domaine (ex. test PLC
+  /// niveau junior et un autre niveau expert), et on a OTHER pour les
+  /// thématiques hors des 5 domaines initiaux.
+  domain      TestDomain
   title       String
   description String?
   isActive    Boolean        @default(true)

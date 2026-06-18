@@ -1,8 +1,9 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Save, Loader2, Pencil, Check, X } from "lucide-react";
-import { updateQuestion } from "@/server/actions/tests";
+import { Save, Loader2, Pencil, Check, X, Plus, Trash2 } from "lucide-react";
+import { updateQuestion, addQuestion, deleteQuestion } from "@/server/actions/tests";
 
 type Choice = { id: string; position: number; text: string; isCorrect: boolean };
 type Question = {
@@ -15,26 +16,75 @@ type Question = {
   choices: Choice[];
 };
 
-export function EditQuestionsClient({ questions: initial }: { questions: Question[] }) {
+export function EditQuestionsClient({
+  questions: initial,
+  testId
+}: {
+  questions: Question[];
+  testId: string;
+}) {
+  const router = useRouter();
   const [questions, setQuestions] = useState<Question[]>(initial);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [addPending, startAdd] = useTransition();
+
+  function addNew() {
+    startAdd(async () => {
+      try {
+        const r = await addQuestion(testId);
+        const q = r.question as unknown as Question;
+        setQuestions((prev) => [...prev, q]);
+        setEditingId(q.id);
+        toast.success("Question ajoutée — édite-la");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
+  function removeQuestion(id: string) {
+    if (!confirm("Supprimer cette question définitivement ?")) return;
+    startAdd(async () => {
+      try {
+        await deleteQuestion(id);
+        setQuestions((prev) => prev.filter((q) => q.id !== id));
+        if (editingId === id) setEditingId(null);
+        toast.success("Question supprimée");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
 
   return (
-    <ol className="space-y-3">
-      {questions.map((q) => (
-        <QuestionEditor
-          key={q.id}
-          question={q}
-          isEditing={editingId === q.id}
-          onEdit={() => setEditingId(q.id)}
-          onCancel={() => setEditingId(null)}
-          onSaved={(updated) => {
-            setQuestions((qs) => qs.map((x) => (x.id === updated.id ? updated : x)));
-            setEditingId(null);
-          }}
-        />
-      ))}
-    </ol>
+    <>
+      <ol className="space-y-3">
+        {questions.map((q) => (
+          <QuestionEditor
+            key={q.id}
+            question={q}
+            isEditing={editingId === q.id}
+            onEdit={() => setEditingId(q.id)}
+            onCancel={() => setEditingId(null)}
+            onDelete={() => removeQuestion(q.id)}
+            onSaved={(updated) => {
+              setQuestions((qs) => qs.map((x) => (x.id === updated.id ? updated : x)));
+              setEditingId(null);
+            }}
+          />
+        ))}
+      </ol>
+      <div className="mt-6 flex justify-center">
+        <button
+          onClick={addNew}
+          disabled={addPending}
+          className="btn-primary"
+        >
+          {addPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+          Ajouter une question
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -43,12 +93,14 @@ function QuestionEditor({
   isEditing,
   onEdit,
   onCancel,
+  onDelete,
   onSaved
 }: {
   question: Question;
   isEditing: boolean;
   onEdit: () => void;
   onCancel: () => void;
+  onDelete: () => void;
   onSaved: (q: Question) => void;
 }) {
   const [pending, start] = useTransition();
@@ -108,9 +160,17 @@ function QuestionEditor({
               ✓ Bonne réponse : {String.fromCharCode(65 + (question.choices.findIndex((c) => c.isCorrect)))} — {correct?.text}
             </p>
           </div>
-          <button onClick={onEdit} className="btn-secondary btn-sm">
-            <Pencil className="w-3 h-3" /> Modifier
-          </button>
+          <div className="flex flex-col gap-1">
+            <button onClick={onEdit} className="btn-secondary btn-sm">
+              <Pencil className="w-3 h-3" /> Modifier
+            </button>
+            <button
+              onClick={onDelete}
+              className="btn-ghost btn-sm text-red-600 hover:bg-red-50"
+            >
+              <Trash2 className="w-3 h-3" /> Supprimer
+            </button>
+          </div>
         </div>
       </li>
     );

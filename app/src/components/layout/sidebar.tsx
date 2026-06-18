@@ -35,8 +35,9 @@ const SECTIONS: Section[] = [
     items: [
       { href: "/companies",   label: "Entreprises",          icon: Building2,       perm: "companies.read" },
       { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" },
-      { href: "/commercial",  label: "Activités commerciales", icon: MessageSquare, perm: "contacts.read" },
-      { href: "/test/crm",    label: "CRM pipeline",         icon: Workflow,        perm: "crm.read" }
+      { href: "/commercial",  label: "Activités commerciales", icon: MessageSquare, perm: "contacts.read" }
+      // CRM pipeline retiré sur demande utilisateur — page /test/crm
+      // reste accessible par URL directe si besoin.
     ]
   },
   {

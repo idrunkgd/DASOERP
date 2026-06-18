@@ -20,7 +20,12 @@ export async function seedTestsIfMissing() {
   }
   let created = 0;
   for (const t of SEED_TESTS) {
-    const already = await prisma.test.findUnique({ where: { domain: t.domain } });
+    // findFirst car le domain n'est plus unique depuis la migration
+    // 20260612140000_tests_create_forms (on autorise plusieurs tests par
+    // domaine). On évite uniquement le re-seed des 5 tests catalogue.
+    const already = await prisma.test.findFirst({
+      where: { domain: t.domain, title: t.title }
+    });
     if (already) continue;
     await prisma.test.create({
       data: {
@@ -592,6 +597,120 @@ export async function getAssignmentsForUser(userId: string) {
       submission: true
     }
   });
+}
+
+// ─── Création libre de tests (formulaires) ──────────────────────────────
+
+const CreateTestSchema = z.object({
+  domain: z.enum(["ELEC_INDUSTRIAL","PLC","DATA_MANAGER","IT_INDUSTRIAL","CYBERSEC_INDUSTRIAL","OTHER"]),
+  title: z.string().min(3).max(200),
+  description: z.string().max(2000).optional().nullable()
+});
+
+export async function createTest(input: z.infer<typeof CreateTestSchema>) {
+  const session = await requirePermission("tests.manage");
+  const data = CreateTestSchema.parse(input);
+  const test = await prisma.test.create({
+    data: {
+      domain: data.domain,
+      title: data.title,
+      description: data.description?.trim() || null,
+      isActive: true
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "Test",
+    entityId: test.id,
+    message: `Test « ${test.title} » créé`
+  });
+  revalidatePath("/tests");
+  return { ok: true, id: test.id };
+}
+
+/**
+ * Ajoute une question vide (avec 4 choix neutres) à un test existant.
+ * Le client doit ensuite l'éditer.
+ */
+export async function addQuestion(testId: string) {
+  const session = await requirePermission("tests.manage");
+  const last = await prisma.testQuestion.findFirst({
+    where: { testId },
+    orderBy: { position: "desc" },
+    select: { position: true }
+  });
+  const newPosition = (last?.position ?? 0) + 1;
+  const question = await prisma.testQuestion.create({
+    data: {
+      testId,
+      position: newPosition,
+      text: "Nouvelle question — clique sur Modifier pour rédiger l'énoncé",
+      difficulty: "MEDIOR",
+      points: 1,
+      isScenario: false,
+      choices: {
+        create: [1, 2, 3, 4].map((i) => ({
+          position: i,
+          text: `Choix ${String.fromCharCode(64 + i)} — à rédiger`,
+          isCorrect: i === 1
+        }))
+      }
+    },
+    include: { choices: { orderBy: { position: "asc" } } }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "TestQuestion",
+    entityId: question.id,
+    message: `Question ${newPosition} ajoutée au test ${testId}`
+  });
+  revalidatePath(`/tests/${testId}/edit`);
+  revalidatePath(`/tests/${testId}`);
+  return { ok: true, question };
+}
+
+export async function deleteQuestion(questionId: string) {
+  const session = await requirePermission("tests.manage");
+  const q = await prisma.testQuestion.findUnique({
+    where: { id: questionId },
+    select: { testId: true, position: true, text: true }
+  });
+  if (!q) throw new Error("Question introuvable");
+  await prisma.testQuestion.delete({ where: { id: questionId } });
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "TestQuestion",
+    entityId: questionId,
+    message: `Question ${q.position} (${q.text.slice(0, 60)}…) supprimée`
+  });
+  revalidatePath(`/tests/${q.testId}/edit`);
+  revalidatePath(`/tests/${q.testId}`);
+  return { ok: true };
+}
+
+export async function deleteTest(testId: string) {
+  const session = await requirePermission("tests.manage");
+  const t = await prisma.test.findUnique({
+    where: { id: testId },
+    select: { title: true, _count: { select: { assignments: true } } }
+  });
+  if (!t) throw new Error("Test introuvable");
+  if (t._count.assignments > 0) {
+    throw new Error(`Ce test a ${t._count.assignments} assignation(s). Supprime-les d'abord ou désactive le test.`);
+  }
+  await prisma.test.delete({ where: { id: testId } });
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "Test",
+    entityId: testId,
+    message: `Test « ${t.title} » supprimé`
+  });
+  revalidatePath("/tests");
+  return { ok: true };
 }
 
 // Note : les helpers d'affichage (domainLabel, difficultyLabel,

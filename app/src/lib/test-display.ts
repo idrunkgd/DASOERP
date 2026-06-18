@@ -14,6 +14,7 @@ export function domainLabel(domain: string) {
     case "DATA_MANAGER": return "Data Manager";
     case "IT_INDUSTRIAL": return "IT industriel";
     case "CYBERSEC_INDUSTRIAL": return "Cybersécurité OT";
+    case "OTHER": return "Autre";
     default: return domain;
   }
 }

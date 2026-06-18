@@ -7,6 +7,7 @@ import { getTestDetail } from "@/server/actions/tests";
 import { domainLabel, difficultyLabel, profileFromScores } from "@/lib/test-display";
 import { AssignForm } from "./assign-form";
 import { CopyTokenButton } from "./copy-token-button";
+import { DeleteTestButton } from "./delete-test-button";
 import { CheckCircle2, AlertCircle, Clock, GraduationCap } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -45,9 +46,12 @@ export default async function TestDetailPage({ params }: { params: { id: string 
         subtitle={`${domainLabel(test.domain)} · ${test.questions.length} questions dont ${scenarioCount} mise${scenarioCount > 1 ? "s" : ""} en situation`}
         breadcrumb={[{ label: "Tests", href: "/tests" }, { label: test.title }]}
         actions={
-          <Link href={`/tests/${test.id}/edit`} className="btn-secondary">
-            ✏️ Éditer les questions
-          </Link>
+          <div className="flex gap-2">
+            <Link href={`/tests/${test.id}/edit`} className="btn-secondary">
+              ✏️ Éditer les questions
+            </Link>
+            <DeleteTestButton testId={test.id} title={test.title} />
+          </div>
         }
       />
 

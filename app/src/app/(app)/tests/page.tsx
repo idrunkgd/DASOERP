@@ -2,10 +2,11 @@ import Link from "next/link";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
-import { GraduationCap, Plus } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import { listTestsForAdmin } from "@/server/actions/tests";
 import { domainLabel } from "@/lib/test-display";
 import { SeedButton } from "./seed-button";
+import { CreateTestButton } from "./create-test-button";
 
 export const dynamic = "force-dynamic";
 
@@ -17,16 +18,26 @@ export default async function TestsPage() {
     <div>
       <PageHeader
         title="Tests techniques"
-        subtitle="Évaluation des candidats et consultants — 5 tests métier avec cartographie de niveau (Junior → Expert)."
-        actions={empty ? <SeedButton /> : null}
+        subtitle="Évaluation des candidats et consultants — tests métier avec cartographie de niveau (Junior → Expert)."
+        actions={
+          <div className="flex gap-2">
+            {empty && <SeedButton />}
+            <CreateTestButton />
+          </div>
+        }
       />
       {empty ? (
         <div className="card">
           <EmptyState
             icon={GraduationCap}
             title="Aucun test en base"
-            description="Clique « Initialiser les 5 tests » pour créer les questionnaires Électricité, PLC, Data Manager, IT et Cybersécurité (130 questions au total)."
-            action={<SeedButton />}
+            description="Clique « Initialiser les 5 tests » pour créer les questionnaires Électricité, PLC, Data Manager, IT et Cybersécurité (130 questions au total), ou « Nouveau test » pour créer un formulaire libre."
+            action={
+              <div className="flex gap-2">
+                <SeedButton />
+                <CreateTestButton />
+              </div>
+            }
           />
         </div>
       ) : (

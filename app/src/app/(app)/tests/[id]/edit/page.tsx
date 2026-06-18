@@ -45,7 +45,7 @@ export default async function EditTestPage({ params }: { params: { id: string } 
           Les réponses déjà enregistrées par les candidats restent figées par un snapshot pris au démarrage de leur test. Tu peux donc modifier librement les questions sans casser les résultats existants.
         </p>
       </div>
-      <EditQuestionsClient questions={questions} />
+      <EditQuestionsClient questions={questions} testId={test.id} />
     </div>
   );
 }
