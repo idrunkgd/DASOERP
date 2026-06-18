@@ -25,7 +25,8 @@ export default async function TestDetailPage({ params }: { params: { id: string 
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }]
     }),
     prisma.candidate.findMany({
-      where: { status: { not: "REJECTED" as any } },
+      // Exclut les candidats archivés du sélecteur (ARCHIVED = sorti du pipeline)
+      where: { status: { not: "ARCHIVED" } },
       select: { id: true, firstName: true, lastName: true, email: true },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }]
     })
