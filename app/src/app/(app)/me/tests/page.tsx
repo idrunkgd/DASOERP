@@ -3,7 +3,8 @@ import { requireSession } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GraduationCap, CheckCircle2, Clock, AlertCircle, Play } from "lucide-react";
-import { getMyAssignments, domainLabel } from "@/server/actions/tests";
+import { getMyAssignments } from "@/server/actions/tests";
+import { domainLabel } from "@/lib/test-display";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";

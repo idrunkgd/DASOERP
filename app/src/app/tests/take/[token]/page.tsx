@@ -5,7 +5,8 @@
 // à la fin.
 
 import { notFound } from "next/navigation";
-import { getAssignmentByToken, domainLabel } from "@/server/actions/tests";
+import { getAssignmentByToken } from "@/server/actions/tests";
+import { domainLabel } from "@/lib/test-display";
 import { TakeTestClient } from "./take-client";
 
 export const dynamic = "force-dynamic";

@@ -3,7 +3,8 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GraduationCap, Plus } from "lucide-react";
-import { listTestsForAdmin, domainLabel } from "@/server/actions/tests";
+import { listTestsForAdmin } from "@/server/actions/tests";
+import { domainLabel } from "@/lib/test-display";
 import { SeedButton } from "./seed-button";
 
 export const dynamic = "force-dynamic";

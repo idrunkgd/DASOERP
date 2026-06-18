@@ -385,38 +385,6 @@ export async function getAssignmentsForUser(userId: string) {
   });
 }
 
-// ─── Helpers UI ───────────────────────────────────────────────────────────
-
-export function domainLabel(domain: string) {
-  switch (domain) {
-    case "ELEC_INDUSTRIAL": return "Électricité industrielle";
-    case "PLC": return "PLC Siemens & Schneider";
-    case "DATA_MANAGER": return "Data Manager";
-    case "IT_INDUSTRIAL": return "IT industriel";
-    case "CYBERSEC_INDUSTRIAL": return "Cybersécurité OT";
-    default: return domain;
-  }
-}
-
-export function difficultyLabel(d: TestDifficulty) {
-  return { JUNIOR: "Junior", MEDIOR: "Médior", SENIOR: "Senior", EXPERT: "Expert" }[d];
-}
-
-export function profileFromScores(s: {
-  scoreJunior: number; maxJunior: number;
-  scoreMedior: number; maxMedior: number;
-  scoreSenior: number; maxSenior: number;
-  scoreExpert: number; maxExpert: number;
-}): string {
-  // Heuristique simple : on regarde où la performance reste >= 70 %
-  const pct = (sc: number, mx: number) => (mx > 0 ? sc / mx : 0);
-  const J = pct(s.scoreJunior, s.maxJunior);
-  const M = pct(s.scoreMedior, s.maxMedior);
-  const S = pct(s.scoreSenior, s.maxSenior);
-  const E = pct(s.scoreExpert, s.maxExpert);
-  if (E >= 0.7 && S >= 0.7) return "Expert confirmé";
-  if (S >= 0.7 && M >= 0.7) return "Senior confirmé";
-  if (M >= 0.7 && J >= 0.7) return "Médior confirmé";
-  if (J >= 0.7) return "Junior solide";
-  return "Profil à conforter";
-}
+// Note : les helpers d'affichage (domainLabel, difficultyLabel,
+// profileFromScores) sont dans src/lib/test-display.ts car ils sont
+// synchrones et la directive "use server" interdit les exports non-async.

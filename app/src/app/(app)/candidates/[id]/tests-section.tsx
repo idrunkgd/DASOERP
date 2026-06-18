@@ -5,7 +5,8 @@
 
 import Link from "next/link";
 import { GraduationCap, Plus } from "lucide-react";
-import { getAssignmentsForCandidate, domainLabel, profileFromScores } from "@/server/actions/tests";
+import { getAssignmentsForCandidate } from "@/server/actions/tests";
+import { domainLabel, profileFromScores } from "@/lib/test-display";
 import { formatDate } from "@/lib/utils";
 
 export async function CandidateTestsSection({ candidateId }: { candidateId: string }) {
