@@ -33,6 +33,11 @@ export default async function MyProfile() {
         subtitle={isCandidatePortal
           ? "Complétez votre CV — vos informations sont directement visibles par notre équipe."
           : "Vos informations personnelles et identifiants"}
+        actions={
+          <a href="/me/tests" className="btn-secondary text-sm">
+            🎓 Mes tests techniques
+          </a>
+        }
       />
 
       <div className="grid lg:grid-cols-3 gap-6">

@@ -24,6 +24,7 @@ export type Permission =
   | "reviews.read"    | "reviews.write"
   | "onboarding.read" | "onboarding.write"
   | "documents.read"  | "documents.write"
+  | "tests.manage"    | "tests.take"
   | "audit.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
@@ -44,6 +45,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "reviews.read","reviews.write",
     "onboarding.read","onboarding.write",
     "documents.read","documents.write",
+    "tests.manage","tests.take",
     "audit.read"
   ],
   MANAGER: [
@@ -62,6 +64,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "reviews.read","reviews.write",
     "onboarding.read","onboarding.write",
     "documents.read","documents.write",
+    "tests.manage","tests.take",
     "audit.read"
   ],
   COMMERCIAL: [
@@ -88,7 +91,8 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "dashboard.read",
     "applinks.read",
     "reviews.read",
-    "documents.read"
+    "documents.read",
+    "tests.take"
   ],
   FINANCE: [
     "companies.read",
@@ -276,7 +280,9 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
   ]},
   { label: "Documents", permissions: [
     { value: "documents.read",  label: "Documents (lecture)" },
-    { value: "documents.write", label: "Documents (écriture)" }
+    { value: "documents.write", label: "Documents (écriture)" },
+    { value: "tests.manage",    label: "Tests techniques (gérer et assigner)" },
+    { value: "tests.take",      label: "Tests techniques (passer un test)" }
   ]}
 ];
 
@@ -421,6 +427,10 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Documents",  href: "/documents",  perms: [
         { value: "documents.read",  label: "Consulter et télécharger" },
         { value: "documents.write", label: "Uploader / modifier / supprimer" }
+      ]},
+      { menuLabel: "Tests techniques", href: "/tests", perms: [
+        { value: "tests.manage", label: "Gérer et assigner les tests (admin)" },
+        { value: "tests.take",   label: "Passer un test assigné" }
       ]}
     ]
   },

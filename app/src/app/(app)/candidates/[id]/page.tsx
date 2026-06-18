@@ -10,6 +10,7 @@ import { RecruitButton } from "./recruit-button";
 import { CandidatePortalButton } from "./portal-button";
 import { HiringInterviewsPanel } from "./hiring-interviews";
 import { ExperiencesPanel } from "../../me/experiences-panel";
+import { CandidateTestsSection } from "./tests-section";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CheckCircle2, MessageSquare } from "lucide-react";
 import { SalaryScenariosPanel } from "./salary-scenarios-panel";
@@ -161,6 +162,8 @@ export default async function CandidateDetail({ params }: { params: { id: string
               createdBy: s.createdBy
             }))}
           />
+
+          <CandidateTestsSection candidateId={c.id} />
 
           <section className="card p-5">
             <div className="flex items-center justify-between mb-3">

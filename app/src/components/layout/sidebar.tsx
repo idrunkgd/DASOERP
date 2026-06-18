@@ -73,8 +73,9 @@ const SECTIONS: Section[] = [
   {
     label: "RH & Documents",
     items: [
-      { href: "/onboarding", label: "Onboarding",     icon: GraduationCap, perm: "onboarding.read" },
-      { href: "/documents",  label: "Documents",      icon: Files,         perm: "documents.read" }
+      { href: "/onboarding", label: "Onboarding",       icon: GraduationCap,  perm: "onboarding.read" },
+      { href: "/documents",  label: "Documents",        icon: Files,          perm: "documents.read" },
+      { href: "/tests",      label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" }
     ]
   },
   {

@@ -304,6 +304,9 @@ model User {
   opportunityActivities OpportunityActivity[] @relation("OpportunityActivityUser")
   // Factures fournisseurs (mirror Skwarel — test feature)
   supplierInvoicesCreated SupplierInvoice[] @relation("SupplierInvoiceCreator")
+  // Tests techniques (évaluation candidat/consultant)
+  testAssignments         TestAssignment[]  @relation("TestAssigneeUser")
+  testAssignmentsCreated  TestAssignment[]  @relation("TestAssignmentCreator")
 }
 
 // =============================================================
@@ -1020,6 +1023,8 @@ model Candidate {
   experiences     CandidateExperience[]
   // Simulations de package salarial rattachées à ce candidat
   salaryScenarios CandidateSalaryScenario[]
+  // Tests techniques assignés
+  testAssignments TestAssignment[] @relation("TestAssigneeCandidate")
 
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -1708,4 +1713,144 @@ model Document {
   @@index([parentDocumentId])
   @@index([expiresAt])
   @@index([createdAt])
+}
+
+// =============================================================
+// TESTS TECHNIQUES — évaluation candidats et consultants
+//
+// Cinq tests métier (ELEC, PLC, DATA, IT, CYBERSEC), question taguée
+// difficulté (Junior → Expert) pour cartographier le niveau et pas juste
+// scorer brut. Le répondant ne voit jamais son score ; l'admin voit le
+// breakdown sur la fiche profil.
+//
+// Accès :
+//   - Consultant interne : connecté Dasohub, onglet /me/tests
+//   - Candidat externe   : lien magique unique (cuid) valide 14 jours
+//     sans création de compte Dasohub
+// =============================================================
+
+enum TestDomain {
+  ELEC_INDUSTRIAL
+  PLC
+  DATA_MANAGER
+  IT_INDUSTRIAL
+  CYBERSEC_INDUSTRIAL
+}
+
+enum TestDifficulty {
+  JUNIOR
+  MEDIOR
+  SENIOR
+  EXPERT
+}
+
+enum TestAssignmentStatus {
+  PENDING       // assignation créée, pas commencée
+  IN_PROGRESS   // au moins une réponse enregistrée
+  COMPLETED     // soumis
+  EXPIRED       // expiresAt dépassé sans soumission
+}
+
+model Test {
+  id          String         @id @default(cuid())
+  domain      TestDomain     @unique
+  title       String
+  description String?
+  isActive    Boolean        @default(true)
+  questions   TestQuestion[]
+  assignments TestAssignment[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model TestQuestion {
+  id         String         @id @default(cuid())
+  testId     String
+  test       Test           @relation(fields: [testId], references: [id], onDelete: Cascade)
+  position   Int
+  text       String         @db.Text
+  /// JUNIOR / MEDIOR / SENIOR / EXPERT — sert au breakdown du score sur fiche profil
+  difficulty TestDifficulty @default(MEDIOR)
+  /// 1 par défaut, ajustable si on veut surpondérer certaines questions
+  points     Int            @default(1)
+  /// True pour les mises en situation (cas pratique). Visible côté admin pour
+  /// distinguer connaissance vs jugement.
+  isScenario Boolean        @default(false)
+  choices    TestChoice[]
+  answers    TestAnswer[]
+
+  @@unique([testId, position])
+  @@index([testId])
+}
+
+model TestChoice {
+  id         String       @id @default(cuid())
+  questionId String
+  question   TestQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  position   Int
+  text       String       @db.Text
+  isCorrect  Boolean      @default(false)
+  answers    TestAnswer[]
+
+  @@unique([questionId, position])
+  @@index([questionId])
+}
+
+model TestAssignment {
+  id            String                @id @default(cuid())
+  testId        String
+  test          Test                  @relation(fields: [testId], references: [id], onDelete: Cascade)
+  // Soit consultant interne, soit candidat externe — exactement un des deux
+  userId        String?
+  user          User?                 @relation("TestAssigneeUser", fields: [userId], references: [id], onDelete: Cascade)
+  candidateId   String?
+  candidate     Candidate?            @relation("TestAssigneeCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  /// Lien magique unique pour l'accès candidat externe sans compte
+  magicToken    String                @unique @default(cuid())
+  status        TestAssignmentStatus  @default(PENDING)
+  assignedAt    DateTime              @default(now())
+  assignedById  String
+  assignedBy    User                  @relation("TestAssignmentCreator", fields: [assignedById], references: [id])
+  /// Par défaut +14 jours côté server action, modifiable à la création
+  expiresAt     DateTime?
+  submission    TestSubmission?
+
+  @@index([userId])
+  @@index([candidateId])
+  @@index([status])
+}
+
+model TestSubmission {
+  id           String         @id @default(cuid())
+  assignmentId String         @unique
+  assignment   TestAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  startedAt    DateTime       @default(now())
+  completedAt  DateTime?
+  /// Scores cumulés — cachés au répondant, visibles admin uniquement
+  score        Int            @default(0)
+  maxScore     Int            @default(0)
+  /// Breakdown par niveau de difficulté pour cartographie de compétences
+  scoreJunior  Int            @default(0)
+  maxJunior    Int            @default(0)
+  scoreMedior  Int            @default(0)
+  maxMedior    Int            @default(0)
+  scoreSenior  Int            @default(0)
+  maxSenior    Int            @default(0)
+  scoreExpert  Int            @default(0)
+  maxExpert    Int            @default(0)
+  answers      TestAnswer[]
+}
+
+model TestAnswer {
+  id           String         @id @default(cuid())
+  submissionId String
+  submission   TestSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     TestQuestion   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  choiceId     String
+  choice       TestChoice     @relation(fields: [choiceId], references: [id], onDelete: Cascade)
+  answeredAt   DateTime       @default(now())
+
+  @@unique([submissionId, questionId])
+  @@index([submissionId])
 }
