@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CandidateAvatar } from "./avatar";
+import { LinkedInImportButton } from "./linkedin-import-button";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,12 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
       <PageHeader
         title="Candidats"
         subtitle={`${list.length} candidat(s) — vivier consultance`}
-        actions={<Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau candidat</Link>}
+        actions={
+          <div className="flex gap-2">
+            <LinkedInImportButton />
+            <Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau candidat</Link>
+          </div>
+        }
       />
 
       <form className="mb-5 flex gap-2 flex-wrap">
