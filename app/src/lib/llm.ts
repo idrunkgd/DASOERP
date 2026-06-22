@@ -205,12 +205,39 @@ async function callGeminiModel(p: {
 }
 
 /**
- * Nettoie la sortie LLM pour extraire le JSON pur (enlève les fences ```json … ```)
+ * Nettoie la sortie LLM pour extraire le JSON pur :
+ *   1. Enlève les fences ```json … ```
+ *   2. Enlève préambule type « Voici le JSON : » et trailing
+ *   3. Cherche le premier { ou [ jusqu'au dernier } ou ] correspondant
+ *
+ * Gère le cas typique de Gemini qui ajoute parfois un préambule narratif
+ * malgré l'instruction explicite, et le cas Claude qui peut ajouter une
+ * petite phrase de conclusion.
  */
 export function extractJson(text: string): string {
-  return text
+  let s = text
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```\s*$/, "")
     .trim();
+
+  // Si la string commence déjà par { ou [ et finit par } ou ], on garde tel quel
+  const startsClean = (s.startsWith("{") || s.startsWith("[")) && (s.endsWith("}") || s.endsWith("]"));
+  if (startsClean) return s;
+
+  // Sinon on cherche le premier { ou [ et le dernier } ou ] correspondants
+  const firstBrace = s.indexOf("{");
+  const firstBracket = s.indexOf("[");
+  let start = -1;
+  if (firstBrace === -1) start = firstBracket;
+  else if (firstBracket === -1) start = firstBrace;
+  else start = Math.min(firstBrace, firstBracket);
+  if (start === -1) return s; // pas de JSON apparent, on laisse échouer en aval
+
+  const lastBrace = s.lastIndexOf("}");
+  const lastBracket = s.lastIndexOf("]");
+  const end = Math.max(lastBrace, lastBracket);
+  if (end <= start) return s;
+
+  return s.slice(start, end + 1).trim();
 }

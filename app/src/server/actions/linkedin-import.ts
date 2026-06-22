@@ -31,7 +31,7 @@ async function callLlmText(prompt: string, userText: string): Promise<{ ok: true
         },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 2500,
+          max_tokens: 4000,  // long profil LinkedIn avec 10+ expériences possible
           messages: [
             {
               role: "user",
@@ -70,7 +70,13 @@ async function callLlmText(prompt: string, userText: string): Promise<{ ok: true
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             contents: [{ role: "user", parts: [{ text: `${prompt}\n\n---\n\n${userText}` }] }],
-            generationConfig: { maxOutputTokens: 2500, temperature: 0.1 }
+            generationConfig: {
+              maxOutputTokens: 4000,  // long profil LinkedIn possible
+              temperature: 0.1,
+              // Force Gemini à répondre en JSON pur (pas de préambule narratif).
+              // Supporté sur 2.x. Pas reconnu sur 1.5 mais ignoré silencieusement.
+              responseMimeType: "application/json"
+            }
           })
         });
         if (resp.ok) {
@@ -195,8 +201,14 @@ export async function parseLinkedInText(rawText: string) {
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(cleaned);
-  } catch {
-    return { ok: false as const, error: "Réponse LLM non parsable (JSON invalide)" };
+  } catch (parseErr) {
+    // Pour faciliter le debug, on renvoie un extrait de ce que le LLM a sorti.
+    const preview = llmResp.text.slice(0, 300).replace(/\n/g, " ");
+    return {
+      ok: false as const,
+      error: `Réponse LLM non parsable. Début de la réponse : « ${preview}… ». ` +
+        `Tu peux soit retenter, soit prendre la méthode propre (sélection ciblée du profil) qui produit moins de bruit.`
+    };
   }
   if (parsedJson && typeof parsedJson === "object" && "error" in parsedJson) {
     return { ok: false as const, error: String((parsedJson as any).error) };
