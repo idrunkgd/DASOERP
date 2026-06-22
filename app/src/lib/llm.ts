@@ -140,13 +140,14 @@ async function callGemini(p: {
   maxTokens?: number;
   apiKey: string;
 }): Promise<LlmCallResult> {
-  // Ordre de fallback : 1.5-flash-latest (free tier le plus stable et généreux)
-  // → 1.5-flash-8b (encore plus léger si le précédent renvoie 429)
-  // → 2.0-flash (preview, free tier plus serré)
+  // Ordre de fallback : du plus récent au plus ancien. Les modèles 1.5
+  // sont parfois 404 en 2026 selon la région ; 2.5-flash est le plus
+  // stable actuellement et conserve un free tier généreux.
   const models = [
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash-8b-latest",
-    "gemini-2.0-flash"
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-001",
+    "gemini-1.5-flash-latest"
   ];
   let lastErr = "";
   for (const model of models) {

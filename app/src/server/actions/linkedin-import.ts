@@ -50,27 +50,47 @@ async function callLlmText(prompt: string, userText: string): Promise<{ ok: true
     }
   }
 
-  // Fallback Gemini Flash
+  // Fallback Gemini Flash : on tente plusieurs modèles dans l'ordre car
+  // les noms changent (les anciens gemini-1.5-* sont régulièrement
+  // dépréciés ou 404 sur certaines régions). Cascade vers le plus récent
+  // au plus ancien tant qu'on a 404/429.
   if (googleKey) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${encodeURIComponent(googleKey)}`;
-    try {
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: `${prompt}\n\n---\n\n${userText}` }] }],
-          generationConfig: { maxOutputTokens: 2500, temperature: 0.1 }
-        })
-      });
-      if (resp.ok) {
-        const json = (await resp.json()) as any;
-        const text: string = json?.candidates?.[0]?.content?.parts?.map((x: any) => x.text ?? "").join("") ?? "";
-        if (text) return { ok: true, text };
+    const models = [
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-2.0-flash-001",
+      "gemini-1.5-flash-latest"
+    ];
+    let lastErr = "";
+    for (const model of models) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(googleKey)}`;
+      try {
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: `${prompt}\n\n---\n\n${userText}` }] }],
+            generationConfig: { maxOutputTokens: 2500, temperature: 0.1 }
+          })
+        });
+        if (resp.ok) {
+          const json = (await resp.json()) as any;
+          const text: string = json?.candidates?.[0]?.content?.parts?.map((x: any) => x.text ?? "").join("") ?? "";
+          if (text) return { ok: true, text };
+          lastErr = `Gemini ${model} : réponse vide`;
+        } else {
+          const errBody = await resp.text();
+          lastErr = `Gemini ${model} ${resp.status}: ${errBody.slice(0, 200)}`;
+          // Sur 404 ou 429 on tente le suivant ; sur autre erreur on abandonne
+          if (resp.status !== 404 && resp.status !== 429) {
+            return { ok: false, error: lastErr };
+          }
+        }
+      } catch (e: any) {
+        lastErr = `Gemini ${model}: ${String(e?.message ?? e)}`;
       }
-      return { ok: false, error: `Gemini ${resp.status}` };
-    } catch (e: any) {
-      return { ok: false, error: `Gemini: ${String(e?.message ?? e)}` };
     }
+    return { ok: false, error: lastErr || "Gemini indisponible sur tous les modèles" };
   }
 
   return { ok: false, error: "Tous les providers LLM ont échoué" };
