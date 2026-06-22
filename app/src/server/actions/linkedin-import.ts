@@ -126,12 +126,23 @@ export type ParsedLinkedInCandidate = z.infer<typeof ParsedCandidateSchema>;
 // ─── Parse seul : retourne le JSON structuré, ne crée rien ─────────────
 // Utile pour permettre à l'utilisateur de valider/corriger avant création.
 
-const PARSE_PROMPT = `Tu es un parser de profils LinkedIn. À partir du texte brut copié-collé d'un profil LinkedIn ci-dessous, extrais les informations dans un JSON strict.
+const PARSE_PROMPT = `Tu es un parser de profils LinkedIn. À partir du texte brut copié-collé d'une page LinkedIn ci-dessous, extrais UNIQUEMENT les informations de la personne dont le profil est affiché au centre de la page.
+
+CONTEXTE IMPORTANT — Le texte est probablement issu d'un Ctrl+A complet de la page LinkedIn, il contient donc beaucoup de bruit à IGNORER :
+- La barre de navigation LinkedIn (Accueil, Mon Réseau, Emplois, Messages, Notifications, Moi, Pour les entreprises, etc.)
+- La colonne de droite : profils suggérés (« People you may know », « Personnes à découvrir », « Autres profils consultés », « Recommended for you »)
+- Les sections « Activité récente », « Show all X employees », « Voir tous les X salariés »
+- Les sections promotionnelles LinkedIn Premium, « Try Premium for free », publicités
+- Le pied de page (Accessibility, Aide, À propos, Politique de confidentialité, Conditions d'utilisation, ...)
+- Les boutons et libellés UI génériques (Se connecter, Message, Suivre, More, Voir plus, Show more, ...)
+- Les listes de profils suggérés avec leurs noms qui n'ont rien à voir avec la personne du profil
+
+La personne du profil est identifiable parce que son nom apparaît en premier dans le bloc principal, généralement suivi du titre (headline), de la localisation, des sections About / À propos, Expérience / Experience, Formation / Education, Compétences / Skills, Langues / Languages.
 
 Format de sortie OBLIGATOIRE (JSON pur, sans bloc de code, sans commentaires) :
 
 {
-  "firstName": "prénom",
+  "firstName": "prénom de la personne du profil",
   "lastName": "nom de famille",
   "email": "email ou null si absent",
   "phone": "téléphone ou null",
@@ -139,7 +150,7 @@ Format de sortie OBLIGATOIRE (JSON pur, sans bloc de code, sans commentaires) :
   "currentTitle": "intitulé du poste actuel ou null",
   "yearsExperience": entier (calcule à partir des expériences) ou null,
   "seniority": "JUNIOR" | "MEDIOR" | "SENIOR" | "EXPERT" ou null,
-  "skills": ["liste des compétences techniques détectées"],
+  "skills": ["liste des compétences techniques détectées dans la section Skills/Compétences uniquement"],
   "spokenLanguages": ["FR", "EN", ...],
   "summary": "résumé/about en 2-3 phrases ou null",
   "experiences": [
@@ -156,13 +167,14 @@ Format de sortie OBLIGATOIRE (JSON pur, sans bloc de code, sans commentaires) :
 Règles :
 - Réponds uniquement avec le JSON, rien d'autre.
 - Si le texte n'est manifestement pas un profil LinkedIn (ou trop pauvre), réponds : { "error": "Texte insuffisant ou non LinkedIn" }
+- Si tu hésites entre plusieurs personnes dans le texte (profils suggérés), choisis celle dont le NOM apparaît en premier ou dans la section centrale principale.
 - Pour seniority : JUNIOR (0-3 ans), MEDIOR (3-6 ans), SENIOR (6-10 ans), EXPERT (10+ ans).
-- Skills : seulement les compétences techniques pertinentes pour une mission consultance (ex: "Python", "Kubernetes", "AVEVA", "Siemens TIA Portal", "ISO 27001"). Ignore les soft skills.
+- Skills : seulement les compétences techniques pertinentes pour une mission consultance (ex: "Python", "Kubernetes", "AVEVA", "Siemens TIA Portal", "ISO 27001"). Ignore les soft skills, les noms des profils suggérés, les libellés UI de LinkedIn.
 - Langues : codes ISO 639-1 deux lettres en majuscules (FR, EN, NL, DE, ES...).
 - Si une date est en français ("janvier 2020"), convertis-la en format ISO ("2020-01").
-- Si le poste est encore en cours, endDate doit être null.
+- Si le poste est encore en cours (endDate dit « Présent », « Present », « En cours », « Aujourd'hui », « Today »), endDate doit être null.
 
-Texte du profil LinkedIn ci-dessous :`;
+Texte de la page LinkedIn ci-dessous :`;
 
 export async function parseLinkedInText(rawText: string) {
   await requirePermission("consulting.write");

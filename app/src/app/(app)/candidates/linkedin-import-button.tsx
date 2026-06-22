@@ -93,13 +93,36 @@ export function LinkedInImportButton() {
             {step === "input" && (
               <>
                 <div className="mb-4 p-3 rounded-lg bg-indigoaccent/5 border border-indigoaccent/20 text-xs text-midnight-700">
-                  <strong className="text-midnight-900">Mode d'emploi</strong>
-                  <ol className="list-decimal ml-5 mt-1 space-y-0.5">
-                    <li>Ouvre le profil LinkedIn du candidat dans un autre onglet</li>
-                    <li>Sélectionne tout le contenu de la page (<kbd className="kbd">⌘A</kbd> puis <kbd className="kbd">⌘C</kbd>)</li>
-                    <li>Colle-le dans le champ ci-dessous</li>
-                    <li>Claude Haiku analyse le profil (≈ 1 ct/analyse) et te propose un candidat à créer</li>
-                  </ol>
+                  <strong className="text-midnight-900">Mode d'emploi — 3 méthodes au choix</strong>
+
+                  <details className="mt-2" open>
+                    <summary className="cursor-pointer font-medium text-midnight-900">⭐ Méthode propre (recommandée)</summary>
+                    <ol className="list-decimal ml-5 mt-1 space-y-0.5">
+                      <li>Ouvre le profil LinkedIn dans un autre onglet</li>
+                      <li><strong>Clique juste avant le nom</strong> du candidat (en haut du bloc central)</li>
+                      <li>Scrolle jusqu'à la fin de la section Compétences ou Langues</li>
+                      <li><strong>Maj+clic</strong> tout en bas pour étendre la sélection</li>
+                      <li><kbd className="kbd">⌘C</kbd> puis colle ici</li>
+                    </ol>
+                    <p className="mt-1 text-midnight-500">Tu ne reprends que la colonne centrale, pas la nav ni les profils suggérés.</p>
+                  </details>
+
+                  <details className="mt-2">
+                    <summary className="cursor-pointer font-medium text-midnight-900">Méthode rapide (Ctrl+A)</summary>
+                    <ol className="list-decimal ml-5 mt-1 space-y-0.5">
+                      <li><kbd className="kbd">⌘A</kbd> puis <kbd className="kbd">⌘C</kbd> directement sur la page</li>
+                      <li>Colle tout ci-dessous, y compris la nav LinkedIn et les profils suggérés</li>
+                      <li>Le LLM est entraîné à <strong>ignorer ce bruit</strong> et à ne garder que la personne du profil</li>
+                    </ol>
+                    <p className="mt-1 text-midnight-500">Plus rapide mais consomme un peu plus de tokens (sans impact sur ton volume actuel).</p>
+                  </details>
+
+                  <details className="mt-2">
+                    <summary className="cursor-pointer font-medium text-midnight-900">Astuce : Save as PDF</summary>
+                    <p className="mt-1 ml-5">
+                      Sur LinkedIn, depuis le profil : <strong>Plus</strong> (« More ») → <strong>Enregistrer au format PDF</strong>. Tu obtiens un PDF propre que tu peux ensuite déposer dans <code>/test/cv-parser</code> (parser CV existant), avec la même qualité de parsing mais sans copier-coller.
+                    </p>
+                  </details>
                 </div>
 
                 <div className="space-y-3">
