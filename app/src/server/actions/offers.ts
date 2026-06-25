@@ -487,3 +487,54 @@ export async function setMilestoneStatus(milestoneId: string, newStatus: Billing
   // milestones en retard). On le revalide pour rester cohérent.
   revalidatePath("/dashboard");
 }
+
+// ─── Contacts client liés à l'offre (affichés sur le PDF Destinataire) ──
+
+export async function addOfferContact(offerId: string, contactId: string) {
+  const session = await requirePermission("offers.write");
+  // Vérif appartenance : le contact doit appartenir à la company de l'offre.
+  // Évite qu'on attache un contact d'une autre entreprise par erreur.
+  const offer = await prisma.offer.findUnique({
+    where: { id: offerId },
+    select: { companyId: true }
+  });
+  if (!offer) throw new Error("Offre introuvable");
+  const contact = await prisma.contact.findUnique({
+    where: { id: contactId },
+    select: { companyId: true, firstName: true, lastName: true }
+  });
+  if (!contact) throw new Error("Contact introuvable");
+  if (contact.companyId !== offer.companyId) {
+    throw new Error("Ce contact n'appartient pas à l'entreprise cliente de l'offre");
+  }
+  await prisma.offerContact.upsert({
+    where: { offerId_contactId: { offerId, contactId } },
+    create: { offerId, contactId },
+    update: {}
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Offer",
+    entityId: offerId,
+    message: `Contact ${contact.firstName} ${contact.lastName} ajouté à l'offre`
+  });
+  revalidatePath(`/offers/${offerId}`);
+  return { ok: true };
+}
+
+export async function removeOfferContact(offerId: string, contactId: string) {
+  const session = await requirePermission("offers.write");
+  await prisma.offerContact.delete({
+    where: { offerId_contactId: { offerId, contactId } }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Offer",
+    entityId: offerId,
+    message: `Contact retiré de l'offre`
+  });
+  revalidatePath(`/offers/${offerId}`);
+  return { ok: true };
+}

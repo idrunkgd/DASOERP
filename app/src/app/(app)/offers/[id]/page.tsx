@@ -9,6 +9,7 @@ import { OfferLinesEditor } from "./lines-editor";
 import { MilestonesEditor } from "./milestones-editor";
 import { OptionsEditor } from "./options-editor";
 import { OfferActions } from "./offer-actions";
+import { OfferContactsSection } from "./contacts-section";
 import { formatCurrency, formatPercent, formatDate } from "@/lib/utils";
 import { isOfferEditable, isOfferHeaderEditable, canCreateNewVersion, isOfferFinal, offerLockMessage } from "@/lib/offer-rules";
 import { Lock } from "lucide-react";
@@ -19,6 +20,8 @@ export default async function OfferDetail({ params }: { params: { id: string } }
     where: { id: params.id },
     include: {
       company: true, owner: true,
+      // Contacts liés à l'offre (apparaissent sur le PDF Destinataire)
+      contacts: { include: { contact: true } },
       lines: { orderBy: { position: "asc" } },
       options: {
         include: { lines: { orderBy: { position: "asc" } } },
@@ -36,10 +39,16 @@ export default async function OfferDetail({ params }: { params: { id: string } }
     }
   });
   if (!offer) notFound();
-  const [companies, users, profiles] = await Promise.all([
+  const [companies, users, profiles, companyContacts] = await Promise.all([
     prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
     prisma.user.findMany({ where: { active: true, candidateProfile: { is: null } }, orderBy: { firstName: "asc" }, select: { id: true, firstName: true, lastName: true } }),
-    prisma.serviceProfile.findMany({ where: { active: true }, orderBy: { name: "asc" } })
+    prisma.serviceProfile.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+    // Tous les contacts de la company cliente, pour le sélecteur d'ajout
+    prisma.contact.findMany({
+      where: { companyId: offer.companyId, status: "ACTIVE" },
+      orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+      select: { id: true, firstName: true, lastName: true, jobTitle: true, email: true, phone: true }
+    })
   ]);
 
   return (
@@ -94,6 +103,20 @@ export default async function OfferDetail({ params }: { params: { id: string } }
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <OfferHeaderForm initial={offer as any} companies={companies} users={users} readOnly={!isOfferHeaderEditable(offer.status)} />
+          <OfferContactsSection
+            offerId={offer.id}
+            companyId={offer.companyId}
+            linkedContacts={offer.contacts.map((oc: any) => ({
+              id: oc.contact.id,
+              firstName: oc.contact.firstName,
+              lastName: oc.contact.lastName,
+              jobTitle: oc.contact.jobTitle,
+              email: oc.contact.email,
+              phone: oc.contact.phone
+            }))}
+            availableContacts={companyContacts}
+            editable={isOfferHeaderEditable(offer.status)}
+          />
           <OfferLinesEditor offerId={offer.id} lines={offer.lines.filter((l: any) => !l.optionId) as any} profiles={profiles as any} readOnly={!isOfferEditable(offer.status)} />
           <OptionsEditor offerId={offer.id} options={offer.options as any} profiles={profiles as any} readOnly={!isOfferEditable(offer.status)} />
           <MilestonesEditor offerId={offer.id} milestones={offer.milestones as any} totalSell={Number(offer.totalSell)} readOnly={!isOfferEditable(offer.status)} />
