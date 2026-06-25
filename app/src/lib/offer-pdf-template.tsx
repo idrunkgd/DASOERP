@@ -294,7 +294,13 @@ export interface OfferPdfData {
     city?: string | null;
     country?: string | null;
   };
-  contacts?: { firstName: string; lastName: string; email?: string | null }[];
+  contacts?: {
+    firstName: string;
+    lastName: string;
+    jobTitle?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  }[];
   lines: {
     description: string;
     quantity: number | string;
@@ -321,7 +327,15 @@ export interface OfferPdfData {
       totalSell: number | string;
     }[];
   }[];
-  owner?: { firstName: string; lastName: string; email?: string | null } | null;
+  /// Owner de l'offre côté Dasolabs : affiché dans le bloc Émetteur comme
+  /// interlocuteur principal du client. On y joint email + tél quand dispo.
+  owner?: {
+    firstName: string;
+    lastName: string;
+    email?: string | null;
+    phone?: string | null;
+    role?: string | null;
+  } | null;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -387,7 +401,8 @@ export function OfferPdfDocument({
       <Page size="A4" style={styles.page}>
         <PageHeader subtitle={`Émis le ${fmtDate(data.sentAt ?? new Date())}`} />
 
-        {/* Émetteur / Destinataire */}
+        {/* Émetteur / Destinataire — chaque bloc identifie la SOCIÉTÉ +
+            l'INTERLOCUTEUR humain pour faciliter le suivi commercial. */}
         <View style={styles.twoCol}>
           <View style={styles.block}>
             <Text style={styles.blockLabel}>Émetteur</Text>
@@ -400,7 +415,32 @@ export function OfferPdfDocument({
             {company.bceNumber && <Text style={styles.blockLine}>BCE : {company.bceNumber}</Text>}
             <Text style={styles.blockLine}>{company.email}</Text>
             {company.phone && <Text style={styles.blockLine}>{company.phone}</Text>}
+
+            {/* Contact Dasolabs en charge — visible si owner défini */}
+            {data.owner && (
+              <View
+                style={{
+                  marginTop: 8,
+                  paddingTop: 6,
+                  borderTop: `1 solid ${colors.border}`
+                }}
+              >
+                <Text style={[styles.blockLabel, { fontSize: 7, marginBottom: 2 }]}>
+                  Votre interlocuteur
+                </Text>
+                <Text style={[styles.blockLine, { fontFamily: "Helvetica-Bold" }]}>
+                  {data.owner.firstName} {data.owner.lastName}
+                </Text>
+                {data.owner.email && (
+                  <Text style={styles.blockLine}>{data.owner.email}</Text>
+                )}
+                {data.owner.phone && (
+                  <Text style={styles.blockLine}>{data.owner.phone}</Text>
+                )}
+              </View>
+            )}
           </View>
+
           <View style={styles.block}>
             <Text style={styles.blockLabel}>Destinataire</Text>
             <Text style={styles.blockName}>{data.company.name}</Text>
@@ -414,10 +454,31 @@ export function OfferPdfDocument({
             {data.company.vatNumber && (
               <Text style={styles.blockLine}>TVA : {data.company.vatNumber}</Text>
             )}
+
+            {/* Tous les contacts client liés à l'offre — pas seulement le
+                premier. On affiche nom + fonction + email + tél. */}
             {data.contacts && data.contacts.length > 0 && (
-              <Text style={[styles.blockLine, { marginTop: 4 }]}>
-                À l'attention de : {data.contacts[0].firstName} {data.contacts[0].lastName}
-              </Text>
+              <View
+                style={{
+                  marginTop: 8,
+                  paddingTop: 6,
+                  borderTop: `1 solid ${colors.border}`
+                }}
+              >
+                <Text style={[styles.blockLabel, { fontSize: 7, marginBottom: 2 }]}>
+                  À l'attention de
+                </Text>
+                {data.contacts.map((c, i) => (
+                  <View key={i} style={{ marginBottom: i < data.contacts!.length - 1 ? 4 : 0 }}>
+                    <Text style={[styles.blockLine, { fontFamily: "Helvetica-Bold" }]}>
+                      {c.firstName} {c.lastName}
+                      {c.jobTitle ? ` — ${c.jobTitle}` : ""}
+                    </Text>
+                    {c.email && <Text style={styles.blockLine}>{c.email}</Text>}
+                    {c.phone && <Text style={styles.blockLine}>{c.phone}</Text>}
+                  </View>
+                ))}
+              </View>
             )}
           </View>
         </View>

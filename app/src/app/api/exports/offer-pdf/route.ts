@@ -51,10 +51,15 @@ export async function GET(req: NextRequest) {
       city: offer.company.city,
       country: offer.company.country
     },
+    // On passe nom + fonction + email + tél de chaque contact client lié.
+    // Le PDF affiche tous les contacts, pas juste le premier (utile pour
+    // les devis adressés à un binôme ex. commercial + technique).
     contacts: offer.contacts.map((oc) => ({
       firstName: oc.contact.firstName,
       lastName: oc.contact.lastName,
-      email: oc.contact.email
+      jobTitle: oc.contact.jobTitle,
+      email: oc.contact.email,
+      phone: oc.contact.phone
     })),
     lines: offer.lines.map((l) => ({
       description: l.description,
@@ -81,11 +86,14 @@ export async function GET(req: NextRequest) {
         totalSell: Number(l.totalSell)
       }))
     })),
+    // Interlocuteur Dasolabs en charge — affiché sous le bloc Émetteur
+    // pour que le client identifie immédiatement qui contacter.
     owner: offer.owner
       ? {
           firstName: offer.owner.firstName,
           lastName: offer.owner.lastName,
-          email: offer.owner.email
+          email: offer.owner.email,
+          phone: offer.owner.phone
         }
       : null
   };
