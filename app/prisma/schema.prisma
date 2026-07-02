@@ -284,6 +284,8 @@ model User {
   contactInteractions ContactInteraction[]
   ownedMissions       MissionRequest[]   @relation("MissionOwner")
   ownedCandidates     Candidate[]        @relation("CandidateOwner")
+  // Propositions consultants dont je suis owner (préparateur du dossier)
+  ownedProposals      MissionProposal[]  @relation("ProposalOwner")
   // Missions T&M exécutées par ce consultant (User interne)
   consultantMissions  Mission[]          @relation("MissionConsultant")
   // Présentations sur des demandes de mission (consultant interne proposé au client)
@@ -1000,6 +1002,9 @@ model MissionRequest {
 
   applications    MissionApplication[]
   offers          Offer[]
+  /// Propositions consultant envoyées au client (une par consultant).
+  /// Cf. modèle MissionProposal en bas de fichier.
+  proposals       MissionProposal[]
   // Si la demande aboutit, une Mission concrète est exécutée
   executedMissions Mission[]    @relation("MissionRequestExecutions")
 
@@ -1009,6 +1014,71 @@ model MissionRequest {
   @@index([companyId])
   @@index([status])
   @@index([intermediaryCompanyId])
+}
+
+// =============================================================
+// PROPOSITION CONSULTANT — offre envoyée au client depuis une
+// demande de mission (MissionRequest) pour un consultant donné.
+//
+// Contient les dates de mission, le régime (jours/semaine), le TJM
+// vendu et un snapshot des jours ouvrés calculés au moment de l'envoi
+// (afin que le PDF reste stable même si les fériés belges sont
+// recalculés plus tard, ou si les dates sont modifiées après envoi).
+// =============================================================
+
+enum MissionProposalStatus {
+  DRAFT       // en préparation
+  SENT        // envoyée au client
+  ACCEPTED    // acceptée par le client
+  REJECTED    // refusée par le client
+  CANCELLED   // annulée par Dasolabs (ex. consultant plus dispo)
+}
+
+model MissionProposal {
+  id               String                @id @default(cuid())
+  reference        String                @unique          // PROP-2026-0001
+
+  missionRequestId String
+  missionRequest   MissionRequest        @relation(fields: [missionRequestId], references: [id], onDelete: Cascade)
+  candidateId      String
+  candidate        Candidate             @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+  ownerId          String?
+  owner            User?                 @relation("ProposalOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  status           MissionProposalStatus @default(DRAFT)
+
+  /// Période de mission proposée au client. Le budget est calculé sur
+  /// ces dates avec la lib working-days (weekends + fériés belges déduits).
+  startDate        DateTime              @db.Date
+  endDate          DateTime              @db.Date
+  /// Régime : 5 = temps plein, 4 = 4/5ème, 2.5 = mi-temps, valeur libre.
+  workDaysPerWeek  Decimal               @default(5) @db.Decimal(3, 1)
+  /// Inclure les fériés belges dans le calcul (les DÉDUIRE) ou pas.
+  includeHolidays  Boolean               @default(true)
+  /// Tarif journalier VENDU au client (HTVA, EUR).
+  dailyRate        Decimal               @db.Decimal(10, 2)
+
+  /// Snapshot calculé : jours ouvrés × ratio régime = jours facturables.
+  /// Rempli à chaque save via recomputeProposalTotals(), affiché sur PDF.
+  computedDays     Decimal               @default(0) @db.Decimal(8, 2)
+  /// Snapshot : dailyRate × computedDays (HTVA).
+  computedBudgetHt Decimal               @default(0) @db.Decimal(12, 2)
+
+  /// Message d'accompagnement affiché sur le PDF (introduction).
+  intro            String?
+  /// Notes internes (pas sur le PDF client).
+  internalNotes    String?
+
+  sentAt           DateTime?
+  decidedAt        DateTime?             // quand ACCEPTED ou REJECTED
+  lostReason       String?
+
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@index([missionRequestId])
+  @@index([candidateId])
+  @@index([status])
 }
 
 model Candidate {
@@ -1054,6 +1124,8 @@ model Candidate {
 
   applications    MissionApplication[]
   attachments     Attachment[]    @relation("CandidateAttachments")
+  /// Propositions consultant envoyées à des clients (une par mission client)
+  proposals       MissionProposal[]
   // Entretiens d'embauche Dasolabs (préliminaires, sans présentation client)
   hiringInterviews Interview[]    @relation("CandidateHiringInterviews")
   // Expériences professionnelles (CV) — alimentées par le candidat ou l'admin

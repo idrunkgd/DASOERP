@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { MissionForm } from "../mission-form";
 import { ApplicationsPanel } from "./applications";
+import { ProposalsPanel } from "./proposals-panel";
 import { MissionStatusActions } from "./status-actions";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -26,7 +27,14 @@ export default async function MissionDetail({ params }: { params: { id: string }
         include: { candidate: true, consultant: true, interviews: { orderBy: { scheduledAt: "asc" } }, mission: true },
         orderBy: { presentedAt: "desc" }
       },
-      executedMissions: { select: { id: true, reference: true, status: true, dailyRate: true, startDate: true, endDate: true } }
+      executedMissions: { select: { id: true, reference: true, status: true, dailyRate: true, startDate: true, endDate: true } },
+      /// Propositions consultants générées depuis cette demande.
+      /// On les affiche dans un panneau dédié pour tout ce qui touche PDF
+      /// consultant, TJM, budget calculé, etc.
+      proposals: {
+        include: { candidate: { select: { id: true, firstName: true, lastName: true, photoUrl: true, seniority: true } } },
+        orderBy: { createdAt: "desc" }
+      }
     }
   });
   if (!m) notFound();
@@ -63,6 +71,31 @@ export default async function MissionDetail({ params }: { params: { id: string }
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <MissionForm initial={m as any} companies={companies} contacts={contacts} users={users} />
+          <ProposalsPanel
+            missionRequestId={m.id}
+            defaults={{
+              startDate: m.startDate ? m.startDate.toISOString().slice(0, 10) : null,
+              endDate:   m.endDate   ? m.endDate.toISOString().slice(0, 10)   : null,
+              dailyRate: m.targetDailyRate ? Number(m.targetDailyRate) : null
+            }}
+            candidates={candidates.map((c) => ({
+              id: c.id, firstName: c.firstName, lastName: c.lastName,
+              seniority: c.seniority, photoUrl: c.photoUrl,
+              dailyCost: c.dailyCost ? Number(c.dailyCost) : null,
+              minDailyRate: c.minDailyRate ? Number(c.minDailyRate) : null
+            }))}
+            proposals={m.proposals.map((p) => ({
+              id: p.id, reference: p.reference, status: p.status,
+              candidate: p.candidate,
+              startDate: p.startDate.toISOString().slice(0, 10),
+              endDate: p.endDate.toISOString().slice(0, 10),
+              workDaysPerWeek: Number(p.workDaysPerWeek),
+              dailyRate: Number(p.dailyRate),
+              computedDays: Number(p.computedDays),
+              computedBudgetHt: Number(p.computedBudgetHt),
+              sentAt: p.sentAt?.toISOString() ?? null
+            }))}
+          />
           <ApplicationsPanel
             missionId={m.id}
             requestDefaults={{
