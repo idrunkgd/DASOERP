@@ -165,6 +165,10 @@ enum ApplicationStatus {
   INTERVIEW_SCHEDULED
   INTERVIEWED
   SHORTLISTED
+  /// Proposition PDF envoyée au client (montant/dates figés). Passage
+  /// intermédiaire avant SELECTED : quand le client valide la proposition,
+  /// on passe à SELECTED qui déclenche la création automatique de Mission.
+  OFFER_SENT
   SELECTED
   REJECTED
   WITHDRAWN
@@ -286,6 +290,11 @@ model User {
   ownedCandidates     Candidate[]        @relation("CandidateOwner")
   // Propositions consultants dont je suis owner (préparateur du dossier)
   ownedProposals      MissionProposal[]  @relation("ProposalOwner")
+  /// Expériences professionnelles du consultant interne (miroir de
+  /// CandidateExperience). Alimentées via /users/[id] par un admin/manager,
+  /// ou via /me par l'utilisateur lui-même. Affichées sur le PDF de
+  /// proposition consultant page 2.
+  experiences         UserExperience[]
   // Missions T&M exécutées par ce consultant (User interne)
   consultantMissions  Mission[]          @relation("MissionConsultant")
   // Présentations sur des demandes de mission (consultant interne proposé au client)
@@ -917,6 +926,25 @@ model CandidateExperience {
   @@index([candidateId, startDate])
 }
 
+/// Expérience professionnelle d'un consultant interne (User). Structure
+/// identique à CandidateExperience — les deux tables sont maintenues en
+/// parallèle plutôt que fusionnées pour éviter une contrainte polymorphique
+/// coûteuse et pour préserver les cascades delete simples.
+model UserExperience {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  jobTitle    String?
+  startDate   DateTime  @db.Date
+  endDate     DateTime? @db.Date     // null = poste en cours
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, startDate])
+}
+
 // Catalogue de compétences pré-configurées (autocomplete + cases à cocher)
 // Les User.skills et Candidate.skills restent String[] : on peut toujours
 // saisir une compétence hors catalogue (champ libre).
@@ -1040,8 +1068,12 @@ model MissionProposal {
 
   missionRequestId String
   missionRequest   MissionRequest        @relation(fields: [missionRequestId], references: [id], onDelete: Cascade)
-  candidateId      String
-  candidate        Candidate             @relation(fields: [candidateId], references: [id], onDelete: Restrict)
+  /// Pivot sur MissionApplication : la proposition est TOUJOURS générée
+  /// pour un profil déjà présenté (candidat externe OU consultant interne).
+  /// L'unique constraint garantit qu'une application n'a qu'une seule
+  /// proposition en cours ; une nouvelle version doit écraser l'ancienne.
+  applicationId    String                @unique
+  application      MissionApplication    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   ownerId          String?
   owner            User?                 @relation("ProposalOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
@@ -1077,7 +1109,6 @@ model MissionProposal {
   updatedAt        DateTime              @updatedAt
 
   @@index([missionRequestId])
-  @@index([candidateId])
   @@index([status])
 }
 
@@ -1124,8 +1155,6 @@ model Candidate {
 
   applications    MissionApplication[]
   attachments     Attachment[]    @relation("CandidateAttachments")
-  /// Propositions consultant envoyées à des clients (une par mission client)
-  proposals       MissionProposal[]
   // Entretiens d'embauche Dasolabs (préliminaires, sans présentation client)
   hiringInterviews Interview[]    @relation("CandidateHiringInterviews")
   // Expériences professionnelles (CV) — alimentées par le candidat ou l'admin
@@ -1215,6 +1244,10 @@ model MissionApplication {
 
   interviews         Interview[]
   offer              Offer?              @relation("OfferApplication")
+  /// Proposition PDF envoyée au client sur ce profil (0 ou 1). L'existence
+  /// d'une proposition + statut OFFER_SENT signifie que l'offre est en
+  /// attente de décision client. Cascade delete si l'application disparaît.
+  proposal           MissionProposal?
   // Une application SELECTED produit une Mission exécutée
   mission            Mission?            @relation("ApplicationMission")
 

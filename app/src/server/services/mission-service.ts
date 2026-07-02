@@ -114,7 +114,14 @@ export async function convertApplicationToMission(opts: {
   const { actorId, applicationId } = opts;
   const app = await prisma.missionApplication.findUniqueOrThrow({
     where: { id: applicationId },
-    include: { missionRequest: true, candidate: true, consultant: true, mission: true }
+    include: {
+      missionRequest: true, candidate: true, consultant: true, mission: true,
+      // La proposition (si présente) porte les termes exacts figés lors de
+      // l'envoi de l'offre PDF : dates, TJM, régime. Ils PRIMENT sur les
+      // valeurs par défaut de la demande de mission quand on convertit
+      // depuis un flow "OFFER_SENT → SELECTED".
+      proposal: true
+    }
   });
   if (app.mission) return app.mission; // idempotent
   if (app.status !== "SELECTED") throw new Error("L'application doit être SELECTED avant conversion.");
@@ -138,11 +145,16 @@ export async function convertApplicationToMission(opts: {
     throw new Error("Application sans candidat ni consultant — incohérence.");
   }
 
-  const dailyRate = Number(app.proposedDailyRate ?? m.targetDailyRate ?? 0);
+  // La proposition prime : ces termes ont été acceptés par le client tels quels.
+  const dailyRate = Number(
+    app.proposal?.dailyRate ?? app.proposedDailyRate ?? m.targetDailyRate ?? 0
+  );
   if (dailyRate <= 0) throw new Error("Tarif journalier facturé manquant.");
 
-  const startDate = m.startDate ?? new Date();
-  const endDate = m.endDate ?? addDays(startDate, (m.estimatedDays ?? 220));
+  const startDate = app.proposal?.startDate ?? m.startDate ?? new Date();
+  const endDate = app.proposal?.endDate
+    ?? m.endDate
+    ?? addDays(startDate, m.estimatedDays ?? 220);
   const reference = await nextMissionExecReference();
 
   const mission = await prisma.mission.create({

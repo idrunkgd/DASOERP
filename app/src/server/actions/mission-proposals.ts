@@ -1,13 +1,16 @@
 "use server";
 /**
- * MissionProposal : proposition consultant pour un client, générée
- * depuis une demande de mission.
+ * MissionProposal : offre PDF envoyée au client pour un profil déjà
+ * présenté (MissionApplication). Une proposition = pivot sur application.
  *
- * Chaque proposition = un consultant candidat pour la mission, avec
- * une période, un régime (jours/sem) et un TJM vendu. Le budget total
- * est calculé serveur-side depuis les dates + régime + fériés belges
- * (voir lib/working-days.ts) et snapshoté sur la row pour que le PDF
- * reste cohérent même si on rejoue le calcul plus tard.
+ * Flow métier :
+ *   1. Un candidat OU consultant est présenté sur la MissionRequest via
+ *      une MissionApplication (statut PRESENTED).
+ *   2. On génère une proposition : période + régime + TJM. L'application
+ *      passe automatiquement en OFFER_SENT.
+ *   3. Le client accepte → application → SELECTED → création automatique
+ *      de la Mission via mission-service.
+ *   4. Le client refuse → application → REJECTED.
  */
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -26,10 +29,6 @@ async function nextReference() {
   return `${prefix}${String(lastNum + 1).padStart(4, "0")}`;
 }
 
-/**
- * Recalcule computedDays et computedBudgetHt depuis les inputs.
- * À appeler après chaque update qui touche start/end/régime/dailyRate.
- */
 async function recomputeTotals(id: string) {
   const p = await prisma.missionProposal.findUniqueOrThrow({ where: { id } });
   const { effectiveDays } = computeWorkingDays({
@@ -46,9 +45,8 @@ async function recomputeTotals(id: string) {
 }
 
 const CreateSchema = z.object({
-  missionRequestId: z.string().min(1),
-  candidateId: z.string().min(1),
-  startDate: z.string().min(1),  // ISO YYYY-MM-DD
+  applicationId: z.string().min(1),
+  startDate: z.string().min(1),
   endDate: z.string().min(1),
   workDaysPerWeek: z.coerce.number().min(0.5).max(7).default(5),
   includeHolidays: z
@@ -60,25 +58,30 @@ const CreateSchema = z.object({
   internalNotes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
 
+/**
+ * Crée une proposition depuis une MissionApplication existante.
+ * Marque simultanément l'application en OFFER_SENT.
+ * Erreur si l'application a déjà une proposition (unique constraint).
+ */
 export async function createMissionProposal(formData: FormData) {
   const session = await requirePermission("consulting.write");
   const data = CreateSchema.parse(Object.fromEntries(formData));
-
   const start = new Date(data.startDate);
   const end = new Date(data.endDate);
   if (end < start) throw new Error("La date de fin doit être après la date de début");
 
-  const [request, candidate] = await Promise.all([
-    prisma.missionRequest.findUnique({ where: { id: data.missionRequestId }, select: { id: true } }),
-    prisma.candidate.findUnique({ where: { id: data.candidateId }, select: { id: true } })
-  ]);
-  if (!request) throw new Error("Demande de mission introuvable");
-  if (!candidate) throw new Error("Consultant introuvable");
+  const application = await prisma.missionApplication.findUnique({
+    where: { id: data.applicationId },
+    select: { id: true, missionRequestId: true, status: true, proposal: { select: { id: true } } }
+  });
+  if (!application) throw new Error("Présentation introuvable");
+  if (application.proposal) {
+    throw new Error(
+      "Une proposition existe déjà pour ce profil. Modifie-la ou supprime-la avant d'en générer une nouvelle."
+    );
+  }
 
   const reference = await nextReference();
-
-  // Calcul initial (aussi refait en recomputeTotals, mais on veut la valeur
-  // dès la création pour éviter une row à 0)
   const { effectiveDays } = computeWorkingDays({
     startDate: start, endDate: end,
     workDaysPerWeek: data.workDaysPerWeek,
@@ -86,38 +89,49 @@ export async function createMissionProposal(formData: FormData) {
   });
   const budget = effectiveDays * data.dailyRate;
 
-  const proposal = await prisma.missionProposal.create({
-    data: {
-      reference,
-      missionRequestId: data.missionRequestId,
-      candidateId: data.candidateId,
-      ownerId: session.user.id,
-      status: "DRAFT",
-      startDate: start,
-      endDate: end,
-      workDaysPerWeek: data.workDaysPerWeek,
-      includeHolidays: data.includeHolidays,
-      dailyRate: data.dailyRate,
-      computedDays: effectiveDays,
-      computedBudgetHt: budget,
-      intro: data.intro,
-      internalNotes: data.internalNotes
+  // Une seule transaction : création de la proposition + passage de
+  // l'application en OFFER_SENT. Si l'un échoue, rien n'est appliqué.
+  const proposal = await prisma.$transaction(async (tx) => {
+    const p = await tx.missionProposal.create({
+      data: {
+        reference,
+        missionRequestId: application.missionRequestId,
+        applicationId: application.id,
+        ownerId: session.user.id,
+        status: "DRAFT",
+        startDate: start, endDate: end,
+        workDaysPerWeek: data.workDaysPerWeek,
+        includeHolidays: data.includeHolidays,
+        dailyRate: data.dailyRate,
+        computedDays: effectiveDays,
+        computedBudgetHt: budget,
+        intro: data.intro,
+        internalNotes: data.internalNotes
+      }
+    });
+    // L'application est marquée OFFER_SENT dès la génération de l'offre.
+    // On garde le rôle d'un statut proposal.status=SENT pour distinguer
+    // "générée" vs "vraiment envoyée au client" (l'utilisateur clique
+    // ensuite sur "Marquer envoyée").
+    if (application.status === "PRESENTED" || application.status === "SHORTLISTED"
+        || application.status === "INTERVIEW_SCHEDULED" || application.status === "INTERVIEWED") {
+      await tx.missionApplication.update({
+        where: { id: application.id },
+        data: { status: "OFFER_SENT" }
+      });
     }
+    return p;
   });
 
-  revalidatePath(`/mission-requests/${data.missionRequestId}`);
-  revalidatePath(`/proposals`);
+  revalidatePath(`/mission-requests/${application.missionRequestId}`);
   return { ok: true, id: proposal.id, reference: proposal.reference };
 }
 
-const UpdateSchema = CreateSchema.omit({ missionRequestId: true });
+const UpdateSchema = CreateSchema.omit({ applicationId: true });
 
 export async function updateMissionProposal(id: string, formData: FormData) {
   await requirePermission("consulting.write");
   const existing = await prisma.missionProposal.findUniqueOrThrow({ where: { id } });
-  // On refuse l'édition après acceptation client (invariant métier :
-  // le PDF envoyé doit refléter les termes acceptés). Le refus ou
-  // l'annulation autorisent l'édition (correction avant renvoi).
   if (existing.status === "ACCEPTED") {
     throw new Error("Cette proposition est acceptée, elle n'est plus modifiable");
   }
@@ -129,7 +143,6 @@ export async function updateMissionProposal(id: string, formData: FormData) {
   await prisma.missionProposal.update({
     where: { id },
     data: {
-      candidateId: data.candidateId,
       startDate: start, endDate: end,
       workDaysPerWeek: data.workDaysPerWeek,
       includeHolidays: data.includeHolidays,
@@ -141,30 +154,38 @@ export async function updateMissionProposal(id: string, formData: FormData) {
   await recomputeTotals(id);
 
   revalidatePath(`/mission-requests/${existing.missionRequestId}`);
-  revalidatePath(`/proposals/${id}`);
   return { ok: true };
 }
 
 export async function deleteMissionProposal(id: string) {
   await requirePermission("consulting.write");
   const p = await prisma.missionProposal.findUniqueOrThrow({
-    where: { id }, select: { id: true, status: true, missionRequestId: true }
+    where: { id },
+    select: { id: true, status: true, missionRequestId: true, applicationId: true }
   });
-  // Belgian legal / prudence : si la proposition a été envoyée ou décidée,
-  // on préfère la marquer CANCELLED plutôt que la supprimer sec (garde une
-  // trace commerciale).
   if (p.status === "SENT" || p.status === "ACCEPTED" || p.status === "REJECTED") {
     throw new Error(
-      "Une proposition envoyée ou décidée ne peut pas être supprimée. " +
-      "Passe-la en CANCELLED ou crée une nouvelle version."
+      "Une proposition envoyée ou décidée ne peut pas être supprimée. Passe-la en CANCELLED."
     );
   }
-  await prisma.missionProposal.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.missionProposal.delete({ where: { id } });
+    // On retombe l'application en PRESENTED puisqu'il n'y a plus d'offre en cours.
+    await tx.missionApplication.update({
+      where: { id: p.applicationId },
+      data: { status: "PRESENTED" }
+    });
+  });
   revalidatePath(`/mission-requests/${p.missionRequestId}`);
-  revalidatePath(`/proposals`);
   return { ok: true };
 }
 
+/**
+ * Change de statut. Sur SENT : marque sentAt. Sur ACCEPTED/REJECTED :
+ * marque decidedAt. L'acceptation ne crée pas la Mission — c'est le
+ * changement de statut de l'APPLICATION → SELECTED qui déclenche la
+ * création de mission (via applications.ts).
+ */
 export async function setMissionProposalStatus(
   id: string,
   status: "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "CANCELLED",
@@ -172,10 +193,9 @@ export async function setMissionProposalStatus(
 ) {
   await requirePermission("consulting.write");
   const p = await prisma.missionProposal.findUniqueOrThrow({
-    where: { id }, select: { id: true, status: true, missionRequestId: true }
+    where: { id }, select: { id: true, missionRequestId: true }
   });
   const data: any = { status };
-  if (status === "SENT" && !p.status) data.sentAt = new Date();
   if (status === "SENT") data.sentAt = new Date();
   if (status === "ACCEPTED" || status === "REJECTED") {
     data.decidedAt = new Date();
@@ -183,13 +203,11 @@ export async function setMissionProposalStatus(
   }
   await prisma.missionProposal.update({ where: { id }, data });
   revalidatePath(`/mission-requests/${p.missionRequestId}`);
-  revalidatePath(`/proposals/${id}`);
   return { ok: true };
 }
 
 /**
- * Endpoint utilitaire pour l'UI : preview des jours ouvrés + budget
- * sans persister, utilisé pendant la saisie du formulaire.
+ * Preview live des totaux dans le formulaire de création. Non-persistant.
  */
 export async function previewProposalTotals(input: {
   startDate: string; endDate: string;

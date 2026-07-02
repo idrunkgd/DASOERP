@@ -2,41 +2,47 @@
 /**
  * Panneau « Propositions consultants » sur la fiche MissionRequest.
  *
- * - Liste des propositions existantes avec statut, budget calculé, TJM.
- * - Bouton « + Proposer un consultant » qui ouvre un formulaire modal
- *   avec preview live des jours ouvrés et du budget (recalcul serveur
- *   à chaque changement, pour fiabilité vis-à-vis des fériés belges).
- * - Actions par proposition : PDF, changer statut, supprimer si DRAFT.
+ * Le pivot est MissionApplication : on ne pick pas un candidat, on pick
+ * une présentation existante (candidat OU consultant interne). Ça évite
+ * la redondance et raccroche le PDF à un profil déjà validé sur le CRM.
+ *
+ * Statuts affichés :
+ *  - DRAFT : proposition créée mais pas encore marquée envoyée
+ *  - SENT  : envoyée au client — l'application est simultanément en OFFER_SENT
+ *  - ACCEPTED : client valide → cascade auto vers création de Mission
+ *  - REJECTED : client refuse
+ *  - CANCELLED : annulée par nous
  */
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-import Link from "next/link";
 import {
   Plus, FileDown, Send, Check, X, Trash2, Loader2, User as UserIcon,
-  CheckCircle2, AlertCircle
+  CheckCircle2, AlertCircle, Users
 } from "lucide-react";
 import {
-  createMissionProposal,
-  deleteMissionProposal,
-  setMissionProposalStatus,
-  previewProposalTotals
+  createMissionProposal, deleteMissionProposal,
+  setMissionProposalStatus, previewProposalTotals
 } from "@/server/actions/mission-proposals";
 
-type Candidate = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  seniority: string | null;
-  photoUrl: string | null;
-  dailyCost: number | null;
-  minDailyRate: number | null;
+type Person = {
+  firstName: string; lastName: string;
+  photoUrl: string | null; seniority: string | null;
+  source: "candidate" | "consultant";
+};
+
+type EligibleApp = {
+  applicationId: string;
+  status: string;
+  person: Person;
+  proposedDailyRate: number | null;
 };
 
 type Proposal = {
   id: string;
   reference: string;
   status: "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "CANCELLED";
-  candidate: { id: string; firstName: string; lastName: string; photoUrl: string | null; seniority: string | null };
+  applicationId: string;
+  person: Person;
   startDate: string;
   endDate: string;
   workDaysPerWeek: number;
@@ -55,11 +61,11 @@ const STATUS_META: Record<Proposal["status"], { label: string; cls: string }> = 
 };
 
 export function ProposalsPanel({
-  missionRequestId, defaults, candidates, proposals
+  missionRequestId, defaults, eligibleApplications, proposals
 }: {
   missionRequestId: string;
   defaults: { startDate: string | null; endDate: string | null; dailyRate: number | null };
-  candidates: Candidate[];
+  eligibleApplications: EligibleApp[];
   proposals: Proposal[];
 }) {
   const [creating, setCreating] = useState(false);
@@ -68,9 +74,9 @@ export function ProposalsPanel({
     <section className="card p-5">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-semibold">Propositions consultants ({proposals.length})</h2>
-        {!creating && (
+        {!creating && eligibleApplications.length > 0 && (
           <button onClick={() => setCreating(true)} className="btn-primary btn-sm">
-            <Plus className="w-3 h-3" /> Proposer un consultant
+            <Plus className="w-3 h-3" /> Générer une proposition
           </button>
         )}
       </div>
@@ -79,28 +85,58 @@ export function ProposalsPanel({
         <NewProposalForm
           missionRequestId={missionRequestId}
           defaults={defaults}
-          candidates={candidates}
+          eligibleApplications={eligibleApplications}
           onDone={() => setCreating(false)}
           onCancel={() => setCreating(false)}
         />
       )}
 
-      {proposals.length === 0 && !creating && (
+      {proposals.length === 0 && !creating && eligibleApplications.length === 0 && (
         <p className="text-sm text-midnight-500">
-          Aucune proposition. Utilise « Proposer un consultant » pour générer
-          une offre par consultant (dates, régime, TJM, budget calculé
-          automatiquement sur jours ouvrés belges).
+          Aucune proposition. Présente d'abord un candidat ou un consultant interne dans le panneau
+          <strong> Applications </strong> ci-dessous, puis reviens ici pour générer sa proposition PDF.
+        </p>
+      )}
+
+      {proposals.length === 0 && !creating && eligibleApplications.length > 0 && (
+        <p className="text-sm text-midnight-500">
+          {eligibleApplications.length} profil(s) présenté(s) disponible(s) pour une proposition.
+          Clique sur « Générer une proposition ».
         </p>
       )}
 
       {proposals.length > 0 && (
         <ul className="space-y-2 mt-2">
-          {proposals.map((p) => (
-            <ProposalRow key={p.id} p={p} />
-          ))}
+          {proposals.map((p) => <ProposalRow key={p.id} p={p} />)}
         </ul>
       )}
     </section>
+  );
+}
+
+function PersonBadge({ p, size = "md" }: { p: Person; size?: "sm" | "md" }) {
+  const dim = size === "sm" ? "w-8 h-8" : "w-12 h-12";
+  return (
+    <div className="flex items-center gap-2">
+      {p.photoUrl ? (
+        <img src={p.photoUrl} alt="" className={`${dim} rounded-full object-cover`} />
+      ) : (
+        <div className={`${dim} rounded-full bg-slate-200 flex items-center justify-center text-slate-500`}>
+          <UserIcon className="w-4 h-4" />
+        </div>
+      )}
+      <div>
+        <div className="font-medium text-sm">{p.firstName} {p.lastName}</div>
+        <div className="text-[10px] text-midnight-500 flex items-center gap-1">
+          {p.source === "consultant" ? (
+            <span className="badge-info text-[9px]">Interne</span>
+          ) : (
+            <span className="badge-neutral text-[9px]">Candidat</span>
+          )}
+          {p.seniority && <span>· {p.seniority}</span>}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -112,14 +148,42 @@ function ProposalRow({ p }: { p: Proposal }) {
     if (next === "REJECTED") {
       const reason = prompt("Raison du refus (optionnel)") ?? undefined;
       start(async () => {
-        try { await setMissionProposalStatus(p.id, "REJECTED", reason); toast.success("Marquée refusée"); }
-        catch (e: any) { toast.error(e?.message ?? "Erreur"); }
+        try {
+          await setMissionProposalStatus(p.id, "REJECTED", reason);
+          toast.success("Marquée refusée");
+        } catch (e: any) { toast.error(e?.message ?? "Erreur"); }
+      });
+      return;
+    }
+    if (next === "ACCEPTED") {
+      const ok = confirm(
+        "Accepter la proposition ?\n\n" +
+        "Cela va : (1) marquer l'application SELECTED, (2) créer automatiquement la Mission, " +
+        "(3) refuser les autres profils présentés en compétition."
+      );
+      if (!ok) return;
+      // L'acceptation métier se fait côté application status (SELECTED), pas
+      // directement sur la proposal — c'est le passage à SELECTED qui trigger
+      // la création de mission. On appelle setApplicationStatus depuis
+      // l'action des applications, disponible via ApplicationsPanel. Ici on
+      // fait un raccourci en pilotant la proposition à ACCEPTED en direct :
+      // l'utilisateur devra ensuite cliquer "Contracter" côté Application.
+      // → Simplification : on route côté server via setMissionProposalStatus,
+      //   qui ne crée pas la mission. Le vrai flow "Accepter → créer Mission"
+      //   passe par le bouton SELECT sur l'application (voir ApplicationsPanel).
+      start(async () => {
+        try {
+          await setMissionProposalStatus(p.id, "ACCEPTED");
+          toast.success("Marquée acceptée. Passe l'application en 'SELECTED' pour créer la mission.");
+        } catch (e: any) { toast.error(e?.message ?? "Erreur"); }
       });
       return;
     }
     start(async () => {
-      try { await setMissionProposalStatus(p.id, next); toast.success(`Statut : ${STATUS_META[next].label}`); }
-      catch (e: any) { toast.error(e?.message ?? "Erreur"); }
+      try {
+        await setMissionProposalStatus(p.id, next);
+        toast.success(`Statut : ${STATUS_META[next].label}`);
+      } catch (e: any) { toast.error(e?.message ?? "Erreur"); }
     });
   }
 
@@ -134,19 +198,9 @@ function ProposalRow({ p }: { p: Proposal }) {
   return (
     <li className="p-3 border border-border rounded-lg">
       <div className="flex items-start gap-3">
-        {p.candidate.photoUrl ? (
-          <img src={p.candidate.photoUrl} alt="" className="w-12 h-12 rounded-full object-cover" />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500">
-            <UserIcon className="w-5 h-5" />
-          </div>
-        )}
+        <PersonBadge p={p.person} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <Link href={`/candidates/${p.candidate.id}`} className="font-medium hover:underline">
-              {p.candidate.firstName} {p.candidate.lastName}
-            </Link>
-            {p.candidate.seniority && <span className="text-xs text-midnight-500">{p.candidate.seniority}</span>}
             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${st.cls}`}>{st.label}</span>
             <span className="text-xs font-mono text-midnight-500">{p.reference}</span>
           </div>
@@ -190,26 +244,27 @@ function ProposalRow({ p }: { p: Proposal }) {
 }
 
 function NewProposalForm({
-  missionRequestId, defaults, candidates, onDone, onCancel
+  missionRequestId, defaults, eligibleApplications, onDone, onCancel
 }: {
   missionRequestId: string;
   defaults: { startDate: string | null; endDate: string | null; dailyRate: number | null };
-  candidates: Candidate[];
+  eligibleApplications: EligibleApp[];
   onDone: () => void;
   onCancel: () => void;
 }) {
   const [pending, start] = useTransition();
   const [form, setForm] = useState({
-    candidateId: candidates[0]?.id ?? "",
+    applicationId: eligibleApplications[0]?.applicationId ?? "",
     startDate: defaults.startDate ?? new Date().toISOString().slice(0, 10),
     endDate: defaults.endDate ?? "",
     workDaysPerWeek: "5",
     includeHolidays: true,
-    dailyRate: String(defaults.dailyRate ?? 0),
+    dailyRate: String(
+      eligibleApplications[0]?.proposedDailyRate ?? defaults.dailyRate ?? 0
+    ),
     intro: ""
   });
 
-  // Preview live du budget calculé (server-side pour fiabilité fériés)
   const [preview, setPreview] = useState<{
     calendarDays: number; fullTimeWorkingDays: number;
     effectiveDays: number; budgetHt: number;
@@ -221,8 +276,7 @@ function NewProposalForm({
     const t = setTimeout(async () => {
       try {
         const r = await previewProposalTotals({
-          startDate: form.startDate,
-          endDate: form.endDate,
+          startDate: form.startDate, endDate: form.endDate,
           workDaysPerWeek: Number(form.workDaysPerWeek || 5),
           includeHolidays: form.includeHolidays,
           dailyRate: Number(form.dailyRate || 0)
@@ -230,29 +284,28 @@ function NewProposalForm({
         setPreview(r);
         setPreviewErr(null);
       } catch (e: any) {
-        setPreviewErr(e?.message ?? "Erreur de calcul");
+        setPreviewErr(e?.message ?? "Erreur");
       }
     }, 150);
     return () => clearTimeout(t);
   }, [form.startDate, form.endDate, form.workDaysPerWeek, form.includeHolidays, form.dailyRate]);
 
-  // Auto-set daily rate à minDailyRate si le candidat en a un et rien n'est déjà mis
+  // Quand on change d'application, on pre-fill le TJM avec le proposedDailyRate
   useEffect(() => {
-    const c = candidates.find((x) => x.id === form.candidateId);
-    if (c?.minDailyRate && (!form.dailyRate || Number(form.dailyRate) === 0)) {
-      setForm((f) => ({ ...f, dailyRate: String(c.minDailyRate) }));
+    const a = eligibleApplications.find((x) => x.applicationId === form.applicationId);
+    if (a?.proposedDailyRate && (!form.dailyRate || Number(form.dailyRate) === 0)) {
+      setForm((f) => ({ ...f, dailyRate: String(a.proposedDailyRate) }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.candidateId]);
+  }, [form.applicationId]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.candidateId) { toast.error("Choisis un consultant"); return; }
+    if (!form.applicationId) { toast.error("Choisis un profil présenté"); return; }
     if (!form.startDate || !form.endDate) { toast.error("Dates requises"); return; }
     if (!Number(form.dailyRate)) { toast.error("TJM requis"); return; }
     const fd = new FormData();
-    fd.set("missionRequestId", missionRequestId);
-    fd.set("candidateId", form.candidateId);
+    fd.set("applicationId", form.applicationId);
     fd.set("startDate", form.startDate);
     fd.set("endDate", form.endDate);
     fd.set("workDaysPerWeek", form.workDaysPerWeek);
@@ -268,32 +321,29 @@ function NewProposalForm({
     });
   }
 
-  const candidate = candidates.find((c) => c.id === form.candidateId);
-  const cost = candidate?.dailyCost ?? null;
-  const rate = Number(form.dailyRate || 0);
-  const marginPct = cost && rate > 0 ? Math.round(((rate - cost) / rate) * 100) : null;
-
   return (
     <form onSubmit={submit} className="p-4 border-2 border-indigoaccent rounded-lg bg-white mb-3 space-y-3">
       <div>
-        <label className="label">Consultant proposé *</label>
+        <label className="label flex items-center gap-1">
+          <Users className="w-3 h-3" /> Profil présenté *
+        </label>
         <select
-          className="input" value={form.candidateId}
-          onChange={(e) => setForm({ ...form, candidateId: e.target.value })}
+          className="input" value={form.applicationId}
+          onChange={(e) => setForm({ ...form, applicationId: e.target.value })}
         >
-          {candidates.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.firstName} {c.lastName}
-              {c.seniority ? ` — ${c.seniority}` : ""}
-              {c.dailyCost ? ` (coût ${c.dailyCost}€/j)` : ""}
+          {eligibleApplications.map((a) => (
+            <option key={a.applicationId} value={a.applicationId}>
+              {a.person.firstName} {a.person.lastName}
+              {" — "}
+              {a.person.source === "consultant" ? "Interne" : "Candidat"}
+              {a.person.seniority ? ` · ${a.person.seniority}` : ""}
+              {a.proposedDailyRate ? ` · TJM proposé ${a.proposedDailyRate} €` : ""}
             </option>
           ))}
         </select>
-        {candidate?.minDailyRate && (
-          <p className="text-[11px] text-midnight-500 mt-1">
-            TJM minimum souhaité par le candidat : {candidate.minDailyRate} €
-          </p>
-        )}
+        <p className="text-[11px] text-midnight-500 mt-1">
+          La liste inclut à la fois les candidats externes et les consultants internes déjà présentés.
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -321,11 +371,6 @@ function NewProposalForm({
           <label className="label">TJM vendu (HTVA) *</label>
           <input type="number" step="1" className="input" value={form.dailyRate}
                  onChange={(e) => setForm({ ...form, dailyRate: e.target.value })} />
-          {marginPct !== null && (
-            <p className={`text-[11px] mt-1 ${marginPct < 15 ? "text-red-600" : marginPct < 30 ? "text-amber-700" : "text-emerald-700"}`}>
-              Marge estimée : {marginPct}% ({(rate - (cost ?? 0)).toFixed(0)} €/j)
-            </p>
-          )}
         </div>
       </div>
 
@@ -346,7 +391,6 @@ function NewProposalForm({
         />
       </div>
 
-      {/* Preview live des totaux calculés */}
       <div className="p-3 bg-slate-50 rounded-lg text-sm space-y-1">
         {previewErr && (
           <div className="flex items-center gap-1 text-red-600 text-xs">

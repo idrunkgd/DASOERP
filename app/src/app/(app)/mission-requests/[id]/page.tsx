@@ -28,11 +28,18 @@ export default async function MissionDetail({ params }: { params: { id: string }
         orderBy: { presentedAt: "desc" }
       },
       executedMissions: { select: { id: true, reference: true, status: true, dailyRate: true, startDate: true, endDate: true } },
-      /// Propositions consultants générées depuis cette demande.
-      /// On les affiche dans un panneau dédié pour tout ce qui touche PDF
-      /// consultant, TJM, budget calculé, etc.
+      /// Propositions consultants générées depuis cette demande. Le pivot
+      /// est MissionApplication : chaque proposition est rattachée au
+      /// profil présenté (candidat ou consultant interne).
       proposals: {
-        include: { candidate: { select: { id: true, firstName: true, lastName: true, photoUrl: true, seniority: true } } },
+        include: {
+          application: {
+            include: {
+              candidate: { select: { id: true, firstName: true, lastName: true, photoUrl: true, seniority: true } },
+              consultant: { select: { id: true, firstName: true, lastName: true, photoUrl: true, seniority: true } }
+            }
+          }
+        },
         orderBy: { createdAt: "desc" }
       }
     }
@@ -78,23 +85,51 @@ export default async function MissionDetail({ params }: { params: { id: string }
               endDate:   m.endDate   ? m.endDate.toISOString().slice(0, 10)   : null,
               dailyRate: m.targetDailyRate ? Number(m.targetDailyRate) : null
             }}
-            candidates={candidates.map((c) => ({
-              id: c.id, firstName: c.firstName, lastName: c.lastName,
-              seniority: c.seniority, photoUrl: c.photoUrl,
-              dailyCost: c.dailyCost ? Number(c.dailyCost) : null,
-              minDailyRate: c.minDailyRate ? Number(c.minDailyRate) : null
-            }))}
-            proposals={m.proposals.map((p) => ({
-              id: p.id, reference: p.reference, status: p.status,
-              candidate: p.candidate,
-              startDate: p.startDate.toISOString().slice(0, 10),
-              endDate: p.endDate.toISOString().slice(0, 10),
-              workDaysPerWeek: Number(p.workDaysPerWeek),
-              dailyRate: Number(p.dailyRate),
-              computedDays: Number(p.computedDays),
-              computedBudgetHt: Number(p.computedBudgetHt),
-              sentAt: p.sentAt?.toISOString() ?? null
-            }))}
+            /* Applications sans proposition : proposables à la génération.
+               Format normalisé : person = candidat OU consultant interne. */
+            eligibleApplications={m.applications
+              .filter((a) => !a.status.startsWith("OFFER") && a.status !== "SELECTED" && a.status !== "REJECTED" && a.status !== "WITHDRAWN")
+              .map((a) => {
+                const person = a.consultantId && a.consultant
+                  ? { firstName: a.consultant.firstName, lastName: a.consultant.lastName,
+                      seniority: a.consultant.seniority, photoUrl: a.consultant.photoUrl,
+                      source: "consultant" as const }
+                  : a.candidate
+                    ? { firstName: a.candidate.firstName, lastName: a.candidate.lastName,
+                        seniority: a.candidate.seniority, photoUrl: a.candidate.photoUrl,
+                        source: "candidate" as const }
+                    : { firstName: "?", lastName: "", seniority: null, photoUrl: null, source: "candidate" as const };
+                return {
+                  applicationId: a.id,
+                  status: a.status,
+                  person,
+                  proposedDailyRate: a.proposedDailyRate ? Number(a.proposedDailyRate) : null
+                };
+              })}
+            proposals={m.proposals.map((p) => {
+              const app = p.application;
+              const person = app.consultant
+                ? { firstName: app.consultant.firstName, lastName: app.consultant.lastName,
+                    photoUrl: app.consultant.photoUrl, seniority: app.consultant.seniority,
+                    source: "consultant" as const }
+                : app.candidate
+                  ? { firstName: app.candidate.firstName, lastName: app.candidate.lastName,
+                      photoUrl: app.candidate.photoUrl, seniority: app.candidate.seniority,
+                      source: "candidate" as const }
+                  : { firstName: "?", lastName: "", photoUrl: null, seniority: null, source: "candidate" as const };
+              return {
+                id: p.id, reference: p.reference, status: p.status,
+                applicationId: p.applicationId,
+                person,
+                startDate: p.startDate.toISOString().slice(0, 10),
+                endDate: p.endDate.toISOString().slice(0, 10),
+                workDaysPerWeek: Number(p.workDaysPerWeek),
+                dailyRate: Number(p.dailyRate),
+                computedDays: Number(p.computedDays),
+                computedBudgetHt: Number(p.computedBudgetHt),
+                sentAt: p.sentAt?.toISOString() ?? null
+              };
+            })}
           />
           <ApplicationsPanel
             missionId={m.id}

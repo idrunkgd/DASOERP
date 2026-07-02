@@ -70,15 +70,57 @@ export async function presentCandidate(missionId: string, formData: FormData) {
 
 export async function setApplicationStatus(applicationId: string, newStatus: ApplicationStatus, rejectedReason?: string | null) {
   const session = await requirePermission("consulting.write");
-  // SELECTED nécessite la modale de contractualisation (dates + tarifs) — on bloque ici
-  // pour éviter qu'un SELECTED arrive sans Mission créée.
-  if (newStatus === "SELECTED") {
-    throw new Error("Pour sélectionner un profil, utilisez le bouton 'Contracter & créer la mission' qui demandera les dates et tarifs.");
-  }
   const before = await prisma.missionApplication.findUniqueOrThrow({
     where: { id: applicationId },
-    include: { candidate: true, consultant: true, missionRequest: true }
+    include: { candidate: true, consultant: true, missionRequest: true, proposal: true, mission: true }
   });
+  // SELECTED :
+  //  - Si la présentation a déjà une proposition (offre PDF envoyée), on peut
+  //    passer directement à SELECTED : la Mission est créée automatiquement
+  //    depuis les termes de la proposition (dates, TJM). C'est le flow
+  //    demandé par le PO : "quand on passe en accepté, on crée la mission".
+  //  - Sinon on garde l'ancien comportement : forcer la modale de
+  //    contractualisation manuelle (bouton "Contracter & créer la mission").
+  if (newStatus === "SELECTED") {
+    if (before.mission) {
+      throw new Error("Cette présentation a déjà une mission contractualisée.");
+    }
+    if (before.proposal) {
+      // Le service convertApplicationToMission utilise les dates + TJM de
+      // la proposition (via app.proposal) — pas besoin de re-passer les
+      // overrides ici. On marque juste l'application SELECTED d'abord,
+      // puis on crée la Mission, puis on marque la proposition ACCEPTED.
+      await prisma.$transaction([
+        prisma.missionApplication.update({
+          where: { id: applicationId },
+          data: {
+            status: "SELECTED", decisionAt: new Date(),
+            // Snapshot du TJM sur l'application pour cohérence historique
+            proposedDailyRate: before.proposal.dailyRate
+          }
+        }),
+        prisma.missionProposal.update({
+          where: { id: before.proposal.id },
+          data: { status: "ACCEPTED", decidedAt: new Date() }
+        })
+      ]);
+      const { convertApplicationToMission } = await import("@/server/services/mission-service");
+      const mission = await convertApplicationToMission({
+        actorId: session.user.id,
+        applicationId
+      });
+      await logActivity({
+        actorId: session.user.id, action: "STATUS_CHANGE", entityType: "MissionApplication", entityId: applicationId,
+        message: `${before.candidate ? `${before.candidate.firstName} ${before.candidate.lastName}` : before.consultant ? `${before.consultant.firstName} ${before.consultant.lastName} (interne)` : "?"} → OFFRE ACCEPTÉE, Mission ${mission.reference} créée`
+      });
+      revalidatePath(`/mission-requests/${before.missionRequestId}`);
+      revalidatePath(`/missions/${mission.id}`);
+      return;
+    }
+    throw new Error(
+      "Pour sélectionner ce profil, génère d'abord une proposition PDF (dates, TJM) — le client peut ensuite l'accepter et la mission sera créée automatiquement."
+    );
+  }
   const subjectName = before.candidate
     ? `${before.candidate.firstName} ${before.candidate.lastName}`
     : before.consultant
