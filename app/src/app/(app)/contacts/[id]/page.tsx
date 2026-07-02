@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ContactForm } from "../contact-form";
+import { ContactCompaniesSection } from "./contact-companies-section";
 import { addInteraction, deleteContact } from "@/server/actions/contacts";
 import { ConfirmButton } from "@/components/ui/confirm";
 import { formatDate } from "@/lib/utils";
@@ -13,7 +14,17 @@ export default async function ContactDetail({ params }: { params: { id: string }
   await requirePermission("contacts.read");
   const contact = await prisma.contact.findUnique({
     where: { id: params.id },
-    include: { company: true, interactions: { orderBy: { occurredAt: "desc" }, include: { user: true } } }
+    include: {
+      company: true,
+      interactions: { orderBy: { occurredAt: "desc" }, include: { user: true } },
+      // Toutes les sociétés rattachées (relation N:N). Le lien isPrimary
+      // correspond à contact.companyId (rétro-compat), on trie principale
+      // en premier puis par ancienneté.
+      companyLinks: {
+        include: { company: { select: { id: true, name: true, city: true } } },
+        orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }]
+      }
+    }
   });
   if (!contact) notFound();
   const companies = await prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
@@ -36,6 +47,19 @@ export default async function ContactDetail({ params }: { params: { id: string }
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ContactForm initial={contact as any} companies={companies} />
+
+          <ContactCompaniesSection
+            contactId={contact.id}
+            links={contact.companyLinks.map((l) => ({
+              companyId: l.companyId,
+              companyName: l.company.name,
+              companyCity: l.company.city,
+              jobTitle: l.jobTitle,
+              notes: l.notes,
+              isPrimary: l.isPrimary
+            }))}
+            availableCompanies={companies}
+          />
 
           <section className="card p-5">
             <h2 className="font-semibold mb-3">Timeline d'interactions</h2>
@@ -71,7 +95,19 @@ export default async function ContactDetail({ params }: { params: { id: string }
         <aside className="space-y-4">
           <div className="card p-5 space-y-2 text-sm">
             <h3 className="font-semibold mb-2">Coordonnées</h3>
-            <div><span className="text-midnight-500">Entreprise : </span>{contact.company ? <Link href={`/companies/${contact.company.id}`} className="text-indigoaccent hover:underline">{contact.company.name}</Link> : "—"}</div>
+            <div>
+              <span className="text-midnight-500">Société principale : </span>
+              {contact.company ? (
+                <Link href={`/companies/${contact.company.id}`} className="text-indigoaccent hover:underline">
+                  {contact.company.name}
+                </Link>
+              ) : "—"}
+              {contact.companyLinks.length > 1 && (
+                <span className="text-midnight-500 text-xs ml-1">
+                  (+{contact.companyLinks.length - 1} autre{contact.companyLinks.length > 2 ? "s" : ""})
+                </span>
+              )}
+            </div>
             <div><span className="text-midnight-500">Email : </span>{contact.email ?? "—"}</div>
             <div><span className="text-midnight-500">Téléphone : </span>{contact.phone ?? "—"}</div>
             <div><span className="text-midnight-500">Tags : </span>{contact.tags.length ? contact.tags.map(t => <span key={t} className="badge-neutral mr-1">{t}</span>) : "—"}</div>

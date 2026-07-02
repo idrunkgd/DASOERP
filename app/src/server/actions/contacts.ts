@@ -22,6 +22,16 @@ export async function createContact(formData: FormData) {
   const session = await requirePermission("contacts.write");
   const data = Schema.parse(Object.fromEntries(formData));
   const c = await prisma.contact.create({ data: { ...data, ownerId: session.user.id } });
+  // Si le contact est créé avec une société : on initialise aussi le lien
+  // ContactCompany (marqué principal) pour rester cohérent avec la relation N:N.
+  if (data.companyId) {
+    await prisma.contactCompany.create({
+      data: {
+        contactId: c.id, companyId: data.companyId,
+        jobTitle: data.jobTitle ?? null, isPrimary: true
+      }
+    });
+  }
   await logActivity({ actorId: session.user.id, action: "CREATE", entityType: "Contact", entityId: c.id, message: `Contact ${c.firstName} ${c.lastName} créé` });
   revalidatePath("/contacts");
   redirect(`/contacts/${c.id}`);
@@ -31,7 +41,31 @@ export async function updateContact(id: string, formData: FormData) {
   const session = await requirePermission("contacts.write");
   const before = await prisma.contact.findUniqueOrThrow({ where: { id } });
   const data = Schema.parse(Object.fromEntries(formData));
-  const after = await prisma.contact.update({ where: { id }, data });
+  const after = await prisma.$transaction(async (tx) => {
+    const updated = await tx.contact.update({ where: { id }, data });
+    // Sync du lien principal ContactCompany avec le nouveau companyId :
+    //  - si companyId change (ou passe à non-null), on démote les autres
+    //    principaux et on marque celui-ci principal (upsert).
+    //  - si companyId passe à NULL, on démote tous les principaux (les
+    //    liens secondaires restent inchangés).
+    if (before.companyId !== data.companyId) {
+      await tx.contactCompany.updateMany({
+        where: { contactId: id, isPrimary: true },
+        data: { isPrimary: false }
+      });
+      if (data.companyId) {
+        await tx.contactCompany.upsert({
+          where: { contactId_companyId: { contactId: id, companyId: data.companyId } },
+          create: {
+            contactId: id, companyId: data.companyId,
+            jobTitle: data.jobTitle ?? null, isPrimary: true
+          },
+          update: { isPrimary: true }
+        });
+      }
+    }
+    return updated;
+  });
   await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "Contact", entityId: id, message: `Contact mis à jour`, before, after });
   revalidatePath(`/contacts/${id}`);
   revalidatePath("/contacts");

@@ -14,7 +14,18 @@ export default async function CompanyDetail({ params }: { params: { id: string }
   const company = await prisma.company.findUnique({
     where: { id: params.id },
     include: {
-      contacts: true,
+      // On lit les contacts via la relation N:N ContactCompany : ça inclut
+      // à la fois les contacts dont c'est la société principale ET ceux
+      // qui y sont rattachés à titre secondaire (ex. Jean travaille chez
+      // deux boîtes). Chaque lien porte son propre rôle (jobTitle).
+      contactLinks: {
+        include: {
+          contact: {
+            select: { id: true, firstName: true, lastName: true, email: true, phone: true, jobTitle: true }
+          }
+        },
+        orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }]
+      },
       offers: { orderBy: { createdAt: "desc" } },
       projects: { orderBy: { createdAt: "desc" } },
       owner: true
@@ -46,23 +57,50 @@ export default async function CompanyDetail({ params }: { params: { id: string }
 
           <section className="card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold">Contacts ({company.contacts.length})</h2>
+              <h2 className="font-semibold">Contacts ({company.contactLinks.length})</h2>
               <Link href={`/contacts/new?companyId=${company.id}`} className="btn-secondary btn-sm">+ Contact</Link>
             </div>
-            {company.contacts.length === 0 ? (
+            {company.contactLinks.length === 0 ? (
               <p className="text-sm text-midnight-500">Aucun contact lié.</p>
             ) : (
               <table className="table-base">
-                <thead><tr><th>Nom</th><th>Fonction</th><th>Email</th><th>Tél</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Nom</th>
+                    <th>Rôle chez {company.name}</th>
+                    <th>Email</th>
+                    <th>Tél</th>
+                    <th></th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {company.contacts.map(c => (
-                    <tr key={c.id}>
-                      <td><Link href={`/contacts/${c.id}`} className="hover:underline font-medium">{c.firstName} {c.lastName}</Link></td>
-                      <td className="text-midnight-700">{c.jobTitle ?? "—"}</td>
-                      <td className="text-midnight-700">{c.email ?? "—"}</td>
-                      <td className="text-midnight-700">{c.phone ?? "—"}</td>
-                    </tr>
-                  ))}
+                  {company.contactLinks.map((l) => {
+                    // Priorité au jobTitle spécifique au lien (rôle chez CETTE
+                    // société) ; à défaut on retombe sur Contact.jobTitle
+                    // (rôle « principal » du contact).
+                    const role = l.jobTitle ?? l.contact.jobTitle;
+                    return (
+                      <tr key={l.contact.id}>
+                        <td>
+                          <Link href={`/contacts/${l.contact.id}`} className="hover:underline font-medium">
+                            {l.contact.firstName} {l.contact.lastName}
+                          </Link>
+                        </td>
+                        <td className="text-midnight-700">{role ?? "—"}</td>
+                        <td className="text-midnight-700">{l.contact.email ?? "—"}</td>
+                        <td className="text-midnight-700">{l.contact.phone ?? "—"}</td>
+                        <td>
+                          {l.isPrimary ? (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigoaccent text-white rounded">
+                              Principal
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-midnight-500">Secondaire</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

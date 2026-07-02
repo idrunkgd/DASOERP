@@ -370,6 +370,10 @@ model Company {
   ownerId     String?
   owner       User?         @relation("CompanyOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   contacts    Contact[]
+  /// Contacts rattachés à cette société via la liaison N:N (un même
+  /// contact peut être rattaché à plusieurs sociétés). Le champ historique
+  /// Contact.companyId reste la « société principale » du contact.
+  contactLinks ContactCompany[]
   offers      Offer[]
   projects    Project[]
   purchases   Purchase[]    @relation("CompanyAsSupplier")
@@ -405,8 +409,14 @@ model Contact {
   status       ContactStatus @default(ACTIVE)
   notes        String?
   tags         String[]      @default([])
+  /// Société « principale » du contact (mise en avant sur la fiche
+  /// contact). Reste par rétro-compatibilité, mais un contact peut être
+  /// rattaché à d'autres sociétés via companyLinks.
   companyId    String?
   company      Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  /// Rattachements N:N vers d'autres sociétés avec rôle par lien.
+  /// Le lien marqué isPrimary=true correspond à companyId.
+  companyLinks ContactCompany[]
   ownerId      String?
   owner        User?         @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   interactions ContactInteraction[]
@@ -424,6 +434,33 @@ model Contact {
 
   @@index([lastName, firstName])
   @@index([companyId])
+}
+
+/// Liaison N:N entre un Contact et une Company : un contact peut être
+/// rattaché à plusieurs sociétés avec un rôle différent par entreprise.
+///
+/// Invariants applicatifs :
+///  - Le lien isPrimary=true correspond au Contact.companyId (rétro-compat).
+///  - Un seul lien isPrimary=true par contact (géré côté server actions ;
+///    Prisma ne supporte pas les unique partial indexes en déclaratif).
+///  - À la suppression d'une des deux entités, le lien est cascade-supprimé.
+model ContactCompany {
+  id        String   @id @default(cuid())
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// Rôle / fonction du contact dans CETTE société (peut différer du
+  /// Contact.jobTitle qui est le rôle « principal »).
+  jobTitle  String?
+  /// True pour la société principale (= Contact.companyId).
+  isPrimary Boolean  @default(false)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([contactId, companyId])
+  @@index([companyId])
+  @@index([contactId, isPrimary])
 }
 
 model ContactInteraction {
