@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { ProfileForm } from "./profile-form";
 import { CandidateCvForm } from "./cv-form";
 import { ExperiencesPanel } from "./experiences-panel";
+import { UserExperiencesPanel } from "./user-experiences-panel";
+import { FileDown } from "lucide-react";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
@@ -15,7 +17,11 @@ export default async function MyProfile() {
   const isAdmin = sessionPerms.includes("users.manage");
 
   const [me, groupName, skillCatalog, candidateProfile] = await Promise.all([
-    prisma.user.findUniqueOrThrow({ where: { id: session.user.id } }),
+    // Inclut les expériences pro pour l'espace "Mon CV" côté consultant interne
+    prisma.user.findUniqueOrThrow({
+      where: { id: session.user.id },
+      include: { experiences: { orderBy: { startDate: "desc" } } }
+    }),
     getUserAccessGroupName(session.user.id),
     prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
     prisma.candidate.findUnique({
@@ -34,9 +40,23 @@ export default async function MyProfile() {
           ? "Complétez votre CV — vos informations sont directement visibles par notre équipe."
           : "Vos informations personnelles et identifiants"}
         actions={
-          <a href="/me/tests" className="btn-secondary text-sm">
-            🎓 Mes tests techniques
-          </a>
+          <>
+            {/* Bouton export CV : disponible à la fois pour le portail
+                candidat et le consultant interne — les deux ont un CV.
+                Le contrôle API dirige vers la bonne source de données. */}
+            <a
+              href={isCandidatePortal
+                ? `/api/exports/cv-pdf?candidateId=${candidateProfile!.id}`
+                : `/api/exports/cv-pdf?userId=${session.user.id}`}
+              target="_blank" rel="noopener noreferrer"
+              className="btn-secondary text-sm inline-flex items-center gap-1"
+            >
+              <FileDown className="w-4 h-4" /> Exporter mon CV
+            </a>
+            <a href="/me/tests" className="btn-secondary text-sm">
+              🎓 Mes tests techniques
+            </a>
+          </>
         }
       />
 
@@ -94,7 +114,22 @@ export default async function MyProfile() {
               />
             </div>
           ) : (
-            <ProfileForm initial={me as any} skillCatalog={skillCatalog} />
+            <div className="space-y-6">
+              <ProfileForm initial={me as any} skillCatalog={skillCatalog} />
+              {/* Expériences pro du consultant interne — utilisées comme CV
+                  sur les propositions consultant PDF envoyées aux clients. */}
+              <UserExperiencesPanel
+                userId={me.id}
+                experiences={me.experiences.map((e) => ({
+                  id: e.id,
+                  companyName: e.companyName,
+                  jobTitle: e.jobTitle,
+                  startDate: e.startDate.toISOString(),
+                  endDate: e.endDate ? e.endDate.toISOString() : null,
+                  description: e.description
+                }))}
+              />
+            </div>
           )}
         </div>
       </div>

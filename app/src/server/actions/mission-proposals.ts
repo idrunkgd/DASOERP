@@ -1,16 +1,17 @@
 "use server";
 /**
  * MissionProposal : offre PDF envoyée au client pour un profil déjà
- * présenté (MissionApplication). Une proposition = pivot sur application.
+ * présenté (MissionApplication). Depuis la refonte du 2 juillet 2026 :
  *
- * Flow métier :
- *   1. Un candidat OU consultant est présenté sur la MissionRequest via
- *      une MissionApplication (statut PRESENTED).
- *   2. On génère une proposition : période + régime + TJM. L'application
- *      passe automatiquement en OFFER_SENT.
- *   3. Le client accepte → application → SELECTED → création automatique
- *      de la Mission via mission-service.
- *   4. Le client refuse → application → REJECTED.
+ *  - MissionProposal ne porte PLUS de statut. Tout l'état métier vit
+ *    sur MissionApplication.status (PRESENTED → OFFER_SENT → SELECTED / REJECTED).
+ *  - La proposition est simplement l'ARTEFACT PDF (termes figés : dates,
+ *    régime, TJM, budget). L'existence d'une proposition + application en
+ *    OFFER_SENT = "offre envoyée en attente de décision client".
+ *  - Générer la proposition met automatiquement l'application en OFFER_SENT.
+ *  - Supprimer la proposition retombe l'application en PRESENTED.
+ *  - Le passage de l'application à SELECTED (via applications.ts) déclenche
+ *    la création automatique de la Mission avec les termes de la proposition.
  */
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
@@ -59,9 +60,8 @@ const CreateSchema = z.object({
 });
 
 /**
- * Crée une proposition depuis une MissionApplication existante.
- * Marque simultanément l'application en OFFER_SENT.
- * Erreur si l'application a déjà une proposition (unique constraint).
+ * Crée la proposition + met l'application en OFFER_SENT dans une seule
+ * transaction. Refuse si l'application a déjà une proposition (unique).
  */
 export async function createMissionProposal(formData: FormData) {
   const session = await requirePermission("consulting.write");
@@ -76,9 +76,7 @@ export async function createMissionProposal(formData: FormData) {
   });
   if (!application) throw new Error("Présentation introuvable");
   if (application.proposal) {
-    throw new Error(
-      "Une proposition existe déjà pour ce profil. Modifie-la ou supprime-la avant d'en générer une nouvelle."
-    );
+    throw new Error("Une offre existe déjà pour ce profil. Supprime-la ou édite-la.");
   }
 
   const reference = await nextReference();
@@ -89,8 +87,6 @@ export async function createMissionProposal(formData: FormData) {
   });
   const budget = effectiveDays * data.dailyRate;
 
-  // Une seule transaction : création de la proposition + passage de
-  // l'application en OFFER_SENT. Si l'un échoue, rien n'est appliqué.
   const proposal = await prisma.$transaction(async (tx) => {
     const p = await tx.missionProposal.create({
       data: {
@@ -98,28 +94,24 @@ export async function createMissionProposal(formData: FormData) {
         missionRequestId: application.missionRequestId,
         applicationId: application.id,
         ownerId: session.user.id,
-        status: "DRAFT",
         startDate: start, endDate: end,
         workDaysPerWeek: data.workDaysPerWeek,
         includeHolidays: data.includeHolidays,
         dailyRate: data.dailyRate,
         computedDays: effectiveDays,
         computedBudgetHt: budget,
+        sentAt: new Date(),
         intro: data.intro,
         internalNotes: data.internalNotes
       }
     });
-    // L'application est marquée OFFER_SENT dès la génération de l'offre.
-    // On garde le rôle d'un statut proposal.status=SENT pour distinguer
-    // "générée" vs "vraiment envoyée au client" (l'utilisateur clique
-    // ensuite sur "Marquer envoyée").
-    if (application.status === "PRESENTED" || application.status === "SHORTLISTED"
-        || application.status === "INTERVIEW_SCHEDULED" || application.status === "INTERVIEWED") {
-      await tx.missionApplication.update({
-        where: { id: application.id },
-        data: { status: "OFFER_SENT" }
-      });
-    }
+    // Simultanément : l'application passe en OFFER_SENT (l'offre est
+    // considérée envoyée dès qu'elle est générée — l'utilisateur fait
+    // du "download + envoi email" ensuite).
+    await tx.missionApplication.update({
+      where: { id: application.id },
+      data: { status: "OFFER_SENT" }
+    });
     return p;
   });
 
@@ -131,9 +123,11 @@ const UpdateSchema = CreateSchema.omit({ applicationId: true });
 
 export async function updateMissionProposal(id: string, formData: FormData) {
   await requirePermission("consulting.write");
-  const existing = await prisma.missionProposal.findUniqueOrThrow({ where: { id } });
-  if (existing.status === "ACCEPTED") {
-    throw new Error("Cette proposition est acceptée, elle n'est plus modifiable");
+  const existing = await prisma.missionProposal.findUniqueOrThrow({
+    where: { id }, include: { application: { select: { status: true } } }
+  });
+  if (existing.application.status === "SELECTED") {
+    throw new Error("L'offre a été acceptée, elle n'est plus modifiable.");
   }
   const data = UpdateSchema.parse(Object.fromEntries(formData));
   const start = new Date(data.startDate);
@@ -152,56 +146,36 @@ export async function updateMissionProposal(id: string, formData: FormData) {
     }
   });
   await recomputeTotals(id);
-
   revalidatePath(`/mission-requests/${existing.missionRequestId}`);
   return { ok: true };
 }
 
+/**
+ * Supprime la proposition + repasse l'application en PRESENTED si elle
+ * était en OFFER_SENT. Permet de refaire une nouvelle offre après
+ * ajustement des termes.
+ */
 export async function deleteMissionProposal(id: string) {
   await requirePermission("consulting.write");
   const p = await prisma.missionProposal.findUniqueOrThrow({
     where: { id },
-    select: { id: true, status: true, missionRequestId: true, applicationId: true }
+    select: {
+      id: true, missionRequestId: true, applicationId: true,
+      application: { select: { status: true } }
+    }
   });
-  if (p.status === "SENT" || p.status === "ACCEPTED" || p.status === "REJECTED") {
-    throw new Error(
-      "Une proposition envoyée ou décidée ne peut pas être supprimée. Passe-la en CANCELLED."
-    );
+  if (p.application.status === "SELECTED") {
+    throw new Error("L'offre a été acceptée — impossible de la supprimer.");
   }
   await prisma.$transaction(async (tx) => {
     await tx.missionProposal.delete({ where: { id } });
-    // On retombe l'application en PRESENTED puisqu'il n'y a plus d'offre en cours.
-    await tx.missionApplication.update({
-      where: { id: p.applicationId },
-      data: { status: "PRESENTED" }
-    });
+    if (p.application.status === "OFFER_SENT") {
+      await tx.missionApplication.update({
+        where: { id: p.applicationId },
+        data: { status: "PRESENTED" }
+      });
+    }
   });
-  revalidatePath(`/mission-requests/${p.missionRequestId}`);
-  return { ok: true };
-}
-
-/**
- * Change de statut. Sur SENT : marque sentAt. Sur ACCEPTED/REJECTED :
- * marque decidedAt. L'acceptation ne crée pas la Mission — c'est le
- * changement de statut de l'APPLICATION → SELECTED qui déclenche la
- * création de mission (via applications.ts).
- */
-export async function setMissionProposalStatus(
-  id: string,
-  status: "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "CANCELLED",
-  lostReason?: string
-) {
-  await requirePermission("consulting.write");
-  const p = await prisma.missionProposal.findUniqueOrThrow({
-    where: { id }, select: { id: true, missionRequestId: true }
-  });
-  const data: any = { status };
-  if (status === "SENT") data.sentAt = new Date();
-  if (status === "ACCEPTED" || status === "REJECTED") {
-    data.decidedAt = new Date();
-    if (status === "REJECTED" && lostReason) data.lostReason = lostReason;
-  }
-  await prisma.missionProposal.update({ where: { id }, data });
   revalidatePath(`/mission-requests/${p.missionRequestId}`);
   return { ok: true };
 }

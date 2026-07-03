@@ -4,8 +4,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { MissionForm } from "../mission-form";
-import { ApplicationsPanel } from "./applications";
-import { ProposalsPanel } from "./proposals-panel";
+import { MissionPipelinePanel } from "./mission-pipeline";
 import { MissionStatusActions } from "./status-actions";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -23,25 +22,18 @@ export default async function MissionDetail({ params }: { params: { id: string }
     include: {
       company: true, contact: true, owner: true,
       intermediaryCompany: true, intermediaryContact: true,
+      // Applications avec toutes les infos utiles au pipeline unifié :
+      // profils (candidate ou consultant), entretiens (compteur), proposition
+      // et Mission créée. Tout ce dont MissionPipelinePanel a besoin en 1 query.
       applications: {
-        include: { candidate: true, consultant: true, interviews: { orderBy: { scheduledAt: "asc" } }, mission: true },
+        include: {
+          candidate: true, consultant: true, mission: true,
+          proposal: true,
+          _count: { select: { interviews: true } }
+        },
         orderBy: { presentedAt: "desc" }
       },
-      executedMissions: { select: { id: true, reference: true, status: true, dailyRate: true, startDate: true, endDate: true } },
-      /// Propositions consultants générées depuis cette demande. Le pivot
-      /// est MissionApplication : chaque proposition est rattachée au
-      /// profil présenté (candidat ou consultant interne).
-      proposals: {
-        include: {
-          application: {
-            include: {
-              candidate: { select: { id: true, firstName: true, lastName: true, photoUrl: true, seniority: true } },
-              consultant: { select: { id: true, firstName: true, lastName: true, photoUrl: true, seniority: true } }
-            }
-          }
-        },
-        orderBy: { createdAt: "desc" }
-      }
+      executedMissions: { select: { id: true, reference: true, status: true, dailyRate: true, startDate: true, endDate: true } }
     }
   });
   if (!m) notFound();
@@ -78,91 +70,61 @@ export default async function MissionDetail({ params }: { params: { id: string }
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <MissionForm initial={m as any} companies={companies} contacts={contacts} users={users} />
-          <ProposalsPanel
+          {/* Pipeline unifié : présentation + offre + décision + création
+              de mission — en une seule carte par consultant proposé. */}
+          <MissionPipelinePanel
             missionRequestId={m.id}
             defaults={{
               startDate: m.startDate ? m.startDate.toISOString().slice(0, 10) : null,
               endDate:   m.endDate   ? m.endDate.toISOString().slice(0, 10)   : null,
               dailyRate: m.targetDailyRate ? Number(m.targetDailyRate) : null
             }}
-            /* Applications sans proposition : proposables à la génération.
-               Format normalisé : person = candidat OU consultant interne. */
-            eligibleApplications={m.applications
-              .filter((a) => !a.status.startsWith("OFFER") && a.status !== "SELECTED" && a.status !== "REJECTED" && a.status !== "WITHDRAWN")
-              .map((a) => {
-                const person = a.consultantId && a.consultant
-                  ? { firstName: a.consultant.firstName, lastName: a.consultant.lastName,
-                      seniority: a.consultant.seniority, photoUrl: a.consultant.photoUrl,
-                      source: "consultant" as const }
-                  : a.candidate
-                    ? { firstName: a.candidate.firstName, lastName: a.candidate.lastName,
-                        seniority: a.candidate.seniority, photoUrl: a.candidate.photoUrl,
-                        source: "candidate" as const }
-                    : { firstName: "?", lastName: "", seniority: null, photoUrl: null, source: "candidate" as const };
-                return {
-                  applicationId: a.id,
-                  status: a.status,
-                  person,
-                  proposedDailyRate: a.proposedDailyRate ? Number(a.proposedDailyRate) : null
-                };
-              })}
-            proposals={m.proposals.map((p) => {
-              const app = p.application;
-              const person = app.consultant
-                ? { firstName: app.consultant.firstName, lastName: app.consultant.lastName,
-                    photoUrl: app.consultant.photoUrl, seniority: app.consultant.seniority,
-                    source: "consultant" as const }
-                : app.candidate
-                  ? { firstName: app.candidate.firstName, lastName: app.candidate.lastName,
-                      photoUrl: app.candidate.photoUrl, seniority: app.candidate.seniority,
-                      source: "candidate" as const }
-                  : { firstName: "?", lastName: "", photoUrl: null, seniority: null, source: "candidate" as const };
-              return {
-                id: p.id, reference: p.reference, status: p.status,
-                applicationId: p.applicationId,
-                person,
-                startDate: p.startDate.toISOString().slice(0, 10),
-                endDate: p.endDate.toISOString().slice(0, 10),
-                workDaysPerWeek: Number(p.workDaysPerWeek),
-                dailyRate: Number(p.dailyRate),
-                computedDays: Number(p.computedDays),
-                computedBudgetHt: Number(p.computedBudgetHt),
-                sentAt: p.sentAt?.toISOString() ?? null
-              };
-            })}
-          />
-          <ApplicationsPanel
-            missionId={m.id}
-            requestDefaults={{
-              startDate: m.startDate ? m.startDate.toISOString().slice(0, 10) : null,
-              endDate:   m.endDate   ? m.endDate.toISOString().slice(0, 10)   : null,
-              estimatedDays: m.estimatedDays ?? null,
-              targetDailyRate: m.targetDailyRate ? Number(m.targetDailyRate) : null,
-              workLocation: m.workLocation ?? null
-            }}
-            applications={m.applications.map(a => {
+            applications={m.applications.map((a) => {
               const isConsultant = !!a.consultantId && !!a.consultant;
               const person = isConsultant
-                ? { id: a.consultant!.id, firstName: a.consultant!.firstName, lastName: a.consultant!.lastName, seniority: a.consultant!.seniority, photoUrl: a.consultant!.photoUrl }
+                ? { id: a.consultant!.id, firstName: a.consultant!.firstName, lastName: a.consultant!.lastName,
+                    photoUrl: a.consultant!.photoUrl, seniority: a.consultant!.seniority,
+                    source: "consultant" as const }
                 : a.candidate
-                  ? { id: a.candidate.id, firstName: a.candidate.firstName, lastName: a.candidate.lastName, seniority: a.candidate.seniority, photoUrl: a.candidate.photoUrl }
-                  : { id: "", firstName: "?", lastName: "", seniority: null, photoUrl: null };
+                  ? { id: a.candidate.id, firstName: a.candidate.firstName, lastName: a.candidate.lastName,
+                      photoUrl: a.candidate.photoUrl, seniority: a.candidate.seniority,
+                      source: "candidate" as const }
+                  : { id: "", firstName: "?", lastName: "", photoUrl: null, seniority: null, source: "candidate" as const };
               return {
-                id: a.id, status: a.status,
-                source: isConsultant ? "consultant" : "candidate",
+                id: a.id,
+                status: a.status as any,
                 person,
                 proposedDailyRate: a.proposedDailyRate ? Number(a.proposedDailyRate) : null,
                 dailyCost: a.dailyCost ? Number(a.dailyCost) : null,
                 presentedAt: a.presentedAt.toISOString(),
                 decisionAt: a.decisionAt?.toISOString() ?? null,
                 rejectedReason: a.rejectedReason,
-                notes: a.notes,
+                interviewCount: a._count.interviews,
                 missionId: a.mission?.id ?? null,
-                interviews: a.interviews.map(i => ({ id: i.id, scheduledAt: i.scheduledAt.toISOString(), kind: i.kind, interviewers: i.interviewers, outcome: i.outcome, feedback: i.feedback }))
+                missionReference: a.mission?.reference ?? null,
+                proposal: a.proposal ? {
+                  id: a.proposal.id, reference: a.proposal.reference,
+                  startDate: a.proposal.startDate.toISOString().slice(0, 10),
+                  endDate: a.proposal.endDate.toISOString().slice(0, 10),
+                  workDaysPerWeek: Number(a.proposal.workDaysPerWeek),
+                  dailyRate: Number(a.proposal.dailyRate),
+                  computedDays: Number(a.proposal.computedDays),
+                  computedBudgetHt: Number(a.proposal.computedBudgetHt)
+                } : null
               };
             })}
-            candidates={candidates.map(c => ({ id: c.id, firstName: c.firstName, lastName: c.lastName, seniority: c.seniority, dailyCost: c.dailyCost ? Number(c.dailyCost) : null, status: c.status }))}
-            consultants={internalConsultants.map(u => ({ id: u.id, firstName: u.firstName, lastName: u.lastName, seniority: u.seniority, dailyCost: u.dailyCost ? Number(u.dailyCost) : null }))}
+            newProfileOptions={[
+              ...internalConsultants.map((u) => ({
+                kind: "consultant" as const, id: u.id,
+                firstName: u.firstName, lastName: u.lastName,
+                seniority: u.seniority, dailyCost: u.dailyCost ? Number(u.dailyCost) : null
+              })),
+              ...candidates.map((c) => ({
+                kind: "candidate" as const, id: c.id,
+                firstName: c.firstName, lastName: c.lastName,
+                seniority: c.seniority, dailyCost: c.dailyCost ? Number(c.dailyCost) : null
+              }))
+            ]}
           />
         </div>
 

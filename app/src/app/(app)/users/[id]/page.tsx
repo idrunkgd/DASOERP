@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { UserForm } from "../user-form";
 import { ReviewsPanel } from "./reviews-panel";
+import { UserExperiencesPanel } from "../../me/user-experiences-panel";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
 import { redirect } from "next/navigation";
+import { FileDown } from "lucide-react";
 
 export default async function UserDetail({ params }: { params: { id: string } }) {
   const session = await requireSession();
@@ -16,7 +19,10 @@ export default async function UserDetail({ params }: { params: { id: string } })
   const isManager = perms.includes("timesheet.validate");
   if (!isAdmin && !isSelf && !isManager) redirect("/dashboard");
 
-  const user = await prisma.user.findUnique({ where: { id: params.id } });
+  const user = await prisma.user.findUnique({
+    where: { id: params.id },
+    include: { experiences: { orderBy: { startDate: "desc" } } }
+  });
   if (!user) notFound();
 
   const planned = await userPlannedHoursForWeek(user.id, new Date());
@@ -45,9 +51,35 @@ export default async function UserDetail({ params }: { params: { id: string } })
         title={`${user.firstName} ${user.lastName}`}
         breadcrumb={[{ label: "Utilisateurs", href: "/users" }, { label: `${user.firstName} ${user.lastName}` }]}
         subtitle={`Charge planifiée semaine en cours : ${planned.toFixed(1)}h / ${Number(user.weeklyCapacityH).toFixed(0)}h`}
+        actions={
+          // Le bouton Export CV est ouvert à tous ceux qui voient la page
+          // (soi-même, admin, manager) — le contrôle strict est côté API.
+          <Link
+            href={`/api/exports/cv-pdf?userId=${user.id}`}
+            target="_blank" rel="noopener noreferrer"
+            className="btn-secondary btn-sm"
+          >
+            <FileDown className="w-4 h-4" /> Exporter le CV
+          </Link>
+        }
       />
       <div className="space-y-6">
         {isAdmin && <UserForm initial={user} skillCatalog={skillCatalog} />}
+
+        {/* Expériences pro : miroir de la fiche candidat. Éditables par
+            soi-même OU un admin/manager (contrôle côté server action).
+            Utilisées comme CV sur les propositions consultant PDF. */}
+        <UserExperiencesPanel
+          userId={user.id}
+          experiences={user.experiences.map((e) => ({
+            id: e.id,
+            companyName: e.companyName,
+            jobTitle: e.jobTitle,
+            startDate: e.startDate.toISOString(),
+            endDate: e.endDate ? e.endDate.toISOString() : null,
+            description: e.description
+          }))}
+        />
 
         <ReviewsPanel
           userId={user.id}

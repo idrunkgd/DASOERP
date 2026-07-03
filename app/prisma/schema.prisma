@@ -1077,8 +1077,6 @@ model MissionProposal {
   ownerId          String?
   owner            User?                 @relation("ProposalOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
-  status           MissionProposalStatus @default(DRAFT)
-
   /// Période de mission proposée au client. Le budget est calculé sur
   /// ces dates avec la lib working-days (weekends + fériés belges déduits).
   startDate        DateTime              @db.Date
