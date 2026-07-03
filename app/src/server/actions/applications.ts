@@ -88,8 +88,10 @@ export async function setApplicationStatus(applicationId: string, newStatus: App
     if (before.proposal) {
       // Le service convertApplicationToMission utilise les dates + TJM de
       // la proposition (via app.proposal) — pas besoin de re-passer les
-      // overrides ici. On marque juste l'application SELECTED d'abord,
-      // puis on crée la Mission, puis on marque la proposition ACCEPTED.
+      // overrides ici. On marque l'application SELECTED d'abord, puis on
+      // crée la Mission. On marque aussi la date de décision sur la
+      // proposition (mais plus de field status : depuis la refonte du 2
+      // juillet, tout l'état vit sur ApplicationStatus).
       await prisma.$transaction([
         prisma.missionApplication.update({
           where: { id: applicationId },
@@ -101,7 +103,7 @@ export async function setApplicationStatus(applicationId: string, newStatus: App
         }),
         prisma.missionProposal.update({
           where: { id: before.proposal.id },
-          data: { status: "ACCEPTED", decidedAt: new Date() }
+          data: { decidedAt: new Date() }
         })
       ]);
       const { convertApplicationToMission } = await import("@/server/services/mission-service");

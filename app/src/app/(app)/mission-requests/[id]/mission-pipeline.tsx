@@ -66,26 +66,42 @@ type NewProfileOption =
   | { kind: "consultant"; id: string; firstName: string; lastName: string; seniority: string | null; dailyCost: number | null };
 
 // ──────────────────────────────────────────────────────────
-// Stepper : suite des 5 étapes du pipeline avec état visuel
+// Stepper : 6 étapes du pipeline avec état visuel. Shortlist
+// est une étape à part entière car c'est un jalon commercial
+// important (le client a validé le profil, on peut chiffrer).
 // ──────────────────────────────────────────────────────────
-const STEPS = ["presented", "interview", "offer", "decision", "mission"] as const;
+const STEPS = ["presented", "interview", "shortlist", "offer", "decision", "mission"] as const;
 type Step = typeof STEPS[number];
 
 function currentStep(app: ApplicationCard): Step {
   if (app.status === "SELECTED") return "mission";
   if (app.status === "REJECTED" || app.status === "WITHDRAWN") return "decision";
   if (app.status === "OFFER_SENT") return "offer";
-  if (app.status === "INTERVIEW_SCHEDULED" || app.status === "INTERVIEWED" || app.status === "SHORTLISTED")
+  if (app.status === "SHORTLISTED") return "shortlist";
+  if (app.status === "INTERVIEW_SCHEDULED" || app.status === "INTERVIEWED")
     return "interview";
   return "presented";
 }
 
 const STEP_META: Record<Step, { label: string }> = {
-  presented: { label: "Présenté" },
-  interview: { label: "Entretien" },
-  offer:     { label: "Offre" },
-  decision:  { label: "Décision" },
-  mission:   { label: "Mission" }
+  presented:  { label: "Présenté" },
+  interview:  { label: "Entretien" },
+  shortlist:  { label: "Retenu" },
+  offer:      { label: "Offre" },
+  decision:   { label: "Décision" },
+  mission:    { label: "Mission" }
+};
+
+// Libellé lisible du statut brut de l'application (badge sur la carte).
+const STATUS_BADGE: Record<ApplicationCard["status"], { label: string; cls: string }> = {
+  PRESENTED:           { label: "Présenté",           cls: "bg-slate-100 text-slate-700" },
+  INTERVIEW_SCHEDULED: { label: "Entretien planifié", cls: "bg-blue-100 text-blue-800" },
+  INTERVIEWED:         { label: "Entretien fait",     cls: "bg-blue-100 text-blue-800" },
+  SHORTLISTED:         { label: "Retenu",             cls: "bg-indigo-100 text-indigo-800" },
+  OFFER_SENT:          { label: "Offre envoyée",      cls: "bg-amber-100 text-amber-800" },
+  SELECTED:            { label: "Accepté",            cls: "bg-emerald-100 text-emerald-800" },
+  REJECTED:            { label: "Refusé",             cls: "bg-red-100 text-red-800" },
+  WITHDRAWN:           { label: "Retiré",             cls: "bg-slate-200 text-slate-500" }
 };
 
 export function MissionPipelinePanel({
@@ -293,6 +309,12 @@ function PipelineCard({
               (p.source === "consultant" ? "bg-indigoaccent/15 text-indigoaccent" : "bg-slate-100 text-slate-700")}>
               {p.source === "consultant" ? "Interne" : "Candidat"}
             </span>
+            {/* Badge de statut brut : source de vérité claire même quand le
+                stepper montre une étape agrégée (ex. Entretien couvre à la
+                fois INTERVIEW_SCHEDULED, INTERVIEWED). */}
+            <span className={"text-[10px] font-bold px-1.5 py-0.5 rounded " + STATUS_BADGE[app.status].cls}>
+              {STATUS_BADGE[app.status].label}
+            </span>
             {p.seniority && <span className="text-xs text-midnight-500">{p.seniority}</span>}
             {app.missionReference && (
               <Link href={`/missions/${app.missionId}`} className="text-xs text-emerald-700 hover:underline inline-flex items-center gap-1">
@@ -376,9 +398,16 @@ function PipelineCard({
             )}
             {step === "interview" && !rejected && (
               <>
-                <button onClick={markShortlisted} disabled={pending} className="btn-ghost btn-sm">
-                  Retenir (shortlist)
+                <button onClick={markShortlisted} disabled={pending} className="btn-primary btn-sm">
+                  <CircleCheck className="w-3 h-3" /> Retenir (shortlist)
                 </button>
+                <button onClick={reject} disabled={pending} className="btn-ghost btn-sm text-red-600">
+                  Refuser
+                </button>
+              </>
+            )}
+            {step === "shortlist" && !rejected && (
+              <>
                 <button onClick={() => setShowOfferForm(true)} disabled={pending} className="btn-primary btn-sm">
                   <Send className="w-3 h-3" /> Générer l'offre PDF
                 </button>
