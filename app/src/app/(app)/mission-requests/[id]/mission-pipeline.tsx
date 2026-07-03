@@ -21,7 +21,7 @@ import {
   User as UserIcon, Users, FileDown, Send, Check, X, Loader2,
   ChevronRight, CircleCheck, Circle, Trash2, Plus, AlertCircle, Eye
 } from "lucide-react";
-import { setApplicationStatus, presentApplication, deleteApplication } from "@/server/actions/applications";
+import { setApplicationStatus, presentCandidate, deleteApplication } from "@/server/actions/applications";
 import {
   createMissionProposal, deleteMissionProposal, previewProposalTotals
 } from "@/server/actions/mission-proposals";
@@ -174,14 +174,19 @@ function AddApplicationForm({
     e.preventDefault();
     if (!form.key) return toast.error("Choisis un profil");
     const [kind, id] = form.key.split(":");
+    // La server action presentCandidate attend :
+    //   - missionId en argument séparé
+    //   - subject au format "C:<candidateId>" ou "U:<consultantId>"
+    //   - proposedDailyRate, notes (optionnels)
     const fd = new FormData();
-    fd.set("missionRequestId", missionRequestId);
-    if (kind === "candidate") fd.set("candidateId", id);
-    else fd.set("consultantId", id);
+    fd.set("subject", kind === "candidate" ? `C:${id}` : `U:${id}`);
     if (form.proposedDailyRate) fd.set("proposedDailyRate", form.proposedDailyRate);
     start(async () => {
-      try { await presentApplication(fd); toast.success("Profil ajouté"); onDone(); }
-      catch (e: any) { toast.error(e?.message ?? "Erreur"); }
+      try {
+        await presentCandidate(missionRequestId, fd);
+        toast.success("Profil ajouté");
+        onDone();
+      } catch (e: any) { toast.error(e?.message ?? "Erreur"); }
     });
   }
 
