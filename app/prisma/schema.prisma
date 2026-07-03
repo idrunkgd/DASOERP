@@ -1107,7 +1107,6 @@ model MissionProposal {
   updatedAt        DateTime              @updatedAt
 
   @@index([missionRequestId])
-  @@index([status])
 }
 
 model Candidate {
