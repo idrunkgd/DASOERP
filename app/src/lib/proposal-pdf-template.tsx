@@ -1,91 +1,157 @@
 /**
- * Template PDF d'une MissionProposal (proposition consultant à envoyer au client).
+ * Template PDF « Proposition consultant » (offre commerciale à envoyer
+ * au client) aux couleurs Dasolabs.
  *
  * Structure :
- *   Page 1 — Contexte & prix
- *     • Header Dasolabs (logo, adresse, TVA)
- *     • Destinataire (client + contact)
- *     • Titre "Proposition de consultant"
- *     • Bloc mission : titre + description
- *     • Bloc consultant proposé : nom, séniorité, rôle, résumé court
- *     • Bloc conditions : période, régime, jours calculés, TJM, TOTAL HT
- *     • Signature de l'interlocuteur Dasolabs
- *   Page 2 — Profil consultant
- *     • Photo + nom + coordonnées
- *     • Bio / séniorité / années xp / langues
- *     • Compétences
- *     • Expériences professionnelles (les 5 dernières)
- *
- * On utilise @react-pdf/renderer 3.4.5 (v4 a un bug unitsPerEm en serverless).
+ *   PAGE 1 — Contexte & prix
+ *     • Header charte Dasolabs (logo + adresse + n° TVA)
+ *     • Titre : PROPOSITION CONSULTANT + référence PROP-YYYY-NNNN
+ *     • Cartouches : destinataire client, interlocuteur Dasolabs
+ *     • Intro (message d'accompagnement optionnel)
+ *     • Description mission
+ *     • Consultant proposé (résumé — détail complet page 2)
+ *     • Bloc conditions financières (dates, régime, jours, TJM, TOTAL HT)
+ *     • Mentions légales / facturation / validité
+ *     • Footer
+ *   PAGE 2 — Profil consultant
+ *     • Bandeau photo + nom + séniorité + coordonnées
+ *     • Langues, compétences (pills)
+ *     • Expériences pro
  */
-import {
-  Document, Page, Text, View, StyleSheet, Image
-} from "@react-pdf/renderer";
 import React from "react";
+import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import type { CompanyInfo } from "./company-info";
 import { DEFAULT_COMPANY_INFO } from "./company-info";
+import { BRAND_COLORS as C, DasolabsIcon } from "./dasolabs-brand";
 
 const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 10, fontFamily: "Helvetica", color: "#0a0a0a" },
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 18, alignItems: "flex-start" },
-  brand: { fontSize: 18, fontWeight: 700 },
-  brandSub: { fontSize: 8, color: "#666" },
-  refBlock: { textAlign: "right" },
-  refLabel: { fontSize: 8, color: "#666" },
-  refValue: { fontSize: 14, fontWeight: 700 },
-  boxes: { flexDirection: "row", justifyContent: "space-between", marginVertical: 12 },
-  box: { width: "48%", padding: 8, border: "1pt solid #ddd", borderRadius: 4 },
-  boxTitle: { fontSize: 8, color: "#666", marginBottom: 4, textTransform: "uppercase" },
-  boxName: { fontSize: 11, fontWeight: 700 },
-  boxLine: { fontSize: 9, color: "#333" },
-  title: { fontSize: 20, fontWeight: 700, marginTop: 10, marginBottom: 4 },
-  subtitle: { fontSize: 11, color: "#666", marginBottom: 12 },
-  h2: { fontSize: 12, fontWeight: 700, marginTop: 14, marginBottom: 6, color: "#202037" },
-  para: { fontSize: 10, lineHeight: 1.4, marginBottom: 4, color: "#333" },
-  intro: { padding: 10, backgroundColor: "#F5F5F0", borderRadius: 4, fontSize: 10, lineHeight: 1.5, marginBottom: 10, fontStyle: "italic" },
+  page: {
+    paddingTop: 36, paddingBottom: 50, paddingHorizontal: 36,
+    fontSize: 10, fontFamily: "Helvetica", color: C.ink
+  },
+
+  // Header charte
+  header: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start",
+    paddingBottom: 12, borderBottom: `2 solid ${C.ink}`, marginBottom: 20
+  },
+  brand: { flexDirection: "row", alignItems: "center", gap: 10 },
+  brandName: { fontSize: 18, fontFamily: "Helvetica-Bold", color: C.ink },
+  brandTagline: { fontSize: 7, color: C.grey, marginTop: 1 },
+  brandLegal: { fontSize: 7, color: C.grey, marginTop: 4, lineHeight: 1.3 },
+  docHeader: { textAlign: "right" },
+  docTitle: { fontSize: 20, fontFamily: "Helvetica-Bold", color: C.accent },
+  docRef: { fontSize: 12, fontFamily: "Helvetica-Bold", color: C.ink, marginTop: 4 },
+  docDate: { fontSize: 8, color: C.grey, marginTop: 2 },
+
+  // Cartouches destinataire / interlocuteur
+  boxRow: { flexDirection: "row", justifyContent: "space-between", gap: 12, marginBottom: 18 },
+  box: {
+    width: "48%", padding: 10, borderRadius: 4,
+    backgroundColor: C.light, borderLeft: `3 solid ${C.accent}`
+  },
+  boxTitle: {
+    fontSize: 7, color: C.grey, marginBottom: 5,
+    textTransform: "uppercase", letterSpacing: 0.5, fontFamily: "Helvetica-Bold"
+  },
+  boxName: { fontSize: 11, fontFamily: "Helvetica-Bold", color: C.ink },
+  boxLine: { fontSize: 9, color: C.ink, marginTop: 2 },
+  boxSmall: { fontSize: 8, color: C.grey, marginTop: 1 },
+
+  // Intro / sections
+  intro: {
+    padding: 10, backgroundColor: C.light, borderRadius: 4,
+    fontSize: 10, lineHeight: 1.5, marginBottom: 12,
+    fontStyle: "italic", color: C.ink
+  },
+  h2: {
+    fontSize: 11, fontFamily: "Helvetica-Bold", color: C.ink,
+    marginTop: 4, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5
+  },
+  h2Line: { borderBottom: `1 solid ${C.border}`, marginBottom: 8, paddingBottom: 2 },
+  para: { fontSize: 10, lineHeight: 1.4, marginBottom: 8, color: C.ink },
+
   // Bloc conditions financières
-  condCard: { border: "1pt solid #202037", borderRadius: 4, marginTop: 10 },
-  condRow: { flexDirection: "row", justifyContent: "space-between", padding: 8, borderBottom: "0.5pt solid #eee" },
-  condLast: { flexDirection: "row", justifyContent: "space-between", padding: 10, backgroundColor: "#202037", borderBottomLeftRadius: 4, borderBottomRightRadius: 4 },
-  condLabel: { fontSize: 10, color: "#333" },
-  condValue: { fontSize: 10, fontWeight: 700, color: "#0a0a0a" },
-  totalLabel: { fontSize: 12, color: "#F5F5F0", fontWeight: 700 },
-  totalValue: { fontSize: 16, color: "#F5F5F0", fontWeight: 700 },
-  footer: { position: "absolute", bottom: 24, left: 40, right: 40, fontSize: 8, color: "#666", textAlign: "center", borderTop: "0.5pt solid #ddd", paddingTop: 6 },
-  // Page 2 consultant
-  profileHeader: { flexDirection: "row", gap: 16, marginBottom: 14, alignItems: "flex-start" },
-  photo: { width: 90, height: 90, borderRadius: 45, backgroundColor: "#eee" },
-  photoPlaceholder: { width: 90, height: 90, borderRadius: 45, backgroundColor: "#eee", justifyContent: "center", alignItems: "center" },
-  photoInitials: { fontSize: 32, color: "#999", fontWeight: 700 },
-  profileName: { fontSize: 18, fontWeight: 700 },
-  profileRole: { fontSize: 11, color: "#666", marginTop: 2 },
-  profileMeta: { fontSize: 9, color: "#666", marginTop: 4 },
-  kpiRow: { flexDirection: "row", gap: 8, marginVertical: 10 },
-  kpi: { flex: 1, border: "1pt solid #ddd", borderRadius: 4, padding: 8 },
-  kpiLabel: { fontSize: 8, color: "#666", textTransform: "uppercase" },
-  kpiValue: { fontSize: 14, fontWeight: 700, marginTop: 2 },
-  skills: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
-  skill: { fontSize: 9, padding: "3pt 8pt", backgroundColor: "#F5F5F0", borderRadius: 10 },
-  expItem: { paddingLeft: 8, borderLeft: "2pt solid #202037", marginBottom: 8 },
-  expTitle: { fontSize: 10, fontWeight: 700 },
-  expCompany: { fontSize: 9, color: "#333" },
-  expDates: { fontSize: 8, color: "#666" },
-  expDesc: { fontSize: 9, color: "#444", marginTop: 2, lineHeight: 1.3 }
+  condCard: {
+    border: `1 solid ${C.ink}`, borderRadius: 4, marginTop: 4, overflow: "hidden"
+  },
+  condRow: {
+    flexDirection: "row", justifyContent: "space-between",
+    padding: 9, borderBottom: `0.5pt solid ${C.border}`
+  },
+  condLabel: { fontSize: 10, color: C.grey },
+  condValue: { fontSize: 10, fontFamily: "Helvetica-Bold", color: C.ink },
+  condTotal: {
+    flexDirection: "row", justifyContent: "space-between",
+    padding: 12, backgroundColor: C.ink
+  },
+  condTotalLabel: { fontSize: 12, fontFamily: "Helvetica-Bold", color: "#FFF" },
+  condTotalValue: { fontSize: 18, fontFamily: "Helvetica-Bold", color: C.accent },
+
+  // Mentions bas de page 1
+  legalHint: {
+    marginTop: 14, padding: 8, backgroundColor: C.light, borderRadius: 3,
+    fontSize: 8, color: C.grey, lineHeight: 1.4
+  },
+
+  // Page 2 — profil consultant
+  profileHeader: {
+    flexDirection: "row", gap: 16, marginBottom: 14, alignItems: "center"
+  },
+  photo: { width: 82, height: 82, borderRadius: 41 },
+  photoPlaceholder: {
+    width: 82, height: 82, borderRadius: 41, backgroundColor: C.ink,
+    justifyContent: "center", alignItems: "center"
+  },
+  photoInitials: { fontSize: 30, fontFamily: "Helvetica-Bold", color: "#FFF" },
+  profileName: { fontSize: 20, fontFamily: "Helvetica-Bold", color: C.ink },
+  profileRole: { fontSize: 11, color: C.accent, marginTop: 2, fontFamily: "Helvetica-Bold" },
+  profileMeta: { fontSize: 9, color: C.grey, marginTop: 4 },
+
+  kpiRow: { flexDirection: "row", gap: 8, marginBottom: 14 },
+  kpi: {
+    flex: 1, backgroundColor: C.light, padding: 8, borderRadius: 4,
+    borderLeft: `3 solid ${C.accent}`
+  },
+  kpiLabel: { fontSize: 7, color: C.grey, textTransform: "uppercase", letterSpacing: 0.5 },
+  kpiValue: { fontSize: 12, fontFamily: "Helvetica-Bold", color: C.ink, marginTop: 2 },
+
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginBottom: 12 },
+  skill: {
+    fontSize: 9, padding: "3pt 8pt", backgroundColor: C.light,
+    borderRadius: 10, color: C.ink
+  },
+  language: {
+    fontSize: 9, padding: "3pt 8pt", border: `0.5pt solid ${C.accent}`,
+    borderRadius: 10, color: C.accent
+  },
+
+  expItem: {
+    paddingLeft: 12, borderLeft: `2 solid ${C.accent}`,
+    marginBottom: 9, paddingVertical: 2
+  },
+  expTitle: { fontSize: 10.5, fontFamily: "Helvetica-Bold", color: C.ink },
+  expCompany: { fontSize: 10, color: C.accent, marginTop: 1 },
+  expDates: { fontSize: 8, color: C.grey, marginTop: 1 },
+  expDesc: { fontSize: 9, color: C.ink, marginTop: 3, lineHeight: 1.35 },
+
+  footer: {
+    position: "absolute", bottom: 24, left: 36, right: 36,
+    fontSize: 7, color: C.grey, textAlign: "center",
+    borderTop: `0.5pt solid ${C.border}`, paddingTop: 6
+  }
 });
 
 export type ProposalPdfData = {
   reference: string;
   intro: string | null;
-  // Mission
   missionTitle: string;
   missionDescription: string | null;
-  // Client destinataire
   clientCompany: { name: string; vatNumber: string | null; addressLine: string | null };
   clientContact: {
     firstName: string; lastName: string; jobTitle: string | null;
     email: string | null; phone: string | null;
   } | null;
-  // Conditions
   startDate: Date;
   endDate: Date;
   workDaysPerWeek: number;
@@ -93,7 +159,6 @@ export type ProposalPdfData = {
   computedDays: number;
   dailyRate: number;
   computedBudgetHt: number;
-  // Consultant
   candidate: {
     firstName: string; lastName: string;
     photoUrl: string | null;
@@ -112,7 +177,6 @@ export type ProposalPdfData = {
       description: string | null;
     }>;
   };
-  // Owner Dasolabs (interlocuteur)
   owner: { firstName: string; lastName: string; email: string | null; phone: string | null } | null;
 };
 
@@ -131,7 +195,7 @@ function fmtMonthYear(d: Date | null) {
 export function ProposalPdf({
   data, companyInfo = DEFAULT_COMPANY_INFO
 }: { data: ProposalPdfData; companyInfo?: CompanyInfo }) {
-  const initials = (data.candidate.firstName[0] ?? "") + (data.candidate.lastName[0] ?? "");
+  const initials = ((data.candidate.firstName[0] ?? "") + (data.candidate.lastName[0] ?? "")).toUpperCase();
   const workRegimeLabel =
     Number(data.workDaysPerWeek) === 5 ? "Temps plein (5 j/sem)" :
     Number(data.workDaysPerWeek) === 4 ? "4/5 (4 j/sem)" :
@@ -142,43 +206,46 @@ export function ProposalPdf({
     <Document>
       {/* ═════════════════ PAGE 1 — CONTEXTE & PRIX ═════════════════ */}
       <Page size="A4" style={styles.page}>
+        {/* Header charte */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.brand}>{companyInfo.name}</Text>
-            <Text style={styles.brandSub}>{companyInfo.addressLine}</Text>
-            {companyInfo.vatNumber && <Text style={styles.brandSub}>TVA {companyInfo.vatNumber}</Text>}
+          <View style={styles.brand}>
+            <DasolabsIcon size={38} color={C.ink} />
+            <View>
+              <Text style={styles.brandName}>{companyInfo.legalName ?? "DASOLABS"}</Text>
+              <Text style={styles.brandTagline}>Expert IT · Consulting</Text>
+              <Text style={styles.brandLegal}>
+                {companyInfo.street}, {companyInfo.postalCode} {companyInfo.city}
+                {companyInfo.vatNumber ? ` · TVA ${companyInfo.vatNumber}` : ""}
+              </Text>
+            </View>
           </View>
-          <View style={styles.refBlock}>
-            <Text style={styles.refLabel}>PROPOSITION CONSULTANT</Text>
-            <Text style={styles.refValue}>{data.reference}</Text>
-            <Text style={styles.brandSub}>Émise le {fmtDate(new Date())}</Text>
+          <View style={styles.docHeader}>
+            <Text style={styles.docTitle}>PROPOSITION</Text>
+            <Text style={styles.docRef}>{data.reference}</Text>
+            <Text style={styles.docDate}>Émise le {fmtDate(new Date())}</Text>
           </View>
         </View>
 
-        <Text style={styles.title}>Proposition de consultant</Text>
-        <Text style={styles.subtitle}>
-          Pour la mission : <Text style={{ fontWeight: 700 }}>{data.missionTitle}</Text>
-        </Text>
-
-        <View style={styles.boxes}>
+        {/* Cartouches destinataire + interlocuteur */}
+        <View style={styles.boxRow}>
           <View style={styles.box}>
             <Text style={styles.boxTitle}>Destinataire</Text>
             <Text style={styles.boxName}>{data.clientCompany.name}</Text>
             {data.clientCompany.addressLine && <Text style={styles.boxLine}>{data.clientCompany.addressLine}</Text>}
-            {data.clientCompany.vatNumber && <Text style={styles.boxLine}>TVA {data.clientCompany.vatNumber}</Text>}
+            {data.clientCompany.vatNumber && <Text style={styles.boxSmall}>TVA {data.clientCompany.vatNumber}</Text>}
             {data.clientContact && (
               <>
-                <Text style={[styles.boxLine, { marginTop: 4, fontWeight: 700 }]}>
+                <Text style={[styles.boxLine, { marginTop: 6, fontFamily: "Helvetica-Bold" }]}>
                   À l'attention de {data.clientContact.firstName} {data.clientContact.lastName}
                 </Text>
-                {data.clientContact.jobTitle && <Text style={styles.boxLine}>{data.clientContact.jobTitle}</Text>}
-                {data.clientContact.email && <Text style={styles.boxLine}>{data.clientContact.email}</Text>}
-                {data.clientContact.phone && <Text style={styles.boxLine}>{data.clientContact.phone}</Text>}
+                {data.clientContact.jobTitle && <Text style={styles.boxSmall}>{data.clientContact.jobTitle}</Text>}
+                {data.clientContact.email && <Text style={styles.boxSmall}>{data.clientContact.email}</Text>}
+                {data.clientContact.phone && <Text style={styles.boxSmall}>{data.clientContact.phone}</Text>}
               </>
             )}
           </View>
           <View style={styles.box}>
-            <Text style={styles.boxTitle}>Interlocuteur Dasolabs</Text>
+            <Text style={styles.boxTitle}>Votre interlocuteur</Text>
             {data.owner ? (
               <>
                 <Text style={styles.boxName}>{data.owner.firstName} {data.owner.lastName}</Text>
@@ -191,68 +258,80 @@ export function ProposalPdf({
           </View>
         </View>
 
+        {/* Objet */}
+        <View style={styles.h2Line}>
+          <Text style={styles.h2}>Objet</Text>
+        </View>
+        <Text style={styles.para}>
+          Proposition consultant pour la mission « <Text style={{ fontFamily: "Helvetica-Bold" }}>{data.missionTitle}</Text> ».
+        </Text>
+
         {data.intro && <Text style={styles.intro}>{data.intro}</Text>}
 
         {data.missionDescription && (
           <>
-            <Text style={styles.h2}>Contexte de la mission</Text>
+            <View style={styles.h2Line}><Text style={styles.h2}>Contexte de la mission</Text></View>
             <Text style={styles.para}>{data.missionDescription}</Text>
           </>
         )}
 
-        <Text style={styles.h2}>Consultant proposé</Text>
+        <View style={styles.h2Line}><Text style={styles.h2}>Consultant proposé</Text></View>
         <Text style={styles.para}>
-          Nous vous proposons <Text style={{ fontWeight: 700 }}>{data.candidate.firstName} {data.candidate.lastName}</Text>
+          Nous vous proposons <Text style={{ fontFamily: "Helvetica-Bold" }}>{data.candidate.firstName} {data.candidate.lastName}</Text>
           {data.candidate.seniority ? ` (${data.candidate.seniority})` : ""}
           {data.candidate.yearsExperience ? `, ${data.candidate.yearsExperience} ans d'expérience` : ""}.
-          Vous trouverez son profil détaillé en page 2 de cette proposition.
+          Son profil détaillé figure en page 2.
         </Text>
 
-        <Text style={styles.h2}>Conditions financières</Text>
+        <View style={styles.h2Line}><Text style={styles.h2}>Conditions financières</Text></View>
         <View style={styles.condCard}>
           <View style={styles.condRow}>
             <Text style={styles.condLabel}>Période</Text>
-            <Text style={styles.condValue}>
-              Du {fmtDate(data.startDate)} au {fmtDate(data.endDate)}
-            </Text>
+            <Text style={styles.condValue}>Du {fmtDate(data.startDate)} au {fmtDate(data.endDate)}</Text>
           </View>
           <View style={styles.condRow}>
             <Text style={styles.condLabel}>Régime</Text>
             <Text style={styles.condValue}>{workRegimeLabel}</Text>
           </View>
           <View style={styles.condRow}>
-            <Text style={styles.condLabel}>Jours facturables (weekends et fériés déduits{data.includeHolidays ? " – fériés belges" : ""})</Text>
+            <Text style={styles.condLabel}>
+              Jours facturables (weekends{data.includeHolidays ? " et fériés belges" : ""} déduits)
+            </Text>
             <Text style={styles.condValue}>{data.computedDays} j</Text>
           </View>
           <View style={styles.condRow}>
             <Text style={styles.condLabel}>Tarif journalier HTVA</Text>
             <Text style={styles.condValue}>{fmtEUR(data.dailyRate)}</Text>
           </View>
-          <View style={styles.condLast}>
-            <Text style={styles.totalLabel}>Budget total HTVA</Text>
-            <Text style={styles.totalValue}>{fmtEUR(data.computedBudgetHt)}</Text>
+          <View style={styles.condTotal}>
+            <Text style={styles.condTotalLabel}>Budget total HTVA</Text>
+            <Text style={styles.condTotalValue}>{fmtEUR(data.computedBudgetHt)}</Text>
           </View>
         </View>
 
-        <Text style={[styles.para, { marginTop: 12, color: "#666" }]}>
-          Facturation mensuelle en fin de mois sur base des jours prestés.
-          TVA 21 % applicable en sus. Proposition valable 30 jours.
-        </Text>
+        <View style={styles.legalHint}>
+          <Text>
+            Facturation mensuelle en fin de mois sur base des jours prestés. TVA 21 % applicable en sus.
+            Proposition valable {companyInfo.offerValidityDays ?? 30} jours à compter de la date d'émission.
+          </Text>
+        </View>
 
         <Text style={styles.footer}>
-          {companyInfo.name} · {companyInfo.addressLine} · TVA {companyInfo.vatNumber} · {companyInfo.email}
+          {companyInfo.legalName ?? "DASOLABS"} · {companyInfo.street}, {companyInfo.postalCode} {companyInfo.city}
+          {companyInfo.vatNumber ? ` · TVA ${companyInfo.vatNumber}` : ""}
+          {companyInfo.email ? ` · ${companyInfo.email}` : ""}
         </Text>
       </Page>
 
       {/* ═════════════════ PAGE 2 — PROFIL CONSULTANT ═════════════════ */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <View>
-            <Text style={styles.brand}>{companyInfo.name}</Text>
-            <Text style={styles.brandSub}>Profil consultant</Text>
-          </View>
-          <View style={styles.refBlock}>
-            <Text style={styles.refLabel}>Annexe à {data.reference}</Text>
+          <View style={styles.brand}>
+            <DasolabsIcon size={32} color={C.ink} />
+            <View>
+              <Text style={[styles.brandName, { fontSize: 14 }]}>{companyInfo.legalName ?? "DASOLABS"}</Text>
+              <Text style={styles.brandTagline}>Profil consultant — annexe à {data.reference}</Text>
+            </View>
           </View>
         </View>
 
@@ -261,14 +340,12 @@ export function ProposalPdf({
             <Image src={data.candidate.photoUrl} style={styles.photo} />
           ) : (
             <View style={styles.photoPlaceholder}>
-              <Text style={styles.photoInitials}>{initials.toUpperCase()}</Text>
+              <Text style={styles.photoInitials}>{initials}</Text>
             </View>
           )}
           <View style={{ flex: 1 }}>
             <Text style={styles.profileName}>{data.candidate.firstName} {data.candidate.lastName}</Text>
-            {data.candidate.seniority && (
-              <Text style={styles.profileRole}>{data.candidate.seniority}</Text>
-            )}
+            {data.candidate.seniority && <Text style={styles.profileRole}>{data.candidate.seniority}</Text>}
             <Text style={styles.profileMeta}>
               {[
                 data.candidate.yearsExperience ? `${data.candidate.yearsExperience} ans d'expérience` : null,
@@ -278,12 +355,29 @@ export function ProposalPdf({
           </View>
         </View>
 
+        <View style={styles.kpiRow}>
+          <View style={styles.kpi}>
+            <Text style={styles.kpiLabel}>Expérience</Text>
+            <Text style={styles.kpiValue}>
+              {data.candidate.yearsExperience != null ? `${data.candidate.yearsExperience} ans` : "—"}
+            </Text>
+          </View>
+          <View style={styles.kpi}>
+            <Text style={styles.kpiLabel}>Compétences</Text>
+            <Text style={styles.kpiValue}>{data.candidate.skills.length}</Text>
+          </View>
+          <View style={styles.kpi}>
+            <Text style={styles.kpiLabel}>Expériences</Text>
+            <Text style={styles.kpiValue}>{data.candidate.experiences.length}</Text>
+          </View>
+        </View>
+
         {data.candidate.spokenLanguages.length > 0 && (
           <>
-            <Text style={styles.h2}>Langues parlées</Text>
-            <View style={styles.skills}>
+            <View style={styles.h2Line}><Text style={styles.h2}>Langues parlées</Text></View>
+            <View style={styles.pills}>
               {data.candidate.spokenLanguages.map((l) => (
-                <Text key={l} style={styles.skill}>{l}</Text>
+                <Text key={l} style={styles.language}>{l}</Text>
               ))}
             </View>
           </>
@@ -291,8 +385,8 @@ export function ProposalPdf({
 
         {data.candidate.skills.length > 0 && (
           <>
-            <Text style={styles.h2}>Compétences techniques</Text>
-            <View style={styles.skills}>
+            <View style={styles.h2Line}><Text style={styles.h2}>Compétences techniques</Text></View>
+            <View style={styles.pills}>
               {data.candidate.skills.map((s) => (
                 <Text key={s} style={styles.skill}>{s}</Text>
               ))}
@@ -302,8 +396,8 @@ export function ProposalPdf({
 
         {data.candidate.experiences.length > 0 && (
           <>
-            <Text style={styles.h2}>Expériences professionnelles</Text>
-            {data.candidate.experiences.slice(0, 5).map((exp, idx) => (
+            <View style={styles.h2Line}><Text style={styles.h2}>Expériences professionnelles</Text></View>
+            {data.candidate.experiences.slice(0, 6).map((exp, idx) => (
               <View key={idx} style={styles.expItem}>
                 <Text style={styles.expTitle}>{exp.jobTitle ?? "—"}</Text>
                 <Text style={styles.expCompany}>{exp.companyName}</Text>
@@ -317,7 +411,8 @@ export function ProposalPdf({
         )}
 
         <Text style={styles.footer}>
-          {companyInfo.name} · {companyInfo.addressLine} · TVA {companyInfo.vatNumber}
+          {companyInfo.legalName ?? "DASOLABS"} · {companyInfo.street}, {companyInfo.postalCode} {companyInfo.city}
+          {companyInfo.vatNumber ? ` · TVA ${companyInfo.vatNumber}` : ""}
         </Text>
       </Page>
     </Document>

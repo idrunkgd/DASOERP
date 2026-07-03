@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import {
   User as UserIcon, Users, FileDown, Send, Check, X, Loader2,
-  ChevronRight, CircleCheck, Circle, Trash2, Plus, AlertCircle
+  ChevronRight, CircleCheck, Circle, Trash2, Plus, AlertCircle, Eye
 } from "lucide-react";
 import { setApplicationStatus, presentApplication, deleteApplication } from "@/server/actions/applications";
 import {
@@ -356,13 +356,21 @@ function PipelineCard({
             <div className="mt-3 p-3 bg-slate-50 rounded-lg text-xs">
               <div className="flex items-center justify-between mb-1">
                 <span className="font-mono text-midnight-500">{app.proposal.reference}</span>
-                <a
-                  href={`/api/exports/proposal-pdf?id=${app.proposal.id}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="text-indigoaccent hover:underline inline-flex items-center gap-1"
-                >
-                  <FileDown className="w-3 h-3" /> Télécharger PDF
-                </a>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={`/api/exports/proposal-pdf?id=${app.proposal.id}&inline=1`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-midnight-700 hover:underline inline-flex items-center gap-1"
+                  >
+                    <Eye className="w-3 h-3" /> Aperçu
+                  </a>
+                  <a
+                    href={`/api/exports/proposal-pdf?id=${app.proposal.id}`}
+                    className="text-indigoaccent hover:underline inline-flex items-center gap-1"
+                  >
+                    <FileDown className="w-3 h-3" /> Télécharger
+                  </a>
+                </div>
               </div>
               <div className="text-midnight-700">
                 {app.proposal.startDate} → {app.proposal.endDate} ·{" "}

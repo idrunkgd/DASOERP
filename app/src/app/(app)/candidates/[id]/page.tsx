@@ -12,7 +12,7 @@ import { HiringInterviewsPanel } from "./hiring-interviews";
 import { ExperiencesPanel } from "../../me/experiences-panel";
 import { CandidateTestsSection } from "./tests-section";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { CheckCircle2, MessageSquare, FileDown } from "lucide-react";
+import { CheckCircle2, MessageSquare, FileDown, Eye } from "lucide-react";
 import { SalaryScenariosPanel } from "./salary-scenarios-panel";
 
 export default async function CandidateDetail({ params }: { params: { id: string } }) {
@@ -77,11 +77,19 @@ export default async function CandidateDetail({ params }: { params: { id: string
         subtitle={c.seniority ?? undefined}
         actions={
           <>
+            {/* Aperçu CV — ouvre le PDF dans le navigateur sans télécharger,
+                pour vérifier le rendu avant envoi. */}
+            <Link
+              href={`/api/exports/cv-pdf?candidateId=${c.id}&inline=1`}
+              target="_blank" rel="noopener noreferrer"
+              className="btn-ghost btn-sm"
+            >
+              <Eye className="w-4 h-4" /> Aperçu CV
+            </Link>
             {/* Export CV standalone : indépendant d'une offre, un vrai CV
                 du candidat au format Dasolabs pour envoi hors process. */}
             <Link
               href={`/api/exports/cv-pdf?candidateId=${c.id}`}
-              target="_blank" rel="noopener noreferrer"
               className="btn-secondary btn-sm"
             >
               <FileDown className="w-4 h-4" /> Exporter le CV

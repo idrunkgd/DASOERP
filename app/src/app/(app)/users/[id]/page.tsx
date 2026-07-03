@@ -8,7 +8,7 @@ import { ReviewsPanel } from "./reviews-panel";
 import { UserExperiencesPanel } from "../../me/user-experiences-panel";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
 import { redirect } from "next/navigation";
-import { FileDown } from "lucide-react";
+import { FileDown, Eye } from "lucide-react";
 
 export default async function UserDetail({ params }: { params: { id: string } }) {
   const session = await requireSession();
@@ -52,15 +52,24 @@ export default async function UserDetail({ params }: { params: { id: string } })
         breadcrumb={[{ label: "Utilisateurs", href: "/users" }, { label: `${user.firstName} ${user.lastName}` }]}
         subtitle={`Charge planifiée semaine en cours : ${planned.toFixed(1)}h / ${Number(user.weeklyCapacityH).toFixed(0)}h`}
         actions={
-          // Le bouton Export CV est ouvert à tous ceux qui voient la page
-          // (soi-même, admin, manager) — le contrôle strict est côté API.
-          <Link
-            href={`/api/exports/cv-pdf?userId=${user.id}`}
-            target="_blank" rel="noopener noreferrer"
-            className="btn-secondary btn-sm"
-          >
-            <FileDown className="w-4 h-4" /> Exporter le CV
-          </Link>
+          // Deux boutons : Aperçu (inline=1, ouvre le PDF dans l'onglet)
+          // et Exporter (téléchargement direct). Le contrôle strict d'accès
+          // est côté route API.
+          <>
+            <Link
+              href={`/api/exports/cv-pdf?userId=${user.id}&inline=1`}
+              target="_blank" rel="noopener noreferrer"
+              className="btn-ghost btn-sm"
+            >
+              <Eye className="w-4 h-4" /> Aperçu CV
+            </Link>
+            <Link
+              href={`/api/exports/cv-pdf?userId=${user.id}`}
+              className="btn-secondary btn-sm"
+            >
+              <FileDown className="w-4 h-4" /> Exporter le CV
+            </Link>
+          </>
         }
       />
       <div className="space-y-6">

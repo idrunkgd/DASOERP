@@ -5,7 +5,7 @@ import { ProfileForm } from "./profile-form";
 import { CandidateCvForm } from "./cv-form";
 import { ExperiencesPanel } from "./experiences-panel";
 import { UserExperiencesPanel } from "./user-experiences-panel";
-import { FileDown } from "lucide-react";
+import { FileDown, Eye } from "lucide-react";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
@@ -41,18 +41,31 @@ export default async function MyProfile() {
           : "Vos informations personnelles et identifiants"}
         actions={
           <>
-            {/* Bouton export CV : disponible à la fois pour le portail
-                candidat et le consultant interne — les deux ont un CV.
-                Le contrôle API dirige vers la bonne source de données. */}
-            <a
-              href={isCandidatePortal
-                ? `/api/exports/cv-pdf?candidateId=${candidateProfile!.id}`
-                : `/api/exports/cv-pdf?userId=${session.user.id}`}
-              target="_blank" rel="noopener noreferrer"
-              className="btn-secondary text-sm inline-flex items-center gap-1"
-            >
-              <FileDown className="w-4 h-4" /> Exporter mon CV
-            </a>
+            {/* Aperçu + Export CV : disponibles pour portail candidat ET
+                consultant interne. L'aperçu (inline=1) ouvre le PDF sans
+                le télécharger, pour vérifier le rendu avant envoi. */}
+            {(() => {
+              const cvQuery = isCandidatePortal
+                ? `candidateId=${candidateProfile!.id}`
+                : `userId=${session.user.id}`;
+              return (
+                <>
+                  <a
+                    href={`/api/exports/cv-pdf?${cvQuery}&inline=1`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="btn-ghost text-sm inline-flex items-center gap-1"
+                  >
+                    <Eye className="w-4 h-4" /> Aperçu
+                  </a>
+                  <a
+                    href={`/api/exports/cv-pdf?${cvQuery}`}
+                    className="btn-secondary text-sm inline-flex items-center gap-1"
+                  >
+                    <FileDown className="w-4 h-4" /> Exporter mon CV
+                  </a>
+                </>
+              );
+            })()}
             <a href="/me/tests" className="btn-secondary text-sm">
               🎓 Mes tests techniques
             </a>
