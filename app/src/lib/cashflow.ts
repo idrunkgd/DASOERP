@@ -63,6 +63,15 @@ export type CashflowRow = {
   endDate?: string | null;
   cells: CashflowCell[];    // 12 cellules, index 0 = janvier
   totalYear: number;
+  /**
+   * Si true, la ligne est TOUJOURS agrégée dans les totaux mensuels et
+   * annuels, mais n'est PAS rendue dans la grille. Utilisé pour les projets
+   * clôturés (toutes les tranches payées) : on garde la contribution
+   * financière dans les KPIs sans polluer la vue avec des lignes inertes.
+   */
+  hidden?: boolean;
+  /** Pour kind = milestones (agrégation par projet) : id du projet source. */
+  projectId?: string;
 };
 
 export type CashflowYear = {
@@ -166,7 +175,14 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         // Lien direct (milestones standalone)
         company: { select: { name: true } },
         offer: { select: { vatRate: true, company: { select: { name: true } } } },
-        project: { select: { vatRate: true, company: { select: { name: true } } } },
+        // On sélectionne aussi id / reference / name du projet pour pouvoir
+        // agréger toutes les tranches d'un même projet sur une seule ligne.
+        project: {
+          select: {
+            id: true, reference: true, name: true,
+            vatRate: true, company: { select: { name: true } }
+          }
+        },
         // Pour grouper les milestones d'une même mission sur une seule ligne
         mission: {
           select: {
@@ -431,61 +447,142 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     });
   }
 
-  // 2) Lignes individuelles pour les milestones standalone (sans mission) → PROJET
-  // Les BillingMilestones stockent leur amount en HTVA (cf. comment dans schéma).
-  // Dans le cashflow on veut afficher le TVAC = HTVA × (1 + vatRate/100). Le
-  // vatRate vient du projet (priorité) ou de l'offre rattachée — défaut 21%.
+  // 2) Lignes agrégées par PROJET (tranches non-mission)
+  //
+  // Refonte (juillet 2026) : au lieu d'une ligne par BillingMilestone, on
+  // regroupe toutes les tranches d'un même projet sur une seule ligne, et
+  // on somme les montants du même mois.
+  //
+  // Règle métier :
+  //  - Un projet dont TOUTES les tranches sont PAID est considéré clôturé
+  //    → la row existe (contribue aux totaux mensuels / annuels) mais est
+  //    marquée `hidden` pour ne pas polluer la grille.
+  //  - Les tranches CANCELLED sont ignorées (elles ne comptent ni pour la
+  //    clôture, ni pour les totaux financiers).
+  //  - Les milestones sans project (companyId direct, offer libre, etc.)
+  //    tombent dans un groupe « standalone » indexé par une clé unique
+  //    (companyId + label) pour rester tolérant à l'existant.
+
+  // Grouping key : project.id si dispo, sinon fallback sur un ID synthétique
+  const projectGroups = new Map<
+    string,
+    {
+      projectId: string | null;
+      projectRef: string | null;
+      projectName: string | null;
+      companyName: string | null;
+      vatRate: number;
+      items: typeof standaloneMilestones;
+    }
+  >();
   for (const m of standaloneMilestones) {
     if (!m.expectedAt) continue;
-    // expectedAt = date d'encaissement attendu (== sur le compte bancaire)
-    const monthIdx = m.expectedAt.getUTCMonth();
-    // Filtre l'année : la fenêtre de fetch est élargie pour les missions
-    // (anciens cas), mais les standalones n'ont pas besoin de cette latitude.
-    if (m.expectedAt.getUTCFullYear() !== year) continue;
-    // Taux TVA effectif : priorité projet > offre > 21%
-    const standaloneVatRate =
-      m.project?.vatRate != null
-        ? Number(m.project.vatRate)
-        : m.offer?.vatRate != null
-          ? Number(m.offer.vatRate)
-          : 21;
-    const standaloneTvacMultiplier = 1 + standaloneVatRate / 100;
-    const companyName =
-      m.company?.name ??
-      m.offer?.company?.name ??
-      m.project?.company?.name ??
-      null;
-    const labelWithCompany = companyName
-      ? `${m.label} (${companyName})`
-      : m.label;
-    const amountTvac =
-      Math.round(Number(m.amount) * standaloneTvacMultiplier * 100) / 100;
-    const cells: CashflowCell[] = MONTHS.map((i) =>
-      i === monthIdx
-        ? {
-            amount: amountTvac,
-            status: (m.status === "PAID"
-              ? "PAID"
-              : m.status === "CANCELLED"
-              ? "SKIPPED"
-              : m.status === "INVOICED" || m.status === "TRANSMITTED"
-              ? "INVOICED"
-              : "PLANNED") as "PLANNED" | "INVOICED" | "PAID" | "SKIPPED",
-            // milestoneIds : nécessaire pour que le clic sur la cellule
-            // ouvre la modal d'édition avec les boutons "Marquer facturé" et
-            // "Marquer payé" (même mécanisme que pour les missions).
-            milestoneIds: [m.id]
-          }
-        : { amount: 0, status: "PLANNED" as const }
-    );
+    // On garde les tranches d'AUTRES années dans les items du groupe pour
+    // savoir si le projet est réellement clôturé (toutes ses tranches
+    // passées et futures sont payées). Le filtrage par année se fait plus bas.
+    const gk = m.project?.id ?? `standalone-${m.companyId ?? "none"}-${m.offerId ?? "none"}`;
+    if (!projectGroups.has(gk)) {
+      const companyName =
+        m.company?.name ??
+        m.offer?.company?.name ??
+        m.project?.company?.name ??
+        null;
+      const vatRate =
+        m.project?.vatRate != null
+          ? Number(m.project.vatRate)
+          : m.offer?.vatRate != null
+            ? Number(m.offer.vatRate)
+            : 21;
+      projectGroups.set(gk, {
+        projectId: m.project?.id ?? null,
+        projectRef: m.project?.reference ?? null,
+        projectName: m.project?.name ?? null,
+        companyName,
+        vatRate,
+        items: []
+      });
+    }
+    projectGroups.get(gk)!.items.push(m);
+  }
+
+  for (const [groupKey, g] of projectGroups) {
+    const tvacMultiplier = 1 + g.vatRate / 100;
+    // On somme par mois de l'ANNÉE affichée + on collecte les milestoneIds
+    // par mois pour permettre l'édition via clic sur la cellule.
+    const monthlyAmount = new Array<number>(12).fill(0);
+    const monthlyIds = Array.from({ length: 12 }, () => [] as string[]);
+    // Statut agrégé par mois : PAID si tout est payé, INVOICED si au moins
+    // une facturée non payée, sinon PLANNED. SKIPPED uniquement si tout est
+    // annulé (rare car on ignore CANCELLED du calcul de montant).
+    const monthlyStatus: Array<"PLANNED" | "INVOICED" | "PAID" | "SKIPPED"> =
+      Array.from({ length: 12 }, () => "PLANNED");
+    const monthlyHasNonCancelled = new Array<boolean>(12).fill(false);
+    const monthlyAllPaid = new Array<boolean>(12).fill(true);
+    const monthlyAnyInvoiced = new Array<boolean>(12).fill(false);
+    for (const m of g.items) {
+      if (!m.expectedAt) continue;
+      if (m.expectedAt.getUTCFullYear() !== year) continue;
+      const monthIdx = m.expectedAt.getUTCMonth();
+      if (m.status === "CANCELLED") continue;
+      monthlyHasNonCancelled[monthIdx] = true;
+      const amountTvac =
+        Math.round(Number(m.amount) * tvacMultiplier * 100) / 100;
+      monthlyAmount[monthIdx] += amountTvac;
+      monthlyIds[monthIdx].push(m.id);
+      if (m.status !== "PAID") monthlyAllPaid[monthIdx] = false;
+      if (m.status === "INVOICED" || m.status === "TRANSMITTED") {
+        monthlyAnyInvoiced[monthIdx] = true;
+      }
+    }
+    for (let i = 0; i < 12; i++) {
+      if (!monthlyHasNonCancelled[i]) continue;
+      if (monthlyAllPaid[i]) monthlyStatus[i] = "PAID";
+      else if (monthlyAnyInvoiced[i]) monthlyStatus[i] = "INVOICED";
+      else monthlyStatus[i] = "PLANNED";
+      // Arrondi final anti-drift virgule flottante
+      monthlyAmount[i] = Math.round(monthlyAmount[i] * 100) / 100;
+    }
+
+    // Un projet est clôturé si TOUTES ses tranches non-annulées sont PAID
+    // (toutes années confondues). Si oui, la ligne existe pour le calcul
+    // des totaux mais est masquée dans la grille.
+    const activeItems = g.items.filter((m) => m.status !== "CANCELLED");
+    const isClosed =
+      activeItems.length > 0 && activeItems.every((m) => m.status === "PAID");
+
+    // Label : « [Réf] Nom projet (Client) » ou fallback tranche libre
+    const projectLabel = g.projectRef
+      ? g.projectName
+        ? `${g.projectRef} — ${g.projectName}`
+        : g.projectRef
+      : g.items[0]?.label ?? "Projet";
+    const label = g.companyName
+      ? `${projectLabel} (${g.companyName})`
+      : projectLabel;
+
+    const cells: CashflowCell[] = MONTHS.map((i) => ({
+      amount: monthlyAmount[i],
+      status: monthlyStatus[i],
+      milestoneIds: monthlyIds[i].length > 0 ? monthlyIds[i] : undefined
+    }));
+    const totalYear = cells.reduce((s, c) => s + c.amount, 0);
+
+    // Si aucune tranche cette année ET pas clôturé → skip complètement
+    // (pas la peine d'avoir une row à 0 partout).
+    if (totalYear === 0 && !isClosed && !cells.some((c) => c.status !== "PLANNED")) {
+      continue;
+    }
+
     rows.push({
-      id: `ms-${m.id}`,
+      id: `proj-${groupKey}`,
       kind: "milestones",
-      label: labelWithCompany,
+      label,
       category: "PROJET",
       isIncome: true,
+      projectId: g.projectId ?? undefined,
       cells,
-      totalYear: amountTvac
+      totalYear: Math.round(totalYear * 100) / 100,
+      hidden: isClosed
     });
   }
 

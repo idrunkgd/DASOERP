@@ -132,6 +132,11 @@ export function CashflowGrid({
       simulation: []
     };
     for (const r of data.rows) {
+      // Les lignes hidden (projets clôturés = toutes tranches payées) sont
+      // toujours contributrices aux monthlyTotals/yearTotals côté serveur,
+      // mais on ne les affiche PAS dans la grille — sinon on pollue la vue
+      // avec des lignes inertes qui n'attendent plus aucune action.
+      if (r.hidden) continue;
       if (
         r.kind === "milestones" ||
         r.kind === "recurring_income" ||
