@@ -736,6 +736,31 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     });
   }
 
+  // ─── Masquage de catégories obsolètes ───
+  // La catégorie « Facture client » (encore présente sur d'anciennes lignes
+  // recurring/oneoff) n'a plus de raison d'être depuis la refonte "1 ligne
+  // par projet" — les revenus client passent tous par les BillingMilestones.
+  // On garde les montants dans les totaux (contribution historique) mais on
+  // cache la ligne à l'affichage. Match insensible à la casse et tolère les
+  // variantes courantes (accents, pluriel, "factures client(s)").
+  const HIDDEN_CATEGORY_LABELS = new Set([
+    "facture client",
+    "factures client",
+    "facture clients",
+    "factures clients"
+  ]);
+  function isHiddenCategory(cat: string | null | undefined): boolean {
+    if (!cat) return false;
+    const norm = cat.trim().toLowerCase()
+      // NFD sépare les accents en combining marks, on les enlève
+      // (U+0300 → U+036F = plage des diacritiques combinés)
+      .normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return HIDDEN_CATEGORY_LABELS.has(norm);
+  }
+  for (const r of rows) {
+    if (isHiddenCategory(r.category)) r.hidden = true;
+  }
+
   // ─── Totaux mensuels ───
   const monthlyTotals = MONTHS.map((monthIdx) => {
     let inflow = 0;
