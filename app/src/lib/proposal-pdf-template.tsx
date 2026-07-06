@@ -212,7 +212,7 @@ export function ProposalPdf({
             <DasolabsIcon size={38} color={C.ink} />
             <View>
               <Text style={styles.brandName}>{companyInfo.legalName ?? "DASOLABS"}</Text>
-              <Text style={styles.brandTagline}>Expert IT · Consulting</Text>
+              <Text style={styles.brandTagline}>Digitalization expert</Text>
               <Text style={styles.brandLegal}>
                 {companyInfo.street}, {companyInfo.postalCode} {companyInfo.city}
                 {companyInfo.vatNumber ? ` · TVA ${companyInfo.vatNumber}` : ""}

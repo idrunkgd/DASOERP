@@ -107,6 +107,12 @@ export type CvProfile = {
   email: string | null;
   phone: string | null;
   linkedinUrl: string | null;
+  /**
+   * Tarif journalier (HTVA, EUR) affiché sur le CV — remplace l'ancien
+   * KPI « Profil ». Source : minDailyRate en priorité (souhaité par le
+   * candidat) sinon dailyCost. null = non renseigné → « — ».
+   */
+  dailyRate: number | null;
   skills: string[];
   spokenLanguages: string[];
   experiences: Array<{
@@ -140,7 +146,7 @@ export function CvPdf({
             <DasolabsIcon size={38} color={C.ink} />
             <View>
               <Text style={styles.brandName}>{companyInfo.legalName ?? "DASOLABS"}</Text>
-              <Text style={styles.brandTagline}>Expert IT · Consulting</Text>
+              <Text style={styles.brandTagline}>Digitalization expert</Text>
             </View>
           </View>
           <View>
@@ -179,9 +185,11 @@ export function CvPdf({
             </Text>
           </View>
           <View style={styles.kpi}>
-            <Text style={styles.kpiLabel}>Profil</Text>
+            <Text style={styles.kpiLabel}>Taux journalier</Text>
             <Text style={styles.kpiValue}>
-              {profile.kind === "user" ? "Consultant interne" : "Freelance"}
+              {profile.dailyRate != null
+                ? new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(profile.dailyRate)
+                : "—"}
             </Text>
           </View>
           <View style={styles.kpi}>
