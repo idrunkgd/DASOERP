@@ -247,6 +247,11 @@ model User {
   // Coûts internes
   dailyCost         Decimal?  @db.Decimal(10, 2)
   hourlyCost        Decimal?  @db.Decimal(10, 2)
+  /// Taux journalier facturable au client (HTVA, EUR). Affiché sur le CV
+  /// et utilisé comme suggestion par défaut lors de la présentation d'un
+  /// consultant sur une demande de mission. Distinct de dailyCost qui est
+  /// le coût interne Dasolabs.
+  dailyRate         Decimal?  @db.Decimal(10, 2)
   weeklyCapacityH   Decimal   @default(38) @db.Decimal(5, 2)
   // Compétences (tags simples)
   skills            String[]  @default([])
@@ -1131,6 +1136,10 @@ model Candidate {
   hourlyCost      Decimal?        @db.Decimal(10, 2)
   // Tarif minimum souhaité par le candidat (pour éviter les présentations à perte)
   minDailyRate    Decimal?        @db.Decimal(10, 2)
+  /// Taux journalier facturable au client (HTVA, EUR). Affiché sur le CV
+  /// et utilisé comme suggestion par défaut lors de la présentation. Peut
+  /// être différent de minDailyRate (marge commerciale).
+  dailyRate       Decimal?        @db.Decimal(10, 2)
 
   status          CandidateStatus @default(ACTIVE)
   availableFrom   DateTime?       @db.Date

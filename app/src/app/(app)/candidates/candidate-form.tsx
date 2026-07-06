@@ -89,6 +89,7 @@ export function CandidateForm({ initial, skillCatalog = [] }: { initial?: any; s
         <div className="col-span-3"><label className="label">Cout / j (€)</label><input name="dailyCost" type="number" step="0.01" defaultValue={initial?.dailyCost ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Cout / h (€)</label><input name="hourlyCost" type="number" step="0.01" defaultValue={initial?.hourlyCost ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Tarif min souhaité / j</label><input name="minDailyRate" type="number" step="0.01" defaultValue={initial?.minDailyRate ?? ""} className="input" /></div>
+        <div className="col-span-3"><label className="label" title="Taux vendu au client, affiché sur le CV">Taux facturable / j (€)</label><input name="dailyRate" type="number" step="0.01" defaultValue={initial?.dailyRate ?? ""} className="input" placeholder="Affiché sur le CV" /></div>
         <div className="col-span-3">
           <label className="label">Statut</label>
           <select name="status" defaultValue={initial?.status ?? "ACTIVE"} className="input">

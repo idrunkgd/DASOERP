@@ -49,12 +49,8 @@ export async function GET(req: NextRequest) {
       photoUrl: c.photoUrl, seniority: c.seniority,
       yearsExperience: c.yearsExperience, city: c.city,
       email: c.email, phone: c.phone, linkedinUrl: c.linkedinUrl,
-      // Taux journalier affiché sur le CV : on prend le minDailyRate
-      // (tarif souhaité par le candidat) en priorité, sinon on retombe
-      // sur le dailyCost interne.
-      dailyRate: c.minDailyRate != null
-        ? Number(c.minDailyRate)
-        : c.dailyCost != null ? Number(c.dailyCost) : null,
+      // Taux journalier CLIENT (dailyRate) — distinct du dailyCost interne.
+      dailyRate: c.dailyRate != null ? Number(c.dailyRate) : null,
       skills: c.skills, spokenLanguages: c.spokenLanguages,
       experiences: c.experiences.map((e) => ({
         companyName: e.companyName, jobTitle: e.jobTitle,
@@ -82,8 +78,8 @@ export async function GET(req: NextRequest) {
       photoUrl: u.photoUrl, seniority: u.seniority,
       yearsExperience: u.yearsExperience, city: u.city,
       email: u.email, phone: u.phone, linkedinUrl: u.linkedinUrl,
-      // Consultant interne : pas de minDailyRate, on affiche dailyCost.
-      dailyRate: u.dailyCost != null ? Number(u.dailyCost) : null,
+      // Consultant interne : taux journalier CLIENT (dailyRate).
+      dailyRate: u.dailyRate != null ? Number(u.dailyRate) : null,
       skills: u.skills, spokenLanguages: u.spokenLanguages,
       experiences: u.experiences.map((e) => ({
         companyName: e.companyName, jobTitle: e.jobTitle,

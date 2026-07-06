@@ -29,6 +29,8 @@ const Schema = z.object({
   // Coûts internes
   hourlyCost:    z.coerce.number().nonnegative().optional(),
   dailyCost:     z.coerce.number().nonnegative().optional(),
+  /// Taux journalier vendu au client (HTVA) — distinct de dailyCost
+  dailyRate:     z.coerce.number().nonnegative().optional(),
   weeklyCapacityH: z.coerce.number().nonnegative().default(38),
   skills: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
   joinedAt: z.string().optional().nullable().transform(v => v ? new Date(v) : null),
