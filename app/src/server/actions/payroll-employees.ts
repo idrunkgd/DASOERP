@@ -68,3 +68,45 @@ export async function deleteEmployee(id: string) {
   revalidatePath("/cashflow");
   return { ok: true };
 }
+
+// ─── Statut d'une cellule payroll (mois × kind) ──────────────
+
+type PayrollKindStr = "NET_PAY" | "WITHHOLDING_TAX" | "ONSS";
+type CashflowStatusStr = "PLANNED" | "PAID" | "SKIPPED";
+
+/**
+ * Marque une cellule payroll comme payée / à venir / skip. Idempotent :
+ * si aucune ligne PayrollMonth n'existe encore pour ce couple (year, month,
+ * kind), elle est créée. Sinon on update.
+ */
+export async function setPayrollMonthStatus(
+  year: number, month: number, kind: PayrollKindStr, status: CashflowStatusStr
+) {
+  await requirePermission("finance.write");
+  const paidAt = status === "PAID" ? new Date() : null;
+  await prisma.payrollMonth.upsert({
+    where: { year_month_kind: { year, month, kind } },
+    create: { year, month, kind, status, paidAt },
+    update: { status, paidAt }
+  });
+  revalidatePath("/cashflow");
+  revalidatePath("/employees");
+  return { ok: true };
+}
+
+/**
+ * Corrige le montant réel d'un versement (rare — quand la banque a débité
+ * un montant différent du calculé et qu'on veut refléter le réel).
+ */
+export async function setPayrollMonthAmount(
+  year: number, month: number, kind: PayrollKindStr, amount: number | null
+) {
+  await requirePermission("finance.write");
+  await prisma.payrollMonth.upsert({
+    where: { year_month_kind: { year, month, kind } },
+    create: { year, month, kind, amountOverride: amount },
+    update: { amountOverride: amount }
+  });
+  revalidatePath("/cashflow");
+  return { ok: true };
+}

@@ -52,6 +52,7 @@ import {
   updateMissionMilestoneDays
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
+import { setPayrollMonthStatus, setPayrollMonthAmount } from "@/server/actions/payroll-employees";
 
 type SectionKey =
   | "income"
@@ -3320,16 +3321,26 @@ function CellEditorModal({
   const [pending, start] = useTransition();
   const cell = row.cells[monthIdx];
   const monthLabel = MONTH_LABELS[monthIdx];
-  // Cellule d'un récurrent → upsertMonthlyEntry
-  // Cellule d'un one-off → on édite directement le one-off (ce qui change le montant pour tout le mois)
   const isRecurring =
     row.kind === "recurring_expense" || row.kind === "recurring_income";
+  // Cellule Payroll (Salaires / Précompte / ONSS agrégés) → mini-form
+  // dédié : statut PLANNED/PAID/SKIPPED + montant réel (override facultatif).
+  const isPayroll = !!cell.payroll;
   return (
     <Modal
       title={`${row.label} — ${monthLabel} ${year}`}
       onClose={onClose}
     >
-      {isRecurring && row.recurringId ? (
+      {isPayroll && cell.payroll ? (
+        <PayrollCellForm
+          year={cell.payroll.year}
+          month={cell.payroll.month}
+          kind={cell.payroll.kind}
+          currentAmount={cell.amount}
+          currentStatus={cell.status}
+          onClose={onClose}
+        />
+      ) : isRecurring && row.recurringId ? (
         <form
           action={(fd) => {
             start(async () => {
@@ -3407,6 +3418,110 @@ function CellEditorModal({
         </p>
       )}
     </Modal>
+  );
+}
+
+/**
+ * Mini-formulaire d'édition d'une cellule Payroll (Salaires / Précompte / ONSS).
+ * Deux actions : changer le statut (PAID / PLANNED / SKIPPED) et corriger
+ * le montant réel constaté (facultatif — utile quand la banque a débité
+ * un montant différent du calculé agrégé).
+ */
+function PayrollCellForm({
+  year, month, kind, currentAmount, currentStatus, onClose
+}: {
+  year: number;
+  month: number;
+  kind: "NET_PAY" | "WITHHOLDING_TAX" | "ONSS";
+  currentAmount: number;
+  currentStatus: "PLANNED" | "INVOICED" | "PAID" | "SKIPPED" | "VIRTUAL";
+  onClose: () => void;
+}) {
+  const [pendingStatus, startStatus] = useTransition();
+  const [pendingAmount, startAmount] = useTransition();
+  const [amount, setAmount] = useState(String(currentAmount.toFixed(2)));
+
+  function apply(status: "PLANNED" | "PAID" | "SKIPPED") {
+    startStatus(async () => {
+      try {
+        await setPayrollMonthStatus(year, month, kind, status);
+        toast.success("Statut mis à jour");
+        onClose();
+      } catch (e: any) { toast.error(e?.message ?? "Erreur"); }
+    });
+  }
+
+  function saveAmount(e: React.FormEvent) {
+    e.preventDefault();
+    const v = Number(amount);
+    if (!Number.isFinite(v) || v < 0) { toast.error("Montant invalide"); return; }
+    startAmount(async () => {
+      try {
+        await setPayrollMonthAmount(year, month, kind, v);
+        toast.success("Montant ajusté");
+        onClose();
+      } catch (e: any) { toast.error(e?.message ?? "Erreur"); }
+    });
+  }
+
+  const kindLabel =
+    kind === "NET_PAY" ? "Salaires (net)" :
+    kind === "WITHHOLDING_TAX" ? "Précompte professionnel" : "ONSS";
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-midnight-600">
+        Cellule payroll <strong>{kindLabel}</strong> — le montant est calculé
+        automatiquement depuis les employés actifs ce mois. Tu peux marquer
+        cette échéance comme payée ou l'ajuster si la banque a débité un
+        montant différent.
+      </p>
+
+      <div>
+        <div className="text-xs uppercase text-midnight-500 mb-1">Statut</div>
+        <div className="flex gap-2">
+          <button
+            disabled={pendingStatus}
+            onClick={() => apply("PAID")}
+            className={"btn-sm " + (currentStatus === "PAID" ? "btn-primary bg-emerald-600 hover:bg-emerald-700" : "btn-ghost")}
+          >
+            <Check className="w-3 h-3" /> Payée
+          </button>
+          <button
+            disabled={pendingStatus}
+            onClick={() => apply("PLANNED")}
+            className={"btn-sm " + (currentStatus === "PLANNED" ? "btn-primary" : "btn-ghost")}
+          >
+            À venir
+          </button>
+          <button
+            disabled={pendingStatus}
+            onClick={() => apply("SKIPPED")}
+            className={"btn-sm " + (currentStatus === "SKIPPED" ? "btn-primary bg-midnight-600" : "btn-ghost")}
+          >
+            <X className="w-3 h-3" /> Sautée
+          </button>
+        </div>
+      </div>
+
+      <form onSubmit={saveAmount} className="border-t border-midnight-100 pt-3">
+        <label className="label">Ajuster le montant réel (facultatif)</label>
+        <div className="flex gap-2">
+          <input
+            type="number" step="0.01" className="input flex-1"
+            value={amount} onChange={(e) => setAmount(e.target.value)}
+          />
+          <button type="submit" disabled={pendingAmount} className="btn-primary">
+            {pendingAmount ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Enregistrer
+          </button>
+        </div>
+        <p className="text-[11px] text-midnight-500 mt-1">
+          Le montant saisi ici prime sur le calcul agrégé. Vide pour revenir
+          au calcul automatique.
+        </p>
+      </form>
+    </div>
   );
 }
 

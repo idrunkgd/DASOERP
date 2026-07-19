@@ -2343,3 +2343,32 @@ model PayrollEmployee {
 
   @@index([startDate, endDate])
 }
+
+/// Type de sortie mensuelle payroll (les 3 lignes agrégées du cashflow).
+enum PayrollKind {
+  NET_PAY           // Salaires nets — vireés aux employés
+  WITHHOLDING_TAX   // Précompte professionnel — versé au fisc
+  ONSS              // Cotisations sociales — versées à l'ONSS
+}
+
+/// Une case (mois × type) du cashflow payroll. Permet de marquer chaque
+/// versement PAID individuellement (utile pour clôturer le passé).
+/// Le MONTANT vient toujours du calcul agrégé sur PayrollEmployee actifs
+/// — sauf si amountOverride est renseigné (rare : correction d'écart).
+model PayrollMonth {
+  id             String         @id @default(cuid())
+  year           Int
+  month          Int            // 1-12
+  kind           PayrollKind
+  status         CashflowStatus @default(PLANNED)
+  paidAt         DateTime?
+  /// Montant réel constaté (si différent du calculé). Rare — utilisé
+  /// pour absorber les micro-écarts constatés à la clôture.
+  amountOverride Decimal?       @db.Decimal(12, 2)
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([year, month, kind])
+  @@index([status])
+}

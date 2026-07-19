@@ -41,6 +41,10 @@ export type CashflowCell = {
    *  des amount / appliedDailyRate des milestones non annulées). undefined si
    *  pas applicable. */
   daysCount?: number;
+  /** Pour les cellules Payroll : marqueur (year, month, kind) permettant à
+   *  l'UI de savoir qu'un clic doit ouvrir le modal payroll et appeler
+   *  setPayrollMonthStatus / setPayrollMonthAmount plutôt qu'une action générique. */
+  payroll?: { year: number; month: number; kind: "NET_PAY" | "WITHHOLDING_TAX" | "ONSS" };
   // Pour ré-éditer
   notes?: string | null;
 };
@@ -161,7 +165,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     /// Employés : leurs 3 sorties mensuelles (Net / Précompte / ONSS) sont
     /// agrégées automatiquement pour créer 3 lignes cashflow SYNTHÉTIQUES,
     /// filtrées par employé actif au mois considéré.
-    employees
+    employees,
+    payrollMonths
   ] = await Promise.all([
     prisma.cashflowSettings.findUnique({ where: { id: "singleton" } }),
     prisma.recurringExpense.findMany({
@@ -203,7 +208,11 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     // filtrées par employé actif au mois considéré.
     prisma.payrollEmployee.findMany({
       orderBy: [{ startDate: "asc" }]
-    })
+    }),
+    // Statut cellule-par-cellule des versements payroll (PAID / PLANNED /
+    // SKIPPED) et éventuel amountOverride quand la valeur réelle diffère
+    // du calcul agrégé. Indexé par year/month/kind.
+    prisma.payrollMonth.findMany({ where: { year } })
   ]);
 
   // ─── Solde de départ projeté pour l'année `year` ───
@@ -599,9 +608,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   // ─── Lignes synthétiques Payroll (Salaires / Précompte / ONSS) ───
   // Une seule ligne par poste, agrégée sur tous les employés actifs au mois M.
   // Actif = startDate <= dernier jour du mois && (endDate == null || endDate >= 1er du mois).
-  // L'ajout d'un employé ou son départ se répercute automatiquement au prochain
-  // rafraîchissement de la page cashflow (revalidatePath("/cashflow") côté
-  // server actions payroll-employees.ts).
+  //
+  // Statut par cellule : lookup dans payrollMonths (year/month/kind). Si un
+  // amountOverride est défini, il PRIME sur le calculé (utile pour aligner
+  // sur le montant réel constaté à la banque).
   if (employees.length > 0) {
     const monthlySalary  = new Array<number>(12).fill(0);
     const monthlyTax     = new Array<number>(12).fill(0);
@@ -610,11 +620,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       const start = e.startDate;
       const end = e.endDate;
       for (let m = 0; m < 12; m++) {
-        // Fenêtre d'activité : dernier jour du mois M
         const monthEnd = new Date(Date.UTC(year, m + 1, 0));
         const monthStart = new Date(Date.UTC(year, m, 1));
-        if (start > monthEnd) continue;                // pas encore embauché
-        if (end != null && end < monthStart) continue; // déjà parti
+        if (start > monthEnd) continue;
+        if (end != null && end < monthStart) continue;
         monthlySalary[m] += Number(e.monthlyNetPay);
         monthlyTax[m]    += Number(e.monthlyWithholdingTax);
         monthlyOnss[m]   += Number(e.monthlyOnss);
@@ -624,20 +633,38 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     const s = roundArr(monthlySalary);
     const t = roundArr(monthlyTax);
     const o = roundArr(monthlyOnss);
-    const mkRow = (label: string, id: string, values: number[]): CashflowRow => ({
+
+    // Index des PayrollMonth par (kind, month) pour lookup O(1)
+    const pmIndex = new Map<string, typeof payrollMonths[number]>();
+    for (const pm of payrollMonths) pmIndex.set(`${pm.kind}-${pm.month}`, pm);
+
+    const mkRow = (
+      label: string, id: string, values: number[],
+      kind: "NET_PAY" | "WITHHOLDING_TAX" | "ONSS"
+    ): CashflowRow => ({
       id, kind: "recurring_expense", label, category: "PAYROLL",
       isIncome: false,
-      cells: values.map((v) => ({
-        amount: v,
-        // Statut fixé à PLANNED — l'utilisateur configure directement dans
-        // /employees, il n'y a pas de "marquer payé" sur ces cellules.
-        status: "PLANNED" as const
-      })),
+      cells: values.map((v, i) => {
+        const monthNum = i + 1;
+        const pm = pmIndex.get(`${kind}-${monthNum}`);
+        const overriden = pm?.amountOverride != null ? Number(pm.amountOverride) : null;
+        const effectiveAmount = overriden != null ? overriden : v;
+        const status = pm?.status === "PAID"
+          ? "PAID" as const
+          : pm?.status === "SKIPPED"
+            ? "SKIPPED" as const
+            : "PLANNED" as const;
+        return {
+          amount: status === "SKIPPED" ? 0 : effectiveAmount,
+          status,
+          payroll: { year, month: monthNum, kind }
+        };
+      }),
       totalYear: values.reduce((a, b) => a + b, 0)
     });
-    if (s.some((v) => v > 0)) rows.push(mkRow("Salaires (net)",         "payroll-salary", s));
-    if (t.some((v) => v > 0)) rows.push(mkRow("Précompte professionnel","payroll-tax",    t));
-    if (o.some((v) => v > 0)) rows.push(mkRow("ONSS",                   "payroll-onss",   o));
+    if (s.some((v) => v > 0)) rows.push(mkRow("Salaires (net)",         "payroll-salary", s, "NET_PAY"));
+    if (t.some((v) => v > 0)) rows.push(mkRow("Précompte professionnel","payroll-tax",    t, "WITHHOLDING_TAX"));
+    if (o.some((v) => v > 0)) rows.push(mkRow("ONSS",                   "payroll-onss",   o, "ONSS"));
   }
 
   // ─── Lignes RecurringExpense ───
