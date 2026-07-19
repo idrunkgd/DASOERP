@@ -20,6 +20,7 @@ import {
   toggleOneOffStatus
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
+import { setPayrollMonthStatus } from "@/server/actions/payroll-employees";
 import { colorForCategory, NO_CATEGORY } from "./category-color";
 
 const MONTHS_LONG = [
@@ -69,6 +70,15 @@ type OneOff = {
   paidAt: string | null;
 };
 
+type PayrollItem = {
+  year: number;
+  month: number;
+  kind: "NET_PAY" | "WITHHOLDING_TAX" | "ONSS";
+  label: string;
+  amount: number;
+  status: string;
+};
+
 /** Type unifié pour l'affichage : tout item (milestone, recurring, oneoff) regroupé par catégorie */
 type UnifiedItem = {
   key: string;
@@ -79,8 +89,10 @@ type UnifiedItem = {
   isSkipped: boolean;
   isIncome: boolean;
   // Données pour les actions
-  source: "milestone" | "recurring" | "oneoff";
+  source: "milestone" | "recurring" | "oneoff" | "payroll";
   sourceId: string;
+  // Pour payroll : le kind exact (NET_PAY / WITHHOLDING_TAX / ONSS)
+  payrollKind?: "NET_PAY" | "WITHHOLDING_TAX" | "ONSS";
   // Métadonnées d'affichage
   companyName?: string | null;
   offerId?: string | null;
@@ -124,13 +136,15 @@ export function CurrentMonthPanel({
   month,
   milestones,
   recurring,
-  oneOffs
+  oneOffs,
+  payroll = []
 }: {
   year: number;
   month: number;
   milestones: Milestone[];
   recurring: RecurringWithEntry[];
   oneOffs: OneOff[];
+  payroll?: PayrollItem[];
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -211,8 +225,29 @@ export function CurrentMonthPanel({
       (o.kind === "INCOME" ? inc : exp).push(item);
     }
 
+    // Payroll : 3 items synthétiques (Salaires, Précompte, ONSS).
+    // Toujours en dépense. SKIPPED filtré. Le kind est stocké dans
+    // payrollKind pour permettre au toggle d'appeler setPayrollMonthStatus.
+    for (const p of payroll) {
+      if (p.status === "SKIPPED") continue;
+      exp.push({
+        key: `p-${p.kind}`,
+        category: "PAYROLL",
+        label: p.label,
+        amount: p.amount,
+        isPaid: p.status === "PAID",
+        isSkipped: false,
+        isIncome: false,
+        source: "payroll",
+        sourceId: `${p.year}-${p.month}-${p.kind}`,
+        payrollKind: p.kind,
+        year: p.year,
+        monthNum: p.month
+      });
+    }
+
     return { incomeItems: inc, expenseItems: exp };
-  }, [milestones, recurringForMonth, oneOffs, year, month]);
+  }, [milestones, recurringForMonth, oneOffs, payroll, year, month]);
 
   // Totaux
   const totals = useMemo(() => {
@@ -500,6 +535,18 @@ function UnifiedItemRow({ item }: { item: UnifiedItem }) {
           await cycleMonthlyStatus(item.sourceId, item.year, item.monthNum);
         } else if (item.source === "oneoff") {
           await toggleOneOffStatus(item.sourceId);
+        } else if (
+          item.source === "payroll" &&
+          item.payrollKind &&
+          item.year &&
+          item.monthNum
+        ) {
+          await setPayrollMonthStatus(
+            item.year,
+            item.monthNum,
+            item.payrollKind,
+            isPaid ? "PLANNED" : "PAID"
+          );
         }
         toast.success(isPaid ? "Non payé (retour à facturé)" : "Payé ✓");
       } catch (e: any) {

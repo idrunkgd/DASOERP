@@ -121,6 +121,43 @@ export default async function CashflowPage({
       })
     ]);
 
+  // ─── Payroll pour le panneau "Ce mois-ci" ───
+  // Salaires (net) / Précompte pro / ONSS : 3 items synthétiques agrégés
+  // sur les employés actifs ce mois. Chacun avec son statut PAID/PLANNED
+  // pour permettre de les cocher payés depuis le panneau du haut.
+  const [payrollEmployeesForMonth, payrollMonthsForFocus] = await Promise.all([
+    prisma.payrollEmployee.findMany({
+      where: {
+        startDate: { lte: focusMonthEnd },
+        OR: [{ endDate: null }, { endDate: { gte: focusMonthStart } }]
+      }
+    }),
+    prisma.payrollMonth.findMany({
+      where: { year, month: focusMonth }
+    })
+  ]);
+  const payrollSums = {
+    NET_PAY: payrollEmployeesForMonth.reduce((s, e) => s + Number(e.monthlyNetPay), 0),
+    WITHHOLDING_TAX: payrollEmployeesForMonth.reduce((s, e) => s + Number(e.monthlyWithholdingTax), 0),
+    ONSS: payrollEmployeesForMonth.reduce((s, e) => s + Number(e.monthlyOnss), 0)
+  };
+  const payrollByKind = new Map<string, typeof payrollMonthsForFocus[number]>();
+  for (const pm of payrollMonthsForFocus) payrollByKind.set(pm.kind, pm);
+  const payrollItems = (["NET_PAY", "WITHHOLDING_TAX", "ONSS"] as const)
+    .map((kind) => {
+      const pm = payrollByKind.get(kind);
+      const overriden = pm?.amountOverride != null ? Number(pm.amountOverride) : null;
+      const amount = overriden != null ? overriden : payrollSums[kind];
+      return {
+        year, month: focusMonth, kind,
+        label: kind === "NET_PAY" ? "Salaires (net)" :
+               kind === "WITHHOLDING_TAX" ? "Précompte professionnel" : "ONSS",
+        amount,
+        status: pm?.status ?? "PLANNED"
+      };
+    })
+    .filter((item) => item.amount > 0);
+
   // ─── TVAC pour les milestones du mois ───
   // Les BillingMilestones stockent leur amount en HTVA. Le panneau "Ce mois-ci"
   // (et donc le résumé "À encaisser / À payer") doivent afficher TVAC pour
@@ -288,6 +325,7 @@ export default async function CashflowPage({
           date: o.date.toISOString(),
           paidAt: o.paidAt?.toISOString() ?? null
         }))}
+        payroll={payrollItems}
       />
 
       <CashflowGrid
