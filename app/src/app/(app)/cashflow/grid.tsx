@@ -53,6 +53,7 @@ import {
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
 import { setPayrollMonthStatus, setPayrollMonthAmount } from "@/server/actions/payroll-employees";
+import { renameCashflowCategory } from "@/server/actions/cashflow";
 
 type SectionKey =
   | "income"
@@ -667,6 +668,36 @@ function SectionBlock({
                       {catName}
                     </span>
                     <span className="text-midnight-400">({catRows.length})</span>
+                    {catName !== NO_CATEGORY && (
+                      <button
+                        onClick={(e) => {
+                          // Ne pas déclencher le toggle collapsed en cliquant
+                          // sur le crayon. On demande le nouveau nom via prompt
+                          // (léger, pas besoin d'un modal complet pour ça).
+                          e.stopPropagation();
+                          const newName = window.prompt(
+                            `Renommer la catégorie « ${catName} » :`,
+                            catName
+                          );
+                          if (newName == null) return;
+                          const trimmed = newName.trim();
+                          if (trimmed === catName) return;
+                          renameCashflowCategory(catName, trimmed)
+                            .then((r) =>
+                              toast.success(
+                                `Renommée : ${r.recurringUpdated + r.oneOffUpdated} ligne(s) mise(s) à jour`
+                              )
+                            )
+                            .catch((err) =>
+                              toast.error(err?.message ?? "Erreur")
+                            );
+                        }}
+                        className="ml-1 text-midnight-400 hover:text-indigoaccent"
+                        title="Renommer cette catégorie (bulk update)"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    )}
                   </span>
                 </td>
                 {catCellTotals.map((amount, i) => (

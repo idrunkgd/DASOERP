@@ -1281,3 +1281,34 @@ export async function toggleOneOffStatus(id: string) {
   });
   revalidatePath("/cashflow");
 }
+
+/**
+ * Renomme une catégorie du cashflow — bulk update sur toutes les
+ * RecurringExpense et OneOffCashflowEntry qui portaient l'ancien nom.
+ *
+ * La catégorie est un champ String libre (pas d'entité séparée), donc
+ * "renommer" = update en masse. Si newName est vide, toutes les lignes
+ * redeviennent "sans catégorie".
+ */
+export async function renameCashflowCategory(oldName: string, newName: string) {
+  await requirePermission(PERM_WRITE);
+  const trimmedOld = oldName.trim();
+  const trimmedNew = newName.trim();
+  if (!trimmedOld) throw new Error("Ancien nom de catégorie requis");
+  const [r1, r2] = await prisma.$transaction([
+    prisma.recurringExpense.updateMany({
+      where: { category: trimmedOld },
+      data: { category: trimmedNew || null }
+    }),
+    prisma.oneOffCashflowEntry.updateMany({
+      where: { category: trimmedOld },
+      data: { category: trimmedNew || null }
+    })
+  ]);
+  revalidatePath("/cashflow");
+  return {
+    ok: true,
+    recurringUpdated: r1.count,
+    oneOffUpdated: r2.count
+  };
+}

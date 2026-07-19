@@ -45,12 +45,19 @@ export default async function CashflowPage({
     })
   ]);
 
-  // Catégories distinctes utilisées (récurrents + ponctuels)
+  // Catégories distinctes utilisées (récurrents + ponctuels) + catégories
+  // "système" (utilisées par les lignes synthétiques comme PAYROLL/MISSION/
+  // PROJET) qu'on veut voir dans l'autocomplete même si aucune ligne
+  // utilisateur ne les porte encore.
+  const SYSTEM_CATEGORIES = ["PAYROLL", "MISSION", "PROJET"];
   const categories = Array.from(
     new Set(
-      [...recurringCats, ...oneOffCats]
-        .map((r) => r.category)
-        .filter((c): c is string => !!c && c.trim().length > 0)
+      [
+        ...SYSTEM_CATEGORIES,
+        ...[...recurringCats, ...oneOffCats]
+          .map((r) => r.category)
+          .filter((c): c is string => !!c && c.trim().length > 0)
+      ]
     )
   ).sort((a, b) => a.localeCompare(b));
 
