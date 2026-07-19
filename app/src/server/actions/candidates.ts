@@ -30,6 +30,8 @@ const Schema = z.object({
   minDailyRate: z.coerce.number().nonnegative().optional().nullable(),
   /// Taux journalier vendu au client (HTVA) — distinct du coût interne
   dailyRate: z.coerce.number().nonnegative().optional().nullable(),
+  /// Type de contrat quand engagé chez Dasolabs
+  contractType: z.enum(["EMPLOYEE", "FREELANCE"]).optional().nullable().transform((v) => v || null),
   status: z.enum(["ACTIVE","ENGAGED","UNAVAILABLE","ARCHIVED"]).default("ACTIVE"),
   availableFrom: z.string().optional().nullable().transform(v => v ? new Date(v) : null),
   notes: z.string().optional().nullable()

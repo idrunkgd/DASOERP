@@ -20,12 +20,19 @@ const Schema = z.object({
   monthlyOnss:           z.coerce.number().nonnegative().default(0),
   monthlyGrossReference: z.coerce.number().nonnegative().optional().nullable(),
   monthsPerYear:         z.coerce.number().positive().default(13.92),
+  /// Lien optionnel vers la source (candidat externe ou consultant interne)
+  candidateId: z.string().optional().nullable().transform((v) => v || null),
+  userId:      z.string().optional().nullable().transform((v) => v || null),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
 
 export async function createEmployee(formData: FormData) {
   await requirePermission("finance.write");
   const data = Schema.parse(Object.fromEntries(formData));
+  // XOR : au max un seul lien source
+  if (data.candidateId && data.userId) {
+    throw new Error("Un employé ne peut pas être lié à la fois à un candidat et un consultant interne.");
+  }
   await prisma.payrollEmployee.create({
     data: {
       ...data,

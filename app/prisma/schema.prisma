@@ -306,6 +306,10 @@ model User {
   // Prospection outbound (chasseuse de têtes)
   outreachInteractions OutreachInteraction[] @relation("OutreachOwner")
   outreachTemplates    OutreachTemplate[]    @relation("OutreachTemplateCreator")
+  /// Type de contrat de ce consultant chez Dasolabs. Idem Candidate.contractType.
+  contractType         ContractType?
+  /// Paie configurée pour ce consultant interne (si contractType=EMPLOYEE).
+  payrollEmployee      PayrollEmployee? @relation("PayrollFromUser")
   // Missions T&M exécutées par ce consultant (User interne)
   consultantMissions  Mission[]          @relation("MissionConsultant")
   // Présentations sur des demandes de mission (consultant interne proposé au client)
@@ -1181,12 +1185,20 @@ model Candidate {
   testAssignments TestAssignment[] @relation("TestAssigneeCandidate")
   // Interactions de prospection (chasseuse de têtes)
   outreachInteractions OutreachInteraction[] @relation("CandidateOutreach")
+  /// Type de contrat quand ce candidat est engagé chez Dasolabs :
+  /// EMPLOYEE = salarié (apparaît dans /employees pour config paie),
+  /// FREELANCE = sous-traitant (factures reçues comme SupplierInvoice).
+  /// NULL = pas encore déterminé (comportement historique).
+  contractType    ContractType?
+  /// Paie configurée pour ce candidat (si contractType=EMPLOYEE).
+  payrollEmployee PayrollEmployee? @relation("PayrollFromCandidate")
 
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
   @@index([lastName, firstName])
   @@index([status])
+  @@index([contractType])
 }
 
 // =============================================================
@@ -2285,11 +2297,30 @@ model OutreachInteraction {
 // pas forcément un employé salarié (ex. consultants externes).
 // =============================================================
 
+/// Type de contrat pour un candidat/consultant Dasolabs.
+/// Détermine si la personne apparaît dans la page /employees pour
+/// configurer sa paie (salaire net, précompte, ONSS).
+enum ContractType {
+  EMPLOYEE     // salarié Dasolabs → apparaît dans /employees pour paie
+  FREELANCE    // sous-traitant → pas de paie interne, factures reçues comme SupplierInvoice
+}
+
 model PayrollEmployee {
   id                    String    @id @default(cuid())
   firstName             String
   lastName              String
   role                  String?   // ex. "Sourceuse", "Consultant Data", "PMO"
+
+  // ─── Lien optionnel vers la source (Candidat ou Consultant interne) ───
+  /// Si la paie est configurée depuis un Candidat existant. Contrainte :
+  /// un candidat n'a qu'une seule paie (unique). Cascade delete côté DB
+  /// pour éviter les orphelins.
+  candidateId           String?   @unique
+  candidate             Candidate? @relation("PayrollFromCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  /// Si la paie est configurée depuis un Consultant interne (User).
+  userId                String?   @unique
+  user                  User?     @relation("PayrollFromUser", fields: [userId], references: [id], onDelete: Cascade)
+
   /// Date d'entrée effective (impact sur le premier mois pris en compte)
   startDate             DateTime  @db.Date
   /// Date de sortie effective. NULL = toujours en poste.

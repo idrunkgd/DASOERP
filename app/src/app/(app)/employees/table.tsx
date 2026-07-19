@@ -4,13 +4,15 @@
  * en cliquant sur "+ Ajouter", et chaque ligne peut passer en mode édition
  * via l'icône crayon. Suppression via poubelle.
  */
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   createEmployee, updateEmployee, deleteEmployee
 } from "@/server/actions/payroll-employees";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Loader2, Save, Trash2, Edit3, X } from "lucide-react";
+import { Plus, Loader2, Save, Trash2, Edit3, X, User as UserIcon } from "lucide-react";
 
 type Employee = {
   id: string;
@@ -25,11 +27,35 @@ type Employee = {
   monthlyGrossReference: number | null;
   monthsPerYear: number;
   notes: string | null;
+  candidateId?: string | null;
+  userId?: string | null;
+  sourceLink?: { href: string; label: string } | null;
 };
 
 export function EmployeesTable({ employees }: { employees: Employee[] }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Si la page a été ouverte avec ?candidateId=X ou ?userId=X (depuis le
+  // bouton "Configurer la paie"), on ouvre auto le formulaire pré-rempli.
+  const prefillCandidateId = searchParams.get("candidateId");
+  const prefillUserId = searchParams.get("userId");
+  const prefillFirstName = searchParams.get("firstName") ?? "";
+  const prefillLastName = searchParams.get("lastName") ?? "";
+  useEffect(() => {
+    if ((prefillCandidateId || prefillUserId) && !adding) {
+      setAdding(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillCandidateId, prefillUserId]);
+
+  function closeAdd() {
+    setAdding(false);
+    // Nettoie la query string pour ne pas ré-ouvrir le form au prochain reload
+    if (prefillCandidateId || prefillUserId) router.replace("/employees");
+  }
 
   return (
     <>
@@ -38,7 +64,15 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
           <Plus className="w-4 h-4" /> Ajouter un employé
         </button>
       ) : (
-        <EmployeeForm onDone={() => setAdding(false)} onCancel={() => setAdding(false)} />
+        <EmployeeForm
+          prefill={{
+            candidateId: prefillCandidateId,
+            userId: prefillUserId,
+            firstName: prefillFirstName,
+            lastName: prefillLastName
+          }}
+          onDone={closeAdd} onCancel={closeAdd}
+        />
       )}
 
       <div className="card overflow-hidden">
@@ -86,6 +120,11 @@ function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
     <tr className={isGone ? "opacity-50" : ""}>
       <td>
         <div className="font-medium">{e.firstName} {e.lastName}</div>
+        {e.sourceLink && (
+          <Link href={e.sourceLink.href} className="text-[10px] text-indigoaccent hover:underline inline-flex items-center gap-1">
+            <UserIcon className="w-2.5 h-2.5" /> {e.sourceLink.label}
+          </Link>
+        )}
         {e.notes && <div className="text-xs text-midnight-500 truncate max-w-[200px]">{e.notes}</div>}
       </td>
       <td className="text-sm">{e.role ?? "—"}</td>
@@ -120,9 +159,15 @@ function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
 }
 
 function EmployeeForm({
-  employee, onDone, onCancel
+  employee, prefill, onDone, onCancel
 }: {
   employee?: Employee;
+  prefill?: {
+    candidateId: string | null;
+    userId: string | null;
+    firstName: string;
+    lastName: string;
+  };
   onDone: () => void;
   onCancel: () => void;
 }) {
@@ -139,17 +184,27 @@ function EmployeeForm({
       } catch (e: any) { toast.error(e?.message ?? "Erreur"); }
     });
   }
+  const firstName = employee?.firstName ?? prefill?.firstName ?? "";
+  const lastName  = employee?.lastName  ?? prefill?.lastName  ?? "";
   return (
-    <form onSubmit={submit} className="card p-4 border-2 border-indigoaccent mb-3 space-y-3">
-      <h3 className="font-semibold">{employee ? "Modifier l'employé" : "Nouvel employé"}</h3>
+    <form id="configure" onSubmit={submit} className="card p-4 border-2 border-indigoaccent mb-3 space-y-3">
+      <h3 className="font-semibold">
+        {employee ? "Modifier l'employé"
+                  : prefill?.candidateId ? "Configurer la paie du candidat"
+                  : prefill?.userId ? "Configurer la paie du consultant"
+                  : "Nouvel employé"}
+      </h3>
+      {/* Liens source cachés — l'utilisateur ne les touche pas */}
+      {prefill?.candidateId && <input type="hidden" name="candidateId" value={prefill.candidateId} />}
+      {prefill?.userId && <input type="hidden" name="userId" value={prefill.userId} />}
       <div className="grid grid-cols-4 gap-2">
         <div>
           <label className="label">Prénom *</label>
-          <input name="firstName" required defaultValue={employee?.firstName ?? ""} className="input" />
+          <input name="firstName" required defaultValue={firstName} className="input" />
         </div>
         <div>
           <label className="label">Nom *</label>
-          <input name="lastName" required defaultValue={employee?.lastName ?? ""} className="input" />
+          <input name="lastName" required defaultValue={lastName} className="input" />
         </div>
         <div className="col-span-2">
           <label className="label">Rôle</label>

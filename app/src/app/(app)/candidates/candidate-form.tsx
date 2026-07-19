@@ -91,6 +91,14 @@ export function CandidateForm({ initial, skillCatalog = [] }: { initial?: any; s
         <div className="col-span-3"><label className="label">Tarif min souhaité / j</label><input name="minDailyRate" type="number" step="0.01" defaultValue={initial?.minDailyRate ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label" title="Taux vendu au client, affiché sur le CV">Taux facturable / j (€)</label><input name="dailyRate" type="number" step="0.01" defaultValue={initial?.dailyRate ?? ""} className="input" placeholder="Affiché sur le CV" /></div>
         <div className="col-span-3">
+          <label className="label">Type de contrat</label>
+          <select name="contractType" defaultValue={initial?.contractType ?? ""} className="input">
+            <option value="">— Non défini —</option>
+            <option value="EMPLOYEE">Employé Dasolabs</option>
+            <option value="FREELANCE">Freelance / sous-traitant</option>
+          </select>
+        </div>
+        <div className="col-span-3">
           <label className="label">Statut</label>
           <select name="status" defaultValue={initial?.status ?? "ACTIVE"} className="input">
             <option value="ACTIVE">Actif</option>

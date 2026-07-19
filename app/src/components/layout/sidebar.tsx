@@ -26,6 +26,7 @@ const SECTIONS: Section[] = [
       { href: "/project-status",    label: "Statut projet",        icon: Gauge,         perm: "projects.read" },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
+      { href: "/employees",         label: "Employés",             icon: Users,         perm: "finance.write" },
       { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       perm: "finance.read" },
       { href: "/app-links",         label: "Outils & apps",        icon: AppWindow,     perm: "applinks.read" }
     ]
@@ -44,7 +45,6 @@ const SECTIONS: Section[] = [
     label: "Consultance",
     items: [
       { href: "/prospection",      label: "Prospection",          icon: UserPlus,        perm: "consulting.write" },
-      { href: "/employees",        label: "Employés",             icon: Users,           perm: "finance.write" },
       { href: "/candidates",       label: "Candidats",            icon: UserPlus,        perm: "consulting.read" },
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },

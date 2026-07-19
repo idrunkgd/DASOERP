@@ -84,6 +84,14 @@ export function UserForm({ initial, skillCatalog = [] }: { initial?: any; skillC
         <div className="col-span-3"><label className="label">Cout / h (€)</label><input name="hourlyCost" type="number" step="0.01" defaultValue={initial?.hourlyCost ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Cout / j (€)</label><input name="dailyCost" type="number" step="0.01" defaultValue={initial?.dailyCost ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label" title="Taux vendu au client, affiché sur le CV">Taux facturable / j (€)</label><input name="dailyRate" type="number" step="0.01" defaultValue={initial?.dailyRate ?? ""} className="input" placeholder="Affiché sur le CV" /></div>
+        <div className="col-span-3">
+          <label className="label">Type de contrat</label>
+          <select name="contractType" defaultValue={initial?.contractType ?? ""} className="input">
+            <option value="">— Non défini —</option>
+            <option value="EMPLOYEE">Employé Dasolabs</option>
+            <option value="FREELANCE">Freelance / sous-traitant</option>
+          </select>
+        </div>
         <div className="col-span-3"><label className="label">Date d'entrée</label><input name="joinedAt" type="date" defaultValue={initial?.joinedAt ? new Date(initial.joinedAt).toISOString().slice(0,10) : ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Date de sortie</label><input name="leftAt" type="date" defaultValue={initial?.leftAt ? new Date(initial.leftAt).toISOString().slice(0,10) : ""} className="input" /></div>
         <div className="col-span-6">
