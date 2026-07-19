@@ -157,7 +157,11 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     recurring,
     monthEntries,
     oneOffs,
-    milestones
+    milestones,
+    /// Employés : leurs 3 sorties mensuelles (Net / Précompte / ONSS) sont
+    /// agrégées automatiquement pour créer 3 lignes cashflow SYNTHÉTIQUES,
+    /// filtrées par employé actif au mois considéré.
+    employees
   ] = await Promise.all([
     prisma.cashflowSettings.findUnique({ where: { id: "singleton" } }),
     prisma.recurringExpense.findMany({
@@ -193,6 +197,12 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
           }
         }
       }
+    }),
+    // Employés : leurs 3 sorties mensuelles (Net / Précompte / ONSS) sont
+    // agrégées ci-dessous pour créer 3 lignes cashflow synthétiques,
+    // filtrées par employé actif au mois considéré.
+    prisma.payrollEmployee.findMany({
+      orderBy: [{ startDate: "asc" }]
     })
   ]);
 
@@ -584,6 +594,50 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       totalYear: Math.round(totalYear * 100) / 100,
       hidden: isClosed
     });
+  }
+
+  // ─── Lignes synthétiques Payroll (Salaires / Précompte / ONSS) ───
+  // Une seule ligne par poste, agrégée sur tous les employés actifs au mois M.
+  // Actif = startDate <= dernier jour du mois && (endDate == null || endDate >= 1er du mois).
+  // L'ajout d'un employé ou son départ se répercute automatiquement au prochain
+  // rafraîchissement de la page cashflow (revalidatePath("/cashflow") côté
+  // server actions payroll-employees.ts).
+  if (employees.length > 0) {
+    const monthlySalary  = new Array<number>(12).fill(0);
+    const monthlyTax     = new Array<number>(12).fill(0);
+    const monthlyOnss    = new Array<number>(12).fill(0);
+    for (const e of employees) {
+      const start = e.startDate;
+      const end = e.endDate;
+      for (let m = 0; m < 12; m++) {
+        // Fenêtre d'activité : dernier jour du mois M
+        const monthEnd = new Date(Date.UTC(year, m + 1, 0));
+        const monthStart = new Date(Date.UTC(year, m, 1));
+        if (start > monthEnd) continue;                // pas encore embauché
+        if (end != null && end < monthStart) continue; // déjà parti
+        monthlySalary[m] += Number(e.monthlyNetPay);
+        monthlyTax[m]    += Number(e.monthlyWithholdingTax);
+        monthlyOnss[m]   += Number(e.monthlyOnss);
+      }
+    }
+    const roundArr = (arr: number[]) => arr.map((v) => Math.round(v * 100) / 100);
+    const s = roundArr(monthlySalary);
+    const t = roundArr(monthlyTax);
+    const o = roundArr(monthlyOnss);
+    const mkRow = (label: string, id: string, values: number[]): CashflowRow => ({
+      id, kind: "recurring_expense", label, category: "PAYROLL",
+      isIncome: false,
+      cells: values.map((v) => ({
+        amount: v,
+        // Statut fixé à PLANNED — l'utilisateur configure directement dans
+        // /employees, il n'y a pas de "marquer payé" sur ces cellules.
+        status: "PLANNED" as const
+      })),
+      totalYear: values.reduce((a, b) => a + b, 0)
+    });
+    if (s.some((v) => v > 0)) rows.push(mkRow("Salaires (net)",         "payroll-salary", s));
+    if (t.some((v) => v > 0)) rows.push(mkRow("Précompte professionnel","payroll-tax",    t));
+    if (o.some((v) => v > 0)) rows.push(mkRow("ONSS",                   "payroll-onss",   o));
   }
 
   // ─── Lignes RecurringExpense ───

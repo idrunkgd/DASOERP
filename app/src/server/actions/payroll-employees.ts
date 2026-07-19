@@ -1,0 +1,63 @@
+"use server";
+/**
+ * CRUD des PayrollEmployee. Chaque save invalide /cashflow et /employees
+ * car les 3 lignes cashflow "Salaires / Précompte / ONSS" sont dérivées
+ * de cette table en temps réel côté serveur.
+ */
+import { z } from "zod";
+import { prisma } from "@/lib/db";
+import { requirePermission } from "@/lib/rbac";
+import { revalidatePath } from "next/cache";
+
+const Schema = z.object({
+  firstName: z.string().min(1),
+  lastName:  z.string().min(1),
+  role:      z.string().optional().nullable().transform((v) => v?.trim() || null),
+  startDate: z.string().min(1),
+  endDate:   z.string().optional().nullable().transform((v) => v || null),
+  monthlyNetPay:         z.coerce.number().nonnegative().default(0),
+  monthlyWithholdingTax: z.coerce.number().nonnegative().default(0),
+  monthlyOnss:           z.coerce.number().nonnegative().default(0),
+  monthlyGrossReference: z.coerce.number().nonnegative().optional().nullable(),
+  monthsPerYear:         z.coerce.number().positive().default(13.92),
+  notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
+});
+
+export async function createEmployee(formData: FormData) {
+  await requirePermission("finance.write");
+  const data = Schema.parse(Object.fromEntries(formData));
+  await prisma.payrollEmployee.create({
+    data: {
+      ...data,
+      startDate: new Date(data.startDate),
+      endDate: data.endDate ? new Date(data.endDate) : null
+    }
+  });
+  revalidatePath("/employees");
+  revalidatePath("/cashflow");
+  return { ok: true };
+}
+
+export async function updateEmployee(id: string, formData: FormData) {
+  await requirePermission("finance.write");
+  const data = Schema.parse(Object.fromEntries(formData));
+  await prisma.payrollEmployee.update({
+    where: { id },
+    data: {
+      ...data,
+      startDate: new Date(data.startDate),
+      endDate: data.endDate ? new Date(data.endDate) : null
+    }
+  });
+  revalidatePath("/employees");
+  revalidatePath("/cashflow");
+  return { ok: true };
+}
+
+export async function deleteEmployee(id: string) {
+  await requirePermission("finance.write");
+  await prisma.payrollEmployee.delete({ where: { id } });
+  revalidatePath("/employees");
+  revalidatePath("/cashflow");
+  return { ok: true };
+}

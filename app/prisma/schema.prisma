@@ -2263,3 +2263,52 @@ model OutreachInteraction {
   @@index([candidateId])
   @@index([contactId])
 }
+
+// =============================================================
+// PAYROLL — Employés Dasolabs avec leurs 3 sorties mensuelles
+//
+// Objectif : dans le cashflow, remplacer les N × 3 lignes (Salaire X,
+// Précompte X, ONSS X pour chaque personne) par 3 lignes AGRÉGÉES
+// (Salaires / Précompte pro / ONSS) sommées sur tous les employés
+// actifs au mois M. L'ajout / le départ d'un employé se répercute
+// automatiquement dans les prévisions.
+//
+// Les 3 montants correspondent aux 3 versements bancaires typiques
+// que l'employeur belge fait chaque mois :
+//  - monthlyNetPay          → au salarié (compte perso)
+//  - monthlyWithholdingTax  → au fisc (précompte professionnel)
+//  - monthlyOnss            → à l'ONSS (cotisations totales patronales
+//                             + salariales versées à la source)
+//
+// PayrollEmployee est INDÉPENDANT du modèle User : un employé n'a pas
+// forcément un compte ERP (ex. Marlène du sourcing), et un User n'est
+// pas forcément un employé salarié (ex. consultants externes).
+// =============================================================
+
+model PayrollEmployee {
+  id                    String    @id @default(cuid())
+  firstName             String
+  lastName              String
+  role                  String?   // ex. "Sourceuse", "Consultant Data", "PMO"
+  /// Date d'entrée effective (impact sur le premier mois pris en compte)
+  startDate             DateTime  @db.Date
+  /// Date de sortie effective. NULL = toujours en poste.
+  /// Le cashflow arrête d'inclure l'employé le mois suivant la sortie.
+  endDate               DateTime? @db.Date
+
+  // ─── Les 3 sorties mensuelles (EUR, valeurs positives) ───
+  monthlyNetPay         Decimal   @default(0) @db.Decimal(10, 2)
+  monthlyWithholdingTax Decimal   @default(0) @db.Decimal(10, 2)
+  monthlyOnss           Decimal   @default(0) @db.Decimal(10, 2)
+
+  // ─── Contexte (indicatif, pas repris dans le cashflow) ───
+  /// Salaire brut mensuel de référence
+  monthlyGrossReference Decimal?  @db.Decimal(10, 2)
+  /// Nb de mois versés / an (13.92 par défaut BE, tient compte du 13e + double pécule)
+  monthsPerYear         Decimal   @default(13.92) @db.Decimal(5, 2)
+  notes                 String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([startDate, endDate])
+}
