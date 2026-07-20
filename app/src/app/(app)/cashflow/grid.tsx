@@ -567,11 +567,10 @@ function SectionBlock({
   // qu'il veut consulter.
   const [collapsedCats, setCollapsedCats] = useState<Record<string, boolean>>({});
 
-  if (rows.length === 0 && (sectionKey === "commitment" || sectionKey === "simulation")) {
-    return null;
-  }
-
   // Regroupe par catégorie
+  // IMPORTANT : ce hook DOIT être appelé avant tout early return, sinon le
+  // count de hooks varie entre renders (React error #310) — cas typique :
+  // section "simulation" vide en janvier 2027 et non-vide en décembre 2026.
   const groupedByCategory = useMemo(() => {
     const map = new Map<string, CashflowRow[]>();
     for (const r of rows) {
@@ -586,6 +585,13 @@ function SectionBlock({
       return a.localeCompare(b);
     });
   }, [rows]);
+
+  // Early return APRÈS tous les hooks (les sections vides "commitment" et
+  // "simulation" sont invisibles pour ne pas polluer la grille, mais le
+  // composant doit être monté avec le même nombre de hooks à chaque render).
+  if (rows.length === 0 && (sectionKey === "commitment" || sectionKey === "simulation")) {
+    return null;
+  }
 
   const sectionTotal = rows.reduce(
     (s, r) => s + r.cells.reduce((sm, c) => sm + (c.status === "SKIPPED" ? 0 : c.amount), 0),
