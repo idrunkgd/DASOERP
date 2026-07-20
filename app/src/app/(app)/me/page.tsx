@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireSession, ROLE_LABELS, getUserAccessGroupName, DEFAULT_GROUP_NAME, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
@@ -6,18 +7,26 @@ import { CandidateCvForm } from "./cv-form";
 import { ExperiencesPanel } from "./experiences-panel";
 import { UserExperiencesPanel } from "./user-experiences-panel";
 import { SickLeaveBlock } from "./sick-leave-form";
-import { FileDown, Eye } from "lucide-react";
+import { MeTabsNav } from "./tabs-nav";
+import { FileDown, Eye, ReceiptText, GraduationCap } from "lucide-react";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function MyProfile() {
+export default async function MyProfile({
+  searchParams
+}: {
+  searchParams: { tab?: string };
+}) {
   const session = await requireSession();
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const isAdmin = sessionPerms.includes("users.manage");
+  const tab = ["general", "cv", "rh"].includes(searchParams.tab ?? "")
+    ? (searchParams.tab as "general" | "cv" | "rh")
+    : "general";
 
-  const [me, groupName, skillCatalog, candidateProfile, sickLeaves] = await Promise.all([
+  const [me, groupName, skillCatalog, candidateProfile, sickLeaves, myExpenses] = await Promise.all([
     // Inclut les expériences pro pour l'espace "Mon CV" côté consultant interne
     prisma.user.findUniqueOrThrow({
       where: { id: session.user.id },
@@ -33,6 +42,11 @@ export default async function MyProfile() {
       where: { userId: session.user.id },
       orderBy: { startDate: "desc" },
       take: 30
+    }),
+    prisma.expenseReport.findMany({
+      where: { userId: session.user.id },
+      orderBy: { date: "desc" },
+      take: 20
     })
   ]);
   const today = new Date();
@@ -132,6 +146,7 @@ export default async function MyProfile() {
 
         <div className="lg:col-span-2">
           {isCandidatePortal ? (
+            /* Portail candidat externe : pas d'onglets, tout en une vue */
             <div className="space-y-6">
               <CandidateCvForm candidateId={candidateProfile.id} initial={candidateProfile as any} skillCatalog={skillCatalog} />
               <ExperiencesPanel
@@ -147,26 +162,167 @@ export default async function MyProfile() {
               />
             </div>
           ) : (
-            <div className="space-y-6">
-              <ProfileForm initial={me as any} skillCatalog={skillCatalog} />
-              {/* Expériences pro du consultant interne — utilisées comme CV
-                  sur les propositions consultant PDF envoyées aux clients. */}
-              <UserExperiencesPanel
-                userId={me.id}
-                experiences={me.experiences.map((e) => ({
-                  id: e.id,
-                  companyName: e.companyName,
-                  jobTitle: e.jobTitle,
-                  startDate: e.startDate.toISOString(),
-                  endDate: e.endDate ? e.endDate.toISOString() : null,
-                  description: e.description
-                }))}
-              />
-              <SickLeaveBlock existingLeaves={sickLeavesUi} />
-            </div>
+            /* Consultant interne : navigation par onglets pour ne pas noyer
+               la page. Sections regroupées par nature (perso, CV, RH). */
+            <>
+              <MeTabsNav current={tab} />
+
+              {tab === "general" && (
+                <div className="space-y-6">
+                  <ProfileForm initial={me as any} skillCatalog={skillCatalog} />
+                </div>
+              )}
+
+              {tab === "cv" && (
+                <div className="space-y-6">
+                  <UserExperiencesPanel
+                    userId={me.id}
+                    experiences={me.experiences.map((e) => ({
+                      id: e.id,
+                      companyName: e.companyName,
+                      jobTitle: e.jobTitle,
+                      startDate: e.startDate.toISOString(),
+                      endDate: e.endDate ? e.endDate.toISOString() : null,
+                      description: e.description
+                    }))}
+                  />
+                </div>
+              )}
+
+              {tab === "rh" && (
+                <RhTab
+                  sickLeavesUi={sickLeavesUi}
+                  myExpenses={myExpenses.map((r) => ({
+                    id: r.id,
+                    date: r.date.toISOString(),
+                    description: r.description,
+                    category: r.category,
+                    amountTtc: Number(r.amountTtc),
+                    status: r.status
+                  }))}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Onglet RH — centralise notes de frais, arrêts maladie, et à
+// terme les formations et tout le reste (mutuelle, contrats, etc.)
+
+const EXPENSE_STATUS_LABELS: Record<string, { label: string; cls: string }> = {
+  DRAFT:     { label: "Brouillon",  cls: "bg-midnight-100 text-midnight-700" },
+  SUBMITTED: { label: "Soumise",    cls: "bg-amber-100 text-amber-700" },
+  APPROVED:  { label: "Approuvée",  cls: "bg-emerald-100 text-emerald-700" },
+  REJECTED:  { label: "Refusée",    cls: "bg-red-100 text-red-700" },
+  PAID:      { label: "Remboursée", cls: "bg-indigoaccent/20 text-indigoaccent" }
+};
+const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
+  TRANSPORT: "Transport", MEAL: "Repas", ACCOMMODATION: "Hébergement",
+  SUPPLIES: "Fournitures", SOFTWARE: "Logiciel", TRAINING: "Formation",
+  OTHER: "Autre"
+};
+
+function RhTab({
+  sickLeavesUi,
+  myExpenses
+}: {
+  sickLeavesUi: {
+    id: string; startDate: string; endDate: string;
+    reason: string | null; certificateUrl: string | null; isActive: boolean;
+  }[];
+  myExpenses: {
+    id: string; date: string; description: string;
+    category: string; amountTtc: number; status: string;
+  }[];
+}) {
+  const totalDraft = myExpenses.filter((e) => e.status === "DRAFT").length;
+  const totalPending = myExpenses.filter((e) => ["SUBMITTED", "APPROVED"].includes(e.status)).length;
+
+  return (
+    <div className="space-y-6">
+      {/* Notes de frais — synthèse + liste courte + CTA vers /expenses */}
+      <section className="card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="font-semibold text-sm flex items-center gap-1.5">
+              <ReceiptText className="w-4 h-4 text-midnight-500" /> Mes notes de frais
+            </h3>
+            <p className="text-xs text-midnight-500">
+              {totalDraft > 0 && <>{totalDraft} brouillon(s) · </>}
+              {totalPending > 0 && <>{totalPending} en attente de remboursement · </>}
+              {myExpenses.length === 0 && "Aucune note pour l'instant"}
+            </p>
+          </div>
+          <Link href="/expenses" className="btn-primary text-sm">
+            + Nouvelle note
+          </Link>
+        </div>
+        {myExpenses.length === 0 ? (
+          <p className="text-xs text-midnight-400 text-center py-4">
+            Va sur <Link href="/expenses" className="text-indigoaccent hover:underline">/expenses</Link> pour en créer une.
+          </p>
+        ) : (
+          <ul className="space-y-1.5">
+            {myExpenses.slice(0, 6).map((e) => (
+              <li
+                key={e.id}
+                className="flex items-center justify-between gap-2 text-sm px-2 py-1.5 border border-midnight-200 rounded"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] bg-midnight-100 text-midnight-700 rounded px-1.5 py-0.5">
+                      {EXPENSE_CATEGORY_LABELS[e.category] ?? e.category}
+                    </span>
+                    <span className="truncate">{e.description}</span>
+                  </div>
+                  <div className="text-[10px] text-midnight-400 tabular-nums">
+                    {new Date(e.date).toLocaleDateString("fr-BE")}
+                  </div>
+                </div>
+                <span className="tabular-nums font-medium text-sm">
+                  {e.amountTtc.toFixed(2)} €
+                </span>
+                <span className={
+                  "text-[10px] rounded px-1.5 py-0.5 shrink-0 " +
+                  (EXPENSE_STATUS_LABELS[e.status]?.cls ?? "")
+                }>
+                  {EXPENSE_STATUS_LABELS[e.status]?.label ?? e.status}
+                </span>
+              </li>
+            ))}
+            {myExpenses.length > 6 && (
+              <li className="text-center pt-1">
+                <Link href="/expenses" className="text-xs text-indigoaccent hover:underline">
+                  Voir mes {myExpenses.length} notes →
+                </Link>
+              </li>
+            )}
+          </ul>
+        )}
+      </section>
+
+      {/* Arrêts maladie */}
+      <SickLeaveBlock existingLeaves={sickLeavesUi} />
+
+      {/* Placeholder Formations — à venir */}
+      <section className="card p-4 border-dashed border-midnight-200 bg-midnight-50/30">
+        <div className="flex items-center gap-2 text-sm text-midnight-500">
+          <GraduationCap className="w-4 h-4" />
+          <span className="font-semibold">Formations</span>
+          <span className="text-[11px] bg-midnight-200 text-midnight-600 rounded px-1.5 py-0.5">
+            Bientôt
+          </span>
+        </div>
+        <p className="text-xs text-midnight-500 mt-1">
+          Suivi de tes formations suivies, budgets alloués, certifications à
+          renouveler — arrive dans une prochaine version.
+        </p>
+      </section>
     </div>
   );
 }
