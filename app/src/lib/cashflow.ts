@@ -227,7 +227,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   const isBootstrapYear = year === bootstrapYear;
 
   let startingBalance = bootstrapBalance;
-  if (year > bootstrapYear) {
+  if (year > bootstrapYear) try {
     // Chaîne année → année : on prend la PROJECTION (PAID + PLANNED, non-SKIPPED,
     // non-CANCELLED, hors simulations), pas uniquement le réel marqué payé.
     // Sinon fin 2026 = 120K ≠ début 2027 = 45K (seulement les payés cochés).
@@ -368,6 +368,13 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     }
 
     startingBalance = Math.round(startingBalance * 100) / 100;
+  } catch (err) {
+    // Défense en profondeur : si le calcul de projection année → année
+    // plante (colonne DB manquante, données corrompues, etc.), on log en
+    // console serveur et on retombe sur le bootstrapBalance plutôt que
+    // de casser toute la page cashflow avec une 500.
+    console.error("[cashflow] Year chaining failed, falling back to bootstrap:", err);
+    startingBalance = bootstrapBalance;
   }
 
   // Index des monthly entries par recurringId/month
