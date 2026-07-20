@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
       user: { select: { firstName: true, lastName: true } },
       approvedBy: { select: { firstName: true, lastName: true } },
       mission: { select: { reference: true, title: true } },
-      project: { select: { reference: true, name: true } }
+      project: { select: { reference: true, name: true } },
+      costCenter: { select: { code: true, name: true } }
     }
   });
   if (!report) return new Response("Not found", { status: 404 });
@@ -55,6 +56,15 @@ export async function GET(req: NextRequest) {
       : null,
     projectRef: report.project
       ? `${report.project.reference} — ${report.project.name}`
+      : null,
+    costCenterRef: report.costCenter
+      ? `${report.costCenter.code} — ${report.costCenter.name}`
+      : null,
+    attendees: Array.isArray(report.attendees)
+      ? (report.attendees as any[]).map((a) => ({
+          name: String(a?.name ?? ""),
+          isInternal: !!a?.userId
+        })).filter((a) => a.name)
       : null,
     approvedByName: report.approvedBy
       ? `${report.approvedBy.firstName} ${report.approvedBy.lastName}`.trim()

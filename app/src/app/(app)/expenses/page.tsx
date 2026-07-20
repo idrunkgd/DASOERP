@@ -46,24 +46,45 @@ export default async function ExpensesPage({
       user: { select: { firstName: true, lastName: true } },
       mission: { select: { reference: true, title: true } },
       project: { select: { reference: true, name: true } },
+      costCenter: { select: { code: true, name: true } },
       approvedBy: { select: { firstName: true, lastName: true } }
     },
     orderBy: { date: "desc" },
     take: 200
   });
 
-  const missions = await prisma.mission.findMany({
-    where: { status: { in: ["PLANNED", "ACTIVE", "EXTENDED"] } },
-    select: { id: true, reference: true, title: true, company: { select: { name: true } } },
-    orderBy: { startDate: "desc" }
-  });
+  const [missions, projects, costCenters, internalUsers] = await Promise.all([
+    prisma.mission.findMany({
+      where: { status: { in: ["PLANNED", "ACTIVE", "EXTENDED"] } },
+      select: { id: true, reference: true, title: true, company: { select: { name: true } } },
+      orderBy: { startDate: "desc" }
+    }),
+    prisma.project.findMany({
+      where: { status: { in: ["TO_START", "ACTIVE"] } },
+      select: { id: true, reference: true, name: true, company: { select: { name: true } } },
+      orderBy: { createdAt: "desc" }
+    }),
+    prisma.costCenter.findMany({
+      where: { active: true },
+      select: { id: true, code: true, name: true },
+      orderBy: { code: "asc" }
+    }),
+    // Users internes pour l'autocomplete "Participants" du repas
+    prisma.user.findMany({
+      where: { active: true, candidateProfile: { is: null } },
+      select: { id: true, firstName: true, lastName: true },
+      orderBy: [{ firstName: "asc" }]
+    })
+  ]);
 
   // Mode édition : ?edit=<id>. On charge la note à éditer et on la passe
   // au form pour pré-remplir. Sécurité : on n'expose que si l'auteur est
   // bien le user courant ET que le statut est DRAFT (règle serveur).
   let editingReport: null | {
     id: string; date: string; category: string; description: string;
-    amountHt: number; vatRate: number; missionId: string | null;
+    amountTtc: number; vatRate: number;
+    missionId: string | null; projectId: string | null; costCenterId: string | null;
+    attendees: { userId: string | null; name: string }[] | null;
     receiptUrl: string | null;
   } = null;
   if (searchParams.edit) {
@@ -76,9 +97,15 @@ export default async function ExpensesPage({
         date: r.date.toISOString().slice(0, 10),
         category: r.category,
         description: r.description,
-        amountHt: Number(r.amountHt),
+        amountTtc: Number(r.amountTtc),
         vatRate: Number(r.vatRate),
         missionId: r.missionId,
+        projectId: r.projectId,
+        costCenterId: r.costCenterId,
+        attendees: Array.isArray(r.attendees) ? (r.attendees as any[]).map((a) => ({
+          userId: a?.userId ?? null,
+          name: String(a?.name ?? "")
+        })).filter((a) => a.name) : null,
         receiptUrl: r.receiptUrl
       };
     }
@@ -121,6 +148,18 @@ export default async function ExpensesPage({
             missions={missions.map((m) => ({
               id: m.id,
               label: `${m.reference} — ${m.title} (${m.company.name})`
+            }))}
+            projects={projects.map((p) => ({
+              id: p.id,
+              label: `${p.reference} — ${p.name} (${p.company.name})`
+            }))}
+            costCenters={costCenters.map((c) => ({
+              id: c.id,
+              label: `${c.code} — ${c.name}`
+            }))}
+            internalUsers={internalUsers.map((u) => ({
+              id: u.id,
+              name: `${u.firstName} ${u.lastName}`.trim()
             }))}
             editing={editingReport}
           />
@@ -212,6 +251,12 @@ export default async function ExpensesPage({
                         <span>
                           {r.project.reference}
                           <div className="text-midnight-400">{r.project.name}</div>
+                        </span>
+                      ) : r.costCenter ? (
+                        <span>
+                          <span className="text-[10px] uppercase tracking-wide text-midnight-500">CC</span>{" "}
+                          {r.costCenter.code}
+                          <div className="text-midnight-400">{r.costCenter.name}</div>
                         </span>
                       ) : (
                         "—"

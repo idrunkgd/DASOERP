@@ -372,6 +372,7 @@ model CostCenter {
   description     String?
   timesheetEntries TimesheetEntry[]
   planningEntries  PlanningEntry[]
+  expenseReports   ExpenseReport[]
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 }
@@ -1602,11 +1603,19 @@ model ExpenseReport {
   /// Auteur de la note (User Dasolabs)
   userId          String
   user            User                  @relation("ExpenseReportUser", fields: [userId], references: [id], onDelete: Cascade)
-  /// Mission/Projet rattaché (optionnel — pour refacturation client éventuelle)
+  /// Rattachement : au max UN de (mission, project, costCenter). Le form UI
+  /// force ce choix mutuellement exclusif pour clarifier la comptabilité.
   missionId       String?
   mission         Mission?              @relation("MissionExpenseReports", fields: [missionId], references: [id], onDelete: SetNull)
   projectId       String?
   project         Project?              @relation("ProjectExpenseReports", fields: [projectId], references: [id], onDelete: SetNull)
+  costCenterId    String?
+  costCenter      CostCenter?           @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
+  /// Participants d'un repas d'affaires (comptabilité analytique + preuve).
+  /// JSON array of { userId?: string, name: string } — les internes (User)
+  /// sont référencés par leur id pour rester à jour ; les externes stockés
+  /// en nom libre. Utile aussi pour les frais de représentation.
+  attendees       Json?
   date            DateTime              @db.Date
   category        ExpenseReportCategory @default(OTHER)
   description     String

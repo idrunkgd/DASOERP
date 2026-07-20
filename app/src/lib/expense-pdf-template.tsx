@@ -78,6 +78,8 @@ export type ExpensePdfData = {
   authorName: string;
   missionRef?: string | null;
   projectRef?: string | null;
+  costCenterRef?: string | null;
+  attendees?: { name: string; isInternal: boolean }[] | null;
   approvedByName?: string | null;
   approvedAt?: string | null;
   paidAt?: string | null;
@@ -130,10 +132,12 @@ export function ExpensePdf({ data }: { data: ExpensePdfData }) {
               <Text style={styles.fieldLabel}>Catégorie</Text>
               <Text style={styles.fieldValue}>{CATEGORY_FR[data.category] ?? data.category}</Text>
             </View>
-            {(data.missionRef || data.projectRef) && (
+            {(data.missionRef || data.projectRef || data.costCenterRef) && (
               <View style={styles.field}>
                 <Text style={styles.fieldLabel}>Rattaché à</Text>
-                <Text style={styles.fieldValue}>{data.missionRef ?? data.projectRef}</Text>
+                <Text style={styles.fieldValue}>
+                  {data.missionRef ?? data.projectRef ?? data.costCenterRef}
+                </Text>
               </View>
             )}
           </View>
@@ -168,6 +172,15 @@ export function ExpensePdf({ data }: { data: ExpensePdfData }) {
             </Text>
           )}
         </View>
+
+        {data.attendees && data.attendees.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionH}>Participants ({data.attendees.length})</Text>
+            <Text style={styles.fieldValue}>
+              {data.attendees.map((a) => a.name + (a.isInternal ? " (interne)" : "")).join(" · ")}
+            </Text>
+          </View>
+        )}
 
         {/* Totaux */}
         <View style={styles.totals}>

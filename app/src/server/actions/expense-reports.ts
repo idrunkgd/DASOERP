@@ -5,8 +5,15 @@ import { requireSession, requirePermission, getUserEffectivePermissions } from "
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { callLlmWithMedia, extractJson } from "@/lib/llm";
+import { defaultVatRate, deriveHtFromTtc } from "@/lib/expense-vat";
 
-const TVA_DEFAULT = 21;
+/// Schéma d'un attendee de repas : soit un User interne (userId non-null),
+/// soit un contact externe stocké par son nom libre. On sérialise en JSON
+/// dans le champ ExpenseReport.attendees.
+const AttendeeSchema = z.object({
+  userId: z.string().optional().nullable(),
+  name: z.string().min(1).max(200)
+});
 
 const Schema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -20,32 +27,63 @@ const Schema = z.object({
     "OTHER"
   ]),
   description: z.string().min(1).max(500),
-  amountHt: z.coerce.number().nonnegative(),
-  vatRate: z.coerce.number().min(0).max(50).default(TVA_DEFAULT),
+  /// Nouveau flux : le user saisit UNIQUEMENT le montant TTC. Le taux TVA
+  /// est déduit de la catégorie (voir lib/expense-vat.ts) et le HT est
+  /// calculé côté serveur. On tolère toujours un override vatRate explicite
+  /// pour les cas où le ticket a un taux atypique.
+  amountTtc: z.coerce.number().nonnegative(),
+  vatRate: z.coerce.number().min(0).max(50).optional().nullable()
+    .transform((v) => (v == null || Number.isNaN(v) ? null : Number(v))),
   missionId: z.string().optional().nullable().transform((v) => v || null),
   projectId: z.string().optional().nullable().transform((v) => v || null),
+  costCenterId: z.string().optional().nullable().transform((v) => v || null),
+  attendees: z.string().optional().nullable()
+    // Le formulaire sérialise la liste des participants en JSON string
+    .transform((v) => {
+      if (!v) return null;
+      try {
+        const raw = JSON.parse(v);
+        if (!Array.isArray(raw) || raw.length === 0) return null;
+        return raw.map((a: any) => AttendeeSchema.parse(a));
+      } catch { return null; }
+    }),
   receiptUrl: z.string().optional().nullable().transform((v) => v || null),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
 
+/**
+ * Règle métier : un seul rattachement à la fois (mission OU projet OU centre
+ * de coût). On garde le premier renseigné dans l'ordre mission → projet →
+ * costCenter et on force les deux autres à null pour éviter les incohérences.
+ */
+function pickOneAttachment(data: {
+  missionId: string | null; projectId: string | null; costCenterId: string | null;
+}) {
+  if (data.missionId) return { missionId: data.missionId, projectId: null, costCenterId: null };
+  if (data.projectId) return { missionId: null, projectId: data.projectId, costCenterId: null };
+  return { missionId: null, projectId: null, costCenterId: data.costCenterId };
+}
+
 export async function createExpenseReport(formData: FormData) {
   const session = await requirePermission("expenses.write");
   const data = Schema.parse(Object.fromEntries(formData));
-  const vatAmount = (data.amountHt * data.vatRate) / 100;
-  const amountTtc = data.amountHt + vatAmount;
+  const vatRate = data.vatRate ?? defaultVatRate(data.category);
+  const { amountHt, vatAmount } = deriveHtFromTtc(data.amountTtc, vatRate);
+  const amountTtc = data.amountTtc;
+  const attach = pickOneAttachment(data);
 
   const created = await prisma.expenseReport.create({
     data: {
       userId: session.user.id,
-      missionId: data.missionId,
-      projectId: data.projectId,
+      ...attach,
       date: new Date(data.date),
       category: data.category,
       description: data.description,
-      amountHt: data.amountHt,
+      amountHt,
       vatAmount,
-      vatRate: data.vatRate,
+      vatRate,
       amountTtc,
+      attendees: data.attendees ?? undefined,
       receiptUrl: data.receiptUrl,
       notes: data.notes,
       status: "DRAFT"
@@ -79,20 +117,21 @@ export async function updateExpenseReport(id: string, formData: FormData) {
     throw new Error("La note n'est plus en brouillon — annule la soumission d'abord");
   }
   const data = Schema.parse(Object.fromEntries(formData));
-  const vatAmount = (data.amountHt * data.vatRate) / 100;
-  const amountTtc = data.amountHt + vatAmount;
+  const vatRate = data.vatRate ?? defaultVatRate(data.category);
+  const { amountHt, vatAmount } = deriveHtFromTtc(data.amountTtc, vatRate);
+  const attach = pickOneAttachment(data);
   await prisma.expenseReport.update({
     where: { id },
     data: {
-      missionId: data.missionId,
-      projectId: data.projectId,
+      ...attach,
       date: new Date(data.date),
       category: data.category,
       description: data.description,
-      amountHt: data.amountHt,
+      amountHt,
       vatAmount,
-      vatRate: data.vatRate,
-      amountTtc,
+      vatRate,
+      amountTtc: data.amountTtc,
+      attendees: data.attendees ?? undefined,
       // On n'écrase le ticket que si un nouveau a été uploadé, sinon on garde
       // l'existant. La convention : formData.receiptUrl vide/absent = pas de
       // changement ; formData.receiptUrl explicite = remplacer.
