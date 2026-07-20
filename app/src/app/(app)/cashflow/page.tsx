@@ -234,7 +234,7 @@ export default async function CashflowPage({
         <KpiCard
           label="Solde compte"
           value={formatCurrency(data.yearTotals.realBankBalance)}
-          hint={`+${formatCurrency(data.yearTotals.realPaidInflow)} − ${formatCurrency(data.yearTotals.realPaidOutflow)} marqués payés`}
+          hint={`+${formatCurrency(data.yearTotals.realPaidInflow)} − ${formatCurrency(data.yearTotals.realPaidOutflow)} depuis le début (payés)`}
           icon={Banknote}
           tone={data.yearTotals.realBankBalance >= 0 ? "success" : "danger"}
         />

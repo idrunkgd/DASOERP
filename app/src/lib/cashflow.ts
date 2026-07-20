@@ -939,18 +939,108 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     m.cumulativeBalanceWithSim = runningBalanceSim;
   }
 
-  // Solde réel = solde initial + tout ce qui a été marqué PAID (exclut simulations)
+  // ─── Solde compte réel — indépendant de l'année affichée ───
+  // Le KPI "Solde compte" doit représenter le SOLDE BANCAIRE ACTUEL, pas
+  // une projection. Il vaut donc : bootstrap + TOUS les paiements réels
+  // encaissés/effectués depuis le bootstrap, tous statuts PAID confondus,
+  // quelle que soit l'année. On ne peut pas se contenter du realPaid de
+  // l'année affichée + startingBalance projeté : ce mix donnerait un
+  // solde différent selon l'année consultée.
+  const [
+    allPaidMs,
+    allPaidOo,
+    allPaidRecMonths,
+    allPaidPayrollMonths
+  ] = await Promise.all([
+    prisma.billingMilestone.findMany({
+      where: { status: "PAID" },
+      include: {
+        mission: { select: { id: true } },
+        project: { select: { vatRate: true } },
+        offer:   { select: { vatRate: true } }
+      }
+    }),
+    prisma.oneOffCashflowEntry.findMany({
+      where: {
+        status: "PAID",
+        kind: { notIn: ["SIMULATION", "SIMULATION_INCOME"] }
+      },
+      select: { amount: true, kind: true }
+    }),
+    prisma.recurringExpenseMonth.findMany({
+      where: { status: "PAID" },
+      include: { recurringExpense: { select: { isIncome: true } } }
+    }),
+    prisma.payrollMonth.findMany({
+      where: { status: "PAID" }
+    })
+  ]);
+  // TVAC pour les milestones PAID (identique à la logique année/année) :
+  // on récupère vatRate depuis project / offer / mission.
+  const allPaidMissionIds = new Set<string>();
+  for (const m of allPaidMs) if (m.missionId) allPaidMissionIds.add(m.missionId);
+  const allPaidVatByMission = new Map<string, number>();
+  if (allPaidMissionIds.size > 0) {
+    try {
+      const idList = Array.from(allPaidMissionIds)
+        .map((id) => `'${id.replace(/'/g, "''")}'`)
+        .join(",");
+      const missionRows = await prisma.$queryRawUnsafe<
+        { id: string; vatRate: string | number }[]
+      >(`SELECT id, "vatRate" FROM "Mission" WHERE id IN (${idList})`);
+      for (const r of missionRows) {
+        const v = Number(r.vatRate);
+        if (Number.isFinite(v) && v > 0) allPaidVatByMission.set(r.id, v);
+      }
+    } catch { /* colonne absente → fallback 21% */ }
+  }
   let realPaidInflow = 0;
   let realPaidOutflow = 0;
-  for (const row of rows) {
-    if (row.kind === "simulation") continue;
-    for (const cell of row.cells) {
-      if (cell.status !== "PAID") continue;
-      if (row.isIncome) realPaidInflow += cell.amount;
-      else realPaidOutflow += cell.amount;
-    }
+  for (const m of allPaidMs) {
+    const vat = m.missionId
+      ? allPaidVatByMission.get(m.missionId) ?? 21
+      : (m.project?.vatRate ?? m.offer?.vatRate ?? 21) as number;
+    realPaidInflow += Number(m.amount) * (1 + Number(vat) / 100);
   }
-  const realBankBalance = startingBalance + realPaidInflow - realPaidOutflow;
+  for (const o of allPaidOo) {
+    const a = Number(o.amount);
+    if (o.kind === "INCOME") realPaidInflow += a;
+    else if (o.kind === "EXPENSE" || o.kind === "COMMITMENT") realPaidOutflow += a;
+  }
+  for (const me of allPaidRecMonths) {
+    const a = Number(me.amountOverride ?? 0);
+    // Si pas d'override, il faudrait le defaultAmount du parent RecurringExpense
+    const amount = me.amountOverride != null
+      ? a
+      : Number((me as any).recurringExpense?.defaultAmount ?? 0);
+    if ((me as any).recurringExpense?.isIncome) realPaidInflow += amount;
+    else realPaidOutflow += amount;
+  }
+  // Payroll : toujours en sortie. Si override présent → on l'utilise ;
+  // sinon on recompose le montant en agrégeant les employés actifs ce
+  // mois-là (même logique que le rendu grille). Sans ça un utilisateur
+  // qui coche Payé sans saisir de montant n'aurait rien dans son solde.
+  const allEmployeesForPaid = allPaidPayrollMonths.length > 0
+    ? await prisma.payrollEmployee.findMany()
+    : [];
+  for (const pm of allPaidPayrollMonths) {
+    if (pm.amountOverride != null) {
+      realPaidOutflow += Number(pm.amountOverride);
+      continue;
+    }
+    const monthStart = new Date(Date.UTC(pm.year, pm.month - 1, 1));
+    const monthEnd = new Date(Date.UTC(pm.year, pm.month, 0));
+    let sum = 0;
+    for (const e of allEmployeesForPaid) {
+      if (e.startDate > monthEnd) continue;
+      if (e.endDate != null && e.endDate < monthStart) continue;
+      if (pm.kind === "NET_PAY") sum += Number(e.monthlyNetPay);
+      else if (pm.kind === "WITHHOLDING_TAX") sum += Number(e.monthlyWithholdingTax);
+      else if (pm.kind === "ONSS") sum += Number(e.monthlyOnss);
+    }
+    realPaidOutflow += sum;
+  }
+  const realBankBalance = bootstrapBalance + realPaidInflow - realPaidOutflow;
 
   // ─── "En cours" : factures émises (INVOICED) en attente de paiement ───
   // On veut le total des outstanding receivables, indépendamment de l'année
