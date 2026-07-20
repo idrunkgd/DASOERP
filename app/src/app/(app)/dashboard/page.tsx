@@ -119,9 +119,9 @@ export default async function Dashboard() {
               <HeartPulse className={"w-4 h-4 " + (sickToday.length > 0 ? "text-red-600" : "text-midnight-400")} />
               En arrêt aujourd'hui
             </h2>
-            <span className={"text-xs font-semibold " + (sickToday.length > 0 ? "text-red-700" : "text-midnight-400")}>
-              {sickToday.length}
-            </span>
+            <Link href="/sick-leaves?filter=active" className="text-xs text-indigoaccent hover:underline">
+              Voir tout
+            </Link>
           </div>
           {sickToday.length === 0 ? (
             <p className="text-xs text-midnight-500">Personne en arrêt 👍</p>

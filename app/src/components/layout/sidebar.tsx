@@ -9,7 +9,7 @@ import {
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
-  AppWindow, GraduationCap, Files, ReceiptText
+  AppWindow, GraduationCap, Files, ReceiptText, HeartPulse
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -76,10 +76,11 @@ const SECTIONS: Section[] = [
   {
     label: "RH & Documents",
     items: [
-      { href: "/onboarding", label: "Onboarding",       icon: GraduationCap,  perm: "onboarding.read" },
-      { href: "/expenses",   label: "Notes de frais",   icon: ReceiptText,    perm: "expenses.read" },
-      { href: "/documents",  label: "Documents",        icon: Files,          perm: "documents.read" },
-      { href: "/tests",      label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" }
+      { href: "/onboarding",  label: "Onboarding",       icon: GraduationCap,  perm: "onboarding.read" },
+      { href: "/expenses",    label: "Notes de frais",   icon: ReceiptText,    perm: "expenses.read" },
+      { href: "/sick-leaves", label: "Arrêts maladie",   icon: HeartPulse,     perm: "users.manage" },
+      { href: "/documents",   label: "Documents",        icon: Files,          perm: "documents.read" },
+      { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" }
     ]
   },
   {
