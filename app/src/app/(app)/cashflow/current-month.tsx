@@ -99,6 +99,8 @@ type UnifiedItem = {
   projectId?: string | null;
   isCommitment?: boolean;
   isCancelled?: boolean;
+  /** Simulation what-if : rendue en italique et exclue des totaux du panneau */
+  isSimulation?: boolean;
   // Pour recurring : on a besoin de l'année/mois pour cycleMonthlyStatus
   year?: number;
   monthNum?: number;
@@ -203,13 +205,16 @@ export function CurrentMonthPanel({
       (r.recurring.isIncome ? inc : exp).push(item);
     }
 
-    // OneOffs : seules les entrées RÉELLES apparaissent dans la vue mensuelle.
-    // Les simulations (SIMULATION = dépense what-if, SIMULATION_INCOME = recette
-    // hypothétique) sont strictement réservées à la grille annuelle, où elles
-    // peuvent être togglées via "Inclure simulations". Ici on ne les voit jamais.
+    // OneOffs : toutes les entrées apparaissent — y compris les simulations
+    // (SIMULATION = dépense what-if, SIMULATION_INCOME = recette hypothétique)
+    // qui doivent être visibles ligne par ligne pour justifier le +avec sim.
+    // Les sims sont affichées avec un style distinct (isSimulation) mais elles
+    // NE COMPTENT PAS dans les totaux "À encaisser / À payer" en haut (voir plus
+    // bas dans totals).
     for (const o of oneOffs) {
-      if (o.kind === "SIMULATION" || o.kind === "SIMULATION_INCOME") continue;
       if (o.status === "SKIPPED") continue;
+      const isSim = o.kind === "SIMULATION" || o.kind === "SIMULATION_INCOME";
+      const isIncome = o.kind === "INCOME" || o.kind === "SIMULATION_INCOME";
       const item: UnifiedItem = {
         key: `o-${o.id}`,
         category: o.category?.trim() || NO_CATEGORY,
@@ -217,12 +222,13 @@ export function CurrentMonthPanel({
         amount: o.amount,
         isPaid: o.status === "PAID",
         isSkipped: false,
-        isIncome: o.kind === "INCOME",
+        isIncome,
         isCommitment: o.kind === "COMMITMENT",
+        isSimulation: isSim,
         source: "oneoff",
         sourceId: o.id
       };
-      (o.kind === "INCOME" ? inc : exp).push(item);
+      (isIncome ? inc : exp).push(item);
     }
 
     // Payroll : 3 items synthétiques (Salaires, Précompte, ONSS).
@@ -249,11 +255,12 @@ export function CurrentMonthPanel({
     return { incomeItems: inc, expenseItems: exp };
   }, [milestones, recurringForMonth, oneOffs, payroll, year, month]);
 
-  // Totaux
+  // Totaux — excluent les simulations (elles sont marquées visuellement mais
+  // ne modifient jamais les KPIs "À encaisser / À payer" du haut du panneau).
   const totals = useMemo(() => {
     const sum = (items: UnifiedItem[], paid: boolean) =>
       items
-        .filter((i) => i.isPaid === paid && !i.isCancelled)
+        .filter((i) => i.isPaid === paid && !i.isCancelled && !i.isSimulation)
         .reduce((s, i) => s + i.amount, 0);
     return {
       incomePaid: sum(incomeItems, true),
@@ -264,8 +271,8 @@ export function CurrentMonthPanel({
   }, [incomeItems, expenseItems]);
 
   const totalUnpaidItems =
-    incomeItems.filter((i) => !i.isPaid && !i.isCancelled).length +
-    expenseItems.filter((i) => !i.isPaid).length;
+    incomeItems.filter((i) => !i.isPaid && !i.isCancelled && !i.isSimulation).length +
+    expenseItems.filter((i) => !i.isPaid && !i.isSimulation).length;
 
   // Navigation mois précédent/suivant (gère les transitions d'année)
   const prevMonth = month === 1 ? 12 : month - 1;
@@ -520,7 +527,7 @@ function ColumnByCategory({
 
 function UnifiedItemRow({ item }: { item: UnifiedItem }) {
   const [pending, start] = useTransition();
-  const { isPaid, isCommitment, isCancelled, isIncome } = item;
+  const { isPaid, isCommitment, isCancelled, isIncome, isSimulation } = item;
 
   function toggle() {
     if (isCancelled) return;
@@ -559,7 +566,9 @@ function UnifiedItemRow({ item }: { item: UnifiedItem }) {
     <div
       className={
         "flex items-center justify-between gap-2 px-2 py-1.5 rounded text-sm border " +
-        (isPaid
+        (isSimulation
+          ? "bg-purple-50/60 border-purple-200 italic"
+          : isPaid
           ? "bg-emerald-50/60 border-emerald-200"
           : isCommitment
           ? "border-amber-300 bg-amber-50/40"
