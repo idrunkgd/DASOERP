@@ -16,7 +16,7 @@ const AttendeeSchema = z.object({
 });
 
 const Schema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date requise"),
   category: z.enum([
     "TRANSPORT",
     "MEAL",
@@ -25,13 +25,13 @@ const Schema = z.object({
     "SOFTWARE",
     "TRAINING",
     "OTHER"
-  ]),
-  description: z.string().min(1).max(500),
+  ], { errorMap: () => ({ message: "Catégorie requise" }) }),
+  description: z.string().min(1, "Description requise").max(500),
   /// Nouveau flux : le user saisit UNIQUEMENT le montant TTC. Le taux TVA
   /// est déduit de la catégorie (voir lib/expense-vat.ts) et le HT est
   /// calculé côté serveur. On tolère toujours un override vatRate explicite
   /// pour les cas où le ticket a un taux atypique.
-  amountTtc: z.coerce.number().nonnegative(),
+  amountTtc: z.coerce.number().positive("Montant TVAC requis"),
   vatRate: z.coerce.number().min(0).max(50).optional().nullable()
     .transform((v) => (v == null || Number.isNaN(v) ? null : Number(v))),
   missionId: z.string().optional().nullable().transform((v) => v || null),
@@ -47,9 +47,31 @@ const Schema = z.object({
         return raw.map((a: any) => AttendeeSchema.parse(a));
       } catch { return null; }
     }),
-  receiptUrl: z.string().optional().nullable().transform((v) => v || null),
-  notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
+  /// Ticket / justificatif — obligatoire. Le comptable en a besoin comme
+  /// preuve légale, donc on refuse toute note sans photo/scan.
+  receiptUrl: z.string().min(1, "Ticket / justificatif obligatoire"),
+  /// Notes libres — obligatoires. Permet de justifier le contexte de la
+  /// dépense au comptable même quand la description reste brève.
+  notes: z.string().min(1, "Notes / commentaire obligatoires").max(1000)
+    .transform((v) => v.trim())
 });
+
+/**
+ * Vérifie les règles métier qui dépendent des relations entre champs
+ * (Zod n'exprime pas facilement ces contraintes croisées) :
+ *  - Au moins UN rattachement (mission, projet ou centre de coût)
+ *  - Au moins un participant si catégorie = MEAL
+ * Throw un message user-friendly qui remonte via toast côté client.
+ */
+function validateCrossFields(data: z.infer<typeof Schema>) {
+  const hasAttach = !!(data.missionId || data.projectId || data.costCenterId);
+  if (!hasAttach) {
+    throw new Error("Rattachement obligatoire : choisis une mission, un projet ou un centre de coût.");
+  }
+  if (data.category === "MEAL" && (!data.attendees || data.attendees.length === 0)) {
+    throw new Error("Repas : au moins un participant est requis (interne ou externe).");
+  }
+}
 
 /**
  * Règle métier : un seul rattachement à la fois (mission OU projet OU centre
@@ -67,6 +89,7 @@ function pickOneAttachment(data: {
 export async function createExpenseReport(formData: FormData) {
   const session = await requirePermission("expenses.write");
   const data = Schema.parse(Object.fromEntries(formData));
+  validateCrossFields(data);
   const vatRate = data.vatRate ?? defaultVatRate(data.category);
   const { amountHt, vatAmount } = deriveHtFromTtc(data.amountTtc, vatRate);
   const amountTtc = data.amountTtc;
@@ -117,6 +140,7 @@ export async function updateExpenseReport(id: string, formData: FormData) {
     throw new Error("La note n'est plus en brouillon — annule la soumission d'abord");
   }
   const data = Schema.parse(Object.fromEntries(formData));
+  validateCrossFields(data);
   const vatRate = data.vatRate ?? defaultVatRate(data.category);
   const { amountHt, vatAmount } = deriveHtFromTtc(data.amountTtc, vatRate);
   const attach = pickOneAttachment(data);

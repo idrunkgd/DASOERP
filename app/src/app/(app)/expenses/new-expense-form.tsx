@@ -41,6 +41,7 @@ export type ExpenseEditData = {
   costCenterId: string | null;
   attendees: Attendee[] | null;
   receiptUrl: string | null;
+  notes: string | null;
 };
 
 type Attachment =
@@ -88,8 +89,9 @@ export function NewExpenseForm({
     category: editing?.category ?? "OTHER",
     description: editing?.description ?? "",
     amountTtc: editing ? String(editing.amountTtc) : "",
-    vatRate: editing ? String(editing.vatRate) : ""
+    vatRate: editing ? String(editing.vatRate) : "",
     // Si vatRate vide → le serveur applique le taux par catégorie
+    notes: editing?.notes ?? ""
   });
 
   const [attendees, setAttendees] = useState<Attendee[]>(
@@ -155,6 +157,24 @@ export function NewExpenseForm({
   }
 
   function submit(fd: FormData) {
+    // Validation client — on rejette localement AVANT d'envoyer pour donner
+    // un feedback immédiat. Le serveur revalidera de toute façon.
+    if (!receiptDataUri) {
+      toast.error("Ticket / justificatif obligatoire — uploade une photo ou un PDF.");
+      return;
+    }
+    if (attachment.type === "none") {
+      toast.error("Rattachement obligatoire : choisis une mission, un projet ou un centre de coût.");
+      return;
+    }
+    if (isMeal && attendees.length === 0) {
+      toast.error("Repas : ajoute au moins un participant (interne ou externe).");
+      return;
+    }
+    if (!form.notes.trim()) {
+      toast.error("Notes / commentaire obligatoires.");
+      return;
+    }
     // Sérialise attendees en JSON pour le server action
     if (isMeal && attendees.length > 0) {
       fd.set("attendees", JSON.stringify(attendees));
@@ -187,7 +207,8 @@ export function NewExpenseForm({
             category: "OTHER",
             description: "",
             amountTtc: "",
-            vatRate: ""
+            vatRate: "",
+            notes: ""
           });
           setReceiptDataUri(null);
           setAttachment({ type: "none" });
@@ -207,7 +228,9 @@ export function NewExpenseForm({
     <form action={submit} className="grid md:grid-cols-2 gap-4">
       {/* ── Colonne 1 — Photo + OCR ── */}
       <div>
-        <label className="label">Ticket / facture</label>
+        <label className="label">
+          Ticket / facture <span className="text-red-600">*</span>
+        </label>
         <label className="flex flex-col items-center justify-center border-2 border-dashed border-midnight-300 rounded-lg p-6 cursor-pointer hover:border-indigoaccent transition-colors min-h-[220px]">
           {ocrPending ? (
             <div className="flex flex-col items-center gap-2 text-indigoaccent">
@@ -238,7 +261,7 @@ export function NewExpenseForm({
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label">Date</label>
+            <label className="label">Date <span className="text-red-600">*</span></label>
             <input
               name="date" type="date" required
               value={form.date}
@@ -247,7 +270,7 @@ export function NewExpenseForm({
             />
           </div>
           <div>
-            <label className="label">Catégorie</label>
+            <label className="label">Catégorie <span className="text-red-600">*</span></label>
             <select
               name="category"
               value={form.category}
@@ -266,7 +289,7 @@ export function NewExpenseForm({
         </div>
 
         <div>
-          <label className="label">Description</label>
+          <label className="label">Description <span className="text-red-600">*</span></label>
           <input
             name="description" required maxLength={500}
             value={form.description}
@@ -278,7 +301,7 @@ export function NewExpenseForm({
 
         {/* Montant TTC — champ unique. HT et TVA calculés en dessous. */}
         <div>
-          <label className="label">Montant TVAC (€)</label>
+          <label className="label">Montant TVAC (€) <span className="text-red-600">*</span></label>
           <input
             name="amountTtc" type="number" step="0.01" required
             value={form.amountTtc}
@@ -315,7 +338,7 @@ export function NewExpenseForm({
 
         {/* ── Rattachement — 3 options mutuellement exclusives ── */}
         <div>
-          <label className="label">Rattacher à</label>
+          <label className="label">Rattacher à <span className="text-red-600">*</span></label>
           <select
             value={
               attachment.type === "none"
@@ -371,6 +394,23 @@ export function NewExpenseForm({
             onRemove={removeAttendee}
           />
         )}
+
+        {/* ── Notes / commentaire (obligatoire) ── */}
+        <div>
+          <label className="label">
+            Notes / commentaire <span className="text-red-600">*</span>
+          </label>
+          <textarea
+            name="notes"
+            required
+            maxLength={1000}
+            rows={3}
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            className="input"
+            placeholder="Contexte de la dépense pour le comptable (ex: déjeuner de négociation avec X, formation technique Y…)"
+          />
+        </div>
 
         <div className="flex gap-2 pt-2">
           {isEdit && (

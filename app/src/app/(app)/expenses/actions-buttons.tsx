@@ -7,7 +7,7 @@ import {
   markExpensePaid,
   deleteExpenseReport
 } from "@/server/actions/expense-reports";
-import { Send, Check, X, Wallet, Trash2, Pencil, FileDown } from "lucide-react";
+import { Send, Check, X, Wallet, Trash2, Pencil, FileDown, Eye } from "lucide-react";
 
 export function ExpenseActions({
   id,
@@ -87,7 +87,17 @@ export function ExpenseActions({
           <Wallet className="w-4 h-4" />
         </button>
       )}
-      {/* Export PDF — dispo dès qu'on peut voir la note (l'auteur ou un approbateur) */}
+      {/* Aperçu PDF — ouvre inline dans un nouvel onglet (avant impression / envoi) */}
+      <a
+        href={`/api/exports/expense-pdf?id=${id}&inline=1`}
+        target="_blank"
+        rel="noreferrer"
+        className="text-midnight-500 hover:bg-midnight-100 rounded p-1"
+        title="Aperçu PDF"
+      >
+        <Eye className="w-4 h-4" />
+      </a>
+      {/* Téléchargement PDF pour le comptable */}
       <a
         href={`/api/exports/expense-pdf?id=${id}`}
         target="_blank"
