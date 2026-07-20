@@ -263,16 +263,15 @@ function SidebarSection({
       >
         <ChevronDown
           className={cn(
-            "w-3.5 h-3.5 transition-transform duration-150 text-midnight-900",
+            "w-3.5 h-3.5 transition-transform duration-150 text-indigoaccent",
             open ? "rotate-0" : "-rotate-90",
-            forceOpen && "opacity-60"
+            forceOpen && "opacity-70"
           )}
         />
-        <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-midnight-900">
+        <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-indigoaccent">
           {/*
-            Thème clair : catégories en midnight-900 (dark navy, très
-            contrasté sur fond blanc). Les items en dessous sont en
-            midnight-500 (gris moyen) pour laisser la hiérarchie claire.
+            Categorie = simple label mauve sur fond blanc (fond de la sidebar).
+            Pas de bandeau, pas de fond — juste un titre de section.
           */}
           {label}
         </span>
@@ -314,26 +313,16 @@ function NavLink({
       href={href}
       className={cn(
         "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-100",
-        // Thème clair : item actif = fond indigo léger + texte indigo,
-        // items normaux = gris moyen qui fonce au hover.
+        // Items = BLOCS mauves avec texte BLANC dessus (inverse des categories
+        // qui sont mauves sur blanc). Item actif = mauve plein + shadow +
+        // font plus grasse pour bien se distinguer des items normaux qui sont
+        // un peu plus attenues (opacite 80%).
         active
-          ? "bg-indigoaccent/10 text-indigoaccent font-medium"
-          : "text-midnight-600 hover:bg-midnight-100 hover:text-midnight-900"
+          ? "bg-indigoaccent text-white font-semibold shadow-sm"
+          : "bg-indigoaccent/80 text-white hover:bg-indigoaccent"
       )}
     >
-      {/* Barre indicatrice à gauche (position absolue) */}
-      <span
-        className={cn(
-          "absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-full transition-all",
-          active ? "bg-indigoaccent" : "bg-transparent group-hover:bg-midnight-300"
-        )}
-      />
-      <Icon
-        className={cn(
-          "w-4 h-4 shrink-0 transition-colors",
-          active ? "text-indigoaccent" : "text-midnight-400 group-hover:text-midnight-700"
-        )}
-      />
+      <Icon className="w-4 h-4 shrink-0 text-white" />
       <span className="truncate">{label}</span>
     </Link>
   );
