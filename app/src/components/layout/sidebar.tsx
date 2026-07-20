@@ -252,29 +252,30 @@ function SidebarSection({
         type="button"
         onClick={toggle}
         className={cn(
-          "w-full flex items-center gap-2 px-3 pt-2 pb-1 group rounded-md",
-          "hover:bg-white/[0.03] transition-colors",
+          "w-full flex items-center gap-2 px-3 pt-3 pb-1.5 mt-1 group rounded-md",
+          "hover:bg-white/[0.04] transition-colors",
           forceOpen ? "cursor-default" : "cursor-pointer"
         )}
         aria-expanded={open}
       >
         <ChevronDown
           className={cn(
-            "w-3 h-3 transition-transform duration-150",
-            // Couleur du chevron : suit la teinte du label pour être cohérent
-            open ? "text-midnight-400" : "text-midnight-600",
+            "w-3.5 h-3.5 transition-transform duration-150",
+            // Chevron plus visible : blanc légèrement dimmed quand ouvert,
+            // teinte moyenne quand fermé (toujours lisible).
+            open ? "text-white/70" : "text-midnight-400",
             open ? "rotate-0" : "-rotate-90",
-            forceOpen && "opacity-40"
+            forceOpen && "opacity-50"
           )}
         />
         <span
           className={cn(
-            "text-[10px] uppercase tracking-[0.12em] font-bold transition-colors",
-            // Fermé → couleur nettement plus sombre pour signaler "sous-menu caché".
-            // Ouvert → teinte standard. Hover éclaircit dans les deux cas.
+            "text-[11px] uppercase tracking-[0.14em] font-bold transition-colors",
+            // Ouvert : label franc en blanc légèrement transparent — bien visible.
+            // Fermé : reste bien lisible en midnight-300, hover éclaircit encore.
             open
-              ? "text-midnight-400 group-hover:text-midnight-200"
-              : "text-midnight-600 group-hover:text-midnight-400"
+              ? "text-white/85 group-hover:text-white"
+              : "text-midnight-300 group-hover:text-white/85"
           )}
         >
           {label}
