@@ -152,11 +152,21 @@ export function CashflowGrid({
       } else if (r.kind === "commitment") {
         groups.commitment.push(r);
       } else if (r.kind === "simulation") {
-        groups.simulation.push(r);
+        // Les simulations d'encaissement (SIMULATION_INCOME → isIncome=true)
+        // remontent dans "Revenus" pour être visibles avec les vraies factures.
+        // Elles gardent kind="simulation" donc l'italique et l'effet visuel
+        // "what-if" restent. Elles ne sont affichées QUE si includeSim est
+        // activé — sinon les totaux de section Revenus divergeraient des
+        // KPIs (qui eux-mêmes ne comptent les sims que si includeSim est on).
+        if (r.isIncome) {
+          if (includeSim) groups.income.push(r);
+        } else {
+          groups.simulation.push(r);
+        }
       }
     }
     return groups;
-  }, [data]);
+  }, [data, includeSim]);
 
   const monthlyTotals = includeSim
     ? data.monthlyTotals.map((m) => ({
