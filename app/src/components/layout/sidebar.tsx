@@ -260,22 +260,18 @@ function SidebarSection({
       >
         <ChevronDown
           className={cn(
-            "w-3.5 h-3.5 transition-transform duration-150",
-            // Chevron plus visible : blanc légèrement dimmed quand ouvert,
-            // teinte moyenne quand fermé (toujours lisible).
-            open ? "text-white/70" : "text-midnight-400",
+            "w-3.5 h-3.5 transition-transform duration-150 text-white",
             open ? "rotate-0" : "-rotate-90",
             forceOpen && "opacity-50"
           )}
         />
         <span
           className={cn(
-            "text-[11px] uppercase tracking-[0.14em] font-bold transition-colors",
-            // Ouvert : label franc en blanc légèrement transparent — bien visible.
-            // Fermé : reste bien lisible en midnight-300, hover éclaircit encore.
-            open
-              ? "text-white/85 group-hover:text-white"
-              : "text-midnight-300 group-hover:text-white/85"
+            "text-[11px] uppercase tracking-[0.14em] font-bold text-white transition-colors",
+            // Volontairement TOUJOURS en blanc pur (ouvert OU fermé) — les
+            // catégories doivent être plus lumineuses que l'entrée
+            // sélectionnée (qui elle est en text-white/85). Ça hiérarchise
+            // visuellement la sidebar : sections > entrée active > items.
           )}
         >
           {label}
@@ -318,8 +314,12 @@ function NavLink({
       href={href}
       className={cn(
         "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-100",
+        // NB : l'item actif est en white/85 (et NON pas pur white) pour rester
+        // légèrement moins lumineux que les headers de catégorie (pur white).
+        // Le repérage se fait via le fond indigo + la barre + l'icône accent,
+        // pas via un blanc plus fort que les catégories.
         active
-          ? "bg-indigoaccent/15 text-white font-medium"
+          ? "bg-indigoaccent/15 text-white/85 font-medium"
           : "text-midnight-300 hover:bg-white/5 hover:text-white"
       )}
     >
