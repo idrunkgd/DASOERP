@@ -260,26 +260,19 @@ function SidebarSection({
       >
         <ChevronDown
           className={cn(
-            "w-3.5 h-3.5 transition-transform duration-150",
-            // Chevron aligné sur le label pour signal cohérent
-            open ? "text-white" : "text-white/50",
+            "w-3.5 h-3.5 transition-transform duration-150 text-white",
             open ? "rotate-0" : "-rotate-90",
             forceOpen && "opacity-60"
           )}
         />
-        <span
-          className={cn(
-            "text-[11px] uppercase tracking-[0.14em] font-bold transition-colors",
-            // Ouvert : blanc pur — la section est visible ET dépliée, tête
-            //   de hiérarchie de la sidebar.
-            // Fermé : blanc à 50% opacité — reste parfaitement lisible mais
-            //   nettement plus terne, signale "sous-menu caché" au coup d'oeil.
-            // Hover : éclaircit pour donner un feedback franc.
-            open
-              ? "text-white group-hover:text-white"
-              : "text-white/50 group-hover:text-white/80"
-          )}
-        >
+        <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-white">
+          {/*
+            Volontairement TOUJOURS en blanc pur (ouvert ou fermé) — les
+            catégories font office de titres, elles doivent contraster
+            franchement avec les items de nav qui sont eux en midnight-300
+            (gris moyen). L'état ouvert/fermé se lit uniquement via le
+            chevron (▼ vs ▶), pas via la teinte du label.
+          */}
           {label}
         </span>
       </button>
