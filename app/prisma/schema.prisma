@@ -1628,6 +1628,9 @@ model ExpenseReport {
   rejectionReason String?
   paidAt          DateTime?
   notes           String?
+  /// Sortie cash planifiée créée à l'approbation (fin du mois de la
+  /// dépense). Cascade delete si la note est supprimée.
+  cashflowEntry   OneOffCashflowEntry? @relation("ExpenseCashflow")
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
 
@@ -1722,6 +1725,11 @@ model OneOffCashflowEntry {
   /// récurrence mensuelle ensemble — la grille les affiche en une seule
   /// ligne avec un montant par mois.
   recurrenceGroupId String?
+  /// Lien vers une note de frais approuvée qui a généré cette sortie de
+  /// cash automatiquement (planifiée fin de mois). Cascade delete pour
+  /// que supprimer la note nettoie l'entrée cashflow.
+  expenseReportId String?  @unique
+  expenseReport   ExpenseReport? @relation("ExpenseCashflow", fields: [expenseReportId], references: [id], onDelete: Cascade)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   createdById String?

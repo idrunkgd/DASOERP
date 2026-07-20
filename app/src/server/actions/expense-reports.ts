@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireSession, requirePermission } from "@/lib/rbac";
+import { requireSession, requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { callLlmWithMedia, extractJson } from "@/lib/llm";
@@ -86,7 +86,10 @@ export async function submitExpenseReport(id: string) {
 
 export async function approveExpenseReport(id: string, approve: boolean, rejectionReason?: string) {
   const session = await requirePermission("expenses.approve");
-  const report = await prisma.expenseReport.findUnique({ where: { id } });
+  const report = await prisma.expenseReport.findUnique({
+    where: { id },
+    include: { user: { select: { firstName: true, lastName: true } } }
+  });
   if (!report) throw new Error("Note introuvable");
   if (report.status !== "SUBMITTED") throw new Error("La note doit être SUBMITTED");
   await prisma.expenseReport.update({
@@ -98,14 +101,54 @@ export async function approveExpenseReport(id: string, approve: boolean, rejecti
       rejectionReason: approve ? null : (rejectionReason ?? "Non précisé")
     }
   });
+
+  // À l'APPROBATION on planifie automatiquement une sortie de cash dans le
+  // cashflow, datée du DERNIER jour du mois de la dépense. Ex : ticket du
+  // 15/03 → sortie prévue au 31/03. Idempotent : si une entrée liée existe
+  // déjà (ré-approbation après refus), on la met à jour au lieu d'en créer
+  // une deuxième. Sur REJECTED on retire l'entrée éventuellement présente.
+  if (approve) {
+    const d = new Date(report.date);
+    const endOfMonth = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0));
+    const authorName = `${report.user.firstName} ${report.user.lastName}`.trim();
+    const label = `${report.description} — ${authorName}`.slice(0, 200);
+    await prisma.oneOffCashflowEntry.upsert({
+      where: { expenseReportId: id },
+      create: {
+        label,
+        category: "Notes de frais",
+        amount: report.amountTtc,
+        date: endOfMonth,
+        kind: "EXPENSE",
+        status: "PLANNED",
+        expenseReportId: id,
+        createdById: session.user.id
+      },
+      update: {
+        label,
+        amount: report.amountTtc,
+        date: endOfMonth,
+        // Si la note repasse par APPROVED après un cycle, on remet à PLANNED
+        // sauf si l'utilisateur avait déjà marqué payé côté cashflow (auquel
+        // cas on respecte son marquage manuel).
+        // Le status n'est PAS écrasé pour préserver un éventuel PAID manuel.
+      }
+    });
+  } else {
+    await prisma.oneOffCashflowEntry.deleteMany({
+      where: { expenseReportId: id }
+    });
+  }
+
   await logActivity({
     actorId: session.user.id,
     action: "STATUS_CHANGE",
     entityType: "ExpenseReport",
     entityId: id,
-    message: approve ? "Note approuvée" : `Note refusée (${rejectionReason ?? "n/a"})`
+    message: approve ? "Note approuvée (+ cashflow planifié)" : `Note refusée (${rejectionReason ?? "n/a"})`
   });
   revalidatePath("/expenses");
+  revalidatePath("/cashflow");
 }
 
 export async function markExpensePaid(id: string) {
@@ -117,26 +160,48 @@ export async function markExpensePaid(id: string) {
     where: { id },
     data: { status: "PAID", paidAt: new Date() }
   });
+  // Synchronise le cashflow : la sortie planifiée devient PAID pour que
+  // le solde bancaire réel se mette à jour et que la ligne verdisse dans
+  // le panneau "Ce mois-ci".
+  await prisma.oneOffCashflowEntry.updateMany({
+    where: { expenseReportId: id },
+    data: { status: "PAID", paidAt: new Date() }
+  });
   await logActivity({
     actorId: session.user.id,
     action: "STATUS_CHANGE",
     entityType: "ExpenseReport",
     entityId: id,
-    message: "Note remboursée"
+    message: "Note remboursée (+ cashflow marqué payé)"
   });
   revalidatePath("/expenses");
+  revalidatePath("/cashflow");
 }
 
 export async function deleteExpenseReport(id: string) {
-  const session = await requireSession();
+  const session = await requirePermission("expenses.write");
   const report = await prisma.expenseReport.findUnique({ where: { id } });
   if (!report) throw new Error("Note introuvable");
+
+  // Règles :
+  //  - L'auteur peut TOUJOURS supprimer sa propre note (même APPROVED/PAID) :
+  //    c'est son tracking perso, à lui de gérer ses erreurs.
+  //  - Un tiers doit avoir expenses.approve pour intervenir sur une note qui
+  //    n'est pas la sienne (ex: manager qui nettoie une note oubliée).
   const isOwner = report.userId === session.user.id;
-  const isAdmin = ["ADMIN", "FINANCE"].includes(session.user.role);
-  if (!isOwner && !isAdmin) throw new Error("Forbidden");
-  if (report.status !== "DRAFT" && !isAdmin) {
-    throw new Error("Note déjà soumise — suppression réservée aux admin");
+  if (!isOwner) {
+    const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+    if (!perms.includes("expenses.approve")) {
+      throw new Error("Suppression réservée à l'auteur ou à un approbateur");
+    }
   }
+
+  // Nettoyage du OneOffCashflowEntry lié si présent (créé auto au APPROVED).
+  // Idempotent : si aucune entrée liée, ne fait rien.
+  await prisma.oneOffCashflowEntry.deleteMany({
+    where: { expenseReportId: id }
+  });
+
   await prisma.expenseReport.delete({ where: { id } });
   await logActivity({
     actorId: session.user.id,
@@ -146,6 +211,7 @@ export async function deleteExpenseReport(id: string) {
     message: `Note de frais supprimée`
   });
   revalidatePath("/expenses");
+  revalidatePath("/cashflow");
 }
 
 /**

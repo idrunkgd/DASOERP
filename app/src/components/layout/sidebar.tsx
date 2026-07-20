@@ -61,7 +61,6 @@ const SECTIONS: Section[] = [
       { href: "/projects",    label: "Projets",               icon: FolderKanban,    perm: "projects.read" },
       { href: "/timesheet",   label: "Timesheets",            icon: Clock,           perm: "timesheet.self.write" },
       { href: "/purchases",   label: "Achats",                icon: ShoppingCart,    perm: "purchases.read" },
-      { href: "/expenses",    label: "Notes de frais",        icon: ReceiptText,     perm: "expenses.read" },
       { href: "/planning",    label: "Planning",              icon: CalendarRange,   perm: "planning.read" }
     ]
   },
@@ -78,6 +77,7 @@ const SECTIONS: Section[] = [
     label: "RH & Documents",
     items: [
       { href: "/onboarding", label: "Onboarding",       icon: GraduationCap,  perm: "onboarding.read" },
+      { href: "/expenses",   label: "Notes de frais",   icon: ReceiptText,    perm: "expenses.read" },
       { href: "/documents",  label: "Documents",        icon: Files,          perm: "documents.read" },
       { href: "/tests",      label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" }
     ]
