@@ -5,6 +5,7 @@ import { ProfileForm } from "./profile-form";
 import { CandidateCvForm } from "./cv-form";
 import { ExperiencesPanel } from "./experiences-panel";
 import { UserExperiencesPanel } from "./user-experiences-panel";
+import { SickLeaveBlock } from "./sick-leave-form";
 import { FileDown, Eye } from "lucide-react";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -16,7 +17,7 @@ export default async function MyProfile() {
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const isAdmin = sessionPerms.includes("users.manage");
 
-  const [me, groupName, skillCatalog, candidateProfile] = await Promise.all([
+  const [me, groupName, skillCatalog, candidateProfile, sickLeaves] = await Promise.all([
     // Inclut les expériences pro pour l'espace "Mon CV" côté consultant interne
     prisma.user.findUniqueOrThrow({
       where: { id: session.user.id },
@@ -27,8 +28,27 @@ export default async function MyProfile() {
     prisma.candidate.findUnique({
       where: { portalUserId: session.user.id },
       include: { experiences: { orderBy: { startDate: "desc" } } }
+    }),
+    prisma.sickLeave.findMany({
+      where: { userId: session.user.id },
+      orderBy: { startDate: "desc" },
+      take: 30
     })
   ]);
+  const today = new Date();
+  const todayIso = today.toISOString().slice(0, 10);
+  const sickLeavesUi = sickLeaves.map((l) => {
+    const startIso = l.startDate.toISOString().slice(0, 10);
+    const endIso = l.endDate.toISOString().slice(0, 10);
+    return {
+      id: l.id,
+      startDate: startIso,
+      endDate: endIso,
+      reason: l.reason,
+      certificateUrl: l.certificateUrl,
+      isActive: startIso <= todayIso && todayIso <= endIso
+    };
+  });
 
   const isCandidatePortal = !!candidateProfile;
 
@@ -142,6 +162,7 @@ export default async function MyProfile() {
                   description: e.description
                 }))}
               />
+              <SickLeaveBlock existingLeaves={sickLeavesUi} />
             </div>
           )}
         </div>

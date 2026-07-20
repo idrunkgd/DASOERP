@@ -63,6 +63,53 @@ export async function createExpenseReport(formData: FormData) {
   return { id: created.id };
 }
 
+/**
+ * Édition d'un brouillon. Seul l'auteur peut modifier sa propre note, et
+ * uniquement tant qu'elle est en DRAFT (une fois SUBMITTED/APPROVED, la
+ * note est verrouillée pour préserver l'intégrité du workflow).
+ */
+export async function updateExpenseReport(id: string, formData: FormData) {
+  const session = await requirePermission("expenses.write");
+  const existing = await prisma.expenseReport.findUnique({ where: { id } });
+  if (!existing) throw new Error("Note introuvable");
+  if (existing.userId !== session.user.id) {
+    throw new Error("Modification réservée à l'auteur");
+  }
+  if (existing.status !== "DRAFT") {
+    throw new Error("La note n'est plus en brouillon — annule la soumission d'abord");
+  }
+  const data = Schema.parse(Object.fromEntries(formData));
+  const vatAmount = (data.amountHt * data.vatRate) / 100;
+  const amountTtc = data.amountHt + vatAmount;
+  await prisma.expenseReport.update({
+    where: { id },
+    data: {
+      missionId: data.missionId,
+      projectId: data.projectId,
+      date: new Date(data.date),
+      category: data.category,
+      description: data.description,
+      amountHt: data.amountHt,
+      vatAmount,
+      vatRate: data.vatRate,
+      amountTtc,
+      // On n'écrase le ticket que si un nouveau a été uploadé, sinon on garde
+      // l'existant. La convention : formData.receiptUrl vide/absent = pas de
+      // changement ; formData.receiptUrl explicite = remplacer.
+      ...(data.receiptUrl !== null ? { receiptUrl: data.receiptUrl } : {}),
+      notes: data.notes
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "ExpenseReport",
+    entityId: id,
+    message: `Note de frais modifiée`
+  });
+  revalidatePath("/expenses");
+}
+
 export async function submitExpenseReport(id: string) {
   const session = await requireSession();
   const report = await prisma.expenseReport.findUnique({ where: { id } });

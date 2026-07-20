@@ -28,7 +28,7 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 export default async function ExpensesPage({
   searchParams
 }: {
-  searchParams: { mine?: string; status?: string };
+  searchParams: { mine?: string; status?: string; edit?: string };
 }) {
   const session = await requirePermissionOrRedirect("expenses.read");
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
@@ -58,6 +58,32 @@ export default async function ExpensesPage({
     orderBy: { startDate: "desc" }
   });
 
+  // Mode édition : ?edit=<id>. On charge la note à éditer et on la passe
+  // au form pour pré-remplir. Sécurité : on n'expose que si l'auteur est
+  // bien le user courant ET que le statut est DRAFT (règle serveur).
+  let editingReport: null | {
+    id: string; date: string; category: string; description: string;
+    amountHt: number; vatRate: number; missionId: string | null;
+    receiptUrl: string | null;
+  } = null;
+  if (searchParams.edit) {
+    const r = await prisma.expenseReport.findUnique({
+      where: { id: searchParams.edit }
+    });
+    if (r && r.userId === session.user.id && r.status === "DRAFT") {
+      editingReport = {
+        id: r.id,
+        date: r.date.toISOString().slice(0, 10),
+        category: r.category,
+        description: r.description,
+        amountHt: Number(r.amountHt),
+        vatRate: Number(r.vatRate),
+        missionId: r.missionId,
+        receiptUrl: r.receiptUrl
+      };
+    }
+  }
+
   // KPI rapides
   const totalToReimburse = reports
     .filter((r) => ["SUBMITTED", "APPROVED"].includes(r.status))
@@ -85,15 +111,18 @@ export default async function ExpensesPage({
         />
       </div>
 
-      {/* Form de saisie */}
-      <div className="card mb-6">
-        <div className="card-header font-semibold">Nouvelle note de frais</div>
+      {/* Form de saisie / édition */}
+      <div className="card mb-6" id="expense-form">
+        <div className="card-header font-semibold">
+          {editingReport ? "Modifier la note de frais" : "Nouvelle note de frais"}
+        </div>
         <div className="p-4">
           <NewExpenseForm
             missions={missions.map((m) => ({
               id: m.id,
               label: `${m.reference} — ${m.title} (${m.company.name})`
             }))}
+            editing={editingReport}
           />
         </div>
       </div>

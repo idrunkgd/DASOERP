@@ -1,22 +1,49 @@
 "use client";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Sparkles, Upload, Loader2 } from "lucide-react";
-import { createExpenseReport, ocrReceipt } from "@/server/actions/expense-reports";
+import { useRouter } from "next/navigation";
+import { Sparkles, Upload, Loader2, X } from "lucide-react";
+import {
+  createExpenseReport,
+  updateExpenseReport,
+  ocrReceipt
+} from "@/server/actions/expense-reports";
 
 type Mission = { id: string; label: string };
 
-export function NewExpenseForm({ missions }: { missions: Mission[] }) {
+/** Note existante à éditer — quand présente, le form passe en mode UPDATE. */
+export type ExpenseEditData = {
+  id: string;
+  date: string;         // yyyy-mm-dd
+  category: string;
+  description: string;
+  amountHt: number;
+  vatRate: number;
+  missionId: string | null;
+  receiptUrl: string | null;
+};
+
+export function NewExpenseForm({
+  missions,
+  editing
+}: {
+  missions: Mission[];
+  editing?: ExpenseEditData | null;
+}) {
+  const router = useRouter();
+  const isEdit = !!editing;
   const [pending, start] = useTransition();
   const [ocrPending, setOcrPending] = useState(false);
-  const [receiptDataUri, setReceiptDataUri] = useState<string | null>(null);
+  const [receiptDataUri, setReceiptDataUri] = useState<string | null>(
+    editing?.receiptUrl ?? null
+  );
   const [form, setForm] = useState({
-    date: new Date().toISOString().slice(0, 10),
-    category: "OTHER",
-    description: "",
-    amountHt: "",
-    vatRate: "21",
-    missionId: ""
+    date: editing?.date ?? new Date().toISOString().slice(0, 10),
+    category: editing?.category ?? "OTHER",
+    description: editing?.description ?? "",
+    amountHt: editing ? String(editing.amountHt) : "",
+    vatRate: editing ? String(editing.vatRate) : "21",
+    missionId: editing?.missionId ?? ""
   });
 
   const vatAmount =
@@ -67,21 +94,32 @@ export function NewExpenseForm({ missions }: { missions: Mission[] }) {
     if (receiptDataUri) formData.set("receiptUrl", receiptDataUri);
     start(async () => {
       try {
-        await createExpenseReport(formData);
-        toast.success("Note de frais créée (brouillon)");
-        setForm({
-          date: new Date().toISOString().slice(0, 10),
-          category: "OTHER",
-          description: "",
-          amountHt: "",
-          vatRate: "21",
-          missionId: ""
-        });
-        setReceiptDataUri(null);
+        if (isEdit && editing) {
+          await updateExpenseReport(editing.id, formData);
+          toast.success("Note modifiée");
+          // On sort du mode édition en nettoyant l'URL
+          router.replace("/expenses");
+        } else {
+          await createExpenseReport(formData);
+          toast.success("Note de frais créée (brouillon)");
+          setForm({
+            date: new Date().toISOString().slice(0, 10),
+            category: "OTHER",
+            description: "",
+            amountHt: "",
+            vatRate: "21",
+            missionId: ""
+          });
+          setReceiptDataUri(null);
+        }
       } catch (e: any) {
         toast.error(e?.message ?? "Erreur");
       }
     });
+  }
+
+  function cancelEdit() {
+    router.replace("/expenses");
   }
 
   return (
@@ -216,14 +254,26 @@ export function NewExpenseForm({ missions }: { missions: Mission[] }) {
             ))}
           </select>
         </div>
-        <button
-          type="submit"
-          className="btn-primary w-full"
-          disabled={pending || ocrPending}
-        >
-          {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          Créer la note (brouillon)
-        </button>
+        <div className="flex gap-2">
+          {isEdit && (
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="btn-secondary"
+              disabled={pending}
+            >
+              <X className="w-4 h-4" /> Annuler
+            </button>
+          )}
+          <button
+            type="submit"
+            className="btn-primary flex-1"
+            disabled={pending || ocrPending}
+          >
+            {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {isEdit ? "Enregistrer les modifications" : "Créer la note (brouillon)"}
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -7,7 +7,7 @@ import {
   markExpensePaid,
   deleteExpenseReport
 } from "@/server/actions/expense-reports";
-import { Send, Check, X, Wallet, Trash2 } from "lucide-react";
+import { Send, Check, X, Wallet, Trash2, Pencil, FileDown } from "lucide-react";
 
 export function ExpenseActions({
   id,
@@ -35,6 +35,15 @@ export function ExpenseActions({
   }
   return (
     <div className="flex items-center gap-1">
+      {status === "DRAFT" && isOwner && (
+        <a
+          href={`/expenses?edit=${id}#expense-form`}
+          className="text-midnight-600 hover:bg-midnight-100 rounded p-1"
+          title="Modifier"
+        >
+          <Pencil className="w-4 h-4" />
+        </a>
+      )}
       {status === "DRAFT" && isOwner && (
         <button
           className="text-amber-700 hover:bg-amber-50 rounded p-1"
@@ -78,7 +87,17 @@ export function ExpenseActions({
           <Wallet className="w-4 h-4" />
         </button>
       )}
-      {(status === "DRAFT" && isOwner) || canMarkPaid ? (
+      {/* Export PDF — dispo dès qu'on peut voir la note (l'auteur ou un approbateur) */}
+      <a
+        href={`/api/exports/expense-pdf?id=${id}`}
+        target="_blank"
+        rel="noreferrer"
+        className="text-midnight-500 hover:bg-midnight-100 rounded p-1"
+        title="Télécharger en PDF (pour le comptable)"
+      >
+        <FileDown className="w-4 h-4" />
+      </a>
+      {(isOwner || canMarkPaid || canApprove) && (
         <button
           className="text-midnight-400 hover:text-red-600 hover:bg-red-50 rounded p-1"
           title="Supprimer"
@@ -89,7 +108,7 @@ export function ExpenseActions({
         >
           <Trash2 className="w-4 h-4" />
         </button>
-      ) : null}
+      )}
     </div>
   );
 }

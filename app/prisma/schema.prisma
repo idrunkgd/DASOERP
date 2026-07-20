@@ -325,6 +325,8 @@ model User {
   // Notes de frais (test feature)
   expenseReports      ExpenseReport[]      @relation("ExpenseReportUser")
   expenseReportsApproved ExpenseReport[]   @relation("ExpenseReportApprover")
+  // Arrêts maladie déclarés par le consultant (certif joint, période)
+  sickLeaves          SickLeave[]           @relation("UserSickLeaves")
   // CRM pipeline (test feature)
   opportunities       Opportunity[]         @relation("OpportunityOwner")
   opportunityActivities OpportunityActivity[] @relation("OpportunityActivityUser")
@@ -1638,6 +1640,33 @@ model ExpenseReport {
   @@index([status])
   @@index([missionId])
   @@index([projectId])
+}
+
+// =============================================================
+// SICK LEAVE — arrêts maladie déclarés par les consultants
+// =============================================================
+// Un consultant déclare son arrêt (période + certificat en PJ). Tant qu'on
+// est dans la fenêtre [startDate, endDate], il est considéré comme malade
+// (badge rouge, section dashboard). Pas de workflow d'approbation : c'est
+// une déclaration factuelle avec preuve (certificat médical).
+
+model SickLeave {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation("UserSickLeaves", fields: [userId], references: [id], onDelete: Cascade)
+  startDate      DateTime  @db.Date
+  /// Dernier jour d'absence inclus (fin de l'arrêt)
+  endDate        DateTime  @db.Date
+  /// Raison optionnelle laissée à l'utilisateur (grippe, RDV médical, etc.)
+  reason         String?
+  /// URL ou data URI du certificat médical (PDF/JPG/PNG scanné)
+  certificateUrl String?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId, startDate])
+  @@index([startDate, endDate])
 }
 
 // =============================================================

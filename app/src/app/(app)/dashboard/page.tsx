@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { projectsOverBudget } from "@/server/services/project-service";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
-import { Briefcase, FolderKanban, Users as UsersIcon, AlertTriangle, Clock, ShoppingCart, FileText, Receipt, Headset, UserPlus } from "lucide-react";
+import { Briefcase, FolderKanban, Users as UsersIcon, AlertTriangle, Clock, ShoppingCart, FileText, Receipt, Headset, UserPlus, HeartPulse, ReceiptText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +49,26 @@ export default async function Dashboard() {
     prisma.candidate.count({ where: { status: "ACTIVE" } })
   ]);
 
+  // ─── Bloc RH — malades du jour, notes à approuver, timesheets en attente ───
+  const today = new Date();
+  const todayStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const [sickToday, expensesToApprove, timesheetsToValidate] = await Promise.all([
+    prisma.sickLeave.findMany({
+      where: { startDate: { lte: todayStart }, endDate: { gte: todayStart } },
+      include: { user: { select: { id: true, firstName: true, lastName: true } } },
+      orderBy: { endDate: "asc" }
+    }),
+    prisma.expenseReport.findMany({
+      where: { status: "SUBMITTED" },
+      include: {
+        user: { select: { firstName: true, lastName: true } }
+      },
+      orderBy: { submittedAt: "asc" },
+      take: 8
+    }),
+    prisma.timesheetEntry.count({ where: { status: "SUBMITTED" } })
+  ]);
+
   const weightedPipeline = offersOpen.reduce((s, o) => s + Number(o.totalSell) * (o.probability / 100), 0);
   const totalPipeline = offersOpen.reduce((s, o) => s + Number(o.totalSell), 0);
   const estimatedMargin = activeProjects.reduce((s, p) => s + Number(p.marginEstimated), 0);
@@ -85,6 +105,98 @@ export default async function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
         <KpiCard label="Missions ouvertes" value={openMissions} icon={Headset} tone="info" />
         <KpiCard label="Candidats disponibles" value={candidatesAvailable} icon={UserPlus} />
+      </div>
+
+      {/* ─── RH — vue rapide équipe ─── */}
+      <div className="grid lg:grid-cols-3 gap-4 mb-6">
+        {/* Malades du jour */}
+        <section className={
+          "card p-4 " +
+          (sickToday.length > 0 ? "border-red-200 bg-red-50/40" : "")
+        }>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <HeartPulse className={"w-4 h-4 " + (sickToday.length > 0 ? "text-red-600" : "text-midnight-400")} />
+              En arrêt aujourd'hui
+            </h2>
+            <span className={"text-xs font-semibold " + (sickToday.length > 0 ? "text-red-700" : "text-midnight-400")}>
+              {sickToday.length}
+            </span>
+          </div>
+          {sickToday.length === 0 ? (
+            <p className="text-xs text-midnight-500">Personne en arrêt 👍</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {sickToday.map((sl) => (
+                <li key={sl.id} className="text-sm flex items-center justify-between gap-2">
+                  <span className="font-medium text-red-800 truncate">
+                    {sl.user.firstName} {sl.user.lastName}
+                  </span>
+                  <span className="text-[11px] text-red-600 tabular-nums shrink-0">
+                    → {sl.endDate.toLocaleDateString("fr-BE")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Notes de frais à approuver */}
+        <section className={
+          "card p-4 " +
+          (expensesToApprove.length > 0 ? "border-amber-200 bg-amber-50/30" : "")
+        }>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <ReceiptText className={"w-4 h-4 " + (expensesToApprove.length > 0 ? "text-amber-600" : "text-midnight-400")} />
+              Notes de frais à approuver
+            </h2>
+            <Link href="/expenses?status=SUBMITTED" className="text-xs text-indigoaccent hover:underline">
+              Voir tout
+            </Link>
+          </div>
+          {expensesToApprove.length === 0 ? (
+            <p className="text-xs text-midnight-500">Aucune note en attente 👌</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {expensesToApprove.slice(0, 6).map((r) => (
+                <li key={r.id} className="text-sm flex items-center justify-between gap-2">
+                  <span className="truncate">
+                    <span className="font-medium">{r.user.firstName} {r.user.lastName}</span>
+                    <span className="text-midnight-500 text-xs"> — {r.description}</span>
+                  </span>
+                  <span className="text-[11px] text-amber-700 tabular-nums shrink-0 font-semibold">
+                    {formatCurrency(Number(r.amountTtc))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Timesheets à valider */}
+        <section className={
+          "card p-4 " +
+          (timesheetsToValidate > 0 ? "border-indigo-200 bg-indigo-50/30" : "")
+        }>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-sm flex items-center gap-2">
+              <Clock className={"w-4 h-4 " + (timesheetsToValidate > 0 ? "text-indigoaccent" : "text-midnight-400")} />
+              Timesheets à valider
+            </h2>
+            <Link href="/timesheet/validation" className="text-xs text-indigoaccent hover:underline">
+              Ouvrir
+            </Link>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <div className={"text-3xl font-bold " + (timesheetsToValidate > 0 ? "text-indigoaccent" : "text-midnight-400")}>
+              {timesheetsToValidate}
+            </div>
+            <div className="text-xs text-midnight-500">
+              {timesheetsToValidate > 0 ? "entrée(s) en attente" : "tout à jour 👌"}
+            </div>
+          </div>
+        </section>
       </div>
 
       {(overBudget.length > 0 || overdueMilestones.length > 0 || overloaded.length > 0) && (
