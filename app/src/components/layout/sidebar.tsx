@@ -112,15 +112,15 @@ export function Sidebar({
   const path = usePathname();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
 
-  // Thème CLAIR — fond blanc, texte en dark navy (midnight-900).
-  // Bordure droite subtile pour délimiter la sidebar de la zone principale.
+  // Thème SOMBRE — deux tons de mauve : fond mauve intense (indigoaccent)
+  // pour les bandeaux catégorie/header, texte mauve clair (indigo-200) pour
+  // les items sur le fond sombre principal.
   const asideClasses = cn(
     "w-64 shrink-0 flex flex-col z-40",
-    "bg-white text-midnight-800",
-    "border-r border-midnight-200",
+    "bg-gradient-to-b from-midnight-950 via-midnight-950 to-[#0a0e1c] text-midnight-100",
     "fixed inset-y-0 left-0 h-screen transition-transform duration-200 ease-out",
     "md:sticky md:top-0 md:translate-x-0",
-    "shadow-lg md:shadow-none",
+    "shadow-2xl md:shadow-none",
     mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
   );
 
@@ -128,22 +128,23 @@ export function Sidebar({
     <button
       type="button"
       onClick={onMobileClose}
-      className="md:hidden text-midnight-500 hover:text-midnight-900 p-1 rounded hover:bg-midnight-100"
+      className="md:hidden text-indigo-100 hover:text-white p-1 rounded hover:bg-white/10"
       aria-label="Fermer le menu"
     >
       <X className="w-5 h-5" />
     </button>
   );
 
+  // Header logo = bandeau mauve intense (indigoaccent) pour matcher les
+  // catégories : cohérence visuelle "tout ce qui est titre = fond mauve".
   const header = (
-    <div className="px-4 py-4 border-b border-midnight-200 flex items-center gap-3">
-      {/* Sur fond blanc on encadre le logo dans un bloc sombre pour qu'il ressorte */}
-      <div className="bg-midnight-900 rounded-xl p-2 shadow-sm">
+    <div className="px-4 py-4 bg-indigoaccent flex items-center gap-3">
+      <div className="bg-white/10 backdrop-blur rounded-xl p-2 ring-1 ring-white/20">
         <Image src="/dasolabs-icon.svg" alt="" width={22} height={26} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-bold text-midnight-900 tracking-tight">Dasohub</div>
-        <div className="text-[10.5px] text-midnight-500 -mt-0.5">
+        <div className="text-sm font-bold text-white tracking-tight">Dasohub</div>
+        <div className="text-[10.5px] text-indigo-100 -mt-0.5">
           {restricted ? "Espace personnel" : "Pilotage Dasolabs"}
         </div>
       </div>
@@ -152,9 +153,9 @@ export function Sidebar({
   );
 
   const footer = (
-    <div className="px-4 py-3 border-t border-midnight-200 text-[11px] text-midnight-500 flex items-center justify-between">
+    <div className="px-4 py-3 border-t border-white/10 text-[11px] text-indigo-200/70 flex items-center justify-between">
       <span>v0.2</span>
-      <span className="text-midnight-400">© {new Date().getFullYear()}</span>
+      <span className="text-indigo-300/50">© {new Date().getFullYear()}</span>
     </div>
   );
 
@@ -255,24 +256,26 @@ function SidebarSection({
         type="button"
         onClick={toggle}
         className={cn(
-          "w-full flex items-center gap-2 px-3 pt-3 pb-1.5 mt-1 group rounded-md",
-          "hover:bg-midnight-100 transition-colors",
+          "w-full flex items-center gap-2 px-3 py-2 mt-1.5 group rounded-md",
+          // Bandeau mauve intense pour la catégorie — cohérent avec le header
+          // logo en haut de la sidebar. Fermé = même bg avec opacité réduite
+          // pour signaler l'état (2ème ton de mauve sur bg mauve).
+          open
+            ? "bg-indigoaccent hover:bg-indigoaccent/90"
+            : "bg-indigoaccent/60 hover:bg-indigoaccent/80",
+          "transition-colors shadow-sm",
           forceOpen ? "cursor-default" : "cursor-pointer"
         )}
         aria-expanded={open}
       >
         <ChevronDown
           className={cn(
-            "w-3.5 h-3.5 transition-transform duration-150 text-indigoaccent",
+            "w-3.5 h-3.5 transition-transform duration-150 text-indigo-100",
             open ? "rotate-0" : "-rotate-90",
             forceOpen && "opacity-70"
           )}
         />
-        <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-indigoaccent">
-          {/*
-            Categorie = simple label mauve sur fond blanc (fond de la sidebar).
-            Pas de bandeau, pas de fond — juste un titre de section.
-          */}
+        <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-indigo-50">
           {label}
         </span>
       </button>
@@ -313,16 +316,28 @@ function NavLink({
       href={href}
       className={cn(
         "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-100",
-        // Items = BLOCS mauves avec texte BLANC dessus (inverse des categories
-        // qui sont mauves sur blanc). Item actif = mauve plein + shadow +
-        // font plus grasse pour bien se distinguer des items normaux qui sont
-        // un peu plus attenues (opacite 80%).
+        // Items sur le fond sombre principal : texte mauve clair (indigo-300)
+        // — c'est le 2ème ton de mauve, en écho au bandeau catégorie mauve
+        // intense (indigoaccent). Actif = mauve plus lumineux (indigo-100) +
+        // léger fond mauve translucide.
         active
-          ? "bg-indigoaccent text-white font-semibold shadow-sm"
-          : "bg-indigoaccent/80 text-white hover:bg-indigoaccent"
+          ? "bg-indigoaccent/20 text-indigo-100 font-medium"
+          : "text-indigo-300 hover:bg-indigoaccent/10 hover:text-indigo-100"
       )}
     >
-      <Icon className="w-4 h-4 shrink-0 text-white" />
+      {/* Barre indicatrice a gauche */}
+      <span
+        className={cn(
+          "absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-full transition-all",
+          active ? "bg-indigoaccent" : "bg-transparent group-hover:bg-indigoaccent/40"
+        )}
+      />
+      <Icon
+        className={cn(
+          "w-4 h-4 shrink-0 transition-colors",
+          active ? "text-indigo-100" : "text-indigo-400 group-hover:text-indigo-200"
+        )}
+      />
       <span className="truncate">{label}</span>
     </Link>
   );
