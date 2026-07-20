@@ -480,14 +480,21 @@ export function CashflowGrid({
         />
       )}
 
-      {editingCell && (
-        <CellEditorModal
-          row={data.rows.find((r) => r.id === editingCell.rowId)!}
-          monthIdx={editingCell.monthIdx}
-          year={data.year}
-          onClose={() => setEditingCell(null)}
-        />
-      )}
+      {editingCell && (() => {
+        // Garde-fou : si l'utilisateur a ouvert un modal puis navigué vers
+        // une autre année, la row peut ne plus exister dans data.rows.
+        // On ferme silencieusement le modal orphelin au lieu de crasher.
+        const row = data.rows.find((r) => r.id === editingCell.rowId);
+        if (!row) return null;
+        return (
+          <CellEditorModal
+            row={row}
+            monthIdx={editingCell.monthIdx}
+            year={data.year}
+            onClose={() => setEditingCell(null)}
+          />
+        );
+      })()}
 
       {editingMilestoneCell && (
         <MilestoneCellModal

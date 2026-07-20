@@ -217,7 +217,13 @@ export function CurrentMonthPanel({
       const isIncome = o.kind === "INCOME" || o.kind === "SIMULATION_INCOME";
       const item: UnifiedItem = {
         key: `o-${o.id}`,
-        category: o.category?.trim() || NO_CATEGORY,
+        // Les sims sont regroupées dans une catégorie dédiée pour ne pas être
+        // confondues avec les vraies factures / dépenses. Sinon un
+        // SIMULATION_INCOME avec category="Factures clients" se retrouverait
+        // à côté des vraies factures.
+        category: isSim
+          ? "Simulations (what-if)"
+          : o.category?.trim() || NO_CATEGORY,
         label: o.label,
         amount: o.amount,
         isPaid: o.status === "PAID",
@@ -615,6 +621,14 @@ function UnifiedItemRow({ item }: { item: UnifiedItem }) {
           {fmt(item.amount)} €
         </div>
       </div>
+      {isSimulation ? (
+        // Les sims n'ont pas de bouton PAID — elles ne sont pas payées, ce
+        // sont juste des projections. On affiche juste un badge "sim" pour
+        // rappeler la nature what-if de la ligne.
+        <span className="text-[10px] font-semibold text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded uppercase tracking-wide">
+          sim
+        </span>
+      ) : (
       <button
         onClick={toggle}
         disabled={pending || isCancelled}
@@ -632,6 +646,7 @@ function UnifiedItemRow({ item }: { item: UnifiedItem }) {
           <Check className="w-3.5 h-3.5" />
         )}
       </button>
+      )}
     </div>
   );
 }
