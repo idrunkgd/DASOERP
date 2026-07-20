@@ -231,27 +231,43 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     // Chaîne année → année : on prend la PROJECTION (PAID + PLANNED, non-SKIPPED,
     // non-CANCELLED, hors simulations), pas uniquement le réel marqué payé.
     // Sinon fin 2026 = 120K ≠ début 2027 = 45K (seulement les payés cochés).
-    const [priorMs, priorOo, priorRecurring] = await Promise.all([
-      prisma.billingMilestone.findMany({
-        where: {
-          status: { not: "CANCELLED" },
-          expectedAt: { gte: bootstrapDate, lt: yearStart }
-        },
-        select: { amount: true, missionId: true }
-      }),
-      prisma.oneOffCashflowEntry.findMany({
-        where: {
-          status: { not: "SKIPPED" },
-          kind: { not: "SIMULATION" },
-          date: { gte: bootstrapDate, lt: yearStart }
-        },
-        select: { amount: true, kind: true }
-      }),
-      prisma.recurringExpense.findMany({
-        where: { isActive: true },
-        include: { months: true }
-      })
-    ]);
+    const [priorMs, priorOo, priorRecurring, priorEmployees, priorPayrollMonths] =
+      await Promise.all([
+        prisma.billingMilestone.findMany({
+          where: {
+            status: { not: "CANCELLED" },
+            expectedAt: { gte: bootstrapDate, lt: yearStart }
+          },
+          select: { amount: true, missionId: true }
+        }),
+        prisma.oneOffCashflowEntry.findMany({
+          where: {
+            status: { not: "SKIPPED" },
+            // On exclut les SIMULATIONS des DEUX côtés (dépense simulée et
+            // recette simulée) : une projection what-if n'a rien à faire
+            // dans le solde reporté du 1er janvier.
+            kind: { notIn: ["SIMULATION", "SIMULATION_INCOME"] },
+            date: { gte: bootstrapDate, lt: yearStart }
+          },
+          select: { amount: true, kind: true }
+        }),
+        prisma.recurringExpense.findMany({
+          where: { isActive: true },
+          include: { months: true }
+        }),
+        // Payroll : mêmes 3 postes (Salaires / Précompte / ONSS) qui
+        // doivent être décomptés du solde reporté sinon fin 2026 ≠ début
+        // 2027 (le manque de 130k ≈ payroll d'une année).
+        prisma.payrollEmployee.findMany({
+          where: {
+            startDate: { lt: yearStart },
+            OR: [{ endDate: null }, { endDate: { gte: bootstrapDate } }]
+          }
+        }),
+        prisma.payrollMonth.findMany({
+          where: { year: { lt: year } }
+        })
+      ]);
 
     // TVAC pour milestones liés à une mission — fetch vatRate en raw SQL
     const priorMissionIds = new Set<string>();
@@ -317,6 +333,40 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         startingBalance += r.isIncome ? a : -a;
       }
     }
+
+    // Payroll : pour chaque (y, month) antérieur à l'année affichée, on
+    // somme les 3 postes (net + précompte + ONSS) pour tous les employés
+    // actifs ce mois-là (start/end dates), en appliquant amountOverride
+    // et le statut SKIPPED s'ils existent dans PayrollMonth.
+    const priorPmIndex = new Map<string, typeof priorPayrollMonths[number]>();
+    for (const pm of priorPayrollMonths) {
+      priorPmIndex.set(`${pm.year}-${pm.month}-${pm.kind}`, pm);
+    }
+    for (const { year: y, month } of monthsInRange) {
+      const monthStart = new Date(Date.UTC(y, month - 1, 1));
+      const monthEnd = new Date(Date.UTC(y, month, 0));
+      let sNet = 0, sTax = 0, sOnss = 0;
+      for (const e of priorEmployees) {
+        if (e.startDate > monthEnd) continue;
+        if (e.endDate != null && e.endDate < monthStart) continue;
+        sNet  += Number(e.monthlyNetPay);
+        sTax  += Number(e.monthlyWithholdingTax);
+        sOnss += Number(e.monthlyOnss);
+      }
+      const kinds: [string, number][] = [
+        ["NET_PAY", sNet],
+        ["WITHHOLDING_TAX", sTax],
+        ["ONSS", sOnss]
+      ];
+      for (const [kind, calc] of kinds) {
+        const pm = priorPmIndex.get(`${y}-${month}-${kind}`);
+        if (pm?.status === "SKIPPED") continue;
+        const overriden = pm?.amountOverride != null ? Number(pm.amountOverride) : null;
+        const amount = overriden != null ? overriden : calc;
+        startingBalance -= amount;
+      }
+    }
+
     startingBalance = Math.round(startingBalance * 100) / 100;
   }
 
