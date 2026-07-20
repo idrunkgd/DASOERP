@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect, useState, useMemo } from "react";
 import {
   LayoutDashboard, Building2, Users, FileText, FolderKanban,
   Clock, ShoppingCart, CalendarRange, UserCog, Receipt, Settings,
@@ -9,7 +10,7 @@ import {
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
-  AppWindow, GraduationCap, Files, ReceiptText, HeartPulse
+  AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -37,8 +38,6 @@ const SECTIONS: Section[] = [
       { href: "/companies",   label: "Entreprises",          icon: Building2,       perm: "companies.read" },
       { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" },
       { href: "/commercial",  label: "Activités commerciales", icon: MessageSquare, perm: "contacts.read" }
-      // CRM pipeline retiré sur demande utilisateur — page /test/crm
-      // reste accessible par URL directe si besoin.
     ]
   },
   {
@@ -70,9 +69,6 @@ const SECTIONS: Section[] = [
       { href: "/finance",     label: "Facturations",          icon: Receipt,         perm: "finance.read" }
     ]
   },
-  // Section "Test (preview)" masquée — les pages restent accessibles par URL directe
-  // (/test/expenses, /test/supplier-invoices, /test/cv-parser, /test/tva, /test/matching)
-  // mais ne sont plus dans la navigation. CRM a été déplacé dans "Commerciale".
   {
     label: "RH & Documents",
     items: [
@@ -97,6 +93,9 @@ const SECTIONS: Section[] = [
   }
 ];
 
+/** Clé localStorage — l'état d'ouverture des sections persiste entre refresh. */
+const COLLAPSED_KEY = "dasohub-sidebar-collapsed-v1";
+
 export function Sidebar({
   role,
   permissions,
@@ -111,13 +110,15 @@ export function Sidebar({
   onMobileClose?: () => void;
 }) {
   const path = usePathname();
-  const permSet = new Set(permissions);
+  const permSet = useMemo(() => new Set(permissions), [permissions]);
 
   // Classes communes : sticky/visible en md+, drawer fixe en mobile
   const asideClasses = cn(
-    "w-60 shrink-0 bg-midnight-950 text-midnight-100 flex flex-col z-40",
+    "w-64 shrink-0 flex flex-col z-40",
+    "bg-gradient-to-b from-midnight-950 via-midnight-950 to-[#0a0e1c] text-midnight-100",
     "fixed inset-y-0 left-0 h-screen transition-transform duration-200 ease-out",
     "md:sticky md:top-0 md:translate-x-0",
+    "shadow-2xl md:shadow-none",
     mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
   );
 
@@ -125,11 +126,33 @@ export function Sidebar({
     <button
       type="button"
       onClick={onMobileClose}
-      className="md:hidden text-midnight-300 hover:text-white p-1"
+      className="md:hidden text-midnight-300 hover:text-white p-1 rounded hover:bg-white/10"
       aria-label="Fermer le menu"
     >
       <X className="w-5 h-5" />
     </button>
+  );
+
+  const header = (
+    <div className="px-4 py-4 border-b border-white/10 flex items-center gap-3">
+      <div className="bg-white rounded-xl p-2 shadow-md">
+        <Image src="/dasolabs-icon.svg" alt="" width={22} height={26} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-bold text-white tracking-tight">Dasohub</div>
+        <div className="text-[10.5px] text-midnight-300 -mt-0.5">
+          {restricted ? "Espace personnel" : "Pilotage Dasolabs"}
+        </div>
+      </div>
+      {closeButton}
+    </div>
+  );
+
+  const footer = (
+    <div className="px-4 py-3 border-t border-white/10 text-[11px] text-midnight-400 flex items-center justify-between">
+      <span>v0.2</span>
+      <span className="text-midnight-500">© {new Date().getFullYear()}</span>
+    </div>
   );
 
   // Visiteur / compte portail : sidebar minimale avec Mon profil uniquement
@@ -137,81 +160,170 @@ export function Sidebar({
     const active = path === "/me" || path.startsWith("/me/");
     return (
       <aside className={asideClasses}>
-        <div className="px-5 py-5 border-b border-white/5 flex items-center gap-3">
-          <div className="bg-white rounded-lg p-1.5">
-            <Image src="/dasolabs-icon.svg" alt="" width={26} height={32} />
-          </div>
-          <div className="flex-1">
-            <div className="text-sm font-semibold text-white">Dasohub</div>
-            <div className="text-[11px] text-midnight-300 -mt-0.5">Espace personnel</div>
-          </div>
-          {closeButton}
-        </div>
+        {header}
         <nav className="flex-1 py-3 px-2">
-          <Link
-            href="/me"
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-              active ? "bg-indigoaccent/20 text-white font-medium" : "text-midnight-200 hover:bg-white/5 hover:text-white"
-            )}
-          >
-            <UserIcon className="w-4 h-4 shrink-0" />
-            <span>Mon profil</span>
-          </Link>
+          <NavLink href="/me" icon={UserIcon} label="Mon profil" active={active} />
         </nav>
-        <div className="p-3 border-t border-white/5 text-[11px] text-midnight-300">
-          v0.2 · {new Date().getFullYear()}
-        </div>
+        {footer}
       </aside>
     );
   }
+
   return (
     <aside className={asideClasses}>
-      <div className="px-5 py-5 border-b border-white/5 flex items-center gap-3">
-        <div className="bg-white rounded-lg p-1.5">
-          <Image src="/dasolabs-icon.svg" alt="" width={26} height={32} />
-        </div>
-        <div className="flex-1">
-          <div className="text-sm font-semibold text-white">Dasohub</div>
-          <div className="text-[11px] text-midnight-300 -mt-0.5">Pilotage Dasolabs</div>
-        </div>
-        {closeButton}
-      </div>
-      <nav className="flex-1 overflow-y-auto py-3 px-2">
-        {SECTIONS.map(section => {
-          const visibleItems = section.items.filter(item => {
+      {header}
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+        {SECTIONS.map((section) => {
+          const visibleItems = section.items.filter((item) => {
             if (item.allowedRoles && !item.allowedRoles.includes(role)) return false;
             if (item.perm && !permSet.has(item.perm)) return false;
             return true;
           });
           if (visibleItems.length === 0) return null;
+          // Une section reste dépliée d'office si la route active tombe dedans
+          const containsActive = visibleItems.some(
+            (i) => path === i.href || path.startsWith(i.href + "/")
+          );
           return (
-            <div key={section.label} className="mb-2">
-              <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-midnight-400 font-semibold">{section.label}</div>
-              {visibleItems.map(item => {
-                const active = path === item.href || path.startsWith(item.href + "/");
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-                      active ? "bg-indigoaccent/20 text-white font-medium" : "text-midnight-200 hover:bg-white/5 hover:text-white"
-                    )}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
+            <SidebarSection
+              key={section.label}
+              label={section.label}
+              items={visibleItems}
+              path={path}
+              forceOpen={containsActive}
+            />
           );
         })}
       </nav>
-      <div className="p-3 border-t border-white/5 text-[11px] text-midnight-300">
-        v0.2 · {new Date().getFullYear()}
-      </div>
+      {footer}
     </aside>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Section repliable
+
+function SidebarSection({
+  label,
+  items,
+  path,
+  forceOpen
+}: {
+  label: string;
+  items: NavItem[];
+  path: string;
+  forceOpen: boolean;
+}) {
+  // État local, hydraté depuis localStorage après mount pour éviter les
+  // mismatch d'hydratation SSR (le serveur ne connaît pas la valeur).
+  // Par défaut : tout ouvert au premier rendu.
+  const [collapsed, setCollapsed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(COLLAPSED_KEY);
+      const map: Record<string, boolean> = raw ? JSON.parse(raw) : {};
+      if (typeof map[label] === "boolean") setCollapsed(map[label]);
+    } catch { /* localStorage désactivé — on garde le défaut */ }
+    setHydrated(true);
+  }, [label]);
+
+  function toggle() {
+    // Si la section contient la route active, on refuse de la replier
+    // silencieusement (sinon on cacherait l'entrée courante). L'utilisateur
+    // peut toujours naviguer ailleurs et replier ensuite.
+    if (forceOpen) return;
+    const next = !collapsed;
+    setCollapsed(next);
+    try {
+      const raw = localStorage.getItem(COLLAPSED_KEY);
+      const map: Record<string, boolean> = raw ? JSON.parse(raw) : {};
+      map[label] = next;
+      localStorage.setItem(COLLAPSED_KEY, JSON.stringify(map));
+    } catch { /* ignore */ }
+  }
+
+  const open = forceOpen || !collapsed;
+
+  return (
+    <div className="mb-1.5">
+      <button
+        type="button"
+        onClick={toggle}
+        className={cn(
+          "w-full flex items-center gap-2 px-3 pt-2 pb-1 group",
+          forceOpen ? "cursor-default" : "cursor-pointer"
+        )}
+        aria-expanded={open}
+      >
+        <ChevronDown
+          className={cn(
+            "w-3 h-3 text-midnight-500 transition-transform duration-150",
+            open ? "rotate-0" : "-rotate-90",
+            forceOpen && "opacity-40"
+          )}
+        />
+        <span className="text-[10px] uppercase tracking-[0.12em] text-midnight-400 font-bold group-hover:text-midnight-200 transition-colors">
+          {label}
+        </span>
+      </button>
+      {/* Rendu conditionnel — évite d'insérer des <a> cachés qui polluent le DOM */}
+      {(open || !hydrated) && (
+        <div className="mt-0.5 space-y-0.5">
+          {items.map((item) => {
+            const active = path === item.href || path.startsWith(item.href + "/");
+            return (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                active={active}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Item de nav — indicateur actif : barre gauche + fond léger
+
+function NavLink({
+  href, icon: Icon, label, active
+}: {
+  href: string;
+  icon: any;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-100",
+        active
+          ? "bg-indigoaccent/15 text-white font-medium"
+          : "text-midnight-300 hover:bg-white/5 hover:text-white"
+      )}
+    >
+      {/* Barre indicatrice à gauche (position absolue) */}
+      <span
+        className={cn(
+          "absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-full transition-all",
+          active ? "bg-indigoaccent" : "bg-transparent group-hover:bg-white/20"
+        )}
+      />
+      <Icon
+        className={cn(
+          "w-4 h-4 shrink-0 transition-colors",
+          active ? "text-indigoaccent" : "text-midnight-400 group-hover:text-midnight-200"
+        )}
+      />
+      <span className="truncate">{label}</span>
+    </Link>
   );
 }
