@@ -112,13 +112,15 @@ export function Sidebar({
   const path = usePathname();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
 
-  // Classes communes : sticky/visible en md+, drawer fixe en mobile
+  // Thème CLAIR — fond blanc, texte en dark navy (midnight-900).
+  // Bordure droite subtile pour délimiter la sidebar de la zone principale.
   const asideClasses = cn(
     "w-64 shrink-0 flex flex-col z-40",
-    "bg-gradient-to-b from-midnight-950 via-midnight-950 to-[#0a0e1c] text-midnight-100",
+    "bg-white text-midnight-800",
+    "border-r border-midnight-200",
     "fixed inset-y-0 left-0 h-screen transition-transform duration-200 ease-out",
     "md:sticky md:top-0 md:translate-x-0",
-    "shadow-2xl md:shadow-none",
+    "shadow-lg md:shadow-none",
     mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
   );
 
@@ -126,7 +128,7 @@ export function Sidebar({
     <button
       type="button"
       onClick={onMobileClose}
-      className="md:hidden text-midnight-300 hover:text-white p-1 rounded hover:bg-white/10"
+      className="md:hidden text-midnight-500 hover:text-midnight-900 p-1 rounded hover:bg-midnight-100"
       aria-label="Fermer le menu"
     >
       <X className="w-5 h-5" />
@@ -134,13 +136,14 @@ export function Sidebar({
   );
 
   const header = (
-    <div className="px-4 py-4 border-b border-white/10 flex items-center gap-3">
-      <div className="bg-white rounded-xl p-2 shadow-md">
+    <div className="px-4 py-4 border-b border-midnight-200 flex items-center gap-3">
+      {/* Sur fond blanc on encadre le logo dans un bloc sombre pour qu'il ressorte */}
+      <div className="bg-midnight-900 rounded-xl p-2 shadow-sm">
         <Image src="/dasolabs-icon.svg" alt="" width={22} height={26} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-bold text-white tracking-tight">Dasohub</div>
-        <div className="text-[10.5px] text-midnight-300 -mt-0.5">
+        <div className="text-sm font-bold text-midnight-900 tracking-tight">Dasohub</div>
+        <div className="text-[10.5px] text-midnight-500 -mt-0.5">
           {restricted ? "Espace personnel" : "Pilotage Dasolabs"}
         </div>
       </div>
@@ -149,9 +152,9 @@ export function Sidebar({
   );
 
   const footer = (
-    <div className="px-4 py-3 border-t border-white/10 text-[11px] text-midnight-400 flex items-center justify-between">
+    <div className="px-4 py-3 border-t border-midnight-200 text-[11px] text-midnight-500 flex items-center justify-between">
       <span>v0.2</span>
-      <span className="text-midnight-500">© {new Date().getFullYear()}</span>
+      <span className="text-midnight-400">© {new Date().getFullYear()}</span>
     </div>
   );
 
@@ -253,25 +256,23 @@ function SidebarSection({
         onClick={toggle}
         className={cn(
           "w-full flex items-center gap-2 px-3 pt-3 pb-1.5 mt-1 group rounded-md",
-          "hover:bg-white/[0.04] transition-colors",
+          "hover:bg-midnight-100 transition-colors",
           forceOpen ? "cursor-default" : "cursor-pointer"
         )}
         aria-expanded={open}
       >
         <ChevronDown
           className={cn(
-            "w-3.5 h-3.5 transition-transform duration-150 text-white",
+            "w-3.5 h-3.5 transition-transform duration-150 text-midnight-900",
             open ? "rotate-0" : "-rotate-90",
             forceOpen && "opacity-60"
           )}
         />
-        <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-white">
+        <span className="text-[11px] uppercase tracking-[0.14em] font-bold text-midnight-900">
           {/*
-            Volontairement TOUJOURS en blanc pur (ouvert ou fermé) — les
-            catégories font office de titres, elles doivent contraster
-            franchement avec les items de nav qui sont eux en midnight-300
-            (gris moyen). L'état ouvert/fermé se lit uniquement via le
-            chevron (▼ vs ▶), pas via la teinte du label.
+            Thème clair : catégories en midnight-900 (dark navy, très
+            contrasté sur fond blanc). Les items en dessous sont en
+            midnight-500 (gris moyen) pour laisser la hiérarchie claire.
           */}
           {label}
         </span>
@@ -313,26 +314,24 @@ function NavLink({
       href={href}
       className={cn(
         "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-100",
-        // NB : l'item actif est en white/85 (et NON pas pur white) pour rester
-        // légèrement moins lumineux que les headers de catégorie (pur white).
-        // Le repérage se fait via le fond indigo + la barre + l'icône accent,
-        // pas via un blanc plus fort que les catégories.
+        // Thème clair : item actif = fond indigo léger + texte indigo,
+        // items normaux = gris moyen qui fonce au hover.
         active
-          ? "bg-indigoaccent/15 text-white/85 font-medium"
-          : "text-midnight-300 hover:bg-white/5 hover:text-white"
+          ? "bg-indigoaccent/10 text-indigoaccent font-medium"
+          : "text-midnight-600 hover:bg-midnight-100 hover:text-midnight-900"
       )}
     >
       {/* Barre indicatrice à gauche (position absolue) */}
       <span
         className={cn(
           "absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r-full transition-all",
-          active ? "bg-indigoaccent" : "bg-transparent group-hover:bg-white/20"
+          active ? "bg-indigoaccent" : "bg-transparent group-hover:bg-midnight-300"
         )}
       />
       <Icon
         className={cn(
           "w-4 h-4 shrink-0 transition-colors",
-          active ? "text-indigoaccent" : "text-midnight-400 group-hover:text-midnight-200"
+          active ? "text-indigoaccent" : "text-midnight-400 group-hover:text-midnight-700"
         )}
       />
       <span className="truncate">{label}</span>
