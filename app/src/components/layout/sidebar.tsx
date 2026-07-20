@@ -135,16 +135,17 @@ export function Sidebar({
     </button>
   );
 
-  // Header logo = bandeau mauve intense (indigoaccent) pour matcher les
-  // catégories : cohérence visuelle "tout ce qui est titre = fond mauve".
+  // Header logo = fond sombre navy (le même que le fond du menu principal)
+  // avec le logo dans un carré blanc pour bien ressortir. Le titre / sous-titre
+  // reprennent le blanc / mauve clair pour rester lisibles sur le dark.
   const header = (
-    <div className="px-4 py-4 bg-indigoaccent flex items-center gap-3">
-      <div className="bg-white/10 backdrop-blur rounded-xl p-2 ring-1 ring-white/20">
+    <div className="px-4 py-4 bg-midnight-950 border-b border-white/10 flex items-center gap-3">
+      <div className="bg-white rounded-xl p-2 shadow-md">
         <Image src="/dasolabs-icon.svg" alt="" width={22} height={26} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-bold text-white tracking-tight">Dasohub</div>
-        <div className="text-[10.5px] text-indigo-100 -mt-0.5">
+        <div className="text-[10.5px] text-indigo-200/80 -mt-0.5">
           {restricted ? "Espace personnel" : "Pilotage Dasolabs"}
         </div>
       </div>
