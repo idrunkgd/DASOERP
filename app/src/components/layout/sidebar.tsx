@@ -260,18 +260,24 @@ function SidebarSection({
       >
         <ChevronDown
           className={cn(
-            "w-3.5 h-3.5 transition-transform duration-150 text-white",
+            "w-3.5 h-3.5 transition-transform duration-150",
+            // Chevron aligné sur le label pour signal cohérent
+            open ? "text-white" : "text-white/50",
             open ? "rotate-0" : "-rotate-90",
-            forceOpen && "opacity-50"
+            forceOpen && "opacity-60"
           )}
         />
         <span
           className={cn(
-            "text-[11px] uppercase tracking-[0.14em] font-bold text-white transition-colors",
-            // Volontairement TOUJOURS en blanc pur (ouvert OU fermé) — les
-            // catégories doivent être plus lumineuses que l'entrée
-            // sélectionnée (qui elle est en text-white/85). Ça hiérarchise
-            // visuellement la sidebar : sections > entrée active > items.
+            "text-[11px] uppercase tracking-[0.14em] font-bold transition-colors",
+            // Ouvert : blanc pur — la section est visible ET dépliée, tête
+            //   de hiérarchie de la sidebar.
+            // Fermé : blanc à 50% opacité — reste parfaitement lisible mais
+            //   nettement plus terne, signale "sous-menu caché" au coup d'oeil.
+            // Hover : éclaircit pour donner un feedback franc.
+            open
+              ? "text-white group-hover:text-white"
+              : "text-white/50 group-hover:text-white/80"
           )}
         >
           {label}
