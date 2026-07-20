@@ -9,7 +9,7 @@ import {
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
-  AppWindow, GraduationCap, Files
+  AppWindow, GraduationCap, Files, ReceiptText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -61,6 +61,7 @@ const SECTIONS: Section[] = [
       { href: "/projects",    label: "Projets",               icon: FolderKanban,    perm: "projects.read" },
       { href: "/timesheet",   label: "Timesheets",            icon: Clock,           perm: "timesheet.self.write" },
       { href: "/purchases",   label: "Achats",                icon: ShoppingCart,    perm: "purchases.read" },
+      { href: "/expenses",    label: "Notes de frais",        icon: ReceiptText,     perm: "expenses.read" },
       { href: "/planning",    label: "Planning",              icon: CalendarRange,   perm: "planning.read" }
     ]
   },

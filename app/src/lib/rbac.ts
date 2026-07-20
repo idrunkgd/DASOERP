@@ -25,6 +25,7 @@ export type Permission =
   | "onboarding.read" | "onboarding.write"
   | "documents.read"  | "documents.write"
   | "tests.manage"    | "tests.take"
+  | "expenses.read"   | "expenses.write" | "expenses.approve"
   | "audit.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
@@ -46,6 +47,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "onboarding.read","onboarding.write",
     "documents.read","documents.write",
     "tests.manage","tests.take",
+    "expenses.read","expenses.write","expenses.approve",
     "audit.read"
   ],
   MANAGER: [
@@ -65,6 +67,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "onboarding.read","onboarding.write",
     "documents.read","documents.write",
     "tests.manage","tests.take",
+    "expenses.read","expenses.write","expenses.approve",
     "audit.read"
   ],
   COMMERCIAL: [
@@ -79,7 +82,8 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "dashboard.read",
     "applinks.read",
     "crm.read","crm.write",
-    "documents.read","documents.write"
+    "documents.read","documents.write",
+    "expenses.read","expenses.write"
   ],
   CONSULTANT: [
     "companies.read",
@@ -92,7 +96,8 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "applinks.read",
     "reviews.read",
     "documents.read",
-    "tests.take"
+    "tests.take",
+    "expenses.read","expenses.write"
   ],
   FINANCE: [
     "companies.read",
@@ -106,6 +111,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "dashboard.read",
     "applinks.read",
     "documents.read","documents.write",
+    "expenses.read","expenses.write","expenses.approve",
     "audit.read"
   ]
 };
@@ -401,6 +407,11 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Achats", href: "/purchases", perms: [
         { value: "purchases.read",  label: "Voir les achats" },
         { value: "purchases.write", label: "Créer & modifier les achats" }
+      ]},
+      { menuLabel: "Notes de frais", href: "/expenses", perms: [
+        { value: "expenses.read",    label: "Voir les notes de frais" },
+        { value: "expenses.write",   label: "Saisir & soumettre ses notes" },
+        { value: "expenses.approve", label: "Approuver / rembourser" }
       ]},
       { menuLabel: "Planning", href: "/planning", perms: [
         { value: "planning.read",  label: "Voir le planning" },

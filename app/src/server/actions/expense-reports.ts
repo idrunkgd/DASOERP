@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requireSession } from "@/lib/rbac";
+import { requireSession, requirePermission } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { callLlmWithMedia, extractJson } from "@/lib/llm";
@@ -29,7 +29,7 @@ const Schema = z.object({
 });
 
 export async function createExpenseReport(formData: FormData) {
-  const session = await requireSession();
+  const session = await requirePermission("expenses.write");
   const data = Schema.parse(Object.fromEntries(formData));
   const vatAmount = (data.amountHt * data.vatRate) / 100;
   const amountTtc = data.amountHt + vatAmount;
@@ -59,7 +59,7 @@ export async function createExpenseReport(formData: FormData) {
     entityId: created.id,
     message: `Note de frais « ${data.description} » créée (${amountTtc.toFixed(2)} € TTC)`
   });
-  revalidatePath("/test/expenses");
+  revalidatePath("/expenses");
   return { id: created.id };
 }
 
@@ -81,14 +81,11 @@ export async function submitExpenseReport(id: string) {
     entityId: id,
     message: "Note de frais soumise"
   });
-  revalidatePath("/test/expenses");
+  revalidatePath("/expenses");
 }
 
 export async function approveExpenseReport(id: string, approve: boolean, rejectionReason?: string) {
-  const session = await requireSession();
-  if (!["ADMIN", "MANAGER", "FINANCE"].includes(session.user.role)) {
-    throw new Error("Forbidden");
-  }
+  const session = await requirePermission("expenses.approve");
   const report = await prisma.expenseReport.findUnique({ where: { id } });
   if (!report) throw new Error("Note introuvable");
   if (report.status !== "SUBMITTED") throw new Error("La note doit être SUBMITTED");
@@ -108,12 +105,11 @@ export async function approveExpenseReport(id: string, approve: boolean, rejecti
     entityId: id,
     message: approve ? "Note approuvée" : `Note refusée (${rejectionReason ?? "n/a"})`
   });
-  revalidatePath("/test/expenses");
+  revalidatePath("/expenses");
 }
 
 export async function markExpensePaid(id: string) {
-  const session = await requireSession();
-  if (!["ADMIN", "FINANCE"].includes(session.user.role)) throw new Error("Forbidden");
+  const session = await requirePermission("finance.write");
   const report = await prisma.expenseReport.findUnique({ where: { id } });
   if (!report) throw new Error("Note introuvable");
   if (report.status !== "APPROVED") throw new Error("La note doit être APPROVED");
@@ -128,7 +124,7 @@ export async function markExpensePaid(id: string) {
     entityId: id,
     message: "Note remboursée"
   });
-  revalidatePath("/test/expenses");
+  revalidatePath("/expenses");
 }
 
 export async function deleteExpenseReport(id: string) {
@@ -149,7 +145,7 @@ export async function deleteExpenseReport(id: string) {
     entityId: id,
     message: `Note de frais supprimée`
   });
-  revalidatePath("/test/expenses");
+  revalidatePath("/expenses");
 }
 
 /**
