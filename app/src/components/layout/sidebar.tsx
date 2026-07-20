@@ -252,19 +252,31 @@ function SidebarSection({
         type="button"
         onClick={toggle}
         className={cn(
-          "w-full flex items-center gap-2 px-3 pt-2 pb-1 group",
+          "w-full flex items-center gap-2 px-3 pt-2 pb-1 group rounded-md",
+          "hover:bg-white/[0.03] transition-colors",
           forceOpen ? "cursor-default" : "cursor-pointer"
         )}
         aria-expanded={open}
       >
         <ChevronDown
           className={cn(
-            "w-3 h-3 text-midnight-500 transition-transform duration-150",
+            "w-3 h-3 transition-transform duration-150",
+            // Couleur du chevron : suit la teinte du label pour être cohérent
+            open ? "text-midnight-400" : "text-midnight-600",
             open ? "rotate-0" : "-rotate-90",
             forceOpen && "opacity-40"
           )}
         />
-        <span className="text-[10px] uppercase tracking-[0.12em] text-midnight-400 font-bold group-hover:text-midnight-200 transition-colors">
+        <span
+          className={cn(
+            "text-[10px] uppercase tracking-[0.12em] font-bold transition-colors",
+            // Fermé → couleur nettement plus sombre pour signaler "sous-menu caché".
+            // Ouvert → teinte standard. Hover éclaircit dans les deux cas.
+            open
+              ? "text-midnight-400 group-hover:text-midnight-200"
+              : "text-midnight-600 group-hover:text-midnight-400"
+          )}
+        >
           {label}
         </span>
       </button>
