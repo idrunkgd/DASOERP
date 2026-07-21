@@ -186,9 +186,12 @@ export function CurrentMonthPanel({
 
     // Recurring
     for (const r of recurringForMonth) {
-      const amount = r.entry?.amountOverride ?? r.recurring.defaultAmount;
+      const amount = Number(r.entry?.amountOverride ?? r.recurring.defaultAmount);
       const status = r.entry?.status ?? "PLANNED";
       if (status === "SKIPPED") continue;
+      // Masque les lignes à 0€ ce mois (ex: EDEBEX un mois où pas facturé).
+      // Un montant nul n'a aucune valeur informative dans "Ce mois-ci".
+      if (!(amount > 0)) continue;
       const item: UnifiedItem = {
         key: `r-${r.recurring.id}`,
         category: r.recurring.category?.trim() || NO_CATEGORY,
@@ -213,6 +216,8 @@ export function CurrentMonthPanel({
     // bas dans totals).
     for (const o of oneOffs) {
       if (o.status === "SKIPPED") continue;
+      // Idem : rien à afficher si l'entrée est à 0€
+      if (!(o.amount > 0)) continue;
       const isSim = o.kind === "SIMULATION" || o.kind === "SIMULATION_INCOME";
       const isIncome = o.kind === "INCOME" || o.kind === "SIMULATION_INCOME";
       const item: UnifiedItem = {

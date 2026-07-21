@@ -899,6 +899,40 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     if (isHiddenCategory(r.category)) r.hidden = true;
   }
 
+  // Masque une ligne s'il ne reste AUCUN paiement dans le futur.
+  //  - Année future (>= année courante) : "futur" = mois index >= cutoffMonth
+  //    (cutoffMonth = mois courant si année courante, sinon 0)
+  //  - Année passée : on garde le comportement "hide seulement si toute
+  //    l'année à 0" pour rester utile en mode archive
+  // Les milestones (projets) conservent leur propre logique "hidden si
+  // projet clôturé" gérée plus haut et ne sont pas touchés ici.
+  const nowRef = new Date();
+  const currentYear = nowRef.getUTCFullYear();
+  const currentMonthIdx = nowRef.getUTCMonth(); // 0..11
+  const isCurrentYear = year === currentYear;
+  const isFutureYear = year > currentYear;
+  for (const r of rows) {
+    if (r.hidden) continue;
+    if (r.kind === "milestones") continue;
+    const cutoff = isCurrentYear ? currentMonthIdx : 0;
+    let hasFuturePayment = false;
+    if (isCurrentYear || isFutureYear) {
+      for (let i = cutoff; i < r.cells.length; i++) {
+        const c = r.cells[i];
+        if (c.status === "SKIPPED") continue;
+        if (Number(c.amount) > 0) { hasFuturePayment = true; break; }
+      }
+    } else {
+      // Année passée : on retombe sur le critère "au moins un paiement
+      // n'importe quand dans l'année" pour ne pas vider la vue archive.
+      for (const c of r.cells) {
+        if (c.status === "SKIPPED") continue;
+        if (Number(c.amount) > 0) { hasFuturePayment = true; break; }
+      }
+    }
+    if (!hasFuturePayment) r.hidden = true;
+  }
+
   // ─── Totaux mensuels ───
   const monthlyTotals = MONTHS.map((monthIdx) => {
     let inflow = 0;
