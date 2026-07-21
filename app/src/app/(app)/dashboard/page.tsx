@@ -45,7 +45,11 @@ export default async function Dashboard() {
       include: { offer: { include: { company: true } }, project: { include: { company: true } } },
       orderBy: { expectedAt: "asc" }, take: 5
     }),
-    prisma.missionRequest.count({ where: { status: { in: ["NEW","QUALIFYING","PRESENTING"] } } }),
+    // "Missions ouvertes" = les Mission (contrats consultants réellement en
+    // cours) actuellement PLANNED, ACTIVE ou EXTENDED. Le comptage
+    // précédent portait sur MissionRequest (demandes commerciales) et
+    // sous-estimait les vraies missions en cours.
+    prisma.mission.count({ where: { status: { in: ["PLANNED", "ACTIVE", "EXTENDED"] } } }),
     prisma.candidate.count({ where: { status: "ACTIVE" } })
   ]);
 
