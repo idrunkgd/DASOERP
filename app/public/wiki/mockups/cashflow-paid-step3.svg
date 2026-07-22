@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 480" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="1000" height="480" fill="#fff"/>
+
+  <!-- Toast succès -->
+  <rect x="720" y="20" width="260" height="60" rx="8" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+  <circle cx="745" cy="50" r="12" fill="#059669"/>
+  <path d="M 738 50 L 743 55 L 752 44" stroke="#fff" stroke-width="2.5" fill="none"/>
+  <text x="770" y="45" font-size="12" font-weight="700" fill="#065f46">Marqué payé ✓</text>
+  <text x="770" y="63" font-size="10" fill="#166534">+16 637,50 € sur le compte</text>
+
+  <text x="30" y="120" font-size="18" font-weight="700" fill="#202037">Cashflow 2026</text>
+
+  <!-- KPI Solde compte AVANT / APRÈS -->
+  <rect x="30" y="145" width="280" height="90" rx="10" fill="#f3f3f7"/>
+  <text x="50" y="170" font-size="11" font-weight="600" fill="#727496">SOLDE COMPTE (avant)</text>
+  <text x="50" y="200" font-size="20" font-weight="600" fill="#535679">62 300 €</text>
+  <text x="50" y="220" font-size="10" fill="#a1a1b8">Avant l'encaissement</text>
+
+  <text x="325" y="195" font-size="24" fill="#5b5fd6">→</text>
+
+  <rect x="360" y="145" width="280" height="90" rx="10" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+  <text x="380" y="170" font-size="11" font-weight="600" fill="#065f46">SOLDE COMPTE (après)</text>
+  <text x="380" y="205" font-size="26" font-weight="700" fill="#059669">78 937,50 €</text>
+  <text x="380" y="222" font-size="10" fill="#059669" font-style="italic">Mis à jour à l'instant</text>
+
+  <!-- Zoom cellule qui a changé de couleur -->
+  <text x="30" y="280" font-size="14" font-weight="600" fill="#202037">La cellule Mars est passée en <tspan fill="#059669">PAID</tspan></text>
+
+  <g font-size="11" fill="#727496" font-weight="600" text-anchor="middle">
+    <rect x="30" y="300" width="220" height="26" fill="#f3f3f7"/>
+    <text x="140" y="317">Poste</text>
+    <rect x="250" y="300" width="130" height="26" fill="#f3f3f7"/><text x="315" y="317">Mars</text>
+    <rect x="380" y="300" width="130" height="26" fill="#f3f3f7"/><text x="445" y="317">Avril</text>
+    <rect x="510" y="300" width="130" height="26" fill="#f3f3f7"/><text x="575" y="317">Mai</text>
+  </g>
+
+  <text x="40" y="355" font-size="12" fill="#202037">Mission ACME (Alice)</text>
+
+  <!-- Cellule PAID (verte) -->
+  <rect x="250" y="335" width="130" height="40" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+  <text x="315" y="355" font-size="13" font-weight="700" fill="#166534" text-anchor="middle">13 750 €</text>
+  <text x="315" y="369" font-size="9" font-weight="700" fill="#059669" text-anchor="middle">✓ PAID</text>
+
+  <rect x="380" y="335" width="130" height="40" fill="#f3f3f7"/>
+  <text x="445" y="355" font-size="12" fill="#535679" text-anchor="middle">13 750 €</text>
+  <text x="445" y="369" font-size="9" fill="#727496" text-anchor="middle">PLANNED</text>
+
+  <rect x="510" y="335" width="130" height="40" fill="#f3f3f7"/>
+  <text x="575" y="355" font-size="12" fill="#535679" text-anchor="middle">13 750 €</text>
+  <text x="575" y="369" font-size="9" fill="#727496" text-anchor="middle">PLANNED</text>
+
+  <!-- Badge étape -->
+  <g>
+    <rect x="20" y="20" width="120" height="26" rx="13" fill="#059669"/>
+    <text x="80" y="37" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 4</text>
+  </g>
+  <text x="30" y="425" font-size="12" fill="#535679" font-style="italic">La cellule passe en <tspan font-weight="700" fill="#059669">PAID</tspan> (vert). Le solde compte augmente immédiatement du TTC. KPI dashboard "En cours" diminue en conséquence.</text>
+</svg>

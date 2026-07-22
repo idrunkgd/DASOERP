@@ -167,25 +167,48 @@ En cours d'année, une ligne est masquée si elle **n'a plus aucun paiement futu
         description: "Le workflow standard sur une mission client : PLANNED → INVOICED → PAID.",
         estimatedMinutes: 5,
         content: `
-Sur une tranche mission, tu passeras typiquement par 3 statuts.
+Sur une tranche mission, tu passeras typiquement par 3 statuts : **PLANNED** (prévu, gris) → **INVOICED** (facturé, bleu) → **PAID** (encaissé, vert). Ce guide te montre comment passer une tranche de INVOICED à PAID quand le client a viré la somme.
 
-![Modal d'une cellule cashflow avec les 3 boutons de statut](/wiki/mockups/cashflow-cell-modal.svg)
+![Étape 1 — Zoom sur la cellule INVOICED à passer en PAID](/wiki/mockups/cashflow-paid-step1.svg)
 
-> [!STEP] 1. PLANNED
-> État initial, avec la date prévue de facturation. Grisé dans la grille. Tu peux modifier la date et le montant tant que la tranche n'est pas facturée.
+> [!STEP] 1. Repérer la tranche INVOICED
+> Va sur le cashflow. Trouve la cellule bleue à passer en PAID — c'est celle du mois où la facture a été émise. Ici, Mission ACME Mars 2026 (13 750 € HT / 16 637,50 € TTC).
 
-> [!STEP] 2. INVOICED (facturé)
-> Une fois la facture émise, clique sur la cellule → bouton **Marquer facturé**. La cellule passe en bleu, et le montant remonte dans le KPI "En cours" du dashboard.
+![Étape 2 — Modal ouvert avec le bouton "Marquer payé" surligné](/wiki/mockups/cashflow-paid-step2.svg)
 
-> [!STEP] 3. PAID (payé)
-> Quand le client paye, clique sur la cellule → **Marquer payé**. La cellule passe en vert, le solde compte augmente du montant TVAC, et la ligne remonte dans le journal PAID.
+> [!STEP] 2. Cliquer la cellule pour ouvrir le modal
+> Le modal affiche montant HT/TTC, statut actuel, date d'encaissement prévue. Trois boutons de statut au bas : PLANNED, INVOICED (l'actuel), et le gros bouton vert **✓ Marquer payé** à droite.
 
-> [!TIP] Encaissement décalé
-> La date d'encaissement peut être décalée par rapport à la date de facturation (paiement 30j fin de mois). Modifie la date de la cellule pour refléter la réalité — le cashflow se recalculera.
+![Étape 3 — Cellule verte et solde compte impacté](/wiki/mockups/cashflow-paid-step3.svg)
+
+> [!STEP] 3. Résultat immédiat
+> Toast vert de confirmation. La cellule Mars passe en **vert PAID**. Le KPI **Solde compte** en haut du cashflow augmente instantanément de 16 637,50 € (le TTC, pas le HT — c'est ce que la banque encaisse vraiment).
+
+![Étape 4 — La tranche remonte dans le panneau "Ce mois-ci"](/wiki/mockups/cashflow-paid-step4.svg)
+
+> [!STEP] 4. Le journal du mois affiche l'encaissement
+> Ta tranche fraîchement PAID apparaît en tête du panneau **"Ce mois-ci"** avec fond vert. Elle rejoint les autres encaissements du mois dans le journal. Le solde compte total en bas du panneau est mis à jour.
+
+---
+
+## Encaissement à date différente de la facturation
+
+Si le client paye 30j fin de mois après la facture (règle standard), tu peux modifier la date de la cellule pour refléter la réalité :
+
+- Facture émise le **15 mars** → date INVOICED = 15/03
+- Encaissement réel prévu **fin avril** → change la date de la cellule à 30/04
+
+Le cashflow re-calcule automatiquement les projections futures.
 
 ## Erreur classique : dé-marquer
 
-Si tu marques PAID par erreur, ouvre la cellule et clique **Repasser en PLANNED**. Le solde compte se recalcule automatiquement.
+Si tu marques PAID par erreur, ré-ouvre la cellule et clique **Repasser en PLANNED**. Le solde compte se recalcule (il diminue du TTC).
+
+> [!TIP] Attention aux fins de mois
+> Les tranches PAID rentrent dans le solde compte **à leur date de paiement**, pas à la date de facturation. C'est ce qui permet à la KPI Solde compte d'être une vraie photo de ta banque, pas une projection.
+
+> [!WARN] Ne PAS marquer PAID par anticipation
+> Si tu marques PAID avant que l'argent soit vraiment sur ton compte, ton solde compte devient faux. Attends le vrai virement (vérifiable sur le relevé bancaire ou le module Bank sync).
 `
       },
       {
@@ -579,25 +602,44 @@ Chaque fin de mois, tu envoies un batch au comptable.
         description: "Depuis /me, choix du type, dates, cas mission client.",
         estimatedMinutes: 4,
         content: `
-![Ton onglet RH avec les 4 cartes de solde et le formulaire de nouvelle demande](/wiki/mockups/leaves-me.svg)
+Le parcours d'une demande de congé, du solde initial jusqu'à la soumission au manager.
+
+![Étape 1 — Arrivée sur /me onglet RH avec le solde 2026](/wiki/mockups/leave-request-step1.svg)
 
 > [!STEP] 1. Ouvrir /me → onglet RH
-> Section "Congés" affiche ton solde 4 cartes : Légaux · RTT · Année précédente · Total.
+> Section "Congés" affiche ton solde en 4 cartes : Légaux · RTT · Année précédente · Total. Clique le bouton **+ Nouvelle demande** en haut à droite.
 
-> [!STEP] 2. Nouvelle demande
-> Formulaire avec dates début/fin. Le nombre de jours ouvrés est suggéré automatiquement (lundi-vendredi).
+![Étape 2 — Formulaire vide déployé, champs à compléter](/wiki/mockups/leave-request-step2.svg)
 
-> [!STEP] 3. Type
-> Légaux (bucket ANNUAL_LEGAL) / RTT / Année précédente / Sans solde / Spécial. Les 3 premiers décomptent des soldes.
+> [!STEP] 2. Le formulaire s'ouvre
+> Trois champs obligatoires : dates de début et fin, type. Le motif est optionnel — utile pour un cas particulier (déménagement, événement familial).
 
-> [!STEP] 4. Mission client active ?
-> Si tu es en mission, une section apparaît avec **"Demandé chez le client et accordé"** à cocher. Coche uniquement si le client a validé de son côté — le manager verra ça pour décider.
+![Étape 3 — Dates remplies, jours calculés auto, type déroulé](/wiki/mockups/leave-request-step3.svg)
+
+> [!STEP] 3. Remplir dates et type
+> Le champ "jours ouvrés" se calcule automatiquement (lundi-vendredi entre les 2 dates). Choisis le type dans la liste :
+> - **Légaux** — décompte du bucket ANNUAL_LEGAL (20j par défaut)
+> - **RTT** — décompte du bucket RTT (12j par défaut)
+> - **Année précédente** — utilise ton reliquat N-1
+> - **Sans solde** / **Spécial** — pas de décompte, statut informatif
+
+![Étape 4 — Case client cochée pour consultant en mission](/wiki/mockups/leave-request-step4.svg)
+
+> [!STEP] 4. Cas spécial : tu es en mission client
+> Si tu es actuellement affecté à une mission active, une section jaune apparaît avec **"Demandé chez le client et accordé"** à cocher. Ne coche que si le PM du client t'a explicitement dit oui — le manager RH utilisera cette info pour décider. Si tu triches, ça se saura et ta demande sera refusée avec motif.
+
+![Étape 5 — Toast succès et demande en attente dans le tableau](/wiki/mockups/leave-request-step5.svg)
 
 > [!STEP] 5. Soumettre
-> DRAFT → SUBMITTED. La demande arrive dans \`/leaves?filter=pending\` du manager.
+> Toast vert de confirmation, la ligne apparaît en tête de ton tableau avec le badge **SUBMITTED** (orange). La demande arrive dans \`/leaves?filter=pending\` du manager qui recevra une notif.
+
+---
 
 > [!TIP] Demi-journée
-> Le champ "jours" accepte des décimales : 0.5 pour une demi-journée.
+> Le champ "jours" accepte des décimales : **0.5** pour une demi-journée. Ajuste manuellement après le calcul auto.
+
+> [!WARN] Ne triche pas sur la case client
+> Cocher "client OK" alors que tu n'as pas eu l'accord = raison n°1 de refus des demandes. Le manager peut vérifier avec le PM en 2 messages.
 `
       },
       {

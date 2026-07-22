@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="1000" height="400" fill="#fff"/>
+
+  <!-- Grille cashflow -->
+  <text x="30" y="40" font-size="18" font-weight="700" fill="#202037">Cashflow 2026 — Zoom Mars-Mai</text>
+
+  <g font-size="11" fill="#727496" font-weight="600" text-anchor="middle">
+    <rect x="30" y="65" width="220" height="30" fill="#f3f3f7"/>
+    <text x="140" y="85">Poste</text>
+    <rect x="250" y="65" width="130" height="30" fill="#f3f3f7"/><text x="315" y="85">Mars</text>
+    <rect x="380" y="65" width="130" height="30" fill="#f3f3f7"/><text x="445" y="85">Avril</text>
+    <rect x="510" y="65" width="130" height="30" fill="#f3f3f7"/><text x="575" y="85">Mai</text>
+    <rect x="640" y="65" width="130" height="30" fill="#f3f3f7"/><text x="705" y="85">Juin</text>
+    <rect x="770" y="65" width="130" height="30" fill="#f3f3f7"/><text x="835" y="85">Juil</text>
+  </g>
+
+  <text x="40" y="130" font-size="12" fill="#202037">Mission ACME (Alice)</text>
+
+  <!-- Cellule INVOICED surlignée (bordure mauve) -->
+  <g>
+    <rect x="250" y="105" width="130" height="40" fill="#dbeafe" stroke="#5b5fd6" stroke-width="3"/>
+    <text x="315" y="125" font-size="13" font-weight="700" fill="#1e40af" text-anchor="middle">13 750 €</text>
+    <text x="315" y="140" font-size="9" font-weight="600" fill="#3730a3" text-anchor="middle">INVOICED</text>
+    <!-- Flèche pointant vers la cellule -->
+    <g>
+      <path d="M 315 175 L 315 155" stroke="#5b5fd6" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+    </g>
+  </g>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 6 3 L 0 6 Z" fill="#5b5fd6"/>
+    </marker>
+  </defs>
+
+  <!-- Cellules voisines normales -->
+  <rect x="380" y="105" width="130" height="40" fill="#f3f3f7"/>
+  <text x="445" y="125" font-size="12" fill="#535679" text-anchor="middle">13 750 €</text>
+  <text x="445" y="140" font-size="9" fill="#727496" text-anchor="middle">PLANNED</text>
+
+  <rect x="510" y="105" width="130" height="40" fill="#f3f3f7"/>
+  <text x="575" y="125" font-size="12" fill="#535679" text-anchor="middle">13 750 €</text>
+  <text x="575" y="140" font-size="9" fill="#727496" text-anchor="middle">PLANNED</text>
+
+  <rect x="640" y="105" width="130" height="40" fill="#f3f3f7"/>
+  <text x="705" y="125" font-size="12" fill="#535679" text-anchor="middle">13 750 €</text>
+
+  <rect x="770" y="105" width="130" height="40" fill="#f3f3f7"/>
+  <text x="835" y="125" font-size="12" fill="#535679" text-anchor="middle">13 750 €</text>
+
+  <text x="315" y="195" font-size="12" font-weight="600" fill="#5b5fd6" text-anchor="middle">👆 Le client vient de payer</text>
+  <text x="315" y="212" font-size="10" fill="#535679" text-anchor="middle">Clique cette cellule pour la marquer PAID</text>
+
+  <!-- Badge étape -->
+  <g>
+    <rect x="20" y="10" width="120" height="26" rx="13" fill="#5b5fd6"/>
+    <text x="80" y="27" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 4</text>
+  </g>
+
+  <text x="30" y="290" font-size="12" fill="#535679" font-style="italic">La tranche est en <tspan font-family="monospace" font-weight="700" fill="#1e40af">INVOICED</tspan> (bleue) — facture envoyée mais paiement pas encore reçu. Le client vient de virer les 16 637,50 € TTC sur ton compte.</text>
+
+  <!-- Légende statuts -->
+  <g font-size="11" fill="#535679">
+    <text x="30" y="345" font-weight="600">Statuts :</text>
+    <rect x="90" y="335" width="18" height="14" fill="#f3f3f7"/><text x="115" y="346">PLANNED</text>
+    <rect x="190" y="335" width="18" height="14" fill="#dbeafe"/><text x="215" y="346">INVOICED</text>
+    <rect x="295" y="335" width="18" height="14" fill="#dcfce7"/><text x="320" y="346">PAID</text>
+  </g>
+</svg>
