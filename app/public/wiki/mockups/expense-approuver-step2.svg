@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="380" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Checklist rapide avant d'approuver</text>
+
+  <rect x="20" y="60" width="860" height="290" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="88" font-size="13" font-weight="700" fill="#202037">Vérifications en 30 secondes</text>
+
+  <g>
+    <rect x="40" y="110" width="24" height="24" rx="4" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+    <path d="M 46 121 L 52 128 L 60 115" stroke="#059669" stroke-width="2.5" fill="none"/>
+    <text x="75" y="128" font-size="12" font-weight="600" fill="#202037">Justificatif présent</text>
+    <text x="75" y="145" font-size="10" fill="#535679">Ticket lisible, dates cohérentes, montant qui matche le TTC saisi</text>
+  </g>
+
+  <g>
+    <rect x="40" y="165" width="24" height="24" rx="4" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+    <path d="M 46 176 L 52 183 L 60 170" stroke="#059669" stroke-width="2.5" fill="none"/>
+    <text x="75" y="183" font-size="12" font-weight="600" fill="#202037">Catégorie cohérente avec la description</text>
+    <text x="75" y="200" font-size="10" fill="#535679">"Café taxi" en Repas = non. Devrait être Déplacement.</text>
+  </g>
+
+  <g>
+    <rect x="40" y="220" width="24" height="24" rx="4" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+    <path d="M 46 231 L 52 238 L 60 225" stroke="#059669" stroke-width="2.5" fill="none"/>
+    <text x="75" y="238" font-size="12" font-weight="600" fill="#202037">Participants (repas &gt; 30€) : au moins un contact client</text>
+    <text x="75" y="255" font-size="10" fill="#535679">Un repas Dasolabs entre 3 internes = pas déductible fiscalement</text>
+  </g>
+
+  <g>
+    <rect x="40" y="275" width="24" height="24" rx="4" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+    <path d="M 46 286 L 52 293 L 60 280" stroke="#059669" stroke-width="2.5" fill="none"/>
+    <text x="75" y="293" font-size="12" font-weight="600" fill="#202037">Centre de coût sensé</text>
+    <text x="75" y="310" font-size="10" fill="#535679">CC-COMMERCIAL pour un déjeuner prospect, pas CC-R&amp;D</text>
+  </g>
+
+  <text x="20" y="370" font-size="11" fill="#535679" font-style="italic">4 vérifs, 30 secondes. Si tout est OK, approuve. Sinon refuse avec motif clair.</text>
+</svg>

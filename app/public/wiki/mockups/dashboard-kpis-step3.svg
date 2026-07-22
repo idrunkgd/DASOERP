@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="350" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#f59e0b"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Notes à approuver — le KPI action manager</text>
+
+  <rect x="20" y="60" width="220" height="230" rx="10" fill="#fff" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="20" y="60" width="4" height="230" fill="#f59e0b"/>
+  <text x="40" y="88" font-size="11" font-weight="600" fill="#727496">NOTES À APPROUVER</text>
+  <text x="40" y="160" font-size="72" font-weight="700" fill="#d97706">3</text>
+  <text x="40" y="200" font-size="12" fill="#535679">SUBMITTED en attente</text>
+  <text x="40" y="270" font-size="11" font-weight="600" fill="#d97706">👆 Clique pour aller sur /expenses</text>
+
+  <rect x="260" y="60" width="620" height="230" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="280" y="88" font-size="13" font-weight="700" fill="#202037">Rituel manager du matin</text>
+  <text x="280" y="120" font-size="12" fill="#535679">Un chiffre &gt; 0 = tu as des notes à traiter. Objectif : passer à 0 chaque matin.</text>
+  <line x1="280" y1="145" x2="860" y2="145" stroke="#e1e1ec"/>
+  <text x="280" y="170" font-size="12" font-weight="600" fill="#202037">Actions rapides</text>
+  <text x="280" y="195" font-size="11" fill="#535679">✓ Un clic sur le KPI → filtre /expenses?filter=to-approve</text>
+  <text x="280" y="215" font-size="11" fill="#535679">✓ Vérifie chaque note : justificatif, catégorie, participants (repas &gt;30€)</text>
+  <text x="280" y="235" font-size="11" fill="#535679">✓ Approuver = auto-création OneOff cashflow catégorie "Notes de frais"</text>
+  <text x="280" y="255" font-size="11" fill="#535679">✗ Refuser = motif obligatoire, le consultant peut resoumettre</text>
+
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Le KPI en orange = action à mener. Si &gt; 5 en attente, ta charge admin déborde.</text>
+</svg>

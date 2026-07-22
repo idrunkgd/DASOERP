@@ -45,7 +45,7 @@ const CATEGORIES: Category[] = [
         content: `
 Le tableau de bord affiche 4 à 6 KPI en tête de page. Chacun résume un aspect de l'activité, sans avoir besoin d'ouvrir le module.
 
-![Le dashboard avec ses 4 KPI et les cartes d'alerte du jour](/wiki/mockups/dashboard-kpis.svg)
+![Étape 1 — KPI Missions ouvertes en détail](/wiki/mockups/dashboard-kpis-step1.svg)
 
 ## Missions ouvertes
 
@@ -54,6 +54,8 @@ Nombre de \`Mission\` dont le statut est **PLANNED**, **ACTIVE** ou **EXTENDED**
 > [!INFO] Différence Mission vs MissionRequest
 > Une **MissionRequest** est une demande entrante d'un client (pipeline CRM). Une **Mission** est un consultant Dasolabs concrètement engagé. Le KPI compte les Mission.
 
+![Étape 2 — KPI CA prévu et Solde compte, côte à côte](/wiki/mockups/dashboard-kpis-step2.svg)
+
 ## Chiffre d'affaires prévu
 
 Somme des tranches (**BillingMilestone**) attendues sur l'année en cours, statuts non-CANCELLED. C'est la prévision réaliste, pas le facturé.
@@ -61,6 +63,8 @@ Somme des tranches (**BillingMilestone**) attendues sur l'année en cours, statu
 ## Solde compte
 
 Solde de trésorerie **réel** — calculé à partir du bootstrap manuel + tous les mouvements marqués PAID depuis le lancement, indépendamment de l'année affichée dans le cashflow. Sert de vérité terrain.
+
+![Étape 3 — KPI Notes à approuver, rituel manager](/wiki/mockups/dashboard-kpis-step3.svg)
 
 ## Notes à approuver
 
@@ -84,11 +88,17 @@ Pour ne pas encombrer, certains chiffres importants restent dans leurs modules :
         content: `
 Sous les KPI, le dashboard affiche des **cartes d'alerte** — des tâches à prendre en main aujourd'hui.
 
+![Étape 1 — Cartes rouges avec cas concrets et actions](/wiki/mockups/dashboard-alertes-step1.svg)
+
 > [!STEP] 1. Cartes rouges
 > Actions urgentes : mission arrivant à échéance, offre en retard, note de frais bloquée. Un clic ouvre la fiche concernée.
 
+![Étape 2 — Cartes oranges avec explications de contexte](/wiki/mockups/dashboard-alertes-step2.svg)
+
 > [!STEP] 2. Cartes oranges
 > Anomalies à surveiller : cellule cashflow non résolue, milestone dont la date de paiement est dépassée sans être marquée PAID.
+
+![Étape 3 — Cartes bleues informatives](/wiki/mockups/dashboard-alertes-step3.svg)
 
 > [!STEP] 3. Cartes bleues
 > Informatif — nouveaux candidats à trier, nouveaux entrants du CRM.
@@ -105,6 +115,8 @@ Sous les KPI, le dashboard affiche des **cartes d'alerte** — des tâches à pr
         content: `
 Depuis n'importe quelle page, **Cmd+K** (ou **Ctrl+K** sur Windows) ouvre la palette de recherche globale.
 
+![Étape 1 — Ouvrir la palette avec Cmd+K depuis n'importe où](/wiki/mockups/dashboard-recherche-step1.svg)
+
 ## Ce qui est indexé
 
 - Entreprises + contacts
@@ -113,8 +125,12 @@ Depuis n'importe quelle page, **Cmd+K** (ou **Ctrl+K** sur Windows) ouvre la pal
 - Candidats et consultants internes
 - Documents
 
+![Étape 2 — Résultats groupés par type d'entité](/wiki/mockups/dashboard-recherche-step2.svg)
+
 > [!TIP] Recherche multi-mots
 > \`sophie belgian\` filtre tout ce qui contient à la fois "sophie" ET "belgian" — pratique pour croiser un prénom et une entreprise sans se rappeler du reste.
+
+![Étape 3 — Recherche multi-mots : "sophie belgian" trouve la bonne personne](/wiki/mockups/dashboard-recherche-step3.svg)
 
 > [!INFO] Résultat prioritaire
 > Les résultats sont groupés par entité. Le premier résultat est sélectionné par défaut : appuie sur **Entrée** pour ouvrir directement.
@@ -520,22 +536,30 @@ Un **OutreachTemplate** est un message pré-écrit avec des placeholders : \`{{p
         description: "Champs obligatoires, TTC direct, participants pour les repas.",
         estimatedMinutes: 4,
         content: `
-![Formulaire de note de frais : date, catégorie, TTC, participants, justificatif](/wiki/mockups/expense-form.svg)
+![Étape 1 — Form vide sur /expenses/new avec les champs obligatoires](/wiki/mockups/expense-saisir-step1.svg)
 
 > [!STEP] 1. Nouvelle note
 > \`/expenses/new\` — tous les champs sont **obligatoires** (date, catégorie, montant TTC, centre de coût, description).
 
+![Étape 2 — Dropdown catégorie ouvert avec TVA appliquée](/wiki/mockups/expense-saisir-step2.svg)
+
 > [!STEP] 2. Choisir la catégorie
 > Repas / Hébergement / Déplacement / Fournitures / Autre. La TVA se déduit automatiquement du montant TTC selon le taux légal belge (Repas 12%, Hébergement 6%, autres 21%).
 
-> [!STEP] 3. Repas → participants
-> Si catégorie Repas, un champ "Participants" s'affiche. Liste-les (interne + client). Ils apparaîtront dans le PDF.
+![Étape 3 — Montant TTC saisi et décomposition HT/TVA auto](/wiki/mockups/expense-saisir-step3.svg)
 
-> [!STEP] 4. Ticket / justificatif
-> Upload le PDF ou l'image du ticket. Obligatoire — sinon le comptable refuse.
+> [!STEP] 3. Montant TTC uniquement
+> Tu saisis QUE le TTC (celui visible sur le ticket). La TVA se déduit automatiquement selon la catégorie choisie. Le HT s'affiche pour info.
 
-> [!STEP] 5. Aperçu + Soumission
-> Bouton **Aperçu PDF** montre le rendu tel qu'il partira au comptable. Une fois OK, **Soumettre** → statut passe en SUBMITTED.
+![Étape 4 — Participants obligatoires pour un repas > 30€](/wiki/mockups/expense-saisir-step4.svg)
+
+> [!STEP] 4. Repas → participants
+> Si catégorie Repas et montant > 30€, un champ "Participants" s'affiche et est **obligatoire**. Liste-les (interne + client). Ils apparaîtront dans le PDF envoyé au comptable.
+
+![Étape 5 — Upload justificatif et boutons Aperçu / Soumettre](/wiki/mockups/expense-saisir-step5.svg)
+
+> [!STEP] 5. Justificatif + Aperçu + Soumission
+> Upload le PDF ou l'image du ticket (**obligatoire**). Bouton **Aperçu PDF** montre le rendu tel qu'il partira au comptable. Une fois OK, **Soumettre** → statut passe en SUBMITTED.
 
 > [!WARN] Brouillon = pas soumis
 > Une note reste éditable tant qu'elle est en brouillon. Une fois soumise, seul un manager peut la modifier ou la refuser.
@@ -549,16 +573,22 @@ Un **OutreachTemplate** est un message pré-écrit avec des placeholders : \`{{p
         content: `
 Un manager voit les notes SUBMITTED dans son dashboard RH.
 
+![Étape 1 — Vue manager avec les notes SUBMITTED en bordure orange](/wiki/mockups/expense-approuver-step1.svg)
+
 > [!STEP] 1. Ouvrir la note
-> Depuis \`/expenses?filter=to-approve\` ou la carte du dashboard.
+> Depuis \`/expenses?filter=to-approve\` ou la carte du dashboard. Les SUBMITTED apparaissent avec bordure orange.
+
+![Étape 2 — Checklist en 30 secondes avant d'approuver](/wiki/mockups/expense-approuver-step2.svg)
 
 > [!STEP] 2. Vérifier
-> Justificatif présent ? Catégorie cohérente ? Participants OK pour les repas > 30€ ?
+> Justificatif présent ? Catégorie cohérente ? Participants OK pour les repas > 30€ ? Centre de coût sensé ? 4 vérifs, 30 secondes.
 
-> [!STEP] 3. Approuver
-> Bouton **Approuver**. La note passe en APPROVED, et l'ERP crée automatiquement une entrée cashflow catégorie "Notes de frais" au dernier jour du mois de la dépense.
+![Étape 3 — Note approuvée et effets automatiques](/wiki/mockups/expense-approuver-step3.svg)
 
-> [!STEP] 4. Refuser
+> [!STEP] 3. Approuver = 3 actions automatiques
+> Bouton **Approuver**. La note passe en APPROVED, l'ERP crée automatiquement une entrée OneOff cashflow catégorie "Notes de frais" au dernier jour du mois de la dépense, et Alice reçoit une notif "Approuvée, remboursement au prochain payroll".
+
+> [!STEP] 4. Refuser (alternative)
 > Bouton **Refuser** avec motif obligatoire. Le consultant reçoit la raison et peut resoumettre.
 
 > [!TIP] Batch d'approbation
@@ -573,14 +603,20 @@ Un manager voit les notes SUBMITTED dans son dashboard RH.
         content: `
 Chaque fin de mois, tu envoies un batch au comptable.
 
+![Étape 1 — Filtres APPROVED + mois pour récupérer le batch mensuel](/wiki/mockups/expense-export-step1.svg)
+
 > [!STEP] 1. Filtrer
-> \`/expenses?filter=approved&month=2026-07\` — toutes les notes approuvées du mois.
+> \`/expenses?filter=approved&month=2026-07\` — toutes les notes approuvées du mois. Le compteur en bas affiche total TTC + TVA récupérable.
+
+![Étape 2 — Bouton Export PDF et détail du contenu généré](/wiki/mockups/expense-export-step2.svg)
 
 > [!STEP] 2. Export PDF
-> Bouton **Export PDF** en tête de liste → génère un document avec table synthétique + tous les justificatifs concaténés.
+> Bouton **Export PDF** en tête de liste → génère un document avec table synthétique + ventilation TVA + comptes comptables suggérés, suivi de tous les justificatifs concaténés.
+
+![Étape 3 — Template de mail à envoyer au comptable](/wiki/mockups/expense-export-step3.svg)
 
 > [!STEP] 3. Envoi
-> Attache le PDF à un mail au comptable. L'ERP ne l'envoie pas automatiquement (pas encore de connecteur mail sortant).
+> Attache le PDF à un mail au comptable. L'ERP ne l'envoie pas automatiquement (pas encore de connecteur mail sortant). Utilise le template fourni.
 
 > [!INFO] Journal comptable
 > Le PDF inclut la ventilation TVA (récupérable / non-récupérable) et le compte comptable suggéré par catégorie. Le comptable n'a plus qu'à saisir.

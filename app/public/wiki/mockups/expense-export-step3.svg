@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#059669"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Envoyer au comptable par mail</text>
+
+  <rect x="20" y="60" width="860" height="230" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+  <text x="40" y="90" font-size="13" font-weight="700" fill="#202037">Rappel : l'ERP n'envoie PAS le mail (pas encore de connecteur SMTP sortant)</text>
+
+  <rect x="40" y="115" width="820" height="140" rx="8" fill="#eef2ff" stroke="#5b5fd6"/>
+  <text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Template de mail (à copier-coller)</text>
+
+  <text x="60" y="165" font-size="11" fill="#535679">À : <tspan font-family="monospace">compta@ton-comptable.be</tspan></text>
+  <text x="60" y="182" font-size="11" fill="#535679">Objet : <tspan font-family="monospace">Notes de frais Dasolabs — Juillet 2026</tspan></text>
+  <text x="60" y="200" font-size="11" fill="#535679">Corps :</text>
+
+  <text x="80" y="220" font-size="11" fill="#202037" font-family="monospace">Bonjour, ci-joint les notes de frais approuvées de juillet 2026.</text>
+  <text x="80" y="236" font-size="11" fill="#202037" font-family="monospace">Total : 1 847,60 € TTC (dont 248,30 € TVA récupérable).</text>
+
+  <text x="60" y="250" font-size="10" fill="#a1a1b8" font-style="italic">Pièce jointe : notes-frais-2026-07.pdf</text>
+
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Attache le PDF exporté et envoie. Le connecteur mail automatique arrivera plus tard.</text>
+</svg>

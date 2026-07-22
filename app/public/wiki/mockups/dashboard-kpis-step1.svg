@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="350" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Missions ouvertes — le KPI opérationnel</text>
+
+  <rect x="20" y="60" width="220" height="230" rx="10" fill="#fff" stroke="#5b5fd6" stroke-width="3"/>
+  <rect x="20" y="60" width="4" height="230" fill="#5b5fd6"/>
+  <text x="40" y="88" font-size="11" font-weight="600" fill="#727496">MISSIONS OUVERTES</text>
+  <text x="40" y="160" font-size="72" font-weight="700" fill="#202037">4</text>
+  <text x="40" y="200" font-size="12" fill="#535679">PLANNED · ACTIVE · EXTENDED</text>
+  <text x="40" y="220" font-size="10" fill="#a1a1b8">Ne compte pas les MissionRequest (CRM)</text>
+  <text x="40" y="270" font-size="11" font-weight="600" fill="#5b5fd6">👆 Le vrai stock de missions consultants</text>
+
+  <rect x="260" y="60" width="620" height="230" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="280" y="88" font-size="13" font-weight="700" fill="#202037">Ce que ça mesure exactement</text>
+  <text x="280" y="120" font-size="12" fill="#535679">→ Nombre de <tspan font-family="monospace" fill="#5b5fd6">Mission</tspan> dont le statut est PLANNED, ACTIVE ou EXTENDED.</text>
+  <text x="280" y="145" font-size="12" fill="#535679">→ C'est le stock de consultants Dasolabs engagés — pas les demandes pipeline.</text>
+  <line x1="280" y1="170" x2="860" y2="170" stroke="#e1e1ec"/>
+  <text x="280" y="195" font-size="12" font-weight="600" fill="#202037">Pièges à éviter</text>
+  <text x="280" y="220" font-size="11" fill="#535679">• Ne pas confondre avec MissionRequest (demandes CRM en pipeline)</text>
+  <text x="280" y="240" font-size="11" fill="#535679">• Une mission COMPLETED n'est plus comptée (cas normal fin de contrat)</text>
+  <text x="280" y="260" font-size="11" fill="#535679">• Une CANCELLED avant démarrage n'apparaît jamais</text>
+
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Le premier KPI en haut à gauche — bordure mauve = 4 missions actives ce mois-ci.</text>
+</svg>

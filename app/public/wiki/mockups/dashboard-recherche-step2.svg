@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="400" fill="rgba(0,0,0,0.5)"/>
+  <rect x="150" y="30" width="600" height="340" rx="12" fill="#fff"/>
+
+  <rect x="20" y="10" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="26" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+
+  <!-- Barre de recherche avec query -->
+  <rect x="170" y="50" width="560" height="50" rx="8" fill="#f3f3f7"/>
+  <text x="195" y="82" font-size="18" fill="#535679">🔍</text>
+  <text x="230" y="83" font-size="16" font-weight="500" fill="#202037">alice</text>
+  <rect x="273" y="65" width="2" height="22" fill="#5b5fd6">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  <text x="700" y="83" font-size="12" fill="#a1a1b8" text-anchor="end">Esc pour fermer</text>
+
+  <!-- Résultats groupés par entité -->
+  <text x="170" y="130" font-size="10" font-weight="700" fill="#a1a1b8" letter-spacing="1">CONSULTANTS INTERNES</text>
+  <rect x="170" y="140" width="560" height="45" rx="6" fill="#eef2ff" stroke="#5b5fd6"/>
+  <circle cx="195" cy="162" r="12" fill="#5b5fd6"/>
+  <text x="195" y="167" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">AM</text>
+  <text x="215" y="160" font-size="13" font-weight="600" fill="#202037">Alice Martin</text>
+  <text x="215" y="177" font-size="10" fill="#535679">Consultante · alice@dasolabs.com · CV à jour</text>
+  <text x="720" y="167" font-size="11" fill="#5b5fd6" text-anchor="end">↩</text>
+
+  <text x="170" y="210" font-size="10" font-weight="700" fill="#a1a1b8" letter-spacing="1">CANDIDATS VIVIER</text>
+  <rect x="170" y="220" width="560" height="35" rx="6" fill="#fff" stroke="#e1e1ec"/>
+  <text x="185" y="242" font-size="12" font-weight="500" fill="#202037">Alicia Bernard</text>
+  <text x="330" y="242" font-size="10" fill="#535679">Data engineer · Bruxelles · Ajoutée le 12/07</text>
+
+  <text x="170" y="285" font-size="10" font-weight="700" fill="#a1a1b8" letter-spacing="1">MISSIONS</text>
+  <rect x="170" y="295" width="560" height="35" rx="6" fill="#fff" stroke="#e1e1ec"/>
+  <text x="185" y="317" font-size="12" font-weight="500" fill="#202037">MISSION-2026-08 — ACME 2026 (Alice Martin)</text>
+  <text x="600" y="317" font-size="10" fill="#059669" text-anchor="end">ACTIVE</text>
+
+  <text x="20" y="380" font-size="11" fill="#fff" font-style="italic">"alice" trouve : consultants, candidats, missions. Groupés par type. Enter sur le 1er.</text>
+</svg>
