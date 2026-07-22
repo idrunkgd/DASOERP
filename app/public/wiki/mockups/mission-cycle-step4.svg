@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="360" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#059669"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 4 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Phase 4 : mission active + facturation mensuelle</text>
+
+  <rect x="20" y="60" width="860" height="270" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Mission MISSION-2026-08</text>
+  <rect x="750" y="72" width="110" height="26" rx="4" fill="#dcfce7"/>
+  <text x="805" y="90" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">ACTIVE</text>
+
+  <text x="40" y="120" font-size="11" fill="#535679">Alice Martin sur Client A · 625 €/j · 5j/sem · démarrée le 01/09/2026</text>
+
+  <text x="40" y="155" font-size="13" font-weight="700" fill="#202037">Statuts d'une Mission</text>
+  <g font-size="11">
+    <rect x="40" y="170" width="90" height="24" rx="3" fill="#f3f3f7"/>
+    <text x="85" y="187" fill="#535679" text-anchor="middle">PLANNED</text>
+    <text x="140" y="187" fill="#a1a1b8">← Signée mais pas démarrée</text>
+  </g>
+  <g font-size="11">
+    <rect x="40" y="200" width="90" height="24" rx="3" fill="#dcfce7"/>
+    <text x="85" y="217" fill="#065f46" text-anchor="middle">ACTIVE</text>
+    <text x="140" y="217" fill="#535679">← En cours (aujourd'hui)</text>
+  </g>
+  <g font-size="11">
+    <rect x="40" y="230" width="90" height="24" rx="3" fill="#dbeafe"/>
+    <text x="85" y="247" fill="#1e40af" text-anchor="middle">EXTENDED</text>
+    <text x="140" y="247" fill="#535679">← Prolongée au-delà de la date de fin initiale</text>
+  </g>
+  <g font-size="11">
+    <rect x="40" y="260" width="90" height="24" rx="3" fill="#e1e1ec"/>
+    <text x="85" y="277" fill="#535679" text-anchor="middle">COMPLETED</text>
+    <text x="140" y="277" fill="#535679">← Terminée normalement</text>
+  </g>
+
+  <rect x="500" y="160" width="350" height="130" rx="8" fill="#eef2ff"/>
+  <text x="520" y="185" font-size="12" font-weight="700" fill="#5b5fd6">Facturation mensuelle</text>
+  <text x="520" y="208" font-size="11" fill="#535679">Chaque fin de mois : "Générer tranche du mois"</text>
+  <text x="520" y="228" font-size="11" fill="#535679">→ Lit timesheets validées</text>
+  <text x="520" y="245" font-size="11" fill="#535679">→ Crée BillingMilestone (jours × TJM × TVA)</text>
+  <text x="520" y="265" font-size="11" fill="#535679">→ Remonte dans le cashflow (PLANNED)</text>
+  <text x="520" y="281" font-size="11" fill="#535679">→ Toi tu émets la facture PDF au client</text>
+
+  <text x="20" y="350" font-size="11" fill="#535679" font-style="italic">Une seule Mission active par consultant (pas de chevauchement). Prévois EXTENDED plutôt que nouvelle.</text>
+</svg>

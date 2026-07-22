@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Créer un template avec placeholders</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Template outbound — LinkedIn cold approach</text>
+  <text x="40" y="120" font-size="11" font-weight="600" fill="#727496">CONTENU (avec placeholders)</text>
+  <rect x="40" y="130" width="820" height="120" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="55" y="152" font-size="11" font-family="monospace" fill="#202037">Bonjour <tspan font-weight="700" fill="#5b5fd6">{{prenom}}</tspan>,</text>
+  <text x="55" y="172" font-size="11" font-family="monospace" fill="#202037"></text>
+  <text x="55" y="188" font-size="11" font-family="monospace" fill="#202037">Je remarque que <tspan font-weight="700" fill="#5b5fd6">{{entreprise}}</tspan> travaille dans le <tspan font-weight="700" fill="#5b5fd6">{{secteur}}</tspan>.</text>
+  <text x="55" y="208" font-size="11" font-family="monospace" fill="#202037">Nous accompagnons des boîtes similaires sur la digitalisation.</text>
+  <text x="55" y="228" font-size="11" font-family="monospace" fill="#202037"></text>
+  <text x="55" y="244" font-size="11" font-family="monospace" fill="#202037">Ouvert(e) à un café virtuel de 15 min ?</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Les {{placeholders}} seront remplacés automatiquement lors de l'envoi personnalisé.</text>
+</svg>

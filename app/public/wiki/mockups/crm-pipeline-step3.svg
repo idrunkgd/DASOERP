@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#f59e0b"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Cartes ORANGES = pas d'activité depuis 14+ jours</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <rect x="40" y="85" width="820" height="90" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="60" y="112" font-size="12" font-weight="700" fill="#78350f">⚠ Epsilon Inc — Formation équipe (Négo)</text>
+  <text x="60" y="130" font-size="11" fill="#92400e">Frank Epsilon (Head of L&amp;D) · 28 K€ HT</text>
+  <text x="60" y="147" font-size="11" fill="#92400e">Dernier échange : 04/07/2026 (mail Frank : "je dois valider avec la direction")</text>
+  <text x="60" y="165" font-size="11" fill="#7f1d1d" font-weight="600">Pas de réponse depuis <tspan text-decoration="underline">18 jours</tspan> → relance recommandée</text>
+  <rect x="40" y="190" width="820" height="70" rx="8" fill="#eff6ff" stroke="#3b82f6"/>
+  <text x="60" y="215" font-size="12" font-weight="700" fill="#1e3a8a">Client A — Refonte ERP V2 (Devis)</text>
+  <text x="60" y="232" font-size="11" fill="#1e40af">Bob Client · 45 K€ TTC · Devis envoyé le 22/07</text>
+  <text x="60" y="250" font-size="10" fill="#3b82f6">Activité récente : validation V2 par le CTO ce matin — attention à la carte suivante !</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Filtres : par owner, stade, période, urgence. Utilise "orange only" pour prioriser tes relances.</text>
+</svg>

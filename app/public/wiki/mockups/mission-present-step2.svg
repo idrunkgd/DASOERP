@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="400" fill="rgba(0,0,0,0.5)"/>
+  <rect x="150" y="30" width="600" height="340" rx="12" fill="#fff"/>
+
+  <rect x="20" y="10" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="26" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 5</text>
+
+  <text x="180" y="70" font-size="16" font-weight="700" fill="#202037">Ajouter un consultant à la shortlist</text>
+
+  <rect x="180" y="100" width="540" height="40" rx="6" fill="#f3f3f7"/>
+  <text x="200" y="126" font-size="16" fill="#535679">🔍</text>
+  <text x="225" y="126" font-size="13" fill="#202037">alice martin</text>
+
+  <text x="180" y="170" font-size="10" font-weight="700" fill="#a1a1b8" letter-spacing="1">CONSULTANTS INTERNES</text>
+  <rect x="180" y="180" width="540" height="60" rx="6" fill="#eef2ff" stroke="#5b5fd6" stroke-width="2"/>
+  <circle cx="210" cy="210" r="16" fill="#5b5fd6"/>
+  <text x="210" y="215" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">AM</text>
+  <text x="235" y="205" font-size="13" font-weight="600" fill="#202037">Alice Martin</text>
+  <text x="235" y="220" font-size="10" fill="#535679">Backend senior · Node.js, TS, PostgreSQL, AWS</text>
+  <text x="235" y="234" font-size="10" fill="#059669">✓ Disponible dès septembre · TJM ref 625 €</text>
+
+  <text x="180" y="270" font-size="10" font-weight="700" fill="#a1a1b8" letter-spacing="1">CANDIDATS VIVIER</text>
+  <rect x="180" y="280" width="540" height="35" rx="6" fill="#fff" stroke="#e1e1ec"/>
+  <text x="195" y="302" font-size="12" fill="#202037">Alicia Bernard — Data engineer (moins pertinent)</text>
+
+  <rect x="580" y="335" width="140" height="30" rx="6" fill="#5b5fd6"/>
+  <text x="650" y="355" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">Ajouter à shortlist</text>
+
+  <text x="180" y="390" font-size="10" fill="#fff" font-style="italic">Cherche par nom, skill, séniorité. Résultats groupés interne / candidats externes.</text>
+</svg>

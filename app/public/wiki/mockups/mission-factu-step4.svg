@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#059669"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 4 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Aperçu PDF facture + envoi client</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <rect x="40" y="80" width="400" height="180" rx="8" fill="#fff" stroke="#c2c3d6"/>
+  <text x="60" y="102" font-size="9" font-weight="700" fill="#5b5fd6">DASOLABS</text>
+  <text x="60" y="115" font-size="8" fill="#535679">BE 0123.456.789 · Bruxelles</text>
+  <line x1="60" y1="122" x2="420" y2="122" stroke="#e1e1ec"/>
+  <text x="60" y="140" font-size="13" font-weight="700" fill="#202037">FACTURE FAC-2026-127</text>
+  <text x="60" y="155" font-size="9" fill="#535679">Date : 30/09/2026 · Échéance : 31/10/2026</text>
+  <text x="60" y="178" font-size="11" font-weight="700" fill="#202037">Client A SA</text>
+  <text x="60" y="192" font-size="9" fill="#535679">BE 0987.654.321</text>
+  <line x1="60" y1="205" x2="420" y2="205" stroke="#e1e1ec"/>
+  <text x="60" y="225" font-size="10" fill="#202037">Prestations conseil septembre 2026</text>
+  <text x="60" y="240" font-size="9" fill="#535679">21 jours × 625 € HT</text>
+  <text x="420" y="240" font-size="12" font-weight="700" fill="#5b5fd6" text-anchor="end">15 881,25 € TTC</text>
+  <rect x="480" y="80" width="380" height="180" rx="8" fill="#eef2ff"/>
+  <text x="500" y="105" font-size="13" font-weight="700" fill="#5b5fd6">Actions</text>
+  <rect x="500" y="125" width="340" height="36" rx="6" fill="#fff" stroke="#c2c3d6"/>
+  <text x="670" y="148" font-size="12" fill="#535679" text-anchor="middle">👁 Aperçu PDF</text>
+  <rect x="500" y="170" width="340" height="36" rx="6" fill="#3b82f6"/>
+  <text x="670" y="193" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">📤 Marquer facturé (envoi client)</text>
+  <text x="500" y="230" font-size="10" fill="#535679">Une fois envoyée : cellule cashflow passe en INVOICED (bleu).</text>
+  <text x="500" y="248" font-size="10" fill="#535679">Puis PAID quand le client règle.</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Aperçu → Marquer facturé → attente paiement → PAID. Le workflow standard.</text>
+</svg>

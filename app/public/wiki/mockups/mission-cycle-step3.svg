@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Phase 3 : offre chiffrée — MissionProposal</text>
+
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Proposal PROP-2026-018 · Alice Martin sur MRQ-2026-042</text>
+
+  <rect x="40" y="110" width="400" height="140" rx="8" fill="#eef2ff"/>
+  <text x="60" y="135" font-size="11" font-weight="700" fill="#5b5fd6">Modalités commerciales</text>
+  <text x="60" y="158" font-size="11" fill="#535679">TJM vendu : <tspan font-weight="600" fill="#202037">625 € HT</tspan></text>
+  <text x="60" y="178" font-size="11" fill="#535679">Régime : temps plein (5j/sem)</text>
+  <text x="60" y="198" font-size="11" fill="#535679">Durée : 6 mois (sept 2026 → fév 2027)</text>
+  <text x="60" y="218" font-size="11" fill="#535679">Volume prévu : ~130 jours</text>
+  <text x="60" y="238" font-size="11" fill="#535679">CA total prévu : <tspan font-weight="600" fill="#059669">81 250 €</tspan></text>
+
+  <rect x="460" y="110" width="400" height="140" rx="8" fill="#fef3c7"/>
+  <text x="480" y="135" font-size="11" font-weight="700" fill="#78350f">Workflow proposal</text>
+  <text x="480" y="158" font-size="11" fill="#92400e"><tspan font-family="monospace">DRAFT</tspan> — brouillon, tu ajustes</text>
+  <text x="480" y="178" font-size="11" fill="#92400e"><tspan font-family="monospace">OFFER_SENT</tspan> — PDF envoyé au client</text>
+  <text x="480" y="198" font-size="11" fill="#92400e"><tspan font-family="monospace">SELECTED</tspan> — client accepte → <tspan font-weight="700">auto-Mission</tspan></text>
+  <text x="480" y="218" font-size="11" fill="#92400e"><tspan font-family="monospace">REJECTED</tspan> — client refuse (garde trace)</text>
+
+  <text x="20" y="320" font-size="11" fill="#535679" font-style="italic">Un proposal SELECTED déclenche automatiquement la création d'une Mission (contrat consultant).</text>
+</svg>

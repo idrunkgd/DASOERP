@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="380" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 5</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Préparer la présentation — édition du CV</text>
+
+  <rect x="20" y="60" width="860" height="290" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Application APP-2026-134 · Alice Martin sur MRQ-2026-042</text>
+
+  <text x="40" y="120" font-size="12" font-weight="700" fill="#5b5fd6">Onglet CV (page 2 du PDF)</text>
+
+  <rect x="40" y="135" width="820" height="60" rx="8" fill="#fff" stroke="#c2c3d6"/>
+  <text x="60" y="158" font-size="12" font-weight="700" fill="#202037">Expérience 1 — Beta Corp (2024-2026)</text>
+  <text x="60" y="175" font-size="10" fill="#535679">Lead backend · Migration monolithe Node → microservices AWS · 5 devs</text>
+  <text x="800" y="167" font-size="10" fill="#5b5fd6" text-anchor="end">↕ Réorganiser</text>
+
+  <rect x="40" y="205" width="820" height="60" rx="8" fill="#fff" stroke="#c2c3d6"/>
+  <text x="60" y="228" font-size="12" font-weight="700" fill="#202037">Expérience 2 — Delta SA (2020-2024)</text>
+  <text x="60" y="245" font-size="10" fill="#535679">Backend engineer · Refonte API Rails → Node.js · TDD, PostgreSQL, Redis</text>
+
+  <text x="40" y="290" font-size="12" font-weight="700" fill="#5b5fd6">Lettre de motivation (optionnelle)</text>
+  <rect x="40" y="298" width="820" height="40" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="55" y="323" font-size="11" fill="#202037" font-style="italic">"Ce que je peux apporter à votre équipe : ..."</text>
+
+  <text x="20" y="370" font-size="11" fill="#535679" font-style="italic">Réordonne les expériences pertinentes en tête. Skills highlighted. Motivation adaptée au client.</text>
+</svg>

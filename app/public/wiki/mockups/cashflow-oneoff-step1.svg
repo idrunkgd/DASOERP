@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Bouton "+ Ajouter" en haut de la grille</text>
+
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Cashflow 2026</text>
+
+  <rect x="750" y="72" width="110" height="36" rx="6" fill="#5b5fd6"/>
+  <text x="805" y="95" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">+ Ajouter</text>
+
+  <rect x="750" y="115" width="130" height="150" rx="6" fill="#fff" stroke="#5b5fd6" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.1))"/>
+  <text x="770" y="140" font-size="11" font-weight="600" fill="#535679">Récurrente</text>
+  <text x="770" y="163" font-size="11" font-weight="600" fill="#535679">Mission jalon</text>
+  <rect x="758" y="175" width="120" height="30" rx="4" fill="#eef2ff"/>
+  <text x="770" y="195" font-size="11" font-weight="700" fill="#5b5fd6">▶ Entrée ponctuelle</text>
+  <text x="770" y="220" font-size="11" font-weight="600" fill="#535679">Simulation</text>
+  <text x="770" y="243" font-size="11" font-weight="600" fill="#535679">Payroll</text>
+
+  <text x="40" y="200" font-size="12" fill="#535679">Cas d'usage entrée ponctuelle :</text>
+  <text x="55" y="222" font-size="11" fill="#535679">• Subside régional (Digitalwallonia, IWEPS...)</text>
+  <text x="55" y="240" font-size="11" fill="#535679">• Remboursement TVA trimestriel</text>
+  <text x="55" y="258" font-size="11" fill="#535679">• Apport capital, achat matériel one-shot</text>
+
+  <text x="20" y="320" font-size="11" fill="#535679" font-style="italic">Une entrée ponctuelle = flux non-récurrent, non lié à une mission. On saisit à la main.</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Nouvelle interaction : choisir cible + template</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Nouvelle interaction outbound</text>
+  <text x="40" y="120" font-size="11" font-weight="600" fill="#727496">CIBLE</text>
+  <rect x="40" y="130" width="400" height="34" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="55" y="152" font-size="12" fill="#202037">Diana Beta (Head of Product · Beta Corp)</text>
+  <text x="460" y="120" font-size="11" font-weight="600" fill="#727496">CANAL</text>
+  <rect x="460" y="130" width="180" height="34" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="550" y="152" font-size="12" fill="#202037" text-anchor="middle">LinkedIn 💼</text>
+  <text x="660" y="120" font-size="11" font-weight="600" fill="#727496">TEMPLATE</text>
+  <rect x="660" y="130" width="200" height="34" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="675" y="152" font-size="11" fill="#202037">LinkedIn cold approach</text>
+  <text x="40" y="190" font-size="12" font-weight="700" fill="#5b5fd6">Aperçu avec placeholders remplacés</text>
+  <rect x="40" y="200" width="820" height="70" rx="4" fill="#eef2ff"/>
+  <text x="55" y="220" font-size="11" fill="#202037">Bonjour <tspan font-weight="700" fill="#059669">Diana</tspan>,</text>
+  <text x="55" y="240" font-size="11" fill="#202037">Je remarque que <tspan font-weight="700" fill="#059669">Beta Corp</tspan> travaille dans le <tspan font-weight="700" fill="#059669">SaaS B2B</tspan>.</text>
+  <text x="55" y="260" font-size="11" fill="#202037">Nous accompagnons des boîtes similaires sur la digitalisation...</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Placeholders remplis à la volée à partir des données Contact + Company.</text>
+</svg>

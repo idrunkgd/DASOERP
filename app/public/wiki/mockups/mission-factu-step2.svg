@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="400" fill="rgba(0,0,0,0.5)"/>
+  <rect x="100" y="30" width="700" height="350" rx="12" fill="#fff"/>
+  <rect x="20" y="10" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="26" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 4</text>
+  <text x="130" y="70" font-size="16" font-weight="700" fill="#202037">Modal génération — septembre 2026</text>
+  <text x="130" y="100" font-size="11" font-weight="600" fill="#727496">JOURS PRESTÉS (auto depuis timesheet)</text>
+  <rect x="130" y="110" width="140" height="42" rx="6" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+  <text x="200" y="138" font-size="20" font-weight="700" fill="#059669" text-anchor="middle">21</text>
+  <text x="285" y="138" font-size="11" fill="#535679">jours (auto-remplis)</text>
+  <text x="130" y="185" font-size="11" font-weight="600" fill="#727496">TAUX (snapshot mission)</text>
+  <rect x="130" y="195" width="180" height="42" rx="6" fill="#f3f3f7"/>
+  <text x="220" y="223" font-size="16" font-weight="600" fill="#202037" text-anchor="middle">625,00 €</text>
+  <text x="340" y="185" font-size="11" font-weight="600" fill="#727496">TVA</text>
+  <rect x="340" y="195" width="120" height="42" rx="6" fill="#f3f3f7"/>
+  <text x="400" y="223" font-size="16" font-weight="600" fill="#202037" text-anchor="middle">21 %</text>
+  <line x1="130" y1="260" x2="770" y2="260" stroke="#e1e1ec"/>
+  <text x="130" y="285" font-size="12" fill="#535679">Total HT</text>
+  <text x="770" y="285" font-size="14" font-weight="600" fill="#202037" text-anchor="end">13 125,00 €</text>
+  <text x="130" y="305" font-size="12" fill="#535679">TVA</text>
+  <text x="770" y="305" font-size="14" font-weight="600" fill="#202037" text-anchor="end">2 756,25 €</text>
+  <rect x="130" y="320" width="640" height="40" fill="#eef2ff"/>
+  <text x="145" y="345" font-size="13" font-weight="700" fill="#202037">Total TTC</text>
+  <text x="760" y="345" font-size="18" font-weight="700" fill="#5b5fd6" text-anchor="end">15 881,25 €</text>
+  <text x="130" y="392" font-size="10" fill="#fff" font-style="italic">Ajuste manuellement si besoin (congés client, jours fériés). Sinon valide.</text>
+</svg>

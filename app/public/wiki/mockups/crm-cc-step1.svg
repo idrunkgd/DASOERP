@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">/companies/new — créer l'entreprise</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Nouvelle entreprise</text>
+  <text x="40" y="120" font-size="11" font-weight="600" fill="#727496">NOM *</text>
+  <rect x="40" y="128" width="400" height="34" rx="4" fill="#fff" stroke="#5b5fd6" stroke-width="2"/>
+  <text x="55" y="150" font-size="13" fill="#202037">Client A SA</text>
+  <text x="460" y="120" font-size="11" font-weight="600" fill="#727496">N° TVA</text>
+  <rect x="460" y="128" width="200" height="34" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="475" y="150" font-size="12" font-family="monospace" fill="#202037">BE 0987.654.321</text>
+  <text x="40" y="185" font-size="11" font-weight="600" fill="#727496">SECTEUR</text>
+  <rect x="40" y="193" width="200" height="34" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="55" y="215" font-size="12" fill="#202037">Fintech</text>
+  <text x="260" y="185" font-size="11" font-weight="600" fill="#727496">OWNER (commercial en charge)</text>
+  <rect x="260" y="193" width="200" height="34" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="275" y="215" font-size="12" fill="#202037">Gérald DV</text>
+  <text x="480" y="185" font-size="11" font-weight="600" fill="#727496">ADRESSE</text>
+  <rect x="480" y="193" width="360" height="34" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="495" y="215" font-size="12" fill="#202037">Rue de la Loi 42, 1000 Bruxelles</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Le TVA sert de clé anti-doublon. Autocomplete depuis le registre BCE si dispo.</text>
+</svg>

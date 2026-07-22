@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="350" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Panneau "Ce mois-ci" — récap actionnable</text>
+
+  <rect x="20" y="60" width="860" height="230" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <rect x="20" y="60" width="860" height="35" fill="#eef2ff"/>
+  <text x="40" y="83" font-size="13" font-weight="700" fill="#5b5fd6">Juillet 2026 — Vue synthétique</text>
+
+  <text x="40" y="120" font-size="11" fill="#535679">3 tranches PAID</text>
+  <text x="820" y="120" font-size="11" font-weight="600" fill="#059669" text-anchor="end">+38 267,50 €</text>
+
+  <text x="40" y="145" font-size="11" fill="#535679">1 tranche INVOICED (attente)</text>
+  <text x="820" y="145" font-size="11" font-weight="600" fill="#3b82f6" text-anchor="end">16 637,50 €</text>
+
+  <text x="40" y="170" font-size="11" fill="#535679">Loyer + assurances + comptable</text>
+  <text x="820" y="170" font-size="11" font-weight="600" fill="#dc2626" text-anchor="end">−1 862,00 €</text>
+
+  <text x="40" y="195" font-size="11" fill="#535679">Payroll (NET + précompte + ONSS)</text>
+  <text x="820" y="195" font-size="11" font-weight="600" fill="#dc2626" text-anchor="end">−12 400,00 €</text>
+
+  <text x="40" y="220" font-size="11" fill="#535679">3 notes de frais approuvées</text>
+  <text x="820" y="220" font-size="11" font-weight="600" fill="#dc2626" text-anchor="end">−624,80 €</text>
+
+  <line x1="40" y1="240" x2="820" y2="240" stroke="#c2c3d6"/>
+  <text x="40" y="265" font-size="13" font-weight="700" fill="#202037">SOLDE DU MOIS</text>
+  <text x="820" y="265" font-size="16" font-weight="700" fill="#059669" text-anchor="end">+23 380,70 €</text>
+
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Un coup d'œil quotidien sur ce panneau = tu sais où tu en es sans ouvrir 3 modules.</text>
+</svg>

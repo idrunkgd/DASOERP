@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#059669"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 5 / 5</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Aperçu PDF → statut SENT</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <rect x="40" y="80" width="380" height="180" rx="8" fill="#fff" stroke="#c2c3d6"/>
+  <text x="60" y="100" font-size="8" font-weight="700" fill="#5b5fd6">DASOLABS · Digitalization expert</text>
+  <text x="60" y="125" font-size="14" font-weight="700" fill="#202037">Devis OFF-2026-0042</text>
+  <text x="60" y="140" font-size="9" fill="#535679">Pour Client A SA · Bob C., Charlie A.</text>
+  <line x1="60" y1="150" x2="400" y2="150" stroke="#e1e1ec"/>
+  <text x="60" y="170" font-size="10" fill="#202037">1. Audit et cadrage — 5 × 1 200 €</text>
+  <text x="60" y="185" font-size="10" fill="#202037">2. Développement — 40 × 750 €</text>
+  <text x="60" y="200" font-size="10" fill="#202037">3. Formation — 3 × 1 500 €</text>
+  <line x1="60" y1="215" x2="400" y2="215" stroke="#e1e1ec"/>
+  <text x="60" y="235" font-size="11" font-weight="700" fill="#5b5fd6">Total : 49 005 € TTC</text>
+  <text x="60" y="250" font-size="9" fill="#535679">Valable jusqu'au 21/08/2026</text>
+  <rect x="450" y="80" width="410" height="180" rx="8" fill="#eef2ff"/>
+  <text x="470" y="105" font-size="13" font-weight="700" fill="#5b5fd6">3 boutons finaux</text>
+  <rect x="470" y="120" width="180" height="34" rx="6" fill="#fff" stroke="#c2c3d6"/>
+  <text x="560" y="141" font-size="11" fill="#535679" text-anchor="middle">👁 Aperçu PDF</text>
+  <rect x="470" y="163" width="180" height="34" rx="6" fill="#fff" stroke="#c2c3d6"/>
+  <text x="560" y="184" font-size="11" fill="#535679" text-anchor="middle">💾 Enregistrer brouillon</text>
+  <rect x="470" y="206" width="180" height="34" rx="6" fill="#059669"/>
+  <text x="560" y="227" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">📤 Envoyer (SENT)</text>
+  <text x="670" y="141" font-size="10" fill="#535679">Vérif dans un nouvel onglet</text>
+  <text x="670" y="184" font-size="10" fill="#535679">Statut DRAFT, éditable</text>
+  <text x="670" y="227" font-size="10" fill="#535679">Passe en SENT, tracé</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Envoyer marque l'offre comme SENT (chronodatée) — édition partielle possible ensuite.</text>
+</svg>

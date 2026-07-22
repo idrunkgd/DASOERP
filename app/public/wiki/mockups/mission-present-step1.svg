@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 5</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Ouvrir la MissionRequest</text>
+
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">MRQ-2026-042 · Client A — Backend TypeScript senior</text>
+  <text x="40" y="110" font-size="11" fill="#535679">Démarrage sept 2026 · 6 mois · TJM cible 650 €</text>
+
+  <g>
+    <rect x="40" y="140" width="130" height="34" rx="6" fill="#9b9cb8"/>
+    <text x="105" y="162" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Nouveau (0)</text>
+    <rect x="180" y="140" width="130" height="34" rx="6" fill="#3b82f6"/>
+    <text x="245" y="162" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Shortlist (0)</text>
+    <rect x="320" y="140" width="130" height="34" rx="6" fill="#8b5cf6"/>
+    <text x="385" y="162" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Présenté (0)</text>
+    <rect x="460" y="140" width="130" height="34" rx="6" fill="#f59e0b"/>
+    <text x="525" y="162" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Offert (0)</text>
+  </g>
+
+  <rect x="600" y="140" width="240" height="34" rx="6" fill="#5b5fd6"/>
+  <text x="720" y="162" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">+ Ajouter un consultant</text>
+  <path d="M 720 195 L 720 178" stroke="#5b5fd6" stroke-width="3" fill="none" marker-end="url(#arrM1)"/>
+  <defs>
+    <marker id="arrM1" markerWidth="10" markerHeight="10" refX="5" refY="3" orient="auto">
+      <path d="M 0 0 L 6 3 L 0 6 Z" fill="#5b5fd6"/>
+    </marker>
+  </defs>
+
+  <text x="600" y="220" font-size="12" font-weight="600" fill="#5b5fd6">👆 Clique ici pour ouvrir le picker</text>
+
+  <text x="20" y="315" font-size="11" fill="#535679" font-style="italic">Le pipeline est vide au départ. On va y ajouter des candidats un par un.</text>
+</svg>

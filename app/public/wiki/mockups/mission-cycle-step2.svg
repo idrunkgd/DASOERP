@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="380" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Phase 2 : présentation candidat — Application</text>
+
+  <rect x="20" y="60" width="860" height="290" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Pipeline horizontal /mission-requests/MRQ-2026-042</text>
+
+  <g>
+    <rect x="40" y="115" width="150" height="34" rx="6" fill="#9b9cb8"/>
+    <text x="115" y="137" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Nouveau (3)</text>
+  </g>
+  <g>
+    <rect x="200" y="115" width="150" height="34" rx="6" fill="#3b82f6"/>
+    <text x="275" y="137" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Shortlist (2)</text>
+  </g>
+  <g>
+    <rect x="360" y="115" width="150" height="34" rx="6" fill="#8b5cf6"/>
+    <text x="435" y="137" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Présenté (1)</text>
+  </g>
+  <g>
+    <rect x="520" y="115" width="150" height="34" rx="6" fill="#f59e0b"/>
+    <text x="595" y="137" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Offert (0)</text>
+  </g>
+  <g>
+    <rect x="680" y="115" width="150" height="34" rx="6" fill="#10b981"/>
+    <text x="755" y="137" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Contrat (0)</text>
+  </g>
+
+  <rect x="360" y="160" width="150" height="80" rx="8" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="375" y="185" font-size="12" font-weight="700" fill="#202037">Alice Martin</text>
+  <text x="375" y="203" font-size="10" fill="#535679">Interne · TJM 625 €</text>
+  <text x="375" y="220" font-size="9" fill="#6b21a8" font-style="italic">CV envoyé le 22/07</text>
+  <text x="375" y="235" font-size="9" fill="#6b21a8" font-style="italic">Attente feedback client</text>
+
+  <rect x="40" y="270" width="820" height="60" rx="8" fill="#f3f3f7"/>
+  <text x="60" y="295" font-size="12" font-weight="600" fill="#202037">Statuts d'une Application :</text>
+  <text x="60" y="315" font-size="11" fill="#535679">SUBMITTED → PRESENTED → OFFER_SENT → SELECTED (auto-Mission) / REJECTED</text>
+
+  <text x="20" y="370" font-size="11" fill="#535679" font-style="italic">Une Application = candidat X sur MissionRequest Y. Drag entre stades pour faire progresser.</text>
+</svg>

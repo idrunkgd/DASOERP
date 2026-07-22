@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Les 5 stades commerciaux du kanban</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <g font-size="11" font-weight="700" fill="#fff" text-anchor="middle">
+    <rect x="40" y="90" width="160" height="34" rx="6" fill="#9b9cb8"/><text x="120" y="112">Nouveau (5)</text>
+    <rect x="210" y="90" width="160" height="34" rx="6" fill="#3b82f6"/><text x="290" y="112">Qualif (3)</text>
+    <rect x="380" y="90" width="160" height="34" rx="6" fill="#8b5cf6"/><text x="460" y="112">Devis (4)</text>
+    <rect x="550" y="90" width="160" height="34" rx="6" fill="#f59e0b"/><text x="630" y="112">Négo (2)</text>
+    <rect x="720" y="90" width="140" height="34" rx="6" fill="#10b981"/><text x="790" y="112">Gagné (1)</text>
+  </g>
+  <text x="40" y="150" font-size="11" fill="#535679">📥 Nouveau : entrée fraîche, à qualifier</text>
+  <text x="40" y="172" font-size="11" fill="#535679">🔍 Qualif : premier contact fait, besoin compris</text>
+  <text x="40" y="194" font-size="11" fill="#535679">📄 Devis : proposition chiffrée envoyée</text>
+  <text x="40" y="216" font-size="11" fill="#535679">💬 Négo : le client négocie prix / conditions</text>
+  <text x="40" y="238" font-size="11" fill="#535679">✅ Gagné / Perdu : décision prise</text>
+  <text x="20" y="315" font-size="11" fill="#535679" font-style="italic">Chaque colonne compte le nombre d'opportunités actives à ce stade.</text>
+</svg>

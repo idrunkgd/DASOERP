@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 350" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="350" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Filtre auto : ligne masquée si plus de paiement futur</text>
+
+  <rect x="20" y="60" width="860" height="230" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="88" font-size="14" font-weight="700" fill="#202037">Exemple : on est en septembre 2026</text>
+
+  <rect x="40" y="105" width="820" height="70" rx="8" fill="#dcfce7" stroke="#059669"/>
+  <text x="60" y="130" font-size="12" font-weight="700" fill="#065f46">EDEBEX (assurance impayés)</text>
+  <text x="60" y="150" font-size="11" fill="#166534">Facturé jusqu'en juin, plus aucun paiement à venir cette année</text>
+  <text x="60" y="167" font-size="10" fill="#059669" font-style="italic">→ Ligne MASQUÉE de la grille (mais gardée dans totaux annuels)</text>
+
+  <rect x="40" y="185" width="820" height="70" rx="8" fill="#eff6ff" stroke="#3b82f6"/>
+  <text x="60" y="210" font-size="12" font-weight="700" fill="#1e40af">Loyer bureau</text>
+  <text x="60" y="230" font-size="11" fill="#1e40af">Paie chaque mois — encore 4 échéances (sep, oct, nov, déc)</text>
+  <text x="60" y="247" font-size="10" fill="#1e40af" font-style="italic">→ Ligne VISIBLE tant qu'il reste au moins un paiement futur</text>
+
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">La règle : ligne cachée si aucun paiement à venir CETTE ANNÉE. Change d'année pour voir l'historique.</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 5</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Header : objet, TVA, validité</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="95" font-size="11" font-weight="600" fill="#727496">OBJET DE L'OFFRE *</text>
+  <rect x="40" y="103" width="820" height="42" rx="4" fill="#fff" stroke="#10b981" stroke-width="2"/>
+  <text x="55" y="130" font-size="13" font-weight="600" fill="#202037">Refonte ERP et migration cloud AWS — Phase 1</text>
+  <text x="40" y="180" font-size="11" font-weight="600" fill="#727496">TAUX TVA *</text>
+  <rect x="40" y="188" width="130" height="40" rx="4" fill="#eef2ff" stroke="#5b5fd6" stroke-width="2"/>
+  <text x="105" y="213" font-size="16" font-weight="700" fill="#5b5fd6" text-anchor="middle">21 %</text>
+  <text x="180" y="213" font-size="10" fill="#535679">Défaut BE</text>
+  <text x="180" y="230" font-size="9" fill="#a1a1b8">6% formations · 12% restauration</text>
+  <text x="360" y="180" font-size="11" font-weight="600" fill="#727496">DATE OFFRE</text>
+  <rect x="360" y="188" width="150" height="40" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="375" y="213" font-size="12" fill="#202037">22/07/2026</text>
+  <text x="530" y="180" font-size="11" font-weight="600" fill="#727496">VALIDITÉ (jours)</text>
+  <rect x="530" y="188" width="100" height="40" rx="4" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="580" y="213" font-size="16" font-weight="600" fill="#202037" text-anchor="middle">30</text>
+  <text x="650" y="215" font-size="10" fill="#535679">→ Expire 21/08/2026</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Le taux TVA se copie automatiquement sur le Projet quand l'offre passe en WON.</text>
+</svg>

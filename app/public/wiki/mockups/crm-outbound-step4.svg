@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="340" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#059669"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 4 / 4</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Programmer une relance J+7</text>
+  <rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Interaction créée · Diana Beta · LinkedIn SENT</text>
+  <rect x="40" y="115" width="820" height="60" rx="8" fill="#eef2ff"/>
+  <text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Rappel de relance</text>
+  <text x="60" y="158" font-size="11" fill="#535679">Date : <tspan font-weight="600" fill="#202037">29/07/2026</tspan> (dans 7 jours) · Type : <tspan font-family="monospace">FOLLOWUP</tspan></text>
+  <rect x="720" y="130" width="120" height="30" rx="6" fill="#5b5fd6"/>
+  <text x="780" y="150" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">Programmer</text>
+  <text x="40" y="205" font-size="12" font-weight="700" fill="#059669">✓ Ce que ça fait :</text>
+  <text x="55" y="228" font-size="11" fill="#535679">• Le 29/07, le dashboard affiche une carte bleue "5 relances aujourd'hui"</text>
+  <text x="55" y="246" font-size="11" fill="#535679">• Le digest email matinal (à venir) listera tous les followups du jour</text>
+  <text x="55" y="264" font-size="11" fill="#535679">• Rien à envoyer manuellement tant que tu marques pas la relance faite</text>
+  <text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Discipline = fixer une relance à chaque envoi. Sinon les prospects disparaissent du radar.</text>
+</svg>

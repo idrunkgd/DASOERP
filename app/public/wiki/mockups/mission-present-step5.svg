@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="900" height="360" fill="#f3f3f7"/>
+  <rect x="20" y="15" width="110" height="24" rx="12" fill="#059669"/>
+  <text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 5 / 5</text>
+  <text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Retour client → SELECTED → Mission auto-créée</text>
+
+  <rect x="20" y="60" width="860" height="270" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+  <text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Client A confirme : "on prend Alice"</text>
+
+  <rect x="40" y="115" width="820" height="60" rx="8" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
+  <circle cx="65" cy="145" r="12" fill="#059669"/>
+  <path d="M 58 145 L 63 150 L 72 138" stroke="#fff" stroke-width="2" fill="none"/>
+  <text x="85" y="142" font-size="12" font-weight="700" fill="#065f46">Application APP-2026-134 passe en SELECTED</text>
+  <text x="85" y="160" font-size="10" fill="#166534">Trigger automatique : création de Mission MISSION-2026-08 · statut PLANNED</text>
+
+  <text x="40" y="205" font-size="12" font-weight="700" fill="#5b5fd6">Ce qui a été créé automatiquement :</text>
+  <text x="55" y="228" font-size="11" fill="#535679">✓ Mission MISSION-2026-08 lié à Alice + Client A</text>
+  <text x="55" y="247" font-size="11" fill="#535679">✓ TJM snapshot = 625 € (verrouillé à la date de sélection)</text>
+  <text x="55" y="266" font-size="11" fill="#535679">✓ Dates : 01/09/2026 → 28/02/2027 (6 mois)</text>
+  <text x="55" y="285" font-size="11" fill="#535679">✓ Volume prévu : ~130 jours à facturer</text>
+  <text x="55" y="304" font-size="11" fill="#535679">✓ La MissionRequest MRQ-2026-042 passe en FILLED (closed)</text>
+
+  <text x="20" y="350" font-size="11" fill="#535679" font-style="italic">Zéro saisie manuelle après SELECTED. Tout est mis en place, prêt pour la facturation mensuelle.</text>
+</svg>
