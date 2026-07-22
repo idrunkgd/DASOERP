@@ -14,25 +14,59 @@ type Entry = {
 };
 type Project = { id: string; name: string; reference: string; company: { name: string } };
 type CC = { id: string; code: string; name: string };
+type Overlay = {
+  id: string; userId: string; startDate: string; endDate: string;
+  kind: "leave-pending" | "leave-approved" | "sick";
+  label: string;
+};
 
-const COLORS = [
-  "bg-indigo-200 text-indigo-900",
-  "bg-emerald-200 text-emerald-900",
-  "bg-amber-200 text-amber-900",
-  "bg-rose-200 text-rose-900",
-  "bg-sky-200 text-sky-900",
-  "bg-violet-200 text-violet-900",
-  "bg-lime-200 text-lime-900"
+// Palettes DISTINCTES par contexte visuel :
+//  - Projet client (targetType=PRJ)          : gamme colorée par projet
+//  - Interne / Centre de coût (targetType=CC): violet neutre
+//  - Congé APPROVED                          : orange plein
+//  - Congé SUBMITTED (en attente)            : jaune rayé (motif diagonal)
+//  - Maladie                                 : rouge
+const PROJECT_PALETTE = [
+  "bg-indigo-300 text-indigo-950",
+  "bg-emerald-300 text-emerald-950",
+  "bg-sky-300 text-sky-950",
+  "bg-cyan-300 text-cyan-950",
+  "bg-teal-300 text-teal-950",
+  "bg-blue-300 text-blue-950",
+  "bg-lime-300 text-lime-950"
 ];
-function colorFor(targetId: string) {
+function colorForProject(targetId: string) {
   let h = 0;
   for (let i = 0; i < targetId.length; i++) h = (h * 31 + targetId.charCodeAt(i)) >>> 0;
-  return COLORS[h % COLORS.length];
+  return PROJECT_PALETTE[h % PROJECT_PALETTE.length];
 }
+function colorForEntry(e: Entry) {
+  if (e.targetType === "CC") return "bg-violet-200 text-violet-900";
+  return colorForProject(e.targetId);
+}
+const OVERLAY_STYLES: Record<Overlay["kind"], { bg: string; label: string }> = {
+  "leave-approved": {
+    bg: "bg-orange-400 text-orange-950",
+    label: "Congé validé"
+  },
+  "leave-pending": {
+    // Rayures diagonales via linear-gradient inline pour signaler "en attente"
+    bg: "text-amber-950 bg-amber-200",
+    label: "Congé en attente"
+  },
+  "sick": {
+    bg: "bg-red-400 text-red-950",
+    label: "Maladie"
+  }
+};
 
 export function MonthGrid({
-  monthStartISO, users, entries, projects, costCenters
-}: { monthStartISO: string; users: User[]; entries: Entry[]; projects: Project[]; costCenters: CC[] }) {
+  monthStartISO, users, entries, projects, costCenters, overlays = []
+}: {
+  monthStartISO: string; users: User[]; entries: Entry[];
+  projects: Project[]; costCenters: CC[];
+  overlays?: Overlay[];
+}) {
   const start = parseISO(monthStartISO);
   const days = useMemo(() => eachDayOfInterval({ start: startOfMonth(start), end: endOfMonth(start) }), [monthStartISO]);
   const [pending, startTr] = useTransition();
@@ -59,6 +93,12 @@ export function MonthGrid({
   function entryOn(userId: string, day: Date) {
     const k = dayKey(day);
     return entries.find(e => e.userId === userId && k >= e.startDate && k <= e.endDate);
+  }
+  function overlayOn(userId: string, day: Date) {
+    const k = dayKey(day);
+    // Priorité maladie > congé validé > congé en attente (le pire en premier)
+    const found = overlays.find(o => o.userId === userId && k >= o.startDate && k <= o.endDate);
+    return found;
   }
 
   function inDragRange(userId: string, day: Date) {
@@ -89,8 +129,18 @@ export function MonthGrid({
               <td className="px-3 py-1.5 font-medium border-b border-border/50 whitespace-nowrap">{u.firstName} {u.lastName}</td>
               {days.map(d => {
                 const e = entryOn(u.id, d);
+                const o = overlayOn(u.id, d);
                 const inSel = inDragRange(u.id, d);
                 const wknd = isWeekend(d);
+                // Overlay (congé / maladie) prime sur l'affectation projet :
+                // dans la vraie vie, quand quelqu'un est en congé, on ne le
+                // planifie pas sur un projet ce jour-là.
+                const showOverlay = !!o;
+                const ovStyle = o ? OVERLAY_STYLES[o.kind] : null;
+                // Rayures diagonales pour "en attente" : motif CSS inline
+                const overlayPatternStyle = o?.kind === "leave-pending"
+                  ? { backgroundImage: "repeating-linear-gradient(45deg, rgba(217,119,6,0.35) 0 3px, transparent 3px 6px)" }
+                  : undefined;
                 return (
                   <td
                     key={dayKey(d)}
@@ -101,10 +151,17 @@ export function MonthGrid({
                       (inSel ? "bg-indigoaccent/30 " : "")}
                     style={{ width: 28, height: 28, padding: 0 }}
                   >
-                    {e && (
+                    {showOverlay && ovStyle && (
+                      <span
+                        title={o!.label}
+                        className={"inline-block w-full h-full leading-7 " + ovStyle.bg}
+                        style={overlayPatternStyle}
+                      >·</span>
+                    )}
+                    {!showOverlay && e && (
                       <span
                         title={`${e.targetLabel} · ${e.hoursPerDay ?? ""}h/j`}
-                        className={"inline-block w-full h-full leading-7 " + colorFor(e.targetId)}
+                        className={"inline-block w-full h-full leading-7 " + colorForEntry(e)}
                       >·</span>
                     )}
                   </td>
@@ -115,20 +172,83 @@ export function MonthGrid({
         </tbody>
       </table>
 
-      <div className="px-3 py-2 border-t border-border flex flex-wrap gap-3 text-[11px] text-midnight-700">
+      <div className="px-3 py-2 border-t border-border flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-midnight-700">
         <span className="font-medium">Légende :</span>
-        {Array.from(new Set(entries.map(e => e.targetId))).slice(0, 12).map(id => {
+        {/* Contextes (couleurs par catégorie) */}
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-indigo-300" />
+          Projet client
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-violet-200" />
+          Interne (centre de coût)
+        </span>
+        <span className="flex items-center gap-1">
+          <span
+            className="inline-block w-3 h-3 rounded bg-amber-200"
+            style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(217,119,6,0.45) 0 2px, transparent 2px 4px)" }}
+          />
+          Congé demandé
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-orange-400" />
+          Congé validé
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-red-400" />
+          Maladie
+        </span>
+        <span className="mx-2 text-midnight-300">|</span>
+        {/* Zoom projets présents ce mois */}
+        <span className="text-midnight-500">Projets :</span>
+        {Array.from(new Set(entries.filter(e => e.targetType === "PRJ").map(e => e.targetId))).slice(0, 8).map(id => {
           const sample = entries.find(e => e.targetId === id)!;
-          return <span key={id} className="flex items-center gap-1"><span className={"inline-block w-3 h-3 rounded " + colorFor(id)} />{sample.targetLabel}</span>;
+          return (
+            <span key={id} className="flex items-center gap-1">
+              <span className={"inline-block w-3 h-3 rounded " + colorForProject(id)} />
+              {sample.targetLabel}
+            </span>
+          );
         })}
       </div>
 
       <div className="px-3 py-3 border-t border-border bg-midnight-50/30">
         <h3 className="text-sm font-semibold mb-2">Affectations en cours sur ce mois</h3>
-        {entries.length === 0 ? <p className="text-xs text-midnight-500">Aucune affectation.</p> : (
+        {entries.length === 0 && overlays.length === 0 ? (
+          <p className="text-xs text-midnight-500">Aucune affectation.</p>
+        ) : (
           <table className="table-base">
-            <thead><tr><th>Utilisateur</th><th>Cible</th><th>Du</th><th>Au</th><th className="text-right">h/j</th><th>Type</th><th></th></tr></thead>
+            <thead><tr><th>Utilisateur</th><th>Cible / Motif</th><th>Du</th><th>Au</th><th className="text-right">h/j</th><th>Type</th><th></th></tr></thead>
             <tbody>
+              {/* Congés + maladies d'abord (context) — non éditables ici */}
+              {overlays.map(o => {
+                const u = users.find(x => x.id === o.userId);
+                const badge =
+                  o.kind === "leave-approved" ? "bg-orange-100 text-orange-800" :
+                  o.kind === "leave-pending"  ? "bg-amber-100 text-amber-800" :
+                                                "bg-red-100 text-red-800";
+                const kindLabel =
+                  o.kind === "leave-approved" ? "Congé validé" :
+                  o.kind === "leave-pending"  ? "Congé demandé" :
+                                                "Maladie";
+                return (
+                  <tr key={o.id} className="opacity-90">
+                    <td>{u?.firstName} {u?.lastName}</td>
+                    <td>{o.label}</td>
+                    <td>{o.startDate}</td>
+                    <td>{o.endDate}</td>
+                    <td className="text-right tabular-nums text-midnight-400">—</td>
+                    <td>
+                      <span className={"text-[10px] rounded px-1.5 py-0.5 " + badge}>
+                        {kindLabel}
+                      </span>
+                    </td>
+                    <td className="text-right text-[10px] text-midnight-400">
+                      {o.kind.startsWith("leave") ? "gérer sur /leaves" : "gérer sur /sick-leaves"}
+                    </td>
+                  </tr>
+                );
+              })}
               {entries.map(e => {
                 const u = users.find(x => x.id === e.userId);
                 return (
