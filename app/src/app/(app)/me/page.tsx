@@ -8,6 +8,8 @@ import { ExperiencesPanel } from "./experiences-panel";
 import { UserExperiencesPanel } from "./user-experiences-panel";
 import { SickLeaveBlock } from "./sick-leave-form";
 import { MeTabsNav } from "./tabs-nav";
+import { LeaveRequestBlock } from "./leave-request-block";
+import { computeLeaveBalance } from "@/lib/leave-balance";
 import { FileDown, Eye, ReceiptText, GraduationCap } from "lucide-react";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
@@ -49,6 +51,41 @@ export default async function MyProfile({
       take: 20
     })
   ]);
+
+  // Congés — solde annuel + demandes récentes + missions actives (pour la
+  // case "demandé chez le client et accordé").
+  const [leaveBalance, leaveRequests, activeMissions] = await Promise.all([
+    computeLeaveBalance(session.user.id),
+    prisma.leaveRequest.findMany({
+      where: { userId: session.user.id },
+      include: { mission: { select: { reference: true, title: true } } },
+      orderBy: { startDate: "desc" },
+      take: 20
+    }),
+    prisma.mission.findMany({
+      where: {
+        status: { in: ["PLANNED", "ACTIVE", "EXTENDED"] },
+        consultantId: session.user.id
+      },
+      select: { id: true, reference: true, title: true, company: { select: { name: true } } }
+    })
+  ]);
+  const leaveRequestsUi = leaveRequests.map((r) => ({
+    id: r.id,
+    startDate: r.startDate.toISOString(),
+    endDate: r.endDate.toISOString(),
+    days: Number(r.days),
+    type: r.type,
+    reason: r.reason,
+    status: r.status,
+    missionRef: r.mission ? `${r.mission.reference} — ${r.mission.title}` : null,
+    clientApproved: r.clientApproved,
+    rejectionReason: r.rejectionReason
+  }));
+  const activeMissionsUi = activeMissions.map((m) => ({
+    id: m.id,
+    label: `${m.reference} — ${m.title} (${m.company?.name ?? "—"})`
+  }));
   const today = new Date();
   const todayIso = today.toISOString().slice(0, 10);
   const sickLeavesUi = sickLeaves.map((l) => {
@@ -200,6 +237,9 @@ export default async function MyProfile({
                     amountTtc: Number(r.amountTtc),
                     status: r.status
                   }))}
+                  leaveBalance={leaveBalance}
+                  leaveRequests={leaveRequestsUi}
+                  activeMissions={activeMissionsUi}
                 />
               )}
             </>
@@ -229,7 +269,10 @@ const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
 
 function RhTab({
   sickLeavesUi,
-  myExpenses
+  myExpenses,
+  leaveBalance,
+  leaveRequests,
+  activeMissions
 }: {
   sickLeavesUi: {
     id: string; startDate: string; endDate: string;
@@ -239,12 +282,29 @@ function RhTab({
     id: string; date: string; description: string;
     category: string; amountTtc: number; status: string;
   }[];
+  leaveBalance: {
+    year: number; entitled: number; approved: number;
+    pending: number; remaining: number; remainingIfAllApproved: number;
+  };
+  leaveRequests: {
+    id: string; startDate: string; endDate: string; days: number;
+    type: string; reason: string | null; status: string;
+    missionRef: string | null; clientApproved: boolean;
+    rejectionReason: string | null;
+  }[];
+  activeMissions: { id: string; label: string }[];
 }) {
   const totalDraft = myExpenses.filter((e) => e.status === "DRAFT").length;
   const totalPending = myExpenses.filter((e) => ["SUBMITTED", "APPROVED"].includes(e.status)).length;
 
   return (
     <div className="space-y-6">
+      {/* Congés — solde + demande + historique */}
+      <LeaveRequestBlock
+        balance={leaveBalance}
+        existing={leaveRequests}
+        activeMissions={activeMissions}
+      />
       {/* Notes de frais — synthèse + liste courte + CTA vers /expenses */}
       <section className="card p-4">
         <div className="flex items-center justify-between mb-3">

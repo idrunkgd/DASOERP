@@ -327,6 +327,12 @@ model User {
   expenseReportsApproved ExpenseReport[]   @relation("ExpenseReportApprover")
   // Arrêts maladie déclarés par le consultant (certif joint, période)
   sickLeaves          SickLeave[]           @relation("UserSickLeaves")
+  // Demandes de congés + solde annuel (en jours ouvrés)
+  leaveRequests       LeaveRequest[]        @relation("UserLeaveRequests")
+  leaveApprovals      LeaveRequest[]        @relation("LeaveRequestApprover")
+  /// Quota annuel de jours de congé (défaut 20 pour la Belgique — 4 semaines
+  /// légales). Modifiable individuellement (ancienneté, temps partiel, etc.).
+  annualLeaveDays     Int                   @default(20)
   // CRM pipeline (test feature)
   opportunities       Opportunity[]         @relation("OpportunityOwner")
   opportunityActivities OpportunityActivity[] @relation("OpportunityActivityUser")
@@ -1366,6 +1372,7 @@ model Mission {
   planningEntries   PlanningEntry[]
   milestones        BillingMilestone[]
   expenseReports    ExpenseReport[]         @relation("MissionExpenseReports")
+  leaveRequests     LeaveRequest[]          @relation("MissionLeaveRequests")
 
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
@@ -1675,6 +1682,68 @@ model SickLeave {
   updatedAt      DateTime  @updatedAt
 
   @@index([userId, startDate])
+  @@index([startDate, endDate])
+}
+
+// =============================================================
+// LEAVE REQUESTS — demandes de congés payés / RTT
+// =============================================================
+// Workflow simple : le consultant saisit une demande (DRAFT), la soumet
+// (SUBMITTED), le manager approuve/refuse. Pour les consultants en mission
+// on trace en plus si le client a accordé le congé côté planning.
+
+enum LeaveRequestStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum LeaveType {
+  ANNUAL          // congé payé légal
+  RTT             // réduction du temps de travail
+  UNPAID          // congé sans solde
+  SPECIAL         // congé spécial (mariage, naissance, décès…)
+  OTHER
+}
+
+model LeaveRequest {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation("UserLeaveRequests", fields: [userId], references: [id], onDelete: Cascade)
+  startDate       DateTime           @db.Date
+  /// Dernier jour de congé inclus
+  endDate         DateTime           @db.Date
+  /// Nombre de jours ouvrés (calculé à la création, permet override manuel
+  /// pour les demi-journées).
+  days            Decimal            @db.Decimal(4, 1)
+  type            LeaveType          @default(ANNUAL)
+  reason          String?
+  notes           String?
+  status          LeaveRequestStatus @default(DRAFT)
+  submittedAt     DateTime?
+  approvedById    String?
+  approvedBy      User?              @relation("LeaveRequestApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  rejectionReason String?
+
+  // ─── Consultant en mission : trace l'accord côté client ───
+  /// Mission active au moment de la demande (optionnel — auto-rempli si
+  /// le consultant a une seule mission active à la période demandée).
+  missionId       String?
+  mission         Mission?           @relation("MissionLeaveRequests", fields: [missionId], references: [id], onDelete: SetNull)
+  /// True si le consultant confirme avoir demandé le congé côté client
+  /// (chef de projet mission) et l'avoir obtenu. Reste false pour les
+  /// non-consultants ou missions non concernées.
+  clientApproved  Boolean            @default(false)
+  clientApprovalNotes String?
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([userId, startDate])
+  @@index([status])
   @@index([startDate, endDate])
 }
 

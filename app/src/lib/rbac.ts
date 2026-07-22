@@ -26,6 +26,7 @@ export type Permission =
   | "documents.read"  | "documents.write"
   | "tests.manage"    | "tests.take"
   | "expenses.read"   | "expenses.write" | "expenses.approve"
+  | "leaves.read"     | "leaves.write"   | "leaves.approve"
   | "audit.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
@@ -48,6 +49,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "documents.read","documents.write",
     "tests.manage","tests.take",
     "expenses.read","expenses.write","expenses.approve",
+    "leaves.read","leaves.write","leaves.approve",
     "audit.read"
   ],
   MANAGER: [
@@ -68,6 +70,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "documents.read","documents.write",
     "tests.manage","tests.take",
     "expenses.read","expenses.write","expenses.approve",
+    "leaves.read","leaves.write","leaves.approve",
     "audit.read"
   ],
   COMMERCIAL: [
@@ -83,7 +86,8 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "applinks.read",
     "crm.read","crm.write",
     "documents.read","documents.write",
-    "expenses.read","expenses.write"
+    "expenses.read","expenses.write",
+    "leaves.read","leaves.write"
   ],
   CONSULTANT: [
     "companies.read",
@@ -97,7 +101,8 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "reviews.read",
     "documents.read",
     "tests.take",
-    "expenses.read","expenses.write"
+    "expenses.read","expenses.write",
+    "leaves.read","leaves.write"
   ],
   FINANCE: [
     "companies.read",
@@ -112,6 +117,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "applinks.read",
     "documents.read","documents.write",
     "expenses.read","expenses.write","expenses.approve",
+    "leaves.read","leaves.write","leaves.approve",
     "audit.read"
   ]
 };
