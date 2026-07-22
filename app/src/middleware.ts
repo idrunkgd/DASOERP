@@ -23,7 +23,15 @@ const SUBDOMAIN_ROUTES: Array<{ host: string; prefix: string }> = [
 
 export default withAuth(
   function middleware(req) {
-    const host = (req.headers.get("host") ?? "").toLowerCase();
+    // Traefik (le reverse proxy de Coolify) passe le vrai domaine dans
+    // X-Forwarded-Host quand il fait du proxy — le Host header peut être
+    // le nom interne du service. On teste les deux, X-Forwarded-Host
+    // en priorité car c'est le vrai domaine client.
+    const host = (
+      req.headers.get("x-forwarded-host") ??
+      req.headers.get("host") ??
+      ""
+    ).toLowerCase();
     const url = req.nextUrl.clone();
     const path = url.pathname;
 
