@@ -10,7 +10,7 @@ import {
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
-  AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown, Plane
+  AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
