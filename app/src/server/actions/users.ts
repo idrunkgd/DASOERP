@@ -90,6 +90,32 @@ export async function updateUserAction(id: string, formData: FormData) {
   return { ok: true, passwordChanged };
 }
 
+/**
+ * Change UNIQUEMENT le mot de passe d'un user, sans toucher au reste.
+ * Utile depuis un bouton dédié — évite de dépendre de la validation Zod
+ * complète du form user qui peut casser si la DB a des colonnes manquantes
+ * (migration en retard, etc.). Isole la fonction critique.
+ */
+export async function resetUserPassword(id: string, newPassword: string) {
+  const session = await requirePermission("users.manage");
+  const trimmed = newPassword?.trim() ?? "";
+  if (trimmed.length < 8) {
+    throw new Error("Mot de passe trop court — 8 caractères minimum.");
+  }
+  const passwordHash = await bcrypt.hash(trimmed, 10);
+  await prisma.user.update({
+    where: { id },
+    data: { passwordHash }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE",
+    entityType: "User", entityId: id,
+    message: "Mot de passe réinitialisé"
+  });
+  revalidatePath(`/users/${id}`);
+  return { ok: true };
+}
+
 export async function setUserActive(id: string, active: boolean) {
   const session = await requirePermission("users.manage");
   await prisma.user.update({ where: { id }, data: { active } });

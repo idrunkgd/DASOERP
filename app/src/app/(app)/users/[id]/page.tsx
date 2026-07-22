@@ -5,6 +5,7 @@ import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { UserForm } from "../user-form";
 import { ReviewsPanel } from "./reviews-panel";
+import { ResetPasswordButton } from "./reset-password-button";
 import { UserExperiencesPanel } from "../../me/user-experiences-panel";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
 import { redirect } from "next/navigation";
@@ -73,6 +74,14 @@ export default async function UserDetail({ params }: { params: { id: string } })
         }
       />
       <div className="space-y-6">
+        {/* Bouton dédié reset password — isolé du form principal pour rester
+            fonctionnel même si le form général plante à cause d'une colonne
+            en retard sur la migration DB. */}
+        {isAdmin && (
+          <div className="flex justify-end">
+            <ResetPasswordButton userId={user.id} />
+          </div>
+        )}
         {isAdmin && <UserForm initial={user} skillCatalog={skillCatalog} />}
 
         {/* Expériences pro : miroir de la fiche candidat. Éditables par
