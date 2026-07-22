@@ -37,8 +37,19 @@ export default withAuth(
 
     // 1. Rewrite sous-domaine → préfixe interne.
     // Ex: wiki.hub.dasolabs.be/cashflow → /formation/cashflow
+    // On exclut les paths d'assets statiques (/wiki/mockups/*.svg, favicon,
+    // images du dossier public) pour qu'ils soient servis tels quels sans
+    // être re-préfixés par /formation.
     const subdomain = SUBDOMAIN_ROUTES.find((s) => host === s.host || host.startsWith(s.host + ":"));
-    if (subdomain && !path.startsWith(subdomain.prefix) && !path.startsWith("/api/") && !path.startsWith("/_next/")) {
+    const isStaticAsset = /\.(svg|png|jpe?g|gif|webp|ico|css|js|woff2?|ttf)$/i.test(path);
+    if (
+      subdomain
+      && !path.startsWith(subdomain.prefix)
+      && !path.startsWith("/api/")
+      && !path.startsWith("/_next/")
+      && !path.startsWith("/wiki/")  // assets du wiki (public/wiki/*)
+      && !isStaticAsset
+    ) {
       url.pathname = subdomain.prefix + (path === "/" ? "" : path);
       return NextResponse.rewrite(url);
     }
