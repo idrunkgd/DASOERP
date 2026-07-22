@@ -689,7 +689,7 @@ Le planning distingue **5 contextes** par palette :
       {
         slug: "charge",
         title: "Suivre la charge d'un consultant",
-        description: "Colonne "Charge planifiée semaine en cours" sur la fiche user.",
+        description: "Colonne « Charge planifiée semaine en cours » sur la fiche user.",
         estimatedMinutes: 2,
         content: `
 Depuis \`/users/[id]\`, le header affiche :
