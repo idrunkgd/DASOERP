@@ -154,7 +154,7 @@ Depuis n'importe quelle page, **Cmd+K** (ou **Ctrl+K** sur Windows) ouvre la pal
         content: `
 Le cashflow est le poste de commande financier de Dasolabs. Il faut prendre 5 minutes pour comprendre sa structure, puis c'est fluide.
 
-![La grille cashflow — colonnes mois, lignes flux, cellules colorées par statut](/wiki/mockups/cashflow-grid.svg)
+![Étape 1 — Structure de la grille : lignes, colonnes, cellules](/wiki/mockups/cashflow-principe-step1.svg)
 
 ## Structure de la grille
 
@@ -166,8 +166,12 @@ Le cashflow est le poste de commande financier de Dasolabs. Il faut prendre 5 mi
 
 Le **solde compte** en tête est ta trésorerie **réelle** aujourd'hui — indépendant de l'année affichée. Il vient du bootstrap manuel + tous les mouvements PAID chronologiquement.
 
+![Étape 2 — Filtre auto : ligne masquée si plus aucun paiement futur](/wiki/mockups/cashflow-principe-step2.svg)
+
 > [!WARN] Ne pas confondre solde compte et solde année
 > Le solde année (fin décembre) est une **projection**. Le solde compte est la vérité banque.
+
+![Étape 3 — Panneau Ce mois-ci pour un check quotidien](/wiki/mockups/cashflow-principe-step3.svg)
 
 ## Filtre "vue courante"
 
@@ -237,14 +241,22 @@ Une **entrée ponctuelle** (OneOff) modélise un flux qui n'est ni une mission n
 
 ## Créer une entrée
 
+![Étape 1 — Menu Ajouter → Entrée ponctuelle](/wiki/mockups/cashflow-oneoff-step1.svg)
+
 > [!STEP] 1. Bouton "+ Ajouter"
 > Depuis la page cashflow, choisis "Entrée ponctuelle" dans la palette.
+
+![Étape 2 — Modal avec catégorie, montant, date, récurrent + date fin](/wiki/mockups/cashflow-oneoff-step2.svg)
 
 > [!STEP] 2. Remplir le formulaire
 > Catégorie (autocomplete), montant, date, sens (recette ou dépense). Tu peux marquer comme récurrent avec date de fin — ex: une garantie qui court 6 mois.
 
+![Étape 3 — Ligne créée avec cellules mensuelles auto-générées](/wiki/mockups/cashflow-oneoff-step3.svg)
+
 > [!STEP] 3. Sauvegarder
 > La ligne apparaît dans la grille et dans le panneau "Ce mois-ci" si le mois affiché est concerné.
+
+![Étape 4 — Bouton corbeille dans Ce mois-ci pour supprimer](/wiki/mockups/cashflow-oneoff-step4.svg)
 
 ## Supprimer
 
@@ -276,17 +288,25 @@ Une note de frais approuvée crée automatiquement un OneOff dans la catégorie 
         content: `
 Une mission client passe par 4 phases distinctes dans DasoERP. Comprendre ce cycle évite les confusions.
 
+![Étape 1 — Phase demande : MissionRequest en pipeline CRM](/wiki/mockups/mission-cycle-step1.svg)
+
 ## 1. MissionRequest — la demande
 
 Une entreprise nous demande un consultant. On crée une **MissionRequest** avec les infos : compétences requises, TJM cible, durée, dates.
+
+![Étape 2 — Phase présentation : Application dans le pipeline horizontal](/wiki/mockups/mission-cycle-step2.svg)
 
 ## 2. Application + Presentation
 
 On crée une **Application** par consultant qu'on veut présenter (interne ou candidat vivier). L'application produit une **presentation** (PDF de CV + lettre de motivation) envoyée au client.
 
+![Étape 3 — Phase offre chiffrée : MissionProposal](/wiki/mockups/mission-cycle-step3.svg)
+
 ## 3. Proposal (offre consultant)
 
 Si le client demande une offre chiffrée, on crée un **MissionProposal** avec TJM vendu, taux, conditions. Statut évolue : DRAFT → OFFER_SENT → SELECTED (le consultant est retenu) → REJECTED.
+
+![Étape 4 — Phase mission ACTIVE et facturation mensuelle](/wiki/mockups/mission-cycle-step4.svg)
 
 ## 4. Mission
 
@@ -309,14 +329,22 @@ Depuis la Mission active, tu génères des **BillingMilestone** mensuelles (jour
 > [!STEP] 1. Ouvrir la demande de mission
 > \`/mission-requests/[id]\` — tu vois le pipeline horizontal en haut : Nouveau · Shortlist · Présenté · Offert · Contrat.
 
+![Étape 2 — Picker avec recherche interne/vivier](/wiki/mockups/mission-present-step2.svg)
+
 > [!STEP] 2. Ajouter un consultant à la shortlist
 > Bouton "+ Consultant" → recherche un candidat vivier ou un consultant interne. Ça crée une **Application**.
+
+![Étape 3 — Édition CV : réordonner expériences + lettre de motivation](/wiki/mockups/mission-present-step3.svg)
 
 > [!STEP] 3. Préparer la présentation
 > Depuis la carte candidat, clique "Préparer présentation". Écran d'édition : ordre des expériences, mise en avant compétences, lettre de motivation optionnelle.
 
+![Étape 4 — Aperçu PDF + bouton Présenté au client](/wiki/mockups/mission-present-step4.svg)
+
 > [!STEP] 4. Aperçu + Envoi
 > **Aperçu PDF** ouvre le rendu final dans un nouvel onglet. Une fois validé, "Présenté au client" fait passer l'application en PRESENTED.
+
+![Étape 5 — SELECTED déclenche création auto de Mission](/wiki/mockups/mission-present-step5.svg)
 
 > [!STEP] 5. Retour client
 > Si retenu → passe en OFFER_SENT (avec proposal chiffrée). Si sélectionné final → SELECTED → Mission auto-créée.
@@ -331,16 +359,22 @@ Depuis la Mission active, tu génères des **BillingMilestone** mensuelles (jour
         description: "Depuis la Mission active, générer les tranches et déclencher le PDF de facture.",
         estimatedMinutes: 4,
         content: `
-![Modal de génération d'une tranche mensuelle : jours, TJM, TVA, total TTC](/wiki/mockups/mission-invoice-form.svg)
+![Étape 1 — Fiche mission, section Facturation, bouton Générer](/wiki/mockups/mission-factu-step1.svg)
 
 > [!STEP] 1. Récupérer les jours du mois
 > Depuis \`/missions/[id]\`, section "Facturation" → bouton **Générer tranche du mois**. L'ERP lit les timesheets validés du consultant sur ce mois.
 
+![Étape 2 — Modal avec jours auto-remplis + TVA + calcul TTC](/wiki/mockups/mission-factu-step2.svg)
+
 > [!STEP] 2. Ajuster si besoin
 > Modal ouvre avec les jours pré-remplis. Tu peux ajuster (déductions, congés client, jours fériés). TVA appliquée = celle du projet.
 
+![Étape 3 — BillingMilestone PLANNED + snapshot du TJM + cashflow](/wiki/mockups/mission-factu-step3.svg)
+
 > [!STEP] 3. Générer la tranche
 > Statut initial = PLANNED, avec date d'encaissement = fin du mois + 30j (personnalisable dans les settings). Elle apparaît dans le cashflow.
+
+![Étape 4 — Aperçu PDF facture + Marquer facturé](/wiki/mockups/mission-factu-step4.svg)
 
 > [!STEP] 4. Émettre la facture
 > **Aperçu PDF** puis "Marquer facturé" quand le PDF est envoyé au client. La tranche passe en INVOICED (bleu).
@@ -368,19 +402,27 @@ Depuis la Mission active, tu génères des **BillingMilestone** mensuelles (jour
         description: "Postes, TVA, contacts, marges — les briques essentielles d'un devis propre.",
         estimatedMinutes: 6,
         content: `
-![Formulaire de création d'offre avec postes et calcul de totaux HT / TVA / TTC](/wiki/mockups/offer-form.svg)
+![Étape 1 — Sélection client (autocomplete) + contacts destinataires](/wiki/mockups/offer-creer-step1.svg)
 
 > [!STEP] 1. Nouvelle offre
 > \`/offers/new\` → sélectionne l'entreprise cliente (autocomplete). Choisis les contacts destinataires (plusieurs possibles).
 
+![Étape 2 — Objet + TVA + date + validité](/wiki/mockups/offer-creer-step2.svg)
+
 > [!STEP] 2. Header
 > Objet, référence auto-générée (modifiable), date, validité (30 jours par défaut), **taux TVA** (21% par défaut, 6% pour formations, 12% pour restauration).
+
+![Étape 3 — Ajouter postes avec drag & drop pour réordonner](/wiki/mockups/offer-creer-step3.svg)
 
 > [!STEP] 3. Postes
 > Ajoute des lignes : description, quantité, PU HT. Le total HT + TVA + TTC se calcule live. Tu peux réordonner par drag.
 
+![Étape 4 — Totaux calculés + CGV en markdown](/wiki/mockups/offer-creer-step4.svg)
+
 > [!STEP] 4. Conditions
 > Zone markdown pour les CGV, délais, garanties. Le rendu PDF applique la charte Dasolabs.
+
+![Étape 5 — Aperçu PDF + 3 boutons finaux (Aperçu, Brouillon, Envoyer)](/wiki/mockups/offer-creer-step5.svg)
 
 > [!STEP] 5. Aperçu + Envoi
 > **Aperçu PDF** dans un nouvel onglet. Une fois OK, clique "Envoyer" → statut passe en SENT. Ta trace commerciale est en place.
@@ -397,11 +439,17 @@ Depuis la Mission active, tu génères des **BillingMilestone** mensuelles (jour
         content: `
 Le client revient avec des demandes de modif. On crée une V2 pour tracer.
 
+![Étape 1 — Bouton Nouvelle version sur une V1 SENT](/wiki/mockups/offer-version-step1.svg)
+
 > [!STEP] 1. Depuis la V1
 > Bouton "Nouvelle version" en haut de la fiche offre. L'ERP duplique tous les postes, options, contacts, conditions.
 
+![Étape 2 — V2 en DRAFT avec postes modifiés (rouge = changement)](/wiki/mockups/offer-version-step2.svg)
+
 > [!STEP] 2. Modifier
 > Ajuste les postes. Les modifs restent locales à la V2 — la V1 est figée pour l'historique.
+
+![Étape 3 — V2 envoyée, V1 archivée dans l'historique masqué](/wiki/mockups/offer-version-step3.svg)
 
 > [!STEP] 3. Envoyer la V2
 > Statut SENT. La V1 reste dans l'historique mais n'apparaît plus dans la liste principale des offres en cours (filtre auto).
@@ -421,11 +469,17 @@ Le client a signé. Il ne suffit pas de mettre le statut : on crée un projet po
 > [!STEP] 1. Bouton "Gagné"
 > Ouvre le wizard \`/offers/[id]/win\`.
 
+![Étape 2 — Wizard : 3 tranches pré-remplies avec dates d'encaissement](/wiki/mockups/offer-won-step2.svg)
+
 > [!STEP] 2. Configurer les tranches
 > Le wizard propose de découper le montant en tranches de facturation : pré-remplies selon les jalons (30% début, 40% mi-projet, 30% fin) ou personnalisables.
 
+![Étape 3 — Actions automatiques : Project créé + 3 tranches + KPI mis à jour](/wiki/mockups/offer-won-step3.svg)
+
 > [!STEP] 3. Dates prévues
 > Chaque tranche a une date prévue de facturation (défaut = fin du mois du jalon). Tu peux ajuster.
+
+![Étape 4 — Différence Project (chantier) vs Mission (consultant TJM)](/wiki/mockups/offer-won-step4.svg)
 
 > [!STEP] 4. Valider
 > Le wizard crée le **Project**, copie le taux TVA de l'offre, et ajoute les tranches dans le cashflow. Tu es redirigé sur la fiche projet.
@@ -452,7 +506,7 @@ Le client a signé. Il ne suffit pas de mettre le statut : on crée un projet po
         content: `
 Le CRM \`/crm\` affiche un **kanban horizontal** avec les stades commerciaux.
 
-![Le pipeline CRM en kanban : 5 colonnes de stades, cartes déplaçables](/wiki/mockups/crm-pipeline.svg)
+![Étape 1 — Les 5 stades du pipeline commercial](/wiki/mockups/crm-pipeline-step1.svg)
 
 ## Les stades
 
@@ -468,6 +522,8 @@ Drag-and-drop d'une carte vers un autre stade. L'ERP met à jour le champ \`crmS
 
 > [!TIP] Cohérence stade / statut
 > Le stade CRM est distinct du statut interne. Un stade "Négo" peut correspondre à une offre en statut SENT et à une MissionRequest en OFFER_SENT. Le kanban ne s'affole pas.
+
+![Étape 3 — Cartes oranges : opportunités sans activité 14+ jours](/wiki/mockups/crm-pipeline-step3.svg)
 
 ## Filtres
 
@@ -485,8 +541,12 @@ Un **Contact** peut être lié à **plusieurs entreprises** (table ContactCompan
 > [!STEP] 1. Créer l'entreprise
 > \`/companies/new\` → nom, TVA, adresse, secteur, owner (toi par défaut).
 
+![Étape 2 — Ajouter des contacts avec rôles (Décideur, Achats, Facturation)](/wiki/mockups/crm-cc-step2.svg)
+
 > [!STEP] 2. Créer les contacts
 > Depuis la fiche entreprise, section "Contacts" → "+ Ajouter". Tu peux marquer le rôle (Décideur, Technique, Achats) qui reste attaché **au lien** — donc si le contact bouge, tu recréé un lien avec un nouveau rôle.
+
+![Étape 3 — Contact multi-entreprises : lier Bob à son ancienne boîte aussi](/wiki/mockups/crm-cc-step3.svg)
 
 > [!STEP] 3. Historique d'interactions
 > Section "Interactions" pour tracer appels, mails, meetings. Le CRM les indexe dans la timeline entreprise.
@@ -507,11 +567,17 @@ Le module Prospection \`/prospection\` gère les envois cold outbound et leurs r
 
 Un **OutreachTemplate** est un message pré-écrit avec des placeholders : \`{{prenom}}\`, \`{{entreprise}}\`, \`{{secteur}}\`. Au moment de l'envoi, l'ERP substitue automatiquement.
 
+![Étape 2 — Choisir cible + canal + template avec aperçu personnalisé](/wiki/mockups/crm-outbound-step2.svg)
+
 > [!STEP] 1. Créer une interaction
 > Bouton "+ Interaction" → cible (contact + entreprise), canal (LinkedIn, email, appel), template optionnel.
 
+![Étape 3 — Copy-paste vers LinkedIn (pas de connecteur auto)](/wiki/mockups/crm-outbound-step3.svg)
+
 > [!STEP] 2. Envoyer
 > L'ERP ne connecte pas encore ton client mail — pour l'instant, copy-paste du texte final vers ta boîte. Statut = SENT.
+
+![Étape 4 — Programmer relance J+7 pour ne rien oublier](/wiki/mockups/crm-outbound-step4.svg)
 
 > [!STEP] 3. Rappels de relance
 > Marque la date de relance J+7. Le dashboard t'affichera cette carte le jour venu.
