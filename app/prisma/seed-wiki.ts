@@ -750,16 +750,22 @@ Le parcours d'une demande de congé, du solde initial jusqu'à la soumission au 
         description: "Vue centralisée + boutons Approuver / Refuser motivé / Supprimer.",
         estimatedMinutes: 3,
         content: `
-![Vue manager des demandes en attente : boutons Approuver, Refuser, Supprimer](/wiki/mockups/leaves-approve.svg)
+![Étape 1 — Vue /leaves?filter=pending avec bordure orange](/wiki/mockups/leaves-approve-step1.svg)
 
 > [!STEP] 1. Voir les demandes en attente
 > \`/leaves?filter=pending\` — nombre de jours + statut client (si case cochée).
 
+![Étape 2 — Approuver ✓ : 4 actions automatiques](/wiki/mockups/leaves-approve-step2.svg)
+
 > [!STEP] 2. Approuver
 > Bouton ✓ vert. La demande passe en APPROVED, le solde du consultant est décrémenté, et l'entrée apparaît en orange dans le planning.
 
+![Étape 3 — Refuser ✗ avec motif obligatoire](/wiki/mockups/leaves-approve-step3.svg)
+
 > [!STEP] 3. Refuser
 > Bouton ✗ rouge avec motif obligatoire. Le consultant peut refaire une demande.
+
+![Étape 4 — Supprimer un congé validé restaure le solde](/wiki/mockups/leaves-approve-step4.svg)
 
 > [!STEP] 4. Supprimer (même une demande validée)
 > L'icône corbeille est visible sur toutes les lignes pour un manager. Sur une APPROVED, elle **restaure automatiquement les jours** dans le compteur du consultant — utile quand un congé est annulé après coup.
@@ -784,8 +790,12 @@ En fin d'année, chaque consultant a un reliquat non-consommé. On veut :
 > [!STEP] 2. Rollover un user
 > Bouton "Ajouter congés N+1" à côté de chaque consultant. Idempotent — si déjà fait, ça refuse.
 
+![Étape 2 — Bouton Ajouter congés N+1 (tous)](/wiki/mockups/leaves-rollover-step2.svg)
+
 > [!STEP] 3. Rollover global
 > Bouton "Ajouter congés N+1 (tous)" en tête de tableau. Boucle sur tous les consultants actifs.
+
+![Étape 3 — Après rollover : nouveaux quotas N+1 + reliquat](/wiki/mockups/leaves-rollover-step3.svg)
 
 > [!INFO] Calcul du reliquat
 > Reliquat = (Légaux N + RTT N + Report N-1) − consommé APPROVED. Tout est reporté en type CARRIED_OVER pour N+1.
@@ -810,8 +820,12 @@ En fin d'année, chaque consultant a un reliquat non-consommé. On veut :
         description: "Drag-select sur les jours, choix du projet ou centre de coût.",
         estimatedMinutes: 4,
         content: `
+![Étape 1 — Drag-select horizontal sur les jours](/wiki/mockups/planning-affecter-step1.svg)
+
 > [!STEP] 1. Sélectionner une plage de jours
 > Sur la ligne du consultant, clique-drag du 1er au dernier jour à couvrir.
+
+![Étape 2 — Modal projet vs centre de coût + charge %](/wiki/mockups/planning-affecter-step2.svg)
 
 > [!STEP] 2. Modal d'affectation
 > S'ouvre automatiquement. Choisis **Projet** (client) ou **Centre de coût** (interne : R&D, formation, admin).
@@ -819,8 +833,12 @@ En fin d'année, chaque consultant a un reliquat non-consommé. On veut :
 > [!STEP] 3. Charge et heures
 > Charge % (par défaut 100) et heures/jour (défaut = capacité hebdo / 5). Le rendu du planning est plein / demi selon la charge.
 
+![Étape 3 — Plage colorée par palette projet](/wiki/mockups/planning-affecter-step3.svg)
+
 > [!STEP] 4. Sauver
 > Une plage colorée apparaît. Chaque projet a sa couleur (hash déterministe).
+
+![Étape 4 — Supprimer via tableau Affectations en cours](/wiki/mockups/planning-affecter-step4.svg)
 
 ## Supprimer une affectation
 
@@ -862,6 +880,8 @@ Depuis \`/users/[id]\`, le header affiche :
 
 Le calcul agrège les PlanningEntry chevauchant la semaine, pondérés par la charge %.
 
+![Étape 2 — Sur-affectation : signal visuel sans blocage](/wiki/mockups/planning-charge-step2.svg)
+
 > [!TIP] Sur-affectation
 > Si tu affectes 100% projet A + 100% projet B sur le même jour, la charge affichera 200% — les cellules restent visibles pour te rappeler qu'il y a conflit.
 `
@@ -882,11 +902,17 @@ Le calcul agrège les PlanningEntry chevauchant la semaine, pondérés par la ch
         description: "Depuis /me, expériences, compétences, taux journalier.",
         estimatedMinutes: 4,
         content: `
+![Étape 1 — Onglet CV depuis /me](/wiki/mockups/consultant-cv-step1.svg)
+
 > [!STEP] 1. /me → onglet CV
 > Le CV consultant est structuré : expériences pro, compétences (tags), langues, taux journalier vendu.
 
+![Étape 2 — Formulaire ajout expérience pro](/wiki/mockups/consultant-cv-step2.svg)
+
 > [!STEP] 2. Ajouter une expérience
 > Entreprise, poste, dates (fin optionnelle si en cours), description en markdown. Les expériences sont triées par date de début décroissante.
+
+![Étape 3 — Autocomplete compétences avec création à la volée](/wiki/mockups/consultant-cv-step3.svg)
 
 > [!STEP] 3. Compétences
 > Autocomplete avec le catalogue. Si la compétence n'existe pas, on la crée à la volée avec casse préservée.
@@ -910,8 +936,12 @@ Les tests \`/tests\` évaluent : ELEC, PLC, Data Manager, IT.
 > [!STEP] 1. Créer une assignation
 > \`/tests\` → "+ Assigner" → choisis le test + candidat (ou consultant interne).
 
+![Étape 2 — Lien avec token à copier et envoyer](/wiki/mockups/consultant-tests-step2.svg)
+
 > [!STEP] 2. Envoyer le lien
 > L'ERP génère un lien avec **token** unique. Copie-le et envoie-le au candidat. Le lien reste valide jusqu'à ce qu'il passe le test.
+
+![Étape 3 — Vue candidat : timer + questions au démarrage](/wiki/mockups/consultant-tests-step3.svg)
 
 > [!STEP] 3. Le candidat passe le test
 > Interface anonyme (pas de login requis), timer, snapshot des questions au démarrage (si l'admin modifie les questions ensuite, la submission garde les originales).
@@ -929,6 +959,8 @@ Les tests \`/tests\` évaluent : ELEC, PLC, Data Manager, IT.
         description: "Copier-coller du profil LinkedIn → parsing automatique via Claude Haiku.",
         estimatedMinutes: 3,
         content: `
+![Étape 1 — Déplier tout sur LinkedIn avant de copier](/wiki/mockups/consultant-linkedin-step1.svg)
+
 > [!STEP] 1. Ouvrir le profil LinkedIn
 > Va sur linkedin.com/in/... du candidat. Assure-toi que le profil est déplié (About, Experience, Education).
 
@@ -938,11 +970,15 @@ Les tests \`/tests\` évaluent : ELEC, PLC, Data Manager, IT.
 > [!STEP] 3. Coller dans l'ERP
 > \`/candidates/new\` → onglet "Depuis LinkedIn" → grosse textarea. Colle et clique **Parser**.
 
+![Étape 3 — Résultat parsé automatiquement à vérifier](/wiki/mockups/consultant-linkedin-step3.svg)
+
 > [!STEP] 4. Vérifier le résultat
 > Claude Haiku extrait prénom, nom, poste actuel, expériences, langues. Affichés dans un form pré-rempli — corrige ce qui ne va pas.
 
 > [!STEP] 5. Sauvegarder
 > Le candidat est créé avec ses expériences en une seule fois.
+
+![Étape 4 — Compléter les compétences manuellement](/wiki/mockups/consultant-linkedin-step4.svg)
 
 > [!WARN] Compétences non extraites
 > Le prompt LinkedIn ne parse pas la section Skills (peu fiable). Ajoute-les à la main sur la fiche.
@@ -964,17 +1000,27 @@ Les tests \`/tests\` évaluent : ELEC, PLC, Data Manager, IT.
         description: "Info générale, permissions par groupe, mot de passe initial.",
         estimatedMinutes: 4,
         content: `
+![Étape 1 — Nom, email et rôle](/wiki/mockups/user-creer-step1.svg)
+
 > [!STEP] 1. /users/new
 > Nom, email (unique), rôle par défaut (CONSULTANT, MANAGER, ADMIN, FINANCE, COMMERCIAL).
+
+![Étape 2 — Photo, téléphone, séniorité, langues](/wiki/mockups/user-creer-step2.svg)
 
 > [!STEP] 2. Attributs consultant
 > Photo (base64, max 1 Mo), téléphone, ville, séniorité, années d'expérience, langues.
 
+![Étape 3 — Coûts internes confidentiels (marge visible)](/wiki/mockups/user-creer-step3.svg)
+
 > [!STEP] 3. Coûts internes
 > hourlyCost, dailyCost, dailyRate (visible admin uniquement). weeklyCapacityH = capacité par semaine (38 par défaut).
 
+![Étape 4 — Quotas Légaux + RTT personnalisables](/wiki/mockups/user-creer-step4.svg)
+
 > [!STEP] 4. Quotas congés
 > annualLeaveDays (20 par défaut légal belge), rttDays (12 par défaut). Personnalisables.
+
+![Étape 5 — Mot de passe initial + groupes d'accès](/wiki/mockups/user-creer-step5.svg)
 
 > [!STEP] 5. Mot de passe initial
 > Minimum 8 caractères, obligatoire à la création. L'utilisateur devra probablement le changer à sa première connexion.
@@ -1019,6 +1065,8 @@ Le **rôle** est un label. Les **permissions réelles** viennent des groupes. Un
         content: `
 Les permissions dans DasoERP sont regroupées par **menu / module**. Un groupe = un ensemble de permissions.
 
+![Étape 1 — Créer un nouveau groupe d'accès](/wiki/mockups/user-groupes-step1.svg)
+
 > [!STEP] 1. /access/groups → "+ Nouveau groupe"
 > Nom (ex: "Manager RH"), description.
 
@@ -1027,6 +1075,8 @@ Les permissions dans DasoERP sont regroupées par **menu / module**. Un groupe =
 
 > [!STEP] 3. Sauver
 > Le groupe est créé. Il apparaît dans la liste.
+
+![Étape 3 — Ajouter des utilisateurs au groupe](/wiki/mockups/user-groupes-step3.svg)
 
 > [!STEP] 4. Ajouter des users
 > Sur la fiche user, section "Groupes d'accès" → tick les groupes concernés.
@@ -1056,6 +1106,8 @@ Les permissions dans DasoERP sont regroupées par **menu / module**. Un groupe =
         content: `
 Le wiki n'est utile que si tu peux **faire confiance** à ce qu'il raconte. Un article obsolète cause plus de tort qu'un article manquant : il pousse un consultant à faire une manip qui ne marche plus.
 
+![Étape 1 — La règle : visible utilisateur = update du wiki](/wiki/mockups/meta-when-step1.svg)
+
 ## La règle
 
 À chaque merge d'une modification visible côté utilisateur (nouveau champ, nouvelle page, changement de workflow, ajout de bouton), **tu passes en revue les articles wiki de la thématique concernée** et tu :
@@ -1066,6 +1118,8 @@ Le wiki n'est utile que si tu peux **faire confiance** à ce qu'il raconte. Un a
 
 > [!WARN] Ce qui compte comme "visible utilisateur"
 > Nouveau champ dans un form, changement de wording, ajout/suppression de bouton, réorganisation de menu, nouveau statut d'un workflow, changement de règle métier (ex: quotas, seuils). **Un refactor interne** qui ne change rien à l'UI ne demande pas de mise à jour wiki.
+
+![Étape 2 — Badge de fraîcheur : vert vs orange](/wiki/mockups/meta-when-step2.svg)
 
 ## Le badge "à revoir"
 
@@ -1094,6 +1148,8 @@ Le badge ne change **rien fonctionnellement** — c'est un rappel visuel pour le
         content: `
 Une bonne capture vaut 200 mots — mais une mauvaise capture désoriente.
 
+![Étape 1 — Checklist des bonnes pratiques capture](/wiki/mockups/meta-screenshot-step1.svg)
+
 ## Capturer proprement
 
 > [!STEP] 1. Ferme les distractions
@@ -1107,6 +1163,8 @@ Une bonne capture vaut 200 mots — mais une mauvaise capture désoriente.
 
 > [!STEP] 4. Anonymise les données sensibles
 > Floute noms de clients réels, montants confidentiels, données personnelles. Un consultant en formation n'a pas besoin de voir "Client X — 45 000€ facturés".
+
+![Étape 2 — Bouton Image dans la toolbar de l'éditeur](/wiki/mockups/meta-screenshot-step2.svg)
 
 ## Insérer dans un article
 
@@ -1124,6 +1182,8 @@ Une bonne capture vaut 200 mots — mais une mauvaise capture désoriente.
 
 > [!STEP] 5. Sauvegarde
 > Bouton **Sauvegarder** en haut. Les autres utilisateurs voient la nouvelle image immédiatement.
+
+![Étape 3 — Rendu final : figure + légende](/wiki/mockups/meta-screenshot-step3.svg)
 
 ## Format et poids
 
@@ -1145,6 +1205,8 @@ Limite : **5 Mo par image**. Si ta capture pèse plus, redimensionne ou compress
         content: `
 Après avoir livré une feature qui touche à l'expérience utilisateur, avant de fermer ta PR/ticket, passe cette checklist :
 
+![Étape 1 — 4 vérifications avant de fermer ta PR](/wiki/mockups/meta-checklist-step1.svg)
+
 ## Le rituel de 5 minutes
 
 - **[ ]** Le module modifié a-t-il un article wiki ? Si non, en créer un via le seed (ou demander à l'admin de le faire depuis l'UI).
@@ -1152,6 +1214,8 @@ Après avoir livré une feature qui touche à l'expérience utilisateur, avant d
 - **[ ]** Un nouveau bouton / champ / workflow ? Ajouter une étape numérotée dans l'article correspondant.
 - **[ ]** Un ancien élément supprimé ? Retirer la mention dans le wiki.
 - **[ ]** Cliquer **Marquer vérifié** sur chaque article touché.
+
+![Étape 2 — Nouveau vs modifier — décision](/wiki/mockups/meta-checklist-step2.svg)
 
 ## Nouvel article = quand ?
 
@@ -1171,6 +1235,8 @@ Modifie un article existant quand :
 
 - **Admin** (perm \`users.manage\`) : peut éditer n'importe quel article et upload d'images.
 - **Consultant lambda** : lit uniquement. Pas de bouton Modifier visible.
+
+![Étape 3 — Retour utilisateur = signal + refonte majeure](/wiki/mockups/meta-checklist-step3.svg)
 
 > [!TIP] Retour utilisateur
 > Si un consultant te dit "j'ai suivi la doc mais ça marche pas", **c'est un signal** — l'article est probablement obsolète. Corrige-le immédiatement, ça évitera la même confusion à 10 autres personnes.
