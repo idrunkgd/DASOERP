@@ -1287,7 +1287,7 @@ Ton timesheet hebdomadaire alimente la facturation client et ta paie. Rituel du 
 
 > [!WARN] Timesheet en retard = blocage
 > Sans validation, la tranche mensuelle mission ne peut pas être générée. Le comptable ne peut pas envoyer la facture. Bref, tout se cascade.
-\`
+`
       }
     ]
   },
@@ -1324,7 +1324,7 @@ La TVA se déclare tous les trimestres en Belgique. Deadline : le 20 du mois sui
 
 > [!WARN] Deadline stricte
 > Retard = amende + intérêts. Rituel : dernière semaine du trimestre, export et transmission.
-\`
+`
       }
     ]
   },
@@ -1361,7 +1361,7 @@ Les factures fournisseurs (loyer, comptable, matériel...) arrivent par mail. Tr
 
 > [!TIP] Webhook email entrant (Phase 2)
 > À venir : forward directement au mail dasoerp+invoices@ → auto-création. Zéro manip.
-\`
+`
       }
     ]
   },
@@ -1398,7 +1398,7 @@ Chaque mois, 3 flux à honorer : salaires nets aux employés, précompte au fisc
 
 > [!WARN] Deadlines belges
 > Précompte : versement le 15 du mois M+1 (mensuel). ONSS : trimestriel. En retard = amendes ONSS lourdes.
-\`
+`
       }
     ]
   },
@@ -1435,7 +1435,7 @@ Avant d'embaucher, tu simules le package : salaire, ATN voiture, chèques-repas,
 
 > [!TIP] Lien depuis simulateur → brut/net personnel
 > Bouton **Voir le net perçu** ouvre \`/simulator/brut-net\` avec les valeurs pré-remplies. Utile pour montrer au candidat son net réel.
-\`
+`
       }
     ]
   },
@@ -1469,7 +1469,7 @@ Un template par rôle. À la création d'un user, l'onboarding est auto-génér�
 
 > [!STEP] 3. Piloter en tant que RH
 > \`/onboarding\` liste tous les onboardings en cours. Barre de progression + statut par personne. Ping les owners si stagnation.
-\`
+`
       }
     ]
   },
@@ -1506,7 +1506,7 @@ L'entretien annuel structure la relation manager-consultant. Trace obligatoire p
 
 > [!WARN] Écris comme si tout pouvait être révélé
 > Un jour un tribunal peut demander accès. Diplomatie et factualité toujours — même dans les notes privées.
-\`
+`
       }
     ]
   },
@@ -1543,7 +1543,7 @@ Un consultant malade déclare depuis /me. Le manager RH voit le tout centralisé
 
 > [!INFO] Arrêt > 30 jours
 > Belgique : déclaration ONSS/mutuelle obligatoire par l'employeur. Contacte le secrétariat social.
-\`
+`
       }
     ]
   },
@@ -1580,7 +1580,7 @@ Tous les documents à un seul endroit, mais consultables depuis les fiches conce
 
 > [!TIP] Contrôle d'accès
 > Les documents privés (RH, entretiens) ne sont pas visibles par le consultant. Permission granulaire.
-\`
+`
       }
     ]
   },
@@ -1617,7 +1617,7 @@ GoCardless (Open Banking) synchronise tes transactions automatiquement. Fini la 
 
 > [!WARN] Consentement à renouveler
 > Tous les 90 jours PSD2 exige une re-authentification. Le dashboard t'affiche un rappel J-7.
-\`
+`
       }
     ]
   },
@@ -1654,7 +1654,7 @@ La prospection nécessite discipline et volumétrie. L'ERP structure les envois 
 
 > [!TIP] Discipline &gt; volumétrie
 > Mieux vaut 5 relances programmées et faites que 50 envois oubliés dans la nature.
-\`
+`
       }
     ]
   },
@@ -1691,7 +1691,7 @@ Distinction Employee/Freelance impacte le payroll, la facturation, les cotisatio
 
 > [!INFO] Freelance vs Employee
 > Employee = payroll mensuel Dasolabs. Freelance = facture mensuelle du freelance à Dasolabs (traité comme SupplierInvoice).
-\`
+`
       }
     ]
   }
