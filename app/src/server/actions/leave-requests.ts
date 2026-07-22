@@ -282,22 +282,50 @@ export async function cancelLeaveRequest(id: string) {
   revalidatePath("/leaves");
 }
 
+/**
+ * Suppression d'une demande de congé.
+ *
+ * - L'auteur peut supprimer ses propres demandes tant qu'elles ne sont pas
+ *   APPROVED (au-delà, il doit passer par un manager RH).
+ * - Un manager RH (leaves.approve) ou un admin (users.manage) peut supprimer
+ *   n'importe quelle demande, y compris une APPROVED. Les jours retournent
+ *   automatiquement dans le compteur puisque le solde est calculé dynamique
+ *   ment (voir lib/leave-balance.ts) — plus de LeaveRequest, plus de conso.
+ */
 export async function deleteLeaveRequest(id: string) {
   const session = await requirePermission("leaves.write");
-  const existing = await prisma.leaveRequest.findUnique({ where: { id } });
+  const existing = await prisma.leaveRequest.findUnique({
+    where: { id },
+    include: { user: { select: { firstName: true, lastName: true } } }
+  });
   if (!existing) throw new Error("Demande introuvable");
-  if (existing.userId !== session.user.id) {
-    const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
-    if (!perms.includes("users.manage")) {
-      throw new Error("Suppression réservée à l'auteur ou à un admin.");
-    }
+
+  const isOwner = existing.userId === session.user.id;
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const isManager = perms.includes("leaves.approve") || perms.includes("users.manage");
+
+  if (!isOwner && !isManager) {
+    throw new Error("Suppression réservée à l'auteur ou à un manager RH.");
   }
+  // L'auteur ne peut pas supprimer une demande déjà validée — il doit passer
+  // par un manager (traçabilité). Un manager RH le peut.
+  if (isOwner && !isManager && existing.status === "APPROVED") {
+    throw new Error("Cette demande est déjà validée — demande à un manager de la supprimer.");
+  }
+
   await prisma.leaveRequest.delete({ where: { id } });
+  const days = Number(existing.days);
+  const restoredNote =
+    existing.status === "APPROVED"
+      ? ` — ${days}j restaurés dans le compteur ${existing.type}`
+      : "";
   await logActivity({
     actorId: session.user.id, action: "DELETE",
     entityType: "LeaveRequest", entityId: id,
-    message: "Demande de congé supprimée"
+    message: `Demande de congé supprimée (${existing.user.firstName} ${existing.user.lastName}, ${days}j du ${existing.startDate.toISOString().slice(0,10)} au ${existing.endDate.toISOString().slice(0,10)}, statut ${existing.status})${restoredNote}`
   });
   revalidatePath("/me");
   revalidatePath("/leaves");
+  revalidatePath("/planning");
+  return { ok: true, restoredDays: existing.status === "APPROVED" ? days : 0 };
 }

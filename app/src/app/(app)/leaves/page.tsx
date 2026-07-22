@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { Plane, CheckCircle2, Users as UsersIcon } from "lucide-react";
-import { ApproveActions } from "./approve-actions";
+import { ApproveActions, DeleteLeaveButton } from "./approve-actions";
 import { RolloverOneButton, RolloverAllButton } from "./rollover-buttons";
 import { computeLeaveBalance } from "@/lib/leave-balance";
 
@@ -202,9 +202,22 @@ export default async function LeavesPage({
                       )}
                     </td>
                     <td>
-                      {canApprove && l.status === "SUBMITTED" && (
-                        <ApproveActions id={l.id} />
-                      )}
+                      <div className="flex items-center gap-1 justify-end">
+                        {canApprove && l.status === "SUBMITTED" && (
+                          <ApproveActions id={l.id} />
+                        )}
+                        {/* Bouton corbeille : un manager RH peut supprimer une
+                            demande à tout statut, y compris APPROVED — les
+                            jours retournent automatiquement dans le compteur. */}
+                        {canApprove && (
+                          <DeleteLeaveButton
+                            id={l.id}
+                            status={l.status}
+                            days={Number(l.days)}
+                            userLabel={`${l.user.firstName} ${l.user.lastName}`}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
