@@ -87,12 +87,22 @@ export function UserForm({ initial, skillCatalog = [] }: { initial?: any; skillC
         <div className="col-span-3"><label className="label">Années d'XP</label><input name="yearsExperience" type="number" defaultValue={initial?.yearsExperience ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Capacité hebdo (h)</label><input name="weeklyCapacityH" type="number" step="0.5" defaultValue={initial?.weeklyCapacityH ?? 38} className="input" /></div>
         <div className="col-span-3">
-          <label className="label" title="Nombre de jours de congés payés par an — défaut 20 (Belgique, 4 semaines)">
-            Congés / an (j)
+          <label className="label" title="Nombre de jours de congés légaux par an — défaut 20 (Belgique)">
+            Légaux / an (j)
           </label>
           <input
             name="annualLeaveDays" type="number" step="1" min="0" max="60"
             defaultValue={initial?.annualLeaveDays ?? 20}
+            className="input"
+          />
+        </div>
+        <div className="col-span-3">
+          <label className="label" title="Nombre de jours de RTT (Réduction du Temps de Travail) par an — défaut 12">
+            RTT / an (j)
+          </label>
+          <input
+            name="rttDays" type="number" step="1" min="0" max="60"
+            defaultValue={initial?.rttDays ?? 12}
             className="input"
           />
         </div>

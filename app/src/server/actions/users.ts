@@ -34,8 +34,10 @@ const Schema = z.object({
   /// Type de contrat chez Dasolabs (EMPLOYEE ou FREELANCE)
   contractType:  z.enum(["EMPLOYEE", "FREELANCE"]).optional().nullable().transform((v) => v || null),
   weeklyCapacityH: z.coerce.number().nonnegative().default(38),
-  /// Nombre de jours de congés payés par an (défaut 20 pour la Belgique)
+  /// Nombre de jours de congés LÉGAUX par an (défaut 20 pour la Belgique)
   annualLeaveDays: z.coerce.number().int().min(0).max(60).default(20),
+  /// Nombre de jours de RTT par an (défaut 12)
+  rttDays: z.coerce.number().int().min(0).max(60).default(12),
   skills: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
   joinedAt: z.string().optional().nullable().transform(v => v ? new Date(v) : null),
   leftAt:   z.string().optional().nullable().transform(v => v ? new Date(v) : null),

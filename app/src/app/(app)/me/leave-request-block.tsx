@@ -48,8 +48,8 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  ANNUAL: "Congé payé", RTT: "RTT", UNPAID: "Sans solde",
-  SPECIAL: "Spécial", OTHER: "Autre"
+  ANNUAL: "Légaux", RTT: "RTT", CARRIED_OVER: "Année précédente",
+  UNPAID: "Sans solde", SPECIAL: "Spécial", OTHER: "Autre"
 };
 
 export function LeaveRequestBlock({
@@ -58,8 +58,12 @@ export function LeaveRequestBlock({
   activeMissions
 }: {
   balance: {
-    year: number; entitled: number; approved: number;
-    pending: number; remaining: number; remainingIfAllApproved: number;
+    year: number;
+    legalRemaining: number;
+    rttRemaining: number;
+    carriedRemaining: number;
+    totalRemaining: number;
+    totalPending: number;
   };
   existing: ExistingLeave[];
   activeMissions: ActiveMission[];
@@ -153,16 +157,33 @@ export function LeaveRequestBlock({
         )}
       </div>
 
-      {/* Solde */}
+      {/* Solde 3 catégories + total */}
       <div className="grid grid-cols-4 gap-2 mb-4">
-        <BalanceCard label="Quota" value={balance.entitled} sub="jours/an" />
-        <BalanceCard label="Pris"  value={balance.approved} sub="approuvés" tone="neutral" />
-        <BalanceCard label="En attente" value={balance.pending} sub="soumis" tone={balance.pending > 0 ? "warn" : "neutral"} />
         <BalanceCard
-          label="Solde"
-          value={balance.remaining}
-          sub={balance.pending > 0 ? `${balance.remainingIfAllApproved} si tout approuvé` : "restants"}
-          tone={balance.remaining > 5 ? "good" : balance.remaining >= 0 ? "warn" : "bad"}
+          label="Légaux"
+          value={balance.legalRemaining}
+          sub="jours restants"
+          tone="info"
+        />
+        <BalanceCard
+          label="RTT"
+          value={balance.rttRemaining}
+          sub="jours restants"
+          tone="info"
+        />
+        <BalanceCard
+          label="Année précédente"
+          value={balance.carriedRemaining}
+          sub="report"
+          tone={balance.carriedRemaining > 0 ? "warn" : "neutral"}
+        />
+        <BalanceCard
+          label="Total"
+          value={balance.totalRemaining}
+          sub={balance.totalPending > 0
+            ? `${balance.totalPending}j en attente`
+            : "à disposition"}
+          tone={balance.totalRemaining > 5 ? "good" : balance.totalRemaining >= 0 ? "warn" : "bad"}
         />
       </div>
 
@@ -215,8 +236,9 @@ export function LeaveRequestBlock({
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
                 className="input"
               >
-                <option value="ANNUAL">Congé payé</option>
+                <option value="ANNUAL">Légaux (congé payé)</option>
                 <option value="RTT">RTT</option>
+                <option value="CARRIED_OVER">Année précédente (report)</option>
                 <option value="UNPAID">Sans solde</option>
                 <option value="SPECIAL">Spécial (mariage, décès…)</option>
                 <option value="OTHER">Autre</option>

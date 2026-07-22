@@ -4,6 +4,7 @@ import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/
 import { PageHeader } from "@/components/ui/page-header";
 import { Plane, CheckCircle2, Users as UsersIcon } from "lucide-react";
 import { ApproveActions } from "./approve-actions";
+import { RolloverOneButton, RolloverAllButton } from "./rollover-buttons";
 import { computeLeaveBalance } from "@/lib/leave-balance";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +17,8 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   CANCELLED: { label: "Annulé",     cls: "bg-midnight-100 text-midnight-500" }
 };
 const TYPE_LABELS: Record<string, string> = {
-  ANNUAL: "Congé payé", RTT: "RTT", UNPAID: "Sans solde",
-  SPECIAL: "Spécial", OTHER: "Autre"
+  ANNUAL: "Légaux", RTT: "RTT", CARRIED_OVER: "Année précédente",
+  UNPAID: "Sans solde", SPECIAL: "Spécial", OTHER: "Autre"
 };
 
 export default async function LeavesPage({
@@ -36,9 +37,13 @@ export default async function LeavesPage({
     : (canApprove ? "pending" : "active");
 
   // Vue "Soldes" — chargée uniquement quand nécessaire pour éviter le coût.
+  const currentYear = new Date().getUTCFullYear();
+  const nextYear = currentYear + 1;
   let balances: Array<{
     userId: string; firstName: string; lastName: string; email: string;
-    entitled: number; approved: number; pending: number; remaining: number;
+    legalRemaining: number; rttRemaining: number; carriedRemaining: number;
+    totalRemaining: number;
+    hasNextYear: boolean;   // True si LeaveBalance pour nextYear existe déjà
   }> = [];
   if (canApprove && filter === "balances") {
     const users = await prisma.user.findMany({
@@ -46,6 +51,11 @@ export default async function LeavesPage({
       select: { id: true, firstName: true, lastName: true, email: true },
       orderBy: [{ firstName: "asc" }]
     });
+    const nextYearBalances = await prisma.leaveBalance.findMany({
+      where: { year: nextYear, userId: { in: users.map((u) => u.id) } },
+      select: { userId: true }
+    });
+    const hasNextYearByUser = new Set(nextYearBalances.map((b) => b.userId));
     balances = await Promise.all(
       users.map(async (u) => {
         const b = await computeLeaveBalance(u.id);
@@ -54,10 +64,11 @@ export default async function LeavesPage({
           firstName: u.firstName,
           lastName: u.lastName,
           email: u.email,
-          entitled: b.entitled,
-          approved: b.approved,
-          pending: b.pending,
-          remaining: b.remaining
+          legalRemaining: b.annualLegal.remaining,
+          rttRemaining: b.rtt.remaining,
+          carriedRemaining: b.carriedOver.remaining,
+          totalRemaining: b.total.remaining,
+          hasNextYear: hasNextYearByUser.has(u.id)
         };
       })
     );
@@ -127,7 +138,7 @@ export default async function LeavesPage({
       </div>
 
       {filter === "balances" && canApprove ? (
-        <BalancesTable balances={balances} />
+        <BalancesTable balances={balances} currentYear={currentYear} nextYear={nextYear} />
       ) : (
       <div className="card">
         <div className="overflow-x-auto">
@@ -208,66 +219,77 @@ export default async function LeavesPage({
 }
 
 function BalancesTable({
-  balances
+  balances, currentYear, nextYear
 }: {
   balances: Array<{
     userId: string; firstName: string; lastName: string; email: string;
-    entitled: number; approved: number; pending: number; remaining: number;
+    legalRemaining: number; rttRemaining: number; carriedRemaining: number;
+    totalRemaining: number; hasNextYear: boolean;
   }>;
+  currentYear: number;
+  nextYear: number;
 }) {
   return (
     <div className="card">
-      <div className="p-3 border-b border-midnight-200 flex items-center gap-2 text-sm text-midnight-600">
-        <UsersIcon className="w-4 h-4" />
-        <span>
-          Quota annuel par consultant ({balances.length}). Modifie le quota
-          depuis la <Link href="/users" className="text-indigoaccent hover:underline">fiche utilisateur</Link> (champ "Congés / an").
-        </span>
+      <div className="p-3 border-b border-midnight-200 flex items-center justify-between gap-2 flex-wrap text-sm">
+        <div className="flex items-center gap-2 text-midnight-600">
+          <UsersIcon className="w-4 h-4" />
+          <span>
+            Soldes {currentYear} par consultant ({balances.length}). Modifie
+            les quotas (Légaux / RTT) sur la <Link href="/users" className="text-indigoaccent hover:underline">fiche utilisateur</Link>.
+          </span>
+        </div>
+        <RolloverAllButton nextYear={nextYear} />
       </div>
       <div className="overflow-x-auto">
         <table className="table-base">
           <thead>
             <tr>
               <th>Consultant</th>
-              <th className="text-right">Quota</th>
-              <th className="text-right">Pris</th>
-              <th className="text-right">En attente</th>
-              <th className="text-right">Solde</th>
+              <th className="text-right" title="Congés légaux restants (bucket ANNUAL_LEGAL)">Légaux</th>
+              <th className="text-right" title="RTT restants">RTT</th>
+              <th className="text-right" title="Report de l'année précédente restant">Report N-1</th>
+              <th className="text-right" title="Somme des 3 buckets">Total</th>
+              <th></th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {balances.length === 0 ? (
-              <tr><td colSpan={6} className="text-center text-midnight-400 py-6">Aucun consultant actif.</td></tr>
+              <tr><td colSpan={7} className="text-center text-midnight-400 py-6">Aucun consultant actif.</td></tr>
             ) : balances.map((b) => (
               <tr key={b.userId}>
                 <td>
                   <div className="font-medium">{b.firstName} {b.lastName}</div>
                   <div className="text-[10px] text-midnight-400">{b.email}</div>
                 </td>
-                <td className="text-right tabular-nums">{b.entitled}j</td>
-                <td className="text-right tabular-nums">{b.approved}j</td>
+                <td className="text-right tabular-nums">{b.legalRemaining}j</td>
+                <td className="text-right tabular-nums">{b.rttRemaining}j</td>
                 <td className="text-right tabular-nums">
-                  {b.pending > 0
-                    ? <span className="text-amber-700">{b.pending}j</span>
+                  {b.carriedRemaining > 0
+                    ? <span className="text-midnight-600">{b.carriedRemaining}j</span>
                     : <span className="text-midnight-400">—</span>}
                 </td>
                 <td className="text-right tabular-nums">
                   <span className={
-                    b.remaining < 0 ? "text-red-700 font-semibold" :
-                    b.remaining <= 5 ? "text-amber-700 font-semibold" :
+                    b.totalRemaining < 0 ? "text-red-700 font-semibold" :
+                    b.totalRemaining <= 5 ? "text-amber-700 font-semibold" :
                     "text-emerald-700 font-semibold"
                   }>
-                    {b.remaining}j
+                    {b.totalRemaining}j
                   </span>
                 </td>
                 <td>
-                  <Link
-                    href={`/users/${b.userId}`}
-                    className="text-xs text-indigoaccent hover:underline"
-                  >
-                    Modifier
+                  <Link href={`/users/${b.userId}`} className="text-xs text-indigoaccent hover:underline">
+                    Éditer quota
                   </Link>
+                </td>
+                <td>
+                  <RolloverOneButton
+                    userId={b.userId}
+                    nextYear={nextYear}
+                    disabled={b.hasNextYear}
+                  />
                 </td>
               </tr>
             ))}

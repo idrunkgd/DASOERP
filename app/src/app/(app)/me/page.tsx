@@ -237,7 +237,14 @@ export default async function MyProfile({
                     amountTtc: Number(r.amountTtc),
                     status: r.status
                   }))}
-                  leaveBalance={leaveBalance}
+                  leaveBalance={{
+                    year: leaveBalance.year,
+                    legalRemaining: leaveBalance.annualLegal.remaining,
+                    rttRemaining: leaveBalance.rtt.remaining,
+                    carriedRemaining: leaveBalance.carriedOver.remaining,
+                    totalRemaining: leaveBalance.total.remaining,
+                    totalPending: leaveBalance.total.pending
+                  }}
                   leaveRequests={leaveRequestsUi}
                   activeMissions={activeMissionsUi}
                 />
@@ -283,8 +290,8 @@ function RhTab({
     category: string; amountTtc: number; status: string;
   }[];
   leaveBalance: {
-    year: number; entitled: number; approved: number;
-    pending: number; remaining: number; remainingIfAllApproved: number;
+    year: number; legalRemaining: number; rttRemaining: number;
+    carriedRemaining: number; totalRemaining: number; totalPending: number;
   };
   leaveRequests: {
     id: string; startDate: string; endDate: string; days: number;

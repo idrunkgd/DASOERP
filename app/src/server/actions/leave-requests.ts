@@ -16,12 +16,111 @@ import { requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Rollover année N → N+1 pour un user donné :
+ *   1. Récupère le solde restant en LÉGAUX + RTT de l'année N (non-consommés)
+ *   2. Crée pour N+1 un bucket CARRIED_OVER = (reste légaux + reste RTT + reste ancien report)
+ *   3. Crée pour N+1 les buckets ANNUAL_LEGAL = User.annualLeaveDays et
+ *      RTT = User.rttDays (les nouveaux quotas fixes de l'année)
+ *
+ * Idempotent : si l'année cible a déjà des balances, on refuse (throw) pour
+ * éviter les doubles-clics qui doubleraient les quotas.
+ */
+export async function rolloverLeaveYear(userId: string, targetYear?: number) {
+  const session = await requirePermission("leaves.approve");
+  const nextYear = targetYear ?? (new Date().getUTCFullYear() + 1);
+  const currentYear = nextYear - 1;
+  const existing = await prisma.leaveBalance.count({
+    where: { userId, year: nextYear }
+  });
+  if (existing > 0) {
+    throw new Error(`Les soldes ${nextYear} existent déjà pour cet utilisateur.`);
+  }
+  const [user, currentBalances, currentRequests] = await Promise.all([
+    prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { firstName: true, lastName: true, annualLeaveDays: true, rttDays: true }
+    }),
+    prisma.leaveBalance.findMany({ where: { userId, year: currentYear } }),
+    prisma.leaveRequest.findMany({
+      where: {
+        userId,
+        type: { in: ["ANNUAL", "RTT", "CARRIED_OVER"] },
+        status: "APPROVED",
+        startDate: { gte: new Date(Date.UTC(currentYear, 0, 1)) },
+        endDate:   { lte: new Date(Date.UTC(currentYear, 11, 31, 23, 59, 59)) }
+      },
+      select: { days: true, type: true }
+    })
+  ]);
+  const balanceByType = new Map(currentBalances.map((b) => [b.type, Number(b.entitled)]));
+  const usedByType = { ANNUAL: 0, RTT: 0, CARRIED_OVER: 0 };
+  for (const r of currentRequests) {
+    if (r.type === "ANNUAL") usedByType.ANNUAL += Number(r.days);
+    else if (r.type === "RTT") usedByType.RTT += Number(r.days);
+    else if (r.type === "CARRIED_OVER") usedByType.CARRIED_OVER += Number(r.days);
+  }
+  const legalRemaining = Math.max(0,
+    (balanceByType.get("ANNUAL_LEGAL") ?? user.annualLeaveDays) - usedByType.ANNUAL);
+  const rttRemaining = Math.max(0,
+    (balanceByType.get("RTT") ?? user.rttDays) - usedByType.RTT);
+  const carriedRemaining = Math.max(0,
+    (balanceByType.get("CARRIED_OVER") ?? 0) - usedByType.CARRIED_OVER);
+  const newCarriedOver = legalRemaining + rttRemaining + carriedRemaining;
+
+  await prisma.leaveBalance.createMany({
+    data: [
+      { userId, year: nextYear, type: "ANNUAL_LEGAL", entitled: user.annualLeaveDays },
+      { userId, year: nextYear, type: "RTT",          entitled: user.rttDays },
+      {
+        userId, year: nextYear, type: "CARRIED_OVER",
+        entitled: newCarriedOver,
+        notes: `Report ${currentYear} : ${legalRemaining}j légaux + ${rttRemaining}j RTT + ${carriedRemaining}j ancien report`
+      }
+    ]
+  });
+  await logActivity({
+    actorId: session.user.id, action: "CREATE",
+    entityType: "LeaveBalance", entityId: `${userId}-${nextYear}`,
+    message: `Soldes ${nextYear} créés pour ${user.firstName} ${user.lastName} — ${user.annualLeaveDays}j légaux + ${user.rttDays}j RTT + ${newCarriedOver}j report`
+  });
+  revalidatePath("/leaves");
+  revalidatePath(`/users/${userId}`);
+  return { ok: true, legalRemaining, rttRemaining, carriedRemaining,
+    newCarriedOver, entitledLegal: user.annualLeaveDays, entitledRtt: user.rttDays };
+}
+
+/** Rollover pour TOUS les users actifs — un simple bouton RH. */
+export async function rolloverLeaveYearAll(targetYear?: number) {
+  await requirePermission("leaves.approve");
+  const nextYear = targetYear ?? (new Date().getUTCFullYear() + 1);
+  const activeUsers = await prisma.user.findMany({
+    where: { active: true, candidateProfile: { is: null } },
+    select: { id: true, firstName: true, lastName: true }
+  });
+  const results: { userId: string; name: string; ok: boolean; error?: string }[] = [];
+  for (const u of activeUsers) {
+    try {
+      await rolloverLeaveYear(u.id, nextYear);
+      results.push({ userId: u.id, name: `${u.firstName} ${u.lastName}`, ok: true });
+    } catch (e: any) {
+      results.push({ userId: u.id, name: `${u.firstName} ${u.lastName}`, ok: false, error: e?.message });
+    }
+  }
+  revalidatePath("/leaves");
+  return {
+    ok: true, total: activeUsers.length,
+    succeeded: results.filter((r) => r.ok).length,
+    failed: results.filter((r) => !r.ok).length, results
+  };
+}
+
 const Schema = z.object({
   startDate:   z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date de début requise"),
   endDate:     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date de fin requise"),
   /// Nombre de jours ouvrés — accepte les demi-journées (0.5 pas).
   days:        z.coerce.number().positive("Nombre de jours requis").max(365),
-  type:        z.enum(["ANNUAL", "RTT", "UNPAID", "SPECIAL", "OTHER"])
+  type:        z.enum(["ANNUAL", "RTT", "CARRIED_OVER", "UNPAID", "SPECIAL", "OTHER"])
     .default("ANNUAL"),
   reason:      z.string().max(500).optional().nullable()
     .transform((v) => v?.trim() || null),

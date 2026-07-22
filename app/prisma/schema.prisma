@@ -330,9 +330,14 @@ model User {
   // Demandes de congés + solde annuel (en jours ouvrés)
   leaveRequests       LeaveRequest[]        @relation("UserLeaveRequests")
   leaveApprovals      LeaveRequest[]        @relation("LeaveRequestApprover")
-  /// Quota annuel de jours de congé (défaut 20 pour la Belgique — 4 semaines
-  /// légales). Modifiable individuellement (ancienneté, temps partiel, etc.).
+  /// Quota annuel de jours de congé LÉGAUX (défaut 20 pour la Belgique — 4
+  /// semaines légales). Modifiable individuellement (ancienneté, temps partiel).
   annualLeaveDays     Int                   @default(20)
+  /// Quota annuel de RTT (Réduction du Temps de Travail). Défaut 12.
+  rttDays             Int                   @default(12)
+  /// Soldes par année et par catégorie — alimentés par le bouton "Ajouter
+  /// congés nouvelle année" qui reporte le reste en CARRIED_OVER.
+  leaveBalances       LeaveBalance[]        @relation("UserLeaveBalances")
   // CRM pipeline (test feature)
   opportunities       Opportunity[]         @relation("OpportunityOwner")
   opportunityActivities OpportunityActivity[] @relation("OpportunityActivityUser")
@@ -1703,9 +1708,39 @@ enum LeaveRequestStatus {
 enum LeaveType {
   ANNUAL          // congé payé légal
   RTT             // réduction du temps de travail
+  CARRIED_OVER    // congé reporté de l'année précédente
   UNPAID          // congé sans solde
   SPECIAL         // congé spécial (mariage, naissance, décès…)
   OTHER
+}
+
+/// Type de compteur (bucket) pour LeaveBalance : LÉGAUX / RTT / REPORT.
+/// Distinct de LeaveType car LeaveType s'applique à une demande individuelle.
+enum LeaveBalanceType {
+  ANNUAL_LEGAL    // congé payé légal
+  RTT             // RTT
+  CARRIED_OVER    // report de l'année précédente
+}
+
+/// Solde par utilisateur × année × type. Utile pour :
+///  - garder l'historique des quotas (temps partiel, ancienneté, etc.)
+///  - permettre le rollover de fin d'année (report + reset)
+///  - afficher 3 compteurs distincts sur /me et /leaves
+model LeaveBalance {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation("UserLeaveBalances", fields: [userId], references: [id], onDelete: Cascade)
+  year      Int
+  type      LeaveBalanceType
+  /// Quota accordé pour cette (année, type)
+  entitled  Decimal           @db.Decimal(4, 1)
+  /// Notes optionnelles (raison du quota spécial, etc.)
+  notes     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@unique([userId, year, type])
+  @@index([userId, year])
 }
 
 model LeaveRequest {
