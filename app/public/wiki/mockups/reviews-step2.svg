@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Prise de notes en séance</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Formulaire entretien annuel</text>
+<text x="40" y="120" font-size="11" font-weight="600" fill="#727496">POINTS FORTS OBSERVÉS</text>
+<rect x="40" y="128" width="820" height="60" rx="4" fill="#f3f3f7"/>
+<text x="55" y="150" font-size="11" fill="#202037">- Excellent leadership technique sur mission ACME</text>
+<text x="55" y="168" font-size="11" fill="#202037">- Mentorat junior Bob D. réussi</text>
+<text x="55" y="182" font-size="11" fill="#202037">- Documentation impeccable des refactorings</text>
+<text x="40" y="210" font-size="11" font-weight="600" fill="#727496">AXES D'AMÉLIORATION</text>
+<rect x="40" y="218" width="820" height="60" rx="4" fill="#f3f3f7"/>
+<text x="55" y="240" font-size="11" fill="#202037">- Prise de parole en réunion client : à travailler</text>
+<text x="55" y="258" font-size="11" fill="#202037">- Certification AWS Solutions Architect envisagée</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Sépare bien Feedback (partagé avec la personne) et Notes privées manager.</text>
+</svg>

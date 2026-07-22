@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">/employees — Vue Employee vs Freelance</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Employés (7) · Freelances (3)</text>
+<rect x="40" y="115" width="820" height="30" fill="#f3f3f7"/>
+<text x="55" y="135" font-size="10" font-weight="700" fill="#727496">NOM</text>
+<text x="280" y="135" font-size="10" font-weight="700" fill="#727496">CONTRAT</text>
+<text x="440" y="135" font-size="10" font-weight="700" fill="#727496">DÉBUT</text>
+<text x="600" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">COÛT/MOIS</text>
+<text x="800" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">TJM CIBLE</text>
+<text x="55" y="170" font-size="12" fill="#202037">Sophie Laurent</text>
+<rect x="270" y="155" width="110" height="24" rx="12" fill="#dbeafe"/>
+<text x="325" y="171" font-size="10" font-weight="700" fill="#1e40af" text-anchor="middle">EMPLOYEE</text>
+<text x="440" y="170" font-size="11" fill="#202037">01/03/2024</text>
+<text x="600" y="170" font-size="11" fill="#dc2626" text-anchor="end">-8 500</text>
+<text x="800" y="170" font-size="11" font-weight="600" fill="#059669" text-anchor="end">750</text>
+<text x="55" y="205" font-size="12" fill="#202037">Alice Martin</text>
+<rect x="270" y="190" width="110" height="24" rx="12" fill="#dbeafe"/>
+<text x="325" y="206" font-size="10" font-weight="700" fill="#1e40af" text-anchor="middle">EMPLOYEE</text>
+<text x="440" y="205" font-size="11" fill="#202037">15/04/2024</text>
+<text x="600" y="205" font-size="11" fill="#dc2626" text-anchor="end">-6 800</text>
+<text x="800" y="205" font-size="11" font-weight="600" fill="#059669" text-anchor="end">625</text>
+<text x="55" y="240" font-size="12" fill="#202037">Frank Ferreira</text>
+<rect x="270" y="225" width="110" height="24" rx="12" fill="#fef3c7"/>
+<text x="325" y="241" font-size="10" font-weight="700" fill="#78350f" text-anchor="middle">FREELANCE</text>
+<text x="440" y="240" font-size="11" fill="#202037">01/07/2026</text>
+<text x="600" y="240" font-size="11" fill="#dc2626" text-anchor="end">-4 200</text>
+<text x="800" y="240" font-size="11" font-weight="600" fill="#059669" text-anchor="end">550</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Flag contractType sur User + Candidate. Différence : payroll auto pour Employee, factures pour Freelance.</text>
+</svg>

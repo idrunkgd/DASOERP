@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Accès via fiches (mission, user, etc.)</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Depuis /missions/MISSION-2026-08 · Section Documents</text>
+<rect x="40" y="115" width="820" height="150" rx="8" fill="#f9fafb"/>
+<text x="55" y="140" font-size="11" font-weight="700" fill="#5b5fd6">Documents liés (3)</text>
+<rect x="55" y="155" width="800" height="30" rx="4" fill="#fff"/>
+<text x="70" y="175" font-size="11" fill="#202037">📄 Contrat MSA Client A · V3 (active)</text>
+<text x="820" y="175" font-size="10" fill="#5b5fd6" text-anchor="end">Voir</text>
+<rect x="55" y="190" width="800" height="30" rx="4" fill="#fff"/>
+<text x="70" y="210" font-size="11" fill="#202037">📄 SOW annexe 1 · V1</text>
+<text x="820" y="210" font-size="10" fill="#5b5fd6" text-anchor="end">Voir</text>
+<rect x="55" y="225" width="800" height="30" rx="4" fill="#fff"/>
+<text x="70" y="245" font-size="11" fill="#202037">📄 Bon de commande N°BC-2026-042</text>
+<text x="820" y="245" font-size="10" fill="#5b5fd6" text-anchor="end">Voir</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Chaque fiche affiche ses documents. Gain de temps énorme vs cherchre par tag.</text>
+</svg>

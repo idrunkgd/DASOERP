@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Détail des factures émises (TVA collectée)</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">12 factures Q3 · 135 500 € HT · 28 450 € TVA</text>
+<rect x="40" y="115" width="820" height="30" fill="#f3f3f7"/>
+<text x="55" y="135" font-size="10" font-weight="700" fill="#727496">FACTURE</text>
+<text x="320" y="135" font-size="10" font-weight="700" fill="#727496">CLIENT</text>
+<text x="520" y="135" font-size="10" font-weight="700" fill="#727496">DATE</text>
+<text x="700" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">HT</text>
+<text x="800" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">TVA 21%</text>
+<text x="55" y="170" font-size="11" fill="#202037">FAC-2026-089</text>
+<text x="320" y="170" font-size="11" fill="#202037">Client A</text>
+<text x="520" y="170" font-size="11" fill="#202037">15/07</text>
+<text x="700" y="170" font-size="11" fill="#202037" text-anchor="end">13 750</text>
+<text x="800" y="170" font-size="11" font-weight="600" fill="#5b5fd6" text-anchor="end">2 887,50</text>
+<text x="55" y="200" font-size="11" fill="#202037">FAC-2026-090</text>
+<text x="320" y="200" font-size="11" fill="#202037">Beta Corp</text>
+<text x="520" y="200" font-size="11" fill="#202037">28/07</text>
+<text x="700" y="200" font-size="11" fill="#202037" text-anchor="end">8 250</text>
+<text x="800" y="200" font-size="11" font-weight="600" fill="#5b5fd6" text-anchor="end">1 732,50</text>
+<text x="55" y="230" font-size="11" fill="#a1a1b8" font-style="italic">... 10 autres factures</text>
+<line x1="40" y1="245" x2="860" y2="245" stroke="#c2c3d6"/>
+<text x="55" y="265" font-size="12" font-weight="700" fill="#202037">TOTAL</text>
+<text x="700" y="265" font-size="12" font-weight="700" fill="#202037" text-anchor="end">135 500 €</text>
+<text x="800" y="265" font-size="14" font-weight="700" fill="#5b5fd6" text-anchor="end">28 450 €</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Le module reprend toutes les BillingMilestone facturées sur la période.</text>
+</svg>

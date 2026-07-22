@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Dashboard RH global</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Onboardings en cours (5 utilisateurs)</text>
+<rect x="40" y="115" width="820" height="30" fill="#f3f3f7"/>
+<text x="55" y="135" font-size="10" font-weight="700" fill="#727496">UTILISATEUR</text>
+<text x="380" y="135" font-size="10" font-weight="700" fill="#727496">DÉBUT</text>
+<text x="550" y="135" font-size="10" font-weight="700" fill="#727496">PROGRESSION</text>
+<text x="800" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">STATUT</text>
+<text x="55" y="170" font-size="12" fill="#202037">Diane Nouveau (CONSULTANT)</text>
+<text x="380" y="170" font-size="11" fill="#202037">22/07/2026</text>
+<rect x="540" y="158" width="140" height="20" rx="10" fill="#eef2ff"/>
+<rect x="540" y="158" width="35" height="20" rx="10" fill="#5b5fd6"/>
+<text x="690" y="172" font-size="10" fill="#535679">3/12</text>
+<text x="800" y="170" font-size="11" fill="#f59e0b" text-anchor="end">EN COURS</text>
+<text x="55" y="205" font-size="12" fill="#202037">Frank Recent (MANAGER)</text>
+<text x="380" y="205" font-size="11" fill="#202037">15/06/2026</text>
+<rect x="540" y="193" width="140" height="20" rx="10" fill="#dcfce7"/>
+<rect x="540" y="193" width="140" height="20" rx="10" fill="#059669"/>
+<text x="690" y="207" font-size="10" fill="#fff" font-weight="700">18/18</text>
+<text x="800" y="205" font-size="11" font-weight="700" fill="#059669" text-anchor="end">COMPLET</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Vue RH globale de qui est où dans son parcours d'intégration.</text>
+</svg>

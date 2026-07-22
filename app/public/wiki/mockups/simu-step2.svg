@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">TJM cible + Marge — vue business</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Calcul TJM à facturer pour équilibrer</text>
+<rect x="40" y="115" width="380" height="150" rx="8" fill="#eef2ff"/>
+<text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Hypothèses</text>
+<text x="60" y="165" font-size="11" fill="#535679">Coût employeur / mois : <tspan font-weight="600">8 240 €</tspan></text>
+<text x="60" y="185" font-size="11" fill="#535679">Coût annuel : <tspan font-weight="600">98 880 €</tspan></text>
+<text x="60" y="205" font-size="11" fill="#535679">Jours facturables : <tspan font-weight="600">200 j</tspan></text>
+<text x="60" y="225" font-size="11" fill="#535679">Coût jour internally : <tspan font-weight="600" fill="#dc2626">494 €</tspan></text>
+<text x="60" y="250" font-size="11" fill="#535679">Marge cible : <tspan font-weight="600" fill="#059669">30%</tspan></text>
+<rect x="440" y="115" width="400" height="150" rx="8" fill="#dcfce7"/>
+<text x="460" y="140" font-size="12" font-weight="700" fill="#065f46">TJM à VENDRE</text>
+<text x="460" y="185" font-size="36" font-weight="700" fill="#059669">705 €</text>
+<text x="460" y="215" font-size="11" fill="#166534">= 494€ (coût) × 1,42 (marge 30% + safety)</text>
+<text x="460" y="240" font-size="11" fill="#166534">Marge annuelle : <tspan font-weight="700">42 120 €</tspan></text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Le TJM cible tient compte des jours non-facturables (congés, maladie, formation).</text>
+</svg>

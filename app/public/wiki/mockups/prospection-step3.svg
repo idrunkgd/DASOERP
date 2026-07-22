@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Follow-up automatique J+7</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Suivi de la relance — Grace Zeta</text>
+<rect x="40" y="115" width="820" height="70" rx="8" fill="#eef2ff"/>
+<text x="55" y="140" font-size="12" font-weight="700" fill="#5b5fd6">1er contact (envoyé)</text>
+<text x="55" y="160" font-size="11" fill="#535679">LinkedIn · 22/07/2026 · Statut SENT · Pas de réponse encore</text>
+<text x="55" y="178" font-size="10" fill="#a1a1b8" font-style="italic">Message : "Bonjour Grace, je remarque que Zeta Group..."</text>
+<rect x="40" y="200" width="820" height="70" rx="8" fill="#fef3c7"/>
+<text x="55" y="225" font-size="12" font-weight="700" fill="#78350f">⏰ Relance programmée</text>
+<text x="55" y="245" font-size="11" fill="#92400e">Date : 29/07/2026 (dans 7 jours)</text>
+<text x="55" y="263" font-size="10" fill="#78350f">Le dashboard affichera automatiquement une carte de rappel ce jour-là.</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Discipline : chaque envoi = 1 follow-up programmé. Sinon les prospects disparaissent.</text>
+</svg>

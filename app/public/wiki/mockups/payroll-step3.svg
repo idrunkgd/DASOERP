@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Impact cashflow automatique</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">3 lignes automatiques dans le cashflow</text>
+<rect x="40" y="115" width="820" height="50" fill="#dbeafe"/>
+<text x="55" y="140" font-size="11" font-weight="700" fill="#1e40af">Payroll — Salaires nets (dépense mensuelle)</text>
+<text x="800" y="150" font-size="12" font-weight="700" fill="#dc2626" text-anchor="end">-15 200 €</text>
+<rect x="40" y="175" width="820" height="50" fill="#fef3c7"/>
+<text x="55" y="200" font-size="11" font-weight="700" fill="#78350f">Payroll — Précompte professionnel</text>
+<text x="800" y="210" font-size="12" font-weight="700" fill="#dc2626" text-anchor="end">-6 400 €</text>
+<rect x="40" y="235" width="820" height="30" fill="#fef2f2"/>
+<text x="55" y="255" font-size="11" font-weight="700" fill="#7f1d1d">Payroll — ONSS</text>
+<text x="800" y="255" font-size="12" font-weight="700" fill="#dc2626" text-anchor="end">-4 500 €</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Les 3 lignes cashflow sont pré-remplies chaque mois — pas de double saisie.</text>
+</svg>

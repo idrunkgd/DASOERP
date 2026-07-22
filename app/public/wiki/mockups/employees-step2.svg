@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Impact cashflow : 1 ligne payroll par mois</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Cashflow · Vue simplifiée</text>
+<text x="40" y="118" font-size="11" fill="#a1a1b8">Avant refonte : 7 lignes salaires distinctes (une par employé)</text>
+<rect x="40" y="130" width="820" height="30" fill="#fef2f2"/>
+<text x="55" y="150" font-size="11" fill="#7f1d1d">Salaire Sophie L. · Salaire Alice M. · Salaire Bob D. · ...</text>
+<text x="40" y="185" font-size="11" fill="#5b5fd6" font-weight="700">Après refonte : 1 ligne agrégée par catégorie</text>
+<rect x="40" y="200" width="820" height="30" fill="#fef2f2"/>
+<text x="55" y="220" font-size="12" font-weight="700" fill="#dc2626">Payroll — Salaires nets</text>
+<text x="800" y="220" font-size="12" font-weight="700" fill="#dc2626" text-anchor="end">-24 800 €</text>
+<rect x="40" y="235" width="820" height="30" fill="#fef3c7"/>
+<text x="55" y="255" font-size="12" font-weight="700" fill="#78350f">Payroll — Précompte professionnel</text>
+<text x="800" y="255" font-size="12" font-weight="700" fill="#78350f" text-anchor="end">-10 400 €</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Grille cashflow lisible même avec 20 employés. Détail dans le module Employés.</text>
+</svg>

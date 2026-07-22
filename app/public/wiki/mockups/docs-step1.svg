@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">/documents — GED liée aux entités</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Gestion documentaire · 47 documents</text>
+<rect x="40" y="115" width="150" height="34" rx="6" fill="#eef2ff" stroke="#5b5fd6"/>
+<text x="115" y="137" font-size="11" font-weight="700" fill="#5b5fd6" text-anchor="middle">Tous (47)</text>
+<rect x="200" y="115" width="120" height="34" rx="6" fill="#f3f3f7"/>
+<text x="260" y="137" font-size="11" fill="#535679" text-anchor="middle">Contrats (12)</text>
+<rect x="330" y="115" width="120" height="34" rx="6" fill="#f3f3f7"/>
+<text x="390" y="137" font-size="11" fill="#535679" text-anchor="middle">Factures (18)</text>
+<rect x="460" y="115" width="140" height="34" rx="6" fill="#f3f3f7"/>
+<text x="530" y="137" font-size="11" fill="#535679" text-anchor="middle">Certifications (5)</text>
+<rect x="40" y="165" width="820" height="50" rx="8" fill="#fff" stroke="#e1e1ec"/>
+<text x="55" y="187" font-size="12" font-weight="600" fill="#202037">📄 Contrat MSA Client A · V2</text>
+<text x="55" y="203" font-size="10" fill="#535679">Lié à : Client A + Mission MISSION-2026-08 · MAJ le 15/07</text>
+<rect x="720" y="175" width="120" height="30" rx="6" fill="#eef2ff"/>
+<text x="780" y="195" font-size="11" font-weight="600" fill="#5b5fd6" text-anchor="middle">👁 Télécharger</text>
+<rect x="40" y="225" width="820" height="50" rx="8" fill="#fff" stroke="#e1e1ec"/>
+<text x="55" y="247" font-size="12" font-weight="600" fill="#202037">📄 CV Alice Martin · V4</text>
+<text x="55" y="263" font-size="10" fill="#535679">Lié à : User Alice · Public interne · MAJ le 20/07</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Chaque doc peut être lié à Company, Mission, Project, User, Contact.</text>
+</svg>

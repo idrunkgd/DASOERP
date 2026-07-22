@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Écran /payroll — vue mensuelle</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Payroll — Juillet 2026 (5 employés)</text>
+<rect x="40" y="115" width="820" height="30" fill="#f3f3f7"/>
+<text x="55" y="135" font-size="10" font-weight="700" fill="#727496">EMPLOYÉ</text>
+<text x="300" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">NET</text>
+<text x="450" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">PRÉCOMPTE</text>
+<text x="600" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">ONSS</text>
+<text x="780" y="135" font-size="10" font-weight="700" fill="#727496" text-anchor="end">TOTAL</text>
+<text x="55" y="170" font-size="12" fill="#202037">Sophie Laurent (MANAGER)</text>
+<text x="300" y="170" font-size="12" font-weight="600" fill="#059669" text-anchor="end">3 850</text>
+<text x="450" y="170" font-size="12" fill="#dc2626" text-anchor="end">1 620</text>
+<text x="600" y="170" font-size="12" fill="#dc2626" text-anchor="end">1 130</text>
+<text x="780" y="170" font-size="12" font-weight="700" fill="#202037" text-anchor="end">6 600</text>
+<text x="55" y="200" font-size="12" fill="#202037">Alice Martin (SENIOR)</text>
+<text x="300" y="200" font-size="12" font-weight="600" fill="#059669" text-anchor="end">3 250</text>
+<text x="450" y="200" font-size="12" fill="#dc2626" text-anchor="end">1 350</text>
+<text x="600" y="200" font-size="12" fill="#dc2626" text-anchor="end">955</text>
+<text x="780" y="200" font-size="12" font-weight="700" fill="#202037" text-anchor="end">5 555</text>
+<text x="55" y="225" font-size="11" fill="#a1a1b8" font-style="italic">... 3 autres</text>
+<line x1="40" y1="240" x2="860" y2="240" stroke="#c2c3d6"/>
+<text x="55" y="265" font-size="13" font-weight="700" fill="#202037">TOTAL MASSE SALARIALE</text>
+<text x="300" y="265" font-size="13" font-weight="700" fill="#059669" text-anchor="end">15 200</text>
+<text x="450" y="265" font-size="13" font-weight="700" fill="#dc2626" text-anchor="end">6 400</text>
+<text x="600" y="265" font-size="13" font-weight="700" fill="#dc2626" text-anchor="end">4 500</text>
+<text x="780" y="265" font-size="14" font-weight="700" fill="#5b5fd6" text-anchor="end">26 100 €</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">3 flux distincts qui remontent dans le cashflow : Salaires nets, Précompte, ONSS.</text>
+</svg>

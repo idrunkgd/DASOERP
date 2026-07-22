@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Matching avec le cashflow</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Réconciliation manuelle · Coffee Time -299,48 €</text>
+<rect x="40" y="115" width="380" height="150" rx="8" fill="#eef2ff"/>
+<text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Transaction bancaire</text>
+<text x="60" y="165" font-size="11" fill="#535679">COFFEE TIME SPRL</text>
+<text x="60" y="185" font-size="14" font-weight="700" fill="#dc2626">-299,48 €</text>
+<text x="60" y="205" font-size="11" fill="#535679">Le 21/07/2026</text>
+<text x="60" y="240" font-size="10" fill="#a1a1b8" font-style="italic">Faut trouver le OneOff correspondant</text>
+<text x="435" y="185" font-size="24" fill="#5b5fd6">→</text>
+<rect x="460" y="115" width="400" height="150" rx="8" fill="#dcfce7" stroke="#059669"/>
+<text x="480" y="140" font-size="12" font-weight="700" fill="#065f46">Suggestion : SupplierInvoice #47</text>
+<text x="480" y="165" font-size="11" fill="#166534">Coffee Time SPRL</text>
+<text x="480" y="185" font-size="14" font-weight="700" fill="#059669">299,48 € TTC</text>
+<text x="480" y="205" font-size="11" fill="#166534">Facture du 18/07/2026</text>
+<rect x="480" y="220" width="140" height="30" rx="6" fill="#059669"/>
+<text x="550" y="240" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">✓ Matcher</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">L'ERP suggère les matches par montant/date/nom. Toi tu confirmes ou corriges.</text>
+</svg>

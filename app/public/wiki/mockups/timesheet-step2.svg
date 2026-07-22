@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Soumettre pour validation manager</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<rect x="720" y="20" width="160" height="46" rx="8" fill="#dcfce7" stroke="#059669"/>
+<text x="800" y="42" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">Semaine soumise</text>
+<text x="800" y="58" font-size="10" fill="#166534" text-anchor="middle">38 h validées</text>
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Workflow validation</text>
+<text x="40" y="120" font-size="11" fill="#5b5fd6" font-weight="700">1</text>
+<text x="60" y="120" font-size="12" fill="#202037">DRAFT → clic <tspan font-family="monospace" fill="#5b5fd6">Soumettre</tspan> → SUBMITTED</text>
+<text x="40" y="150" font-size="11" fill="#5b5fd6" font-weight="700">2</text>
+<text x="60" y="150" font-size="12" fill="#202037">Manager reçoit notif · voit toutes les semaines à valider</text>
+<text x="40" y="180" font-size="11" fill="#5b5fd6" font-weight="700">3</text>
+<text x="60" y="180" font-size="12" fill="#202037">APPROVED → jours utilisables pour facturation mission</text>
+<text x="40" y="210" font-size="11" fill="#5b5fd6" font-weight="700">4</text>
+<text x="60" y="210" font-size="12" fill="#202037">REJECTED avec motif → retour DRAFT, consultant corrige</text>
+<rect x="40" y="240" width="820" height="30" rx="4" fill="#fef3c7"/>
+<text x="55" y="260" font-size="11" fill="#78350f">⚠ Un timesheet non validé bloque la génération de la tranche mensuelle mission.</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Rituel vendredi soir : boucler ta semaine avant de partir.</text>
+</svg>

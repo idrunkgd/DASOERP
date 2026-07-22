@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Ajouter une interaction outbound</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Nouvelle interaction</text>
+<text x="40" y="120" font-size="11" font-weight="600" fill="#727496">CIBLE (contact + entreprise)</text>
+<rect x="40" y="128" width="380" height="34" rx="4" fill="#f3f3f7"/>
+<text x="55" y="150" font-size="12" fill="#202037">Grace Zeta (CTO · Zeta Group)</text>
+<text x="440" y="120" font-size="11" font-weight="600" fill="#727496">CANAL</text>
+<rect x="440" y="128" width="160" height="34" rx="4" fill="#eef2ff"/>
+<text x="520" y="150" font-size="12" font-weight="700" fill="#5b5fd6" text-anchor="middle">LinkedIn 💼</text>
+<text x="620" y="120" font-size="11" font-weight="600" fill="#727496">TEMPLATE</text>
+<rect x="620" y="128" width="220" height="34" rx="4" fill="#f3f3f7"/>
+<text x="635" y="150" font-size="11" fill="#202037">Cold approach — Fintech</text>
+<text x="40" y="185" font-size="11" font-weight="600" fill="#727496">MESSAGE (aperçu personnalisé)</text>
+<rect x="40" y="193" width="820" height="60" rx="4" fill="#eef2ff"/>
+<text x="55" y="215" font-size="11" fill="#202037">Bonjour <tspan font-weight="700" fill="#059669">Grace</tspan>, je remarque que <tspan font-weight="700" fill="#059669">Zeta Group</tspan> travaille dans le <tspan font-weight="700" fill="#059669">SaaS Fintech</tspan>.</text>
+<text x="55" y="233" font-size="11" fill="#202037">Nous accompagnons des boîtes similaires... [tronqué]</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Placeholders {{prenom}}, {{entreprise}}, {{secteur}} substitués auto.</text>
+</svg>

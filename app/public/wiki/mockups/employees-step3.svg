@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Chaînage automatique avec Candidate</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Recrutement Candidate → User Employee</text>
+<rect x="40" y="115" width="240" height="150" rx="8" fill="#eef2ff"/>
+<text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Candidate</text>
+<text x="60" y="165" font-size="11" fill="#535679">Diane Nouveau</text>
+<text x="60" y="185" font-size="10" fill="#a1a1b8">Vivier · contractType null</text>
+<text x="60" y="220" font-size="11" font-weight="600" fill="#f59e0b">Statut : HIRED</text>
+<text x="60" y="240" font-size="10" fill="#a1a1b8" font-style="italic">Bouton "Promouvoir en User"</text>
+<text x="295" y="195" font-size="24" fill="#5b5fd6">→</text>
+<rect x="320" y="115" width="240" height="150" rx="8" fill="#dcfce7"/>
+<text x="340" y="140" font-size="12" font-weight="700" fill="#065f46">User créé</text>
+<text x="340" y="165" font-size="11" fill="#166534">Diane Nouveau</text>
+<text x="340" y="185" font-size="10" fill="#059669">contractType : EMPLOYEE</text>
+<text x="340" y="215" font-size="10" fill="#166534">Onboarding auto-généré</text>
+<text x="340" y="235" font-size="10" fill="#166534">Ajouté au payroll mensuel</text>
+<text x="575" y="195" font-size="24" fill="#5b5fd6">→</text>
+<rect x="600" y="115" width="240" height="150" rx="8" fill="#fef3c7"/>
+<text x="620" y="140" font-size="12" font-weight="700" fill="#78350f">Effets automatiques</text>
+<text x="620" y="165" font-size="11" fill="#92400e">Payroll +1 employé</text>
+<text x="620" y="185" font-size="11" fill="#92400e">Cashflow màj auto</text>
+<text x="620" y="205" font-size="11" fill="#92400e">Onboarding créé</text>
+<text x="620" y="225" font-size="11" fill="#92400e">Fiche user complète</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Un clic Hire = 4 automatismes. Aucune saisie manuelle du payroll.</text>
+</svg>

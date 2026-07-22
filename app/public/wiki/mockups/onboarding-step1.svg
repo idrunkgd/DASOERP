@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Template onboarding par rôle</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Templates par rôle — Settings</text>
+<rect x="40" y="115" width="380" height="150" rx="8" fill="#eef2ff"/>
+<text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Template CONSULTANT (12 items)</text>
+<text x="60" y="165" font-size="10" fill="#535679">Semaine 1 : setup mac, comptes, badges, CV Dasolabs</text>
+<text x="60" y="185" font-size="10" fill="#535679">Semaine 2 : formation ERP, entretien PMO, missions</text>
+<text x="60" y="205" font-size="10" fill="#535679">Semaine 3 : shadowing collègue, premier ticket</text>
+<text x="60" y="240" font-size="10" fill="#a1a1b8" font-style="italic">Chaque item a un owner (RH, PMO, manager)</text>
+<rect x="440" y="115" width="400" height="150" rx="8" fill="#f3f3f7"/>
+<text x="460" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Autres templates</text>
+<text x="460" y="165" font-size="10" fill="#535679">MANAGER (18 items)</text>
+<text x="460" y="185" font-size="10" fill="#535679">COMMERCIAL (10 items)</text>
+<text x="460" y="205" font-size="10" fill="#535679">FINANCE (8 items)</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Un template par rôle. À la création d'un user, l'onboarding est auto-généré.</text>
+</svg>

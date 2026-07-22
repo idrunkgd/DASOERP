@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Export PDF pour la déclaration comptable</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Générer la déclaration Q3</text>
+<rect x="40" y="115" width="380" height="150" rx="8" fill="#f9fafb" stroke="#e1e1ec"/>
+<text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Contenu du PDF</text>
+<text x="60" y="165" font-size="11" fill="#535679">✓ Récap TVA collectée par taux (6/12/21%)</text>
+<text x="60" y="185" font-size="11" fill="#535679">✓ Récap TVA déductible (frais + fournisseurs)</text>
+<text x="60" y="205" font-size="11" fill="#535679">✓ Solde net à payer</text>
+<text x="60" y="225" font-size="11" fill="#535679">✓ Détail ligne par ligne (12 factures)</text>
+<text x="60" y="248" font-size="10" fill="#a1a1b8" font-style="italic">Format compatible saisie sur INTERVAT</text>
+<rect x="450" y="115" width="390" height="150" rx="8" fill="#eef2ff"/>
+<text x="470" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Envoyer au comptable</text>
+<text x="470" y="165" font-size="11" fill="#535679">1. Bouton Export PDF trimestriel</text>
+<text x="470" y="185" font-size="11" fill="#535679">2. Attache le fichier à un mail</text>
+<text x="470" y="205" font-size="11" fill="#535679">3. Comptable saisit sur INTERVAT</text>
+<text x="470" y="225" font-size="11" fill="#535679">4. Toi : programmer le virement</text>
+<text x="470" y="248" font-size="10" fill="#a1a1b8" font-style="italic">Deadline stricte : 20 du mois suivant</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">En retard = amende. Rituel : dernière semaine du trimestre, export et transmission.</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Drop PDF fournisseur → OCR auto</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">/supplier-invoices — Nouvelle facture fournisseur</text>
+<rect x="40" y="115" width="820" height="140" rx="8" fill="#fafafa" stroke="#c2c3d6" stroke-dasharray="6,6"/>
+<text x="450" y="170" font-size="36" fill="#a1a1b8" text-anchor="middle">📄</text>
+<text x="450" y="205" font-size="14" font-weight="600" fill="#535679" text-anchor="middle">Drop PDF ici ou clique pour uploader</text>
+<text x="450" y="225" font-size="10" fill="#a1a1b8" text-anchor="middle">Formats acceptés : PDF, PNG, JPG · Max 5 Mo</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">L'OCR extrait automatiquement : fournisseur, montant HT/TVA/TTC, date, référence.</text>
+</svg>

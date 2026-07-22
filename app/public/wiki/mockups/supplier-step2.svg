@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 2 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Vérification des données extraites</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<rect x="720" y="20" width="160" height="46" rx="8" fill="#dcfce7"/>
+<text x="800" y="42" font-size="11" font-weight="700" fill="#065f46" text-anchor="middle">✓ OCR terminé</text>
+<text x="800" y="58" font-size="10" fill="#166534" text-anchor="middle">4 champs extraits</text>
+<text x="40" y="95" font-size="11" font-weight="600" fill="#727496">FOURNISSEUR *</text>
+<rect x="40" y="103" width="380" height="34" rx="4" fill="#dcfce7" stroke="#059669"/>
+<text x="55" y="125" font-size="12" fill="#202037">Coffee Time SPRL</text>
+<text x="440" y="95" font-size="11" font-weight="600" fill="#727496">DATE FACTURE</text>
+<rect x="440" y="103" width="180" height="34" rx="4" fill="#dcfce7" stroke="#059669"/>
+<text x="455" y="125" font-size="12" fill="#202037">18/07/2026</text>
+<text x="640" y="95" font-size="11" font-weight="600" fill="#727496">MONTANT HT</text>
+<rect x="640" y="103" width="200" height="34" rx="4" fill="#dcfce7" stroke="#059669"/>
+<text x="740" y="125" font-size="14" font-weight="600" fill="#059669" text-anchor="middle">247,50 €</text>
+<text x="40" y="165" font-size="11" font-weight="600" fill="#727496">TVA</text>
+<rect x="40" y="173" width="180" height="34" rx="4" fill="#dcfce7"/>
+<text x="130" y="195" font-size="14" font-weight="600" fill="#059669" text-anchor="middle">51,98 € (21%)</text>
+<text x="240" y="165" font-size="11" font-weight="600" fill="#727496">CATÉGORIE</text>
+<rect x="240" y="173" width="200" height="34" rx="4" fill="#f3f3f7"/>
+<text x="255" y="195" font-size="12" fill="#202037">Fournitures bureau</text>
+<text x="460" y="165" font-size="11" font-weight="600" fill="#727496">STATUT</text>
+<rect x="460" y="173" width="180" height="34" rx="4" fill="#fef3c7"/>
+<text x="550" y="195" font-size="12" font-weight="600" fill="#78350f" text-anchor="middle">À payer</text>
+<rect x="720" y="230" width="140" height="34" rx="6" fill="#5b5fd6"/>
+<text x="790" y="252" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">Valider</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Corrige à la main les champs mal parsés. L'OCR est ~90% fiable sur factures BE.</text>
+</svg>

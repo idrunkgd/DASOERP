@@ -1253,6 +1253,448 @@ Plutôt que de tenter une édition incrémentale d'un article devenu incompréhe
       }
     ]
   }
+  ,
+  {
+    key: "timesheet",
+    title: "Timesheet",
+    description: "Saisir tes heures, soumettre, validation manager.",
+    icon: "Clock",
+    colorClass: "text-teal-600",
+    requiredPermission: "timesheet.read",
+    articles: [
+      {
+        slug: "utiliser",
+        title: "Saisir et faire valider ton timesheet",
+        description: "Cycle DRAFT → SUBMITTED → APPROVED en 3 étapes.",
+        estimatedMinutes: 4,
+        content: `
+Ton timesheet hebdomadaire alimente la facturation client et ta paie. Rituel du vendredi.
+
+![Étape 1 — Grille semaine × projets/missions](/wiki/mockups/timesheet-step1.svg)
+
+> [!STEP] 1. Saisir la semaine
+> \`/timesheet\` → grille par jour + projet/mission. Tab entre les cellules. Total automatique en pied de colonne.
+
+![Étape 2 — Workflow validation DRAFT → SUBMITTED → APPROVED](/wiki/mockups/timesheet-step2.svg)
+
+> [!STEP] 2. Soumettre le vendredi
+> Bouton **Soumettre** en haut → statut passe en SUBMITTED. Ton manager reçoit une notif.
+
+![Étape 3 — Vue manager /timesheet/validation](/wiki/mockups/timesheet-step3.svg)
+
+> [!STEP] 3. Le manager valide (ou refuse motivé)
+> Un timesheet APPROVED est utilisable pour la facturation mensuelle mission. REJECTED = tu corriges.
+
+> [!WARN] Timesheet en retard = blocage
+> Sans validation, la tranche mensuelle mission ne peut pas être générée. Le comptable ne peut pas envoyer la facture. Bref, tout se cascade.
+\`
+      }
+    ]
+  },
+  {
+    key: "finance",
+    title: "Facturation & TVA",
+    description: "Vue synthétique factures trimestrielles + déclaration TVA.",
+    icon: "Landmark",
+    colorClass: "text-emerald-700",
+    requiredPermission: "finance.read",
+    articles: [
+      {
+        slug: "declaration-tva",
+        title: "Préparer la déclaration TVA trimestrielle",
+        description: "Récap collectée/déductible + export PDF au comptable.",
+        estimatedMinutes: 5,
+        content: `
+La TVA se déclare tous les trimestres en Belgique. Deadline : le 20 du mois suivant.
+
+![Étape 1 — Vue synthèse du trimestre en cours](/wiki/mockups/finance-step1.svg)
+
+> [!STEP] 1. Vue synthèse
+> \`/finance\` → cartes TVA collectée / déductible / à payer. Un seul écran te dit tout.
+
+![Étape 2 — Détail des 12 factures émises ce trimestre](/wiki/mockups/finance-step2.svg)
+
+> [!STEP] 2. Détail des factures émises
+> Tableau ligne par ligne avec ventilation par taux TVA. Sers de contrôle avant envoi comptable.
+
+![Étape 3 — Export PDF déclaration + envoi comptable](/wiki/mockups/finance-step3.svg)
+
+> [!STEP] 3. Export et envoi
+> Bouton **Export PDF trimestriel** → attache au mail comptable → programme le virement pour le 20 du mois suivant.
+
+> [!WARN] Deadline stricte
+> Retard = amende + intérêts. Rituel : dernière semaine du trimestre, export et transmission.
+\`
+      }
+    ]
+  },
+  {
+    key: "supplier-invoices",
+    title: "Factures fournisseurs",
+    description: "Drop PDF, OCR auto, workflow paiement.",
+    icon: "FileScan",
+    colorClass: "text-orange-700",
+    requiredPermission: "supplier-invoices.read",
+    articles: [
+      {
+        slug: "traiter-facture",
+        title: "Traiter une facture fournisseur reçue",
+        description: "De l'upload PDF au marquage payé.",
+        estimatedMinutes: 4,
+        content: `
+Les factures fournisseurs (loyer, comptable, matériel...) arrivent par mail. Traitement en 3 étapes.
+
+![Étape 1 — Drop PDF avec OCR automatique](/wiki/mockups/supplier-step1.svg)
+
+> [!STEP] 1. Drop le PDF
+> \`/supplier-invoices\` → drag le PDF. L'OCR extrait fournisseur, montant, TVA, date automatiquement.
+
+![Étape 2 — Vérifier les champs extraits + catégorie](/wiki/mockups/supplier-step2.svg)
+
+> [!STEP] 2. Vérifier et catégoriser
+> L'OCR est ~90% fiable. Corrige à la main ce qui ne va pas. Choisis la catégorie comptable.
+
+![Étape 3 — Cycle de vie TO_PAY → SCHEDULED → PAID](/wiki/mockups/supplier-step3.svg)
+
+> [!STEP] 3. Suivre le paiement
+> Statut TO_PAY → SCHEDULED (virement programmé) → PAID (débit confirmé). Effet cashflow automatique à PAID.
+
+> [!TIP] Webhook email entrant (Phase 2)
+> À venir : forward directement au mail dasoerp+invoices@ → auto-création. Zéro manip.
+\`
+      }
+    ]
+  },
+  {
+    key: "payroll",
+    title: "Payroll",
+    description: "Calcul mensuel salaires, précompte, ONSS.",
+    icon: "Wallet2",
+    colorClass: "text-rose-700",
+    requiredPermission: "payroll.read",
+    articles: [
+      {
+        slug: "workflow-mensuel",
+        title: "Workflow payroll mensuel",
+        description: "Calcul, validation, statut PAID par flux.",
+        estimatedMinutes: 4,
+        content: `
+Chaque mois, 3 flux à honorer : salaires nets aux employés, précompte au fisc, ONSS.
+
+![Étape 1 — Vue mensuelle avec tous les employés](/wiki/mockups/payroll-step1.svg)
+
+> [!STEP] 1. Vérifier le récap
+> \`/payroll\` → tableau par employé avec Net / Précompte / ONSS. Total masse salariale en bas.
+
+![Étape 2 — Marquer chaque flux payé individuellement](/wiki/mockups/payroll-step2.svg)
+
+> [!STEP] 2. Marquer les 3 flux
+> Chaque flux a sa deadline légale. Marque PAID au fur et à mesure des virements réels.
+
+![Étape 3 — 3 lignes cashflow créées automatiquement](/wiki/mockups/payroll-step3.svg)
+
+> [!STEP] 3. Impact cashflow
+> Les 3 lignes cashflow sont pré-remplies chaque mois. Aucune double saisie.
+
+> [!WARN] Deadlines belges
+> Précompte : versement le 15 du mois M+1 (mensuel). ONSS : trimestriel. En retard = amendes ONSS lourdes.
+\`
+      }
+    ]
+  },
+  {
+    key: "simulators",
+    title: "Simulateurs",
+    description: "Package RH consultant + brut/net personnel.",
+    icon: "Calculator",
+    colorClass: "text-violet-700",
+    requiredPermission: "candidates.read",
+    articles: [
+      {
+        slug: "package-consultant",
+        title: "Simuler un package consultant",
+        description: "Construire une offre RH avec TJM cible et marge.",
+        estimatedMinutes: 5,
+        content: `
+Avant d'embaucher, tu simules le package : salaire, ATN voiture, chèques-repas, hospitalisation, GSM.
+
+![Étape 1 — Saisie salaire brut + extras](/wiki/mockups/simu-step1.svg)
+
+> [!STEP] 1. Saisir le brut mensuel + extras
+> \`/simulator/package\` → salaire brut + coche les avantages (voiture, chèques-repas, frais représentation, hospi, GSM).
+
+![Étape 2 — Calcul du TJM cible avec marge 30%](/wiki/mockups/simu-step2.svg)
+
+> [!STEP] 2. Lire le TJM à vendre
+> L'ERP calcule le coût employeur total, le divise par 200 jours facturables, applique la marge cible → **TJM à vendre**.
+
+![Étape 3 — Sauvegarder pour comparer](/wiki/mockups/simu-step3.svg)
+
+> [!STEP] 3. Sauvegarder plusieurs scénarios
+> Compare "4500€ brut" vs "4200€ + voiture". Souvent l'ATN gagne : moins cher pour toi, plus attractif pour le candidat.
+
+> [!TIP] Lien depuis simulateur → brut/net personnel
+> Bouton **Voir le net perçu** ouvre \`/simulator/brut-net\` avec les valeurs pré-remplies. Utile pour montrer au candidat son net réel.
+\`
+      }
+    ]
+  },
+  {
+    key: "onboarding",
+    title: "Onboarding",
+    description: "Parcours d'intégration structuré par rôle.",
+    icon: "UserPlus",
+    colorClass: "text-cyan-700",
+    requiredPermission: "onboarding.read",
+    articles: [
+      {
+        slug: "utiliser",
+        title: "Créer et suivre un onboarding",
+        description: "Template par rôle → instance auto → progression trackée.",
+        estimatedMinutes: 4,
+        content: `
+Un template par rôle. À la création d'un user, l'onboarding est auto-généré. Pas de checklist perdue.
+
+![Étape 1 — Templates par rôle dans Settings](/wiki/mockups/onboarding-step1.svg)
+
+> [!STEP] 1. Templates configurables
+> \`/settings/onboarding-templates\` → 1 template par rôle (CONSULTANT, MANAGER, COMMERCIAL, FINANCE). Chaque item a un owner.
+
+![Étape 2 — Instance auto-créée au recrutement](/wiki/mockups/onboarding-step2.svg)
+
+> [!STEP] 2. Nouveau user = onboarding auto
+> Quand tu crées un user avec un rôle, son onboarding est instancié automatiquement (12-18 items selon rôle).
+
+![Étape 3 — Vue RH globale de tous les onboardings](/wiki/mockups/onboarding-step3.svg)
+
+> [!STEP] 3. Piloter en tant que RH
+> \`/onboarding\` liste tous les onboardings en cours. Barre de progression + statut par personne. Ping les owners si stagnation.
+\`
+      }
+    ]
+  },
+  {
+    key: "reviews",
+    title: "Entretiens",
+    description: "Annuels, semi-annuels, projet — trace structurée.",
+    icon: "MessagesSquare",
+    colorClass: "text-blue-700",
+    requiredPermission: "reviews.read",
+    articles: [
+      {
+        slug: "conduire",
+        title: "Conduire un entretien annuel",
+        description: "Planifier, prendre notes, séparer feedback et notes privées.",
+        estimatedMinutes: 4,
+        content: `
+L'entretien annuel structure la relation manager-consultant. Trace obligatoire pour évolution salariale, promotion.
+
+![Étape 1 — Planifier l'entretien](/wiki/mockups/reviews-step1.svg)
+
+> [!STEP] 1. Planifier
+> Fiche user → onglet Entretiens → **Nouveau**. Type : Annuel / Semi-annuel / Projet. Invite dans le calendrier (à la main).
+
+![Étape 2 — Formulaire structuré en séance](/wiki/mockups/reviews-step2.svg)
+
+> [!STEP] 2. Prendre les notes en séance
+> Sections : points forts observés, axes d'amélioration, objectifs N+1, souhaits carrière du consultant.
+
+![Étape 3 — Distinguer Feedback partagé vs Notes privées](/wiki/mockups/reviews-step3.svg)
+
+> [!STEP] 3. Séparer le partagé du privé
+> **Feedback** : partagé avec le consultant, visible sur son /me. **Notes privées** : manager+admins only, pour contexte confidentiel.
+
+> [!WARN] Écris comme si tout pouvait être révélé
+> Un jour un tribunal peut demander accès. Diplomatie et factualité toujours — même dans les notes privées.
+\`
+      }
+    ]
+  },
+  {
+    key: "sick-leaves",
+    title: "Arrêts maladie",
+    description: "Déclaration consultant + vue RH centralisée.",
+    icon: "HeartPulse",
+    colorClass: "text-red-700",
+    requiredPermission: "users.manage",
+    articles: [
+      {
+        slug: "gerer",
+        title: "Gérer les arrêts maladie",
+        description: "Déclaration consultant → certif → RH → impact planning.",
+        estimatedMinutes: 4,
+        content: `
+Un consultant malade déclare depuis /me. Le manager RH voit le tout centralisé et prévient les impacts.
+
+![Étape 1 — Consultant déclare depuis /me](/wiki/mockups/sick-step1.svg)
+
+> [!STEP] 1. Le consultant déclare
+> \`/me\` → onglet RH → Nouvel arrêt → dates + upload certificat médical (obligatoire).
+
+![Étape 2 — Vue manager RH centralisée](/wiki/mockups/sick-step2.svg)
+
+> [!STEP] 2. Manager RH voit tout
+> \`/sick-leaves\` → tous les arrêts en cours en rouge. Communique aux managers projet impactés.
+
+![Étape 3 — Effets automatiques sur planning + KPI](/wiki/mockups/sick-step3.svg)
+
+> [!STEP] 3. Impact automatique partout
+> Planning : jours en rouge Maladie. Facturation mission : jours déduits. Dashboard : carte "consultant absent".
+
+> [!INFO] Arrêt > 30 jours
+> Belgique : déclaration ONSS/mutuelle obligatoire par l'employeur. Contacte le secrétariat social.
+\`
+      }
+    ]
+  },
+  {
+    key: "documents",
+    title: "Documents",
+    description: "GED liée aux entités : contrats, factures, certifs.",
+    icon: "Files",
+    colorClass: "text-slate-700",
+    requiredPermission: "documents.read",
+    articles: [
+      {
+        slug: "utiliser",
+        title: "Utiliser la GED intégrée",
+        description: "Upload avec versioning + liaison aux entités.",
+        estimatedMinutes: 3,
+        content: `
+Tous les documents à un seul endroit, mais consultables depuis les fiches concernées.
+
+![Étape 1 — Vue documents avec filtres par type](/wiki/mockups/docs-step1.svg)
+
+> [!STEP] 1. Liste centralisée
+> \`/documents\` → 47 documents · filtres par type (contrats, factures, certifs) et recherche.
+
+![Étape 2 — Upload avec liaison entité + versioning](/wiki/mockups/docs-step2.svg)
+
+> [!STEP] 2. Upload avec liens
+> Nouveau document → upload + lie-le à une entité (Mission, User, Contact) + tags. Versioning natif (V1 → V2).
+
+![Étape 3 — Accès depuis les fiches entité](/wiki/mockups/docs-step3.svg)
+
+> [!STEP] 3. Accéder depuis les fiches
+> Fiche mission / user / client → section Documents affiche les documents liés. Pas besoin de chercher par nom.
+
+> [!TIP] Contrôle d'accès
+> Les documents privés (RH, entretiens) ne sont pas visibles par le consultant. Permission granulaire.
+\`
+      }
+    ]
+  },
+  {
+    key: "bank",
+    title: "Banque",
+    description: "Sync GoCardless + réconciliation cashflow.",
+    icon: "Building2",
+    colorClass: "text-green-700",
+    requiredPermission: "bank.read",
+    articles: [
+      {
+        slug: "connecter-syncer",
+        title: "Connecter ta banque et synchroniser",
+        description: "GoCardless PSD2 · sync auto · réconciliation.",
+        estimatedMinutes: 5,
+        content: `
+GoCardless (Open Banking) synchronise tes transactions automatiquement. Fini la saisie manuelle.
+
+![Étape 1 — Connecter ta banque via GoCardless](/wiki/mockups/bank-step1.svg)
+
+> [!STEP] 1. Connecter (première fois)
+> \`/bank\` → Connecter → choisis ta banque (ING, Belfius, BNP, KBC...). Redirection sécurisée PSD2, consentement 90j.
+
+![Étape 2 — Transactions syncées en continu](/wiki/mockups/bank-step2.svg)
+
+> [!STEP] 2. Consultation
+> Sync automatique toutes les heures. Chaque tx affichée avec statut Réconcilié / À matcher.
+
+![Étape 3 — Réconciliation manuelle des à matcher](/wiki/mockups/bank-step3.svg)
+
+> [!STEP] 3. Matcher avec le cashflow
+> L'ERP suggère les matches par montant/date/nom. Tu confirmes en 1 clic → tx marquée RÉCONCILIÉE.
+
+> [!WARN] Consentement à renouveler
+> Tous les 90 jours PSD2 exige une re-authentification. Le dashboard t'affiche un rappel J-7.
+\`
+      }
+    ]
+  },
+  {
+    key: "prospection",
+    title: "Prospection",
+    description: "Outbound structuré avec templates et relances.",
+    icon: "Send",
+    colorClass: "text-pink-700",
+    requiredPermission: "crm.read",
+    articles: [
+      {
+        slug: "outbound-followup",
+        title: "Organiser sa prospection outbound",
+        description: "Templates + envois personnalisés + relances programmées.",
+        estimatedMinutes: 4,
+        content: `
+La prospection nécessite discipline et volumétrie. L'ERP structure les envois et automatise les relances.
+
+![Étape 1 — Dashboard prospection avec KPI](/wiki/mockups/prospection-step1.svg)
+
+> [!STEP] 1. Vue synthèse quotidienne
+> \`/prospection\` → envoyés, réponses, relances du jour. Taux de réponse en un coup d'œil.
+
+![Étape 2 — Créer une interaction avec template](/wiki/mockups/prospection-step2.svg)
+
+> [!STEP] 2. Ajouter une interaction
+> Cible (contact + entreprise) + canal (LinkedIn/email/appel) + template. Placeholders {{prenom}}, {{entreprise}}, {{secteur}} substitués auto.
+
+![Étape 3 — Programmer follow-up J+7](/wiki/mockups/prospection-step3.svg)
+
+> [!STEP] 3. Toujours programmer une relance
+> À chaque envoi, coche "Rappel J+7". Le jour venu, carte bleue sur le dashboard.
+
+> [!TIP] Discipline &gt; volumétrie
+> Mieux vaut 5 relances programmées et faites que 50 envois oubliés dans la nature.
+\`
+      }
+    ]
+  },
+  {
+    key: "employees",
+    title: "Employés & Freelances",
+    description: "Distinguer contractTypes, payroll agrégé, chaînage automatique.",
+    icon: "Users2",
+    colorClass: "text-amber-700",
+    requiredPermission: "employees.read",
+    articles: [
+      {
+        slug: "gerer",
+        title: "Gérer employés vs freelances",
+        description: "Flag contractType + impact cashflow + chaînage recrutement.",
+        estimatedMinutes: 4,
+        content: `
+Distinction Employee/Freelance impacte le payroll, la facturation, les cotisations. À bien setter.
+
+![Étape 1 — Liste unifiée Employees + Freelances](/wiki/mockups/employees-step1.svg)
+
+> [!STEP] 1. Vue unifiée
+> \`/employees\` → tous les postes, badge EMPLOYEE ou FREELANCE, coût mensuel, TJM cible.
+
+![Étape 2 — Cashflow : 1 ligne agrégée par flux](/wiki/mockups/employees-step2.svg)
+
+> [!STEP] 2. Cashflow simplifié
+> Avant : 1 ligne par employé (illisible). Après : 3 lignes agrégées (Salaires nets, Précompte, ONSS).
+
+![Étape 3 — Chaînage Candidate → User Employee](/wiki/mockups/employees-step3.svg)
+
+> [!STEP] 3. Recrutement chaîné
+> Candidat HIRED → bouton "Promouvoir en User" → contractType EMPLOYEE + onboarding auto + ajout payroll. Un clic, 4 automatismes.
+
+> [!INFO] Freelance vs Employee
+> Employee = payroll mensuel Dasolabs. Freelance = facture mensuelle du freelance à Dasolabs (traité comme SupplierInvoice).
+\`
+      }
+    ]
+  }
 ];
 
 export async function seedWiki(prisma: PrismaClient) {
