@@ -27,8 +27,17 @@ export function UserForm({ initial, skillCatalog = [] }: { initial?: any; skillC
     <form
       action={(fd) => start(async () => {
         try {
-          if (initial?.id) { await updateUserAction(initial.id, fd); toast.success("Utilisateur mis à jour"); router.refresh(); }
-          else { await createUserAction(fd); }
+          if (initial?.id) {
+            const res = await updateUserAction(initial.id, fd);
+            toast.success(
+              res?.passwordChanged
+                ? "Utilisateur + mot de passe mis à jour 🔒"
+                : "Utilisateur mis à jour"
+            );
+            router.refresh();
+          } else {
+            await createUserAction(fd);
+          }
         } catch (e: any) { toast.error(e.message); }
       })}
       className="card p-6 max-w-3xl space-y-4"

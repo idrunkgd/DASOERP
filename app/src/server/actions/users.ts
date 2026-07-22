@@ -58,13 +58,32 @@ export async function updateUserAction(id: string, formData: FormData) {
   const data = Schema.parse(Object.fromEntries(formData));
   const { password, ...rest } = data;
   const updateData: any = { ...rest };
-  if (password && password.length >= 8) updateData.passwordHash = await bcrypt.hash(password, 10);
+  let passwordChanged = false;
+  // Explicite : si l'utilisateur a saisi quelque chose, on valide vraiment.
+  // Avant, un mot de passe < 8 chars était silencieusement ignoré → l'utilisateur
+  // pensait avoir changé le mot de passe alors que rien n'avait été sauvé.
+  const trimmedPassword = password?.trim() ?? "";
+  if (trimmedPassword.length > 0) {
+    if (trimmedPassword.length < 8) {
+      throw new Error("Nouveau mot de passe trop court — 8 caractères minimum.");
+    }
+    updateData.passwordHash = await bcrypt.hash(trimmedPassword, 10);
+    passwordChanged = true;
+  }
   const after = await prisma.user.update({ where: { id }, data: updateData });
   // On retire les hashes du diff
   const { passwordHash: _b, ...beforeSafe } = before as any;
   const { passwordHash: _a, ...afterSafe } = after as any;
-  await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "User", entityId: id, message: "Utilisateur mis à jour", before: beforeSafe, after: afterSafe });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE",
+    entityType: "User", entityId: id,
+    message: passwordChanged
+      ? `Utilisateur mis à jour (mot de passe changé)`
+      : "Utilisateur mis à jour",
+    before: beforeSafe, after: afterSafe
+  });
   revalidatePath(`/users/${id}`); revalidatePath("/users");
+  return { ok: true, passwordChanged };
 }
 
 export async function setUserActive(id: string, active: boolean) {
