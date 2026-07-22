@@ -1,7 +1,7 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
-import { Search, LogOut, ChevronDown, User as UserIcon, Menu } from "lucide-react";
+import { Search, LogOut, ChevronDown, User as UserIcon, Menu, BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: string; onToggleMenu?: () => void }) {
@@ -48,6 +48,18 @@ export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: str
           <kbd className="border border-midnight-200 rounded px-1 py-0.5 bg-white">K</kbd>
         </span>
       </button>
+      {/* Raccourci wiki formation — s'ouvre dans un nouvel onglet vers le
+          sous-domaine dédié. Discret mais toujours visible. */}
+      <a
+        href="https://wiki.hub.dasolabs.be"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hidden sm:flex items-center gap-1.5 px-3 h-9 rounded-md border border-border text-sm text-midnight-700 hover:bg-indigoaccent/5 hover:border-indigoaccent hover:text-indigoaccent transition-colors"
+        title="Ouvrir le wiki formation dans un nouvel onglet"
+      >
+        <BookOpen className="w-4 h-4" />
+        <span className="hidden md:inline">Wiki</span>
+      </a>
       <UserMenu name={session?.user?.name ?? ""} accessGroupName={accessGroupName} />
     </header>
   );
