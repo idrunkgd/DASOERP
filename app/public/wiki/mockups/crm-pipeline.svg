@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="1200" height="480" fill="#f3f3f7"/>
+  <text x="30" y="35" font-size="20" font-weight="700" fill="#202037">CRM — Pipeline commercial</text>
+
+  <!-- Colonnes du kanban -->
+  <g font-size="11" font-weight="700" fill="#fff" text-anchor="middle">
+    <rect x="30" y="60" width="220" height="30" rx="6" fill="#9b9cb8"/><text x="140" y="80">Nouveau (5)</text>
+    <rect x="260" y="60" width="220" height="30" rx="6" fill="#3b82f6"/><text x="370" y="80">Qualif (3)</text>
+    <rect x="490" y="60" width="220" height="30" rx="6" fill="#8b5cf6"/><text x="600" y="80">Devis (4)</text>
+    <rect x="720" y="60" width="220" height="30" rx="6" fill="#f59e0b"/><text x="830" y="80">Négo (2)</text>
+    <rect x="950" y="60" width="220" height="30" rx="6" fill="#10b981"/><text x="1060" y="80">Gagné (1)</text>
+  </g>
+
+  <!-- Cartes -->
+  <!-- Nouveau -->
+  <rect x="30" y="100" width="220" height="70" rx="8" fill="#fff" stroke="#e1e1ec"/>
+  <text x="45" y="122" font-size="12" font-weight="600" fill="#202037">Client A — Refonte ERP</text>
+  <text x="45" y="140" font-size="10" fill="#727496">Bob Client · Charlie Achats</text>
+  <text x="45" y="156" font-size="10" fill="#a1a1b8">120 K€ · Ajouté il y a 2j</text>
+
+  <rect x="30" y="180" width="220" height="70" rx="8" fill="#fff" stroke="#e1e1ec"/>
+  <text x="45" y="202" font-size="12" font-weight="600" fill="#202037">Beta Corp — Migration cloud</text>
+  <text x="45" y="220" font-size="10" fill="#727496">Diana Beta</text>
+  <text x="45" y="236" font-size="10" fill="#a1a1b8">45 K€ · Ajouté il y a 5j</text>
+
+  <!-- Qualif -->
+  <rect x="260" y="100" width="220" height="70" rx="8" fill="#fff" stroke="#e1e1ec"/>
+  <text x="275" y="122" font-size="12" font-weight="600" fill="#202037">Delta SA — Data platform</text>
+  <text x="275" y="140" font-size="10" fill="#727496">Eve Delta</text>
+  <text x="275" y="156" font-size="10" fill="#a1a1b8">85 K€ · RDV 28/07</text>
+
+  <!-- Devis -->
+  <rect x="490" y="100" width="220" height="70" rx="8" fill="#fff" stroke="#e1e1ec"/>
+  <text x="505" y="122" font-size="12" font-weight="600" fill="#202037">Client A — Refonte ERP V2</text>
+  <text x="505" y="140" font-size="10" fill="#727496">Devis OFF-2026-0042</text>
+  <text x="505" y="156" font-size="10" fill="#a1a1b8">49 K€ · Envoyé le 22/07</text>
+
+  <rect x="490" y="180" width="220" height="70" rx="8" fill="#fff" stroke="#e1e1ec"/>
+  <text x="505" y="202" font-size="12" font-weight="600" fill="#202037">Gamma Ltd — Audit process</text>
+  <text x="505" y="220" font-size="10" fill="#727496">Devis OFF-2026-0039</text>
+  <text x="505" y="236" font-size="10" fill="#a1a1b8">32 K€ · Envoyé le 15/07</text>
+
+  <!-- Négo (avec alerte) -->
+  <rect x="720" y="100" width="220" height="80" rx="8" fill="#fef3c7" stroke="#fcd34d"/>
+  <text x="735" y="122" font-size="12" font-weight="600" fill="#78350f">⚠ Epsilon Inc — Formation</text>
+  <text x="735" y="140" font-size="10" fill="#92400e">Frank Epsilon</text>
+  <text x="735" y="156" font-size="10" fill="#7f1d1d">28 K€ · Pas d'activité depuis 18j</text>
+  <text x="735" y="172" font-size="9" fill="#7f1d1d" font-style="italic">Relance nécessaire</text>
+
+  <!-- Gagné -->
+  <rect x="950" y="100" width="220" height="70" rx="8" fill="#dcfce7" stroke="#86efac"/>
+  <text x="965" y="122" font-size="12" font-weight="600" fill="#14532d">✓ Zeta Group — Mission 6 mois</text>
+  <text x="965" y="140" font-size="10" fill="#166534">Grace Zeta</text>
+  <text x="965" y="156" font-size="10" fill="#065f46">78 K€ · Contrat signé</text>
+
+  <!-- Info bottom -->
+  <text x="30" y="310" font-size="12" fill="#535679" font-style="italic">Drag &amp; drop d'une carte vers une autre colonne pour changer son stade.</text>
+  <text x="30" y="330" font-size="12" fill="#535679" font-style="italic">Les cartes oranges signalent une absence d'activité &gt; 14 jours.</text>
+
+  <text x="30" y="420" font-size="10" fill="#a1a1b8" font-style="italic">Données de démonstration — les vrais noms clients ne s'affichent que dans ton instance.</text>
+</svg>

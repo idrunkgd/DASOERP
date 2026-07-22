@@ -45,6 +45,8 @@ const CATEGORIES: Category[] = [
         content: `
 Le tableau de bord affiche 4 à 6 KPI en tête de page. Chacun résume un aspect de l'activité, sans avoir besoin d'ouvrir le module.
 
+![Le dashboard avec ses 4 KPI et les cartes d'alerte du jour](/wiki/mockups/dashboard-kpis.svg)
+
 ## Missions ouvertes
 
 Nombre de \`Mission\` dont le statut est **PLANNED**, **ACTIVE** ou **EXTENDED**. C'est le vrai stock de missions consultants en cours, pas les demandes de mission en pipeline (celles-là restent dans le CRM).
@@ -136,6 +138,8 @@ Depuis n'importe quelle page, **Cmd+K** (ou **Ctrl+K** sur Windows) ouvre la pal
         content: `
 Le cashflow est le poste de commande financier de Dasolabs. Il faut prendre 5 minutes pour comprendre sa structure, puis c'est fluide.
 
+![La grille cashflow — colonnes mois, lignes flux, cellules colorées par statut](/wiki/mockups/cashflow-grid.svg)
+
 ## Structure de la grille
 
 - **Colonnes** : les 12 mois de l'année sélectionnée (janvier à décembre).
@@ -164,6 +168,8 @@ En cours d'année, une ligne est masquée si elle **n'a plus aucun paiement futu
         estimatedMinutes: 5,
         content: `
 Sur une tranche mission, tu passeras typiquement par 3 statuts.
+
+![Modal d'une cellule cashflow avec les 3 boutons de statut](/wiki/mockups/cashflow-cell-modal.svg)
 
 > [!STEP] 1. PLANNED
 > État initial, avec la date prévue de facturation. Grisé dans la grille. Tu peux modifier la date et le montant tant que la tranche n'est pas facturée.
@@ -286,6 +292,8 @@ Depuis la Mission active, tu génères des **BillingMilestone** mensuelles (jour
         description: "Depuis la Mission active, générer les tranches et déclencher le PDF de facture.",
         estimatedMinutes: 4,
         content: `
+![Modal de génération d'une tranche mensuelle : jours, TJM, TVA, total TTC](/wiki/mockups/mission-invoice-form.svg)
+
 > [!STEP] 1. Récupérer les jours du mois
 > Depuis \`/missions/[id]\`, section "Facturation" → bouton **Générer tranche du mois**. L'ERP lit les timesheets validés du consultant sur ce mois.
 
@@ -321,6 +329,8 @@ Depuis la Mission active, tu génères des **BillingMilestone** mensuelles (jour
         description: "Postes, TVA, contacts, marges — les briques essentielles d'un devis propre.",
         estimatedMinutes: 6,
         content: `
+![Formulaire de création d'offre avec postes et calcul de totaux HT / TVA / TTC](/wiki/mockups/offer-form.svg)
+
 > [!STEP] 1. Nouvelle offre
 > \`/offers/new\` → sélectionne l'entreprise cliente (autocomplete). Choisis les contacts destinataires (plusieurs possibles).
 
@@ -402,6 +412,8 @@ Le client a signé. Il ne suffit pas de mettre le statut : on crée un projet po
         estimatedMinutes: 5,
         content: `
 Le CRM \`/crm\` affiche un **kanban horizontal** avec les stades commerciaux.
+
+![Le pipeline CRM en kanban : 5 colonnes de stades, cartes déplaçables](/wiki/mockups/crm-pipeline.svg)
 
 ## Les stades
 
@@ -485,6 +497,8 @@ Un **OutreachTemplate** est un message pré-écrit avec des placeholders : \`{{p
         description: "Champs obligatoires, TTC direct, participants pour les repas.",
         estimatedMinutes: 4,
         content: `
+![Formulaire de note de frais : date, catégorie, TTC, participants, justificatif](/wiki/mockups/expense-form.svg)
+
 > [!STEP] 1. Nouvelle note
 > \`/expenses/new\` — tous les champs sont **obligatoires** (date, catégorie, montant TTC, centre de coût, description).
 
@@ -565,6 +579,8 @@ Chaque fin de mois, tu envoies un batch au comptable.
         description: "Depuis /me, choix du type, dates, cas mission client.",
         estimatedMinutes: 4,
         content: `
+![Ton onglet RH avec les 4 cartes de solde et le formulaire de nouvelle demande](/wiki/mockups/leaves-me.svg)
+
 > [!STEP] 1. Ouvrir /me → onglet RH
 > Section "Congés" affiche ton solde 4 cartes : Légaux · RTT · Année précédente · Total.
 
@@ -590,6 +606,8 @@ Chaque fin de mois, tu envoies un batch au comptable.
         description: "Vue centralisée + boutons Approuver / Refuser motivé / Supprimer.",
         estimatedMinutes: 3,
         content: `
+![Vue manager des demandes en attente : boutons Approuver, Refuser, Supprimer](/wiki/mockups/leaves-approve.svg)
+
 > [!STEP] 1. Voir les demandes en attente
 > \`/leaves?filter=pending\` — nombre de jours + statut client (si case cochée).
 
@@ -671,6 +689,8 @@ Depuis le tableau "Affectations en cours" sous la grille, icône X à droite de 
         description: "Projet, interne, congé demandé, congé validé, maladie : lecture rapide.",
         estimatedMinutes: 3,
         content: `
+![Le planning avec les 5 palettes distinctes : projet, interne, congé, maladie](/wiki/mockups/planning-colors.svg)
+
 Le planning distingue **5 contextes** par palette :
 
 - **Projet client** — palette colorée par projet (indigo/sky/teal/…). Hash déterministe sur l'id projet.
@@ -829,6 +849,8 @@ Le **rôle** est un label. Les **permissions réelles** viennent des groupes. Un
         description: "Bouton dédié isolé du form général, robuste aux migrations en retard.",
         estimatedMinutes: 2,
         content: `
+![Le bouton isolé de reset password et son mini-form déployé](/wiki/mockups/user-reset-password.svg)
+
 > [!STEP] 1. Aller sur /users/[id]
 > En haut de la fiche user, bouton **Réinitialiser le mot de passe** (visible admin uniquement).
 

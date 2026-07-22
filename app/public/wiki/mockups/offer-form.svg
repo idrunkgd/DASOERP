@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="1000" height="600" fill="#f3f3f7"/>
+
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#202037">Nouvelle offre</text>
+  <text x="30" y="60" font-size="12" fill="#535679">Réf. auto : OFF-2026-0042</text>
+
+  <!-- Header form -->
+  <rect x="30" y="80" width="940" height="130" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+  <text x="50" y="110" font-size="11" font-weight="600" fill="#727496">CLIENT</text>
+  <rect x="50" y="118" width="280" height="34" rx="5" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="65" y="140" font-size="12" fill="#202037">Client A SA — BE 0123.456.789</text>
+
+  <text x="350" y="110" font-size="11" font-weight="600" fill="#727496">CONTACTS DESTINATAIRES</text>
+  <rect x="350" y="118" width="280" height="34" rx="5" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="365" y="140" font-size="12" fill="#202037">Bob Client, Charlie Achats +1</text>
+
+  <text x="650" y="110" font-size="11" font-weight="600" fill="#727496">TVA</text>
+  <rect x="650" y="118" width="90" height="34" rx="5" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="695" y="140" font-size="12" font-weight="600" fill="#202037" text-anchor="middle">21 %</text>
+
+  <text x="760" y="110" font-size="11" font-weight="600" fill="#727496">VALIDITÉ</text>
+  <rect x="760" y="118" width="190" height="34" rx="5" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="775" y="140" font-size="12" fill="#202037">30 jours (22/08/2026)</text>
+
+  <text x="50" y="175" font-size="11" font-weight="600" fill="#727496">OBJET</text>
+  <rect x="50" y="182" width="900" height="20" fill="#f3f3f7"/>
+  <text x="65" y="197" font-size="12" fill="#202037">Refonte système ERP et migration cloud — Client A</text>
+
+  <!-- Postes -->
+  <text x="30" y="245" font-size="16" font-weight="700" fill="#202037">Postes</text>
+  <rect x="30" y="255" width="940" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+  <!-- Table header -->
+  <rect x="30" y="255" width="940" height="34" fill="#f3f3f7"/>
+  <text x="50" y="277" font-size="11" font-weight="600" fill="#727496">DESCRIPTION</text>
+  <text x="620" y="277" font-size="11" font-weight="600" fill="#727496" text-anchor="end">QTÉ</text>
+  <text x="770" y="277" font-size="11" font-weight="600" fill="#727496" text-anchor="end">PU HT</text>
+  <text x="940" y="277" font-size="11" font-weight="600" fill="#727496" text-anchor="end">TOTAL HT</text>
+
+  <!-- Ligne 1 -->
+  <text x="50" y="315" font-size="12" fill="#202037">Audit et cadrage — Phase 1</text>
+  <text x="620" y="315" font-size="12" fill="#202037" text-anchor="end">5</text>
+  <text x="770" y="315" font-size="12" fill="#202037" text-anchor="end">1 200,00 €</text>
+  <text x="940" y="315" font-size="12" font-weight="600" fill="#202037" text-anchor="end">6 000,00 €</text>
+  <line x1="30" y1="330" x2="970" y2="330" stroke="#e1e1ec"/>
+
+  <!-- Ligne 2 -->
+  <text x="50" y="355" font-size="12" fill="#202037">Développement — Phase 2 (agile)</text>
+  <text x="620" y="355" font-size="12" fill="#202037" text-anchor="end">40</text>
+  <text x="770" y="355" font-size="12" fill="#202037" text-anchor="end">750,00 €</text>
+  <text x="940" y="355" font-size="12" font-weight="600" fill="#202037" text-anchor="end">30 000,00 €</text>
+  <line x1="30" y1="370" x2="970" y2="370" stroke="#e1e1ec"/>
+
+  <!-- Ligne 3 -->
+  <text x="50" y="395" font-size="12" fill="#202037">Formation utilisateurs</text>
+  <text x="620" y="395" font-size="12" fill="#202037" text-anchor="end">3</text>
+  <text x="770" y="395" font-size="12" fill="#202037" text-anchor="end">1 500,00 €</text>
+  <text x="940" y="395" font-size="12" font-weight="600" fill="#202037" text-anchor="end">4 500,00 €</text>
+
+  <!-- Totaux -->
+  <rect x="30" y="440" width="940" height="35" fill="#f3f3f7"/>
+  <text x="580" y="463" font-size="12" fill="#535679" text-anchor="end">Total HT :</text>
+  <text x="700" y="463" font-size="14" font-weight="700" fill="#202037" text-anchor="end">40 500,00 €</text>
+  <text x="770" y="463" font-size="12" fill="#535679" text-anchor="end">TVA 21% :</text>
+  <text x="870" y="463" font-size="12" font-weight="600" fill="#202037" text-anchor="end">8 505,00 €</text>
+  <text x="960" y="463" font-size="14" font-weight="700" fill="#5b5fd6" text-anchor="end">49 005,00 € TTC</text>
+
+  <!-- Boutons -->
+  <rect x="620" y="500" width="120" height="36" rx="6" fill="#fff" stroke="#c2c3d6"/>
+  <text x="680" y="523" font-size="12" fill="#535679" text-anchor="middle">Aperçu PDF</text>
+  <rect x="750" y="500" width="100" height="36" rx="6" fill="#fff" stroke="#c2c3d6"/>
+  <text x="800" y="523" font-size="12" fill="#535679" text-anchor="middle">Brouillon</text>
+  <rect x="860" y="500" width="110" height="36" rx="6" fill="#5b5fd6"/>
+  <text x="915" y="523" font-size="12" font-weight="600" fill="#fff" text-anchor="middle">Envoyer</text>
+</svg>

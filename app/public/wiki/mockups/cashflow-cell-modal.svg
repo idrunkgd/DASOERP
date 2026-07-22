@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="800" height="500" fill="rgba(0,0,0,0.4)"/>
+  <rect x="150" y="80" width="500" height="380" rx="12" fill="#fff"/>
+  <text x="180" y="115" font-size="18" font-weight="700" fill="#202037">Tranche mission — Mars 2026</text>
+  <text x="180" y="135" font-size="12" fill="#535679">Mission ACME 2026 (Alice) · 22 jours × 625 €/j</text>
+
+  <!-- Ligne info -->
+  <line x1="180" y1="155" x2="620" y2="155" stroke="#e1e1ec"/>
+
+  <text x="180" y="185" font-size="12" font-weight="600" fill="#727496">MONTANT</text>
+  <text x="180" y="215" font-size="26" font-weight="700" fill="#202037">13 750 € HT</text>
+  <text x="180" y="235" font-size="12" fill="#535679">16 637,50 € TTC (TVA 21%)</text>
+
+  <text x="420" y="185" font-size="12" font-weight="600" fill="#727496">STATUT ACTUEL</text>
+  <rect x="420" y="200" width="120" height="26" rx="4" fill="#dbeafe"/>
+  <text x="480" y="218" font-size="12" font-weight="700" fill="#1e40af" text-anchor="middle">INVOICED</text>
+
+  <text x="420" y="255" font-size="12" font-weight="600" fill="#727496">ENCAISSEMENT PRÉVU</text>
+  <text x="420" y="278" font-size="14" fill="#202037">30 avril 2026</text>
+
+  <!-- Actions -->
+  <line x1="180" y1="310" x2="620" y2="310" stroke="#e1e1ec"/>
+  <text x="180" y="335" font-size="12" font-weight="600" fill="#727496">CHANGER LE STATUT</text>
+
+  <rect x="180" y="350" width="130" height="36" rx="6" fill="#f3f3f7" stroke="#c2c3d6"/>
+  <text x="245" y="373" font-size="12" font-weight="600" fill="#535679" text-anchor="middle">PLANNED</text>
+
+  <rect x="325" y="350" width="130" height="36" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+  <text x="390" y="373" font-size="12" font-weight="700" fill="#1e40af" text-anchor="middle">INVOICED</text>
+
+  <rect x="470" y="350" width="150" height="36" rx="6" fill="#5b5fd6"/>
+  <text x="545" y="373" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓ Marquer payé</text>
+
+  <text x="180" y="410" font-size="11" fill="#727496" font-style="italic">Le solde compte augmentera de 16 637,50 € une fois marqué PAID.</text>
+
+  <!-- Bouton fermer -->
+  <text x="612" y="115" font-size="20" fill="#9b9cb8">×</text>
+</svg>

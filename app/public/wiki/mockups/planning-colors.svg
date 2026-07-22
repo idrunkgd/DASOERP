@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" font-family="-apple-system,'Segoe UI',sans-serif">
+  <rect width="1200" height="480" fill="#fff"/>
+  <text x="30" y="35" font-size="20" font-weight="700" fill="#202037">Planning — Août 2026</text>
+
+  <!-- Header jours -->
+  <g font-size="10" fill="#727496" font-weight="600" text-anchor="middle">
+    <rect x="30" y="60" width="180" height="26" fill="#f3f3f7"/>
+    <text x="120" y="78">Consultant</text>
+    <text x="228" y="78">L</text><text x="256" y="78">M</text><text x="284" y="78">M</text>
+    <text x="312" y="78">J</text><text x="340" y="78">V</text>
+    <rect x="354" y="60" width="56" height="26" fill="#e1e1ec"/>
+    <text x="368" y="78">S</text><text x="396" y="78">D</text>
+    <text x="424" y="78">L</text><text x="452" y="78">M</text><text x="480" y="78">M</text>
+    <text x="508" y="78">J</text><text x="536" y="78">V</text>
+    <rect x="550" y="60" width="56" height="26" fill="#e1e1ec"/>
+    <text x="564" y="78">S</text><text x="592" y="78">D</text>
+    <text x="620" y="78">L</text><text x="648" y="78">M</text><text x="676" y="78">M</text>
+    <text x="704" y="78">J</text><text x="732" y="78">V</text>
+    <rect x="746" y="60" width="56" height="26" fill="#e1e1ec"/>
+    <text x="760" y="78">S</text><text x="788" y="78">D</text>
+    <text x="816" y="78">L</text><text x="844" y="78">M</text><text x="872" y="78">M</text>
+    <text x="900" y="78">J</text><text x="928" y="78">V</text>
+  </g>
+
+  <!-- Alice : projet client -->
+  <line x1="30" y1="86" x2="960" y2="86" stroke="#e1e1ec"/>
+  <text x="45" y="110" font-size="13" font-weight="600" fill="#202037">Alice Martin</text>
+  <g>
+    <!-- Semaine 1 : projet A -->
+    <rect x="215" y="94" width="140" height="22" fill="#a5b4fc"/>
+    <text x="285" y="109" font-size="9" fill="#312e81" font-weight="600" text-anchor="middle">Projet ACME</text>
+    <!-- WE -->
+    <rect x="355" y="94" width="56" height="22" fill="#f3f3f7"/>
+    <!-- Semaine 2 : congé validé -->
+    <rect x="411" y="94" width="140" height="22" fill="#fb923c"/>
+    <text x="481" y="109" font-size="9" fill="#7c2d12" font-weight="600" text-anchor="middle">Congé validé</text>
+    <rect x="551" y="94" width="56" height="22" fill="#f3f3f7"/>
+    <!-- Semaine 3 : congé en attente -->
+    <rect x="607" y="94" width="140" height="22" fill="#fde68a">
+      <animate attributeName="opacity" values="1;0.7;1" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <line x1="607" y1="94" x2="747" y2="116" stroke="#d97706" stroke-width="0.5" stroke-dasharray="4,4"/>
+    <text x="677" y="109" font-size="9" fill="#78350f" font-weight="600" text-anchor="middle">Demandé</text>
+    <rect x="747" y="94" width="56" height="22" fill="#f3f3f7"/>
+    <!-- Semaine 4 : projet A retour -->
+    <rect x="803" y="94" width="140" height="22" fill="#a5b4fc"/>
+    <text x="873" y="109" font-size="9" fill="#312e81" font-weight="600" text-anchor="middle">Projet ACME</text>
+  </g>
+
+  <!-- Bob : projet + interne -->
+  <line x1="30" y1="120" x2="960" y2="120" stroke="#e1e1ec"/>
+  <text x="45" y="145" font-size="13" font-weight="600" fill="#202037">Bob Durant</text>
+  <g>
+    <rect x="215" y="128" width="112" height="22" fill="#67e8f9"/>
+    <text x="271" y="143" font-size="9" fill="#164e63" font-weight="600" text-anchor="middle">Projet Beta</text>
+    <rect x="327" y="128" width="28" height="22" fill="#c4b5fd"/>
+    <text x="341" y="143" font-size="9" fill="#4c1d95" text-anchor="middle">CC</text>
+    <rect x="355" y="128" width="56" height="22" fill="#f3f3f7"/>
+    <rect x="411" y="128" width="140" height="22" fill="#67e8f9"/>
+    <text x="481" y="143" font-size="9" fill="#164e63" font-weight="600" text-anchor="middle">Projet Beta</text>
+    <rect x="551" y="128" width="56" height="22" fill="#f3f3f7"/>
+    <rect x="607" y="128" width="140" height="22" fill="#67e8f9"/>
+    <text x="677" y="143" font-size="9" fill="#164e63" font-weight="600" text-anchor="middle">Projet Beta</text>
+    <rect x="747" y="128" width="56" height="22" fill="#f3f3f7"/>
+    <rect x="803" y="128" width="140" height="22" fill="#c4b5fd"/>
+    <text x="873" y="143" font-size="9" fill="#4c1d95" font-weight="600" text-anchor="middle">Formation interne</text>
+  </g>
+
+  <!-- Charlie : maladie -->
+  <line x1="30" y1="154" x2="960" y2="154" stroke="#e1e1ec"/>
+  <text x="45" y="180" font-size="13" font-weight="600" fill="#202037">Charlie Petit</text>
+  <g>
+    <rect x="215" y="163" width="140" height="22" fill="#86efac"/>
+    <text x="285" y="178" font-size="9" fill="#14532d" font-weight="600" text-anchor="middle">Projet Delta</text>
+    <rect x="355" y="163" width="56" height="22" fill="#f3f3f7"/>
+    <rect x="411" y="163" width="84" height="22" fill="#fca5a5"/>
+    <text x="453" y="178" font-size="9" fill="#7f1d1d" font-weight="600" text-anchor="middle">Maladie</text>
+    <rect x="495" y="163" width="56" height="22" fill="#86efac"/>
+    <text x="523" y="178" font-size="9" fill="#14532d" font-weight="600" text-anchor="middle">Delta</text>
+    <rect x="551" y="163" width="56" height="22" fill="#f3f3f7"/>
+    <rect x="607" y="163" width="140" height="22" fill="#86efac"/>
+    <text x="677" y="178" font-size="9" fill="#14532d" font-weight="600" text-anchor="middle">Projet Delta</text>
+    <rect x="747" y="163" width="56" height="22" fill="#f3f3f7"/>
+    <rect x="803" y="163" width="140" height="22" fill="#86efac"/>
+    <text x="873" y="178" font-size="9" fill="#14532d" font-weight="600" text-anchor="middle">Projet Delta</text>
+  </g>
+
+  <!-- Légende -->
+  <text x="30" y="240" font-size="14" font-weight="700" fill="#202037">Légende</text>
+  <g font-size="12">
+    <rect x="30" y="250" width="18" height="18" fill="#a5b4fc"/>
+    <text x="55" y="264" fill="#202037">Projet client (palette par projet)</text>
+
+    <rect x="30" y="280" width="18" height="18" fill="#c4b5fd"/>
+    <text x="55" y="294" fill="#202037">Interne (centre de coût)</text>
+
+    <rect x="30" y="310" width="18" height="18" fill="#fde68a"/>
+    <text x="55" y="324" fill="#202037">Congé demandé (en attente)</text>
+
+    <rect x="30" y="340" width="18" height="18" fill="#fb923c"/>
+    <text x="55" y="354" fill="#202037">Congé validé (APPROVED)</text>
+
+    <rect x="30" y="370" width="18" height="18" fill="#fca5a5"/>
+    <text x="55" y="384" fill="#202037">Arrêt maladie</text>
+  </g>
+
+  <text x="30" y="430" font-size="11" fill="#a1a1b8" font-style="italic">Un congé/maladie masque l'affectation projet ce jour-là — comportement voulu.</text>
+</svg>
