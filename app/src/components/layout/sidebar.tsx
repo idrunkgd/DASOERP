@@ -177,7 +177,9 @@ export function Sidebar({
   return (
     <aside className={asideClasses}>
       {header}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+      {/* nav-scroll classe custom (voir globals.css) : cache la scrollbar
+          native (webkit + firefox) tout en conservant le scroll. */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 nav-scroll">
         {SECTIONS.map((section) => {
           const visibleItems = section.items.filter((item) => {
             if (item.allowedRoles && !item.allowedRoles.includes(role)) return false;
@@ -219,10 +221,11 @@ function SidebarSection({
   path: string;
   forceOpen: boolean;
 }) {
-  // État local, hydraté depuis localStorage après mount pour éviter les
-  // mismatch d'hydratation SSR (le serveur ne connaît pas la valeur).
-  // Par défaut : tout ouvert au premier rendu.
-  const [collapsed, setCollapsed] = useState(false);
+  // Par défaut : TOUT REPLIÉ sauf "Pilotage" (section principale, toujours
+  // ouverte au premier rendu). L'état est ensuite écrasé par localStorage
+  // au mount pour respecter les préférences de l'utilisateur.
+  const defaultCollapsed = label !== "Pilotage";
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {

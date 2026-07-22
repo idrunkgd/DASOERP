@@ -9,6 +9,26 @@
 
 html, body { background: rgb(var(--background)); color: rgb(var(--foreground)); }
 
+/*
+ * .nav-scroll — scrollbar discrète pour la sidebar. La scrollbar native
+ * (webkit gris épais) est franchement moche sur fond sombre. On la remplace
+ * par un rail translucide très fin qui n'apparaît qu'au hover.
+ *   - webkit (Chrome, Safari) : ::-webkit-scrollbar
+ *   - Firefox : scrollbar-width + scrollbar-color
+ */
+.nav-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+.nav-scroll::-webkit-scrollbar { width: 4px; }
+.nav-scroll::-webkit-scrollbar-track { background: transparent; }
+.nav-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+.nav-scroll:hover { scrollbar-color: rgba(255, 255, 255, 0.18) transparent; }
+.nav-scroll:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); }
+
 @layer components {
   .card {
     @apply bg-white rounded-xl border border-border shadow-card;
