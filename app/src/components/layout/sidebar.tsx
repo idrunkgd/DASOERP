@@ -93,8 +93,10 @@ const SECTIONS: Section[] = [
   }
 ];
 
-/** Clé localStorage — l'état d'ouverture des sections persiste entre refresh. */
-const COLLAPSED_KEY = "dasohub-sidebar-collapsed-v1";
+/** Clé localStorage — l'état d'ouverture des sections persiste entre refresh.
+ *  Bumpée en v2 pour nettoyer les anciennes préférences "tout déplié" et
+ *  laisser le nouveau défaut (seulement Pilotage ouvert) prendre le relais. */
+const COLLAPSED_KEY = "dasohub-sidebar-collapsed-v2";
 
 export function Sidebar({
   role,
