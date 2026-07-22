@@ -10,7 +10,7 @@ import {
   ClipboardCheck, Plane, CalendarDays, ShieldCheck, Sparkles, User as UserIcon,
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
-  AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown
+  AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown, BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -77,7 +77,11 @@ const SECTIONS: Section[] = [
       { href: "/leaves",      label: "Congés",           icon: Plane,          perm: "leaves.read" },
       { href: "/sick-leaves", label: "Arrêts maladie",   icon: HeartPulse,     perm: "users.manage" },
       { href: "/documents",   label: "Documents",        icon: Files,          perm: "documents.read" },
-      { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" }
+      { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" },
+      // Le wiki formation utilise "dashboard.read" comme perm garde-fou :
+      // tout user ayant accès à l'ERP y a droit. La granularité fine (voir
+      // uniquement les modules autorisés) est appliquée par article.
+      { href: "/formation",   label: "Formation (wiki)", icon: BookOpen,       perm: "dashboard.read" }
     ]
   },
   {

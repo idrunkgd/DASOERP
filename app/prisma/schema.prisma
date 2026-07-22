@@ -306,6 +306,8 @@ model User {
   // Prospection outbound (chasseuse de têtes)
   outreachInteractions OutreachInteraction[] @relation("OutreachOwner")
   outreachTemplates    OutreachTemplate[]    @relation("OutreachTemplateCreator")
+  // Wiki formation — traçabilité des dernières éditions par cet admin
+  wikiArticlesEdited   WikiArticle[]         @relation("WikiArticleUpdatedBy")
   /// Type de contrat de ce consultant chez Dasolabs. Idem Candidate.contractType.
   contractType         ContractType?
   /// Paie configurée pour ce consultant interne (si contractType=EMPLOYEE).
@@ -2521,4 +2523,65 @@ model PayrollMonth {
 
   @@unique([year, month, kind])
   @@index([status])
+}
+
+/// =========================================================================
+/// WIKI FORMATION — Centre de formation intégré à l'ERP
+/// =========================================================================
+/// Accessible sur wiki.hub.dasolabs.be (même app, middleware sous-domaine).
+/// Un article est protégé par une permission ERP — un user ne voit que les
+/// modules pour lesquels il a accès. Contenu markdown éditable en ligne.
+
+enum WikiDifficulty {
+  BEGINNER      // Débutant — première prise en main
+  INTERMEDIATE  // Intermédiaire — utilisation quotidienne
+  ADVANCED      // Avancé — cas complexes / admin
+}
+
+/// Une thématique (Pilotage, Cashflow, RH…) — 1 par module ERP grand format.
+/// Défaut de permission au niveau catégorie, chaque article peut override.
+model WikiCategory {
+  id                  String          @id @default(cuid())
+  key                 String          @unique  // "cashflow", "leaves", "missions"…
+  title               String
+  description         String
+  icon                String?         // Nom d'icône lucide-react
+  colorClass          String?         // Classe tailwind pour l'accent (ex: "text-indigoaccent")
+  orderIndex          Int             @default(0)
+  /// Permission ERP requise pour voir cette thématique. Ex: "cashflow.read".
+  /// Un user sans cette perm ne voit ni la catégorie ni ses articles.
+  requiredPermission  String
+  articles            WikiArticle[]
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([orderIndex])
+}
+
+/// Un article pas-à-pas. Contenu markdown, avec support d'étapes numérotées,
+/// avertissements, cas pratiques. Éditable par un admin depuis l'UI.
+model WikiArticle {
+  id                  String          @id @default(cuid())
+  categoryId          String
+  category            WikiCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  slug                String          // Unique dans la catégorie
+  title               String
+  description         String          // Résumé une ligne pour les cards
+  content             String          @db.Text  // Markdown
+  difficulty          WikiDifficulty  @default(BEGINNER)
+  /// Temps de lecture estimé — informatif, pas de calcul dérivé.
+  estimatedMinutes    Int             @default(5)
+  orderIndex          Int             @default(0)
+  /// Override de la permission catégorie. Rare : ex. un article
+  /// admin dans une catégorie ouverte à tous.
+  requiredPermission  String?
+  publishedAt         DateTime?       // NULL = brouillon
+  updatedById         String?
+  updatedBy           User?           @relation("WikiArticleUpdatedBy", fields: [updatedById], references: [id])
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@unique([categoryId, slug])
+  @@index([categoryId, orderIndex])
+  @@index([publishedAt])
 }

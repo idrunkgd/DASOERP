@@ -1,5 +1,6 @@
 import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { seedWiki } from "./seed-wiki";
 
 const prisma = new PrismaClient();
 
@@ -580,6 +581,9 @@ async function main() {
       create: { name: s.name, category: s.category, active: true }
     });
   }
+
+  // Wiki formation (10 catégories, 30 articles pas-à-pas)
+  await seedWiki(prisma);
 
   console.log("✅ Seed terminé.");
   console.log(`   👤 Admin    : ${adminEmail} / ${adminPwd}`);

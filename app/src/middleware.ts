@@ -4,12 +4,43 @@ import { withAuth } from "next-auth/middleware";
 // Routes toujours autorisées pour un Visiteur
 const VISITOR_ALLOWED_PREFIXES = ["/me", "/api/auth", "/api/profile"];
 
+/**
+ * Sous-domaines routés vers un préfixe interne :
+ *   wiki.hub.dasolabs.be → /formation
+ *
+ * En prod, Coolify/Caddy termine le TLS pour le sous-domaine et proxy vers
+ * la même app. Le middleware détecte le host et rewrite l'URL vers le
+ * préfixe correspondant, en préservant le pathname (ex: /getting-started
+ * → /formation/getting-started).
+ *
+ * On garde /formation exposé sur le domaine principal aussi (fallback si
+ * quelqu'un tape directement hub.dasolabs.be/formation).
+ */
+const SUBDOMAIN_ROUTES: Array<{ host: string; prefix: string }> = [
+  { host: "wiki.hub.dasolabs.be", prefix: "/formation" },
+  { host: "wiki.localhost",       prefix: "/formation" } // pratique en dev
+];
+
 export default withAuth(
   function middleware(req) {
-    const path = req.nextUrl.pathname;
+    const host = (req.headers.get("host") ?? "").toLowerCase();
+    const url = req.nextUrl.clone();
+    const path = url.pathname;
+
+    // 1. Rewrite sous-domaine → préfixe interne.
+    // Ex: wiki.hub.dasolabs.be/cashflow → /formation/cashflow
+    const subdomain = SUBDOMAIN_ROUTES.find((s) => host === s.host || host.startsWith(s.host + ":"));
+    if (subdomain && !path.startsWith(subdomain.prefix) && !path.startsWith("/api/") && !path.startsWith("/_next/")) {
+      url.pathname = subdomain.prefix + (path === "/" ? "" : path);
+      return NextResponse.rewrite(url);
+    }
+
+    // 2. Politique visiteur : forcer /me (mais tolérer le wiki formation
+    // pour qu'un consultant puisse consulter ses formations disponibles).
     const token: any = (req as any).nextauth?.token;
-    // Si le JWT marque explicitement isVisitor, on force /me sur les autres routes.
-    if (token?.isVisitor && !VISITOR_ALLOWED_PREFIXES.some(p => path === p || path.startsWith(p + "/"))) {
+    if (token?.isVisitor
+        && !VISITOR_ALLOWED_PREFIXES.some(p => path === p || path.startsWith(p + "/"))
+        && !path.startsWith("/formation")) {
       return NextResponse.redirect(new URL("/me", req.url));
     }
     return NextResponse.next();
