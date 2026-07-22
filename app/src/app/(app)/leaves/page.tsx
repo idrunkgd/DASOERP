@@ -2,8 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
-import { Plane, CheckCircle2 } from "lucide-react";
+import { Plane, CheckCircle2, Users as UsersIcon } from "lucide-react";
 import { ApproveActions } from "./approve-actions";
+import { computeLeaveBalance } from "@/lib/leave-balance";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +29,39 @@ export default async function LeavesPage({
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canApprove = perms.includes("leaves.approve");
 
-  // Filtre : à approuver / actifs / historique — défaut = à approuver si
-  // manager, sinon actifs (utile pour un consultant qui veut voir sa liste).
-  const filter = ["pending", "active", "history"].includes(searchParams.filter ?? "")
-    ? (searchParams.filter as "pending" | "active" | "history")
+  // Filtre : à approuver / actifs / historique / soldes (RH only).
+  // Défaut = à approuver si manager, sinon actifs.
+  const filter = ["pending", "active", "history", "balances"].includes(searchParams.filter ?? "")
+    ? (searchParams.filter as "pending" | "active" | "history" | "balances")
     : (canApprove ? "pending" : "active");
+
+  // Vue "Soldes" — chargée uniquement quand nécessaire pour éviter le coût.
+  let balances: Array<{
+    userId: string; firstName: string; lastName: string; email: string;
+    entitled: number; approved: number; pending: number; remaining: number;
+  }> = [];
+  if (canApprove && filter === "balances") {
+    const users = await prisma.user.findMany({
+      where: { active: true, candidateProfile: { is: null } },
+      select: { id: true, firstName: true, lastName: true, email: true },
+      orderBy: [{ firstName: "asc" }]
+    });
+    balances = await Promise.all(
+      users.map(async (u) => {
+        const b = await computeLeaveBalance(u.id);
+        return {
+          userId: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          email: u.email,
+          entitled: b.entitled,
+          approved: b.approved,
+          pending: b.pending,
+          remaining: b.remaining
+        };
+      })
+    );
+  }
 
   const today = new Date();
   const todayStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
@@ -86,8 +115,20 @@ export default async function LeavesPage({
           label="Historique"
           tone="neutral"
         />
+        {canApprove && (
+          <TabLink
+            href="/leaves?filter=balances"
+            active={filter === "balances"}
+            count={0}
+            label="Soldes"
+            tone="neutral"
+          />
+        )}
       </div>
 
+      {filter === "balances" && canApprove ? (
+        <BalancesTable balances={balances} />
+      ) : (
       <div className="card">
         <div className="overflow-x-auto">
           <table className="table-base">
@@ -160,6 +201,78 @@ export default async function LeavesPage({
             </tbody>
           </table>
         </div>
+      </div>
+      )}
+    </div>
+  );
+}
+
+function BalancesTable({
+  balances
+}: {
+  balances: Array<{
+    userId: string; firstName: string; lastName: string; email: string;
+    entitled: number; approved: number; pending: number; remaining: number;
+  }>;
+}) {
+  return (
+    <div className="card">
+      <div className="p-3 border-b border-midnight-200 flex items-center gap-2 text-sm text-midnight-600">
+        <UsersIcon className="w-4 h-4" />
+        <span>
+          Quota annuel par consultant ({balances.length}). Modifie le quota
+          depuis la <Link href="/users" className="text-indigoaccent hover:underline">fiche utilisateur</Link> (champ "Congés / an").
+        </span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="table-base">
+          <thead>
+            <tr>
+              <th>Consultant</th>
+              <th className="text-right">Quota</th>
+              <th className="text-right">Pris</th>
+              <th className="text-right">En attente</th>
+              <th className="text-right">Solde</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {balances.length === 0 ? (
+              <tr><td colSpan={6} className="text-center text-midnight-400 py-6">Aucun consultant actif.</td></tr>
+            ) : balances.map((b) => (
+              <tr key={b.userId}>
+                <td>
+                  <div className="font-medium">{b.firstName} {b.lastName}</div>
+                  <div className="text-[10px] text-midnight-400">{b.email}</div>
+                </td>
+                <td className="text-right tabular-nums">{b.entitled}j</td>
+                <td className="text-right tabular-nums">{b.approved}j</td>
+                <td className="text-right tabular-nums">
+                  {b.pending > 0
+                    ? <span className="text-amber-700">{b.pending}j</span>
+                    : <span className="text-midnight-400">—</span>}
+                </td>
+                <td className="text-right tabular-nums">
+                  <span className={
+                    b.remaining < 0 ? "text-red-700 font-semibold" :
+                    b.remaining <= 5 ? "text-amber-700 font-semibold" :
+                    "text-emerald-700 font-semibold"
+                  }>
+                    {b.remaining}j
+                  </span>
+                </td>
+                <td>
+                  <Link
+                    href={`/users/${b.userId}`}
+                    className="text-xs text-indigoaccent hover:underline"
+                  >
+                    Modifier
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

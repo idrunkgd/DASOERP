@@ -86,6 +86,16 @@ export function UserForm({ initial, skillCatalog = [] }: { initial?: any; skillC
         <div className="col-span-3"><label className="label">Séniorité</label><input name="seniority" defaultValue={initial?.seniority ?? ""} placeholder="Junior / Senior / Lead" className="input" /></div>
         <div className="col-span-3"><label className="label">Années d'XP</label><input name="yearsExperience" type="number" defaultValue={initial?.yearsExperience ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Capacité hebdo (h)</label><input name="weeklyCapacityH" type="number" step="0.5" defaultValue={initial?.weeklyCapacityH ?? 38} className="input" /></div>
+        <div className="col-span-3">
+          <label className="label" title="Nombre de jours de congés payés par an — défaut 20 (Belgique, 4 semaines)">
+            Congés / an (j)
+          </label>
+          <input
+            name="annualLeaveDays" type="number" step="1" min="0" max="60"
+            defaultValue={initial?.annualLeaveDays ?? 20}
+            className="input"
+          />
+        </div>
         <div className="col-span-12">
           <SkillsPicker name="skills" catalog={skillCatalog} initial={initial?.skills ?? []} />
         </div>
