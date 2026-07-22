@@ -20,9 +20,12 @@ export default async function FormationLayout({ children }: { children: React.Re
             <span>Dasolabs Formation</span>
           </Link>
           <div className="flex items-center gap-3 text-xs">
-            <Link href="/dashboard" className="text-midnight-500 hover:text-midnight-800 flex items-center gap-1">
+            {/* Lien absolu vers hub.dasolabs.be — depuis le sous-domaine wiki,
+                un href relatif "/dashboard" serait ré-écrit vers /formation/dashboard
+                par mon middleware, ce qui n'existe pas (404). */}
+            <a href="https://hub.dasolabs.be/dashboard" className="text-midnight-500 hover:text-midnight-800 flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Retour à l'ERP
-            </Link>
+            </a>
             <span className="text-midnight-400">•</span>
             <span className="text-midnight-600">{session.user.name ?? session.user.email}</span>
           </div>
