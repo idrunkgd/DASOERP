@@ -13,11 +13,13 @@ import {
   ChevronRight,
   ChevronLeft,
   AlertCircle,
-  CalendarClock
+  CalendarClock,
+  Trash2
 } from "lucide-react";
 import {
   cycleMonthlyStatus,
-  toggleOneOffStatus
+  toggleOneOffStatus,
+  deleteOneOffEntry
 } from "@/server/actions/cashflow";
 import { setMilestoneStatus } from "@/server/actions/offers";
 import { setPayrollMonthStatus } from "@/server/actions/payroll-employees";
@@ -652,7 +654,47 @@ function UnifiedItemRow({ item }: { item: UnifiedItem }) {
         )}
       </button>
       )}
+      {/*
+        Bouton delete pour les oneOff (dépenses/recettes ponctuelles, engagements,
+        simulations). Placé ICI en plus de la grille annuelle pour couvrir le cas
+        où la row est masquée du bas (entrée dans un mois passé de l'année
+        courante → filtre 'no future payment'). Les milestones/récurrents ont
+        leur propre workflow (via le crayon d'édition), pas de delete direct ici.
+      */}
+      {item.source === "oneoff" && (
+        <DeleteOneOffButton id={item.sourceId} label={item.label} />
+      )}
     </div>
+  );
+}
+
+function DeleteOneOffButton({ id, label }: { id: string; label: string }) {
+  const [pending, start] = useTransition();
+  return (
+    <button
+      onClick={() => {
+        if (!confirm(`Supprimer « ${label} » ?`)) return;
+        start(async () => {
+          try {
+            const res = await deleteOneOffEntry(id);
+            toast.success(
+              res?.wasGroup ? `Récurrence supprimée (${res.deletedCount} mois)` : "Supprimé"
+            );
+          } catch (e: any) {
+            toast.error(e?.message ?? "Erreur");
+          }
+        });
+      }}
+      disabled={pending}
+      className="text-midnight-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded"
+      title="Supprimer"
+    >
+      {pending ? (
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+      ) : (
+        <Trash2 className="w-3.5 h-3.5" />
+      )}
+    </button>
   );
 }
 
