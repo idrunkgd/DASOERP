@@ -27,6 +27,7 @@ type Token =
   | { kind: "hr" }
   | { kind: "ul" | "ol"; items: string[] }
   | { kind: "code"; text: string; lang?: string }
+  | { kind: "image"; alt: string; url: string }
   | { kind: "callout"; type: "TIP" | "INFO" | "WARN" | "STEP"; text: string };
 
 function tokenize(md: string): Token[] {
@@ -44,6 +45,14 @@ function tokenize(md: string): Token[] {
         buf.push(lines[i]); i++;
       }
       tokens.push({ kind: "code", text: buf.join("\n"), lang });
+      i++;
+      continue;
+    }
+    // Image seule sur sa ligne : ![alt](url)
+    // (une image inline dans un paragraphe est gérée par renderInline)
+    const imgOnly = l.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/);
+    if (imgOnly) {
+      tokens.push({ kind: "image", alt: imgOnly[1], url: imgOnly[2] });
       i++;
       continue;
     }
@@ -155,6 +164,22 @@ export function Markdown({ source }: { source: string }) {
             <pre key={i} className="bg-midnight-900 text-midnight-50 rounded-lg p-4 overflow-x-auto text-sm font-mono">
               <code>{t.text}</code>
             </pre>
+          );
+          case "image": return (
+            <figure key={i} className="my-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={t.url}
+                alt={t.alt}
+                className="rounded-lg border border-border shadow-sm w-full"
+                loading="lazy"
+              />
+              {t.alt && (
+                <figcaption className="text-xs text-midnight-500 text-center mt-2 italic">
+                  {t.alt}
+                </figcaption>
+              )}
+            </figure>
           );
           case "callout": {
             const s = CALLOUT_STYLES[t.type];

@@ -873,6 +873,153 @@ Les permissions dans DasoERP sont regroupées par **menu / module**. Un groupe =
 `
       }
     ]
+  },
+  {
+    key: "meta",
+    title: "Maintenir le wiki",
+    description: "Comment garder cette documentation à jour à chaque évolution de l'ERP.",
+    icon: "BookOpenCheck",
+    colorClass: "text-midnight-600",
+    requiredPermission: "users.manage",
+    articles: [
+      {
+        slug: "when-to-update",
+        title: "Quand modifier le wiki",
+        description: "Règle simple : chaque changement visible pour l'utilisateur doit passer par le wiki.",
+        estimatedMinutes: 3,
+        content: `
+Le wiki n'est utile que si tu peux **faire confiance** à ce qu'il raconte. Un article obsolète cause plus de tort qu'un article manquant : il pousse un consultant à faire une manip qui ne marche plus.
+
+## La règle
+
+À chaque merge d'une modification visible côté utilisateur (nouveau champ, nouvelle page, changement de workflow, ajout de bouton), **tu passes en revue les articles wiki de la thématique concernée** et tu :
+
+- Édites l'article pour refléter la nouvelle réalité (icône **Modifier**)
+- Ajoutes une nouvelle capture d'écran si l'UI a changé (bouton **Image** dans l'éditeur)
+- Cliques **Marquer vérifié** pour remettre à zéro le compteur "à revoir"
+
+> [!WARN] Ce qui compte comme "visible utilisateur"
+> Nouveau champ dans un form, changement de wording, ajout/suppression de bouton, réorganisation de menu, nouveau statut d'un workflow, changement de règle métier (ex: quotas, seuils). **Un refactor interne** qui ne change rien à l'UI ne demande pas de mise à jour wiki.
+
+## Le badge "à revoir"
+
+Chaque article affiche un badge :
+
+- **Vert "Vérifié il y a Xj"** — la doc est confirmée à jour
+- **Orange "À revoir (Xj sans vérif)"** — plus de 90 jours sans vérification, considère-la douteuse
+- **Orange "Jamais vérifié"** — article créé mais jamais confirmé
+
+Le badge ne change **rien fonctionnellement** — c'est un rappel visuel pour les lecteurs.
+
+## Cadence recommandée
+
+- **Après chaque feature merge** : les 1-3 articles impactés
+- **1 fois par trimestre** : passer sur les articles orange "À revoir" que personne n'a touchés
+
+> [!TIP] Pas d'excuse pour ne pas mettre à jour
+> Modifier un article prend < 2 minutes. L'éditeur est en ligne, split view avec preview, sauvegarde en 1 clic. Aucun redeploy nécessaire.
+`
+      },
+      {
+        slug: "how-to-screenshot",
+        title: "Capturer et insérer une capture d'écran",
+        description: "Bonnes pratiques : cadrage, résolution, insertion depuis l'éditeur.",
+        estimatedMinutes: 4,
+        content: `
+Une bonne capture vaut 200 mots — mais une mauvaise capture désoriente.
+
+## Capturer proprement
+
+> [!STEP] 1. Ferme les distractions
+> Ferme les onglets inutiles, les notifs, les fenêtres qui se superposent. Le lecteur doit voir uniquement ce dont l'article parle.
+
+> [!STEP] 2. Cadre uniquement la zone utile
+> Sur macOS : **Cmd + Maj + 4** puis espace pour capturer une fenêtre entière, ou drag pour sélectionner. Sur Windows : **Win + Maj + S**. Coupe la sidebar de l'ERP si l'article ne parle pas du menu.
+
+> [!STEP] 3. Résolution modérée
+> Vise ~1200-1600 px de large. Trop grand alourdit inutilement, trop petit rend illisible sur écran retina. Le rendu wiki adapte automatiquement à la largeur.
+
+> [!STEP] 4. Anonymise les données sensibles
+> Floute noms de clients réels, montants confidentiels, données personnelles. Un consultant en formation n'a pas besoin de voir "Client X — 45 000€ facturés".
+
+## Insérer dans un article
+
+> [!STEP] 1. Ouvre l'article en édition
+> Bouton **Modifier** en haut à droite de l'article.
+
+> [!STEP] 2. Positionne le curseur
+> Clique dans le markdown à l'endroit exact où tu veux l'image (généralement après un paragraphe qui décrit ce qu'on va voir).
+
+> [!STEP] 3. Bouton Image
+> Barre d'outils du haut → **Image**. Sélectionne ton PNG/JPEG.
+
+> [!STEP] 4. L'ERP insère automatiquement la syntaxe
+> \`![nom-fichier](/api/wiki-images/xxxxx)\` apparaît à ton curseur. Change \`nom-fichier\` en une **description courte** — elle deviendra la légende sous l'image et le texte alt (accessibilité).
+
+> [!STEP] 5. Sauvegarde
+> Bouton **Sauvegarder** en haut. Les autres utilisateurs voient la nouvelle image immédiatement.
+
+## Format et poids
+
+- **PNG** pour les captures d'UI (texte net, pas de compression bavante)
+- **JPEG** pour les photos ou schémas avec dégradés
+- **GIF/WebP animés** pour illustrer une interaction (drag, survol) — mais reste sobre, ça alourdit la page
+
+Limite : **5 Mo par image**. Si ta capture pèse plus, redimensionne ou compresse (macOS : Preview → Export → Reduce File Size).
+
+> [!TIP] Suppression d'images
+> Pour l'instant, les images uploadées restent en base même si tu retires la syntaxe markdown. Pas de garbage collector automatique. Si ça devient un problème, on ajoutera une purge.
+`
+      },
+      {
+        slug: "process-checklist",
+        title: "Checklist post-feature",
+        description: "La liste de vérifications à faire après avoir mergé une feature.",
+        estimatedMinutes: 3,
+        content: `
+Après avoir livré une feature qui touche à l'expérience utilisateur, avant de fermer ta PR/ticket, passe cette checklist :
+
+## Le rituel de 5 minutes
+
+- **[ ]** Le module modifié a-t-il un article wiki ? Si non, en créer un via le seed (ou demander à l'admin de le faire depuis l'UI).
+- **[ ]** Les captures d'écran de l'article correspondent-elles encore à l'UI actuelle ? Sinon, en refaire.
+- **[ ]** Un nouveau bouton / champ / workflow ? Ajouter une étape numérotée dans l'article correspondant.
+- **[ ]** Un ancien élément supprimé ? Retirer la mention dans le wiki.
+- **[ ]** Cliquer **Marquer vérifié** sur chaque article touché.
+
+## Nouvel article = quand ?
+
+Crée un nouvel article quand :
+
+- Tu introduis un **nouveau flux** qui n'existait pas (ex: nouveau workflow de validation)
+- Tu ajoutes un **nouvel écran** avec sa propre logique
+- Un cas d'usage récurrent te fait dire "tiens, il faudrait documenter ça"
+
+Modifie un article existant quand :
+
+- Tu ajoutes un champ, un bouton, un onglet à quelque chose qui existe déjà
+- Tu changes le wording d'un statut, d'un label
+- Tu ajustes une règle métier (ex: TVA, plafond, seuil)
+
+## Qui édite quoi
+
+- **Admin** (perm \`users.manage\`) : peut éditer n'importe quel article et upload d'images.
+- **Consultant lambda** : lit uniquement. Pas de bouton Modifier visible.
+
+> [!TIP] Retour utilisateur
+> Si un consultant te dit "j'ai suivi la doc mais ça marche pas", **c'est un signal** — l'article est probablement obsolète. Corrige-le immédiatement, ça évitera la même confusion à 10 autres personnes.
+
+## En cas de refonte majeure
+
+Si tu refais complètement un module (ex: refonte du cashflow), il vaut mieux :
+
+1. Créer les nouveaux articles à partir de zéro dans le seed (avec captures fraîches)
+2. Archiver les anciens en dépubliant (nullifier \`publishedAt\` — accessible côté DB)
+
+Plutôt que de tenter une édition incrémentale d'un article devenu incompréhensible.
+`
+      }
+    ]
   }
 ];
 

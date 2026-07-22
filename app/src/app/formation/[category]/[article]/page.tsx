@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
-import { ChevronLeft, ChevronRight, Clock, GraduationCap, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, GraduationCap, User, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Markdown } from "./markdown";
 import { ArticleEditor } from "./editor";
 
@@ -49,6 +49,14 @@ export default async function ArticlePage({ params }: { params: { category: stri
 
   const diff = DIFFICULTY_LABELS[article.difficulty] ?? DIFFICULTY_LABELS.BEGINNER;
 
+  // Freshness — un article non vérifié depuis > 90 jours affiche un badge
+  // orange "à revoir". Sert de rappel visuel pour maintenir le wiki en
+  // synchro avec l'ERP après chaque évolution.
+  const now = Date.now();
+  const referenceDate = (article.lastReviewedAt ?? article.updatedAt).getTime();
+  const daysSince = Math.floor((now - referenceDate) / (1000 * 60 * 60 * 24));
+  const stale = daysSince > 90;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-1 text-xs text-midnight-500">
@@ -62,7 +70,7 @@ export default async function ArticlePage({ params }: { params: { category: stri
       <header className="space-y-3">
         <h1 className="text-3xl font-bold text-midnight-900">{article.title}</h1>
         <p className="text-base text-midnight-600">{article.description}</p>
-        <div className="flex items-center gap-3 text-xs text-midnight-500">
+        <div className="flex items-center gap-3 text-xs text-midnight-500 flex-wrap">
           <span className={"rounded px-2 py-0.5 " + diff.cls}>
             <GraduationCap className="w-3 h-3 inline-block mr-0.5" />
             {diff.label}
@@ -74,6 +82,29 @@ export default async function ArticlePage({ params }: { params: { category: stri
             <span className="flex items-center gap-1">
               <User className="w-3 h-3" /> Dernière édition : {updatedBy.firstName} {updatedBy.lastName}
               &nbsp;· {article.updatedAt.toLocaleDateString("fr-BE")}
+            </span>
+          )}
+          {article.lastReviewedAt ? (
+            <span
+              className={
+                "flex items-center gap-1 rounded px-2 py-0.5 " +
+                (stale ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800")
+              }
+              title={stale
+                ? `Non vérifié depuis ${daysSince} jours — peut être obsolète`
+                : `Vérifié il y a ${daysSince} jour(s)`}
+            >
+              {stale ? <AlertCircle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
+              {stale
+                ? `À revoir (${daysSince}j sans vérif)`
+                : `Vérifié il y a ${daysSince}j`}
+            </span>
+          ) : (
+            <span
+              className="flex items-center gap-1 rounded px-2 py-0.5 bg-amber-100 text-amber-800"
+              title="Jamais vérifié depuis la création — cliquer sur 'Marquer vérifié' quand tu confirmes que le contenu correspond à la version actuelle de l'ERP"
+            >
+              <AlertCircle className="w-3 h-3" /> Jamais vérifié
             </span>
           )}
         </div>

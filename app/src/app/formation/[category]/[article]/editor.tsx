@@ -1,8 +1,8 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { toast } from "sonner";
-import { Edit3, Eye, Save, X, Loader2 } from "lucide-react";
-import { updateWikiArticle } from "@/server/actions/wiki";
+import { Edit3, Eye, Save, X, Loader2, ImagePlus, CheckCircle2 } from "lucide-react";
+import { updateWikiArticle, uploadWikiImage, markArticleReviewed } from "@/server/actions/wiki";
 import { Markdown } from "./markdown";
 
 /**
@@ -21,6 +21,9 @@ export function ArticleEditor({
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [content, setContent] = useState(initial);
   const [pending, start] = useTransition();
+  const [uploading, setUploading] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   function save() {
     start(async () => {
@@ -34,16 +37,74 @@ export function ArticleEditor({
     });
   }
 
+  function markReviewed() {
+    start(async () => {
+      try {
+        await markArticleReviewed(id);
+        toast.success("Article marqué vérifié aujourd'hui.");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
+  /**
+   * Upload une image et insère la syntaxe markdown au curseur.
+   * Si le curseur n'est pas positionné, insère à la fin.
+   */
+  async function handleImage(file: File) {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const r = await uploadWikiImage(fd);
+      const alt = file.name.replace(/\.[^.]+$/, "");
+      const snippet = `\n\n![${alt}](${r.url})\n\n`;
+      const ta = textareaRef.current;
+      if (ta) {
+        const start = ta.selectionStart ?? content.length;
+        const end   = ta.selectionEnd ?? content.length;
+        const next = content.slice(0, start) + snippet + content.slice(end);
+        setContent(next);
+        // Repositionne le curseur après l'image
+        setTimeout(() => {
+          ta.focus();
+          const pos = start + snippet.length;
+          ta.setSelectionRange(pos, pos);
+        }, 10);
+      } else {
+        setContent(content + snippet);
+      }
+      toast.success("Image insérée.");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Erreur d'upload");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   if (mode === "view") {
     return (
       <div className="relative">
-        <button
-          onClick={() => setMode("edit")}
-          className="absolute -top-2 right-0 btn-ghost btn-sm text-xs"
-          title="Modifier l'article"
-        >
-          <Edit3 className="w-3.5 h-3.5" /> Modifier
-        </button>
+        <div className="absolute -top-2 right-0 flex items-center gap-2">
+          <button
+            onClick={markReviewed}
+            disabled={pending}
+            className="btn-ghost btn-sm text-xs text-emerald-700"
+            title="Confirmer que cet article reflète la version actuelle de l'ERP"
+          >
+            {pending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+            Marquer vérifié
+          </button>
+          <button
+            onClick={() => setMode("edit")}
+            className="btn-ghost btn-sm text-xs"
+            title="Modifier l'article"
+          >
+            <Edit3 className="w-3.5 h-3.5" /> Modifier
+          </button>
+        </div>
         <article className="card p-8">
           <Markdown source={content} />
         </article>
@@ -60,6 +121,25 @@ export function ArticleEditor({
           <span className="text-xs text-midnight-500">/formation/{categorySlug}/{articleSlug}</span>
         </div>
         <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleImage(f);
+            }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="btn-ghost btn-sm text-xs"
+            disabled={pending || uploading}
+            title="Insérer une capture d'écran au curseur"
+          >
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
+            Image
+          </button>
           <button
             onClick={() => { setContent(initial); setMode("view"); }}
             className="btn-ghost btn-sm text-xs"
@@ -83,6 +163,7 @@ export function ArticleEditor({
             <Edit3 className="w-3 h-3" /> Markdown
           </div>
           <textarea
+            ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full p-4 font-mono text-sm resize-none focus:outline-none min-h-[600px]"
@@ -104,6 +185,7 @@ export function ArticleEditor({
         <span><code>- item</code> ou <code>1. item</code></span>
         <span><code>&gt; [!TIP]</code>/<code>[!INFO]</code>/<code>[!WARN]</code>/<code>[!STEP]</code> callouts</span>
         <span><code>```lang</code> bloc de code</span>
+        <span><code>![alt](url)</code> image (utilise le bouton Image ci-dessus)</span>
       </div>
     </div>
   );

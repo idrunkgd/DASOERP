@@ -308,6 +308,7 @@ model User {
   outreachTemplates    OutreachTemplate[]    @relation("OutreachTemplateCreator")
   // Wiki formation — traçabilité des dernières éditions par cet admin
   wikiArticlesEdited   WikiArticle[]         @relation("WikiArticleUpdatedBy")
+  wikiImagesUploaded   WikiImage[]           @relation("WikiImageUploader")
   /// Type de contrat de ce consultant chez Dasolabs. Idem Candidate.contractType.
   contractType         ContractType?
   /// Paie configurée pour ce consultant interne (si contractType=EMPLOYEE).
@@ -2578,10 +2579,30 @@ model WikiArticle {
   publishedAt         DateTime?       // NULL = brouillon
   updatedById         String?
   updatedBy           User?           @relation("WikiArticleUpdatedBy", fields: [updatedById], references: [id])
+  /// Dernière vérification manuelle par un admin — sépare "édité pour
+  /// coquille" de "revu et validé conforme à la version actuelle de l'ERP".
+  /// Sert à afficher le badge "à revoir" quand > 90 jours.
+  lastReviewedAt      DateTime?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 
   @@unique([categoryId, slug])
   @@index([categoryId, orderIndex])
   @@index([publishedAt])
+}
+
+/// Image (capture d'écran, illustration) attachée à un article wiki.
+/// Stockage binaire en DB — pas de dépendance externe (S3, filesystem).
+/// Reference dans le markdown : ![alt](/api/wiki-images/<id>)
+model WikiImage {
+  id          String    @id @default(cuid())
+  filename    String    // Nom original pour info
+  mimeType    String    // "image/png", "image/jpeg"...
+  sizeBytes   Int
+  data        Bytes     // Contenu binaire brut
+  uploadedById String?
+  uploadedBy   User?    @relation("WikiImageUploader", fields: [uploadedById], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([createdAt])
 }
