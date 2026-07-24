@@ -33,13 +33,25 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
   if (!vehicle) notFound();
 
   const activeAssignment = vehicle.assignments.find((a) => a.endDate === null);
+
+  // Users éligibles : actifs + PAS déjà attribués à un autre véhicule (règle 1 véhicule / personne)
   const users = canManage
     ? await prisma.user.findMany({
-        where: { active: true, candidateProfile: { is: null } },
+        where: {
+          active: true,
+          candidateProfile: { is: null },
+          vehicleAssignments: {
+            none: { endDate: null, vehicleId: { not: vehicle.id } }
+          }
+        },
         select: { id: true, firstName: true, lastName: true },
         orderBy: [{ firstName: "asc" }]
       })
     : [];
+
+  // Date minimale d'attribution : début du contrat leasing ou date de mise en service
+  const earliest = vehicle.leasingContract?.startDate ?? vehicle.commissioningDate;
+  const minStartDate = earliest ? earliest.toISOString().slice(0, 10) : undefined;
 
   return (
     <div>
@@ -176,8 +188,12 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
             ) : (
               <div>
                 <p className="text-sm text-midnight-500 italic mb-3">Aucune attribution active.</p>
-                {canManage && users.length > 0 && (
-                  <AssignForm vehicleId={vehicle.id} users={users} />
+                {canManage && (
+                  <AssignForm
+                    vehicleId={vehicle.id}
+                    users={users}
+                    minStartDate={minStartDate}
+                  />
                 )}
               </div>
             )}

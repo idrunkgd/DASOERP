@@ -202,13 +202,55 @@ const AssignSchema = z.object({
 /**
  * Attribue un véhicule à un utilisateur. Ferme automatiquement
  * l'attribution active précédente (s'il y en a une) à la veille de startDate.
+ *
+ * Deux règles métier :
+ *   1. Un utilisateur ne peut avoir qu'UN seul véhicule attribué à la fois.
+ *      Si le user a déjà une attribution active sur un autre véhicule, on
+ *      refuse. Il faut d'abord clôturer l'ancienne (rendre le véhicule).
+ *   2. La date d'attribution ne peut pas être antérieure à la date de départ
+ *      du contrat leasing (si LEASING) ou date de mise en service (si OWNED).
+ *      Impossible d'attribuer une voiture qu'on n'a pas encore reçue.
  */
 export async function assignVehicle(formData: FormData) {
   const session = await requirePermission("fleet.manage");
   const data = AssignSchema.parse(Object.fromEntries(formData));
   const start = new Date(data.startDate);
 
-  // Ferme l'attribution en cours (endDate = NULL) le jour d'avant
+  // Charge le véhicule + son contrat pour valider les dates
+  const vehicle = await prisma.vehicle.findUniqueOrThrow({
+    where: { id: data.vehicleId },
+    include: { leasingContract: { select: { startDate: true } } }
+  });
+
+  // Règle 2 : date d'attribution ≥ début du contrat / mise en service
+  const earliest = vehicle.leasingContract?.startDate ?? vehicle.commissioningDate;
+  if (earliest && start < earliest) {
+    const dateStr = earliest.toISOString().slice(0, 10);
+    throw new Error(
+      vehicle.leasingContract
+        ? `Date d'attribution trop tôt : le contrat leasing commence le ${dateStr}.`
+        : `Date d'attribution trop tôt : le véhicule a été mis en service le ${dateStr}.`
+    );
+  }
+
+  // Règle 1 : le user ne peut pas déjà avoir un autre véhicule attribué
+  const existingUserAssignment = await prisma.vehicleAssignment.findFirst({
+    where: {
+      userId: data.userId,
+      endDate: null,
+      vehicleId: { not: data.vehicleId }
+    },
+    include: { vehicle: { select: { plate: true, brand: true, model: true } } }
+  });
+  if (existingUserAssignment) {
+    const v = existingUserAssignment.vehicle;
+    throw new Error(
+      `Ce collaborateur a déjà un véhicule attribué : ${v.plate} (${v.brand} ${v.model}). ` +
+      `Clôture d'abord son attribution actuelle avant de lui en donner un autre.`
+    );
+  }
+
+  // Ferme l'attribution en cours SUR CE VÉHICULE (endDate = NULL) le jour d'avant
   const previousDay = new Date(start);
   previousDay.setUTCDate(previousDay.getUTCDate() - 1);
   await prisma.vehicleAssignment.updateMany({

@@ -5,12 +5,19 @@ import { UserPlus, UserMinus } from "lucide-react";
 import { assignVehicle, unassignVehicle } from "@/server/actions/fleet";
 
 export function AssignForm({
-  vehicleId, users
+  vehicleId, users, minStartDate
 }: {
   vehicleId: string;
+  /** Users éligibles (déjà filtrés côté serveur pour exclure ceux ayant déjà une voiture) */
   users: { id: string; firstName: string; lastName: string }[];
+  /** Date minimale d'attribution — début du contrat leasing ou mise en service (YYYY-MM-DD) */
+  minStartDate?: string;
 }) {
   const [pending, start] = useTransition();
+
+  // Défaut : aujourd'hui, mais jamais avant minStartDate
+  const today = new Date().toISOString().slice(0, 10);
+  const defaultStart = minStartDate && minStartDate > today ? minStartDate : today;
 
   function submit(fd: FormData) {
     fd.set("vehicleId", vehicleId);
@@ -22,6 +29,14 @@ export function AssignForm({
         toast.error(e?.message ?? "Erreur");
       }
     });
+  }
+
+  if (users.length === 0) {
+    return (
+      <p className="text-xs text-midnight-500 italic">
+        Tous les collaborateurs actifs ont déjà un véhicule attribué. Clôture une attribution existante pour libérer quelqu'un.
+      </p>
+    );
   }
 
   return (
@@ -38,7 +53,17 @@ export function AssignForm({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="label">Depuis le *</label>
-          <input name="startDate" type="date" required defaultValue={new Date().toISOString().slice(0, 10)} className="input" />
+          <input
+            name="startDate" type="date" required
+            defaultValue={defaultStart}
+            min={minStartDate}
+            className="input"
+          />
+          {minStartDate && (
+            <p className="text-[10px] text-midnight-400 mt-0.5">
+              Pas avant le {new Date(minStartDate).toLocaleDateString("fr-BE")}
+            </p>
+          )}
         </div>
         <div>
           <label className="label">Km au départ</label>
