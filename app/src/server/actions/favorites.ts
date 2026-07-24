@@ -9,7 +9,9 @@ import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/rbac";
 import { revalidatePath } from "next/cache";
 
-export const MAX_FAVORITES = 10;
+// Cap métier. Non exporté : dans un fichier "use server", seules des fonctions
+// async peuvent l'être. Le client hardcode la même valeur (composant FavoritesBar).
+const MAX_FAVORITES = 10;
 
 const AddSchema = z.object({
   label: z.string().min(1).max(60).transform((v) => v.trim()),

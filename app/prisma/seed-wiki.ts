@@ -1714,7 +1714,7 @@ La flotte Dasolabs (voitures leasing + propriété) tient dans un module dédié
 ![Étape 1 — Liste des véhicules avec statut et utilisateur](/wiki/mockups/fleet-step1.svg)
 
 > [!STEP] 1. Vue liste
-> \\`/fleet\\` affiche tous les véhicules actifs · plaque · marque/modèle · type (Leasing/Propriété) · utilisateur actuel · mensualité leasing. Section "Sortis de flotte" pliable en bas.
+> \`/fleet\` affiche tous les véhicules actifs · plaque · marque/modèle · type (Leasing/Propriété) · utilisateur actuel · mensualité leasing. Section "Sortis de flotte" pliable en bas.
 
 ![Étape 2 — Fiche véhicule avec contrat leasing + attribution](/wiki/mockups/fleet-step2.svg)
 
@@ -1731,7 +1731,7 @@ La flotte Dasolabs (voitures leasing + propriété) tient dans un module dédié
 
 > [!INFO] Kilométrage optionnel
 > Tu peux tracer les km au départ / retour d'attribution — utile pour arbitrer le forfait leasing en fin de contrat (dépassement km facturé).
-\\`
+`
       }
     ]
   }
