@@ -2901,10 +2901,12 @@ function MilestoneEditCard({
     });
   }
 
-  // Calcul auto pour les missions
-  const dailyRate = milestone.mission?.dailyRate ?? 0;
+  // Calcul auto pour les missions — utilise le SNAPSHOT (effectiveRate)
+  // et non le taux mission courant. Sinon, si le rate mission a été modifié
+  // après création de la tranche, l'affichage "jours × rate" utiliserait
+  // le nouveau taux → incohérence visible entre montant enregistré et calcul.
   const computedAmount = isLinkedToMission
-    ? Math.round(days * dailyRate * 100) / 100
+    ? Math.round(days * effectiveRate * 100) / 100
     : amount;
 
   return (
@@ -2928,7 +2930,14 @@ function MilestoneEditCard({
             {milestone.label}
           </div>
           <div className="text-[10px] text-midnight-500 mt-0.5">
-            Taux : <strong>{dailyRate} €/j</strong> · libellé auto-généré
+            Taux : <strong>{effectiveRate} €/j</strong>
+            {milestone.mission && milestone.appliedDailyRate != null
+              && Number(milestone.appliedDailyRate) !== milestone.mission.dailyRate && (
+              <span className="text-amber-600 ml-1">
+                (mission actuel : {milestone.mission.dailyRate} €/j)
+              </span>
+            )}
+            <span> · libellé auto-généré</span>
           </div>
         </div>
       ) : (
@@ -2965,7 +2974,7 @@ function MilestoneEditCard({
             />
           </div>
           <div className="col-span-1 text-center pb-2 text-midnight-400 text-sm">
-            × {dailyRate} =
+            × {effectiveRate} =
           </div>
           <div className="col-span-1 text-right">
             <label className="text-[10px] uppercase text-midnight-500 tracking-wider block">
