@@ -3,7 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
-import { Car, User as UserIcon, Trash2, Files, Plus } from "lucide-react";
+import { Car, User as UserIcon, Trash2, Files, Plus, Pencil } from "lucide-react";
 import { ContractForm } from "./contract-form";
 import { AssignForm, UnassignButton } from "./assign-form";
 import { DeleteVehicleButton } from "./delete-button";
@@ -61,7 +61,12 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
         breadcrumb={[{ label: "Flotte", href: "/fleet" }, { label: vehicle.plate }]}
         actions={
           canManage && (
-            <DeleteVehicleButton id={vehicle.id} plate={vehicle.plate} />
+            <div className="flex gap-2">
+              <Link href={`/fleet/${vehicle.id}/edit`} className="btn-secondary btn-sm">
+                <Pencil className="w-3.5 h-3.5" /> Modifier
+              </Link>
+              <DeleteVehicleButton id={vehicle.id} plate={vehicle.plate} />
+            </div>
           )
         }
       />
