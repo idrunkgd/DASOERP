@@ -2795,14 +2795,24 @@ function MilestoneEditCard({
 
   // Pour les tranches liées à une mission : édition uniquement des jours,
   // le label et le taux sont auto-générés à partir de la mission.
-  // On utilise PRIORITAIREMENT appliedDailyRate (snapshot du rate au moment
-  // de la création de la tranche), fallback sur mission.dailyRate sinon.
-  // Sans ça, si le rate mission a changé après création de la tranche, le
-  // calcul des jours initiaux serait faux.
-  const effectiveRate =
-    milestone.appliedDailyRate && milestone.appliedDailyRate > 0
-      ? milestone.appliedDailyRate
-      : milestone.mission?.dailyRate ?? 0;
+  //
+  // Règle du taux effectif :
+  //   - Tranche PAID / INVOICED (facture déjà émise) → SNAPSHOT (appliedDailyRate)
+  //     car le montant a été facturé et ne doit plus bouger même si le TJM
+  //     mission est modifié après coup.
+  //   - Tranche PLANNED / READY (pas encore facturée) → TAUX MISSION COURANT
+  //     car on veut que l'ajustement du TJM se reflète immédiatement dans le
+  //     calcul pour les prochaines factures.
+  //
+  // Comme ça, changer le TJM mission :
+  //   → n'impacte pas rétroactivement les factures déjà émises (safe)
+  //   → réajuste automatiquement les tranches en cours de préparation (attendu)
+  const isLocked = milestone.status === "PAID" || milestone.status === "INVOICED";
+  const missionRate = milestone.mission?.dailyRate ?? 0;
+  const snapshotRate = milestone.appliedDailyRate ?? 0;
+  const effectiveRate = isLocked && snapshotRate > 0
+    ? snapshotRate
+    : (missionRate > 0 ? missionRate : snapshotRate);
   const initialDays =
     effectiveRate > 0
       ? Math.round((milestone.amount / effectiveRate) * 10) / 10
