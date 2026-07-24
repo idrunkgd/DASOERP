@@ -2024,6 +2024,8 @@ model Document {
   offer        Offer?   @relation("DocumentOffer",   fields: [offerId],   references: [id], onDelete: SetNull)
   consultantId String?
   consultant   User?    @relation("DocumentConsultant", fields: [consultantId], references: [id], onDelete: SetNull)
+  vehicleId    String?
+  vehicle      Vehicle? @relation("DocumentVehicle", fields: [vehicleId], references: [id], onDelete: SetNull)
 
   // Versioning : V1 = parent=null, V2/V3/Vn = parent=V1.id
   parentDocumentId String?
@@ -2633,6 +2635,7 @@ model Vehicle {
   vin                 String?                   // Numéro de série (VIN) — optionnel
   category            VehicleCategory
   status              VehicleStatus   @default(ACTIVE)
+  photoUrl            String?         @db.Text   // Base64 ou URL vers la photo du véhicule
   commissioningDate   DateTime?       @db.Date   // Date de mise en service
   releaseDate         DateTime?       @db.Date   // Date de sortie (rendu / vendu)
   notes               String?
@@ -2641,6 +2644,7 @@ model Vehicle {
 
   leasingContract     LeasingContract?
   assignments         VehicleAssignment[]
+  documents           Document[]              @relation("DocumentVehicle")
 
   @@index([status])
   @@index([category])
@@ -2658,6 +2662,11 @@ model LeasingContract {
   endDate             DateTime        @db.Date
   monthlyAmount       Decimal         @db.Decimal(10, 2)  // TVAC (ce qu'on paie vraiment chaque mois)
   kmIncludedYear      Int?                      // Forfait km annuel inclus (info)
+  /// Catégorie utilisée dans le cashflow pour la ligne récurrente auto-générée.
+  /// Personnalisable par l'utilisateur — permet de regrouper les leasings avec
+  /// une catégorie existante (ex: "voiture" créée manuellement) plutôt que
+  /// "Leasing véhicules" par défaut.
+  cashflowCategory    String?
   notes               String?
   /// Lien vers l'entrée RecurringExpense créée automatiquement dans le
   /// cashflow. Si présent, ça signifie que la ligne cashflow est

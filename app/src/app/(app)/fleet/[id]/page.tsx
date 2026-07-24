@@ -3,7 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
-import { Car, User as UserIcon, Trash2 } from "lucide-react";
+import { Car, User as UserIcon, Trash2, Files, Plus } from "lucide-react";
 import { ContractForm } from "./contract-form";
 import { AssignForm, UnassignButton } from "./assign-form";
 import { DeleteVehicleButton } from "./delete-button";
@@ -22,6 +22,11 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
       assignments: {
         include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
         orderBy: { startDate: "desc" }
+      },
+      documents: {
+        where: { parentDocumentId: null },  // dernière version seulement
+        orderBy: { createdAt: "desc" },
+        select: { id: true, title: true, originalName: true, createdAt: true, tags: true, version: true }
       }
     }
   });
@@ -52,6 +57,13 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Colonne gauche : infos + contrat */}
         <div className="lg:col-span-2 space-y-4">
+          {vehicle.photoUrl && (
+            <section className="card p-5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={vehicle.photoUrl} alt={`${vehicle.brand} ${vehicle.model}`}
+                className="w-full max-h-72 object-cover rounded-lg" />
+            </section>
+          )}
           <section className="card p-5">
             <h2 className="font-semibold text-midnight-900 mb-3 flex items-center gap-2">
               <Car className="w-4 h-4 text-indigoaccent" /> Fiche véhicule
@@ -112,6 +124,7 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
                     endDate: vehicle.leasingContract.endDate.toISOString().slice(0, 10),
                     monthlyAmount: Number(vehicle.leasingContract.monthlyAmount),
                     kmIncludedYear: vehicle.leasingContract.kmIncludedYear,
+                    cashflowCategory: vehicle.leasingContract.cashflowCategory,
                     notes: vehicle.leasingContract.notes
                   } : null}
                 />
@@ -167,6 +180,38 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
                   <AssignForm vehicleId={vehicle.id} users={users} />
                 )}
               </div>
+            )}
+          </section>
+
+          <section className="card p-5">
+            <h2 className="font-semibold text-midnight-900 mb-3 flex items-center gap-2">
+              <Files className="w-4 h-4 text-indigoaccent" /> Documents
+            </h2>
+            {vehicle.documents.length === 0 ? (
+              <p className="text-sm text-midnight-500 italic mb-3">
+                Aucun document. Contrat leasing PDF, carte grise, assurance…
+              </p>
+            ) : (
+              <ul className="space-y-2 mb-3 text-sm">
+                {vehicle.documents.map((d) => (
+                  <li key={d.id}>
+                    <Link href={`/documents/${d.id}`} className="flex items-center justify-between hover:text-indigoaccent">
+                      <span className="truncate">📄 {d.title}</span>
+                      <span className="text-[10px] text-midnight-400">
+                        {d.createdAt.toLocaleDateString("fr-BE")}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {canManage && (
+              <Link
+                href={`/documents/new?vehicleId=${vehicle.id}`}
+                className="btn-secondary btn-sm w-full text-xs"
+              >
+                <Plus className="w-3 h-3" /> Ajouter un document
+              </Link>
             )}
           </section>
 

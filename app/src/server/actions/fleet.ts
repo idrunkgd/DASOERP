@@ -13,7 +13,8 @@ import { requirePermission } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
-const LEASING_CATEGORY = "Leasing véhicules";
+const DEFAULT_LEASING_CATEGORY = "Leasing véhicules";
+const MAX_PHOTO_BYTES = 1_400_000; // ~1 Mo base64
 
 /// ----------- Vehicle -----------
 
@@ -24,6 +25,12 @@ const VehicleSchema = z.object({
   vin: z.string().optional().nullable().transform((v) => v?.trim() || null),
   category: z.enum(["LEASING", "OWNED"]),
   status: z.enum(["ACTIVE", "RETURNED", "SOLD", "ARCHIVED"]).default("ACTIVE"),
+  photoUrl: z.string().optional().nullable().transform((v) => {
+    const t = (v ?? "").trim();
+    if (!t) return null;
+    if (t.length > MAX_PHOTO_BYTES) throw new Error("Photo trop volumineuse (>1 Mo).");
+    return t;
+  }),
   commissioningDate: z.string().optional().nullable().transform((v) => v ? new Date(v) : null),
   releaseDate: z.string().optional().nullable().transform((v) => v ? new Date(v) : null),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
@@ -84,6 +91,7 @@ const ContractSchema = z.object({
   endDate: z.string(),
   monthlyAmount: z.coerce.number().positive(),
   kmIncludedYear: z.coerce.number().int().nonnegative().optional().nullable(),
+  cashflowCategory: z.string().optional().nullable().transform((v) => v?.trim() || null),
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
 
@@ -106,6 +114,8 @@ export async function upsertLeasingContract(formData: FormData) {
   });
 
   const recurringLabel = `Leasing ${vehicle.plate} · ${data.lessor}`;
+  // Catégorie cashflow : celle fournie par le user (ex: "voiture") sinon défaut
+  const cashflowCat = data.cashflowCategory || DEFAULT_LEASING_CATEGORY;
 
   // Étape 1 : upsert la RecurringExpense dans le cashflow
   let recurringExpenseId = existing?.recurringExpenseId ?? null;
@@ -114,7 +124,7 @@ export async function upsertLeasingContract(formData: FormData) {
       where: { id: recurringExpenseId },
       data: {
         label: recurringLabel,
-        category: LEASING_CATEGORY,
+        category: cashflowCat,
         defaultAmount: data.monthlyAmount,
         startDate: start,
         endDate: end,
@@ -125,7 +135,7 @@ export async function upsertLeasingContract(formData: FormData) {
     const re = await prisma.recurringExpense.create({
       data: {
         label: recurringLabel,
-        category: LEASING_CATEGORY,
+        category: cashflowCat,
         defaultAmount: data.monthlyAmount,
         isIncome: false,
         frequency: "MONTHLY",

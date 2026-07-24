@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { createVehicle } from "@/server/actions/fleet";
+import { PhotoInput } from "./photo-input";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,7 @@ export default async function NewVehiclePage() {
             <input name="releaseDate" type="date" className="input" />
           </div>
         </div>
+        <PhotoInput />
         <div>
           <label className="label">Notes</label>
           <textarea name="notes" rows={2} className="input" placeholder="Couleur, options, particularités…"/>

@@ -11,6 +11,7 @@ type Initial = {
   endDate: string;
   monthlyAmount: number;
   kmIncludedYear: number | null;
+  cashflowCategory: string | null;
   notes: string | null;
 } | null;
 
@@ -69,6 +70,15 @@ export function ContractForm({ vehicleId, initial }: { vehicleId: string; initia
           <label className="label">Forfait km / an</label>
           <input name="kmIncludedYear" type="number" min="0"
             defaultValue={initial?.kmIncludedYear ?? ""} className="input" placeholder="25000" />
+        </div>
+        <div className="md:col-span-2">
+          <label className="label">Catégorie cashflow</label>
+          <input name="cashflowCategory" type="text"
+            defaultValue={initial?.cashflowCategory ?? ""}
+            className="input" placeholder='Ex: "voiture" (laissé vide → "Leasing véhicules")' />
+          <p className="text-[10px] text-midnight-500 mt-1">
+            Nom exact de la catégorie sous laquelle la ligne apparaîtra dans le cashflow.
+          </p>
         </div>
       </div>
       <div>
