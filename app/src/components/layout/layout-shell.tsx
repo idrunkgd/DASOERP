@@ -7,6 +7,7 @@ import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { ChatWidget } from "./chat-widget";
 import { CommandPalette } from "./command-palette";
+import { FavoritesBar, type Favorite } from "./favorites-bar";
 
 /**
  * Shell client qui gère l'état d'ouverture de la sidebar sur mobile.
@@ -19,12 +20,14 @@ export function LayoutShell({
   permissions,
   restricted,
   accessGroupName,
+  favorites,
   children
 }: {
   role: Role;
   permissions: Permission[];
   restricted: boolean;
   accessGroupName: string;
+  favorites: Favorite[];
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -71,6 +74,7 @@ export function LayoutShell({
           accessGroupName={accessGroupName}
           onToggleMenu={() => setSidebarOpen((v) => !v)}
         />
+        {!restricted && <FavoritesBar initial={favorites} />}
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
 

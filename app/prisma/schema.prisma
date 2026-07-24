@@ -310,6 +310,8 @@ model User {
   wikiArticlesEdited   WikiArticle[]         @relation("WikiArticleUpdatedBy")
   wikiImagesUploaded   WikiImage[]           @relation("WikiImageUploader")
   vehicleAssignments   VehicleAssignment[]   @relation("VehicleAssignmentUser")
+  /// Favoris épinglés dans la barre du topbar (max 10 par user, gérés côté serveur).
+  favorites            UserFavorite[]        @relation("UserFavorites")
   /// Type de contrat de ce consultant chez Dasolabs. Idem Candidate.contractType.
   contractType         ContractType?
   /// Paie configurée pour ce consultant interne (si contractType=EMPLOYEE).
@@ -2698,4 +2700,22 @@ model VehicleAssignment {
 
   @@index([vehicleId, endDate])
   @@index([userId, endDate])
+}
+
+/// Favori épinglé par un utilisateur dans la barre du topbar.
+/// Contrainte métier : max 10 par user, enforcée côté server action.
+/// href est stocké en chemin relatif ("/dashboard", "/fleet/xxx") ou URL
+/// absolue si externe. Le sortOrder permet un drag-and-drop futur.
+model UserFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("UserFavorites", fields: [userId], references: [id], onDelete: Cascade)
+  label     String   // Libellé affiché (ex: "Cashflow 2026")
+  href      String   // Chemin relatif ("/cashflow") ou URL complète
+  icon      String?  // Nom d'icône lucide facultatif ("Star", "Car"…)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, href])
+  @@index([userId, sortOrder])
 }

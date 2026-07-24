@@ -4,13 +4,19 @@ import { authOptions } from "@/lib/auth";
 import { LayoutShell } from "@/components/layout/layout-shell";
 import { Providers } from "@/components/providers";
 import { getUserEffectivePermissions, getUserAccessGroupName, DEFAULT_GROUP_NAME } from "@/lib/rbac";
+import { prisma } from "@/lib/db";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
-  const [permissions, groupName] = await Promise.all([
+  const [permissions, groupName, favorites] = await Promise.all([
     getUserEffectivePermissions(session.user.id, session.user.role),
-    getUserAccessGroupName(session.user.id)
+    getUserAccessGroupName(session.user.id),
+    prisma.userFavorite.findMany({
+      where: { userId: session.user.id },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      select: { id: true, label: true, href: true, icon: true }
+    })
   ]);
   // Mode restreint = aucune permission effective. Si un user "Visiteur" a reçu
   // des overrides de permission (grants individuels), il sort du mode restreint
@@ -26,6 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         permissions={permissions}
         restricted={isRestricted}
         accessGroupName={groupName}
+        favorites={favorites}
       >
         {children}
       </LayoutShell>
