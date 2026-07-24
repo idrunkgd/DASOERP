@@ -2793,29 +2793,34 @@ function MilestoneEditCard({
   const isCancelled = milestone.status === "CANCELLED";
   const isLinkedToMission = !!milestone.mission;
 
-  // Pour les tranches liées à une mission : édition uniquement des jours,
-  // le label et le taux sont auto-générés à partir de la mission.
+  // Pour les tranches liées à une mission :
   //
-  // Règle du taux effectif :
-  //   - Tranche PAID / INVOICED (facture déjà émise) → SNAPSHOT (appliedDailyRate)
-  //     car le montant a été facturé et ne doit plus bouger même si le TJM
-  //     mission est modifié après coup.
-  //   - Tranche PLANNED / READY (pas encore facturée) → TAUX MISSION COURANT
-  //     car on veut que l'ajustement du TJM se reflète immédiatement dans le
-  //     calcul pour les prochaines factures.
+  // 1) initialDays vient TOUJOURS du snapshot (appliedDailyRate) :
+  //    c'est la vérité historique — la tranche a été créée avec N jours au
+  //    taux snapshot, donc amount / snapshotRate = jours réels (ex: 14212/748 = 19).
+  //    Si on utilisait le taux courant, un changement de TJM ferait apparaître
+  //    des jours faussés (ex: 14212/780 = 18.22).
   //
-  // Comme ça, changer le TJM mission :
-  //   → n'impacte pas rétroactivement les factures déjà émises (safe)
-  //   → réajuste automatiquement les tranches en cours de préparation (attendu)
+  // 2) effectiveRate (le taux d'affichage et de recalcul) suit le statut :
+  //    - PAID / INVOICED (facture émise)   → snapshotRate (figé, safe)
+  //    - PLANNED / READY (pas facturée)     → missionRate courant (réajuste)
+  //
+  // 3) computedAmount = days × effectiveRate.
+  //    → Si tu sauvegardes une tranche PLANNED, le montant en DB passe au
+  //      nouveau taux (19 j × 780 = 14 820) et appliedDailyRate est mis à
+  //      jour côté serveur pour rester cohérent.
   const isLocked = milestone.status === "PAID" || milestone.status === "INVOICED";
   const missionRate = milestone.mission?.dailyRate ?? 0;
   const snapshotRate = milestone.appliedDailyRate ?? 0;
   const effectiveRate = isLocked && snapshotRate > 0
     ? snapshotRate
     : (missionRate > 0 ? missionRate : snapshotRate);
+
+  // Jours réels = montant / snapshot (vérité historique), pas le courant.
+  const historicalRate = snapshotRate > 0 ? snapshotRate : effectiveRate;
   const initialDays =
-    effectiveRate > 0
-      ? Math.round((milestone.amount / effectiveRate) * 10) / 10
+    historicalRate > 0
+      ? Math.round((milestone.amount / historicalRate) * 10) / 10
       : 0;
   const [days, setDays] = useState<number>(initialDays);
 

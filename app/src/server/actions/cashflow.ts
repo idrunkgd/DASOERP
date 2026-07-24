@@ -1165,14 +1165,23 @@ export async function updateMissionMilestoneDays(formData: FormData) {
     revalidatePath("/cashflow");
     return;
   }
-  // Utilise le snapshot rate de la tranche si présent, sinon fallback au
-  // rate actuel de la mission (rétro-compat pour les tranches sans snapshot)
+  // Règle du taux effectif pour la sauvegarde :
+  //  - Tranche verrouillée (PAID / INVOICED) → SNAPSHOT (appliedDailyRate)
+  //    → montant recalculé avec l'ancien taux, cohérent avec la facture émise
+  //  - Tranche modifiable (PLANNED / READY / DRAFT) → TAUX MISSION COURANT
+  //    → montant recalculé avec le nouveau taux + snapshot mis à jour pour
+  //    que les affichages ultérieurs restent cohérents (les jours affichés
+  //    dérivent du snapshot).
   const existingSnapshot = (existing as { appliedDailyRate?: any })
     ?.appliedDailyRate;
-  const effectiveRate =
-    existingSnapshot != null && Number.isFinite(Number(existingSnapshot))
-      ? Number(existingSnapshot)
-      : Number(existing.mission.dailyRate);
+  const snapshotRate = existingSnapshot != null && Number.isFinite(Number(existingSnapshot))
+    ? Number(existingSnapshot)
+    : null;
+  const missionRate = Number(existing.mission.dailyRate);
+  const isLocked = existing.status === "PAID" || existing.status === "INVOICED";
+  const effectiveRate = isLocked && snapshotRate != null
+    ? snapshotRate
+    : missionRate;
   const amount = Math.round(days * effectiveRate * 100) / 100;
   const MONTH_LABELS = [
     "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -1186,10 +1195,10 @@ export async function updateMissionMilestoneDays(formData: FormData) {
     data: {
       amount,
       label,
-      // Pose le snapshot si pas défini
-      ...(existingSnapshot == null
-        ? { appliedDailyRate: effectiveRate }
-        : {})
+      // Pour une tranche modifiable, on met à jour le snapshot pour que
+      // le calcul jours = amount / snapshot reste cohérent après reload.
+      // Pour une tranche verrouillée, le snapshot reste intact.
+      ...(isLocked ? {} : { appliedDailyRate: effectiveRate })
     }
   });
   await logActivity({
