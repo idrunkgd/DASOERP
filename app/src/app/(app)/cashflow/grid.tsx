@@ -1,5 +1,6 @@
 "use client";
 import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   Check,
@@ -900,7 +901,17 @@ function RowLine({
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
             <div className="truncate font-medium text-midnight-900">
-              {row.label}
+              {row.vehicleId ? (
+                <Link
+                  href={`/fleet/${row.vehicleId}`}
+                  className="hover:text-indigoaccent hover:underline"
+                  title="Ouvrir la fiche véhicule"
+                >
+                  {row.label}
+                </Link>
+              ) : (
+                row.label
+              )}
             </div>
             {/* Affichage de la fréquence seulement (la catégorie est déjà dans le sous-header) */}
             {row.frequency && row.frequency !== "MONTHLY" && (

@@ -76,6 +76,10 @@ export type CashflowRow = {
   hidden?: boolean;
   /** Pour kind = milestones (agrégation par projet) : id du projet source. */
   projectId?: string;
+  /** Pour les lignes de leasing véhicule (RecurringExpense synchronisée avec
+   *  un LeasingContract) : id du véhicule pour rendre le libellé cliquable
+   *  vers /fleet/[vehicleId]. */
+  vehicleId?: string;
 };
 
 export type CashflowYear = {
@@ -160,6 +164,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     settings,
     recurring,
     monthEntries,
+    leasingByRecurring,
     oneOffs,
     milestones,
     /// Employés : leurs 3 sorties mensuelles (Net / Précompte / ONSS) sont
@@ -174,6 +179,27 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       orderBy: [{ isIncome: "desc" }, { category: "asc" }, { label: "asc" }]
     }),
     prisma.recurringExpenseMonth.findMany({ where: { year } }),
+    // Contrats de leasing → utilisés pour renommer les lignes cashflow
+    // synchronisées en "Plaque — Prénom Nom" et exposer vehicleId.
+    // On ne remonte que ceux liés à une RecurringExpense (recurringExpenseId non null).
+    prisma.leasingContract.findMany({
+      where: { recurringExpenseId: { not: null } },
+      select: {
+        recurringExpenseId: true,
+        vehicle: {
+          select: {
+            id: true, plate: true,
+            assignments: {
+              where: { endDate: null },
+              take: 1,
+              select: {
+                user: { select: { firstName: true, lastName: true } }
+              }
+            }
+          }
+        }
+      }
+    }),
     prisma.oneOffCashflowEntry.findMany({
       where: { date: { gte: yearStart, lte: yearEnd } },
       orderBy: [{ date: "asc" }, { kind: "asc" }, { label: "asc" }]
@@ -725,6 +751,23 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   }
 
   // ─── Lignes RecurringExpense ───
+  // Index leasing par recurringExpenseId → { vehicleId, plate, assignedUser }
+  // Utilisé pour renommer les lignes leasing en "Plaque — Prénom Nom" et
+  // exposer le vehicleId pour rendre le libellé cliquable.
+  const leasingByRec = new Map<string, {
+    vehicleId: string;
+    plate: string;
+    assignedUser: { firstName: string; lastName: string } | null;
+  }>();
+  for (const lc of leasingByRecurring) {
+    if (!lc.recurringExpenseId || !lc.vehicle) continue;
+    leasingByRec.set(lc.recurringExpenseId, {
+      vehicleId: lc.vehicle.id,
+      plate: lc.vehicle.plate,
+      assignedUser: lc.vehicle.assignments[0]?.user ?? null
+    });
+  }
+
   for (const r of recurring) {
     // Bornes temporelles : on n'affiche la récurrence que dans [startDate, endDate]
     // (vues comme yyyy-mm pour le bucketing mensuel). Si null, illimité.
@@ -767,10 +810,22 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         notes: entry?.notes
       };
     });
+    // Si cette ligne est synchronisée avec un contrat leasing, on la
+    // renomme dynamiquement en "Plaque — Prénom Nom" (ou "— Non attribué")
+    // et on expose vehicleId pour rendre le libellé cliquable.
+    const leasing = leasingByRec.get(r.id);
+    const dynamicLabel = leasing
+      ? `${leasing.plate} — ${
+          leasing.assignedUser
+            ? `${leasing.assignedUser.firstName} ${leasing.assignedUser.lastName}`
+            : "Non attribué"
+        }`
+      : r.label;
+
     rows.push({
       id: `rec-${r.id}`,
       kind: r.isIncome ? "recurring_income" : "recurring_expense",
-      label: r.label,
+      label: dynamicLabel,
       category: r.category,
       isIncome: r.isIncome,
       recurringId: r.id,
@@ -780,7 +835,8 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       startDate: recStart ? recStart.toISOString().slice(0, 10) : null,
       endDate: recEnd ? recEnd.toISOString().slice(0, 10) : null,
       cells,
-      totalYear: cells.reduce((s, c) => s + c.amount, 0)
+      totalYear: cells.reduce((s, c) => s + c.amount, 0),
+      vehicleId: leasing?.vehicleId
     });
   }
 
