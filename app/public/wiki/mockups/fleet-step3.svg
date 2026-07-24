@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 3 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">Sync cashflow automatique</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Impact cashflow</text>
+<rect x="40" y="115" width="820" height="70" rx="8" fill="#eef2ff" stroke="#5b5fd6"/>
+<text x="60" y="140" font-size="12" font-weight="700" fill="#5b5fd6">Nouvelle ligne récurrente créée automatiquement :</text>
+<text x="60" y="160" font-size="11" font-family="monospace" fill="#535679">Leasing 1-ABC-123 · ALD Automotive · -620,50 €/mois</text>
+<text x="60" y="176" font-size="10" fill="#a1a1b8">Bornes : 01/03/2024 → 28/02/2028 · Catégorie "Leasing véhicules"</text>
+<rect x="40" y="195" width="820" height="30" fill="#f3f3f7"/>
+<text x="55" y="215" font-size="10" font-weight="700" fill="#727496">POSTE CASHFLOW · MENSUEL</text>
+<rect x="40" y="225" width="820" height="40" fill="#fef2f2"/>
+<text x="55" y="250" font-size="12" fill="#7f1d1d">Leasing 1-ABC-123 (Peugeot 3008) · ALD</text>
+<text x="800" y="250" font-size="12" font-weight="700" fill="#dc2626" text-anchor="end">-620,50 €</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Modifier le contrat = mise à jour de la ligne. Supprimer = suppression de la ligne.</text>
+</svg>

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" font-family="-apple-system,'Segoe UI',sans-serif">
+<rect width="900" height="340" fill="#f3f3f7"/>
+<rect x="20" y="15" width="110" height="24" rx="12" fill="#5b5fd6"/>
+<text x="75" y="31" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ÉTAPE 1 / 3</text>
+<text x="140" y="33" font-size="12" font-weight="600" fill="#535679">/fleet — vue liste avec statut et utilisateur actuel</text>
+<rect x="20" y="60" width="860" height="220" rx="10" fill="#fff" stroke="#e1e1ec"/>
+
+<text x="40" y="90" font-size="14" font-weight="700" fill="#202037">Flotte · 5 véhicules en circulation</text>
+<rect x="40" y="115" width="820" height="30" fill="#f3f3f7"/>
+<text x="55" y="135" font-size="10" font-weight="700" fill="#727496">PLAQUE</text>
+<text x="200" y="135" font-size="10" font-weight="700" fill="#727496">VÉHICULE</text>
+<text x="380" y="135" font-size="10" font-weight="700" fill="#727496">TYPE</text>
+<text x="480" y="135" font-size="10" font-weight="700" fill="#727496">UTILISATEUR</text>
+<text x="680" y="135" font-size="10" font-weight="700" fill="#727496">LEASING</text>
+<text x="55" y="170" font-size="12" font-family="monospace" font-weight="700" fill="#202037">1-ABC-123</text>
+<text x="200" y="170" font-size="11" fill="#202037">Peugeot 3008</text>
+<rect x="370" y="155" width="90" height="24" rx="4" fill="#fef3c7"/>
+<text x="415" y="171" font-size="10" font-weight="700" fill="#78350f" text-anchor="middle">Leasing</text>
+<text x="480" y="170" font-size="11" fill="#202037">Sophie Laurent</text>
+<text x="680" y="170" font-size="11" fill="#202037">ALD · 620 €/mois</text>
+<text x="55" y="210" font-size="12" font-family="monospace" font-weight="700" fill="#202037">1-DEF-456</text>
+<text x="200" y="210" font-size="11" fill="#202037">Tesla Model 3</text>
+<rect x="370" y="195" width="90" height="24" rx="4" fill="#dbeafe"/>
+<text x="415" y="211" font-size="10" font-weight="700" fill="#1e40af" text-anchor="middle">Propriété</text>
+<text x="480" y="210" font-size="11" fill="#202037">Alice Martin</text>
+<text x="680" y="210" font-size="11" fill="#a1a1b8">—</text>
+<text x="55" y="250" font-size="12" font-family="monospace" font-weight="700" fill="#202037">1-GHI-789</text>
+<text x="200" y="250" font-size="11" fill="#202037">BMW i3</text>
+<rect x="370" y="235" width="90" height="24" rx="4" fill="#fef3c7"/>
+<text x="415" y="251" font-size="10" font-weight="700" fill="#78350f" text-anchor="middle">Leasing</text>
+<text x="480" y="250" font-size="11" fill="#a1a1b8">— (non attribué)</text>
+<text x="680" y="250" font-size="11" fill="#202037">Arval · 480 €/mois</text>
+
+<text x="20" y="325" font-size="11" fill="#535679" font-style="italic">Bouton + Nouveau véhicule en haut à droite. Section 'Sortis de flotte' pliable en bas.</text>
+</svg>

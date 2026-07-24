@@ -27,6 +27,7 @@ export type Permission =
   | "tests.manage"    | "tests.take"
   | "expenses.read"   | "expenses.write" | "expenses.approve"
   | "leaves.read"     | "leaves.write"   | "leaves.approve"
+  | "fleet.read"      | "fleet.manage"
   | "audit.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
@@ -49,7 +50,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "documents.read","documents.write",
     "tests.manage","tests.take",
     "expenses.read","expenses.write","expenses.approve",
-    "leaves.read","leaves.write","leaves.approve",
+    "leaves.read","leaves.write","leaves.approve","fleet.read","fleet.manage",
     "audit.read"
   ],
   MANAGER: [
@@ -70,7 +71,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "documents.read","documents.write",
     "tests.manage","tests.take",
     "expenses.read","expenses.write","expenses.approve",
-    "leaves.read","leaves.write","leaves.approve",
+    "leaves.read","leaves.write","leaves.approve","fleet.read","fleet.manage",
     "audit.read"
   ],
   COMMERCIAL: [
@@ -87,7 +88,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "crm.read","crm.write",
     "documents.read","documents.write",
     "expenses.read","expenses.write",
-    "leaves.read","leaves.write"
+    "leaves.read","leaves.write","fleet.read"
   ],
   CONSULTANT: [
     "companies.read",
@@ -102,7 +103,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "documents.read",
     "tests.take",
     "expenses.read","expenses.write",
-    "leaves.read","leaves.write"
+    "leaves.read","leaves.write","fleet.read"
   ],
   FINANCE: [
     "companies.read",
@@ -294,7 +295,9 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
     { value: "documents.read",  label: "Documents (lecture)" },
     { value: "documents.write", label: "Documents (écriture)" },
     { value: "tests.manage",    label: "Tests techniques (gérer et assigner)" },
-    { value: "tests.take",      label: "Tests techniques (passer un test)" }
+    { value: "tests.take",      label: "Tests techniques (passer un test)" },
+    { value: "fleet.read",      label: "Flotte véhicules (lecture)" },
+    { value: "fleet.manage",    label: "Flotte véhicules (gestion complète)" }
   ]}
 ];
 
@@ -448,6 +451,10 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Tests techniques", href: "/tests", perms: [
         { value: "tests.manage", label: "Gérer et assigner les tests (admin)" },
         { value: "tests.take",   label: "Passer un test assigné" }
+      ]},
+      { menuLabel: "Flotte véhicules", href: "/fleet", perms: [
+        { value: "fleet.read",   label: "Voir la flotte et les attributions" },
+        { value: "fleet.manage", label: "Ajouter/éditer/attribuer/supprimer un véhicule" }
       ]}
     ]
   },

@@ -1694,6 +1694,46 @@ Distinction Employee/Freelance impacte le payroll, la facturation, les cotisatio
 `
       }
     ]
+  }  ,
+  {
+    key: "fleet",
+    title: "Flotte véhicules",
+    description: "Gérer voitures leasing + achat, attribuer, tracer.",
+    icon: "Car",
+    colorClass: "text-slate-700",
+    requiredPermission: "fleet.read",
+    articles: [
+      {
+        slug: "gerer",
+        title: "Gérer la flotte de véhicules",
+        description: "Liste, fiche véhicule, contrat leasing, attribution + sync cashflow.",
+        estimatedMinutes: 4,
+        content: `
+La flotte Dasolabs (voitures leasing + propriété) tient dans un module dédié qui alimente automatiquement le cashflow pour les mensualités leasing.
+
+![Étape 1 — Liste des véhicules avec statut et utilisateur](/wiki/mockups/fleet-step1.svg)
+
+> [!STEP] 1. Vue liste
+> \\`/fleet\\` affiche tous les véhicules actifs · plaque · marque/modèle · type (Leasing/Propriété) · utilisateur actuel · mensualité leasing. Section "Sortis de flotte" pliable en bas.
+
+![Étape 2 — Fiche véhicule avec contrat leasing + attribution](/wiki/mockups/fleet-step2.svg)
+
+> [!STEP] 2. Fiche véhicule
+> Trois blocs : infos véhicule (plaque, VIN, dates), contrat de leasing (bailleur, dates, mensualité), attribution actuelle avec bouton "Clôturer".
+
+![Étape 3 — Sync cashflow des mensualités leasing](/wiki/mockups/fleet-step3.svg)
+
+> [!STEP] 3. Sync cashflow automatique
+> Sauvegarder un contrat = créer une ligne récurrente dans le cashflow (catégorie "Leasing véhicules") entre les dates du contrat. Modifier = màj, supprimer = suppression de la ligne cashflow.
+
+> [!TIP] Attribution avec historique
+> Attribuer un véhicule à un nouvel user ferme automatiquement l'attribution précédente à la veille de la nouvelle date. L'historique complet reste consultable sur la fiche.
+
+> [!INFO] Kilométrage optionnel
+> Tu peux tracer les km au départ / retour d'attribution — utile pour arbitrer le forfait leasing en fin de contrat (dépassement km facturé).
+\\`
+      }
+    ]
   }
 ];
 

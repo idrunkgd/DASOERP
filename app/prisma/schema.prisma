@@ -309,6 +309,7 @@ model User {
   // Wiki formation — traçabilité des dernières éditions par cet admin
   wikiArticlesEdited   WikiArticle[]         @relation("WikiArticleUpdatedBy")
   wikiImagesUploaded   WikiImage[]           @relation("WikiImageUploader")
+  vehicleAssignments   VehicleAssignment[]   @relation("VehicleAssignmentUser")
   /// Type de contrat de ce consultant chez Dasolabs. Idem Candidate.contractType.
   contractType         ContractType?
   /// Paie configurée pour ce consultant interne (si contractType=EMPLOYEE).
@@ -2605,4 +2606,87 @@ model WikiImage {
   createdAt   DateTime  @default(now())
 
   @@index([createdAt])
+}
+
+/// =========================================================================
+/// FLOTTE — Gestion des véhicules (leasing + achat) + attribution
+/// =========================================================================
+
+enum VehicleCategory {
+  LEASING     // Loué chez une société de leasing (contrat associé)
+  OWNED       // Acheté par Dasolabs
+}
+
+enum VehicleStatus {
+  ACTIVE      // En circulation
+  RETURNED    // Rendu au leaseur (fin de contrat)
+  SOLD        // Vendu (si OWNED)
+  ARCHIVED    // Sortie de flotte (ancien véhicule)
+}
+
+/// Un véhicule de la flotte Dasolabs.
+model Vehicle {
+  id                  String          @id @default(cuid())
+  plate               String          @unique  // Plaque d'immatriculation (belge : 1-ABC-123)
+  brand               String                    // Peugeot, BMW, Tesla...
+  model               String                    // 3008, i3, Model 3
+  vin                 String?                   // Numéro de série (VIN) — optionnel
+  category            VehicleCategory
+  status              VehicleStatus   @default(ACTIVE)
+  commissioningDate   DateTime?       @db.Date   // Date de mise en service
+  releaseDate         DateTime?       @db.Date   // Date de sortie (rendu / vendu)
+  notes               String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  leasingContract     LeasingContract?
+  assignments         VehicleAssignment[]
+
+  @@index([status])
+  @@index([category])
+}
+
+/// Contrat de leasing associé à un véhicule (LEASING only).
+/// Un véhicule LEASING a exactement un LeasingContract.
+model LeasingContract {
+  id                  String          @id @default(cuid())
+  vehicleId           String          @unique
+  vehicle             Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  lessor              String                    // Société de leasing (ALD, Arval, Athlon...)
+  contractRef         String?                   // Référence contrat côté leaseur
+  startDate           DateTime        @db.Date
+  endDate             DateTime        @db.Date
+  monthlyAmount       Decimal         @db.Decimal(10, 2)  // TVAC (ce qu'on paie vraiment chaque mois)
+  kmIncludedYear      Int?                      // Forfait km annuel inclus (info)
+  notes               String?
+  /// Lien vers l'entrée RecurringExpense créée automatiquement dans le
+  /// cashflow. Si présent, ça signifie que la ligne cashflow est
+  /// synchronisée avec ce contrat. Suppression du contrat = suppression
+  /// de la ligne cashflow associée.
+  recurringExpenseId  String?         @unique
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([lessor])
+}
+
+/// Attribution d'un véhicule à un utilisateur, avec dates début/fin.
+/// Un même véhicule peut avoir plusieurs attributions successives ; à un
+/// instant T il n'y a qu'une attribution "active" (endDate = null).
+model VehicleAssignment {
+  id                  String          @id @default(cuid())
+  vehicleId           String
+  vehicle             Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  userId              String
+  user                User            @relation("VehicleAssignmentUser", fields: [userId], references: [id])
+  startDate           DateTime        @db.Date
+  endDate             DateTime?       @db.Date   // NULL = attribution active
+  startKm             Int?                       // Kilométrage à la remise
+  endKm               Int?                       // Kilométrage au retour
+  notes               String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([vehicleId, endDate])
+  @@index([userId, endDate])
 }
