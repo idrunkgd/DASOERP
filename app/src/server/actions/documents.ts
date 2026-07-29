@@ -32,7 +32,8 @@ const MetaSchema = z.object({
   companyId: z.string().optional().nullable(),
   projectId: z.string().optional().nullable(),
   offerId: z.string().optional().nullable(),
-  consultantId: z.string().optional().nullable()
+  consultantId: z.string().optional().nullable(),
+  vehicleId: z.string().optional().nullable()
 });
 
 /**
@@ -62,7 +63,8 @@ export async function uploadDocument(formData: FormData) {
     companyId: raw.companyId || null,
     projectId: raw.projectId || null,
     offerId: raw.offerId || null,
-    consultantId: raw.consultantId || null
+    consultantId: raw.consultantId || null,
+    vehicleId: raw.vehicleId || null
   });
 
   const tags = parseTags(meta.tags);
@@ -100,6 +102,7 @@ export async function uploadDocument(formData: FormData) {
         projectId: meta.projectId,
         offerId: meta.offerId,
         consultantId: meta.consultantId,
+        vehicleId: meta.vehicleId,
         uploadedById: session.user.id
       }
     });
@@ -111,6 +114,7 @@ export async function uploadDocument(formData: FormData) {
       message: `Document « ${created.title} » uploadé (${humanSize(created.size)})`
     });
     revalidatePath("/documents");
+    if (meta.vehicleId) revalidatePath(`/fleet/${meta.vehicleId}`);
     return created;
   } catch (e) {
     // Cleanup fichier si DB a planté

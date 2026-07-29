@@ -7,6 +7,7 @@ import { Car, User as UserIcon, Trash2, Files, Plus, Pencil } from "lucide-react
 import { ContractForm } from "./contract-form";
 import { AssignForm, UnassignButton } from "./assign-form";
 import { DeleteVehicleButton } from "./delete-button";
+import { VehicleDocUpload } from "./doc-upload";
 
 export const dynamic = "force-dynamic";
 
@@ -227,12 +228,7 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
               </ul>
             )}
             {canManage && (
-              <Link
-                href={`/documents/new?vehicleId=${vehicle.id}`}
-                className="btn-secondary btn-sm w-full text-xs"
-              >
-                <Plus className="w-3 h-3" /> Ajouter un document
-              </Link>
+              <VehicleDocUpload vehicleId={vehicle.id} />
             )}
           </section>
 
