@@ -124,7 +124,7 @@ export type CashflowYear = {
 const MONTHS = Array.from({ length: 12 }, (_, i) => i);
 
 /** Détermine si une RecurringExpense tombe sur un mois donné selon sa fréquence. */
-function falsOnMonth(
+export function falsOnMonth(
   frequency: string,
   paymentMonths: number[],
   month1to12: number

@@ -3486,11 +3486,11 @@ function RecurringCellForm({
           try {
             await upsertMonthlyEntry(fd);
             if (applyToFuture && changed) {
-              await applyRecurringAmountToFuture(
+              const r = await applyRecurringAmountToFuture(
                 recurringId, year, month, effectiveAmount
               );
               toast.success(
-                `Cellule + tous les mois non-payés à ${effectiveAmount} €`
+                `${effectiveAmount} € appliqué à ${r.updated} mois (à partir de ce mois)`
               );
             } else {
               toast.success("Cellule mise à jour");
@@ -3533,12 +3533,12 @@ function RecurringCellForm({
           />
           <span className="flex-1">
             <span className="font-medium text-indigoaccent">
-              Appliquer à tous les mois non-payés
+              Appliquer à partir de ce mois jusqu'à la fin
             </span>
             <span className="block text-xs text-midnight-600 mt-0.5">
-              {effectiveAmount} € devient le nouveau défaut de cette ligne. Tous
-              les mois prévus (PLANNED) sont mis à jour — avant ET après ce mois.
-              Les mois déjà payés (PAID) et sautés (SKIPPED) restent intacts.
+              Tous les mois de ce mois-ci inclus jusqu'à la fin du contrat
+              passent à {effectiveAmount} €. Les mois AVANT restent inchangés.
+              Les mois déjà payés ou sautés dans la période restent intacts.
             </span>
           </span>
         </label>

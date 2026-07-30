@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
+import { falsOnMonth } from "@/lib/cashflow";
 
 const PERM = "finance.read" as const;
 const PERM_WRITE = "finance.write" as const;
@@ -222,22 +223,24 @@ export async function upsertMonthlyEntry(formData: FormData) {
 }
 
 /**
- * Propage un nouveau montant à TOUS les mois PLANNED d'une ligne récurrente,
- * y compris les mois passés qui n'ont pas encore été marqués payés. Cas
- * d'usage : "j'augmente l'assurance parce qu'un nouvel employé arrive →
- * applique le nouveau montant à tous les mois non-payés, avant et après".
+ * Propage un nouveau montant à partir d'un mois pivot (inclus) jusqu'à
+ * la fin du contrat (endDate de la ligne récurrente, ou +48 mois par
+ * défaut si illimité). Les mois AVANT le pivot ne sont PAS touchés —
+ * ils continuent d'afficher leur valeur courante (defaultAmount ou
+ * override existant), sans être figés.
+ *
+ * Cas d'usage : "impôts à 2000€/mois jusqu'à fin 2028. À mi-2027 je
+ * passe à 4000€ → juin 2027 à décembre 2028 = 4000€, avant juin 2027 =
+ * inchangé (2000€)."
  *
  * Stratégie :
- *   1. Met à jour defaultAmount du RecurringExpense (nouvelle baseline
- *      pour les mois sans override).
- *   2. Sur TOUS les mois PLANNED (peu importe l'année) avec un
- *      amountOverride existant, on le supprime → ils re-héritent du
- *      nouveau default. On préserve les entrées PAID (historique figé)
- *      et SKIPPED (choix explicite du user).
- *
- * Les paramètres fromYear/fromMonth ne servent plus qu'à indiquer d'où
- * vient l'action (traçabilité) et à l'affichage côté client — la portée
- * SQL couvre toute la durée de la ligne.
+ *   - On NE MODIFIE PAS defaultAmount (sinon les mois passés PLANNED
+ *     sans override afficheraient aussi le nouveau montant).
+ *   - Pour chaque mois de [pivot ; endDate] où la récurrence tombe :
+ *       * si un RecurringExpenseMonth existe et est PAID/SKIPPED →
+ *         on laisse tel quel (historique + choix explicite préservés).
+ *       * sinon on set amountOverride = newAmount avec status PLANNED.
+ *   - Cap à 48 mois si endDate est null (garde-fou contre boucles infinies).
  */
 export async function applyRecurringAmountToFuture(
   recurringExpenseId: string,
@@ -249,26 +252,75 @@ export async function applyRecurringAmountToFuture(
   if (!Number.isFinite(newAmount) || newAmount < 0) {
     throw new Error("Montant invalide.");
   }
-  await prisma.$transaction(async (tx) => {
-    await tx.recurringExpense.update({
-      where: { id: recurringExpenseId },
-      data: { defaultAmount: newAmount }
-    });
-    // Efface les overrides sur TOUS les mois PLANNED (passés + futurs).
-    // Les mois PAID conservent leur override (historique réel) et les
-    // mois SKIPPED restent tels quels. On ignore fromYear/fromMonth :
-    // scope = toute la ligne.
-    await tx.recurringExpenseMonth.updateMany({
-      where: {
-        recurringExpenseId,
-        status: "PLANNED",
-        amountOverride: { not: null }
-      },
-      data: { amountOverride: null }
-    });
+
+  const rec = await prisma.recurringExpense.findUniqueOrThrow({
+    where: { id: recurringExpenseId },
+    select: { endDate: true, frequency: true, paymentMonths: true }
   });
+
+  const CAP_MONTHS = 48;
+  const startYM = fromYear * 12 + (fromMonth - 1);
+  const endYM = rec.endDate
+    ? rec.endDate.getUTCFullYear() * 12 + rec.endDate.getUTCMonth()
+    : startYM + CAP_MONTHS;
+
+  if (endYM < startYM) {
+    // Rien à faire — le pivot est au-delà de endDate.
+    return { ok: true, updated: 0 };
+  }
+
+  // Énumération des mois où la récurrence tombe.
+  const months: Array<{ year: number; month: number }> = [];
+  for (let ym = startYM; ym <= endYM; ym++) {
+    const y = Math.floor(ym / 12);
+    const m = (ym % 12) + 1; // 1-12
+    if (falsOnMonth(rec.frequency, rec.paymentMonths, m)) {
+      months.push({ year: y, month: m });
+    }
+  }
+
+  if (months.length === 0) return { ok: true, updated: 0 };
+
+  // On récupère les entries existantes dans la range en une seule requête,
+  // puis on décide pour chacun des mois cibles s'il faut update, create
+  // ou skip. Un peu plus verbeux qu'un updateMany + createMany mais on
+  // évite les cas limites (PAID/SKIPPED préservés).
+  const existing = await prisma.recurringExpenseMonth.findMany({
+    where: {
+      recurringExpenseId,
+      OR: months.map((m) => ({ year: m.year, month: m.month }))
+    }
+  });
+  const byKey = new Map<string, typeof existing[number]>();
+  for (const e of existing) byKey.set(`${e.year}-${e.month}`, e);
+
+  let updated = 0;
+  await prisma.$transaction(async (tx) => {
+    for (const { year, month } of months) {
+      const found = byKey.get(`${year}-${month}`);
+      if (found) {
+        // Ne jamais toucher aux mois déjà payés ou explicitement sautés.
+        if (found.status === "PAID" || found.status === "SKIPPED") continue;
+        await tx.recurringExpenseMonth.update({
+          where: { id: found.id },
+          data: { amountOverride: newAmount }
+        });
+      } else {
+        await tx.recurringExpenseMonth.create({
+          data: {
+            recurringExpenseId,
+            year, month,
+            amountOverride: newAmount,
+            status: "PLANNED"
+          }
+        });
+      }
+      updated++;
+    }
+  });
+
   revalidatePath("/cashflow");
-  return { ok: true };
+  return { ok: true, updated };
 }
 
 /**
