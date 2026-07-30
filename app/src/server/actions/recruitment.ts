@@ -1,7 +1,7 @@
 "use server";
 import { z } from "zod";
 import { requirePermission } from "@/lib/rbac";
-import { promoteCandidateToConsultant, offboardConsultant, createCandidatePortalAccount } from "@/server/services/recruitment";
+import { promoteCandidateToConsultant, offboardConsultant, createCandidatePortalAccount, backfillPromotedCandidateExperiences } from "@/server/services/recruitment";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -41,6 +41,23 @@ export async function createCandidatePortalAction(candidateId: string, formData:
   const data = PortalSchema.parse(Object.fromEntries(formData));
   await createCandidatePortalAccount({ actorId: session.user.id, candidateId, ...data });
   revalidatePath(`/candidates/${candidateId}`);
+}
+
+/**
+ * Rattrape le CV d'un candidat déjà recruté (bug historique où la promotion
+ * ne recopiait pas les expériences). Idempotent : ne duplique pas les
+ * expériences déjà présentes côté user.
+ */
+export async function backfillPromotedCandidateExperiencesAction(candidateId: string) {
+  const session = await requirePermission("users.manage");
+  const r = await backfillPromotedCandidateExperiences({
+    actorId: session.user.id, candidateId
+  });
+  revalidatePath(`/candidates/${candidateId}`);
+  // On ne connaît pas ici le userId : le service revalide via logActivity,
+  // mais pour rafraîchir la fiche user consultant après clic on force /users.
+  revalidatePath("/users", "layout");
+  return r;
 }
 
 export async function offboardConsultantAction(userId: string, formData: FormData) {

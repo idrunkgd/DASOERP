@@ -10,6 +10,7 @@ import { RecruitButton } from "./recruit-button";
 import { CandidatePortalButton } from "./portal-button";
 import { HiringInterviewsPanel } from "./hiring-interviews";
 import { ClientInterviewsPanel, type AppWithInterviews } from "./client-interviews-panel";
+import { BackfillCvButton } from "./backfill-cv-button";
 import { ExperiencesPanel } from "../../me/experiences-panel";
 import { CandidateTestsSection } from "./tests-section";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -118,6 +119,12 @@ export default async function CandidateDetail({ params }: { params: { id: string
             </div>
             <div className="text-xs text-midnight-500 mt-1">Cette fiche n'apparaît plus dans la liste candidats par défaut (exclusivité Candidat / Consultant).</div>
           </div>
+          {canRecruit && c.experiences.length > 0 && (
+            <BackfillCvButton
+              candidateId={c.id}
+              hint={`${c.experiences.length} expérience${c.experiences.length > 1 ? "s" : ""} sur la fiche candidat — clic pour les copier vers le consultant si elles manquent.`}
+            />
+          )}
         </div>
       )}
 

@@ -53,6 +53,26 @@ export async function promoteCandidateToConsultant(opts: {
         joinedAt: joinedAt ?? new Date()
       }
     });
+    // ✱ Copie du CV (CandidateExperience → UserExperience). Structure
+    // identique entre les deux modèles, donc mapping trivial. Sans cette
+    // étape, le CV s'évaporait lors de la promotion : sur la fiche du
+    // nouveau consultant, l'onglet Expériences était vide alors que le
+    // candidat avait bien un historique côté /candidates.
+    const candidateExperiences = await tx.candidateExperience.findMany({
+      where: { candidateId }
+    });
+    if (candidateExperiences.length > 0) {
+      await tx.userExperience.createMany({
+        data: candidateExperiences.map((e) => ({
+          userId: user.id,
+          companyName: e.companyName,
+          jobTitle: e.jobTitle,
+          startDate: e.startDate,
+          endDate: e.endDate,
+          description: e.description
+        }))
+      });
+    }
     await tx.candidate.update({
       where: { id: candidateId },
       data: {
@@ -65,11 +85,64 @@ export async function promoteCandidateToConsultant(opts: {
     });
     await logActivity({
       actorId, action: "STATUS_CHANGE", entityType: "Candidate", entityId: candidate.id,
-      message: `Candidat ${candidate.firstName} ${candidate.lastName} promu Consultant — User ${user.email} créé`,
-      diff: { candidateId, userId: user.id, role } as any
+      message: `Candidat ${candidate.firstName} ${candidate.lastName} promu Consultant — User ${user.email} créé (${candidateExperiences.length} expérience${candidateExperiences.length > 1 ? "s" : ""} recopiée${candidateExperiences.length > 1 ? "s" : ""})`,
+      diff: { candidateId, userId: user.id, role, copiedExperiences: candidateExperiences.length } as any
     });
     return user;
   });
+}
+
+/**
+ * Ré-copie les expériences d'un candidat vers son user consultant existant.
+ * Cas d'usage : bug historique où la promotion perdait le CV — cette action
+ * permet de rattraper sans avoir à re-saisir les expériences à la main.
+ *
+ * Comportement idempotent : on ne duplique pas les expériences déjà présentes
+ * côté user (matching sur companyName + startDate).
+ */
+export async function backfillPromotedCandidateExperiences(opts: {
+  actorId: string;
+  candidateId: string;
+}) {
+  const { actorId, candidateId } = opts;
+  const candidate = await prisma.candidate.findUniqueOrThrow({
+    where: { id: candidateId },
+    include: { experiences: true, convertedToUser: true }
+  });
+  if (!candidate.convertedToUserId || !candidate.convertedToUser) {
+    throw new Error("Ce candidat n'a pas été recruté — rien à recopier.");
+  }
+  if (candidate.experiences.length === 0) {
+    throw new Error("Ce candidat n'a aucune expérience à recopier.");
+  }
+  const existing = await prisma.userExperience.findMany({
+    where: { userId: candidate.convertedToUserId },
+    select: { companyName: true, startDate: true }
+  });
+  const existingKey = new Set(
+    existing.map((e) => `${e.companyName}|${e.startDate.toISOString().slice(0, 10)}`)
+  );
+  const toCreate = candidate.experiences.filter((e) => {
+    const key = `${e.companyName}|${e.startDate.toISOString().slice(0, 10)}`;
+    return !existingKey.has(key);
+  });
+  if (toCreate.length === 0) return { created: 0 };
+  await prisma.userExperience.createMany({
+    data: toCreate.map((e) => ({
+      userId: candidate.convertedToUserId!,
+      companyName: e.companyName,
+      jobTitle: e.jobTitle,
+      startDate: e.startDate,
+      endDate: e.endDate,
+      description: e.description
+    }))
+  });
+  await logActivity({
+    actorId, action: "UPDATE", entityType: "User", entityId: candidate.convertedToUserId,
+    message: `Backfill CV : ${toCreate.length} expérience${toCreate.length > 1 ? "s" : ""} recopiée${toCreate.length > 1 ? "s" : ""} depuis le candidat`,
+    diff: { candidateId, userId: candidate.convertedToUserId, created: toCreate.length } as any
+  });
+  return { created: toCreate.length };
 }
 
 /**
