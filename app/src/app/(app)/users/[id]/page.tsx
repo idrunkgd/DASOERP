@@ -5,6 +5,7 @@ import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { UserForm } from "../user-form";
 import { ReviewsPanel } from "./reviews-panel";
+import { ClientInterviewsPanel, type AppWithInterviews } from "../../candidates/[id]/client-interviews-panel";
 import { ResetPasswordButton } from "./reset-password-button";
 import { UserExperiencesPanel } from "../../me/user-experiences-panel";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
@@ -28,8 +29,8 @@ export default async function UserDetail({ params }: { params: { id: string } })
 
   const planned = await userPlannedHoursForWeek(user.id, new Date());
 
-  // Reviews + projets disponibles + catalogue compétences
-  const [reviews, projects, skillCatalog] = await Promise.all([
+  // Reviews + projets disponibles + catalogue compétences + présentations client
+  const [reviews, projects, skillCatalog, applications] = await Promise.all([
     prisma.consultantReview.findMany({
       where: { subjectId: user.id },
       include: { conductedBy: true, project: true },
@@ -40,7 +41,17 @@ export default async function UserDetail({ params }: { params: { id: string } })
       orderBy: { reference: "desc" },
       select: { id: true, reference: true, name: true }
     }),
-    prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] })
+    prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    // Missions sur lesquelles ce consultant a été présenté (comme User) — avec
+    // tous ses entretiens client (1 par tour du process client).
+    prisma.missionApplication.findMany({
+      where: { consultantId: user.id },
+      include: {
+        missionRequest: { include: { company: { select: { name: true } } } },
+        interviews: { orderBy: { scheduledAt: "asc" } }
+      },
+      orderBy: { presentedAt: "desc" }
+    })
   ]);
 
   const canManageReviews = isAdmin || isManager;
@@ -96,6 +107,26 @@ export default async function UserDetail({ params }: { params: { id: string } })
             startDate: e.startDate.toISOString(),
             endDate: e.endDate ? e.endDate.toISOString() : null,
             description: e.description
+          }))}
+        />
+
+        <ClientInterviewsPanel
+          applications={applications.map<AppWithInterviews>((a) => ({
+            applicationId: a.id,
+            missionRequestId: a.missionRequest.id,
+            missionRef: a.missionRequest.reference,
+            missionTitle: a.missionRequest.title,
+            companyName: a.missionRequest.company.name,
+            status: a.status,
+            interviews: a.interviews.map((iv) => ({
+              id: iv.id,
+              scheduledAt: iv.scheduledAt,
+              kind: iv.kind,
+              interviewers: iv.interviewers,
+              location: iv.location,
+              feedback: iv.feedback,
+              outcome: iv.outcome
+            }))
           }))}
         />
 

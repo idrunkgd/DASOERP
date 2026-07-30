@@ -9,6 +9,7 @@ import { PersonAvatar } from "@/components/ui/person-avatar";
 import { RecruitButton } from "./recruit-button";
 import { CandidatePortalButton } from "./portal-button";
 import { HiringInterviewsPanel } from "./hiring-interviews";
+import { ClientInterviewsPanel, type AppWithInterviews } from "./client-interviews-panel";
 import { ExperiencesPanel } from "../../me/experiences-panel";
 import { CandidateTestsSection } from "./tests-section";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -236,6 +237,26 @@ export default async function CandidateDetail({ params }: { params: { id: string
               </table>
             )}
           </section>
+
+          <ClientInterviewsPanel
+            applications={c.applications.map<AppWithInterviews>((a) => ({
+              applicationId: a.id,
+              missionRequestId: a.missionRequest.id,
+              missionRef: a.missionRequest.reference,
+              missionTitle: a.missionRequest.title,
+              companyName: a.missionRequest.company.name,
+              status: a.status,
+              interviews: a.interviews.map((iv) => ({
+                id: iv.id,
+                scheduledAt: iv.scheduledAt,
+                kind: iv.kind,
+                interviewers: iv.interviewers,
+                location: iv.location,
+                feedback: iv.feedback,
+                outcome: iv.outcome
+              }))
+            }))}
+          />
         </div>
 
         <aside className="space-y-4">

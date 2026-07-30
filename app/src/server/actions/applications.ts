@@ -170,6 +170,8 @@ export async function addInterview(applicationId: string, formData: FormData) {
   }
   await logActivity({ actorId: session.user.id, action: "CREATE", entityType: "Interview", entityId: created.id, message: `Entretien ${data.kind} planifié`, after: created });
   revalidatePath(`/mission-requests/${app.missionRequestId}`);
+  if (app.candidateId) revalidatePath(`/candidates/${app.candidateId}`);
+  if (app.consultantId) revalidatePath(`/users/${app.consultantId}`);
 }
 
 export async function updateInterview(id: string, formData: FormData) {
@@ -183,6 +185,8 @@ export async function updateInterview(id: string, formData: FormData) {
   }
   await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "Interview", entityId: id, message: "Entretien mis à jour", before, after });
   revalidatePath(`/mission-requests/${before.application.missionRequestId}`);
+  if (before.application.candidateId) revalidatePath(`/candidates/${before.application.candidateId}`);
+  if (before.application.consultantId) revalidatePath(`/users/${before.application.consultantId}`);
 }
 
 export async function deleteInterview(id: string) {
@@ -192,6 +196,8 @@ export async function deleteInterview(id: string) {
   await logActivity({ actorId: session.user.id, action: "DELETE", entityType: "Interview", entityId: id, message: "Entretien supprimé", before });
   if (before.application?.missionRequestId) revalidatePath(`/mission-requests/${before.application.missionRequestId}`);
   if (before.candidateId) revalidatePath(`/candidates/${before.candidateId}`);
+  if (before.application?.candidateId) revalidatePath(`/candidates/${before.application.candidateId}`);
+  if (before.application?.consultantId) revalidatePath(`/users/${before.application.consultantId}`);
   revalidatePath("/calendar");
 }
 
