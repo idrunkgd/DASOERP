@@ -3490,7 +3490,7 @@ function RecurringCellForm({
                 recurringId, year, month, effectiveAmount
               );
               toast.success(
-                `Cellule + tous les mois suivants (${effectiveAmount} €)`
+                `Cellule + tous les mois non-payés à ${effectiveAmount} €`
               );
             } else {
               toast.success("Cellule mise à jour");
@@ -3533,12 +3533,12 @@ function RecurringCellForm({
           />
           <span className="flex-1">
             <span className="font-medium text-indigoaccent">
-              Appliquer aussi aux mois suivants
+              Appliquer à tous les mois non-payés
             </span>
             <span className="block text-xs text-midnight-600 mt-0.5">
-              {effectiveAmount} € deviendra le nouveau défaut de cette ligne. Les
-              mois futurs prévus (PLANNED) sont mis à jour ; les mois déjà payés
-              (PAID) et sautés (SKIPPED) restent intacts.
+              {effectiveAmount} € devient le nouveau défaut de cette ligne. Tous
+              les mois prévus (PLANNED) sont mis à jour — avant ET après ce mois.
+              Les mois déjà payés (PAID) et sautés (SKIPPED) restent intacts.
             </span>
           </span>
         </label>

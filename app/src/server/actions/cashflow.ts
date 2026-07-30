@@ -222,18 +222,22 @@ export async function upsertMonthlyEntry(formData: FormData) {
 }
 
 /**
- * Propage un nouveau montant à TOUS les mois futurs (>= fromYear/fromMonth)
- * d'une ligne récurrente. Cas d'usage : "j'augmente l'assurance parce qu'un
- * nouvel employé arrive → applique le nouveau montant à tous les mois qui
- * suivent, pas juste ce mois-ci".
+ * Propage un nouveau montant à TOUS les mois PLANNED d'une ligne récurrente,
+ * y compris les mois passés qui n'ont pas encore été marqués payés. Cas
+ * d'usage : "j'augmente l'assurance parce qu'un nouvel employé arrive →
+ * applique le nouveau montant à tous les mois non-payés, avant et après".
  *
  * Stratégie :
  *   1. Met à jour defaultAmount du RecurringExpense (nouvelle baseline
  *      pour les mois sans override).
- *   2. Sur les mois futurs PLANNED avec un amountOverride existant, on
- *      supprime l'override (mise à null) → ils re-héritent du nouveau
- *      default. On préserve les entrées PAID (historique figé) et
- *      SKIPPED (choix explicite du user).
+ *   2. Sur TOUS les mois PLANNED (peu importe l'année) avec un
+ *      amountOverride existant, on le supprime → ils re-héritent du
+ *      nouveau default. On préserve les entrées PAID (historique figé)
+ *      et SKIPPED (choix explicite du user).
+ *
+ * Les paramètres fromYear/fromMonth ne servent plus qu'à indiquer d'où
+ * vient l'action (traçabilité) et à l'affichage côté client — la portée
+ * SQL couvre toute la durée de la ligne.
  */
 export async function applyRecurringAmountToFuture(
   recurringExpenseId: string,
@@ -250,18 +254,15 @@ export async function applyRecurringAmountToFuture(
       where: { id: recurringExpenseId },
       data: { defaultAmount: newAmount }
     });
-    // Efface les overrides des mois >= (fromYear, fromMonth) qui sont
-    // encore PLANNED. On calcule le seuil "année × 12 + mois" pour
-    // exprimer la comparaison en SQL brut (compat multi-DB).
+    // Efface les overrides sur TOUS les mois PLANNED (passés + futurs).
+    // Les mois PAID conservent leur override (historique réel) et les
+    // mois SKIPPED restent tels quels. On ignore fromYear/fromMonth :
+    // scope = toute la ligne.
     await tx.recurringExpenseMonth.updateMany({
       where: {
         recurringExpenseId,
         status: "PLANNED",
-        amountOverride: { not: null },
-        OR: [
-          { year: { gt: fromYear } },
-          { year: fromYear, month: { gte: fromMonth } }
-        ]
+        amountOverride: { not: null }
       },
       data: { amountOverride: null }
     });
