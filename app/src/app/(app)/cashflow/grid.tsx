@@ -33,6 +33,7 @@ import {
   updateRecurringExpense,
   deleteRecurringExpense,
   upsertMonthlyEntry,
+  applyRecurringAmountToFuture,
   cycleMonthlyStatus,
   createOneOffEntry,
   updateOneOffEntry,
@@ -3430,76 +3431,16 @@ function CellEditorModal({
           onClose={onClose}
         />
       ) : isRecurring && row.recurringId ? (
-        <form
-          action={(fd) => {
-            start(async () => {
-              try {
-                await upsertMonthlyEntry(fd);
-                toast.success("Cellule mise à jour");
-                onClose();
-              } catch (e: any) {
-                toast.error(e.message);
-              }
-            });
-          }}
-          className="space-y-3"
-        >
-          <input
-            type="hidden"
-            name="recurringExpenseId"
-            value={row.recurringId}
-          />
-          <input type="hidden" name="year" value={year} />
-          <input type="hidden" name="month" value={monthIdx + 1} />
-          <div>
-            <label className="label">
-              Montant override (€) — laisser vide pour utiliser le défaut (
-              {row.defaultAmount}€)
-            </label>
-            <input
-              name="amountOverride"
-              type="number"
-              step="0.01"
-              defaultValue={
-                cell.amount && cell.amount !== row.defaultAmount
-                  ? cell.amount
-                  : ""
-              }
-              className="input"
-              placeholder={`Défaut : ${row.defaultAmount}€`}
-            />
-          </div>
-          <div>
-            <label className="label">Statut</label>
-            <select
-              name="status"
-              defaultValue={cell.status}
-              className="input"
-            >
-              <option value="PLANNED">⏰ Prévu</option>
-              <option value="PAID">✓ Payé / Encaissé</option>
-              <option value="SKIPPED">⊘ Sauté ce mois</option>
-            </select>
-          </div>
-          <div>
-            <label className="label">Notes</label>
-            <textarea
-              name="notes"
-              rows={2}
-              defaultValue={cell.notes ?? ""}
-              className="input"
-              placeholder="Ex: Montant réajusté, facture spécifique…"
-            />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary">
-              Annuler
-            </button>
-            <button disabled={pending} className="btn-primary">
-              <Save className="w-4 h-4" /> Enregistrer
-            </button>
-          </div>
-        </form>
+        <RecurringCellForm
+          recurringId={row.recurringId}
+          defaultAmount={row.defaultAmount ?? 0}
+          year={year}
+          month={monthIdx + 1}
+          cell={cell}
+          pending={pending}
+          start={start}
+          onClose={onClose}
+        />
       ) : (
         <p className="text-sm text-midnight-600">
           Cette cellule appartient à un type qui se gère depuis la ligne complète.
@@ -3507,6 +3448,129 @@ function CellEditorModal({
         </p>
       )}
     </Modal>
+  );
+}
+
+/**
+ * Formulaire d'édition d'une cellule pour une ligne récurrente.
+ * Inclut une case "Appliquer aussi aux mois suivants" pour propager le
+ * nouveau montant à toute la ligne (nouvel employé qui change l'assurance,
+ * augmentation de loyer, etc). Voir applyRecurringAmountToFuture côté serveur.
+ */
+function RecurringCellForm({
+  recurringId, defaultAmount, year, month, cell, pending, start, onClose
+}: {
+  recurringId: string;
+  defaultAmount: number;
+  year: number;
+  month: number;
+  cell: CashflowCell;
+  pending: boolean;
+  start: (cb: () => void) => void;
+  onClose: () => void;
+}) {
+  const [amountStr, setAmountStr] = useState<string>(
+    cell.amount && cell.amount !== defaultAmount ? String(cell.amount) : ""
+  );
+  const [applyToFuture, setApplyToFuture] = useState(false);
+
+  // Le montant "effectif" utilisé = override si saisi, sinon default
+  const effectiveAmount =
+    amountStr.trim() === "" ? defaultAmount : Number(amountStr);
+  const changed = Number.isFinite(effectiveAmount) && effectiveAmount !== defaultAmount;
+
+  return (
+    <form
+      action={(fd) => {
+        start(async () => {
+          try {
+            await upsertMonthlyEntry(fd);
+            if (applyToFuture && changed) {
+              await applyRecurringAmountToFuture(
+                recurringId, year, month, effectiveAmount
+              );
+              toast.success(
+                `Cellule + tous les mois suivants (${effectiveAmount} €)`
+              );
+            } else {
+              toast.success("Cellule mise à jour");
+            }
+            onClose();
+          } catch (e: any) {
+            toast.error(e.message);
+          }
+        });
+      }}
+      className="space-y-3"
+    >
+      <input type="hidden" name="recurringExpenseId" value={recurringId} />
+      <input type="hidden" name="year" value={year} />
+      <input type="hidden" name="month" value={month} />
+      <div>
+        <label className="label">
+          Montant override (€) — laisser vide pour utiliser le défaut ({defaultAmount}€)
+        </label>
+        <input
+          name="amountOverride"
+          type="number"
+          step="0.01"
+          value={amountStr}
+          onChange={(e) => setAmountStr(e.target.value)}
+          className="input"
+          placeholder={`Défaut : ${defaultAmount}€`}
+        />
+      </div>
+
+      {/* Case "propager aux mois futurs" — n'apparaît que si le montant
+          diffère du défaut, sinon ce serait un no-op. */}
+      {changed && (
+        <label className="flex items-start gap-2 text-sm border border-indigoaccent/30 bg-indigoaccent/5 rounded p-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={applyToFuture}
+            onChange={(e) => setApplyToFuture(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span className="flex-1">
+            <span className="font-medium text-indigoaccent">
+              Appliquer aussi aux mois suivants
+            </span>
+            <span className="block text-xs text-midnight-600 mt-0.5">
+              {effectiveAmount} € deviendra le nouveau défaut de cette ligne. Les
+              mois futurs prévus (PLANNED) sont mis à jour ; les mois déjà payés
+              (PAID) et sautés (SKIPPED) restent intacts.
+            </span>
+          </span>
+        </label>
+      )}
+
+      <div>
+        <label className="label">Statut</label>
+        <select name="status" defaultValue={cell.status} className="input">
+          <option value="PLANNED">⏰ Prévu</option>
+          <option value="PAID">✓ Payé / Encaissé</option>
+          <option value="SKIPPED">⊘ Sauté ce mois</option>
+        </select>
+      </div>
+      <div>
+        <label className="label">Notes</label>
+        <textarea
+          name="notes"
+          rows={2}
+          defaultValue={cell.notes ?? ""}
+          className="input"
+          placeholder="Ex: Montant réajusté, facture spécifique…"
+        />
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="button" onClick={onClose} className="btn-secondary">
+          Annuler
+        </button>
+        <button disabled={pending} className="btn-primary">
+          <Save className="w-4 h-4" /> Enregistrer
+        </button>
+      </div>
+    </form>
   );
 }
 

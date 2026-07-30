@@ -222,6 +222,55 @@ export async function upsertMonthlyEntry(formData: FormData) {
 }
 
 /**
+ * Propage un nouveau montant à TOUS les mois futurs (>= fromYear/fromMonth)
+ * d'une ligne récurrente. Cas d'usage : "j'augmente l'assurance parce qu'un
+ * nouvel employé arrive → applique le nouveau montant à tous les mois qui
+ * suivent, pas juste ce mois-ci".
+ *
+ * Stratégie :
+ *   1. Met à jour defaultAmount du RecurringExpense (nouvelle baseline
+ *      pour les mois sans override).
+ *   2. Sur les mois futurs PLANNED avec un amountOverride existant, on
+ *      supprime l'override (mise à null) → ils re-héritent du nouveau
+ *      default. On préserve les entrées PAID (historique figé) et
+ *      SKIPPED (choix explicite du user).
+ */
+export async function applyRecurringAmountToFuture(
+  recurringExpenseId: string,
+  fromYear: number,
+  fromMonth: number,
+  newAmount: number
+) {
+  await requirePermission(PERM_WRITE);
+  if (!Number.isFinite(newAmount) || newAmount < 0) {
+    throw new Error("Montant invalide.");
+  }
+  await prisma.$transaction(async (tx) => {
+    await tx.recurringExpense.update({
+      where: { id: recurringExpenseId },
+      data: { defaultAmount: newAmount }
+    });
+    // Efface les overrides des mois >= (fromYear, fromMonth) qui sont
+    // encore PLANNED. On calcule le seuil "année × 12 + mois" pour
+    // exprimer la comparaison en SQL brut (compat multi-DB).
+    await tx.recurringExpenseMonth.updateMany({
+      where: {
+        recurringExpenseId,
+        status: "PLANNED",
+        amountOverride: { not: null },
+        OR: [
+          { year: { gt: fromYear } },
+          { year: fromYear, month: { gte: fromMonth } }
+        ]
+      },
+      data: { amountOverride: null }
+    });
+  });
+  revalidatePath("/cashflow");
+  return { ok: true };
+}
+
+/**
  * Bascule rapide du statut : PLANNED ↔ PAID (toggle 2 états).
  * Le statut SKIPPED reste accessible via le modal d'édition de cellule.
  *
