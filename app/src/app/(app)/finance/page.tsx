@@ -6,13 +6,19 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { MilestoneStatusSelect } from "./status-select";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
 export default async function FinancePage({ searchParams }: { searchParams: { status?: string; companyId?: string; from?: string; to?: string } }) {
   await requirePermission("finance.read");
+  const statuses = parseMulti(searchParams.status);
+  const companyIds = parseMulti(searchParams.companyId);
   const where: any = {};
-  if (searchParams.status) where.status = searchParams.status;
+  const statusFilter = inFilter(statuses);
+  if (statusFilter) where.status = statusFilter;
   if (searchParams.from) where.expectedAt = { ...(where.expectedAt ?? {}), gte: new Date(searchParams.from) };
   if (searchParams.to)   where.expectedAt = { ...(where.expectedAt ?? {}), lte: new Date(searchParams.to) };
 
@@ -25,8 +31,11 @@ export default async function FinancePage({ searchParams }: { searchParams: { st
     orderBy: [{ status: "asc" }, { expectedAt: "asc" }]
   });
 
-  const filtered = searchParams.companyId
-    ? milestones.filter(m => (m.offer?.companyId === searchParams.companyId) || (m.project?.companyId === searchParams.companyId))
+  const filtered = companyIds.length > 0
+    ? milestones.filter(m => {
+        const cid = m.offer?.companyId ?? m.project?.companyId;
+        return cid ? companyIds.includes(cid) : false;
+      })
     : milestones;
 
   const totalPlanned = filtered.filter(m => m.status === "PLANNED").reduce((s, m) => s + Number(m.amount), 0);
@@ -53,23 +62,33 @@ export default async function FinancePage({ searchParams }: { searchParams: { st
         <KpiCard label="En retard" value={overdue.length} hint={formatCurrency(overdue.reduce((s,m) => s + Number(m.amount), 0))} tone={overdue.length ? "danger" : "neutral"} />
       </div>
 
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[180px]">
-          <option value="">Tous statuts</option>
-          <option value="PLANNED">Prévue</option>
-          <option value="READY">Prête à facturer</option>
-          <option value="TRANSMITTED">Transmise Peppol</option>
-          <option value="PAID">Payée</option>
-          <option value="CANCELLED">Annulée</option>
-        </select>
-        <select name="companyId" defaultValue={searchParams.companyId ?? ""} className="input max-w-[220px]">
-          <option value="">Tous clients</option>
-          {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        <input type="date" name="from" defaultValue={searchParams.from ?? ""} className="input max-w-[160px]" />
-        <input type="date" name="to" defaultValue={searchParams.to ?? ""} className="input max-w-[160px]" />
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "PLANNED",     label: "Prévue",            tone: "info" },
+            { value: "READY",       label: "Prête à facturer",  tone: "warning" },
+            { value: "TRANSMITTED", label: "Transmise Peppol",  tone: "info" },
+            { value: "PAID",        label: "Payée",             tone: "success" },
+            { value: "CANCELLED",   label: "Annulée",           tone: "neutral" }
+          ]}
+        />
+        <FilterChips
+          paramName="companyId"
+          label="Client"
+          options={companies.map(c => ({ value: c.id, label: c.name }))}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["from", "to", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input type="date" name="from" defaultValue={searchParams.from ?? ""} className="input max-w-[160px] text-sm" />
+          <input type="date" name="to" defaultValue={searchParams.to ?? ""} className="input max-w-[160px] text-sm" />
+          <button className="btn-secondary btn-sm">Appliquer dates</button>
+        </PreservedSearchForm>
+      </div>
 
       <div className="card overflow-hidden">
         <table className="table-base">

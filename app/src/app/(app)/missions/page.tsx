@@ -5,6 +5,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Plane } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -19,12 +22,19 @@ const STATUS_TONES: Record<string, string> = {
 
 export default async function MissionsPage({ searchParams }: { searchParams: { q?: string; status?: string; consultantId?: string; companyId?: string; intermediaryCompanyId?: string } }) {
   await requirePermission("consulting.read");
+  const statuses = parseMulti(searchParams.status);
+  const consultantIds = parseMulti(searchParams.consultantId);
+  const companyIds = parseMulti(searchParams.companyId);
+  const intermediaryIds = parseMulti(searchParams.intermediaryCompanyId);
   const where: any = {};
-  if (searchParams.status) where.status = searchParams.status;
+  if (statuses.length > 0) where.status = inFilter(statuses);
   else where.status = { in: ["PLANNED","ACTIVE","EXTENDED","ON_HOLD"] };
-  if (searchParams.consultantId) where.consultantId = searchParams.consultantId;
-  if (searchParams.companyId) where.companyId = searchParams.companyId;
-  if (searchParams.intermediaryCompanyId) where.intermediaryCompanyId = searchParams.intermediaryCompanyId;
+  const consultantFilter = inFilter(consultantIds);
+  if (consultantFilter) where.consultantId = consultantFilter;
+  const companyFilter = inFilter(companyIds);
+  if (companyFilter) where.companyId = companyFilter;
+  const intermediaryFilter = inFilter(intermediaryIds);
+  if (intermediaryFilter) where.intermediaryCompanyId = intermediaryFilter;
   if (searchParams.q) where.OR = [
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
@@ -50,27 +60,45 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
         title="Missions T&M (consultants placés)"
         subtitle={`${list.length} mission(s) — distinct du module Projets (forfait)`}
       />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Réf, titre..." className="input max-w-xs" />
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[200px]">
-          <option value="">En cours (par défaut)</option>
-          {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-        <select name="consultantId" defaultValue={searchParams.consultantId ?? ""} className="input max-w-[220px]">
-          <option value="">Tous consultants</option>
-          {consultants.map(c => <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>)}
-        </select>
-        <select name="companyId" defaultValue={searchParams.companyId ?? ""} className="input max-w-[220px]">
-          <option value="">Tous clients</option>
-          {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        <select name="intermediaryCompanyId" defaultValue={searchParams.intermediaryCompanyId ?? ""} className="input max-w-[220px]">
-          <option value="">Tous portages</option>
-          <option value="__none__" disabled>(missions directes uniquement : utiliser filtre)</option>
-          {intermediaries.map(c => <option key={c.id} value={c.id}>via {c.name}</option>)}
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "PLANNED",   label: "Planifiée",  tone: "info" },
+            { value: "ACTIVE",    label: "Active",     tone: "success" },
+            { value: "EXTENDED",  label: "Prolongée",  tone: "success" },
+            { value: "ON_HOLD",   label: "En pause",   tone: "warning" },
+            { value: "COMPLETED", label: "Terminée",   tone: "neutral" },
+            { value: "CANCELLED", label: "Annulée",    tone: "danger" }
+          ]}
+        />
+        <FilterChips
+          paramName="consultantId"
+          label="Consultant"
+          options={consultants.map(c => ({ value: c.id, label: `${c.firstName} ${c.lastName}` }))}
+        />
+        <FilterChips
+          paramName="companyId"
+          label="Client"
+          options={companies.map(c => ({ value: c.id, label: c.name }))}
+        />
+        {intermediaries.length > 0 && (
+          <FilterChips
+            paramName="intermediaryCompanyId"
+            label="Portage"
+            options={intermediaries.map(c => ({ value: c.id, label: c.name }))}
+          />
+        )}
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Réf, titre..." className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+        </PreservedSearchForm>
+      </div>
 
       {list.length === 0 ? (
         <div className="card"><EmptyState icon={Plane} title="Aucune mission" description="Les missions sont créées depuis les demandes de mission après sélection d'un candidat." /></div>

@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/ui/page-header";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { NewExpenseForm } from "./new-expense-form";
 import { ExpenseActions } from "./actions-buttons";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +40,9 @@ export default async function ExpensesPage({
 
   const where: any = {};
   if (mineOnly) where.userId = session.user.id;
-  if (searchParams.status) where.status = searchParams.status;
+  const statuses = parseMulti(searchParams.status);
+  const statusFilter = inFilter(statuses);
+  if (statusFilter) where.status = statusFilter;
 
   const reports = await prisma.expenseReport.findMany({
     where,
@@ -168,30 +172,31 @@ export default async function ExpensesPage({
 
       {/* Filtres + liste */}
       <div className="card">
-        <div className="card-header flex items-center justify-between flex-wrap gap-2">
-          <div className="font-semibold">Notes ({reports.length})</div>
-          <form className="flex gap-2 text-sm">
+        <div className="card-header flex flex-col gap-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="font-semibold">Notes ({reports.length})</div>
             {isApprover && (
-              <label className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  name="mine"
-                  value="1"
-                  defaultChecked={mineOnly}
-                />{" "}
-                Mes notes uniquement
-              </label>
+              <FilterChips
+                paramName="mine"
+                label=""
+                multi={false}
+                options={[
+                  { value: "1", label: "Mes notes uniquement", tone: "info" }
+                ]}
+              />
             )}
-            <select name="status" defaultValue={searchParams.status ?? ""} className="input text-sm">
-              <option value="">Tous les statuts</option>
-              {Object.keys(STATUS_LABELS).map((s) => (
-                <option key={s} value={s}>
-                  {STATUS_LABELS[s].label}
-                </option>
-              ))}
-            </select>
-            <button className="btn-secondary text-sm">Filtrer</button>
-          </form>
+          </div>
+          <FilterChips
+            paramName="status"
+            label="Statut"
+            options={[
+              { value: "DRAFT",     label: "Brouillon",   tone: "neutral" },
+              { value: "SUBMITTED", label: "Soumise",     tone: "warning" },
+              { value: "APPROVED",  label: "Approuvée",   tone: "success" },
+              { value: "REJECTED",  label: "Refusée",     tone: "danger" },
+              { value: "PAID",      label: "Remboursée",  tone: "info" }
+            ]}
+          />
         </div>
         <div className="overflow-x-auto">
           <table className="table-base">

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -20,11 +22,17 @@ export default async function ReviewsPage({ searchParams }: { searchParams: { su
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   // Lecture : Admin / Manager voient tout. Les autres ne voient que leurs propres reviews.
   const canSeeAll = sessionPerms.includes("users.manage") || sessionPerms.includes("timesheet.validate");
+  const subjects = parseMulti(searchParams.subject);
+  const kinds = parseMulti(searchParams.kind);
+  const outcomes = parseMulti(searchParams.outcome);
   const where: any = {};
   if (!canSeeAll) where.subjectId = session.user.id;
-  if (searchParams.subject) where.subjectId = searchParams.subject;
-  if (searchParams.kind) where.kind = searchParams.kind;
-  if (searchParams.outcome) where.outcome = searchParams.outcome;
+  const subjectFilter = inFilter(subjects);
+  if (subjectFilter && canSeeAll) where.subjectId = subjectFilter;
+  const kindFilter = inFilter(kinds);
+  if (kindFilter) where.kind = kindFilter;
+  const outcomeFilter = inFilter(outcomes);
+  if (outcomeFilter) where.outcome = outcomeFilter;
 
   const [list, users] = await Promise.all([
     prisma.consultantReview.findMany({
@@ -41,26 +49,30 @@ export default async function ReviewsPage({ searchParams }: { searchParams: { su
         title="Entretiens internes — consultants"
         subtitle={`${list.length} entretien(s) — suivi RH/Manager des employés Dasolabs`}
       />
-      <form className="mb-4 flex gap-2 flex-wrap">
+      <div className="mb-4 space-y-3">
         {canSeeAll && (
-          <select name="subject" defaultValue={searchParams.subject ?? ""} className="input max-w-[240px]">
-            <option value="">Tous les consultants</option>
-            {users.map(u => <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>)}
-          </select>
+          <FilterChips
+            paramName="subject"
+            label="Consultant"
+            options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+          />
         )}
-        <select name="kind" defaultValue={searchParams.kind ?? ""} className="input max-w-[200px]">
-          <option value="">Tous types</option>
-          {Object.entries(KIND_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-        <select name="outcome" defaultValue={searchParams.outcome ?? ""} className="input max-w-[180px]">
-          <option value="">Toutes issues</option>
-          <option value="SCHEDULED">Planifié</option>
-          <option value="COMPLETED">Tenu</option>
-          <option value="CANCELLED">Annulé</option>
-          <option value="RESCHEDULED">Reprogrammé</option>
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+        <FilterChips
+          paramName="kind"
+          label="Type"
+          options={Object.entries(KIND_LABELS).map(([v, l]) => ({ value: v, label: l }))}
+        />
+        <FilterChips
+          paramName="outcome"
+          label="Issue"
+          options={[
+            { value: "SCHEDULED",   label: "Planifié",     tone: "info" },
+            { value: "COMPLETED",   label: "Tenu",         tone: "success" },
+            { value: "CANCELLED",   label: "Annulé",       tone: "neutral" },
+            { value: "RESCHEDULED", label: "Reprogrammé",  tone: "warning" }
+          ]}
+        />
+      </div>
 
       {list.length === 0 ? (
         <div className="card p-10 text-center text-sm text-midnight-500">Aucun entretien interne.</div>

@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { UploadDocumentForm } from "./upload-form";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +34,7 @@ export default async function DocumentsPage({
   await requirePermissionOrRedirect("documents.read");
 
   const q = (searchParams.q || "").trim();
-  const tag = (searchParams.tag || "").trim();
+  const tags = parseMulti(searchParams.tag);
   const expiring = searchParams.expiring === "1";
 
   const where: any = { parentDocumentId: null };
@@ -42,7 +45,7 @@ export default async function DocumentsPage({
       { description: { contains: q, mode: "insensitive" } }
     ];
   }
-  if (tag) where.tags = { has: tag };
+  if (tags.length > 0) where.tags = { hasSome: tags };
   if (expiring) {
     const in30 = new Date();
     in30.setDate(in30.getDate() + 30);
@@ -122,47 +125,49 @@ export default async function DocumentsPage({
         </div>
       </div>
 
-      <div className="card p-3 mb-4">
-        <form className="flex flex-wrap gap-2 items-center">
+      <div className="card p-3 mb-4 space-y-3">
+        {distinctTags.length > 0 && (
+          <FilterChips
+            paramName="tag"
+            label="Tags"
+            options={distinctTags.map((t) => ({ value: t, label: t }))}
+          />
+        )}
+        <FilterChips
+          paramName="expiring"
+          label="Filtres rapides"
+          multi={false}
+          options={[
+            { value: "1", label: `Expire dans 30j${expiringCount > 0 ? ` (${expiringCount})` : ""}`, tone: "warning" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex flex-wrap gap-2 items-center"
+        >
           <input
             name="q"
             defaultValue={q}
             placeholder="Rechercher..."
-            className="input max-w-xs"
+            className="input max-w-xs text-sm"
           />
-          <select name="tag" defaultValue={tag} className="input max-w-[200px]">
-            <option value="">— Tous les tags —</option>
-            {distinctTags.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <label className="flex items-center gap-1.5 text-xs text-midnight-700">
-            <input
-              type="checkbox"
-              name="expiring"
-              value="1"
-              defaultChecked={expiring}
-            />
-            Expire dans 30j {expiringCount > 0 && `(${expiringCount})`}
-          </label>
-          <button className="btn-secondary text-xs">Filtrer</button>
-          {(q || tag || expiring) && (
+          <button className="btn-secondary btn-sm">Rechercher</button>
+          {(q || tags.length > 0 || expiring) && (
             <Link href="/documents" className="text-xs text-midnight-500 hover:underline">
-              Réinitialiser
+              Réinitialiser tous
             </Link>
           )}
-        </form>
+        </PreservedSearchForm>
       </div>
 
       {documents.length === 0 ? (
         <div className="card">
           <EmptyState
             icon={FileIcon}
-            title={q || tag || expiring ? "Aucun résultat" : "Aucun document"}
+            title={q || tags.length > 0 || expiring ? "Aucun résultat" : "Aucun document"}
             description={
-              q || tag || expiring
+              q || tags.length > 0 || expiring
                 ? "Aucun document ne correspond à ces filtres."
                 : "Uploade ton premier document ci-dessus."
             }

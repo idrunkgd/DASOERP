@@ -7,6 +7,9 @@ import { PersonAvatar } from "@/components/ui/person-avatar";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Users as UsersIcon, MapPin, Briefcase, Languages, CalendarClock, Plane, CalendarCheck } from "lucide-react";
 import { getConsultantMissionStatusBatch, type ConsultantMissionStatus } from "@/server/services/mission-status";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +32,15 @@ export default async function ConsultantsPage({ searchParams }: { searchParams: 
     { email:     { contains: searchParams.q, mode: "insensitive" } }
   ];
   if (searchParams.skill) where.skills = { has: searchParams.skill };
-  if (searchParams.role) where.role = searchParams.role;
-  // Par défaut : on n'affiche que les CONSULTANTS sur cette page. Les Managers,
-  // Commerciaux, etc. ont leur propre rôle métier et n'ont pas vocation à
-  // apparaître dans le pool "disponibles pour mission". L'utilisateur peut
-  // explicitement filtrer sur un autre rôle via le select.
-  if (!searchParams.role) where.role = "CONSULTANT";
+  const roles = parseMulti(searchParams.role);
+  if (roles.length > 0) {
+    where.role = inFilter(roles);
+  } else {
+    // Par défaut : on n'affiche que les CONSULTANTS sur cette page. Les Managers,
+    // Commerciaux, etc. ont leur propre rôle métier et n'ont pas vocation à
+    // apparaître dans le pool "disponibles pour mission".
+    where.role = "CONSULTANT";
+  }
 
   const list = await prisma.user.findMany({
     where, orderBy: [{ active: "desc" }, { lastName: "asc" }],
@@ -80,33 +86,51 @@ export default async function ConsultantsPage({ searchParams }: { searchParams: 
         actions={<Link href="/users/new" className="btn-primary">+ Nouveau (admin)</Link>}
       />
 
-      <form className="mb-5 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Nom, email..." className="input max-w-xs" />
-        <input name="skill" defaultValue={searchParams.skill ?? ""} placeholder="Compétence (ex: react)" className="input max-w-xs" />
-        <select name="role" defaultValue={searchParams.role ?? ""} className="input max-w-[200px]">
-          <option value="">Tous rôles</option>
-          <option value="CONSULTANT">Consultant</option>
-          <option value="MANAGER">Manager</option>
-          <option value="COMMERCIAL">Commercial</option>
-          <option value="FINANCE">Finance</option>
-          <option value="ADMIN">Admin</option>
-        </select>
-        <select name="status" defaultValue={statusFilter} className="input max-w-[180px]">
-          <option value="active">Actifs (par défaut)</option>
-          <option value="inactive">Anciens (partis)</option>
-          <option value="all">Tous</option>
-        </select>
-        <select name="mission" defaultValue={missionFilter} className="input max-w-[200px]">
-          <option value="">Mission : peu importe</option>
-          <option value="on_mission">En mission</option>
-          <option value="available">Disponibles maintenant</option>
-          <option value="scheduled">Programmés (futur)</option>
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-        {(searchParams.q || searchParams.status || searchParams.skill || searchParams.role || searchParams.mission) && (
-          <Link href="/consultants" className="btn-ghost">Réinitialiser</Link>
-        )}
-      </form>
+      <div className="mb-5 space-y-3">
+        <FilterChips
+          paramName="role"
+          label="Rôle"
+          options={[
+            { value: "CONSULTANT", label: "Consultant" },
+            { value: "MANAGER",    label: "Manager" },
+            { value: "COMMERCIAL", label: "Commercial" },
+            { value: "FINANCE",    label: "Finance" },
+            { value: "ADMIN",      label: "Admin" }
+          ]}
+        />
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          multi={false}
+          options={[
+            { value: "active",   label: "Actifs",       tone: "success" },
+            { value: "inactive", label: "Anciens",      tone: "neutral" },
+            { value: "all",      label: "Tous",         tone: "info" }
+          ]}
+        />
+        <FilterChips
+          paramName="mission"
+          label="Mission"
+          multi={false}
+          options={[
+            { value: "on_mission", label: "En mission",           tone: "warning" },
+            { value: "available",  label: "Disponibles maintenant", tone: "success" },
+            { value: "scheduled",  label: "Programmés (futur)",   tone: "info" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "skill", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Nom, email..." className="input max-w-xs text-sm" />
+          <input name="skill" defaultValue={searchParams.skill ?? ""} placeholder="Compétence (ex: react)" className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+          {(searchParams.q || searchParams.status || searchParams.skill || searchParams.role || searchParams.mission) && (
+            <Link href="/consultants" className="btn-ghost btn-sm">Réinitialiser tous</Link>
+          )}
+        </PreservedSearchForm>
+      </div>
 
       {filteredList.length === 0 ? (
         <div className="card">

@@ -5,6 +5,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Building2, Plus } from "lucide-react";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +15,7 @@ type Search = { q?: string; status?: string };
 
 export default async function CompaniesPage({ searchParams }: { searchParams: Search }) {
   await requirePermission("companies.read");
+  const statuses = parseMulti(searchParams.status);
   const where: any = {};
   if (searchParams.q) {
     where.OR = [
@@ -20,7 +24,8 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Se
       { city: { contains: searchParams.q, mode: "insensitive" } }
     ];
   }
-  if (searchParams.status) where.status = searchParams.status;
+  const statusFilter = inFilter(statuses);
+  if (statusFilter) where.status = statusFilter;
 
   const companies = await prisma.company.findMany({
     where, orderBy: { name: "asc" },
@@ -40,20 +45,29 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Se
           </>
         }
       />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Nom, TVA, ville..." className="input max-w-xs" />
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[180px]">
-          <option value="">Tous statuts</option>
-          <option value="PROSPECT">Prospect</option>
-          <option value="CLIENT">Client</option>
-          <option value="PARTNER">Partenaire</option>
-          <option value="SUPPLIER">Fournisseur</option>
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-        {(searchParams.q || searchParams.status) && (
-          <Link href="/companies" className="btn-ghost">Réinitialiser</Link>
-        )}
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "PROSPECT", label: "Prospect",    tone: "warning" },
+            { value: "CLIENT",   label: "Client",      tone: "success" },
+            { value: "PARTNER",  label: "Partenaire",  tone: "info" },
+            { value: "SUPPLIER", label: "Fournisseur", tone: "neutral" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Nom, TVA, ville..." className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+          {(searchParams.q || searchParams.status) && (
+            <Link href="/companies" className="btn-ghost btn-sm">Réinitialiser tous</Link>
+          )}
+        </PreservedSearchForm>
+      </div>
 
       <div className="card overflow-hidden">
         {companies.length === 0 ? (

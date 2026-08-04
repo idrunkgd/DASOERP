@@ -6,6 +6,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileText, Plus } from "lucide-react";
 import { formatCurrency, formatDate, formatPercent } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +18,14 @@ export default async function OffersPage({ searchParams }: { searchParams: { q?:
   //   - nextVersion = null : c'est la dernière version (V1 sans V2, ou la V2 d'une chaîne)
   //   - parentOfferId = null : on exclut aussi les compléments d'offres
   // Les versions précédentes sont accessibles depuis la fiche détail.
+  const statuses = parseMulti(searchParams.status);
   const where: any = { nextVersion: null, parentOfferId: null };
   if (searchParams.q) where.OR = [
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
-  if (searchParams.status) where.status = searchParams.status;
+  const statusFilter = inFilter(statuses);
+  if (statusFilter) where.status = statusFilter;
 
   const offers = await prisma.offer.findMany({
     where, orderBy: { createdAt: "desc" },
@@ -39,19 +44,28 @@ export default async function OffersPage({ searchParams }: { searchParams: { q?:
           </>
         }
       />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Référence, titre..." className="input max-w-xs" />
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[180px]">
-          <option value="">Tous statuts</option>
-          <option value="DRAFT">Brouillon</option>
-          <option value="SENT">Envoyée</option>
-          <option value="NEGOTIATION">En négociation</option>
-          <option value="WON">Gagnée</option>
-          <option value="LOST">Perdue</option>
-          <option value="CANCELLED">Annulée</option>
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "DRAFT",       label: "Brouillon",     tone: "neutral" },
+            { value: "SENT",        label: "Envoyée",       tone: "info" },
+            { value: "NEGOTIATION", label: "En négociation",tone: "warning" },
+            { value: "WON",         label: "Gagnée",        tone: "success" },
+            { value: "LOST",        label: "Perdue",        tone: "danger" },
+            { value: "CANCELLED",   label: "Annulée",       tone: "neutral" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Référence, titre..." className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+        </PreservedSearchForm>
+      </div>
 
       <div className="card overflow-hidden">
         {offers.length === 0 ? (

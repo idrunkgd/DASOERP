@@ -8,14 +8,18 @@ import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages } from "luc
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CandidateAvatar } from "./avatar";
 import { LinkedInImportButton } from "./linkedin-import-button";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
 export default async function CandidatesPage({ searchParams }: { searchParams: { q?: string; status?: string; skill?: string } }) {
   await requirePermission("consulting.read");
+  const statuses = parseMulti(searchParams.status);
   const where: any = {};
-  if (searchParams.status) {
-    where.status = searchParams.status;
+  if (statuses.length > 0) {
+    where.status = inFilter(statuses);
   } else {
     // Exclusivité Candidat / Consultant : par défaut, on masque
     //  - les candidats ARCHIVED (déjà recrutés en interne)
@@ -47,21 +51,30 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
         }
       />
 
-      <form className="mb-5 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Nom, email..." className="input max-w-xs" />
-        <input name="skill" defaultValue={searchParams.skill ?? ""} placeholder="Compétence (ex: react)" className="input max-w-xs" />
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[220px]">
-          <option value="">Disponibles + indispo (par défaut)</option>
-          <option value="ACTIVE">Actifs uniquement</option>
-          <option value="UNAVAILABLE">Indisponibles uniquement</option>
-          <option value="ENGAGED">En mission</option>
-          <option value="ARCHIVED">Archivés / recrutés</option>
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-        {(searchParams.q || searchParams.status || searchParams.skill) && (
-          <Link href="/candidates" className="btn-ghost">Réinitialiser</Link>
-        )}
-      </form>
+      <div className="mb-5 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "ACTIVE",      label: "Actif",         tone: "success" },
+            { value: "UNAVAILABLE", label: "Indisponible",  tone: "warning" },
+            { value: "ENGAGED",     label: "En mission",    tone: "info" },
+            { value: "ARCHIVED",    label: "Archivé/recruté", tone: "neutral" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "skill", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Nom, email..." className="input max-w-xs text-sm" />
+          <input name="skill" defaultValue={searchParams.skill ?? ""} placeholder="Compétence (ex: react)" className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+          {(searchParams.q || searchParams.status || searchParams.skill) && (
+            <Link href="/candidates" className="btn-ghost btn-sm">Réinitialiser tous</Link>
+          )}
+        </PreservedSearchForm>
+      </div>
 
       {list.length === 0 ? (
         <div className="card">

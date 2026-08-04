@@ -6,17 +6,22 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FolderKanban, Plus, AlertTriangle } from "lucide-react";
 import { formatCurrency, formatPercent } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage({ searchParams }: { searchParams: { q?: string; status?: string } }) {
   await requirePermission("projects.read");
+  const statuses = parseMulti(searchParams.status);
   const where: any = {};
   if (searchParams.q) where.OR = [
     { name: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
-  if (searchParams.status) where.status = searchParams.status;
+  const statusFilter = inFilter(statuses);
+  if (statusFilter) where.status = statusFilter;
 
   const projects = await prisma.project.findMany({
     where, include: { company: true, manager: true }, orderBy: { createdAt: "desc" }
@@ -34,18 +39,27 @@ export default async function ProjectsPage({ searchParams }: { searchParams: { q
           </>
         }
       />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Réf, nom..." className="input max-w-xs" />
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[180px]">
-          <option value="">Tous statuts</option>
-          <option value="TO_START">À démarrer</option>
-          <option value="ACTIVE">Actif</option>
-          <option value="ON_HOLD">En pause</option>
-          <option value="COMPLETED">Terminé</option>
-          <option value="CANCELLED">Annulé</option>
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "TO_START",  label: "À démarrer", tone: "info" },
+            { value: "ACTIVE",    label: "Actif",      tone: "success" },
+            { value: "ON_HOLD",   label: "En pause",   tone: "warning" },
+            { value: "COMPLETED", label: "Terminé",    tone: "neutral" },
+            { value: "CANCELLED", label: "Annulé",     tone: "danger" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Réf, nom..." className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+        </PreservedSearchForm>
+      </div>
 
       <div className="card overflow-hidden">
         {projects.length === 0 ? (

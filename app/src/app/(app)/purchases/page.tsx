@@ -6,14 +6,21 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ShoppingCart, Plus } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
 export default async function PurchasesPage({ searchParams }: { searchParams: { status?: string; projectId?: string; q?: string } }) {
   await requirePermission("purchases.read");
+  const statuses = parseMulti(searchParams.status);
+  const projectIds = parseMulti(searchParams.projectId);
   const where: any = {};
-  if (searchParams.status) where.status = searchParams.status;
-  if (searchParams.projectId) where.projectId = searchParams.projectId;
+  const statusFilter = inFilter(statuses);
+  if (statusFilter) where.status = statusFilter;
+  const projectFilter = inFilter(projectIds);
+  if (projectFilter) where.projectId = projectFilter;
   if (searchParams.q) where.description = { contains: searchParams.q, mode: "insensitive" };
 
   const purchases = await prisma.purchase.findMany({
@@ -33,18 +40,27 @@ export default async function PurchasesPage({ searchParams }: { searchParams: { 
           </>
         }
       />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Description..." className="input max-w-xs" />
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[180px]">
-          <option value="">Tous statuts</option>
-          <option value="PLANNED">Prévu</option>
-          <option value="ORDERED">Commandé</option>
-          <option value="RECEIVED">Reçu</option>
-          <option value="PAID">Payé</option>
-          <option value="CANCELLED">Annulé</option>
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "PLANNED",   label: "Prévu",     tone: "info" },
+            { value: "ORDERED",   label: "Commandé",  tone: "warning" },
+            { value: "RECEIVED",  label: "Reçu",      tone: "info" },
+            { value: "PAID",      label: "Payé",      tone: "success" },
+            { value: "CANCELLED", label: "Annulé",    tone: "neutral" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Description..." className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+        </PreservedSearchForm>
+      </div>
       <div className="card overflow-hidden">
         {purchases.length === 0 ? (
           <EmptyState icon={ShoppingCart} title="Aucun achat" action={<Link href="/purchases/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau</Link>} />

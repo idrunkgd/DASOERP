@@ -2,6 +2,9 @@ import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -10,10 +13,16 @@ const PAGE_SIZE = 50;
 export default async function AuditPage({ searchParams }: { searchParams: { entity?: string; action?: string; actor?: string; q?: string; page?: string } }) {
   await requirePermissionOrRedirect("audit.read");
   const page = Math.max(1, Number(searchParams.page ?? 1));
+  const entities = parseMulti(searchParams.entity);
+  const actions = parseMulti(searchParams.action);
+  const actors = parseMulti(searchParams.actor);
   const where: any = {};
-  if (searchParams.entity) where.entityType = searchParams.entity;
-  if (searchParams.action) where.action = searchParams.action;
-  if (searchParams.actor) where.actorId = searchParams.actor;
+  const entityFilter = inFilter(entities);
+  if (entityFilter) where.entityType = entityFilter;
+  const actionFilter = inFilter(actions);
+  if (actionFilter) where.action = actionFilter;
+  const actorFilter = inFilter(actors);
+  if (actorFilter) where.actorId = actorFilter;
   if (searchParams.q) where.message = { contains: searchParams.q, mode: "insensitive" };
 
   const [events, total, users] = await Promise.all([
@@ -26,22 +35,31 @@ export default async function AuditPage({ searchParams }: { searchParams: { enti
   return (
     <div>
       <PageHeader title="Audit trail" subtitle={`${total} événement(s) — qui a fait quoi, quand, avec diff avant/après`} />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Rechercher dans message..." className="input max-w-xs" />
-        <select name="entity" defaultValue={searchParams.entity ?? ""} className="input max-w-[200px]">
-          <option value="">Toutes les entités</option>
-          {["Company","Contact","ContactInteraction","Offer","OfferLine","BillingMilestone","Project","ProjectMember","TimesheetEntry","Purchase","PlanningEntry","User","ServiceProfile","CostCenter"].map(e => <option key={e} value={e}>{e}</option>)}
-        </select>
-        <select name="action" defaultValue={searchParams.action ?? ""} className="input max-w-[200px]">
-          <option value="">Toutes les actions</option>
-          {["CREATE","UPDATE","DELETE","STATUS_CHANGE","OFFER_WON","OFFER_LOST","PROJECT_CREATED_FROM_OFFER","TIMESHEET_SUBMITTED","TIMESHEET_APPROVED","TIMESHEET_REJECTED","MILESTONE_STATUS_CHANGE","CSV_IMPORT"].map(a => <option key={a} value={a}>{a}</option>)}
-        </select>
-        <select name="actor" defaultValue={searchParams.actor ?? ""} className="input max-w-[200px]">
-          <option value="">Tous les acteurs</option>
-          {users.map(u => <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>)}
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="entity"
+          label="Entité"
+          options={["Company","Contact","ContactInteraction","Offer","OfferLine","BillingMilestone","Project","ProjectMember","TimesheetEntry","Purchase","PlanningEntry","User","ServiceProfile","CostCenter"].map(e => ({ value: e, label: e }))}
+        />
+        <FilterChips
+          paramName="action"
+          label="Action"
+          options={["CREATE","UPDATE","DELETE","STATUS_CHANGE","OFFER_WON","OFFER_LOST","PROJECT_CREATED_FROM_OFFER","TIMESHEET_SUBMITTED","TIMESHEET_APPROVED","TIMESHEET_REJECTED","MILESTONE_STATUS_CHANGE","CSV_IMPORT"].map(a => ({ value: a, label: a }))}
+        />
+        <FilterChips
+          paramName="actor"
+          label="Acteur"
+          options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Rechercher dans message..." className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+        </PreservedSearchForm>
+      </div>
 
       <div className="card overflow-hidden">
         <table className="table-base">

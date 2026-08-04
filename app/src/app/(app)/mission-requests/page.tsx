@@ -5,6 +5,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Briefcase, Plus } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +22,10 @@ const STATUS_TONES: Record<string, string> = {
 
 export default async function MissionsPage({ searchParams }: { searchParams: { q?: string; status?: string } }) {
   await requirePermission("consulting.read");
+  const statuses = parseMulti(searchParams.status);
   const where: any = {};
-  if (searchParams.status) where.status = searchParams.status;
+  const statusFilter = inFilter(statuses);
+  if (statusFilter) where.status = statusFilter;
   if (searchParams.q) where.OR = [
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
@@ -36,14 +41,28 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
         subtitle={`${list.length} demande(s) — pipeline consultance`}
         actions={<Link href="/mission-requests/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouvelle demande</Link>}
       />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Réf, titre..." className="input max-w-xs" />
-        <select name="status" defaultValue={searchParams.status ?? ""} className="input max-w-[200px]">
-          <option value="">Tous statuts</option>
-          {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-        </select>
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="status"
+          label="Statut"
+          options={[
+            { value: "NEW",         label: "Nouvelle",     tone: "info" },
+            { value: "QUALIFYING",  label: "Qualification",tone: "warning" },
+            { value: "PRESENTING",  label: "Présentation", tone: "info" },
+            { value: "CONTRACTED",  label: "Contractée",   tone: "success" },
+            { value: "LOST",        label: "Perdue",       tone: "danger" },
+            { value: "CANCELLED",   label: "Annulée",      tone: "neutral" }
+          ]}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Réf, titre..." className="input max-w-xs text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+        </PreservedSearchForm>
+      </div>
       <div className="card overflow-hidden">
         {list.length === 0 ? (
           <EmptyState icon={Briefcase} title="Aucune demande" action={<Link href="/mission-requests/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouvelle</Link>} />

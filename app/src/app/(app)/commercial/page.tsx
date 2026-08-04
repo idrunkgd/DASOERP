@@ -5,6 +5,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
 import { TodoToggle } from "./todo-toggle";
 import { Phone } from "lucide-react";
+import { FilterChips } from "@/components/ui/filter-chips";
+import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
+import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
@@ -12,9 +15,13 @@ const PAGE_SIZE = 50;
 export default async function CommercialTimeline({ searchParams }: { searchParams: { user?: string; kind?: string; q?: string; from?: string; to?: string; page?: string } }) {
   await requirePermission("contacts.read");
   const page = Math.max(1, Number(searchParams.page ?? 1));
+  const kinds = parseMulti(searchParams.kind);
+  const userIds = parseMulti(searchParams.user);
   const where: any = {};
-  if (searchParams.user) where.userId = searchParams.user;
-  if (searchParams.kind) where.kind = searchParams.kind;
+  const userIdFilter = inFilter(userIds);
+  if (userIdFilter) where.userId = userIdFilter;
+  const kindFilter = inFilter(kinds);
+  if (kindFilter) where.kind = kindFilter;
   if (searchParams.from) where.occurredAt = { ...(where.occurredAt ?? {}), gte: new Date(searchParams.from) };
   if (searchParams.to)   where.occurredAt = { ...(where.occurredAt ?? {}), lte: new Date(searchParams.to) };
   if (searchParams.q) where.OR = [
@@ -42,24 +49,34 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
   return (
     <div>
       <PageHeader title="Activité commerciale" subtitle={`${total} interaction(s) — toutes équipes confondues`} />
-      <form className="mb-4 flex gap-2 flex-wrap">
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Sujet, contenu..." className="input max-w-xs" />
-        <select name="kind" defaultValue={searchParams.kind ?? ""} className="input max-w-[180px]">
-          <option value="">Tous types</option>
-          <option value="note">Note</option>
-          <option value="call">Appel</option>
-          <option value="email">Email</option>
-          <option value="meeting">Réunion</option>
-          <option value="todo">À faire</option>
-        </select>
-        <select name="user" defaultValue={searchParams.user ?? ""} className="input max-w-[200px]">
-          <option value="">Tous les utilisateurs</option>
-          {users.map(u => <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>)}
-        </select>
-        <input name="from" type="date" defaultValue={searchParams.from ?? ""} className="input max-w-[160px]" />
-        <input name="to" type="date" defaultValue={searchParams.to ?? ""} className="input max-w-[160px]" />
-        <button className="btn-secondary">Filtrer</button>
-      </form>
+      <div className="space-y-3 mb-4">
+        <FilterChips
+          paramName="kind"
+          label="Type"
+          options={[
+            { value: "todo",    label: "À faire",  tone: "warning" },
+            { value: "call",    label: "Appel",    tone: "info" },
+            { value: "email",   label: "Email",    tone: "info" },
+            { value: "meeting", label: "Réunion",  tone: "info" },
+            { value: "note",    label: "Note",     tone: "neutral" }
+          ]}
+        />
+        <FilterChips
+          paramName="user"
+          label="Utilisateur"
+          options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+        />
+        <PreservedSearchForm
+          searchParams={searchParams as Record<string, string | undefined>}
+          except={["q", "from", "to", "page"]}
+          className="flex gap-2 flex-wrap items-center"
+        >
+          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Sujet, contenu..." className="input max-w-xs text-sm" />
+          <input name="from" type="date" defaultValue={searchParams.from ?? ""} className="input max-w-[160px] text-sm" />
+          <input name="to" type="date" defaultValue={searchParams.to ?? ""} className="input max-w-[160px] text-sm" />
+          <button className="btn-secondary btn-sm">Rechercher</button>
+        </PreservedSearchForm>
+      </div>
 
       {items.length === 0 ? (
         <div className="card p-10 text-center text-sm text-midnight-500">Aucune interaction.</div>
