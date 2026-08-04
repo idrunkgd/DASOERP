@@ -164,24 +164,34 @@ export async function generateContractFromTemplate(formData: FormData) {
     include: { chapters: { orderBy: { sortOrder: "asc" } } }
   });
 
-  // Charge le sujet avec la relation payrollEmployee (pour {{monthlyNetPay}}).
-  const subject = data.userId
-    ? {
-        kind: "user" as const,
-        user: await prisma.user.findUniqueOrThrow({
-          where: { id: data.userId },
-          include: { payrollEmployee: true }
-        })
-      }
-    : {
-        kind: "candidate" as const,
-        candidate: await prisma.candidate.findUniqueOrThrow({
-          where: { id: data.candidateId! },
-          // Un Candidate peut aussi avoir une PayrollEmployee liée
-          // (freelance ou candidat pré-configuré pour la paie).
-          include: { payrollEmployee: true }
-        })
-      };
+  // Charge le sujet + sources de variables salaire :
+  //   - User consultant interne : PayrollEmployee (config paie officielle)
+  //   - Candidate : latest CandidateSalaryScenario (le candidat n'est pas
+  //     encore employé au moment de la génération du contrat — le workflow
+  //     est Candidat → Offre → Signature → Passage employé). PayrollEmployee
+  //     est chargée en secondaire si déjà pré-configurée.
+  let subject: import("@/lib/contracts").ContractSubject;
+  if (data.userId) {
+    subject = {
+      kind: "user",
+      user: await prisma.user.findUniqueOrThrow({
+        where: { id: data.userId },
+        include: { payrollEmployee: true }
+      })
+    };
+  } else {
+    const [candidate, salaryScenario] = await Promise.all([
+      prisma.candidate.findUniqueOrThrow({
+        where: { id: data.candidateId! },
+        include: { payrollEmployee: true }
+      }),
+      prisma.candidateSalaryScenario.findFirst({
+        where: { candidateId: data.candidateId! },
+        orderBy: { createdAt: "desc" }
+      })
+    ]);
+    subject = { kind: "candidate", candidate, salaryScenario };
+  }
 
   // Parse extras (optionnel : JSON {"startDate": "…", "salary": 3200, …})
   let extra: Record<string, any> = {};

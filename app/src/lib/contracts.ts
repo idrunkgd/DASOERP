@@ -11,8 +11,15 @@
  */
 
 export type ContractSubject =
-  | { kind: "user"; user: any /* User */ }
-  | { kind: "candidate"; candidate: any /* Candidate */ };
+  | { kind: "user"; user: any /* User + payrollEmployee include */ }
+  | {
+      kind: "candidate";
+      candidate: any /* Candidate + payrollEmployee include */;
+      /** Dernière simulation de package salarial du candidat (ordre desc).
+       *  Source primaire des variables salaire pour un candidat pas encore
+       *  recruté (workflow : Candidat → Offre package → Signature → Employé). */
+      salaryScenario?: any | null;
+    };
 
 /** Une entrée de chapitre snapshotée (structure stockée dans Contract.chapters JSON). */
 export type ContractChapterSnapshot = {
@@ -49,15 +56,24 @@ export const VARIABLE_CATALOG: VariableDoc[] = [
   { key: "joinedAt",        label: "Date d'entrée en service",   sample: "01/09/2026" },
   { key: "startDate",       label: "Date de début du contrat",   sample: "01/09/2026" },
   { key: "endDate",         label: "Date de fin du contrat",     sample: "31/08/2027" },
-  { key: "monthlyNetPay",       label: "Salaire net mensuel (€)",       sample: "3 200,00" },
-  { key: "monthlyGrossPay",     label: "Salaire brut mensuel réf. (€)", sample: "4 500,00" },
-  { key: "monthlyWithholdingTax",label: "Précompte pro. mensuel (€)",    sample: "820,00" },
-  { key: "monthlyOnss",         label: "Cotisations ONSS mensuelles (€)", sample: "580,00" },
-  { key: "monthsPerYear",       label: "Mois payés / an (13.92 BE)",    sample: "13,92" },
-  { key: "dailyCost",           label: "Coût journalier interne (€)",   sample: "450,00" },
-  { key: "dailyRate",           label: "TJM facturé client (€)",        sample: "780,00" },
-  { key: "weeklyCapacityH",     label: "Heures/semaine",                sample: "38" },
-  { key: "today",               label: "Date du jour",                  sample: "24/07/2026" }
+  { key: "monthlyNetPay",         label: "Salaire net mensuel (€) — payroll",     sample: "3 200,00" },
+  { key: "monthlyGrossPay",       label: "Salaire brut mensuel (€)",              sample: "4 500,00" },
+  { key: "monthlyWithholdingTax", label: "Précompte pro. mensuel (€) — payroll",  sample: "820,00" },
+  { key: "monthlyOnss",           label: "Cotisations ONSS mensuelles (€) — payroll", sample: "580,00" },
+  { key: "monthsPerYear",         label: "Mois payés / an (13.92 BE)",            sample: "13,92" },
+  { key: "employerChargesPct",    label: "Charges patronales (%)",                sample: "25" },
+  { key: "workingDaysPerWeek",    label: "Régime hebdo (jours/sem)",              sample: "5" },
+  { key: "carMonthly",            label: "Voiture — coût mensuel (€)",            sample: "650,00" },
+  { key: "mealVoucherPerDay",     label: "Chèque-repas / jour employeur (€)",     sample: "6,91" },
+  { key: "ecoVouchersAnnual",     label: "Éco-chèques annuel (€)",                sample: "250,00" },
+  { key: "groupInsurancePct",     label: "Assurance groupe (%)",                  sample: "3" },
+  { key: "hospitalInsuranceMonthly",label: "Hospitalisation mensuelle (€)",       sample: "45,00" },
+  { key: "phoneInternetMonthly",  label: "GSM + internet mensuel (€)",            sample: "50,00" },
+  { key: "netExpensesMonthly",    label: "Frais représentation nets (€/mois)",    sample: "150,00" },
+  { key: "dailyCost",             label: "Coût journalier interne (€)",           sample: "450,00" },
+  { key: "dailyRate",             label: "TJM facturé client (€)",                sample: "780,00" },
+  { key: "weeklyCapacityH",       label: "Heures/semaine",                        sample: "38" },
+  { key: "today",                 label: "Date du jour",                          sample: "24/07/2026" }
 ];
 
 const FR_DATE = new Intl.DateTimeFormat("fr-BE", {
@@ -93,6 +109,47 @@ export function resolveSubjectVariables(
   extra: Record<string, string | number | Date | null | undefined> = {}
 ): Record<string, string> {
   const s: any = subject.kind === "user" ? subject.user : subject.candidate;
+  const payroll = s.payrollEmployee ?? null;
+  const scenario = subject.kind === "candidate" ? (subject.salaryScenario ?? null) : null;
+
+  // Résolution des variables salaire selon la source disponible :
+  //
+  //   Consultant interne (User) :
+  //     - Déjà employé → PayrollEmployee est la source de vérité.
+  //     - Net réel, précompte, ONSS : uniquement dispo côté payroll.
+  //
+  //   Candidat (Candidate) :
+  //     - Pas encore employé → on utilise la dernière simulation de
+  //       package (CandidateSalaryScenario) que le user a créée dans
+  //       /salary-simulator. Brut + avantages y sont détaillés.
+  //     - Le net est un CALCUL complexe (précompte progressif belge) : on
+  //       ne l'affiche pas depuis un scénario, seulement depuis payroll.
+  //     - Si une PayrollEmployee est déjà pré-configurée pour le candidat
+  //       (rare : freelance), elle prime sur le scenario pour cohérence.
+  const monthlyGrossPay =
+    payroll?.monthlyGrossReference ?? scenario?.grossMonthly ?? null;
+  const monthlyNetPay = payroll?.monthlyNetPay ?? null;
+  const monthlyWithholdingTax = payroll?.monthlyWithholdingTax ?? null;
+  const monthlyOnss = payroll?.monthlyOnss ?? null;
+  const monthsPerYear =
+    payroll?.monthsPerYear ?? scenario?.monthsPerYear ?? null;
+  // Avantages : viennent du scenario si candidat, ne sont pas modélisés
+  // côté payroll (payroll ne stocke que les 3 flux ONSS/précompte/net).
+  const employerChargesPct = scenario?.employerChargesPct ?? null;
+  const workingDaysPerWeek = scenario?.workingDaysPerWeek ?? null;
+  const carMonthly = scenario?.carMonthlyTco ?? null;
+  const mealVoucherPerDay = scenario?.mealVoucherEmployerPerDay ?? null;
+  const ecoVouchersAnnual = scenario?.ecoVouchersAnnual ?? null;
+  const groupInsurancePct = scenario?.groupInsurancePct ?? null;
+  const hospitalInsuranceMonthly = scenario?.hospitalInsuranceMonthly ?? null;
+  const phoneInternetMonthly = scenario?.phoneInternetMonthly ?? null;
+  const netExpensesMonthly = scenario?.netExpensesMonthly ?? null;
+
+  const fmtNumFR = (v: any) =>
+    v != null && Number.isFinite(Number(v))
+      ? String(v).replace(".", ",")
+      : "—";
+
   const vars: Record<string, string> = {
     firstName:       s.firstName ?? "—",
     lastName:        s.lastName ?? "—",
@@ -110,16 +167,23 @@ export function resolveSubjectVariables(
     joinedAt:        fmtDate(subject.kind === "user" ? s.joinedAt : s.availableFrom),
     startDate:       "—",
     endDate:         "—",
-    // Salaires : source unique = PayrollEmployee (config paie officielle
-    // Dasolabs, éditable depuis /employees). Champ brut = monthlyGrossReference.
-    // Si aucune paie configurée pour ce sujet, la variable retourne "—".
-    monthlyNetPay:          fmtMoney(s.payrollEmployee?.monthlyNetPay),
-    monthlyGrossPay:        fmtMoney(s.payrollEmployee?.monthlyGrossReference),
-    monthlyWithholdingTax:  fmtMoney(s.payrollEmployee?.monthlyWithholdingTax),
-    monthlyOnss:            fmtMoney(s.payrollEmployee?.monthlyOnss),
-    monthsPerYear:          s.payrollEmployee?.monthsPerYear != null
-                              ? String(s.payrollEmployee.monthsPerYear).replace(".", ",")
-                              : "—",
+    // Salaires — PayrollEmployee (consultant) > SalaryScenario (candidat).
+    monthlyNetPay:          fmtMoney(monthlyNetPay),
+    monthlyGrossPay:        fmtMoney(monthlyGrossPay),
+    monthlyWithholdingTax:  fmtMoney(monthlyWithholdingTax),
+    monthlyOnss:            fmtMoney(monthlyOnss),
+    monthsPerYear:          fmtNumFR(monthsPerYear),
+    employerChargesPct:     fmtNumFR(employerChargesPct),
+    workingDaysPerWeek:     fmtNumFR(workingDaysPerWeek),
+    // Avantages (scenario)
+    carMonthly:             fmtMoney(carMonthly),
+    mealVoucherPerDay:      fmtMoney(mealVoucherPerDay),
+    ecoVouchersAnnual:      fmtMoney(ecoVouchersAnnual),
+    groupInsurancePct:      fmtNumFR(groupInsurancePct),
+    hospitalInsuranceMonthly: fmtMoney(hospitalInsuranceMonthly),
+    phoneInternetMonthly:   fmtMoney(phoneInternetMonthly),
+    netExpensesMonthly:     fmtMoney(netExpensesMonthly),
+    // Métriques Dasolabs
     dailyCost:       fmtMoney(s.dailyCost),
     dailyRate:       fmtMoney(s.dailyRate),
     weeklyCapacityH: s.weeklyCapacityH != null ? String(s.weeklyCapacityH) : "—",
