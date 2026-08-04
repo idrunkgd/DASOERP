@@ -1,15 +1,20 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermission, requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Users, Plus, Upload } from "lucide-react";
+import { PhoneTodoButton } from "./phone-todo-button";
 
 export const dynamic = "force-dynamic";
 
 export default async function ContactsPage({ searchParams }: { searchParams: { q?: string } }) {
   await requirePermission("contacts.read");
+  const session = await requireSession();
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canCreateTodo = perms.includes("contacts.write");
+
   const where: any = {};
   if (searchParams.q) {
     where.OR = [
@@ -18,9 +23,18 @@ export default async function ContactsPage({ searchParams }: { searchParams: { q
       { email:     { contains: searchParams.q, mode: "insensitive" } }
     ];
   }
-  const contacts = await prisma.contact.findMany({
-    where, include: { company: true }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }]
-  });
+  const [contacts, users] = await Promise.all([
+    prisma.contact.findMany({
+      where, include: { company: true }, orderBy: [{ lastName: "asc" }, { firstName: "asc" }]
+    }),
+    canCreateTodo
+      ? prisma.user.findMany({
+          where: { active: true },
+          orderBy: [{ firstName: "asc" }],
+          select: { id: true, firstName: true, lastName: true }
+        })
+      : Promise.resolve([])
+  ]);
   return (
     <div>
       <PageHeader
@@ -43,10 +57,23 @@ export default async function ContactsPage({ searchParams }: { searchParams: { q
           <EmptyState icon={Users} title="Aucun contact" action={<Link href="/contacts/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau</Link>} />
         ) : (
           <table className="table-base">
-            <thead><tr><th>Nom</th><th>Entreprise</th><th>Fonction</th><th>Email</th><th>Tél</th><th>Statut</th></tr></thead>
+            <thead><tr>
+              {canCreateTodo && <th className="w-10"></th>}
+              <th>Nom</th><th>Entreprise</th><th>Fonction</th><th>Email</th><th>Tél</th><th>Statut</th>
+            </tr></thead>
             <tbody>
               {contacts.map(c => (
                 <tr key={c.id}>
+                  {canCreateTodo && (
+                    <td className="pl-3 pr-1 py-1">
+                      <PhoneTodoButton
+                        contactId={c.id}
+                        contactLabel={`${c.firstName} ${c.lastName}`}
+                        users={users}
+                        defaultAssigneeId={session.user.id}
+                      />
+                    </td>
+                  )}
                   <td><Link href={`/contacts/${c.id}`} className="font-medium hover:underline">{c.firstName} {c.lastName}</Link></td>
                   <td>{c.company ? <Link href={`/companies/${c.company.id}`} className="hover:underline text-midnight-700">{c.company.name}</Link> : "—"}</td>
                   <td className="text-midnight-700">{c.jobTitle ?? "—"}</td>

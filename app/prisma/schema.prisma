@@ -302,6 +302,7 @@ model User {
   attachmentsUploaded Attachment[]       @relation("AttachmentUploader")
   auditLogs           ActivityLog[]      @relation("ActivityLogActor")
   contactInteractions ContactInteraction[]
+  interactionsAssigned ContactInteraction[] @relation("InteractionAssignee")
   ownedMissions       MissionRequest[]   @relation("MissionOwner")
   ownedCandidates     Candidate[]        @relation("CandidateOwner")
   // Propositions consultants dont je suis owner (préparateur du dossier)
@@ -532,13 +533,24 @@ model ContactInteraction {
   contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  kind      String   // email, call, meeting, note...
+  /// email, call, meeting, note, todo… "todo" = tâche à faire (assigneeId +
+  /// dueAt renseignés, completedAt null tant qu'ouvert).
+  kind      String
   subject   String
   body      String?
   occurredAt DateTime @default(now())
+  /// User à qui la tâche est assignée (utilisé quand kind = "todo").
+  assigneeId  String?
+  assignee    User?      @relation("InteractionAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  /// Échéance de la tâche (utilisé quand kind = "todo").
+  dueAt       DateTime?
+  /// Non null = tâche complétée (pour les todos).
+  completedAt DateTime?
   createdAt DateTime @default(now())
 
   @@index([contactId, occurredAt])
+  @@index([assigneeId, completedAt])
+  @@index([dueAt])
 }
 
 // =============================================================

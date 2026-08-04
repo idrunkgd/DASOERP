@@ -91,3 +91,58 @@ export async function addInteraction(contactId: string, formData: FormData) {
   });
   revalidatePath(`/contacts/${contactId}`);
 }
+
+/**
+ * Crée une tâche "à faire" liée à un contact — utilisé par le bouton
+ * téléphone dans la liste contacts. Apparaît ensuite dans /commercial
+ * (Activité commerciale) avec un badge todo + case à cocher.
+ */
+export async function createContactTodo(contactId: string, formData: FormData) {
+  const session = await requirePermission("contacts.write");
+  const assigneeId = String(formData.get("assigneeId") || "").trim() || null;
+  const dueAtStr = String(formData.get("dueAt") || "").trim();
+  const subject = String(formData.get("subject") || "").trim() || "À rappeler";
+  const body = String(formData.get("body") || "").trim() || null;
+  const dueAt = dueAtStr ? new Date(dueAtStr) : null;
+
+  const contact = await prisma.contact.findUniqueOrThrow({
+    where: { id: contactId },
+    select: { firstName: true, lastName: true }
+  });
+  // Défaut de subject : "Rappeler {prenom nom}" si l'utilisateur n'en a pas mis
+  const finalSubject = subject === "À rappeler"
+    ? `Rappeler ${contact.firstName} ${contact.lastName}`
+    : subject;
+
+  const created = await prisma.contactInteraction.create({
+    data: {
+      contactId,
+      userId: session.user.id, // créateur
+      assigneeId: assigneeId ?? session.user.id, // par défaut, s'assigner à soi
+      kind: "todo",
+      subject: finalSubject,
+      body,
+      dueAt,
+      // occurredAt = maintenant (date de création de la tâche) — la timeline
+      // reste ordonnée par occurredAt. dueAt sert à la logique de rappel.
+    }
+  });
+  revalidatePath("/contacts");
+  revalidatePath("/commercial");
+  revalidatePath(`/contacts/${contactId}`);
+  return { ok: true, id: created.id };
+}
+
+/**
+ * Bascule le statut complété d'une tâche. Idempotent.
+ */
+export async function toggleContactTodoDone(id: string, done: boolean) {
+  const session = await requirePermission("contacts.write");
+  const updated = await prisma.contactInteraction.update({
+    where: { id },
+    data: { completedAt: done ? new Date() : null }
+  });
+  revalidatePath("/commercial");
+  revalidatePath(`/contacts/${updated.contactId}`);
+  return { ok: true };
+}

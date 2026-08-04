@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
+import { TodoToggle } from "./todo-toggle";
+import { Phone } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
@@ -23,7 +25,11 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
   const [items, total, users] = await Promise.all([
     prisma.contactInteraction.findMany({
       where,
-      include: { user: true, contact: { include: { company: true } } },
+      include: {
+        user: true,
+        assignee: { select: { id: true, firstName: true, lastName: true } },
+        contact: { include: { company: true } }
+      },
       orderBy: { occurredAt: "desc" },
       skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE
     }),
@@ -44,6 +50,7 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
           <option value="call">Appel</option>
           <option value="email">Email</option>
           <option value="meeting">Réunion</option>
+          <option value="todo">À faire</option>
         </select>
         <select name="user" defaultValue={searchParams.user ?? ""} className="input max-w-[200px]">
           <option value="">Tous les utilisateurs</option>
@@ -58,23 +65,56 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
         <div className="card p-10 text-center text-sm text-midnight-500">Aucune interaction.</div>
       ) : (
         <div className="card divide-y divide-border">
-          {items.map(it => (
-            <div key={it.id} className="p-4 flex gap-4">
-              <div className="w-32 shrink-0 text-xs text-midnight-500">{formatDate(it.occurredAt, { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="badge-info uppercase">{it.kind}</span>
-                  <span className="text-midnight-500">par</span>
-                  <span className="font-medium">{it.user ? `${it.user.firstName} ${it.user.lastName}` : "—"}</span>
-                  <span className="text-midnight-500">·</span>
-                  <Link href={`/contacts/${it.contact.id}`} className="hover:underline">{it.contact.firstName} {it.contact.lastName}</Link>
-                  {it.contact.company && (<><span className="text-midnight-500">·</span><Link href={`/companies/${it.contact.company.id}`} className="text-midnight-700 hover:underline">{it.contact.company.name}</Link></>)}
+          {items.map(it => {
+            const isTodo = it.kind === "todo";
+            const done = isTodo && it.completedAt != null;
+            const overdue = isTodo && !done && it.dueAt && new Date(it.dueAt) < new Date();
+            return (
+              <div key={it.id} className={
+                "p-4 flex gap-4 " +
+                (isTodo && !done ? (overdue ? "bg-red-50/40" : "bg-amber-50/40") : "")
+              }>
+                <div className="w-32 shrink-0 text-xs text-midnight-500">
+                  {formatDate(it.occurredAt, { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  {isTodo && it.dueAt && (
+                    <div className={"text-[10px] mt-1 " + (overdue ? "text-red-600 font-medium" : "text-amber-700")}>
+                      Échéance : {formatDate(it.dueAt, { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      {overdue && " (en retard)"}
+                    </div>
+                  )}
                 </div>
-                <div className="font-medium text-midnight-900 mt-1">{it.subject}</div>
-                {it.body && <div className="text-sm text-midnight-700 mt-1 whitespace-pre-wrap">{it.body}</div>}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 text-sm flex-wrap">
+                    {isTodo ? (
+                      <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded uppercase font-semibold">
+                        <Phone className="w-3 h-3" /> Todo
+                      </span>
+                    ) : (
+                      <span className="badge-info uppercase">{it.kind}</span>
+                    )}
+                    <span className="text-midnight-500">par</span>
+                    <span className="font-medium">{it.user ? `${it.user.firstName} ${it.user.lastName}` : "—"}</span>
+                    {isTodo && it.assignee && (
+                      <>
+                        <span className="text-midnight-500">→</span>
+                        <span className="font-medium text-indigoaccent">{it.assignee.firstName} {it.assignee.lastName}</span>
+                      </>
+                    )}
+                    <span className="text-midnight-500">·</span>
+                    <Link href={`/contacts/${it.contact.id}`} className="hover:underline">{it.contact.firstName} {it.contact.lastName}</Link>
+                    {it.contact.company && (<><span className="text-midnight-500">·</span><Link href={`/companies/${it.contact.company.id}`} className="text-midnight-700 hover:underline">{it.contact.company.name}</Link></>)}
+                    {isTodo && (
+                      <span className="ml-auto"><TodoToggle id={it.id} done={done} /></span>
+                    )}
+                  </div>
+                  <div className={"font-medium text-midnight-900 mt-1 " + (done ? "line-through opacity-60" : "")}>
+                    {it.subject}
+                  </div>
+                  {it.body && <div className="text-sm text-midnight-700 mt-1 whitespace-pre-wrap">{it.body}</div>}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
