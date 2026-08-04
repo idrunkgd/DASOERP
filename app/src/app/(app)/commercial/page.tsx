@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermission, requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
 import { TodoToggle } from "./todo-toggle";
-import { Phone } from "lucide-react";
+import { NewTaskButton } from "./new-task-button";
+import { Phone, ClipboardList } from "lucide-react";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
@@ -14,6 +15,9 @@ const PAGE_SIZE = 50;
 
 export default async function CommercialTimeline({ searchParams }: { searchParams: { user?: string; assignee?: string; kind?: string; q?: string; from?: string; to?: string; done?: string; page?: string } }) {
   await requirePermission("contacts.read");
+  const session = await requireSession();
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canWrite = perms.includes("contacts.write");
   const page = Math.max(1, Number(searchParams.page ?? 1));
   const kinds = parseMulti(searchParams.kind);
   const creatorIds = parseMulti(searchParams.user);
@@ -77,7 +81,13 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
 
   return (
     <div>
-      <PageHeader title="Activité commerciale" subtitle={`${total} interaction(s) — toutes équipes confondues`} />
+      <PageHeader
+        title="Activité"
+        subtitle={`${total} entrée(s) — tâches, appels, emails, notes`}
+      />
+      {canWrite && (
+        <NewTaskButton users={users} defaultAssigneeId={session.user.id} />
+      )}
       <div className="space-y-3 mb-4">
         <FilterChips
           paramName="kind"
@@ -160,9 +170,20 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
                         <span className="font-medium text-indigoaccent">{it.assignee.firstName} {it.assignee.lastName}</span>
                       </>
                     )}
-                    <span className="text-midnight-500">·</span>
-                    <Link href={`/contacts/${it.contact.id}`} className="hover:underline">{it.contact.firstName} {it.contact.lastName}</Link>
-                    {it.contact.company && (<><span className="text-midnight-500">·</span><Link href={`/companies/${it.contact.company.id}`} className="text-midnight-700 hover:underline">{it.contact.company.name}</Link></>)}
+                    {it.contact ? (
+                      <>
+                        <span className="text-midnight-500">·</span>
+                        <Link href={`/contacts/${it.contact.id}`} className="hover:underline">{it.contact.firstName} {it.contact.lastName}</Link>
+                        {it.contact.company && (<><span className="text-midnight-500">·</span><Link href={`/companies/${it.contact.company.id}`} className="text-midnight-700 hover:underline">{it.contact.company.name}</Link></>)}
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-midnight-500">·</span>
+                        <span className="inline-flex items-center gap-1 text-xs text-midnight-500">
+                          <ClipboardList className="w-3 h-3" /> Tâche interne
+                        </span>
+                      </>
+                    )}
                     {isTodo && (
                       <span className="ml-auto"><TodoToggle id={it.id} done={done} /></span>
                     )}

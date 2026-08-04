@@ -134,6 +134,35 @@ export async function createContactTodo(contactId: string, formData: FormData) {
 }
 
 /**
+ * Crée une tâche générique (non liée à un contact) — ex : "commander
+ * cartes de visite", "renouveler licence Notion". Apparaît dans la
+ * timeline /commercial (Activité) au même titre que les tâches contact.
+ */
+export async function createStandaloneTask(formData: FormData) {
+  const session = await requirePermission("contacts.write");
+  const assigneeId = String(formData.get("assigneeId") || "").trim() || null;
+  const dueAtStr = String(formData.get("dueAt") || "").trim();
+  const subject = String(formData.get("subject") || "").trim();
+  const body = String(formData.get("body") || "").trim() || null;
+  if (!subject) throw new Error("Un titre est requis.");
+  const dueAt = dueAtStr ? new Date(dueAtStr) : null;
+
+  const created = await prisma.contactInteraction.create({
+    data: {
+      contactId: null, // tâche standalone
+      userId: session.user.id,
+      assigneeId: assigneeId ?? session.user.id,
+      kind: "todo",
+      subject,
+      body,
+      dueAt
+    }
+  });
+  revalidatePath("/commercial");
+  return { ok: true, id: created.id };
+}
+
+/**
  * Bascule le statut complété d'une tâche. Idempotent.
  */
 export async function toggleContactTodoDone(id: string, done: boolean) {
@@ -143,6 +172,22 @@ export async function toggleContactTodoDone(id: string, done: boolean) {
     data: { completedAt: done ? new Date() : null }
   });
   revalidatePath("/commercial");
-  revalidatePath(`/contacts/${updated.contactId}`);
+  if (updated.contactId) revalidatePath(`/contacts/${updated.contactId}`);
+  return { ok: true };
+}
+
+/**
+ * Supprime une tâche/interaction. Utilisé pour retirer une tâche
+ * annulée ou créée par erreur.
+ */
+export async function deleteContactInteraction(id: string) {
+  await requirePermission("contacts.write");
+  const before = await prisma.contactInteraction.findUniqueOrThrow({
+    where: { id },
+    select: { contactId: true }
+  });
+  await prisma.contactInteraction.delete({ where: { id } });
+  revalidatePath("/commercial");
+  if (before.contactId) revalidatePath(`/contacts/${before.contactId}`);
   return { ok: true };
 }

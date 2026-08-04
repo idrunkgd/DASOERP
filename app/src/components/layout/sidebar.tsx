@@ -26,6 +26,7 @@ const SECTIONS: Section[] = [
     items: [
       { href: "/dashboard",         label: "Tableau de bord",      icon: LayoutDashboard, perm: "dashboard.read" },
       { href: "/project-status",    label: "Statut projet",        icon: Gauge,         perm: "projects.read" },
+      { href: "/commercial",        label: "Activité",             icon: MessageSquare, perm: "contacts.read" },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
       { href: "/employees",         label: "Employés",             icon: Users,         perm: "finance.write" },
@@ -37,8 +38,7 @@ const SECTIONS: Section[] = [
     label: "Commerciale",
     items: [
       { href: "/companies",   label: "Entreprises",          icon: Building2,       perm: "companies.read" },
-      { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" },
-      { href: "/commercial",  label: "Activités commerciales", icon: MessageSquare, perm: "contacts.read" }
+      { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" }
     ]
   },
   {

@@ -529,8 +529,10 @@ model ContactCompany {
 
 model ContactInteraction {
   id        String   @id @default(cuid())
-  contactId String
-  contact   Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  /// Null = tâche/activité générique non liée à un contact (ex: "commander
+  /// cartes de visite"). Sinon la ligne concerne un contact précis.
+  contactId String?
+  contact   Contact?  @relation(fields: [contactId], references: [id], onDelete: Cascade)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   /// email, call, meeting, note, todo… "todo" = tâche à faire (assigneeId +
