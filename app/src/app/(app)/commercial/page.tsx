@@ -12,14 +12,20 @@ import { parseMulti, inFilter } from "@/lib/filters";
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
 
-export default async function CommercialTimeline({ searchParams }: { searchParams: { user?: string; kind?: string; q?: string; from?: string; to?: string; page?: string } }) {
+export default async function CommercialTimeline({ searchParams }: { searchParams: { user?: string; assignee?: string; kind?: string; q?: string; from?: string; to?: string; done?: string; page?: string } }) {
   await requirePermission("contacts.read");
   const page = Math.max(1, Number(searchParams.page ?? 1));
   const kinds = parseMulti(searchParams.kind);
-  const userIds = parseMulti(searchParams.user);
+  const creatorIds = parseMulti(searchParams.user);
+  const assigneeIds = parseMulti(searchParams.assignee);
+  // done : "1" = inclure les tâches terminées, sinon on les masque par défaut.
+  // "only" = ne voir QUE les tâches terminées.
+  const doneFilter = searchParams.done ?? "";
   const where: any = {};
-  const userIdFilter = inFilter(userIds);
-  if (userIdFilter) where.userId = userIdFilter;
+  const creatorFilter = inFilter(creatorIds);
+  if (creatorFilter) where.userId = creatorFilter;
+  const assigneeFilter = inFilter(assigneeIds);
+  if (assigneeFilter) where.assigneeId = assigneeFilter;
   const kindFilter = inFilter(kinds);
   if (kindFilter) where.kind = kindFilter;
   if (searchParams.from) where.occurredAt = { ...(where.occurredAt ?? {}), gte: new Date(searchParams.from) };
@@ -28,6 +34,29 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
     { subject: { contains: searchParams.q, mode: "insensitive" } },
     { body: { contains: searchParams.q, mode: "insensitive" } }
   ];
+  // Filtre de complétion :
+  //   - "" (défaut)  → masque les tâches terminées (garde les autres kinds)
+  //   - "1"          → tout afficher (inclure les tâches faites)
+  //   - "only"       → uniquement les tâches faites
+  if (doneFilter === "only") {
+    where.kind = "todo";
+    where.completedAt = { not: null };
+  } else if (doneFilter !== "1") {
+    // Défaut : masque les tâches terminées.
+    // (kind != "todo") OR (kind = "todo" AND completedAt = null)
+    const openTodoOrNotTodo = {
+      OR: [
+        { kind: { not: "todo" } },
+        { AND: [{ kind: "todo" }, { completedAt: null }] }
+      ]
+    };
+    if (where.OR) {
+      where.AND = [{ OR: where.OR }, openTodoOrNotTodo];
+      delete where.OR;
+    } else {
+      Object.assign(where, openTodoOrNotTodo);
+    }
+  }
 
   const [items, total, users] = await Promise.all([
     prisma.contactInteraction.findMany({
@@ -62,8 +91,22 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
           ]}
         />
         <FilterChips
+          paramName="done"
+          label="Tâches"
+          multi={false}
+          options={[
+            { value: "1",    label: "Inclure les faites",       tone: "info" },
+            { value: "only", label: "Uniquement les faites",    tone: "success" }
+          ]}
+        />
+        <FilterChips
           paramName="user"
-          label="Utilisateur"
+          label="Créateur"
+          options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+        />
+        <FilterChips
+          paramName="assignee"
+          label="Assigné à"
           options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
         />
         <PreservedSearchForm
