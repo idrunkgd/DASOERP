@@ -176,7 +176,10 @@ export async function generateContractFromTemplate(formData: FormData) {
     : {
         kind: "candidate" as const,
         candidate: await prisma.candidate.findUniqueOrThrow({
-          where: { id: data.candidateId! }
+          where: { id: data.candidateId! },
+          // Un Candidate peut aussi avoir une PayrollEmployee liée
+          // (freelance ou candidat pré-configuré pour la paie).
+          include: { payrollEmployee: true }
         })
       };
 

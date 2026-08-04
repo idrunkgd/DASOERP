@@ -49,12 +49,15 @@ export const VARIABLE_CATALOG: VariableDoc[] = [
   { key: "joinedAt",        label: "Date d'entrée en service",   sample: "01/09/2026" },
   { key: "startDate",       label: "Date de début du contrat",   sample: "01/09/2026" },
   { key: "endDate",         label: "Date de fin du contrat",     sample: "31/08/2027" },
-  { key: "monthlyNetPay",   label: "Salaire net mensuel (€)",    sample: "3 200,00" },
-  { key: "monthlyGrossPay", label: "Salaire brut mensuel (€)",   sample: "4 500,00" },
-  { key: "dailyCost",       label: "Coût journalier interne (€)",sample: "450,00" },
-  { key: "dailyRate",       label: "TJM facturé client (€)",     sample: "780,00" },
-  { key: "weeklyCapacityH", label: "Heures/semaine",             sample: "38" },
-  { key: "today",           label: "Date du jour",               sample: "24/07/2026" }
+  { key: "monthlyNetPay",       label: "Salaire net mensuel (€)",       sample: "3 200,00" },
+  { key: "monthlyGrossPay",     label: "Salaire brut mensuel réf. (€)", sample: "4 500,00" },
+  { key: "monthlyWithholdingTax",label: "Précompte pro. mensuel (€)",    sample: "820,00" },
+  { key: "monthlyOnss",         label: "Cotisations ONSS mensuelles (€)", sample: "580,00" },
+  { key: "monthsPerYear",       label: "Mois payés / an (13.92 BE)",    sample: "13,92" },
+  { key: "dailyCost",           label: "Coût journalier interne (€)",   sample: "450,00" },
+  { key: "dailyRate",           label: "TJM facturé client (€)",        sample: "780,00" },
+  { key: "weeklyCapacityH",     label: "Heures/semaine",                sample: "38" },
+  { key: "today",               label: "Date du jour",                  sample: "24/07/2026" }
 ];
 
 const FR_DATE = new Intl.DateTimeFormat("fr-BE", {
@@ -107,8 +110,16 @@ export function resolveSubjectVariables(
     joinedAt:        fmtDate(subject.kind === "user" ? s.joinedAt : s.availableFrom),
     startDate:       "—",
     endDate:         "—",
-    monthlyNetPay:   fmtMoney(s.payrollEmployee?.monthlyNetPay),
-    monthlyGrossPay: fmtMoney(s.payrollEmployee?.monthlyGrossPay),
+    // Salaires : source unique = PayrollEmployee (config paie officielle
+    // Dasolabs, éditable depuis /employees). Champ brut = monthlyGrossReference.
+    // Si aucune paie configurée pour ce sujet, la variable retourne "—".
+    monthlyNetPay:          fmtMoney(s.payrollEmployee?.monthlyNetPay),
+    monthlyGrossPay:        fmtMoney(s.payrollEmployee?.monthlyGrossReference),
+    monthlyWithholdingTax:  fmtMoney(s.payrollEmployee?.monthlyWithholdingTax),
+    monthlyOnss:            fmtMoney(s.payrollEmployee?.monthlyOnss),
+    monthsPerYear:          s.payrollEmployee?.monthsPerYear != null
+                              ? String(s.payrollEmployee.monthsPerYear).replace(".", ",")
+                              : "—",
     dailyCost:       fmtMoney(s.dailyCost),
     dailyRate:       fmtMoney(s.dailyRate),
     weeklyCapacityH: s.weeklyCapacityH != null ? String(s.weeklyCapacityH) : "—",
