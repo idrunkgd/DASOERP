@@ -11,7 +11,7 @@ import {
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
   AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown, BookOpen,
-  Car
+  Car, FileSignature
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -80,6 +80,7 @@ const SECTIONS: Section[] = [
       { href: "/documents",   label: "Documents",        icon: Files,          perm: "documents.read" },
       { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" },
       { href: "/fleet",       label: "Flotte véhicules", icon: Car,            perm: "fleet.read" },
+      { href: "/contracts",   label: "Contrats",         icon: FileSignature,  perm: "contracts.read" },
       // Le wiki formation utilise "dashboard.read" comme perm garde-fou :
       // tout user ayant accès à l'ERP y a droit. La granularité fine (voir
       // uniquement les modules autorisés) est appliquée par article.

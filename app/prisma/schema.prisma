@@ -253,6 +253,17 @@ model User {
   /// le coût interne Dasolabs.
   dailyRate         Decimal?  @db.Decimal(10, 2)
   weeklyCapacityH   Decimal   @default(38) @db.Decimal(5, 2)
+  // ─── Données personnelles pour la génération de contrats ───
+  /// Date de naissance — utilisée pour les contrats de travail (formule légale).
+  birthDate         DateTime? @db.Date
+  /// Lieu de naissance — souvent requis sur un contrat belge.
+  birthPlace        String?
+  /// Numéro de registre national belge (RRN, XX.XX.XX-XXX.XX) — sensible.
+  nationalNumber    String?
+  /// Adresse postale complète (rue + numéro).
+  address           String?
+  postalCode        String?
+  country           String?   @default("Belgique")
   // Compétences (tags simples)
   skills            String[]  @default([])
   joinedAt          DateTime?
@@ -312,6 +323,10 @@ model User {
   vehicleAssignments   VehicleAssignment[]   @relation("VehicleAssignmentUser")
   /// Favoris épinglés dans la barre du topbar (max 10 par user, gérés côté serveur).
   favorites            UserFavorite[]        @relation("UserFavorites")
+  /// Contrats (contrat de travail, avenants, NDA…) générés pour ce consultant.
+  contracts            Contract[]            @relation("UserContracts")
+  contractTemplatesCreated ContractTemplate[] @relation("ContractTemplateCreator")
+  contractsGenerated   Contract[]            @relation("ContractGeneratedBy")
   /// Type de contrat de ce consultant chez Dasolabs. Idem Candidate.contractType.
   contractType         ContractType?
   /// Paie configurée pour ce consultant interne (si contractType=EMPLOYEE).
@@ -1179,6 +1194,14 @@ model Candidate {
   availableFrom   DateTime?       @db.Date
   notes           String?
 
+  // ─── Données personnelles pour la génération de contrats ───
+  birthDate       DateTime?       @db.Date
+  birthPlace      String?
+  nationalNumber  String?         // RRN belge (sensible)
+  address         String?
+  postalCode      String?
+  country         String?         @default("Belgique")
+
   ownerId         String?
   owner           User?           @relation("CandidateOwner", fields: [ownerId], references: [id], onDelete: SetNull)
 
@@ -1205,6 +1228,8 @@ model Candidate {
   testAssignments TestAssignment[] @relation("TestAssigneeCandidate")
   // Interactions de prospection (chasseuse de têtes)
   outreachInteractions OutreachInteraction[] @relation("CandidateOutreach")
+  /// Contrats générés pour ce candidat (ex: freelance).
+  contracts       Contract[]      @relation("CandidateContracts")
   /// Type de contrat quand ce candidat est engagé chez Dasolabs :
   /// EMPLOYEE = salarié (apparaît dans /employees pour config paie),
   /// FREELANCE = sous-traitant (factures reçues comme SupplierInvoice).
@@ -2718,4 +2743,91 @@ model UserFavorite {
 
   @@unique([userId, href])
   @@index([userId, sortOrder])
+}
+
+// =============================================================
+// CONTRATS — templates réutilisables + instances générées
+// =============================================================
+
+enum ContractStatus {
+  DRAFT       // brouillon
+  ACTIVE      // signé et en cours
+  TERMINATED  // clôturé
+  CANCELLED   // annulé avant signature
+}
+
+/// Modèle de contrat réutilisable — CDI, CDD, freelance, NDA…
+/// Contient des chapitres ordonnés dont le corps peut inclure des variables
+/// {{firstName}}, {{salary}}, etc. qui seront remplacées au moment de la
+/// génération d'un Contract sur base d'un User ou Candidate.
+model ContractTemplate {
+  id          String                    @id @default(cuid())
+  name        String                    // "CDI Consultant", "Freelance annuel"…
+  description String?                   // Contexte / notes internes
+  active      Boolean                   @default(true)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  createdById String?
+  createdBy   User?                     @relation("ContractTemplateCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  chapters    ContractTemplateChapter[]
+  contracts   Contract[]                @relation("ContractFromTemplate")
+
+  @@index([active])
+}
+
+model ContractTemplateChapter {
+  id          String            @id @default(cuid())
+  templateId  String
+  template    ContractTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  title       String
+  /// Corps en markdown avec variables {{key}}. Le rendu est calculé à la
+  /// génération et stocké dans Contract.chapters (JSON) — snapshot légal.
+  bodyMd      String
+  sortOrder   Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([templateId, sortOrder])
+}
+
+/// Instance de contrat générée à partir d'un template pour un User ou un
+/// Candidate. Les chapitres sont snapshotés en JSON avec les variables
+/// résolues — le contrat reste stable même si le template est modifié
+/// après (intégrité légale).
+model Contract {
+  id             String         @id @default(cuid())
+  reference      String         @unique  // CTR-2026-0001
+  title          String                    // Ex: "CDI - Alice Martin - 2026"
+  status         ContractStatus @default(DRAFT)
+
+  templateId     String?
+  template       ContractTemplate? @relation("ContractFromTemplate", fields: [templateId], references: [id], onDelete: SetNull)
+  templateName   String?                   // Snapshot du nom au moment de la génération
+
+  // Sujet : soit un User consultant interne, soit un Candidate externe.
+  // Exactement un des deux doit être renseigné.
+  userId         String?
+  user           User?          @relation("UserContracts", fields: [userId], references: [id], onDelete: Cascade)
+  candidateId    String?
+  candidate      Candidate?     @relation("CandidateContracts", fields: [candidateId], references: [id], onDelete: Cascade)
+
+  /// Chapitres snapshotés au moment de la génération :
+  /// [{ title: string, bodyMd: string (variables résolues), sortOrder: number }]
+  chapters       Json
+
+  startDate      DateTime?      @db.Date
+  endDate        DateTime?      @db.Date
+  signedAt       DateTime?
+  terminatedAt   DateTime?
+  notes          String?
+
+  generatedById  String?
+  generatedBy    User?          @relation("ContractGeneratedBy", fields: [generatedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([userId, status])
+  @@index([candidateId, status])
+  @@index([status])
 }

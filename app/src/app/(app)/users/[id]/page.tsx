@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { UserForm } from "../user-form";
 import { ReviewsPanel } from "./reviews-panel";
 import { ClientInterviewsPanel, type AppWithInterviews } from "../../candidates/[id]/client-interviews-panel";
+import { SubjectContractsPanel } from "@/components/contracts/subject-contracts-panel";
 import { ResetPasswordButton } from "./reset-password-button";
 import { UserExperiencesPanel } from "../../me/user-experiences-panel";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
@@ -29,8 +30,8 @@ export default async function UserDetail({ params }: { params: { id: string } })
 
   const planned = await userPlannedHoursForWeek(user.id, new Date());
 
-  // Reviews + projets disponibles + catalogue compétences + présentations client
-  const [reviews, projects, skillCatalog, applications] = await Promise.all([
+  // Reviews + projets disponibles + catalogue compétences + présentations client + contrats
+  const [reviews, projects, skillCatalog, applications, contracts, contractTemplates] = await Promise.all([
     prisma.consultantReview.findMany({
       where: { subjectId: user.id },
       include: { conductedBy: true, project: true },
@@ -51,10 +52,22 @@ export default async function UserDetail({ params }: { params: { id: string } })
         interviews: { orderBy: { scheduledAt: "asc" } }
       },
       orderBy: { presentedAt: "desc" }
+    }),
+    prisma.contract.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, reference: true, title: true, status: true, startDate: true, endDate: true }
+    }),
+    prisma.contractTemplate.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true }
     })
   ]);
 
   const canManageReviews = isAdmin || isManager;
+  const canManageContracts = perms.includes("contracts.manage");
+  const canReadContracts = perms.includes("contracts.read");
   const showPrivateNotes = canManageReviews && !isSelf || isAdmin;
 
   return (
@@ -109,6 +122,15 @@ export default async function UserDetail({ params }: { params: { id: string } })
             description: e.description
           }))}
         />
+
+        {canReadContracts && (
+          <SubjectContractsPanel
+            contracts={contracts}
+            templates={contractTemplates}
+            subject={{ kind: "user", id: user.id, label: `${user.firstName} ${user.lastName}` }}
+            canManage={canManageContracts}
+          />
+        )}
 
         <ClientInterviewsPanel
           applications={applications.map<AppWithInterviews>((a) => ({

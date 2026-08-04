@@ -11,6 +11,7 @@ import { CandidatePortalButton } from "./portal-button";
 import { HiringInterviewsPanel } from "./hiring-interviews";
 import { ClientInterviewsPanel, type AppWithInterviews } from "./client-interviews-panel";
 import { BackfillCvButton } from "./backfill-cv-button";
+import { SubjectContractsPanel } from "@/components/contracts/subject-contracts-panel";
 import { ExperiencesPanel } from "../../me/experiences-panel";
 import { CandidateTestsSection } from "./tests-section";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -20,7 +21,7 @@ import { SalaryScenariosPanel } from "./salary-scenarios-panel";
 export default async function CandidateDetail({ params }: { params: { id: string } }) {
   await requirePermission("consulting.read");
   const session = await requireSession();
-  const [c, skillCatalog] = await Promise.all([
+  const [c, skillCatalog, candidateContracts, contractTemplates] = await Promise.all([
     prisma.candidate.findUnique({
       where: { id: params.id },
       include: {
@@ -42,13 +43,25 @@ export default async function CandidateDetail({ params }: { params: { id: string
         }
       }
     }),
-    prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] })
+    prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    prisma.contract.findMany({
+      where: { candidateId: params.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, reference: true, title: true, status: true, startDate: true, endDate: true }
+    }),
+    prisma.contractTemplate.findMany({
+      where: { active: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true }
+    })
   ]);
   if (!c) notFound();
 
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canRecruit = sessionPerms.includes("users.manage");
   const canApplyScenarios = sessionPerms.includes("consulting.write");
+  const canManageContracts = sessionPerms.includes("contracts.manage");
+  const canReadContracts = sessionPerms.includes("contracts.read");
 
   // Aplatit tous les entretiens à travers toutes les missions (plus pratique pour avoir la vue globale)
   const allInterviews = c.applications.flatMap(a =>
@@ -244,6 +257,15 @@ export default async function CandidateDetail({ params }: { params: { id: string
               </table>
             )}
           </section>
+
+          {canReadContracts && (
+            <SubjectContractsPanel
+              contracts={candidateContracts}
+              templates={contractTemplates}
+              subject={{ kind: "candidate", id: c.id, label: `${c.firstName} ${c.lastName}` }}
+              canManage={canManageContracts}
+            />
+          )}
 
           <ClientInterviewsPanel
             applications={c.applications.map<AppWithInterviews>((a) => ({

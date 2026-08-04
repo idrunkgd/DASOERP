@@ -28,6 +28,7 @@ export type Permission =
   | "expenses.read"   | "expenses.write" | "expenses.approve"
   | "leaves.read"     | "leaves.write"   | "leaves.approve"
   | "fleet.read"      | "fleet.manage"
+  | "contracts.read"  | "contracts.manage"
   | "audit.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
@@ -51,6 +52,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "tests.manage","tests.take",
     "expenses.read","expenses.write","expenses.approve",
     "leaves.read","leaves.write","leaves.approve","fleet.read","fleet.manage",
+    "contracts.read","contracts.manage",
     "audit.read"
   ],
   MANAGER: [
@@ -72,6 +74,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "tests.manage","tests.take",
     "expenses.read","expenses.write","expenses.approve",
     "leaves.read","leaves.write","leaves.approve","fleet.read","fleet.manage",
+    "contracts.read","contracts.manage",
     "audit.read"
   ],
   COMMERCIAL: [
@@ -297,7 +300,9 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
     { value: "tests.manage",    label: "Tests techniques (gérer et assigner)" },
     { value: "tests.take",      label: "Tests techniques (passer un test)" },
     { value: "fleet.read",      label: "Flotte véhicules (lecture)" },
-    { value: "fleet.manage",    label: "Flotte véhicules (gestion complète)" }
+    { value: "fleet.manage",    label: "Flotte véhicules (gestion complète)" },
+    { value: "contracts.read",  label: "Contrats (lecture)" },
+    { value: "contracts.manage",label: "Contrats (créer templates et générer)" }
   ]}
 ];
 
@@ -455,6 +460,10 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Flotte véhicules", href: "/fleet", perms: [
         { value: "fleet.read",   label: "Voir la flotte et les attributions" },
         { value: "fleet.manage", label: "Ajouter/éditer/attribuer/supprimer un véhicule" }
+      ]},
+      { menuLabel: "Contrats", href: "/contracts", perms: [
+        { value: "contracts.read",   label: "Voir les contrats et templates" },
+        { value: "contracts.manage", label: "Créer templates + générer / éditer contrats" }
       ]}
     ]
   },
