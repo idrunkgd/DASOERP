@@ -180,16 +180,32 @@ export type ProposalPdfData = {
   owner: { firstName: string; lastName: string; email: string | null; phone: string | null } | null;
 };
 
+/**
+ * Intl.NumberFormat("fr-BE") utilise   (no-break space) et parfois
+ *   (narrow no-break space) comme séparateur de milliers. Les polices
+ * Helvetica embarquées par @react-pdf/renderer ne rendent PAS ces glyphes
+ * → le séparateur disparaît silencieusement : "33495,00 €" au lieu de
+ * "33 495,00 €". On les remplace par un espace normal.
+ */
+function pdfSafe(s: string): string {
+  return s.replace(/ /g, " ").replace(/ /g, " ");
+}
 function fmtEUR(n: number) {
-  return new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(n);
+  return pdfSafe(
+    new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR" }).format(n)
+  );
 }
 function fmtDate(d: Date | null) {
   if (!d) return "en cours";
-  return new Intl.DateTimeFormat("fr-BE", { day: "2-digit", month: "long", year: "numeric" }).format(d);
+  return pdfSafe(
+    new Intl.DateTimeFormat("fr-BE", { day: "2-digit", month: "long", year: "numeric" }).format(d)
+  );
 }
 function fmtMonthYear(d: Date | null) {
   if (!d) return "aujourd'hui";
-  return new Intl.DateTimeFormat("fr-BE", { month: "short", year: "numeric" }).format(d);
+  return pdfSafe(
+    new Intl.DateTimeFormat("fr-BE", { month: "short", year: "numeric" }).format(d)
+  );
 }
 
 export function ProposalPdf({

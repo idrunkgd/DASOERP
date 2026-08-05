@@ -124,13 +124,21 @@ export type CvProfile = {
   }>;
 };
 
+/**
+ * Les polices Helvetica de @react-pdf/renderer ne rendent pas les no-break
+ * spaces (U+00A0, U+202F) qu'Intl utilise comme séparateurs de milliers en
+ * fr-BE. Résultat : "33495,00 €" au lieu de "33 495,00 €". On les remplace.
+ */
+function pdfSafe(s: string): string {
+  return s.replace(/ /g, " ").replace(/ /g, " ");
+}
 function fmtMonthYear(d: Date | null): string {
   if (!d) return "aujourd'hui";
-  return new Intl.DateTimeFormat("fr-BE", { month: "short", year: "numeric" }).format(d);
+  return pdfSafe(new Intl.DateTimeFormat("fr-BE", { month: "short", year: "numeric" }).format(d));
 }
 function fmtDate(d: Date | null): string {
   if (!d) return "—";
-  return new Intl.DateTimeFormat("fr-BE", { day: "2-digit", month: "long", year: "numeric" }).format(d);
+  return pdfSafe(new Intl.DateTimeFormat("fr-BE", { day: "2-digit", month: "long", year: "numeric" }).format(d));
 }
 
 export function CvPdf({
@@ -188,7 +196,7 @@ export function CvPdf({
             <Text style={styles.kpiLabel}>Taux journalier</Text>
             <Text style={styles.kpiValue}>
               {profile.dailyRate != null
-                ? new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(profile.dailyRate)
+                ? pdfSafe(new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(profile.dailyRate))
                 : "—"}
             </Text>
           </View>

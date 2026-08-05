@@ -87,15 +87,25 @@ export type ExpensePdfData = {
   notes?: string | null;
 };
 
+/**
+ * Les polices Helvetica du @react-pdf/renderer ne rendent pas les no-break
+ * spaces (U+00A0, U+202F) qu'utilise fr-BE comme séparateurs de milliers →
+ * on remplace par un espace normal.
+ */
+function pdfSafe(s: string): string {
+  return s.replace(/ /g, " ").replace(/ /g, " ");
+}
 function fmt(n: number) {
-  return n.toLocaleString("fr-BE", {
-    minimumFractionDigits: 2, maximumFractionDigits: 2
-  }) + " €";
+  return pdfSafe(
+    n.toLocaleString("fr-BE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  ) + " €";
 }
 function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString("fr-BE", {
-    year: "numeric", month: "long", day: "numeric"
-  });
+  return pdfSafe(
+    new Date(iso).toLocaleDateString("fr-BE", {
+      year: "numeric", month: "long", day: "numeric"
+    })
+  );
 }
 
 export function ExpensePdf({ data }: { data: ExpensePdfData }) {
