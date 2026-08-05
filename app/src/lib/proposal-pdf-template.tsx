@@ -328,15 +328,13 @@ export function ProposalPdf({
         <View style={styles.legalHint}>
           <Text>
             Facturation mensuelle en fin de mois sur base des jours prestés. TVA 21 % applicable en sus.
+            Paiement à {companyInfo.paymentTermsDays ?? 30} jours fin de mois par virement sur le compte IBAN {companyInfo.iban}
+            {companyInfo.bic ? ` (BIC ${companyInfo.bic})` : ""}.
             Proposition valable {companyInfo.offerValidityDays ?? 30} jours à compter de la date d'émission.
           </Text>
         </View>
 
-        <Text style={styles.footer}>
-          {companyInfo.legalName ?? "DASOLABS"} · {companyInfo.street}, {companyInfo.postalCode} {companyInfo.city}
-          {companyInfo.vatNumber ? ` · TVA ${companyInfo.vatNumber}` : ""}
-          {companyInfo.email ? ` · ${companyInfo.email}` : ""}
-        </Text>
+        <LegalFooter companyInfo={companyInfo} />
       </Page>
 
       {/* ═════════════════ PAGE 2 — PROFIL CONSULTANT ═════════════════ */}
@@ -426,11 +424,55 @@ export function ProposalPdf({
           </>
         )}
 
-        <Text style={styles.footer}>
-          {companyInfo.legalName ?? "DASOLABS"} · {companyInfo.street}, {companyInfo.postalCode} {companyInfo.city}
-          {companyInfo.vatNumber ? ` · TVA ${companyInfo.vatNumber}` : ""}
-        </Text>
+        <LegalFooter companyInfo={companyInfo} />
       </Page>
     </Document>
+  );
+}
+
+/**
+ * Bloc de mentions légales complet répété au pied de chaque page :
+ * raison sociale, adresse, BCE, TVA, coordonnées bancaires + contact.
+ * Concentre en un endroit toutes les infos exigées par la loi belge sur
+ * les documents commerciaux (art. XX. Livre III Code économique).
+ */
+function LegalFooter({ companyInfo }: { companyInfo: CompanyInfo }) {
+  const parts1: string[] = [];
+  if (companyInfo.legalName) parts1.push(companyInfo.legalName);
+  const addr = [companyInfo.street, companyInfo.postalCode + " " + companyInfo.city, companyInfo.country]
+    .filter(Boolean).join(", ");
+  if (addr) parts1.push(addr);
+  const idParts: string[] = [];
+  if (companyInfo.bceNumber) idParts.push(`BCE ${companyInfo.bceNumber}`);
+  if (companyInfo.vatNumber) idParts.push(`TVA ${companyInfo.vatNumber}`);
+  const bankParts: string[] = [];
+  if (companyInfo.iban) bankParts.push(`IBAN ${companyInfo.iban}`);
+  if (companyInfo.bic)  bankParts.push(`BIC ${companyInfo.bic}`);
+  const contactParts: string[] = [];
+  if (companyInfo.phone)   contactParts.push(companyInfo.phone);
+  if (companyInfo.email)   contactParts.push(companyInfo.email);
+  if (companyInfo.website) contactParts.push(companyInfo.website);
+
+  return (
+    <View style={{ marginTop: 12, paddingTop: 6, borderTopWidth: 0.5, borderTopColor: C.border}}>
+      <Text style={{ fontSize: 7.5, color: C.grey, textAlign: "center", lineHeight: 1.4 }}>
+        {parts1.join(" · ")}
+      </Text>
+      {idParts.length > 0 && (
+        <Text style={{ fontSize: 7.5, color: C.grey, textAlign: "center", lineHeight: 1.4 }}>
+          {idParts.join(" · ")}
+        </Text>
+      )}
+      {bankParts.length > 0 && (
+        <Text style={{ fontSize: 7.5, color: C.grey, textAlign: "center", lineHeight: 1.4 }}>
+          {bankParts.join(" · ")}
+        </Text>
+      )}
+      {contactParts.length > 0 && (
+        <Text style={{ fontSize: 7.5, color: C.grey, textAlign: "center", lineHeight: 1.4 }}>
+          {contactParts.join(" · ")}
+        </Text>
+      )}
+    </View>
   );
 }
