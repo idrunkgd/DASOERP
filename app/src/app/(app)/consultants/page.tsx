@@ -149,13 +149,28 @@ function ConsultantTile({ c, mission }: { c: any; mission: ConsultantMissionStat
   const inactive = !c.active;
   const fromCandidate = !!c.recruitedFromCandidate;
 
-  // Bandeau statut mission (haut de la dalle)
-  let missionBadge: { label: string; tone: "success" | "warning" | "info" | "neutral" } | null = null;
+  // Bandeau statut mission (haut de la dalle). Format date court dd/mm/yy
+  // pour tenir sur une ligne dans la tuile (aspect-square). Le titre HTML
+  // reprend la version longue pour survol.
+  const shortDate = (d: Date | string | null | undefined) => {
+    if (!d) return "";
+    const date = d instanceof Date ? d : new Date(d);
+    return date.toLocaleDateString("fr-BE", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  };
+  let missionBadge: { label: string; tone: "success" | "warning" | "info" | "neutral"; hover?: string } | null = null;
   if (!inactive && mission) {
     if (mission.state === "on_mission") {
-      missionBadge = { label: `En mission · jusqu'au ${formatDate(mission.latestEnd)}`, tone: "warning" };
+      missionBadge = {
+        label: `En mission · ${shortDate(mission.latestEnd)}`,
+        hover: `En mission jusqu'au ${formatDate(mission.latestEnd)}`,
+        tone: "warning"
+      };
     } else if (mission.state === "scheduled") {
-      missionBadge = { label: `Disponible · mission le ${formatDate(mission.nextStart)}`, tone: "info" };
+      missionBadge = {
+        label: `Dispo · mission ${shortDate(mission.nextStart)}`,
+        hover: `Disponible — prochaine mission le ${formatDate(mission.nextStart)}`,
+        tone: "info"
+      };
     } else {
       missionBadge = { label: "Disponible", tone: "success" };
     }
@@ -181,15 +196,18 @@ function ConsultantTile({ c, mission }: { c: any; mission: ConsultantMissionStat
           {inactive ? <span className="badge-neutral text-[9px] px-1.5 py-0">Parti</span> : <span className="badge-success text-[9px] px-1.5 py-0">Actif</span>}
         </div>
         {missionBadge && (
-          <div className={
-            "absolute bottom-1 left-1 right-1 text-[10px] font-medium rounded px-1.5 py-0.5 flex items-center gap-1 truncate " +
-            (missionBadge.tone === "warning" ? "bg-amber-500/95 text-white" :
-             missionBadge.tone === "info"    ? "bg-indigoaccent/95 text-white" :
-             missionBadge.tone === "success" ? "bg-emerald-600/95 text-white" :
-                                                "bg-white/90 text-midnight-900")
-          }>
+          <div
+            title={missionBadge.hover ?? missionBadge.label}
+            className={
+              "absolute bottom-1 left-1 right-1 text-[10px] font-medium rounded px-1.5 py-0.5 flex items-center gap-1 leading-tight " +
+              (missionBadge.tone === "warning" ? "bg-amber-500/95 text-white" :
+               missionBadge.tone === "info"    ? "bg-indigoaccent/95 text-white" :
+               missionBadge.tone === "success" ? "bg-emerald-600/95 text-white" :
+                                                  "bg-white/90 text-midnight-900")
+            }
+          >
             {missionBadge.tone === "warning" ? <Plane className="w-2.5 h-2.5 shrink-0" /> : <CalendarCheck className="w-2.5 h-2.5 shrink-0" />}
-            <span className="truncate">{missionBadge.label}</span>
+            <span className="break-words">{missionBadge.label}</span>
           </div>
         )}
       </div>

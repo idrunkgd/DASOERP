@@ -7,6 +7,7 @@ import { KpiCard } from "@/components/ui/kpi-card";
 import { MilestoneStatusSelect } from "./status-select";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { FilterMultiSelect } from "@/components/ui/filter-multi-select";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
 
@@ -74,11 +75,15 @@ export default async function FinancePage({ searchParams }: { searchParams: { st
             { value: "CANCELLED",   label: "Annulée",           tone: "neutral" }
           ]}
         />
-        <FilterChips
-          paramName="companyId"
-          label="Client"
-          options={companies.map(c => ({ value: c.id, label: c.name }))}
-        />
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-medium text-midnight-500 uppercase tracking-wide mr-1">Client</span>
+          <FilterMultiSelect
+            paramName="companyId"
+            label="Client"
+            options={companies.map(c => ({ value: c.id, label: c.name }))}
+            placeholder="Chercher un client…"
+          />
+        </div>
         <PreservedSearchForm
           searchParams={searchParams as Record<string, string | undefined>}
           except={["from", "to", "page"]}

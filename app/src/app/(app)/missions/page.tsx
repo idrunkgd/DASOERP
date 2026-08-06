@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Plane } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { FilterMultiSelect } from "@/components/ui/filter-multi-select";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
 
@@ -73,23 +74,29 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
             { value: "CANCELLED", label: "Annulée",    tone: "danger" }
           ]}
         />
-        <FilterChips
-          paramName="consultantId"
-          label="Consultant"
-          options={consultants.map(c => ({ value: c.id, label: `${c.firstName} ${c.lastName}` }))}
-        />
-        <FilterChips
-          paramName="companyId"
-          label="Client"
-          options={companies.map(c => ({ value: c.id, label: c.name }))}
-        />
-        {intermediaries.length > 0 && (
-          <FilterChips
-            paramName="intermediaryCompanyId"
-            label="Portage"
-            options={intermediaries.map(c => ({ value: c.id, label: c.name }))}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-medium text-midnight-500 uppercase tracking-wide mr-1">Filtres</span>
+          <FilterMultiSelect
+            paramName="consultantId"
+            label="Consultant"
+            options={consultants.map(c => ({ value: c.id, label: `${c.firstName} ${c.lastName}` }))}
+            placeholder="Chercher un consultant…"
           />
-        )}
+          <FilterMultiSelect
+            paramName="companyId"
+            label="Client"
+            options={companies.map(c => ({ value: c.id, label: c.name }))}
+            placeholder="Chercher un client…"
+          />
+          {intermediaries.length > 0 && (
+            <FilterMultiSelect
+              paramName="intermediaryCompanyId"
+              label="Portage"
+              options={intermediaries.map(c => ({ value: c.id, label: c.name }))}
+              placeholder="Chercher une société de portage…"
+            />
+          )}
+        </div>
         <PreservedSearchForm
           searchParams={searchParams as Record<string, string | undefined>}
           except={["q", "page"]}

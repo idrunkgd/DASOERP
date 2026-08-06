@@ -19,6 +19,7 @@ import {
 import { formatDate, cn } from "@/lib/utils";
 import { UploadDocumentForm } from "./upload-form";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { FilterMultiSelect } from "@/components/ui/filter-multi-select";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti } from "@/lib/filters";
 
@@ -127,11 +128,15 @@ export default async function DocumentsPage({
 
       <div className="card p-3 mb-4 space-y-3">
         {distinctTags.length > 0 && (
-          <FilterChips
-            paramName="tag"
-            label="Tags"
-            options={distinctTags.map((t) => ({ value: t, label: t }))}
-          />
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-medium text-midnight-500 uppercase tracking-wide mr-1">Tags</span>
+            <FilterMultiSelect
+              paramName="tag"
+              label="Tags"
+              options={distinctTags.map((t) => ({ value: t, label: t }))}
+              placeholder="Chercher un tag…"
+            />
+          </div>
         )}
         <FilterChips
           paramName="expiring"

@@ -4,6 +4,7 @@ import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { FilterMultiSelect } from "@/components/ui/filter-multi-select";
 import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
@@ -51,11 +52,15 @@ export default async function ReviewsPage({ searchParams }: { searchParams: { su
       />
       <div className="mb-4 space-y-3">
         {canSeeAll && (
-          <FilterChips
-            paramName="subject"
-            label="Consultant"
-            options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
-          />
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-medium text-midnight-500 uppercase tracking-wide mr-1">Consultant</span>
+            <FilterMultiSelect
+              paramName="subject"
+              label="Consultant"
+              options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+              placeholder="Chercher un consultant…"
+            />
+          </div>
         )}
         <FilterChips
           paramName="kind"

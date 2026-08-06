@@ -3,6 +3,7 @@ import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { formatDate } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { FilterMultiSelect } from "@/components/ui/filter-multi-select";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
 
@@ -36,21 +37,27 @@ export default async function AuditPage({ searchParams }: { searchParams: { enti
     <div>
       <PageHeader title="Audit trail" subtitle={`${total} événement(s) — qui a fait quoi, quand, avec diff avant/après`} />
       <div className="mb-4 space-y-3">
-        <FilterChips
-          paramName="entity"
-          label="Entité"
-          options={["Company","Contact","ContactInteraction","Offer","OfferLine","BillingMilestone","Project","ProjectMember","TimesheetEntry","Purchase","PlanningEntry","User","ServiceProfile","CostCenter"].map(e => ({ value: e, label: e }))}
-        />
-        <FilterChips
-          paramName="action"
-          label="Action"
-          options={["CREATE","UPDATE","DELETE","STATUS_CHANGE","OFFER_WON","OFFER_LOST","PROJECT_CREATED_FROM_OFFER","TIMESHEET_SUBMITTED","TIMESHEET_APPROVED","TIMESHEET_REJECTED","MILESTONE_STATUS_CHANGE","CSV_IMPORT"].map(a => ({ value: a, label: a }))}
-        />
-        <FilterChips
-          paramName="actor"
-          label="Acteur"
-          options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
-        />
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-medium text-midnight-500 uppercase tracking-wide mr-1">Filtres</span>
+          <FilterMultiSelect
+            paramName="entity"
+            label="Entité"
+            options={["Company","Contact","ContactInteraction","Offer","OfferLine","BillingMilestone","Project","ProjectMember","TimesheetEntry","Purchase","PlanningEntry","User","ServiceProfile","CostCenter"].map(e => ({ value: e, label: e }))}
+            placeholder="Chercher une entité…"
+          />
+          <FilterMultiSelect
+            paramName="action"
+            label="Action"
+            options={["CREATE","UPDATE","DELETE","STATUS_CHANGE","OFFER_WON","OFFER_LOST","PROJECT_CREATED_FROM_OFFER","TIMESHEET_SUBMITTED","TIMESHEET_APPROVED","TIMESHEET_REJECTED","MILESTONE_STATUS_CHANGE","CSV_IMPORT"].map(a => ({ value: a, label: a }))}
+            placeholder="Chercher une action…"
+          />
+          <FilterMultiSelect
+            paramName="actor"
+            label="Acteur"
+            options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+            placeholder="Chercher un acteur…"
+          />
+        </div>
         <PreservedSearchForm
           searchParams={searchParams as Record<string, string | undefined>}
           except={["q", "page"]}

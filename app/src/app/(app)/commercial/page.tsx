@@ -7,6 +7,7 @@ import { TodoToggle } from "./todo-toggle";
 import { NewTaskButton } from "./new-task-button";
 import { Phone, ClipboardList } from "lucide-react";
 import { FilterChips } from "@/components/ui/filter-chips";
+import { FilterMultiSelect } from "@/components/ui/filter-multi-select";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
 
@@ -109,16 +110,21 @@ export default async function CommercialTimeline({ searchParams }: { searchParam
             { value: "only", label: "Uniquement les faites",    tone: "success" }
           ]}
         />
-        <FilterChips
-          paramName="user"
-          label="Créateur"
-          options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
-        />
-        <FilterChips
-          paramName="assignee"
-          label="Assigné à"
-          options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
-        />
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-medium text-midnight-500 uppercase tracking-wide mr-1">Personnes</span>
+          <FilterMultiSelect
+            paramName="user"
+            label="Créateur"
+            options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+            placeholder="Chercher un créateur…"
+          />
+          <FilterMultiSelect
+            paramName="assignee"
+            label="Assigné à"
+            options={users.map(u => ({ value: u.id, label: `${u.firstName} ${u.lastName}` }))}
+            placeholder="Chercher un assigné…"
+          />
+        </div>
         <PreservedSearchForm
           searchParams={searchParams as Record<string, string | undefined>}
           except={["q", "from", "to", "page"]}
