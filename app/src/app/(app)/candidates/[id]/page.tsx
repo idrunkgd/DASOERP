@@ -15,12 +15,18 @@ import { SubjectContractsPanel } from "@/components/contracts/subject-contracts-
 import { ExperiencesPanel } from "../../me/experiences-panel";
 import { CandidateTestsSection } from "./tests-section";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { CheckCircle2, MessageSquare, FileDown, Eye } from "lucide-react";
+import { CheckCircle2, MessageSquare, FileDown, Eye, User as UserIcon, FileText, Briefcase, FileSignature } from "lucide-react";
 import { SalaryScenariosPanel } from "./salary-scenarios-panel";
+import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
 
-export default async function CandidateDetail({ params }: { params: { id: string } }) {
+type CandidateTab = "general" | "cv" | "recruitment" | "contracts";
+
+export default async function CandidateDetail({ params, searchParams }: { params: { id: string }; searchParams: { tab?: string } }) {
   await requirePermission("consulting.read");
   const session = await requireSession();
+  const tab: CandidateTab = (["general", "cv", "recruitment", "contracts"].includes(searchParams.tab ?? "")
+    ? searchParams.tab
+    : "general") as CandidateTab;
   const [c, skillCatalog, candidateContracts, contractTemplates] = await Promise.all([
     prisma.candidate.findUnique({
       where: { id: params.id },
@@ -158,107 +164,117 @@ export default async function CandidateDetail({ params }: { params: { id: string
         </div>
       )}
 
+      {/* Onglets — préserve les autres params (?edit=xxx…) */}
+      {(() => {
+        const CANDIDATE_TABS: PersonTab[] = [
+          { key: "general",     label: "Général",     icon: UserIcon },
+          { key: "cv",          label: "CV & Package", icon: FileText,
+            badge: c.experiences.length || c.salaryScenarios.length
+              ? c.experiences.length + c.salaryScenarios.length
+              : undefined },
+          { key: "recruitment", label: "Recrutement", icon: Briefcase,
+            badge: c.applications.length + c.hiringInterviews.length || undefined },
+          { key: "contracts",   label: "Contrats",    icon: FileSignature,
+            badge: candidateContracts.length || undefined }
+        ];
+        return <PersonTabsNav tabs={CANDIDATE_TABS} current={tab} />;
+      })()}
+
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <CandidateForm initial={c as any} skillCatalog={skillCatalog} />
+          {tab === "general" && (
+            <CandidateForm initial={c as any} skillCatalog={skillCatalog} />
+          )}
 
-          <ExperiencesPanel
-            candidateId={c.id}
-            experiences={c.experiences.map(e => ({
-              id: e.id,
-              companyName: e.companyName,
-              jobTitle: e.jobTitle,
-              startDate: e.startDate.toISOString(),
-              endDate: e.endDate ? e.endDate.toISOString() : null,
-              description: e.description
-            }))}
-          />
+          {tab === "cv" && (
+            <>
+              <ExperiencesPanel
+                candidateId={c.id}
+                experiences={c.experiences.map(e => ({
+                  id: e.id,
+                  companyName: e.companyName,
+                  jobTitle: e.jobTitle,
+                  startDate: e.startDate.toISOString(),
+                  endDate: e.endDate ? e.endDate.toISOString() : null,
+                  description: e.description
+                }))}
+              />
+              <SalaryScenariosPanel
+                candidateId={c.id}
+                canApply={canApplyScenarios}
+                candidateCurrentDailyCost={c.dailyCost ? Number(c.dailyCost) : null}
+                scenarios={c.salaryScenarios.map((s: any) => ({
+                  id: s.id,
+                  label: s.label,
+                  grossMonthly: Number(s.grossMonthly),
+                  workingDaysPerWeek: Number(s.workingDaysPerWeek),
+                  totalAnnualCost: Number(s.totalAnnualCost),
+                  costPerDay: Number(s.costPerDay),
+                  billableRate: Number(s.billableRate),
+                  soldDailyRate: Number(s.soldDailyRate),
+                  targetMarginPct: Number(s.targetMarginPct),
+                  createdAt: s.createdAt.toISOString(),
+                  createdBy: s.createdBy
+                }))}
+              />
+            </>
+          )}
 
-          <HiringInterviewsPanel
-            candidateId={c.id}
-            interviews={c.hiringInterviews.map(i => ({
-              id: i.id, scheduledAt: i.scheduledAt.toISOString(), kind: i.kind,
-              interviewers: i.interviewers, location: i.location, feedback: i.feedback, outcome: i.outcome
-            }))}
-          />
+          {tab === "recruitment" && (
+            <>
+              <HiringInterviewsPanel
+                candidateId={c.id}
+                interviews={c.hiringInterviews.map(i => ({
+                  id: i.id, scheduledAt: i.scheduledAt.toISOString(), kind: i.kind,
+                  interviewers: i.interviewers, location: i.location, feedback: i.feedback, outcome: i.outcome
+                }))}
+              />
+              <CandidateTestsSection candidateId={c.id} />
+              <section className="card p-5">
+                <h2 className="font-semibold mb-3">Présentations sur missions ({c.applications.length})</h2>
+                {c.applications.length === 0 ? (
+                  <p className="text-sm text-midnight-500">Pas encore présenté sur une mission.</p>
+                ) : (
+                  <table className="table-base">
+                    <thead><tr><th>Mission</th><th>Client</th><th className="text-right">Tarif proposé</th><th>Statut</th><th>Présenté</th><th className="text-right">Entretiens</th></tr></thead>
+                    <tbody>
+                      {c.applications.map(a => (
+                        <tr key={a.id}>
+                          <td><Link href={`/mission-requests/${a.missionRequest.id}`} className="font-medium hover:underline">{a.missionRequest.reference}</Link><div className="text-xs text-midnight-500">{a.missionRequest.title}</div></td>
+                          <td className="text-midnight-700">{a.missionRequest.company.name}</td>
+                          <td className="text-right tabular-nums">{a.proposedDailyRate ? formatCurrency(a.proposedDailyRate) : "—"}</td>
+                          <td><StatusBadge status={a.status} /></td>
+                          <td className="text-xs text-midnight-500">{formatDate(a.presentedAt)}</td>
+                          <td className="text-right tabular-nums">{a.interviews.length}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </section>
+              <ClientInterviewsPanel
+                applications={c.applications.map<AppWithInterviews>((a) => ({
+                  applicationId: a.id,
+                  missionRequestId: a.missionRequest.id,
+                  missionRef: a.missionRequest.reference,
+                  missionTitle: a.missionRequest.title,
+                  companyName: a.missionRequest.company.name,
+                  status: a.status,
+                  interviews: a.interviews.map((iv) => ({
+                    id: iv.id,
+                    scheduledAt: iv.scheduledAt,
+                    kind: iv.kind,
+                    interviewers: iv.interviewers,
+                    location: iv.location,
+                    feedback: iv.feedback,
+                    outcome: iv.outcome
+                  }))
+                }))}
+              />
+            </>
+          )}
 
-          <SalaryScenariosPanel
-            candidateId={c.id}
-            canApply={canApplyScenarios}
-            candidateCurrentDailyCost={c.dailyCost ? Number(c.dailyCost) : null}
-            scenarios={c.salaryScenarios.map((s: any) => ({
-              id: s.id,
-              label: s.label,
-              grossMonthly: Number(s.grossMonthly),
-              workingDaysPerWeek: Number(s.workingDaysPerWeek),
-              totalAnnualCost: Number(s.totalAnnualCost),
-              costPerDay: Number(s.costPerDay),
-              billableRate: Number(s.billableRate),
-              soldDailyRate: Number(s.soldDailyRate),
-              targetMarginPct: Number(s.targetMarginPct),
-              createdAt: s.createdAt.toISOString(),
-              createdBy: s.createdBy
-            }))}
-          />
-
-          <CandidateTestsSection candidateId={c.id} />
-
-          <section className="card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-semibold flex items-center gap-2"><MessageSquare className="w-4 h-4" /> Entretiens client (placement) ({allInterviews.length})</h2>
-            </div>
-            {allInterviews.length === 0 ? (
-              <p className="text-sm text-midnight-500">Aucun entretien de recrutement à ce jour.</p>
-            ) : (
-              <table className="table-base">
-                <thead><tr><th>Date</th><th>Mission</th><th>Type</th><th>Interviewer(s)</th><th>Issue</th><th>Feedback</th></tr></thead>
-                <tbody>
-                  {allInterviews.map(i => (
-                    <tr key={i.id} className="align-top">
-                      <td className="text-xs text-midnight-700">{formatDate(i.scheduledAt, { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
-                      <td>
-                        <Link href={`/mission-requests/${i.missionId}`} className="font-medium hover:underline">{i.missionRef}</Link>
-                        <div className="text-xs text-midnight-500">{i.companyName} — {i.missionTitle}</div>
-                      </td>
-                      <td className="text-xs">{KIND_LABEL[i.kind] ?? i.kind}</td>
-                      <td className="text-xs text-midnight-700">{i.interviewers ?? "—"}</td>
-                      <td>
-                        <span className={"badge-" + (i.outcome === "PASSED" ? "success" : i.outcome === "FAILED" ? "danger" : i.outcome === "CANCELLED" ? "neutral" : "warning")}>
-                          {i.outcome}
-                        </span>
-                      </td>
-                      <td className="text-xs text-midnight-700 max-w-md whitespace-pre-wrap">{i.feedback ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </section>
-
-          <section className="card p-5">
-            <h2 className="font-semibold mb-3">Présentations sur missions ({c.applications.length})</h2>
-            {c.applications.length === 0 ? (
-              <p className="text-sm text-midnight-500">Pas encore présenté sur une mission.</p>
-            ) : (
-              <table className="table-base">
-                <thead><tr><th>Mission</th><th>Client</th><th className="text-right">Tarif proposé</th><th>Statut</th><th>Présenté</th><th className="text-right">Entretiens</th></tr></thead>
-                <tbody>
-                  {c.applications.map(a => (
-                    <tr key={a.id}>
-                      <td><Link href={`/mission-requests/${a.missionRequest.id}`} className="font-medium hover:underline">{a.missionRequest.reference}</Link><div className="text-xs text-midnight-500">{a.missionRequest.title}</div></td>
-                      <td className="text-midnight-700">{a.missionRequest.company.name}</td>
-                      <td className="text-right tabular-nums">{a.proposedDailyRate ? formatCurrency(a.proposedDailyRate) : "—"}</td>
-                      <td><StatusBadge status={a.status} /></td>
-                      <td className="text-xs text-midnight-500">{formatDate(a.presentedAt)}</td>
-                      <td className="text-right tabular-nums">{a.interviews.length}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </section>
-
-          {canReadContracts && (
+          {tab === "contracts" && canReadContracts && (
             <SubjectContractsPanel
               contracts={candidateContracts}
               templates={contractTemplates}
@@ -266,26 +282,11 @@ export default async function CandidateDetail({ params }: { params: { id: string
               canManage={canManageContracts}
             />
           )}
-
-          <ClientInterviewsPanel
-            applications={c.applications.map<AppWithInterviews>((a) => ({
-              applicationId: a.id,
-              missionRequestId: a.missionRequest.id,
-              missionRef: a.missionRequest.reference,
-              missionTitle: a.missionRequest.title,
-              companyName: a.missionRequest.company.name,
-              status: a.status,
-              interviews: a.interviews.map((iv) => ({
-                id: iv.id,
-                scheduledAt: iv.scheduledAt,
-                kind: iv.kind,
-                interviewers: iv.interviewers,
-                location: iv.location,
-                feedback: iv.feedback,
-                outcome: iv.outcome
-              }))
-            }))}
-          />
+          {tab === "contracts" && !canReadContracts && (
+            <div className="card p-6 text-sm text-midnight-500 italic">
+              Tu n'as pas la permission pour voir les contrats de ce candidat.
+            </div>
+          )}
         </div>
 
         <aside className="space-y-4">

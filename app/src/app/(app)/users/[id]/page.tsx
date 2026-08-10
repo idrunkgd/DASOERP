@@ -11,10 +11,16 @@ import { ResetPasswordButton } from "./reset-password-button";
 import { UserExperiencesPanel } from "../../me/user-experiences-panel";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
 import { redirect } from "next/navigation";
-import { FileDown, Eye } from "lucide-react";
+import { FileDown, Eye, User as UserIcon, FileText, Briefcase, ClipboardCheck, FileSignature } from "lucide-react";
+import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
 
-export default async function UserDetail({ params }: { params: { id: string } }) {
+type UserTab = "general" | "cv" | "missions" | "rh" | "contracts";
+
+export default async function UserDetail({ params, searchParams }: { params: { id: string }; searchParams: { tab?: string } }) {
   const session = await requireSession();
+  const tab: UserTab = (["general", "cv", "missions", "rh", "contracts"].includes(searchParams.tab ?? "")
+    ? searchParams.tab
+    : "general") as UserTab;
   // Vérification basée sur les permissions effectives (groupe + overrides), pas sur le rôle.
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const isSelf = session.user.id === params.id;
@@ -97,33 +103,97 @@ export default async function UserDetail({ params }: { params: { id: string } })
           </>
         }
       />
+      {/* Onglets */}
+      {(() => {
+        const USER_TABS: PersonTab[] = [
+          { key: "general",   label: "Général",     icon: UserIcon },
+          { key: "cv",        label: "CV",          icon: FileText,
+            badge: user.experiences.length || undefined },
+          { key: "missions",  label: "Missions",    icon: Briefcase,
+            badge: applications.length || undefined },
+          { key: "rh",        label: "RH",          icon: ClipboardCheck,
+            badge: reviews.length || undefined },
+          { key: "contracts", label: "Contrats",    icon: FileSignature,
+            badge: contracts.length || undefined }
+        ];
+        return <PersonTabsNav tabs={USER_TABS} current={tab} />;
+      })()}
+
       <div className="space-y-6">
-        {/* Bouton dédié reset password — isolé du form principal pour rester
-            fonctionnel même si le form général plante à cause d'une colonne
-            en retard sur la migration DB. */}
-        {isAdmin && (
-          <div className="flex justify-end">
-            <ResetPasswordButton userId={user.id} />
-          </div>
+        {tab === "general" && (
+          <>
+            {isAdmin && (
+              <div className="flex justify-end">
+                <ResetPasswordButton userId={user.id} />
+              </div>
+            )}
+            {isAdmin && <UserForm initial={user} skillCatalog={skillCatalog} />}
+            {!isAdmin && (
+              <div className="card p-6 text-sm text-midnight-500 italic">
+                Édition du profil réservée aux administrateurs.
+              </div>
+            )}
+          </>
         )}
-        {isAdmin && <UserForm initial={user} skillCatalog={skillCatalog} />}
 
-        {/* Expériences pro : miroir de la fiche candidat. Éditables par
-            soi-même OU un admin/manager (contrôle côté server action).
-            Utilisées comme CV sur les propositions consultant PDF. */}
-        <UserExperiencesPanel
-          userId={user.id}
-          experiences={user.experiences.map((e) => ({
-            id: e.id,
-            companyName: e.companyName,
-            jobTitle: e.jobTitle,
-            startDate: e.startDate.toISOString(),
-            endDate: e.endDate ? e.endDate.toISOString() : null,
-            description: e.description
-          }))}
-        />
+        {tab === "cv" && (
+          <UserExperiencesPanel
+            userId={user.id}
+            experiences={user.experiences.map((e) => ({
+              id: e.id,
+              companyName: e.companyName,
+              jobTitle: e.jobTitle,
+              startDate: e.startDate.toISOString(),
+              endDate: e.endDate ? e.endDate.toISOString() : null,
+              description: e.description
+            }))}
+          />
+        )}
 
-        {canReadContracts && (
+        {tab === "missions" && (
+          <ClientInterviewsPanel
+            applications={applications.map<AppWithInterviews>((a) => ({
+              applicationId: a.id,
+              missionRequestId: a.missionRequest.id,
+              missionRef: a.missionRequest.reference,
+              missionTitle: a.missionRequest.title,
+              companyName: a.missionRequest.company.name,
+              status: a.status,
+              interviews: a.interviews.map((iv) => ({
+                id: iv.id,
+                scheduledAt: iv.scheduledAt,
+                kind: iv.kind,
+                interviewers: iv.interviewers,
+                location: iv.location,
+                feedback: iv.feedback,
+                outcome: iv.outcome
+              }))
+            }))}
+          />
+        )}
+
+        {tab === "rh" && (
+          <ReviewsPanel
+            userId={user.id}
+            reviews={reviews.map(r => ({
+              id: r.id,
+              scheduledAt: r.scheduledAt.toISOString(),
+              kind: r.kind,
+              outcome: r.outcome,
+              feedback: r.feedback,
+              privateNotes: r.privateNotes,
+              goals: r.goals,
+              projectId: r.projectId,
+              project: r.project ? { id: r.project.id, reference: r.project.reference, name: r.project.name } : null,
+              conductedBy: r.conductedBy ? { firstName: r.conductedBy.firstName, lastName: r.conductedBy.lastName } : null
+            }))}
+            projects={projects}
+            canManage={canManageReviews}
+            showPrivate={showPrivateNotes}
+          />
+        )}
+
+        {tab === "contracts" && canReadContracts && (
           <SubjectContractsPanel
             contracts={contracts}
             templates={contractTemplates}
@@ -131,45 +201,11 @@ export default async function UserDetail({ params }: { params: { id: string } })
             canManage={canManageContracts}
           />
         )}
-
-        <ClientInterviewsPanel
-          applications={applications.map<AppWithInterviews>((a) => ({
-            applicationId: a.id,
-            missionRequestId: a.missionRequest.id,
-            missionRef: a.missionRequest.reference,
-            missionTitle: a.missionRequest.title,
-            companyName: a.missionRequest.company.name,
-            status: a.status,
-            interviews: a.interviews.map((iv) => ({
-              id: iv.id,
-              scheduledAt: iv.scheduledAt,
-              kind: iv.kind,
-              interviewers: iv.interviewers,
-              location: iv.location,
-              feedback: iv.feedback,
-              outcome: iv.outcome
-            }))
-          }))}
-        />
-
-        <ReviewsPanel
-          userId={user.id}
-          reviews={reviews.map(r => ({
-            id: r.id,
-            scheduledAt: r.scheduledAt.toISOString(),
-            kind: r.kind,
-            outcome: r.outcome,
-            feedback: r.feedback,
-            privateNotes: r.privateNotes,
-            goals: r.goals,
-            projectId: r.projectId,
-            project: r.project ? { id: r.project.id, reference: r.project.reference, name: r.project.name } : null,
-            conductedBy: r.conductedBy ? { firstName: r.conductedBy.firstName, lastName: r.conductedBy.lastName } : null
-          }))}
-          projects={projects}
-          canManage={canManageReviews}
-          showPrivate={showPrivateNotes}
-        />
+        {tab === "contracts" && !canReadContracts && (
+          <div className="card p-6 text-sm text-midnight-500 italic">
+            Tu n'as pas la permission pour voir les contrats.
+          </div>
+        )}
       </div>
     </div>
   );
