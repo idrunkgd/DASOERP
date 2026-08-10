@@ -8,7 +8,7 @@ import { ShoppingCart, Plus } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
-import { parseMulti, inFilter } from "@/lib/filters";
+import { parseMulti, inFilter, resolveStatusFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -16,13 +16,10 @@ export default async function PurchasesPage({ searchParams }: { searchParams: { 
   await requirePermission("purchases.read");
   const statuses = parseMulti(searchParams.status);
   const projectIds = parseMulti(searchParams.projectId);
+  const activeOnly = (searchParams as any).active === "1";
   const where: any = {};
-  // Défaut : masquer les statuts terminaux (PAID, CANCELLED).
-  if (statuses.length > 0) {
-    where.status = inFilter(statuses);
-  } else {
-    where.status = { in: ["PLANNED", "ORDERED", "RECEIVED"] };
-  }
+  const statusFilter = resolveStatusFilter(statuses, activeOnly, ["PLANNED", "ORDERED", "RECEIVED"]);
+  if (statusFilter) where.status = statusFilter;
   const projectFilter = inFilter(projectIds);
   if (projectFilter) where.projectId = projectFilter;
   if (searchParams.q) where.description = { contains: searchParams.q, mode: "insensitive" };
@@ -45,6 +42,14 @@ export default async function PurchasesPage({ searchParams }: { searchParams: { 
         }
       />
       <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="active"
+          label="Vue rapide"
+          multi={false}
+          options={[
+            { value: "1", label: "Actifs uniquement (masquer terminés)", tone: "info" }
+          ]}
+        />
         <FilterChips
           paramName="status"
           label="Statut"

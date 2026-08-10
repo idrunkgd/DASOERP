@@ -3,16 +3,48 @@
  * Navigation par onglets pour fiche personne (candidat, consultant, /me).
  * Chaque tab est une URL ?tab=key : bookmarkable + refreshable, rendu SSR.
  * Préserve les autres query params de l'URL (ex: ?edit=xxx, ?section=…).
+ *
+ * IMPORTANT : les icônes sont passées par NOM (string) et résolues côté
+ * client via ICON_MAP. On ne peut PAS passer un composant Lucide depuis
+ * un Server Component — les fonctions ne traversent pas la frontière RSC.
  */
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import {
+  User, FileText, Briefcase, ClipboardCheck, FileSignature,
+  Users, ClipboardList, MessageSquare, Building2, GraduationCap
+} from "lucide-react";
+
+export type PersonTabIcon =
+  | "user"
+  | "file"
+  | "briefcase"
+  | "check"
+  | "contract"
+  | "users"
+  | "list"
+  | "message"
+  | "company"
+  | "graduation";
+
+const ICON_MAP: Record<PersonTabIcon, typeof User> = {
+  user:      User,
+  file:      FileText,
+  briefcase: Briefcase,
+  check:     ClipboardCheck,
+  contract:  FileSignature,
+  users:     Users,
+  list:      ClipboardList,
+  message:   MessageSquare,
+  company:   Building2,
+  graduation: GraduationCap
+};
 
 export type PersonTab = {
   key: string;
   label: string;
-  icon: LucideIcon;
-  /** Badge optionnel (compteur, ex: "3" pour 3 entretiens) */
+  icon: PersonTabIcon;
+  /** Badge optionnel (compteur, ex: 3 pour 3 entretiens) */
   badge?: number | string;
 };
 
@@ -32,6 +64,7 @@ export function PersonTabsNav({
         const sp = new URLSearchParams(searchParams?.toString() ?? "");
         sp.set("tab", t.key);
         const href = `${pathname}?${sp.toString()}`;
+        const Icon = ICON_MAP[t.icon] ?? User;
         return (
           <Link
             key={t.key}
@@ -43,7 +76,7 @@ export function PersonTabsNav({
                 : "text-midnight-500 hover:text-midnight-800")
             }
           >
-            <t.icon className="w-4 h-4" />
+            <Icon className="w-4 h-4" />
             {t.label}
             {t.badge != null && (
               <span className={

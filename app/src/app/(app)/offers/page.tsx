@@ -8,7 +8,7 @@ import { FileText, Plus } from "lucide-react";
 import { formatCurrency, formatDate, formatPercent } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
-import { parseMulti, inFilter } from "@/lib/filters";
+import { parseMulti, resolveStatusFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -19,17 +19,14 @@ export default async function OffersPage({ searchParams }: { searchParams: { q?:
   //   - parentOfferId = null : on exclut aussi les compléments d'offres
   // Les versions précédentes sont accessibles depuis la fiche détail.
   const statuses = parseMulti(searchParams.status);
+  const activeOnly = (searchParams as any).active === "1";
   const where: any = { nextVersion: null, parentOfferId: null };
   if (searchParams.q) where.OR = [
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
-  // Défaut : masquer les statuts terminaux (WON, LOST, CANCELLED).
-  if (statuses.length > 0) {
-    where.status = inFilter(statuses);
-  } else {
-    where.status = { in: ["DRAFT", "SENT", "NEGOTIATION"] };
-  }
+  const statusFilter = resolveStatusFilter(statuses, activeOnly, ["DRAFT", "SENT", "NEGOTIATION"]);
+  if (statusFilter) where.status = statusFilter;
 
   const offers = await prisma.offer.findMany({
     where, orderBy: { createdAt: "desc" },
@@ -49,6 +46,14 @@ export default async function OffersPage({ searchParams }: { searchParams: { q?:
         }
       />
       <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="active"
+          label="Vue rapide"
+          multi={false}
+          options={[
+            { value: "1", label: "Actifs uniquement (masquer terminés)", tone: "info" }
+          ]}
+        />
         <FilterChips
           paramName="status"
           label="Statut"

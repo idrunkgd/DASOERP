@@ -7,7 +7,7 @@ import { Briefcase, Plus } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
-import { parseMulti, inFilter } from "@/lib/filters";
+import { parseMulti, resolveStatusFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -23,14 +23,10 @@ const STATUS_TONES: Record<string, string> = {
 export default async function MissionsPage({ searchParams }: { searchParams: { q?: string; status?: string } }) {
   await requirePermission("consulting.read");
   const statuses = parseMulti(searchParams.status);
+  const activeOnly = searchParams.active === "1";
   const where: any = {};
-  // Défaut : masquer les statuts terminaux (CONTRACTED, LOST, CANCELLED).
-  // Si l'utilisateur en coche un explicitement, on respecte son choix.
-  if (statuses.length > 0) {
-    where.status = inFilter(statuses);
-  } else {
-    where.status = { in: ["NEW", "QUALIFYING", "PRESENTING"] };
-  }
+  const statusFilter = resolveStatusFilter(statuses, activeOnly, ["NEW", "QUALIFYING", "PRESENTING"]);
+  if (statusFilter) where.status = statusFilter;
   if (searchParams.q) where.OR = [
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
@@ -47,6 +43,14 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
         actions={<Link href="/mission-requests/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouvelle demande</Link>}
       />
       <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="active"
+          label="Vue rapide"
+          multi={false}
+          options={[
+            { value: "1", label: "Actifs uniquement (masquer terminés)", tone: "info" }
+          ]}
+        />
         <FilterChips
           paramName="status"
           label="Statut"

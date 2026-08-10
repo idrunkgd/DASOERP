@@ -9,7 +9,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { FilterMultiSelect } from "@/components/ui/filter-multi-select";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
-import { parseMulti, inFilter } from "@/lib/filters";
+import { parseMulti, inFilter, resolveStatusFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
@@ -17,13 +17,10 @@ export default async function FinancePage({ searchParams }: { searchParams: { st
   await requirePermission("finance.read");
   const statuses = parseMulti(searchParams.status);
   const companyIds = parseMulti(searchParams.companyId);
+  const activeOnly = (searchParams as any).active === "1";
   const where: any = {};
-  // Défaut : masquer les statuts terminaux (PAID, CANCELLED).
-  if (statuses.length > 0) {
-    where.status = inFilter(statuses);
-  } else {
-    where.status = { in: ["PLANNED", "READY", "TRANSMITTED"] };
-  }
+  const statusFilter = resolveStatusFilter(statuses, activeOnly, ["PLANNED", "READY", "TRANSMITTED"]);
+  if (statusFilter) where.status = statusFilter;
   if (searchParams.from) where.expectedAt = { ...(where.expectedAt ?? {}), gte: new Date(searchParams.from) };
   if (searchParams.to)   where.expectedAt = { ...(where.expectedAt ?? {}), lte: new Date(searchParams.to) };
 
@@ -68,6 +65,14 @@ export default async function FinancePage({ searchParams }: { searchParams: { st
       </div>
 
       <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="active"
+          label="Vue rapide"
+          multi={false}
+          options={[
+            { value: "1", label: "Actifs uniquement (masquer terminés)", tone: "info" }
+          ]}
+        />
         <FilterChips
           paramName="status"
           label="Statut"

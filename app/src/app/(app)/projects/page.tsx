@@ -8,24 +8,21 @@ import { FolderKanban, Plus, AlertTriangle } from "lucide-react";
 import { formatCurrency, formatPercent } from "@/lib/utils";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
-import { parseMulti, inFilter } from "@/lib/filters";
+import { parseMulti, resolveStatusFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage({ searchParams }: { searchParams: { q?: string; status?: string } }) {
   await requirePermission("projects.read");
   const statuses = parseMulti(searchParams.status);
+  const activeOnly = (searchParams as any).active === "1";
   const where: any = {};
   if (searchParams.q) where.OR = [
     { name: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
-  // Défaut : masquer les statuts terminaux (COMPLETED, CANCELLED).
-  if (statuses.length > 0) {
-    where.status = inFilter(statuses);
-  } else {
-    where.status = { in: ["TO_START", "ACTIVE", "ON_HOLD"] };
-  }
+  const statusFilter = resolveStatusFilter(statuses, activeOnly, ["TO_START", "ACTIVE", "ON_HOLD"]);
+  if (statusFilter) where.status = statusFilter;
 
   const projects = await prisma.project.findMany({
     where, include: { company: true, manager: true }, orderBy: { createdAt: "desc" }
@@ -44,6 +41,14 @@ export default async function ProjectsPage({ searchParams }: { searchParams: { q
         }
       />
       <div className="mb-4 space-y-3">
+        <FilterChips
+          paramName="active"
+          label="Vue rapide"
+          multi={false}
+          options={[
+            { value: "1", label: "Actifs uniquement (masquer terminés)", tone: "info" }
+          ]}
+        />
         <FilterChips
           paramName="status"
           label="Statut"

@@ -19,3 +19,23 @@ export function parseMulti(raw: string | string[] | undefined): string[] {
 export function inFilter<T extends string>(values: T[]): { in: T[] } | undefined {
   return values.length > 0 ? { in: values } : undefined;
 }
+
+/**
+ * Résout le filtre statut pour un listing :
+ *   - Si des statuts explicites sont cochés → filtre sur ceux-ci
+ *   - Sinon si `activeOnly=true` → filtre sur les statuts encore actifs
+ *   - Sinon → aucun filtre (tout afficher, défaut)
+ *
+ * Retourne la clause à mettre dans `where.status` (ou `undefined` si aucun
+ * filtre à appliquer). Le param `active=1` dans l'URL active le filtre
+ * "encore en cours".
+ */
+export function resolveStatusFilter<T extends string>(
+  statuses: T[],
+  activeOnly: boolean,
+  activeStatuses: T[]
+): { in: T[] } | undefined {
+  if (statuses.length > 0) return { in: statuses };
+  if (activeOnly) return { in: activeStatuses };
+  return undefined;
+}

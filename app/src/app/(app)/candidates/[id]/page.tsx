@@ -15,7 +15,7 @@ import { SubjectContractsPanel } from "@/components/contracts/subject-contracts-
 import { ExperiencesPanel } from "../../me/experiences-panel";
 import { CandidateTestsSection } from "./tests-section";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { CheckCircle2, MessageSquare, FileDown, Eye, User as UserIcon, FileText, Briefcase, FileSignature } from "lucide-react";
+import { CheckCircle2, MessageSquare, FileDown, Eye } from "lucide-react";
 import { SalaryScenariosPanel } from "./salary-scenarios-panel";
 import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
 
@@ -167,14 +167,14 @@ export default async function CandidateDetail({ params, searchParams }: { params
       {/* Onglets — préserve les autres params (?edit=xxx…) */}
       {(() => {
         const CANDIDATE_TABS: PersonTab[] = [
-          { key: "general",     label: "Général",     icon: UserIcon },
-          { key: "cv",          label: "CV & Package", icon: FileText,
+          { key: "general",     label: "Général",     icon: "user" },
+          { key: "cv",          label: "CV & Package", icon: "file",
             badge: c.experiences.length || c.salaryScenarios.length
               ? c.experiences.length + c.salaryScenarios.length
               : undefined },
-          { key: "recruitment", label: "Recrutement", icon: Briefcase,
+          { key: "recruitment", label: "Recrutement", icon: "briefcase",
             badge: c.applications.length + c.hiringInterviews.length || undefined },
-          { key: "contracts",   label: "Contrats",    icon: FileSignature,
+          { key: "contracts",   label: "Contrats",    icon: "contract",
             badge: candidateContracts.length || undefined }
         ];
         return <PersonTabsNav tabs={CANDIDATE_TABS} current={tab} />;

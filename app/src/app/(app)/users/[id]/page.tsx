@@ -11,7 +11,7 @@ import { ResetPasswordButton } from "./reset-password-button";
 import { UserExperiencesPanel } from "../../me/user-experiences-panel";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
 import { redirect } from "next/navigation";
-import { FileDown, Eye, User as UserIcon, FileText, Briefcase, ClipboardCheck, FileSignature } from "lucide-react";
+import { FileDown, Eye } from "lucide-react";
 import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
 
 type UserTab = "general" | "cv" | "missions" | "rh" | "contracts";
@@ -106,14 +106,14 @@ export default async function UserDetail({ params, searchParams }: { params: { i
       {/* Onglets */}
       {(() => {
         const USER_TABS: PersonTab[] = [
-          { key: "general",   label: "Général",     icon: UserIcon },
-          { key: "cv",        label: "CV",          icon: FileText,
+          { key: "general",   label: "Général",  icon: "user" },
+          { key: "cv",        label: "CV",       icon: "file",
             badge: user.experiences.length || undefined },
-          { key: "missions",  label: "Missions",    icon: Briefcase,
+          { key: "missions",  label: "Missions", icon: "briefcase",
             badge: applications.length || undefined },
-          { key: "rh",        label: "RH",          icon: ClipboardCheck,
+          { key: "rh",        label: "RH",       icon: "check",
             badge: reviews.length || undefined },
-          { key: "contracts", label: "Contrats",    icon: FileSignature,
+          { key: "contracts", label: "Contrats", icon: "contract",
             badge: contracts.length || undefined }
         ];
         return <PersonTabsNav tabs={USER_TABS} current={tab} />;
