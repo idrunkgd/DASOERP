@@ -18,8 +18,12 @@ export default async function FinancePage({ searchParams }: { searchParams: { st
   const statuses = parseMulti(searchParams.status);
   const companyIds = parseMulti(searchParams.companyId);
   const where: any = {};
-  const statusFilter = inFilter(statuses);
-  if (statusFilter) where.status = statusFilter;
+  // Défaut : masquer les statuts terminaux (PAID, CANCELLED).
+  if (statuses.length > 0) {
+    where.status = inFilter(statuses);
+  } else {
+    where.status = { in: ["PLANNED", "READY", "TRANSMITTED"] };
+  }
   if (searchParams.from) where.expectedAt = { ...(where.expectedAt ?? {}), gte: new Date(searchParams.from) };
   if (searchParams.to)   where.expectedAt = { ...(where.expectedAt ?? {}), lte: new Date(searchParams.to) };
 

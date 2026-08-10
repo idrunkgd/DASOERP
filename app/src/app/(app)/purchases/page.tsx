@@ -17,8 +17,12 @@ export default async function PurchasesPage({ searchParams }: { searchParams: { 
   const statuses = parseMulti(searchParams.status);
   const projectIds = parseMulti(searchParams.projectId);
   const where: any = {};
-  const statusFilter = inFilter(statuses);
-  if (statusFilter) where.status = statusFilter;
+  // Défaut : masquer les statuts terminaux (PAID, CANCELLED).
+  if (statuses.length > 0) {
+    where.status = inFilter(statuses);
+  } else {
+    where.status = { in: ["PLANNED", "ORDERED", "RECEIVED"] };
+  }
   const projectFilter = inFilter(projectIds);
   if (projectFilter) where.projectId = projectFilter;
   if (searchParams.q) where.description = { contains: searchParams.q, mode: "insensitive" };

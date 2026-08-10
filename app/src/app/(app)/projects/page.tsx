@@ -20,8 +20,12 @@ export default async function ProjectsPage({ searchParams }: { searchParams: { q
     { name: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
-  const statusFilter = inFilter(statuses);
-  if (statusFilter) where.status = statusFilter;
+  // Défaut : masquer les statuts terminaux (COMPLETED, CANCELLED).
+  if (statuses.length > 0) {
+    where.status = inFilter(statuses);
+  } else {
+    where.status = { in: ["TO_START", "ACTIVE", "ON_HOLD"] };
+  }
 
   const projects = await prisma.project.findMany({
     where, include: { company: true, manager: true }, orderBy: { createdAt: "desc" }

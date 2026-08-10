@@ -24,8 +24,12 @@ export default async function OffersPage({ searchParams }: { searchParams: { q?:
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
-  const statusFilter = inFilter(statuses);
-  if (statusFilter) where.status = statusFilter;
+  // Défaut : masquer les statuts terminaux (WON, LOST, CANCELLED).
+  if (statuses.length > 0) {
+    where.status = inFilter(statuses);
+  } else {
+    where.status = { in: ["DRAFT", "SENT", "NEGOTIATION"] };
+  }
 
   const offers = await prisma.offer.findMany({
     where, orderBy: { createdAt: "desc" },

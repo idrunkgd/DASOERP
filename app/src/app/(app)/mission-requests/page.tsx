@@ -24,8 +24,13 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
   await requirePermission("consulting.read");
   const statuses = parseMulti(searchParams.status);
   const where: any = {};
-  const statusFilter = inFilter(statuses);
-  if (statusFilter) where.status = statusFilter;
+  // Défaut : masquer les statuts terminaux (CONTRACTED, LOST, CANCELLED).
+  // Si l'utilisateur en coche un explicitement, on respecte son choix.
+  if (statuses.length > 0) {
+    where.status = inFilter(statuses);
+  } else {
+    where.status = { in: ["NEW", "QUALIFYING", "PRESENTING"] };
+  }
   if (searchParams.q) where.OR = [
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
