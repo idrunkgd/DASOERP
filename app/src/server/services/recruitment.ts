@@ -27,17 +27,97 @@ export async function promoteCandidateToConsultant(opts: {
   }
   const existing = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
-    select: { id: true, firstName: true, lastName: true, role: true, active: true }
+    select: {
+      id: true, firstName: true, lastName: true, role: true, active: true,
+      leftAt: true, candidateProfile: { select: { id: true } }
+    }
   });
+
+  const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+  // ─── CAS RÉEMBAUCHE ───
+  // L'offboarding ne SUPPRIME pas le User : il le désactive (active=false,
+  // leftAt renseigné) et détache le Candidate (convertedToUserId=null) pour
+  // le remettre dans le vivier. L'email reste donc pris par ce compte
+  // inactif. Si on retente de recruter la même personne plus tard, on doit
+  // RÉACTIVER l'ancien compte au lieu d'échouer sur une collision d'email.
+  //
+  // Sécurité : on ne réactive que si le compte est bien un ancien
+  // consultant parti (active=false ET leftAt non null) ET que ce n'est pas
+  // un compte portail candidat (candidateProfile null).
+  if (existing && !existing.active && existing.leftAt && !existing.candidateProfile) {
+    return prisma.$transaction(async (tx) => {
+      const user = await tx.user.update({
+        where: { id: existing.id },
+        data: {
+          passwordHash,          // nouveau mot de passe initial
+          active: true,
+          leftAt: null,          // il revient !
+          role,
+          firstName: candidate.firstName,
+          lastName: candidate.lastName,
+          // Rafraîchit le profil avec les données à jour du candidat
+          photoUrl: candidate.photoUrl ?? undefined,
+          phone: candidate.phone ?? undefined,
+          linkedinUrl: candidate.linkedinUrl ?? undefined,
+          city: candidate.city ?? undefined,
+          seniority: candidate.seniority ?? undefined,
+          yearsExperience: candidate.yearsExperience ?? undefined,
+          spokenLanguages: candidate.spokenLanguages.length > 0 ? candidate.spokenLanguages : undefined,
+          skills: candidate.skills.length > 0 ? candidate.skills : undefined,
+          dailyCost: candidate.dailyCost ?? undefined,
+          hourlyCost: candidate.hourlyCost ?? undefined,
+          weeklyCapacityH: weeklyCapacityH ?? 38,
+          joinedAt: joinedAt ?? new Date()
+        }
+      });
+      // Re-copie les expériences manquantes (idempotent sur companyName+startDate)
+      const [candidateExperiences, userExperiences] = await Promise.all([
+        tx.candidateExperience.findMany({ where: { candidateId } }),
+        tx.userExperience.findMany({
+          where: { userId: user.id },
+          select: { companyName: true, startDate: true }
+        })
+      ]);
+      const existingKeys = new Set(
+        userExperiences.map((e) => `${e.companyName}|${e.startDate.toISOString().slice(0, 10)}`)
+      );
+      const toCreate = candidateExperiences.filter(
+        (e) => !existingKeys.has(`${e.companyName}|${e.startDate.toISOString().slice(0, 10)}`)
+      );
+      if (toCreate.length > 0) {
+        await tx.userExperience.createMany({
+          data: toCreate.map((e) => ({
+            userId: user.id,
+            companyName: e.companyName,
+            jobTitle: e.jobTitle,
+            startDate: e.startDate,
+            endDate: e.endDate,
+            description: e.description
+          }))
+        });
+      }
+      await tx.candidate.update({
+        where: { id: candidateId },
+        data: { convertedToUserId: user.id, convertedAt: new Date(), status: "ARCHIVED" }
+      });
+      await logActivity({
+        actorId, action: "STATUS_CHANGE", entityType: "Candidate", entityId: candidate.id,
+        message: `RÉEMBAUCHE : ${candidate.firstName} ${candidate.lastName} — compte ${user.email} réactivé (${toCreate.length} expérience(s) ajoutée(s))`,
+        diff: { candidateId, userId: user.id, role, reactivated: true } as any
+      });
+      return user;
+    });
+  }
+
+  // ─── CAS COLLISION RÉELLE ───
   if (existing) {
     throw new Error(
       `Un utilisateur existe déjà avec l'email ${email} : ${existing.firstName} ${existing.lastName} ` +
-      `(rôle ${existing.role}${existing.active ? "" : ", inactif"}). ` +
+      `(rôle ${existing.role}${existing.active ? ", actif" : ", inactif"}). ` +
       `Ouvre sa fiche : /users/${existing.id} — ou choisis un autre email.`
     );
   }
-
-  const passwordHash = await bcrypt.hash(tempPassword, 10);
 
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
