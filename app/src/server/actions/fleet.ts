@@ -39,6 +39,21 @@ const VehicleSchema = z.object({
 export async function createVehicle(formData: FormData) {
   const session = await requirePermission("fleet.manage");
   const data = VehicleSchema.parse(Object.fromEntries(formData));
+
+  // Check préalable pour donner un message clair au lieu du P2002 Prisma.
+  // Cas typique : double-clic sur "Créer" ou re-soumission après retour
+  // navigateur → le vehicle a été créé mais l'utilisateur ne l'a pas vu.
+  const existing = await prisma.vehicle.findUnique({
+    where: { plate: data.plate },
+    select: { id: true, brand: true, model: true }
+  });
+  if (existing) {
+    throw new Error(
+      `Un véhicule existe déjà avec la plaque ${data.plate} (${existing.brand} ${existing.model}). ` +
+      `Ouvre sa fiche : /fleet/${existing.id}`
+    );
+  }
+
   const v = await prisma.vehicle.create({ data });
   await logActivity({
     actorId: session.user.id, action: "CREATE",
@@ -52,6 +67,19 @@ export async function createVehicle(formData: FormData) {
 export async function updateVehicle(id: string, formData: FormData) {
   const session = await requirePermission("fleet.manage");
   const data = VehicleSchema.parse(Object.fromEntries(formData));
+
+  // Vérif : si la plaque a changé, s'assurer qu'elle n'est pas déjà utilisée
+  // par un autre véhicule (message user-friendly au lieu du P2002 Prisma).
+  const conflict = await prisma.vehicle.findFirst({
+    where: { plate: data.plate, NOT: { id } },
+    select: { id: true, brand: true, model: true }
+  });
+  if (conflict) {
+    throw new Error(
+      `La plaque ${data.plate} est déjà utilisée par ${conflict.brand} ${conflict.model} (fiche /fleet/${conflict.id}).`
+    );
+  }
+
   await prisma.vehicle.update({ where: { id }, data });
   await logActivity({
     actorId: session.user.id, action: "UPDATE",

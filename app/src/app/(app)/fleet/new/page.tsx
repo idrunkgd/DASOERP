@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { createVehicle } from "@/server/actions/fleet";
 import { PhotoInput } from "./photo-input";
 
@@ -73,7 +74,7 @@ export default async function NewVehiclePage() {
           💡 Si LEASING, tu configureras le contrat (bailleur, mensualité, dates) sur la fiche du véhicule.
         </div>
         <div className="flex justify-end gap-2 pt-2 border-t border-border">
-          <button className="btn-primary">Créer</button>
+          <SubmitButton pendingLabel="Création…">Créer</SubmitButton>
         </div>
       </form>
     </div>

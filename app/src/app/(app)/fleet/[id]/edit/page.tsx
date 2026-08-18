@@ -4,6 +4,7 @@ import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { updateVehicle } from "@/server/actions/fleet";
 import { PhotoInput } from "../../new/photo-input";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ export default async function EditVehiclePage({ params }: { params: { id: string
 
         <div className="flex justify-between items-center pt-2 border-t border-border">
           <a href={`/fleet/${vehicle.id}`} className="btn-ghost">Annuler</a>
-          <button className="btn-primary">Enregistrer les modifications</button>
+          <SubmitButton pendingLabel="Sauvegarde…">Enregistrer les modifications</SubmitButton>
         </div>
       </form>
     </div>
