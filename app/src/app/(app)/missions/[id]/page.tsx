@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { MissionExecForm } from "./mission-exec-form";
 import { MissionExecStatusActions } from "./status-actions";
+import { GenerateCashflowButton } from "./generate-cashflow-button";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { differenceInCalendarDays } from "date-fns";
 
@@ -119,9 +120,15 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
           </div>
 
           <div className="card p-5 space-y-2 text-sm">
-            <h3 className="font-semibold mb-2">Tranches de facturation T&M</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold">Tranches de facturation T&M</h3>
+              <GenerateCashflowButton missionId={m.id} />
+            </div>
             {m.milestones.length === 0 ? (
-              <p className="text-midnight-500">Aucune tranche générée. Les tranches T&M sont créées mensuellement depuis les timesheets validés.</p>
+              <p className="text-midnight-500">
+                Aucune tranche dans le cashflow. Clique <strong>« Générer les tranches manquantes »</strong> ci-dessus
+                pour créer une tranche PLANNED par mois de la mission (jours ouvrés × TJM).
+              </p>
             ) : (
               <ul className="space-y-1">
                 {m.milestones.map(ms => (

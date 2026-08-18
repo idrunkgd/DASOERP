@@ -70,3 +70,30 @@ export async function convertApplicationToMissionAction(applicationId: string) {
   revalidatePath(`/missions`);
   redirect(`/missions/${mission.id}`);
 }
+
+/**
+ * Rattrapage : génère les tranches de facturation mensuelles manquantes
+ * pour une mission existante. Utile pour les missions contractualisées
+ * avant l'ajout de la génération automatique, ou si les dates ont changé
+ * (prolongation → nouveaux mois à couvrir).
+ *
+ * Idempotent : ne recrée jamais une tranche sur un mois déjà couvert.
+ */
+export async function generateMissionCashflowAction(missionId: string) {
+  const session = await requirePermission("consulting.write");
+  const mission = await prisma.mission.findUniqueOrThrow({ where: { id: missionId } });
+  const { generateMissionBillingSchedule } = await import("@/server/services/mission-service");
+  const r = await generateMissionBillingSchedule({
+    actorId: session.user.id,
+    missionId: mission.id,
+    startDate: mission.startDate,
+    endDate: mission.actualEndDate ?? mission.endDate,
+    dailyRate: Number(mission.dailyRate),
+    companyId: mission.companyId,
+    reference: mission.reference
+  });
+  revalidatePath(`/missions/${missionId}`);
+  revalidatePath("/cashflow");
+  revalidatePath("/finance");
+  return r;
+}

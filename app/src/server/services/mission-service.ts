@@ -103,8 +103,126 @@ export async function contractApplication(opts: {
       message: `Mission ${reference} contractualisée pour ${displayName} chez ${app.missionRequest.companyId}`,
       after: mission
     });
+    // ─── Alimentation automatique du cashflow ───
+    // Sans ça, la mission existe mais n'apparaît nulle part dans le cashflow
+    // (qui lit les BillingMilestone). On génère une tranche PLANNED par mois
+    // couvert par la mission, sur base d'une estimation de jours ouvrés.
+    // L'utilisateur pourra ajuster chaque mois depuis la grille cashflow.
+    try {
+      await generateMissionBillingSchedule({
+        actorId,
+        missionId: mission.id,
+        startDate: mission.startDate,
+        endDate: mission.endDate,
+        dailyRate: Number(mission.dailyRate),
+        companyId: mission.companyId,
+        reference: mission.reference
+      });
+    } catch (e) {
+      // Non bloquant : la mission est créée même si la génération échoue.
+      // L'utilisateur pourra générer manuellement depuis la fiche mission.
+      console.error("[contractApplication] génération cashflow échouée", e);
+    }
     return mission;
   });
+}
+
+/**
+ * Génère les tranches de facturation mensuelles d'une mission T&M.
+ *
+ * Une tranche PLANNED par mois entre startDate et endDate, montant estimé
+ * = (jours ouvrés du mois dans la période) × dailyRate. Date d'encaissement
+ * = dernier jour du mois.
+ *
+ * Idempotent : skip les mois qui ont déjà une tranche pour cette mission.
+ * Les jours sont une ESTIMATION — l'utilisateur ajuste ensuite mois par mois
+ * depuis la grille cashflow (le modal recalcule amount = jours × TJM).
+ */
+export async function generateMissionBillingSchedule(opts: {
+  actorId: string;
+  missionId: string;
+  startDate: Date;
+  endDate: Date;
+  dailyRate: number;
+  companyId: string;
+  reference: string;
+}): Promise<{ created: number; skipped: number }> {
+  const { actorId, missionId, startDate, endDate, dailyRate, companyId, reference } = opts;
+
+  const MONTH_LABELS = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+
+  /** Compte les jours ouvrés (lun-ven) entre deux dates incluses. */
+  function businessDays(from: Date, to: Date): number {
+    let count = 0;
+    const cur = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()));
+    const end = new Date(Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate()));
+    while (cur <= end) {
+      const dow = cur.getUTCDay();
+      if (dow !== 0 && dow !== 6) count++;
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+    return count;
+  }
+
+  let created = 0;
+  let skipped = 0;
+
+  // Itère mois par mois de startDate à endDate
+  let y = startDate.getUTCFullYear();
+  let m = startDate.getUTCMonth() + 1; // 1-12
+  const endY = endDate.getUTCFullYear();
+  const endM = endDate.getUTCMonth() + 1;
+
+  // Garde-fou : max 36 mois pour éviter une boucle infinie si dates aberrantes
+  let guard = 0;
+  while ((y < endY || (y === endY && m <= endM)) && guard < 36) {
+    guard++;
+    const monthStart = new Date(Date.UTC(y, m - 1, 1));
+    const monthEnd = new Date(Date.UTC(y, m, 0, 23, 59, 59));
+
+    // Fenêtre effective = intersection [mission] ∩ [mois]
+    const effFrom = monthStart < startDate ? startDate : monthStart;
+    const effTo = monthEnd > endDate ? endDate : monthEnd;
+    const days = businessDays(effFrom, effTo);
+
+    // Idempotence : une seule tranche par mission par mois
+    const existing = await prisma.billingMilestone.findFirst({
+      where: { missionId, expectedAt: { gte: monthStart, lte: monthEnd } }
+    });
+
+    if (existing) {
+      skipped++;
+    } else if (days > 0) {
+      const amount = Math.round(days * dailyRate * 100) / 100;
+      await prisma.billingMilestone.create({
+        data: {
+          label: `${reference} — ${MONTH_LABELS[m - 1]} ${y} (${days}j)`,
+          amount,
+          expectedAt: new Date(Date.UTC(y, m, 0)), // dernier jour du mois
+          status: "PLANNED",
+          appliedDailyRate: dailyRate,
+          mission: { connect: { id: missionId } },
+          company: { connect: { id: companyId } },
+          comment: `Auto à la contractualisation : ${days} jours ouvrés × ${dailyRate}€`
+        }
+      });
+      created++;
+    }
+
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+
+  if (created > 0) {
+    await logActivity({
+      actorId, action: "CREATE", entityType: "BillingMilestone", entityId: missionId,
+      message: `Cashflow alimenté pour ${reference} : ${created} tranche(s) mensuelle(s) créée(s)${skipped > 0 ? `, ${skipped} déjà existante(s)` : ""}`
+    });
+  }
+  return { created, skipped };
 }
 
 export async function convertApplicationToMission(opts: {
@@ -180,6 +298,20 @@ export async function convertApplicationToMission(opts: {
     message: `Mission ${reference} contractualisée (demande ${m.reference}, ${displayName})`,
     after: mission
   });
+  // Alimente le cashflow (voir contractApplication pour le détail).
+  try {
+    await generateMissionBillingSchedule({
+      actorId,
+      missionId: mission.id,
+      startDate: mission.startDate,
+      endDate: mission.endDate,
+      dailyRate: Number(mission.dailyRate),
+      companyId: mission.companyId,
+      reference: mission.reference
+    });
+  } catch (e) {
+    console.error("[convertApplicationToMission] génération cashflow échouée", e);
+  }
   return mission;
 }
 
