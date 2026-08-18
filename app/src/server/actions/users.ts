@@ -32,7 +32,10 @@ const Schema = z.object({
   /// Taux journalier vendu au client (HTVA) — distinct de dailyCost
   dailyRate:     z.coerce.number().nonnegative().optional(),
   /// Type de contrat chez Dasolabs (EMPLOYEE ou FREELANCE)
-  contractType:  z.enum(["EMPLOYEE", "FREELANCE"]).optional().nullable().transform((v) => v || null),
+  contractType:  z.preprocess(
+    (v) => (v === "" || v == null ? null : v),
+    z.enum(["EMPLOYEE", "FREELANCE"]).nullable().optional()
+  ),
   weeklyCapacityH: z.coerce.number().nonnegative().default(38),
   /// Nombre de jours de congés LÉGAUX par an (défaut 20 pour la Belgique)
   annualLeaveDays: z.coerce.number().int().min(0).max(60).default(20),

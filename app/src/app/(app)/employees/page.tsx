@@ -22,22 +22,18 @@ export const dynamic = "force-dynamic";
  */
 export default async function EmployeesPage() {
   await requirePermission("finance.write");
-  const [employees, candidatesToConfig, usersToConfig] = await Promise.all([
+  // Note : on ne liste PAS les Candidats ici, même flaggés EMPLOYEE. Tant
+  // qu'ils ne sont pas recrutés (convertedToUserId=null), ils ne sont pas
+  // encore engagés → aucune paie à configurer. Dès qu'ils passent User,
+  // ils apparaîtront naturellement dans usersToConfig si leur User a
+  // contractType=EMPLOYEE.
+  const [employees, usersToConfig] = await Promise.all([
     prisma.payrollEmployee.findMany({
       orderBy: [{ endDate: { sort: "asc", nulls: "first" } }, { startDate: "asc" }],
       include: {
         candidate: { select: { id: true, firstName: true, lastName: true } },
         user:      { select: { id: true, firstName: true, lastName: true } }
       }
-    }),
-    // Candidats flag=EMPLOYEE sans PayrollEmployee lié
-    prisma.candidate.findMany({
-      where: {
-        contractType: "EMPLOYEE",
-        payrollEmployee: null,
-        status: { in: ["ACTIVE", "ENGAGED"] }
-      },
-      select: { id: true, firstName: true, lastName: true, seniority: true }
     }),
     // Consultants internes flag=EMPLOYEE sans PayrollEmployee lié
     prisma.user.findMany({
@@ -63,7 +59,7 @@ export default async function EmployeesPage() {
   const totalOnss  = active.reduce((s, e) => s + Number(e.monthlyOnss), 0);
   const totalMonth = totalNet + totalTax + totalOnss;
 
-  const toConfigCount = candidatesToConfig.length + usersToConfig.length;
+  const toConfigCount = usersToConfig.length;
 
   return (
     <div>
@@ -107,18 +103,6 @@ export default async function EmployeesPage() {
             Ces personnes sont marquées « Employé Dasolabs » sur leur fiche mais n'ont pas encore de paie configurée.
           </p>
           <ul className="divide-y divide-amber-200">
-            {candidatesToConfig.map((c) => (
-              <li key={c.id} className="py-2 flex items-center justify-between">
-                <div className="text-sm">
-                  <Link href={`/candidates/${c.id}`} className="font-medium hover:underline">
-                    {c.firstName} {c.lastName}
-                  </Link>
-                  {c.seniority && <span className="text-xs text-midnight-500 ml-2">— {c.seniority}</span>}
-                  <span className="badge-neutral text-[10px] ml-2">Candidat</span>
-                </div>
-                <ConfigureButton candidateId={c.id} firstName={c.firstName} lastName={c.lastName} />
-              </li>
-            ))}
             {usersToConfig.map((u) => (
               <li key={u.id} className="py-2 flex items-center justify-between">
                 <div className="text-sm">
