@@ -132,6 +132,22 @@ export type CvProfile = {
 function pdfSafe(s: string): string {
   return s.replace(/ /g, " ").replace(/ /g, " ");
 }
+
+/**
+ * @react-pdf/renderer ne supporte que JPEG et PNG. BMP/WEBP/GIF/SVG font
+ * planter le rendu ('Base64 image invalid format: bmp'). On accepte :
+ *   - data URI JPEG (image/jpeg, image/jpg)
+ *   - data URI PNG (image/png)
+ *   - URL externe se terminant par .jpg/.jpeg/.png (best effort)
+ * Sinon on renvoie false → placeholder avec initiales.
+ */
+function isPdfSafePhoto(url: string | null | undefined): boolean {
+  if (!url) return false;
+  if (url.startsWith("data:image/jpeg") || url.startsWith("data:image/jpg")) return true;
+  if (url.startsWith("data:image/png")) return true;
+  if (url.startsWith("data:")) return false; // autre data URI (bmp, webp…)
+  return /\.(jpe?g|png)(\?|$)/i.test(url);
+}
 function fmtMonthYear(d: Date | null): string {
   if (!d) return "aujourd'hui";
   return pdfSafe(new Intl.DateTimeFormat("fr-BE", { month: "short", year: "numeric" }).format(d));
@@ -165,8 +181,8 @@ export function CvPdf({
 
         {/* Bandeau profil */}
         <View style={styles.profile}>
-          {profile.photoUrl ? (
-            <Image src={profile.photoUrl} style={styles.photo} />
+          {isPdfSafePhoto(profile.photoUrl) ? (
+            <Image src={profile.photoUrl!} style={styles.photo} />
           ) : (
             <View style={styles.photoPlaceholder}>
               <Text style={styles.photoInitials}>{initials}</Text>

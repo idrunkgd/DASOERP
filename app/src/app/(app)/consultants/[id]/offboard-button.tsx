@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { offboardConsultantAction } from "@/server/actions/recruitment";
 import { toast } from "sonner";
 import { LogOut } from "lucide-react";
+import { isNextControlFlow } from "@/lib/next-errors";
 
 export function OffboardButton({ userId, fullName }: { userId: string; fullName: string }) {
   const [open, setOpen] = useState(false);
@@ -19,8 +20,14 @@ export function OffboardButton({ userId, fullName }: { userId: string; fullName:
             <p className="text-xs text-midnight-500 mb-4">Le compte sera désactivé (impossible de se connecter), la date de sortie sera fixée à aujourd'hui.</p>
             <form
               action={(fd) => start(async () => {
-                try { await offboardConsultantAction(userId, fd); toast.success("Départ enregistré"); setOpen(false); }
-                catch (e: any) { toast.error(e.message); }
+                try {
+                  await offboardConsultantAction(userId, fd);
+                  toast.success("Départ enregistré");
+                  setOpen(false);
+                } catch (e: any) {
+                  if (isNextControlFlow(e)) throw e; // laisse le redirect Next.js faire son taf
+                  toast.error(e.message);
+                }
               })}
               className="space-y-3"
             >

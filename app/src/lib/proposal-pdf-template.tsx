@@ -350,7 +350,9 @@ export function ProposalPdf({
         </View>
 
         <View style={styles.profileHeader}>
-          {data.candidate.photoUrl ? (
+          {/* Photo : @react-pdf/renderer ne rend que JPEG/PNG. Les BMP/WEBP
+              plantent le rendu → placeholder d'initiales si format autre. */}
+          {data.candidate.photoUrl && /^data:image\/(jpe?g|png)|\.(jpe?g|png)($|\?)/i.test(data.candidate.photoUrl) ? (
             <Image src={data.candidate.photoUrl} style={styles.photo} />
           ) : (
             <View style={styles.photoPlaceholder}>

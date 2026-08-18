@@ -7,6 +7,7 @@ import {
 } from "@/server/actions/offers";
 import { toast } from "sonner";
 import Link from "next/link";
+import { isNextControlFlow } from "@/lib/next-errors";
 
 const TRANSITIONS: Record<string, { value: string; label: string }[]> = {
   DRAFT:       [{ value: "SENT", label: "Marquer envoyée" }, { value: "CANCELLED", label: "Annuler" }],
@@ -33,7 +34,7 @@ export function OfferActions({ offer }: { offer: { id: string; status: string; p
       {canVersion && (
         <button
           disabled={pending}
-          onClick={() => { if (window.confirm("Créer une nouvelle version (V+1) ? L'offre actuelle restera consultable mais figée.")) start(async () => { try { await createNewVersionAction(offer.id); } catch (e: any) { toast.error(e.message); } }); }}
+          onClick={() => { if (window.confirm("Créer une nouvelle version (V+1) ? L'offre actuelle restera consultable mais figée.")) start(async () => { try { await createNewVersionAction(offer.id); } catch (e: any) { if (isNextControlFlow(e)) throw e; toast.error(e.message); } }); }}
           className="btn-primary btn-sm"
         >+ Nouvelle version</button>
       )}
@@ -42,7 +43,7 @@ export function OfferActions({ offer }: { offer: { id: string; status: string; p
       {!offer.isComplement && !isFinal && offer.status !== "DRAFT" && (
         <button
           disabled={pending}
-          onClick={() => { if (window.confirm("Créer un complément à cette offre ?")) start(async () => { try { await createComplementAction(offer.id); } catch (e: any) { toast.error(e.message); } }); }}
+          onClick={() => { if (window.confirm("Créer un complément à cette offre ?")) start(async () => { try { await createComplementAction(offer.id); } catch (e: any) { if (isNextControlFlow(e)) throw e; toast.error(e.message); } }); }}
           className="btn-secondary btn-sm"
         >+ Complément</button>
       )}
@@ -101,7 +102,7 @@ export function OfferActions({ offer }: { offer: { id: string; status: string; p
       {/* Suppression : autorisée sauf WON */}
       {offer.status !== "WON" && (
         <button
-          onClick={() => { if (window.confirm("Supprimer cette offre ?")) start(async () => { try { await deleteOfferAction(offer.id); } catch (e: any) { toast.error(e.message); } }); }}
+          onClick={() => { if (window.confirm("Supprimer cette offre ?")) start(async () => { try { await deleteOfferAction(offer.id); } catch (e: any) { if (isNextControlFlow(e)) throw e; toast.error(e.message); } }); }}
           className="btn-danger btn-sm"
         >Supprimer</button>
       )}

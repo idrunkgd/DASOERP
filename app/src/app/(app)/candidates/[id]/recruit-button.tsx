@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { promoteCandidateAction } from "@/server/actions/recruitment";
 import { toast } from "sonner";
 import { UserCheck } from "lucide-react";
+import { isNextControlFlow } from "@/lib/next-errors";
 
 function suggestPassword() {
   const r = Math.random().toString(36).slice(-6);
@@ -28,8 +29,18 @@ export function RecruitButton({ candidateId, suggestedEmail }: { candidateId: st
             </p>
             <form
               action={(fd) => start(async () => {
-                try { await promoteCandidateAction(candidateId, fd); toast.success("Recrutement effectué"); setOpen(false); }
-                catch (e: any) { toast.error(e.message); }
+                try {
+                  await promoteCandidateAction(candidateId, fd);
+                  // Ne devrait jamais arriver ici : l'action redirect vers /consultants/[id].
+                  toast.success("Recrutement effectué");
+                  setOpen(false);
+                } catch (e: any) {
+                  // Laisse Next.js gérer les redirects (sinon on bloque l'user
+                  // sur la page ET on a déjà créé le compte → collision d'email
+                  // au 2e clic).
+                  if (isNextControlFlow(e)) throw e;
+                  toast.error(e.message);
+                }
               })}
               className="space-y-3"
             >
