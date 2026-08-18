@@ -25,8 +25,17 @@ export async function promoteCandidateToConsultant(opts: {
   if (candidate.convertedToUserId) {
     throw new Error("Ce candidat a déjà été recruté.");
   }
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-  if (existing) throw new Error(`Un utilisateur existe déjà avec l'email ${email}.`);
+  const existing = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+    select: { id: true, firstName: true, lastName: true, role: true, active: true }
+  });
+  if (existing) {
+    throw new Error(
+      `Un utilisateur existe déjà avec l'email ${email} : ${existing.firstName} ${existing.lastName} ` +
+      `(rôle ${existing.role}${existing.active ? "" : ", inactif"}). ` +
+      `Ouvre sa fiche : /users/${existing.id} — ou choisis un autre email.`
+    );
+  }
 
   const passwordHash = await bcrypt.hash(tempPassword, 10);
 
@@ -162,8 +171,17 @@ export async function createCandidatePortalAccount(opts: {
   const { actorId, candidateId, email, tempPassword } = opts;
   const candidate = await prisma.candidate.findUniqueOrThrow({ where: { id: candidateId } });
   if (candidate.portalUserId) throw new Error("Ce candidat a déjà un compte portail.");
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-  if (existing) throw new Error(`Un utilisateur existe déjà avec l'email ${email}.`);
+  const existing = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+    select: { id: true, firstName: true, lastName: true, role: true, active: true }
+  });
+  if (existing) {
+    throw new Error(
+      `Un utilisateur existe déjà avec l'email ${email} : ${existing.firstName} ${existing.lastName} ` +
+      `(rôle ${existing.role}${existing.active ? "" : ", inactif"}). ` +
+      `Ouvre sa fiche : /users/${existing.id} — ou choisis un autre email.`
+    );
+  }
   // Convention : un email portail commence par "ext." pour bien distinguer des
   // emails consultants internes. On le warne mais on n'impose pas (libre choix admin).
 
