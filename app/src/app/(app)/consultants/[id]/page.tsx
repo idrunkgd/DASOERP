@@ -13,9 +13,15 @@ import { ROLE_LABELS } from "@/lib/rbac";
 import { Plane, CalendarCheck, CalendarClock as CalIcon, Pencil, FileText, MessageSquare, Wallet, Car, HeartPulse } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
 import { computeLeaveBalance } from "@/lib/leave-balance";
+import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
 
-export default async function ConsultantDetail({ params }: { params: { id: string } }) {
+type ConsultantTab = "profile" | "compensation" | "rh";
+
+export default async function ConsultantDetail({ params, searchParams }: { params: { id: string }; searchParams: { tab?: string } }) {
   const session = await requireSession();
+  const tab: ConsultantTab = (["profile", "compensation", "rh"].includes(searchParams.tab ?? "")
+    ? searchParams.tab
+    : "profile") as ConsultantTab;
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   if (!perms.includes("consulting.read")) notFound();
 
@@ -37,7 +43,11 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
   const canManage = isAdmin || isManager;
 
   // Données RH sensibles : chargées seulement si canManage
-  const [reviews, projects, planned, mission, payroll, activeVehicle, leaveBalance, recentLeaves, recentSickLeaves] = await Promise.all([
+  // Source de vérité rémunération = dernière simulation de package
+  // (CandidateSalaryScenario) créée pour le candidat d'origine — pas la
+  // PayrollEmployee (qui n'est configurée qu'après signature du contrat).
+  const originCandidateId = user.recruitedFromCandidate?.id ?? null;
+  const [reviews, projects, planned, mission, salaryScenario, activeVehicle, leaveBalance, recentLeaves, recentSickLeaves] = await Promise.all([
     prisma.consultantReview.findMany({
       where: { subjectId: user.id },
       include: { conductedBy: true, project: true },
@@ -50,7 +60,12 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
     }),
     userPlannedHoursForWeek(user.id, new Date()),
     getConsultantMissionStatus(user.id),
-    canManage ? prisma.payrollEmployee.findUnique({ where: { userId: user.id } }) : null,
+    canManage && originCandidateId
+      ? prisma.candidateSalaryScenario.findFirst({
+          where: { candidateId: originCandidateId },
+          orderBy: { createdAt: "desc" }
+        })
+      : null,
     canManage ? prisma.vehicleAssignment.findFirst({
       where: { userId: user.id, endDate: null },
       include: {
@@ -63,13 +78,13 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
     canManage ? prisma.leaveRequest.findMany({
       where: { userId: user.id, status: { in: ["SUBMITTED", "APPROVED"] } },
       orderBy: { startDate: "desc" },
-      take: 5,
+      take: 10,
       select: { id: true, type: true, status: true, startDate: true, endDate: true, days: true, reason: true }
     }) : [],
     canManage ? prisma.sickLeave.findMany({
       where: { userId: user.id },
       orderBy: { startDate: "desc" },
-      take: 5,
+      take: 10,
       select: { id: true, startDate: true, endDate: true, certificateUrl: true, notes: true, reason: true }
     }) : []
   ]);
@@ -124,6 +139,20 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
 
       {user.active && <MissionStatusBanner mission={mission} />}
 
+      {/* Onglets — visibles seulement si l'utilisateur peut voir les RH */}
+      {canManage && (
+        <PersonTabsNav
+          current={tab}
+          tabs={[
+            { key: "profile",      label: "Profil",       icon: "user" },
+            { key: "compensation", label: "Rémunération", icon: "briefcase",
+              badge: (salaryScenario || activeVehicle) ? "•" : undefined },
+            { key: "rh",           label: "Congés & maladie", icon: "check",
+              badge: (recentLeaves.length + recentSickLeaves.length) || undefined }
+          ]}
+        />
+      )}
+
       <div className="grid lg:grid-cols-3 gap-6">
         <aside className="space-y-4">
           <div className="card p-5 flex flex-col items-center text-center">
@@ -152,165 +181,6 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
             <Row k="Projets actifs" v={activeProjects.length} />
           </div>
 
-          {/* ─── RH : rémunération + voiture + congés + maladie ─── */}
-          {canManage && (
-            <>
-              <div className="card p-5 space-y-2 text-sm">
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  <Wallet className="w-4 h-4 text-indigoaccent" /> Rémunération
-                </h3>
-                {payroll ? (
-                  <>
-                    <Row k="Brut mensuel réf." v={payroll.monthlyGrossReference ? formatCurrency(Number(payroll.monthlyGrossReference)) : "—"} />
-                    <Row k="Net mensuel" v={formatCurrency(Number(payroll.monthlyNetPay))} />
-                    <Row k="Précompte pro" v={formatCurrency(Number(payroll.monthlyWithholdingTax))} />
-                    <Row k="ONSS" v={formatCurrency(Number(payroll.monthlyOnss))} />
-                    <Row k="Mois / an" v={String(payroll.monthsPerYear).replace(".", ",")} />
-                    <hr />
-                    <Row
-                      k="Coût employeur / mois"
-                      v={<strong>{formatCurrency(
-                        Number(payroll.monthlyNetPay) +
-                        Number(payroll.monthlyWithholdingTax) +
-                        Number(payroll.monthlyOnss)
-                      )}</strong>}
-                    />
-                    <Row k="Depuis" v={formatDate(payroll.startDate)} />
-                    {payroll.endDate && <Row k="Jusqu'au" v={formatDate(payroll.endDate)} />}
-                    <div className="pt-1 text-right">
-                      <Link href="/employees" className="text-[11px] text-indigoaccent hover:underline">
-                        Modifier dans /employees →
-                      </Link>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-xs text-midnight-500 italic">
-                    Paie pas encore configurée.
-                    <Link href="/employees" className="text-indigoaccent hover:underline ml-1">Configurer →</Link>
-                  </div>
-                )}
-              </div>
-
-              <div className="card p-5 space-y-2 text-sm">
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  <Car className="w-4 h-4 text-indigoaccent" /> Voiture de société
-                </h3>
-                {activeVehicle ? (
-                  <>
-                    <Row
-                      k="Véhicule"
-                      v={<Link href={`/fleet/${activeVehicle.vehicle.id}`} className="text-indigoaccent hover:underline">
-                        {activeVehicle.vehicle.plate} · {activeVehicle.vehicle.brand} {activeVehicle.vehicle.model}
-                      </Link>}
-                    />
-                    <Row k="Type" v={activeVehicle.vehicle.category === "LEASING" ? "Leasing" : "Propriété"} />
-                    {activeVehicle.vehicle.leasingContract && (
-                      <>
-                        <Row k="Leaseur" v={activeVehicle.vehicle.leasingContract.lessor} />
-                        <Row
-                          k="Mensualité TVAC"
-                          v={<strong>{formatCurrency(Number(activeVehicle.vehicle.leasingContract.monthlyAmount))}</strong>}
-                        />
-                        <Row k="Fin contrat" v={formatDate(activeVehicle.vehicle.leasingContract.endDate)} />
-                      </>
-                    )}
-                    <Row k="Attribué depuis" v={formatDate(activeVehicle.startDate)} />
-                    {activeVehicle.startKm && <Row k="Km au départ" v={`${activeVehicle.startKm.toLocaleString("fr-BE")} km`} />}
-                  </>
-                ) : (
-                  <div className="text-xs text-midnight-500 italic">
-                    Aucun véhicule attribué.
-                    <Link href="/fleet" className="text-indigoaccent hover:underline ml-1">Attribuer depuis /fleet →</Link>
-                  </div>
-                )}
-              </div>
-
-              {leaveBalance && (
-                <div className="card p-5 space-y-2 text-sm">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <CalendarCheck className="w-4 h-4 text-indigoaccent" /> Congés {leaveBalance.year}
-                  </h3>
-                  <Row k="Légaux" v={`${leaveBalance.annualLegal.remaining.toFixed(1)} / ${leaveBalance.annualLegal.entitled.toFixed(0)} j`} />
-                  <Row k="RTT" v={`${leaveBalance.rtt.remaining.toFixed(1)} / ${leaveBalance.rtt.entitled.toFixed(0)} j`} />
-                  {leaveBalance.carriedOver.entitled > 0 && (
-                    <Row k="Reportés" v={`${leaveBalance.carriedOver.remaining.toFixed(1)} / ${leaveBalance.carriedOver.entitled.toFixed(0)} j`} />
-                  )}
-                  <hr />
-                  <Row
-                    k="Solde total"
-                    v={<strong>{leaveBalance.total.remaining.toFixed(1)} / {leaveBalance.total.entitled.toFixed(0)} j</strong>}
-                  />
-                  {leaveBalance.total.pending > 0 && (
-                    <div className="text-[11px] text-amber-700">
-                      {leaveBalance.total.pending.toFixed(1)}j en attente d'approbation
-                    </div>
-                  )}
-                  {recentLeaves.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-border">
-                      <div className="text-[10px] text-midnight-500 uppercase tracking-wide mb-1">Dernières demandes</div>
-                      <ul className="space-y-1">
-                        {recentLeaves.map((l) => (
-                          <li key={l.id} className="text-xs flex justify-between gap-2">
-                            <span className="truncate">
-                              <span className={"badge-" + (l.status === "APPROVED" ? "success" : "warning") + " text-[9px] mr-1"}>
-                                {l.status === "APPROVED" ? "OK" : "?"}
-                              </span>
-                              {formatDate(l.startDate, { day: "2-digit", month: "short" })}
-                              {l.startDate.getTime() !== l.endDate.getTime() && ` → ${formatDate(l.endDate, { day: "2-digit", month: "short" })}`}
-                              <span className="text-midnight-400 ml-1">({l.type.toLowerCase()})</span>
-                            </span>
-                            <span className="tabular-nums text-midnight-500">{Number(l.days).toFixed(1)}j</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  <div className="pt-1 text-right">
-                    <Link href="/leaves" className="text-[11px] text-indigoaccent hover:underline">
-                      Voir tous les congés →
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              {recentSickLeaves.length > 0 && (
-                <div className="card p-5 space-y-2 text-sm">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <HeartPulse className="w-4 h-4 text-red-600" /> Maladie récente
-                  </h3>
-                  <ul className="space-y-1.5">
-                    {recentSickLeaves.map((s) => {
-                      const days = Math.max(1, Math.round((s.endDate.getTime() - s.startDate.getTime()) / 86400000) + 1);
-                      return (
-                        <li key={s.id} className="text-xs">
-                          <div className="flex justify-between gap-2">
-                            <span className="font-medium">
-                              {formatDate(s.startDate, { day: "2-digit", month: "short", year: "numeric" })}
-                              {s.startDate.getTime() !== s.endDate.getTime() && ` → ${formatDate(s.endDate, { day: "2-digit", month: "short" })}`}
-                            </span>
-                            <span className="text-midnight-500 tabular-nums">{days}j</span>
-                          </div>
-                          {s.reason && <div className="text-midnight-500 truncate">{s.reason}</div>}
-                          {s.certificateUrl && (
-                            <a href={s.certificateUrl} target="_blank" rel="noopener noreferrer"
-                              className="text-[10px] text-indigoaccent hover:underline">
-                              📎 Certificat médical
-                            </a>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  <div className="pt-1 text-right">
-                    <Link href="/sick-leaves" className="text-[11px] text-indigoaccent hover:underline">
-                      Voir tous les arrêts →
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-
           <div className="card p-5 space-y-2 text-sm">
             <h3 className="font-semibold mb-2">Compétences & langues</h3>
             <div className="flex flex-wrap gap-1">
@@ -326,6 +196,9 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
         </aside>
 
         <div className="lg:col-span-2 space-y-6">
+          {/* ═══════ Onglet PROFIL — projets, entretiens, placements, reviews ═══════ */}
+          {tab === "profile" && (
+          <>
           <section className="card p-5">
             <h2 className="font-semibold mb-3">Projets ({user.projectMemberships.length})</h2>
             {user.projectMemberships.length === 0 ? (
@@ -423,6 +296,232 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
             canManage={canManage}
             showPrivate={canManage && session.user.id !== user.id}
           />
+          </>
+          )}
+
+          {/* ═══════ Onglet RÉMUNÉRATION — salaire (simulation) + voiture ═══════ */}
+          {tab === "compensation" && canManage && (
+            <>
+              <section className="card p-5">
+                <h2 className="font-semibold mb-3 flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-indigoaccent" /> Rémunération
+                </h2>
+                {salaryScenario ? (
+                  <div className="space-y-4 text-sm">
+                    <div className="flex items-center justify-between text-xs text-midnight-500 border-b border-border pb-2">
+                      <span>
+                        Simulation « <strong>{salaryScenario.label}</strong> » créée le {formatDate(salaryScenario.createdAt)}
+                      </span>
+                      {originCandidateId && (
+                        <Link href={`/candidates/${originCandidateId}?tab=cv`}
+                          className="text-indigoaccent hover:underline">
+                          Voir sur la fiche candidat →
+                        </Link>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="font-semibold text-midnight-900 mb-2 text-xs uppercase tracking-wide">Salaire</h3>
+                        <Row k="Brut mensuel" v={<strong>{formatCurrency(Number(salaryScenario.grossMonthly))}</strong>} />
+                        <Row k="Mois payés / an" v={String(Number(salaryScenario.monthsPerYear)).replace(".", ",")} />
+                        <Row k="Charges patronales" v={`${Number(salaryScenario.employerChargesPct)} %`} />
+                        <Row k="Régime hebdo" v={`${Number(salaryScenario.workingDaysPerWeek)} j/sem`} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-midnight-900 mb-2 text-xs uppercase tracking-wide">Sortie annuelle</h3>
+                        <Row k="Coût total" v={<strong>{formatCurrency(Number(salaryScenario.totalAnnualCost))}</strong>} />
+                        <Row k="Coût / jour" v={formatCurrency(Number(salaryScenario.costPerDay))} />
+                        <Row k="TJM cible marge" v={formatCurrency(Number(salaryScenario.billableRate))} />
+                        {Number(salaryScenario.soldDailyRate) > 0 && (
+                          <Row k="TJM vendu client" v={formatCurrency(Number(salaryScenario.soldDailyRate))} />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="border-t border-border pt-3">
+                      <h3 className="font-semibold text-midnight-900 mb-2 text-xs uppercase tracking-wide">Avantages</h3>
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-1">
+                        <Row k="Voiture (TCO / mois)" v={formatCurrency(Number(salaryScenario.carMonthlyTco))} />
+                        <Row k="Chèques-repas / jour" v={formatCurrency(Number(salaryScenario.mealVoucherEmployerPerDay))} />
+                        <Row k="Éco-chèques / an" v={formatCurrency(Number(salaryScenario.ecoVouchersAnnual))} />
+                        <Row k="Assurance groupe" v={`${Number(salaryScenario.groupInsurancePct)} %`} />
+                        <Row k="Hospitalisation / mois" v={formatCurrency(Number(salaryScenario.hospitalInsuranceMonthly))} />
+                        <Row k="GSM + internet / mois" v={formatCurrency(Number(salaryScenario.phoneInternetMonthly))} />
+                        <Row k="Frais représ. nets / mois" v={formatCurrency(Number(salaryScenario.netExpensesMonthly))} />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-midnight-500 italic">
+                    Aucune simulation de package pour ce consultant.
+                    {originCandidateId ? (
+                      <> Va sur <Link href={`/candidates/${originCandidateId}?tab=cv`} className="text-indigoaccent hover:underline">sa fiche candidat</Link> pour en créer une.</>
+                    ) : (
+                      <> Ce consultant n'a pas de candidat d'origine — la simulation n'est possible que via une fiche candidat.</>
+                    )}
+                  </p>
+                )}
+              </section>
+
+              <section className="card p-5">
+                <h2 className="font-semibold mb-3 flex items-center gap-2">
+                  <Car className="w-4 h-4 text-indigoaccent" /> Voiture de société
+                </h2>
+                {activeVehicle ? (
+                  <div className="space-y-2 text-sm">
+                    <Row
+                      k="Véhicule"
+                      v={<Link href={`/fleet/${activeVehicle.vehicle.id}`} className="text-indigoaccent hover:underline">
+                        {activeVehicle.vehicle.plate} · {activeVehicle.vehicle.brand} {activeVehicle.vehicle.model}
+                      </Link>}
+                    />
+                    <Row k="Type" v={activeVehicle.vehicle.category === "LEASING" ? "Leasing" : "Propriété"} />
+                    {activeVehicle.vehicle.leasingContract && (
+                      <>
+                        <Row k="Leaseur" v={activeVehicle.vehicle.leasingContract.lessor} />
+                        <Row
+                          k="Mensualité TVAC"
+                          v={<strong>{formatCurrency(Number(activeVehicle.vehicle.leasingContract.monthlyAmount))}</strong>}
+                        />
+                        <Row k="Fin de contrat" v={formatDate(activeVehicle.vehicle.leasingContract.endDate)} />
+                      </>
+                    )}
+                    <Row k="Attribué depuis" v={formatDate(activeVehicle.startDate)} />
+                    {activeVehicle.startKm && <Row k="Km au départ" v={`${activeVehicle.startKm.toLocaleString("fr-BE")} km`} />}
+                  </div>
+                ) : (
+                  <p className="text-sm text-midnight-500 italic">
+                    Aucun véhicule attribué.
+                    <Link href="/fleet" className="text-indigoaccent hover:underline ml-1">Attribuer depuis /fleet →</Link>
+                  </p>
+                )}
+              </section>
+            </>
+          )}
+
+          {/* ═══════ Onglet CONGÉS & MALADIE ═══════ */}
+          {tab === "rh" && canManage && (
+            <>
+              <section className="card p-5">
+                <h2 className="font-semibold mb-3 flex items-center gap-2">
+                  <CalendarCheck className="w-4 h-4 text-indigoaccent" /> Congés {leaveBalance?.year ?? new Date().getFullYear()}
+                </h2>
+                {leaveBalance && (
+                  <>
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="border border-border rounded p-3 text-center">
+                        <div className="text-[10px] text-midnight-500 uppercase tracking-wide">Légaux</div>
+                        <div className="text-2xl font-bold text-midnight-900">
+                          {leaveBalance.annualLegal.remaining.toFixed(1)}
+                        </div>
+                        <div className="text-[11px] text-midnight-500">/ {leaveBalance.annualLegal.entitled.toFixed(0)} j</div>
+                      </div>
+                      <div className="border border-border rounded p-3 text-center">
+                        <div className="text-[10px] text-midnight-500 uppercase tracking-wide">RTT</div>
+                        <div className="text-2xl font-bold text-midnight-900">
+                          {leaveBalance.rtt.remaining.toFixed(1)}
+                        </div>
+                        <div className="text-[11px] text-midnight-500">/ {leaveBalance.rtt.entitled.toFixed(0)} j</div>
+                      </div>
+                      <div className="border border-border rounded p-3 text-center">
+                        <div className="text-[10px] text-midnight-500 uppercase tracking-wide">Reportés</div>
+                        <div className="text-2xl font-bold text-midnight-900">
+                          {leaveBalance.carriedOver.remaining.toFixed(1)}
+                        </div>
+                        <div className="text-[11px] text-midnight-500">/ {leaveBalance.carriedOver.entitled.toFixed(0)} j</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
+                      <span className="text-sm text-midnight-700">Solde total restant</span>
+                      <span className="text-lg font-bold text-indigoaccent">
+                        {leaveBalance.total.remaining.toFixed(1)} / {leaveBalance.total.entitled.toFixed(0)} j
+                      </span>
+                    </div>
+                    {leaveBalance.total.pending > 0 && (
+                      <p className="text-xs text-amber-700 mb-3">
+                        ⏳ {leaveBalance.total.pending.toFixed(1)}j en attente d'approbation
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {recentLeaves.length === 0 ? (
+                  <p className="text-sm text-midnight-500 italic">Aucune demande récente.</p>
+                ) : (
+                  <>
+                    <h3 className="text-xs text-midnight-500 uppercase tracking-wide mb-2">Dernières demandes</h3>
+                    <table className="table-base text-sm">
+                      <thead><tr><th>Période</th><th>Type</th><th className="text-right">Jours</th><th>Statut</th><th>Motif</th></tr></thead>
+                      <tbody>
+                        {recentLeaves.map((l) => (
+                          <tr key={l.id}>
+                            <td className="text-xs">
+                              {formatDate(l.startDate, { day: "2-digit", month: "short" })}
+                              {l.startDate.getTime() !== l.endDate.getTime() && ` → ${formatDate(l.endDate, { day: "2-digit", month: "short" })}`}
+                            </td>
+                            <td className="text-xs">{l.type}</td>
+                            <td className="text-right tabular-nums">{Number(l.days).toFixed(1)}</td>
+                            <td>
+                              <span className={"badge-" + (l.status === "APPROVED" ? "success" : "warning") + " text-[10px]"}>
+                                {l.status === "APPROVED" ? "Validé" : "En attente"}
+                              </span>
+                            </td>
+                            <td className="text-xs text-midnight-700 truncate max-w-xs">{l.reason ?? "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+                <div className="mt-3 text-right">
+                  <Link href="/leaves" className="text-xs text-indigoaccent hover:underline">
+                    Voir tous les congés →
+                  </Link>
+                </div>
+              </section>
+
+              <section className="card p-5">
+                <h2 className="font-semibold mb-3 flex items-center gap-2">
+                  <HeartPulse className="w-4 h-4 text-red-600" /> Arrêts maladie
+                </h2>
+                {recentSickLeaves.length === 0 ? (
+                  <p className="text-sm text-midnight-500 italic">Aucun arrêt maladie enregistré.</p>
+                ) : (
+                  <table className="table-base text-sm">
+                    <thead><tr><th>Période</th><th className="text-right">Jours</th><th>Certificat</th><th>Notes</th></tr></thead>
+                    <tbody>
+                      {recentSickLeaves.map((s) => {
+                        const days = Math.max(1, Math.round((s.endDate.getTime() - s.startDate.getTime()) / 86400000) + 1);
+                        return (
+                          <tr key={s.id}>
+                            <td className="text-xs">
+                              {formatDate(s.startDate, { day: "2-digit", month: "short", year: "numeric" })}
+                              {s.startDate.getTime() !== s.endDate.getTime() && ` → ${formatDate(s.endDate, { day: "2-digit", month: "short" })}`}
+                            </td>
+                            <td className="text-right tabular-nums">{days}</td>
+                            <td className="text-xs">
+                              {s.certificateUrl
+                                ? <a href={s.certificateUrl} target="_blank" rel="noopener noreferrer" className="text-indigoaccent hover:underline">📎 Voir</a>
+                                : <span className="text-midnight-400">—</span>}
+                            </td>
+                            <td className="text-xs text-midnight-700 truncate max-w-xs">
+                              {s.reason ?? s.notes ?? "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+                <div className="mt-3 text-right">
+                  <Link href="/sick-leaves" className="text-xs text-indigoaccent hover:underline">
+                    Voir tous les arrêts →
+                  </Link>
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </div>
     </div>
