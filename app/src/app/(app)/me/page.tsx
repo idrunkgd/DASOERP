@@ -10,7 +10,7 @@ import { SickLeaveBlock } from "./sick-leave-form";
 import { MeTabsNav } from "./tabs-nav";
 import { LeaveRequestBlock } from "./leave-request-block";
 import { computeLeaveBalance } from "@/lib/leave-balance";
-import { FileDown, Eye, ReceiptText, GraduationCap } from "lucide-react";
+import { FileDown, Eye, ReceiptText, GraduationCap, FileSignature } from "lucide-react";
 import { PersonAvatar } from "@/components/ui/person-avatar";
 import { formatDate, formatCurrency } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ export default async function MyProfile({
     ? (searchParams.tab as "general" | "cv" | "rh")
     : "general";
 
-  const [me, groupName, skillCatalog, candidateProfile, sickLeaves, myExpenses] = await Promise.all([
+  const [me, groupName, skillCatalog, candidateProfile, sickLeaves, myExpenses, pendingPolicies] = await Promise.all([
     // Inclut les expériences pro pour l'espace "Mon CV" côté consultant interne
     prisma.user.findUniqueOrThrow({
       where: { id: session.user.id },
@@ -49,6 +49,15 @@ export default async function MyProfile({
       where: { userId: session.user.id },
       orderBy: { date: "desc" },
       take: 20
+    }),
+    // Chartes & politiques à signer (PENDING) pour widget sidebar /me
+    prisma.documentSignature.findMany({
+      where: { userId: session.user.id, status: "PENDING" },
+      include: {
+        document: { select: { id: true, title: true, category: true, mandatory: true } },
+        version: { select: { versionNum: true } }
+      },
+      orderBy: { assignedAt: "desc" }
     })
   ]);
 
@@ -165,6 +174,35 @@ export default async function MyProfile({
             {isAdmin && me.dailyCost && <div className="flex justify-between"><span className="text-midnight-500">Taux jour</span><span className="tabular-nums">{formatCurrency(me.dailyCost)}</span></div>}
             {isAdmin && me.weeklyCapacityH && <div className="flex justify-between"><span className="text-midnight-500">Capacité</span><span>{Number(me.weeklyCapacityH).toFixed(0)}h/sem</span></div>}
           </div>
+
+          {/* Widget "Documents à signer" — visible dès qu'il y a des
+              signatures en attente (consultant interne ET candidat). Rouge
+              pour attirer l'oeil, avec CTA direct vers le document. */}
+          {pendingPolicies.length > 0 && (
+            <div className="card p-4 border-rose-200 bg-rose-50/40">
+              <h3 className="font-semibold text-sm mb-2 flex items-center gap-2 text-rose-900">
+                <FileSignature className="w-4 h-4" />
+                À signer ({pendingPolicies.length})
+              </h3>
+              <ul className="space-y-1.5">
+                {pendingPolicies.map((sig) => (
+                  <li key={sig.id}>
+                    <Link
+                      href={`/policies/${sig.document.id}?signatureId=${sig.id}`}
+                      className="block text-xs hover:text-indigoaccent group"
+                    >
+                      <span className="font-medium">{sig.document.title}</span>
+                      {sig.document.mandatory && <span className="badge-warning text-[9px] ml-1">Obligatoire</span>}
+                      <span className="text-[10px] text-midnight-400 ml-1">v{sig.version.versionNum}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/policies" className="btn-primary btn-sm w-full text-xs mt-3">
+                Voir & signer
+              </Link>
+            </div>
+          )}
 
           {!isCandidatePortal && groupName === DEFAULT_GROUP_NAME && (
             <div className="card p-4 text-xs border-amber-200 bg-amber-50/50 text-amber-900">

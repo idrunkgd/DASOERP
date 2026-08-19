@@ -116,6 +116,24 @@ export function Sidebar({
   const path = usePathname();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
 
+  // Badge "à signer" sur l'item /policies : polling léger toutes les 60s.
+  const [pendingPolicies, setPendingPolicies] = useState(0);
+  useEffect(() => {
+    if (restricted) return;
+    let cancelled = false;
+    async function fetchCount() {
+      try {
+        const r = await fetch("/api/policies/pending-count", { cache: "no-store" });
+        if (!r.ok) return;
+        const j = await r.json();
+        if (!cancelled) setPendingPolicies(j.count ?? 0);
+      } catch { /* ignore */ }
+    }
+    fetchCount();
+    const t = setInterval(fetchCount, 60_000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [restricted, path]);
+
   // Thème SOMBRE — deux tons de mauve : fond mauve intense (indigoaccent)
   // pour les bandeaux catégorie/header, texte mauve clair (indigo-200) pour
   // les items sur le fond sombre principal.
@@ -202,6 +220,7 @@ export function Sidebar({
               items={visibleItems}
               path={path}
               forceOpen={containsActive}
+              badges={{ "/policies": pendingPolicies }}
             />
           );
         })}
@@ -218,12 +237,14 @@ function SidebarSection({
   label,
   items,
   path,
-  forceOpen
+  forceOpen,
+  badges = {}
 }: {
   label: string;
   items: NavItem[];
   path: string;
   forceOpen: boolean;
+  badges?: Record<string, number>;
 }) {
   // Par défaut : TOUT REPLIÉ sauf "Pilotage" (section principale, toujours
   // ouverte au premier rendu). L'état est ensuite écrasé par localStorage
@@ -299,6 +320,7 @@ function SidebarSection({
                 icon={item.icon}
                 label={item.label}
                 active={active}
+                badge={badges[item.href] ?? 0}
               />
             );
           })}
@@ -312,12 +334,13 @@ function SidebarSection({
 // Item de nav — indicateur actif : barre gauche + fond léger
 
 function NavLink({
-  href, icon: Icon, label, active
+  href, icon: Icon, label, active, badge = 0
 }: {
   href: string;
   icon: any;
   label: string;
   active: boolean;
+  badge?: number;
 }) {
   return (
     <Link
@@ -346,7 +369,15 @@ function NavLink({
           active ? "text-indigo-100" : "text-indigo-400 group-hover:text-indigo-200"
         )}
       />
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {badge > 0 && (
+        <span
+          className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500 text-white min-w-[1.25rem] text-center leading-tight"
+          title={`${badge} en attente`}
+        >
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
     </Link>
   );
 }
