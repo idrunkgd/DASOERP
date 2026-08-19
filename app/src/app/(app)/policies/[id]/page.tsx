@@ -7,6 +7,7 @@ import { FileText, ArrowLeft, CheckCircle2, Clock, XCircle, Upload } from "lucid
 import { AssignPanel } from "./assign-panel";
 import { SignForm } from "./sign-form";
 import { UploadNewVersion } from "./upload-new-version";
+import { EditMetaForm } from "./edit-meta-form";
 
 export const dynamic = "force-dynamic";
 
@@ -161,6 +162,21 @@ export default async function PolicyDetailPage({
               </div>
             )}
           </div>
+
+          {canManage && (
+            <div className="card p-4">
+              <EditMetaForm
+                documentId={doc.id}
+                initial={{
+                  title: doc.title,
+                  description: doc.description,
+                  category: doc.category,
+                  mandatory: doc.mandatory,
+                  active: doc.active
+                }}
+              />
+            </div>
+          )}
 
           {canManage && (
             <AssignPanel

@@ -104,6 +104,59 @@ export async function createPolicy(formData: FormData) {
   }
 }
 
+// ═════════════ MODIFICATION MÉTADONNÉES ═════════════
+
+const UpdateMetaSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  category: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  mandatory: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
+  active: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean())
+});
+
+/**
+ * Met à jour les métadonnées d'une charte (titre, description, catégorie,
+ * flags). NE TOUCHE PAS au contenu du PDF (pour ça, uploader une nouvelle
+ * version). NE touche pas non plus aux signatures existantes — l'audit des
+ * versions précédentes reste préservé.
+ */
+export async function updatePolicyMeta(documentId: string, formData: FormData) {
+  const session = await requirePermission("policies.manage");
+  const data = UpdateMetaSchema.parse(Object.fromEntries(formData));
+
+  const doc = await prisma.signableDocument.findUnique({
+    where: { id: documentId },
+    select: { id: true, title: true, category: true, mandatory: true, active: true }
+  });
+  if (!doc) throw new Error("Document introuvable.");
+
+  await prisma.signableDocument.update({
+    where: { id: documentId },
+    data: {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      mandatory: data.mandatory,
+      active: data.active
+    }
+  });
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "SignableDocument",
+    entityId: documentId,
+    message: `Charte "${data.title}" modifiée`,
+    before: doc,
+    after: { title: data.title, category: data.category, mandatory: data.mandatory, active: data.active }
+  });
+
+  revalidatePath(`/policies/${documentId}`);
+  revalidatePath("/policies");
+  revalidatePath("/policies/manage");
+  return { ok: true };
+}
+
 /** Nouvelle version d'un document — les signatures anciennes restent (audit). */
 export async function uploadNewPolicyVersion(documentId: string, formData: FormData) {
   const session = await requirePermission("policies.manage");
