@@ -10,8 +10,9 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
 import { getConsultantMissionStatus } from "@/server/services/mission-status";
 import { ROLE_LABELS } from "@/lib/rbac";
-import { Plane, CalendarCheck, CalendarClock as CalIcon, Pencil, FileText, MessageSquare } from "lucide-react";
+import { Plane, CalendarCheck, CalendarClock as CalIcon, Pencil, FileText, MessageSquare, Wallet, Car, HeartPulse } from "lucide-react";
 import { differenceInCalendarDays } from "date-fns";
+import { computeLeaveBalance } from "@/lib/leave-balance";
 
 export default async function ConsultantDetail({ params }: { params: { id: string } }) {
   const session = await requireSession();
@@ -35,7 +36,8 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
   const isManager = perms.includes("timesheet.validate");
   const canManage = isAdmin || isManager;
 
-  const [reviews, projects, planned, mission] = await Promise.all([
+  // Données RH sensibles : chargées seulement si canManage
+  const [reviews, projects, planned, mission, payroll, activeVehicle, leaveBalance, recentLeaves, recentSickLeaves] = await Promise.all([
     prisma.consultantReview.findMany({
       where: { subjectId: user.id },
       include: { conductedBy: true, project: true },
@@ -47,7 +49,29 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
       select: { id: true, reference: true, name: true }
     }),
     userPlannedHoursForWeek(user.id, new Date()),
-    getConsultantMissionStatus(user.id)
+    getConsultantMissionStatus(user.id),
+    canManage ? prisma.payrollEmployee.findUnique({ where: { userId: user.id } }) : null,
+    canManage ? prisma.vehicleAssignment.findFirst({
+      where: { userId: user.id, endDate: null },
+      include: {
+        vehicle: {
+          include: { leasingContract: { select: { monthlyAmount: true, lessor: true, endDate: true } } }
+        }
+      }
+    }) : null,
+    canManage ? computeLeaveBalance(user.id) : null,
+    canManage ? prisma.leaveRequest.findMany({
+      where: { userId: user.id, status: { in: ["SUBMITTED", "APPROVED"] } },
+      orderBy: { startDate: "desc" },
+      take: 5,
+      select: { id: true, type: true, status: true, startDate: true, endDate: true, days: true, reason: true }
+    }) : [],
+    canManage ? prisma.sickLeave.findMany({
+      where: { userId: user.id },
+      orderBy: { startDate: "desc" },
+      take: 5,
+      select: { id: true, startDate: true, endDate: true, certificateUrl: true, notes: true, reason: true }
+    }) : []
   ]);
 
   const activeProjects = user.projectMemberships.filter(m => ["TO_START","ACTIVE","ON_HOLD"].includes(m.project.status));
@@ -127,6 +151,165 @@ export default async function ConsultantDetail({ params }: { params: { id: strin
             <Row k="Charge planifiée" v={`${planned.toFixed(1)}h cette semaine`} />
             <Row k="Projets actifs" v={activeProjects.length} />
           </div>
+
+          {/* ─── RH : rémunération + voiture + congés + maladie ─── */}
+          {canManage && (
+            <>
+              <div className="card p-5 space-y-2 text-sm">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-indigoaccent" /> Rémunération
+                </h3>
+                {payroll ? (
+                  <>
+                    <Row k="Brut mensuel réf." v={payroll.monthlyGrossReference ? formatCurrency(Number(payroll.monthlyGrossReference)) : "—"} />
+                    <Row k="Net mensuel" v={formatCurrency(Number(payroll.monthlyNetPay))} />
+                    <Row k="Précompte pro" v={formatCurrency(Number(payroll.monthlyWithholdingTax))} />
+                    <Row k="ONSS" v={formatCurrency(Number(payroll.monthlyOnss))} />
+                    <Row k="Mois / an" v={String(payroll.monthsPerYear).replace(".", ",")} />
+                    <hr />
+                    <Row
+                      k="Coût employeur / mois"
+                      v={<strong>{formatCurrency(
+                        Number(payroll.monthlyNetPay) +
+                        Number(payroll.monthlyWithholdingTax) +
+                        Number(payroll.monthlyOnss)
+                      )}</strong>}
+                    />
+                    <Row k="Depuis" v={formatDate(payroll.startDate)} />
+                    {payroll.endDate && <Row k="Jusqu'au" v={formatDate(payroll.endDate)} />}
+                    <div className="pt-1 text-right">
+                      <Link href="/employees" className="text-[11px] text-indigoaccent hover:underline">
+                        Modifier dans /employees →
+                      </Link>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-xs text-midnight-500 italic">
+                    Paie pas encore configurée.
+                    <Link href="/employees" className="text-indigoaccent hover:underline ml-1">Configurer →</Link>
+                  </div>
+                )}
+              </div>
+
+              <div className="card p-5 space-y-2 text-sm">
+                <h3 className="font-semibold mb-2 flex items-center gap-2">
+                  <Car className="w-4 h-4 text-indigoaccent" /> Voiture de société
+                </h3>
+                {activeVehicle ? (
+                  <>
+                    <Row
+                      k="Véhicule"
+                      v={<Link href={`/fleet/${activeVehicle.vehicle.id}`} className="text-indigoaccent hover:underline">
+                        {activeVehicle.vehicle.plate} · {activeVehicle.vehicle.brand} {activeVehicle.vehicle.model}
+                      </Link>}
+                    />
+                    <Row k="Type" v={activeVehicle.vehicle.category === "LEASING" ? "Leasing" : "Propriété"} />
+                    {activeVehicle.vehicle.leasingContract && (
+                      <>
+                        <Row k="Leaseur" v={activeVehicle.vehicle.leasingContract.lessor} />
+                        <Row
+                          k="Mensualité TVAC"
+                          v={<strong>{formatCurrency(Number(activeVehicle.vehicle.leasingContract.monthlyAmount))}</strong>}
+                        />
+                        <Row k="Fin contrat" v={formatDate(activeVehicle.vehicle.leasingContract.endDate)} />
+                      </>
+                    )}
+                    <Row k="Attribué depuis" v={formatDate(activeVehicle.startDate)} />
+                    {activeVehicle.startKm && <Row k="Km au départ" v={`${activeVehicle.startKm.toLocaleString("fr-BE")} km`} />}
+                  </>
+                ) : (
+                  <div className="text-xs text-midnight-500 italic">
+                    Aucun véhicule attribué.
+                    <Link href="/fleet" className="text-indigoaccent hover:underline ml-1">Attribuer depuis /fleet →</Link>
+                  </div>
+                )}
+              </div>
+
+              {leaveBalance && (
+                <div className="card p-5 space-y-2 text-sm">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <CalendarCheck className="w-4 h-4 text-indigoaccent" /> Congés {leaveBalance.year}
+                  </h3>
+                  <Row k="Légaux" v={`${leaveBalance.annualLegal.remaining.toFixed(1)} / ${leaveBalance.annualLegal.entitled.toFixed(0)} j`} />
+                  <Row k="RTT" v={`${leaveBalance.rtt.remaining.toFixed(1)} / ${leaveBalance.rtt.entitled.toFixed(0)} j`} />
+                  {leaveBalance.carriedOver.entitled > 0 && (
+                    <Row k="Reportés" v={`${leaveBalance.carriedOver.remaining.toFixed(1)} / ${leaveBalance.carriedOver.entitled.toFixed(0)} j`} />
+                  )}
+                  <hr />
+                  <Row
+                    k="Solde total"
+                    v={<strong>{leaveBalance.total.remaining.toFixed(1)} / {leaveBalance.total.entitled.toFixed(0)} j</strong>}
+                  />
+                  {leaveBalance.total.pending > 0 && (
+                    <div className="text-[11px] text-amber-700">
+                      {leaveBalance.total.pending.toFixed(1)}j en attente d'approbation
+                    </div>
+                  )}
+                  {recentLeaves.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-border">
+                      <div className="text-[10px] text-midnight-500 uppercase tracking-wide mb-1">Dernières demandes</div>
+                      <ul className="space-y-1">
+                        {recentLeaves.map((l) => (
+                          <li key={l.id} className="text-xs flex justify-between gap-2">
+                            <span className="truncate">
+                              <span className={"badge-" + (l.status === "APPROVED" ? "success" : "warning") + " text-[9px] mr-1"}>
+                                {l.status === "APPROVED" ? "OK" : "?"}
+                              </span>
+                              {formatDate(l.startDate, { day: "2-digit", month: "short" })}
+                              {l.startDate.getTime() !== l.endDate.getTime() && ` → ${formatDate(l.endDate, { day: "2-digit", month: "short" })}`}
+                              <span className="text-midnight-400 ml-1">({l.type.toLowerCase()})</span>
+                            </span>
+                            <span className="tabular-nums text-midnight-500">{Number(l.days).toFixed(1)}j</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="pt-1 text-right">
+                    <Link href="/leaves" className="text-[11px] text-indigoaccent hover:underline">
+                      Voir tous les congés →
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {recentSickLeaves.length > 0 && (
+                <div className="card p-5 space-y-2 text-sm">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <HeartPulse className="w-4 h-4 text-red-600" /> Maladie récente
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {recentSickLeaves.map((s) => {
+                      const days = Math.max(1, Math.round((s.endDate.getTime() - s.startDate.getTime()) / 86400000) + 1);
+                      return (
+                        <li key={s.id} className="text-xs">
+                          <div className="flex justify-between gap-2">
+                            <span className="font-medium">
+                              {formatDate(s.startDate, { day: "2-digit", month: "short", year: "numeric" })}
+                              {s.startDate.getTime() !== s.endDate.getTime() && ` → ${formatDate(s.endDate, { day: "2-digit", month: "short" })}`}
+                            </span>
+                            <span className="text-midnight-500 tabular-nums">{days}j</span>
+                          </div>
+                          {s.reason && <div className="text-midnight-500 truncate">{s.reason}</div>}
+                          {s.certificateUrl && (
+                            <a href={s.certificateUrl} target="_blank" rel="noopener noreferrer"
+                              className="text-[10px] text-indigoaccent hover:underline">
+                              📎 Certificat médical
+                            </a>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <div className="pt-1 text-right">
+                    <Link href="/sick-leaves" className="text-[11px] text-indigoaccent hover:underline">
+                      Voir tous les arrêts →
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           <div className="card p-5 space-y-2 text-sm">
             <h3 className="font-semibold mb-2">Compétences & langues</h3>
