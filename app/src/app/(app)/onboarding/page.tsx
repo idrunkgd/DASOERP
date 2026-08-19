@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function OnboardingListPage() {
   await requirePermissionOrRedirect("onboarding.read");
 
-  const [onboardings, usersWithoutOnboarding, templates] = await Promise.all([
+  const [onboardings, archivedOnboardings, usersWithoutOnboarding, templates] = await Promise.all([
     prisma.onboarding.findMany({
       where: { status: { in: ["IN_PROGRESS", "DONE"] } },
       include: {
@@ -23,6 +23,16 @@ export default async function OnboardingListPage() {
         template: { select: { name: true } }
       },
       orderBy: [{ status: "asc" }, { startDate: "desc" }]
+    }),
+    // Onboardings archivés — affichés dans une section repliable pour
+    // pouvoir les réactiver ou les supprimer et relancer un nouvel onboarding.
+    prisma.onboarding.findMany({
+      where: { status: "ARCHIVED" },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true, role: true } },
+        template: { select: { name: true } }
+      },
+      orderBy: { updatedAt: "desc" }
     }),
     prisma.user.findMany({
       where: {
@@ -121,6 +131,43 @@ export default async function OnboardingListPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Onboardings archivés — repliable, permet de réactiver ou repartir à zéro */}
+      {archivedOnboardings.length > 0 && (
+        <details className="card mt-6 p-4">
+          <summary className="cursor-pointer text-sm font-medium text-midnight-700">
+            Archivés ({archivedOnboardings.length})
+            <span className="text-[11px] text-midnight-500 ml-2">
+              — clic pour dérouler et réactiver / supprimer pour repartir
+            </span>
+          </summary>
+          <ul className="divide-y divide-border mt-3 text-sm">
+            {archivedOnboardings.map((ob) => (
+              <li key={ob.id} className="py-2 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <Link
+                    href={`/onboarding/${ob.userId}`}
+                    className="font-medium hover:text-indigoaccent"
+                  >
+                    {ob.user.firstName} {ob.user.lastName}
+                  </Link>
+                  <span className="text-xs text-midnight-500 ml-2">
+                    {ob.user.role}
+                    {ob.template?.name && ` · ${ob.template.name}`}
+                    {" · démarré le "}{formatDate(ob.startDate)}
+                  </span>
+                </div>
+                <Link
+                  href={`/onboarding/${ob.userId}`}
+                  className="btn-secondary btn-sm text-xs flex-shrink-0"
+                >
+                  Ouvrir
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
     </div>
   );

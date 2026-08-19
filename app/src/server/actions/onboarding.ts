@@ -237,6 +237,50 @@ export async function archiveOnboarding(onboardingId: string) {
   return updated;
 }
 
+/**
+ * Réactive un onboarding archivé — le repasse en IN_PROGRESS sans toucher
+ * aux items (les cases cochées restent cochées, l'historique est préservé).
+ * Utile quand un onboarding a été archivé par erreur ou trop tôt.
+ */
+export async function reactivateOnboarding(onboardingId: string) {
+  const session = await requireSession();
+  const updated = await prisma.onboarding.update({
+    where: { id: onboardingId },
+    data: { status: "IN_PROGRESS" }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE",
+    entityType: "Onboarding", entityId: onboardingId,
+    message: "Onboarding réactivé (archivé → en cours)"
+  });
+  revalidatePath("/onboarding");
+  revalidatePath(`/onboarding/${updated.userId}`);
+  return updated;
+}
+
+/**
+ * Supprime définitivement un onboarding et tous ses items. Nécessaire pour
+ * "recommencer à zéro" avec un nouveau template : le modèle Onboarding a
+ * un @unique(userId) donc on ne peut pas en créer un second tant que
+ * l'ancien existe. Cascade delete côté DB sur les OnboardingItem.
+ */
+export async function deleteOnboarding(onboardingId: string) {
+  const session = await requireSession();
+  const before = await prisma.onboarding.findUniqueOrThrow({
+    where: { id: onboardingId },
+    select: { userId: true, user: { select: { firstName: true, lastName: true } } }
+  });
+  await prisma.onboarding.delete({ where: { id: onboardingId } });
+  await logActivity({
+    actorId: session.user.id, action: "DELETE",
+    entityType: "Onboarding", entityId: onboardingId,
+    message: `Onboarding supprimé (${before.user.firstName} ${before.user.lastName}) — l'utilisateur peut recevoir un nouvel onboarding`
+  });
+  revalidatePath("/onboarding");
+  revalidatePath(`/onboarding/${before.userId}`);
+  return { ok: true, userId: before.userId };
+}
+
 // ─── Templates (CRUD léger) ────────────────────────────────────────────────
 
 const TemplateSchema = z.object({

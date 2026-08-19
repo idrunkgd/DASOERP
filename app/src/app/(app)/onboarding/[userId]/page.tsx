@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { CalendarClock, ChevronLeft, MessageSquare } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { OnboardingChecklist } from "./checklist";
-import { archiveOnboarding } from "@/server/actions/onboarding";
+import { archiveOnboarding, reactivateOnboarding, deleteOnboarding } from "@/server/actions/onboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -91,17 +91,51 @@ export default async function OnboardingDetailPage({
               <ChevronLeft className="w-3 h-3" />
               Retour
             </Link>
-            <form
-              action={async () => {
-                "use server";
-                await archiveOnboarding(onboarding.id);
-                redirect("/onboarding");
-              }}
-            >
-              <button type="submit" className="btn-secondary text-xs">
-                Archiver
-              </button>
-            </form>
+            {onboarding.status === "ARCHIVED" ? (
+              <>
+                {/* Réactiver — repasse l'onboarding en IN_PROGRESS, garde les items */}
+                <form
+                  action={async () => {
+                    "use server";
+                    await reactivateOnboarding(onboarding.id);
+                  }}
+                >
+                  <button type="submit" className="btn-primary text-xs">
+                    Réactiver
+                  </button>
+                </form>
+                {/* Supprimer définitivement — libère l'unique constraint pour
+                    permettre à cet utilisateur de recevoir un NOUVEL onboarding
+                    (nouveau template éventuellement). */}
+                <form
+                  action={async () => {
+                    "use server";
+                    await deleteOnboarding(onboarding.id);
+                    redirect("/onboarding");
+                  }}
+                >
+                  <button
+                    type="submit"
+                    className="btn-ghost text-xs text-red-600"
+                    title="Supprime cet onboarding pour pouvoir en relancer un nouveau depuis un template"
+                  >
+                    Supprimer & repartir à zéro
+                  </button>
+                </form>
+              </>
+            ) : (
+              <form
+                action={async () => {
+                  "use server";
+                  await archiveOnboarding(onboarding.id);
+                  redirect("/onboarding");
+                }}
+              >
+                <button type="submit" className="btn-secondary text-xs">
+                  Archiver
+                </button>
+              </form>
+            )}
           </div>
         }
       />
