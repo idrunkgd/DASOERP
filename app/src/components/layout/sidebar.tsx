@@ -116,21 +116,24 @@ export function Sidebar({
   const path = usePathname();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
 
-  // Badge "à signer" sur l'item /policies : polling léger toutes les 60s.
-  const [pendingPolicies, setPendingPolicies] = useState(0);
+  // Badges dynamiques par route (docs à signer, tâches, demandes, factures…).
+  // Une seule requête GET /api/nav-badges renvoie la map complète, rafraîchie
+  // toutes les 60s + à chaque navigation (path change) pour refléter les
+  // actions faites par l'user sans qu'il attende le prochain tick.
+  const [badges, setBadges] = useState<Record<string, number>>({});
   useEffect(() => {
     if (restricted) return;
     let cancelled = false;
-    async function fetchCount() {
+    async function fetchBadges() {
       try {
-        const r = await fetch("/api/policies/pending-count", { cache: "no-store" });
+        const r = await fetch("/api/nav-badges", { cache: "no-store" });
         if (!r.ok) return;
         const j = await r.json();
-        if (!cancelled) setPendingPolicies(j.count ?? 0);
+        if (!cancelled) setBadges(j ?? {});
       } catch { /* ignore */ }
     }
-    fetchCount();
-    const t = setInterval(fetchCount, 60_000);
+    fetchBadges();
+    const t = setInterval(fetchBadges, 60_000);
     return () => { cancelled = true; clearInterval(t); };
   }, [restricted, path]);
 
@@ -220,7 +223,7 @@ export function Sidebar({
               items={visibleItems}
               path={path}
               forceOpen={containsActive}
-              badges={{ "/policies": pendingPolicies }}
+              badges={badges}
             />
           );
         })}
