@@ -49,8 +49,6 @@ const SECTIONS: Section[] = [
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },
       { href: "/missions",         label: "Missions",             icon: Plane,           perm: "consulting.read" },
-      { href: "/test/matching",    label: "Matching mission",     icon: GitCompareArrows, perm: "consulting.read" },
-      { href: "/reviews",          label: "Entretiens",           icon: ClipboardCheck,  perm: "reviews.read" },
       { href: "/calendar",         label: "Calendrier",           icon: CalendarDays,    perm: "consulting.read" }
     ]
   },
@@ -74,18 +72,13 @@ const SECTIONS: Section[] = [
     label: "RH & Documents",
     items: [
       { href: "/onboarding",  label: "Onboarding",       icon: GraduationCap,  perm: "onboarding.read" },
-      { href: "/expenses",    label: "Notes de frais",   icon: ReceiptText,    perm: "expenses.read" },
       { href: "/leaves",      label: "Congés",           icon: Plane,          perm: "leaves.read" },
       { href: "/sick-leaves", label: "Arrêts maladie",   icon: HeartPulse,     perm: "users.manage" },
       { href: "/documents",   label: "Documents",        icon: Files,          perm: "documents.read" },
       { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" },
       { href: "/fleet",       label: "Flotte véhicules", icon: Car,            perm: "fleet.read" },
       { href: "/contracts",   label: "Contrats",         icon: FileSignature,  perm: "contracts.read" },
-      { href: "/policies",    label: "Chartes & politiques", icon: FileText,   perm: "policies.read" },
-      // Le wiki formation utilise "dashboard.read" comme perm garde-fou :
-      // tout user ayant accès à l'ERP y a droit. La granularité fine (voir
-      // uniquement les modules autorisés) est appliquée par article.
-      { href: "/formation",   label: "Formation (wiki)", icon: BookOpen,       perm: "dashboard.read" }
+      { href: "/policies",    label: "Chartes & politiques", icon: FileText,   perm: "policies.read" }
     ]
   },
   {
