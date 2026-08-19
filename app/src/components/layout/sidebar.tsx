@@ -81,6 +81,7 @@ const SECTIONS: Section[] = [
       { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" },
       { href: "/fleet",       label: "Flotte véhicules", icon: Car,            perm: "fleet.read" },
       { href: "/contracts",   label: "Contrats",         icon: FileSignature,  perm: "contracts.read" },
+      { href: "/policies",    label: "Chartes & politiques", icon: FileText,   perm: "policies.read" },
       // Le wiki formation utilise "dashboard.read" comme perm garde-fou :
       // tout user ayant accès à l'ERP y a droit. La granularité fine (voir
       // uniquement les modules autorisés) est appliquée par article.

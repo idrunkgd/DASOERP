@@ -328,6 +328,11 @@ model User {
   contracts            Contract[]            @relation("UserContracts")
   contractTemplatesCreated ContractTemplate[] @relation("ContractTemplateCreator")
   contractsGenerated   Contract[]            @relation("ContractGeneratedBy")
+  // Chartes & politiques à signer (signature électronique simple type-name + timestamp)
+  signableDocsCreated     SignableDocument[]        @relation("SignableDocCreator")
+  signableDocVersionsCreated SignableDocumentVersion[] @relation("SignableDocVersionCreator")
+  documentSignatures      DocumentSignature[]       @relation("UserDocumentSignatures")
+  signaturesAssigned      DocumentSignature[]       @relation("SignatureAssigner")
   /// Type de contrat de ce consultant chez Dasolabs. Idem Candidate.contractType.
   contractType         ContractType?
   /// Paie configurée pour ce consultant interne (si contractType=EMPLOYEE).
@@ -2844,4 +2849,97 @@ model Contract {
   @@index([userId, status])
   @@index([candidateId, status])
   @@index([status])
+}
+
+// =============================================================
+// CHARTES & POLITIQUES — documents PDF à faire signer aux employés
+// =============================================================
+// Workflow : admin crée un SignableDocument avec sa v1 (upload PDF),
+// assigne à des employés → chaque employé reçoit une DocumentSignature
+// PENDING qu'il transforme en SIGNED via un formulaire "Lu et approuvé"
+// (nom + timestamp + IP + user-agent). Une nouvelle version invalide
+// les signatures existantes → nouvelles assignations à générer.
+
+model SignableDocument {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  /// Catégorie libre : "RH", "Sécurité", "IT", "EPI", "Voiture"…
+  category     String?
+  /// Signature obligatoire pour tous les employés actifs (défaut true).
+  /// Si false, l'admin assigne au cas par cas.
+  mandatory    Boolean  @default(true)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdById  String?
+  createdBy    User?    @relation("SignableDocCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  versions     SignableDocumentVersion[]
+  signatures   DocumentSignature[]
+
+  @@index([active])
+  @@index([category])
+}
+
+/// Une version d'un SignableDocument = un PDF précis. On garde toutes
+/// les versions pour l'historique (audit légal). Les signatures sont
+/// attachées à une version particulière, pas au document parent.
+model SignableDocumentVersion {
+  id           String   @id @default(cuid())
+  documentId   String
+  document     SignableDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionNum   Int      @default(1)
+  /// Chemin relatif au DOCS_STORAGE_PATH : "signable/<docId>/v<n>/<safeName>"
+  filePath     String
+  originalName String
+  mimeType     String
+  size         Int
+  releasedAt   DateTime @default(now())
+  /// Notes de version (changelog "quoi a changé depuis la v précédente")
+  notes        String?
+  createdById  String?
+  createdBy    User?    @relation("SignableDocVersionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  signatures   DocumentSignature[]
+
+  @@unique([documentId, versionNum])
+  @@index([documentId])
+}
+
+model DocumentSignature {
+  id              String   @id @default(cuid())
+  documentId      String
+  document        SignableDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionId       String
+  version         SignableDocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation("UserDocumentSignatures", fields: [userId], references: [id], onDelete: Cascade)
+
+  /// PENDING = assigné, pas encore signé
+  /// SIGNED = signé (signedAt + signatureText renseignés)
+  /// DECLINED = refusé (declinedAt + declinedReason renseignés)
+  status          String   @default("PENDING")
+
+  assignedAt      DateTime @default(now())
+  assignedById    String?
+  assignedBy      User?    @relation("SignatureAssigner", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  signedAt        DateTime?
+  /// Nom tapé par l'utilisateur au moment de la signature (validation
+  /// "Lu et approuvé — Prénom Nom" façon signature électronique simple).
+  signatureText   String?
+  /// IP et user-agent au moment de la signature — trace d'audit.
+  signatureIp     String?
+  signatureUA     String?
+
+  declinedAt      DateTime?
+  declinedReason  String?
+
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, versionId]) // Un user ne signe qu'une seule fois par version
+  @@index([userId, status])
+  @@index([documentId, status])
+  @@index([versionId, status])
 }
