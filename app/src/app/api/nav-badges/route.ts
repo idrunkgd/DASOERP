@@ -86,10 +86,18 @@ export async function GET() {
         )
       : 0,
 
-    // /timesheet — semaine courante pas remplie (aucune entrée cette semaine
-    // pour l'user courant). 1 si vide, 0 sinon (badge = "à faire cette semaine").
+    // /timesheet — semaine courante pas remplie ET user actuellement sur une
+    // mission active (PLANNED/ACTIVE/EXTENDED). Un user sans mission n'a pas
+    // à remplir de timesheet → pas de badge parasite.
     has("timesheet.self.write")
       ? safeCount(async () => {
+          const hasActiveMission = await prisma.mission.count({
+            where: {
+              consultantId: userId,
+              status: { in: ["PLANNED", "ACTIVE", "EXTENDED"] }
+            }
+          });
+          if (hasActiveMission === 0) return 0;
           const count = await prisma.timesheetEntry.count({
             where: { userId, date: { gte: weekStart, lt: weekEnd } }
           });

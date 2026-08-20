@@ -4,6 +4,7 @@ import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { ArrowLeft, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { NewPolicyForm } from "../new-policy-form";
+import { DeletePolicyButton } from "./delete-policy-button";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +83,11 @@ export default async function PoliciesManagePage() {
                         <XCircle className="w-3.5 h-3.5" /> {declinedCount}
                       </span>
                     )}
+                    <DeletePolicyButton
+                      documentId={d.id}
+                      title={d.title}
+                      hasSignatures={d._count.signatures > 0}
+                    />
                   </div>
                 </li>
               );
