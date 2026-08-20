@@ -51,86 +51,91 @@ export default async function PoliciesPage() {
         </div>
       )}
 
-      {/* Bloc "À signer" — grille de cartes centrées, mises en avant */}
+      {/* Bloc "À signer" — lignes, ton amber, mis en avant */}
       {pending.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-sm font-semibold text-amber-900 mb-3 flex items-center gap-2 uppercase tracking-wide">
+        <section className="mb-6">
+          <h2 className="text-sm font-semibold text-amber-900 mb-2 flex items-center gap-2 uppercase tracking-wide">
             <AlertCircle className="w-4 h-4" />
             À signer ({pending.length})
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="rounded-xl border border-amber-200 bg-amber-50/40 overflow-hidden divide-y divide-amber-200">
             {pending.map((sig) => (
-              <Link
-                key={sig.id}
-                href={`/policies/${sig.document.id}?signatureId=${sig.id}`}
-                className="group relative flex flex-col items-center text-center rounded-xl border border-amber-200 bg-gradient-to-b from-amber-50/70 to-white p-5 shadow-sm hover:shadow-md hover:border-amber-400 transition-all"
-              >
-                <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  <FileText className="w-6 h-6" />
+              <li key={sig.id} className="p-3 flex items-center gap-3 hover:bg-amber-50 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-4 h-4" />
                 </div>
-                <h3 className="font-semibold text-midnight-900 text-sm leading-tight">
-                  {sig.document.title}
-                </h3>
-                <div className="flex flex-wrap justify-center gap-1 mt-2">
-                  {sig.document.category && (
-                    <span className="badge-neutral text-[10px]">{sig.document.category}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={`/policies/${sig.document.id}?signatureId=${sig.id}`}
+                      className="font-semibold text-sm text-midnight-900 hover:text-indigoaccent"
+                    >
+                      {sig.document.title}
+                    </Link>
+                    {sig.document.category && (
+                      <span className="badge-neutral text-[10px]">{sig.document.category}</span>
+                    )}
+                    {sig.document.mandatory && (
+                      <span className="badge-warning text-[10px]">Obligatoire</span>
+                    )}
+                    <span className="text-[10px] text-midnight-400">v{sig.version.versionNum}</span>
+                  </div>
+                  {sig.document.description && (
+                    <p className="text-xs text-midnight-600 mt-0.5 line-clamp-1">
+                      {sig.document.description}
+                    </p>
                   )}
-                  {sig.document.mandatory && (
-                    <span className="badge-warning text-[10px]">Obligatoire</span>
-                  )}
-                  <span className="badge-neutral text-[10px] bg-white">v{sig.version.versionNum}</span>
                 </div>
-                {sig.document.description && (
-                  <p className="text-xs text-midnight-600 mt-3 line-clamp-3">
-                    {sig.document.description}
-                  </p>
-                )}
-                <span className="btn-primary btn-sm text-xs mt-4 pointer-events-none">
+                <Link
+                  href={`/policies/${sig.document.id}?signatureId=${sig.id}`}
+                  className="btn-primary btn-sm text-xs flex-shrink-0"
+                >
                   Lire & signer
-                </span>
-              </Link>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
 
-      {/* Bloc "Déjà signés" — même grille, ton émeraude, plus discret */}
+      {/* Bloc "Déjà signés" — lignes, ton émeraude, plus discret */}
       {signed.length > 0 && (
         <section>
-          <h2 className="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-2 uppercase tracking-wide">
+          <h2 className="text-sm font-semibold text-emerald-800 mb-2 flex items-center gap-2 uppercase tracking-wide">
             <CheckCircle2 className="w-4 h-4" />
             Signés ({signed.length})
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="rounded-xl border border-emerald-100 bg-white overflow-hidden divide-y divide-emerald-100">
             {signed.map((sig) => (
-              <Link
-                key={sig.id}
-                href={`/policies/${sig.document.id}`}
-                className="group flex flex-col items-center text-center rounded-xl border border-emerald-100 bg-white p-5 hover:border-emerald-300 hover:shadow-sm transition-all"
-              >
-                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-                  <CheckCircle2 className="w-6 h-6" />
+              <li key={sig.id} className="p-3 flex items-center gap-3 hover:bg-emerald-50/50 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
                 </div>
-                <h3 className="font-semibold text-midnight-900 text-sm leading-tight">
-                  {sig.document.title}
-                </h3>
-                <div className="flex flex-wrap justify-center gap-1 mt-2">
-                  {sig.document.category && (
-                    <span className="badge-neutral text-[10px]">{sig.document.category}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={`/policies/${sig.document.id}`}
+                      className="font-semibold text-sm text-midnight-900 hover:text-indigoaccent"
+                    >
+                      {sig.document.title}
+                    </Link>
+                    {sig.document.category && (
+                      <span className="badge-neutral text-[10px]">{sig.document.category}</span>
+                    )}
+                    <span className="text-[10px] text-midnight-400">v{sig.version.versionNum}</span>
+                  </div>
+                  {sig.document.description && (
+                    <p className="text-xs text-midnight-500 mt-0.5 line-clamp-1">
+                      {sig.document.description}
+                    </p>
                   )}
-                  <span className="badge-neutral text-[10px]">v{sig.version.versionNum}</span>
                 </div>
-                {sig.document.description && (
-                  <p className="text-xs text-midnight-500 mt-3 line-clamp-2">
-                    {sig.document.description}
-                  </p>
-                )}
-                <span className="text-[11px] text-emerald-700 font-medium mt-3 inline-flex items-center gap-1">
+                <span className="text-[11px] text-emerald-700 font-medium flex-shrink-0">
                   Signé le {sig.signedAt?.toLocaleDateString("fr-BE")}
                 </span>
-              </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
     </div>
