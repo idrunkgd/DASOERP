@@ -21,7 +21,8 @@ const COURSES = [
   "highbyte",
   "openshift",
   "sql-server",
-  "ssrs"
+  "ssrs",
+  "aveva-report"
 ];
 
 const prisma = new PrismaClient();
