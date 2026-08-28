@@ -9,7 +9,10 @@ import { PrismaClient } from "@prisma/client";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const COURSES = ["aveva-system-platform-2023"];
+const COURSES = [
+  "aveva-system-platform-2023",
+  "plc-programming"
+];
 
 const prisma = new PrismaClient();
 

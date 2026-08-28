@@ -1,0 +1,870 @@
+{
+  "slug": "plc-programming",
+  "title": "Programmation PLC générique",
+  "subtitle": "Formation complète — Débutant · Intermédiaire · Expert",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "notes": null,
+      "quiz": null,
+      "title": "Programmation PLC générique",
+      "bodyMd": "Formation — 3 niveaux · 24 h",
+      "imageUrl": "/training/plc-programming/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "notes": null,
+      "quiz": null,
+      "title": "Objectifs de la formation",
+      "bodyMd": "Devenir autonome selon IEC 61131-3.",
+      "imageUrl": "/training/plc-programming/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "notes": null,
+      "quiz": null,
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "Débutant · Intermédiaire · Expert.",
+      "imageUrl": "/training/plc-programming/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "notes": null,
+      "quiz": null,
+      "title": "Prérequis et environnement",
+      "bodyMd": "Culture automatisme, Windows, notions réseau.",
+      "imageUrl": "/training/plc-programming/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Niveau 1 · Débutant",
+      "bodyMd": "Fondamentaux + programmation basique.",
+      "imageUrl": "/training/plc-programming/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Qu'est-ce qu'un PLC ?",
+      "bodyMd": "- Programmable Logic Controller — automate programmable industriel\n- Ordinateur robuste : 24/7, températures, vibrations\n- Standardisé IEC 61131-3 (langages) + IEC 61131-2 (matériel)\n- Alternative aux relais câblés — flexibilité, diagnostic, modif à chaud\n\n💡 Un PLC exécute le même programme des milliers de fois par seconde.",
+      "imageUrl": "/training/plc-programming/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Architecture matérielle",
+      "bodyMd": "- CPU : processeur + mémoire + firmware temps réel\n- Alimentation : 24 VDC ou 230 VAC selon module\n- Modules d'entrée : lisent capteurs (TOR ou analogique)\n- Modules de sortie : commandent actionneurs (relais ou statiques)\n- Fond de panier (backplane) — communication entre modules\n- Interface programmation : USB, Ethernet, série RS-232/485",
+      "imageUrl": "/training/plc-programming/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Types d'E/S",
+      "bodyMd": "- TOR (Tout Ou Rien) — 0 ou 1 : boutons, contacteurs, capteurs\n- Analogiques : 4-20 mA, 0-10 V, thermocouples, PT100\n- Résolution typique : 12 à 16 bits\n- Sorties : relais mécaniques (charges lourdes) ou transistors (rapides)\n- Isolation galvanique entre E/S et CPU",
+      "imageUrl": "/training/plc-programming/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Le cycle scan — cœur du PLC",
+      "bodyMd": "- 1. LECTURE des entrées → mémoire image entrées (PII)\n- 2. EXÉCUTION du programme utilisateur\n- 3. ÉCRITURE des sorties depuis mémoire image sorties (PIQ)\n- 4. Tâches système + WATCHDOG\n- Temps de cycle typique : 1 à 100 ms\n- Les sorties ne changent qu'à la fin du scan\n\n💡 Le cycle scan est déterministe. C'est ce qui rend le PLC prévisible.",
+      "imageUrl": "/training/plc-programming/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Adressage mémoire",
+      "bodyMd": "- I (Input) : entrées TOR/analogiques du terrain\n- Q (Output) : sorties vers actionneurs\n- M (Merker/Memento) : mémoire interne, bit ou mot\n- DB (Data Block) : bloc de données structuré (Siemens)\n- T / C : timers et compteurs classiques\n- Adressage byte.bit (%I0.0) ou symbolique (Start_Button)",
+      "imageUrl": "/training/plc-programming/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Types de données IEC 61131-3",
+      "bodyMd": "- BOOL — 1 bit (TRUE/FALSE)\n- BYTE / WORD / DWORD / LWORD — 8/16/32/64 bits\n- INT / DINT / LINT — 16/32/64 bits signés\n- REAL / LREAL — flottants IEEE 754\n- TIME / DATE / TIME_OF_DAY — types temporels\n- STRING, ARRAY, STRUCT, énumérations — composés",
+      "imageUrl": "/training/plc-programming/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Les 5 langages IEC 61131-3",
+      "bodyMd": "- LD (Ladder Diagram) — schéma à contacts\n- FBD (Function Block Diagram) — blocs interconnectés\n- ST (Structured Text) — texte type Pascal, puissant\n- IL (Instruction List) — bas niveau (déprécié)\n- SFC (Sequential Function Chart) — grafcet\n- Choix selon la nature du problème et culture équipe",
+      "imageUrl": "/training/plc-programming/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Ladder Diagram — LD",
+      "bodyMd": "- Représentation « rail-échelle » — courant gauche à droite\n- Contacts NO / NF en série (ET) ou parallèle (OU)\n- Bobines : sortie, SET, RESET\n- Blocs : timers, compteurs, comparateurs\n- Idéal : logique combinatoire, câblage à convertir\n- Adopté par les électriciens, lisible en maintenance\n\n💡 LD reste le plus lu en maintenance — accessible sans formation lourde.",
+      "imageUrl": "/training/plc-programming/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Function Block Diagram — FBD",
+      "bodyMd": "- Blocs graphiques connectés par liens (signaux)\n- Bibliothèque : AND, OR, timers, PID…\n- Entrées à gauche, sorties à droite\n- Idéal : régulation continue, dataflow signal\n- Naturel pour automaticiens habitués aux P&ID",
+      "imageUrl": "/training/plc-programming/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Structured Text — ST",
+      "bodyMd": "- Syntaxe proche du Pascal / C\n- IF/THEN/ELSE, CASE, FOR/WHILE, fonctions\n- Idéal : algorithmes complexes, calculs, boucles\n- Exemple : IF Temp > SP THEN Heater := FALSE; END_IF;\n- Devient le langage principal des grands projets\n\n💡 Un ST bien écrit se relit comme un pseudo-code.",
+      "imageUrl": "/training/plc-programming/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Sequential Function Chart — SFC",
+      "bodyMd": "- Étapes + transitions (grafcet français)\n- Idéal : séquences machine, batch, procédés\n- Chaque étape a des actions à l'activation\n- Transitions = expressions booléennes\n- Divergence ET / OU pour parallélisme ou choix",
+      "imageUrl": "/training/plc-programming/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Cyclique vs interruption",
+      "bodyMd": "- Main OB : appelé à chaque cycle scan\n- OB temporisé : intervalle fixe (10 ms, 100 ms…)\n- OB alarme matérielle : front d'entrée rapide (safety)\n- OB erreur : défaut (débordement, div/0…)\n- Garder les OB courts pour ne pas bloquer le scan",
+      "imageUrl": "/training/plc-programming/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Contacts, bobines, branchements",
+      "bodyMd": "- Contact NO : passant si signal = 1\n- Contact NF : passant si signal = 0\n- Bobine simple : recopie l'état de la ligne\n- SET (à 1) / RESET (à 0) mémorisent\n- Front montant / descendant : détection d'événement\n- Ordre d'écriture — dernier écrit gagne dans le scan",
+      "imageUrl": "/training/plc-programming/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Timers TON / TOF / TP",
+      "bodyMd": "- TON (On-delay) : passe à 1 après délai IN=1 stable\n- TOF (Off-delay) : reste à 1 pendant délai après IN=0\n- TP (Pulse) : impulsion durée fixe sur front montant\n- PT (Preset Time) : durée souhaitée (T#5s)\n- Sortie Q + valeur écoulée ET\n- Applications : démarrage, filtrage anti-rebond",
+      "imageUrl": "/training/plc-programming/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Compteurs CTU / CTD / CTUD",
+      "bodyMd": "- CTU (Up) : incrémente sur front CU, reset R\n- CTD (Down) : décrémente sur front CD, load LD\n- CTUD : compteur bi-directionnel\n- Sortie Q signale atteinte du preset PV\n- Applications : comptage pièces, cadence, cycles usure\n- Utiliser DINT pour les gros compteurs",
+      "imageUrl": "/training/plc-programming/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "SET, RESET, front, latch",
+      "bodyMd": "- S (SET) : force à 1 et mémorise\n- R (RESET) : force à 0 et mémorise\n- R prioritaire sur S (RS bistable)\n- R_TRIG / F_TRIG : détection front\n- Latch : bobine qui se maintient par son propre contact\n- Attention à l'ordre d'écriture",
+      "imageUrl": "/training/plc-programming/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Structurer un projet PLC",
+      "bodyMd": "- Séparer : logique procédé / matériel / HMI\n- Un FB par équipement (moteur, vanne, boucle)\n- Un DB d'instance par équipement\n- Nommage cohérent : M_ moteur, V_ vanne…\n- Symboles explicites, éviter adresses absolues\n- Documentation : commentaires + spec fonctionnelle\n\n💡 Un projet bien structuré = 80 % de temps gagné en maintenance.",
+      "imageUrl": "/training/plc-programming/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Sauvegarde et transfert",
+      "bodyMd": "- Toujours sauvegarder avant modification (archive datée)\n- Transfert online en RUN ou STOP selon nature\n- Certaines modifs demandent STOP (structure DB, taille)\n- Vérifier après transfert : LEDs, diagnostic, essais\n- Conserver le code source en gestionnaire de version",
+      "imageUrl": "/training/plc-programming/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": null,
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "Les 5 idées à emporter.",
+      "imageUrl": "/training/plc-programming/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Que veut dire IEC 61131-3 ?",
+            "options": [
+              "Norme connecteurs",
+              "Norme langages PLC",
+              "Norme cybersécurité OT"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Le cycle scan d'un PLC est :",
+            "options": [
+              "Non déterministe",
+              "Déterministe : lecture E, prog, écriture S",
+              "Aléatoire selon CPU"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Quel langage est retiré en pratique ?",
+            "options": [
+              "SFC",
+              "IL (Instruction List)",
+              "ST"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "TON est un timer :",
+            "options": [
+              "à retard à l'enclenchement",
+              "à retard au déclenchement",
+              "à impulsion fixe"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Sur front montant on utilise :",
+            "options": [
+              "F_TRIG",
+              "R_TRIG",
+              "SET"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un DB d'instance correspond à :",
+            "options": [
+              "Backup programme",
+              "Données propres à une instance de FB",
+              "Table de sortie"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "imageUrl": "/training/plc-programming/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Niveau 2 · Intermédiaire",
+      "bodyMd": "Programmation objet, communications.",
+      "imageUrl": "/training/plc-programming/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Function Blocks personnalisés",
+      "bodyMd": "- Encapsulation : entrées, sorties, mémoire persistante\n- Réutilisable par instanciation — DB dédié\n- Interface figée : modifs internes ne cassent pas les appelants\n- Objets métier : Motor, Valve, Pump, PID_Loop\n- Version + auteur dans métadonnées\n- Testable unitairement dans un OB de test\n\n💡 Un FB bien conçu se réutilise sur 10 projets sans le modifier.",
+      "imageUrl": "/training/plc-programming/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Structured Text avancé",
+      "bodyMd": "- Contrôle de flux : IF/ELSIF/ELSE, CASE OF\n- Boucles : FOR, WHILE, REPEAT..UNTIL\n- EXIT (loop), RETURN (fonction)\n- Opérateurs bit : AND_BW, OR_BW, XOR_BW, SHL, SHR\n- Fonctions : ABS, SQRT, EXP, LN, SIN, COS\n- Éviter les boucles infinies (watchdog CPU !)",
+      "imageUrl": "/training/plc-programming/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Tableaux (ARRAY)",
+      "bodyMd": "- Déclaration : ARRAY[0..9] OF REAL\n- Accès indexé : Temperatures[3]\n- Multi-dimensionnel : ARRAY[1..10, 1..5] OF INT\n- Boucle : FOR i := 0 TO 9 DO Sum := Sum + Arr[i]; END_FOR;\n- Vérifier index pour éviter défaut d'accès\n- Utilité : buffers, moyennes glissantes, historiques",
+      "imageUrl": "/training/plc-programming/slide-29.jpg"
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "STRUCT et UDT",
+      "bodyMd": "- STRUCT : regroupe champs de types différents\n- UDT (User Defined Type) : STRUCT réutilisable\n- TYPE MotorData : STRUCT State:BOOL; Speed:REAL; END_STRUCT\n- Passer un objet complet en un paramètre\n- Meilleure lisibilité, maintenabilité\n- Version des UDT — casser change tous usages",
+      "imageUrl": "/training/plc-programming/slide-30.jpg"
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Pointeurs et références",
+      "bodyMd": "- Pointeur : adresse mémoire (Any, Pointer, Variant Siemens)\n- Reference : alias fort typé (préféré moderne)\n- Passage par référence évite copie mémoire\n- Attention pointeurs invalides — crash CPU\n- Préférer Variant/UDT bien typés",
+      "imageUrl": "/training/plc-programming/slide-31.jpg"
+    },
+    {
+      "position": 32,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "SFC en pratique — grafcet",
+      "bodyMd": "- Étape initiale (double cadre) — 1 seule par grafcet\n- Actions : activation, cycliques, désactivation\n- Transitions : expressions booléennes (contacts + timers)\n- Divergence ET / OU — parallélisme ou choix\n- Convergence obligatoire pour clôturer branche\n- Surveillance temps de séjour → alarme",
+      "imageUrl": "/training/plc-programming/slide-32.jpg"
+    },
+    {
+      "position": 33,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Alarmes et diagnostics",
+      "bodyMd": "- Détection : dépassement, timeout, incohérence capteur\n- Structure : ID + gravité + horodatage + message\n- Latching : reste active tant que non acquittée\n- Priorités : critique / haute / basse / info\n- Historisation : buffer FIFO + export SCADA\n- Norme ISA-18.2 pour gestion d'alarmes\n\n💡 Une alarme utile est une alarme actionable. Le reste = pollution.",
+      "imageUrl": "/training/plc-programming/slide-33.jpg"
+    },
+    {
+      "position": 34,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Interruptions matérielles/horaires",
+      "bodyMd": "- OB temporisé (cyclique) : régulation, échantillonnage\n- OB horloge : action à heure fixe (démarrage 6h, arrêt 22h)\n- OB alarme matérielle : signal capteur rapide (safety)\n- OB alarme erreur : divisions par zéro, sur-cycle\n- Priorité : haute interrompt basse\n- Attention ré-entrance et accès mémoire concurrent",
+      "imageUrl": "/training/plc-programming/slide-34.jpg"
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Communication série",
+      "bodyMd": "- RS-232 point à point (courte distance)\n- RS-485 multi-drop, 32 périphériques\n- Modbus RTU (série) — maître/esclave\n- Paramètres : baud, parité, stop bits, timeout\n- Trames binaires optimisées bande passante\n- Réserver un slot maintenance",
+      "imageUrl": "/training/plc-programming/slide-35.jpg"
+    },
+    {
+      "position": 36,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Communication Ethernet",
+      "bodyMd": "- TCP/IP standard : port + IP + protocole applicatif\n- Modbus TCP : Modbus dans TCP (port 502)\n- Profinet : temps réel, sub-ms possible\n- EtherNet/IP : Rockwell/CIP, port 44818/2222\n- OPC UA : standard transverse, sécurité intégrée\n- Segmentation réseau OT/IT obligatoire (IEC 62443)",
+      "imageUrl": "/training/plc-programming/slide-36.jpg"
+    },
+    {
+      "position": 37,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "OPC UA — client/server",
+      "bodyMd": "- Standard ouvert (OPC Foundation) pour interopérabilité\n- Modèle info : Objects → Variables → Methods\n- Sécurité : chiffrement + signature + x509\n- Sub/Publish : notifications sur changement\n- Companion Specs : PackML, DI, Robotics…\n- Lingua franca industrie 4.0\n\n💡 OPC UA remplace peu à peu DDE, OPC DA, connecteurs propriétaires.",
+      "imageUrl": "/training/plc-programming/slide-37.jpg"
+    },
+    {
+      "position": 38,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Profinet — cyclique/acyclique",
+      "bodyMd": "- Cyclique (RT) : déterministe 1-10 ms\n- Isochronous (IRT) : sub-ms motion control\n- Acyclique : lecture/écriture paramètres, alarmes\n- GSDML : description équipements\n- Nom du device sur réseau (DCP) — attention conflits\n- Diagnostic : PROFINET Explorer, PN discovery, LED",
+      "imageUrl": "/training/plc-programming/slide-38.jpg"
+    },
+    {
+      "position": 39,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Modbus TCP / RTU",
+      "bodyMd": "- Protocole simple, maître/esclave, très répandu\n- Types : Coils, Discrete Inputs, Holding, Input Registers\n- Fonction 03 (Read), 06 (Write Single), 16 (Write Multi)\n- TCP : port 502, plusieurs esclaves via IP\n- RTU : RS-485, adresse esclave 1-247\n- Timeout typique 1s, retry x3",
+      "imageUrl": "/training/plc-programming/slide-39.jpg"
+    },
+    {
+      "position": 40,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Debug live",
+      "bodyMd": "- Watch table : lecture en temps réel\n- Forçage : imposer valeur à une entrée (test)\n- Trend recording : capture d'échantillons\n- Breakpoints sur CPU récentes\n- Comparaison online/offline pour divergences\n- Annoter modifs et sauvegarder après\n\n💡 Le forçage est puissant mais dangereux — bien communiquer avant.",
+      "imageUrl": "/training/plc-programming/slide-40.jpg"
+    },
+    {
+      "position": 41,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Nommage des variables",
+      "bodyMd": "- Préfixes : M_ moteur, V_ vanne, PID_ régul\n- Suffixes : _Cmd, _FB (feedback), _Sp (setpoint)\n- PascalCase pour FB, camelCase pour variables\n- Éviter accents et espaces (compat SCADA)\n- Longueur lisible en watch (~20 char)\n- Documenter la convention dans un doc partagé",
+      "imageUrl": "/training/plc-programming/slide-41.jpg"
+    },
+    {
+      "position": 42,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Modularisation, bibliothèques",
+      "bodyMd": "- Lib = FB versionnés et testés\n- Une seule source de vérité par organisation\n- Import projets avec version figée\n- Tests non régressifs à chaque évolution\n- Séparer libs métier vs infrastructure\n- Gouvernance : responsable, review, changelog",
+      "imageUrl": "/training/plc-programming/slide-42.jpg"
+    },
+    {
+      "position": 43,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "DB paramétrable — recettes",
+      "bodyMd": "- DB dédié aux paramètres (seuils, temps, coefficients)\n- Modification en RUN sans re-download\n- Interface HMI pour l'exploitant / recette produit\n- Persistance en coupure (retentive)\n- Séparer paramètres process vs tech\n- Versionner les DB de config avec le code source",
+      "imageUrl": "/training/plc-programming/slide-43.jpg"
+    },
+    {
+      "position": 44,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Sécurité fonctionnelle (fail-safe)",
+      "bodyMd": "- PLC de sécurité (F-CPU) : redondance interne + diag\n- Programme F : blocs certifiés, langage restreint\n- Sortie sûre → 0 (dé-énergisée) en cas de défaut\n- SIL 1 à 4 selon criticité\n- IEC 61508 (générale), IEC 62061 / ISO 13849 (machines)\n- Réseau F isolé du standard\n\n💡 Un défaut détecté doit mener à un état sûr, pas juste une alarme.",
+      "imageUrl": "/training/plc-programming/slide-44.jpg"
+    },
+    {
+      "position": 45,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": null,
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "Les 5 idées à emporter.",
+      "imageUrl": "/training/plc-programming/slide-45.jpg"
+    },
+    {
+      "position": 46,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Une instance de FB stocke ses données dans :",
+            "options": [
+              "Un DB global unique",
+              "Un DB d'instance dédié",
+              "La RAM CPU volatile"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Modbus TCP utilise le port :",
+            "options": [
+              "80",
+              "502",
+              "1883"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "SFC est un langage :",
+            "options": [
+              "Textuel type C",
+              "Séquentiel à étapes/transitions",
+              "Analogique dataflow"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "OPC UA garantit la sécurité par :",
+            "options": [
+              "Chiffrement + signature + x509",
+              "Simple mot de passe",
+              "Isolation physique"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "La norme ISA-18.2 concerne :",
+            "options": [
+              "Gestion des alarmes",
+              "Protocoles réseau",
+              "Le grafcet"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Un DB paramétrable permet :",
+            "options": [
+              "Sécuriser le programme",
+              "Modifier réglages sans re-download",
+              "Accélérer le scan"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "imageUrl": "/training/plc-programming/slide-46.jpg"
+    },
+    {
+      "position": 47,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Niveau 3 · Expert",
+      "bodyMd": "Redondance, cybersécurité, CI/CD.",
+      "imageUrl": "/training/plc-programming/slide-47.jpg"
+    },
+    {
+      "position": 48,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Architectures redondées",
+      "bodyMd": "- Simplex : 1 CPU — arrêt total si défaillance\n- Hot standby : CPU secondaire synchronisée, bascule <100ms\n- Warm : secondaire à jour périodiquement, bascule quelques s\n- Cold : secondaire chargée manuellement\n- Critères : RTO (temps reprise) + RPO (perte data max)\n- Coût explose entre simplex et hot — dimensionner selon criticité",
+      "imageUrl": "/training/plc-programming/slide-48.jpg"
+    },
+    {
+      "position": 49,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Redondance CPU — H systems",
+      "bodyMd": "- Deux CPUs H connectées par câble haut débit (sync)\n- Bascule automatique sur défaut maître\n- Perte du câble sync → dégradation, alarmes\n- Simulation bascule à programmer en maintenance\n- Programmation identique sur les 2 CPUs\n- Diagnostic dédié : Siemens H, Rockwell HSBY",
+      "imageUrl": "/training/plc-programming/slide-49.jpg"
+    },
+    {
+      "position": 50,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Redondance réseau — MRP/PRP/HSR",
+      "bodyMd": "- MRP (Media Redundancy) : anneau, bascule 200ms\n- PRP (Parallel Redundancy) : 2 réseaux //, 0ms\n- HSR (High-availability Seamless) : anneau dupliqué, 0ms\n- PRP + HSR = norme IEC 62439\n- PRP pour très haute dispo, HSR pour anneau économique\n- MRP = compromis coût/dispo le plus courant",
+      "imageUrl": "/training/plc-programming/slide-50.jpg"
+    },
+    {
+      "position": 51,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Cybersécurité PLC — IEC 62443",
+      "bodyMd": "- Norme cadre pour ICS (Industrial Control Systems)\n- Niveaux SL-1 (basique) à SL-4 (attaquant sophistiqué)\n- Composants (SL-C), Systèmes (SL), Zones (SL-T)\n- Menaces : ransomware, exfiltration IP, sabotage\n- Approche : Defense in Depth (couches multiples)\n- Souvent obligatoire dans les appels d'offres",
+      "imageUrl": "/training/plc-programming/slide-51.jpg"
+    },
+    {
+      "position": 52,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Zones et conduits",
+      "bodyMd": "- Zone : assets partageant mêmes exigences sécurité\n- Conduit : canal de comm entre zones\n- Purdue Model : couches 0 (process) → 5 (enterprise)\n- Firewalls entre couches, DMZ IT/OT entre 3.5 et 4\n- Modif en zone L1 ne doit pas impacter L2\n- Documenter chaque zone : périmètre, assets, SL cible",
+      "imageUrl": "/training/plc-programming/slide-52.jpg"
+    },
+    {
+      "position": 53,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Durcissement PLC",
+      "bodyMd": "- Désactiver services non utilisés (Web, FTP, Telnet)\n- Mots de passe forts + rotation\n- Firmware à jour (patch management OT)\n- Signer les projets — détecte modif non autorisée\n- Logs vers SIEM\n- Backup off-site du projet et de la config\n\n💡 Le durcissement PLC est aussi important qu'un firewall serveur.",
+      "imageUrl": "/training/plc-programming/slide-53.jpg"
+    },
+    {
+      "position": 54,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Firewall industriel — DMZ OT",
+      "bodyMd": "- Firewall inspection deep packet (DPI) pour protocoles OT\n- Whitelist des flux nécessaires uniquement\n- DMZ entre OT/IT : proxies, historiens répliqués\n- Segmentation VLAN + microsegmentation\n- Data diode pour flux unidirectionnels\n- Tests réguliers : pentests, red team OT",
+      "imageUrl": "/training/plc-programming/slide-54.jpg"
+    },
+    {
+      "position": 55,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Contrôle d'accès et audit",
+      "bodyMd": "- RBAC sur outils d'ingénierie\n- MFA pour accès distant\n- Journalisation : qui a modifié quoi et quand\n- Signature électronique pour changes critiques (GxP)\n- Revue périodique des droits (leavers, rôles)\n- Comptes de service pour scripts automatisés",
+      "imageUrl": "/training/plc-programming/slide-55.jpg"
+    },
+    {
+      "position": 56,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Gestion de version PLC (Git)",
+      "bodyMd": "- Export texte du projet (TIA Openness, Codesys export)\n- Commits atomiques par fonctionnalité\n- Branches : main / develop / feature / hotfix\n- Tags de version pour chaque déploiement\n- Code review avant merge\n- Git LFS ou exports texte pour fichiers binaires",
+      "imageUrl": "/training/plc-programming/slide-56.jpg"
+    },
+    {
+      "position": 57,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "CI/CD pour PLC",
+      "bodyMd": "- Compilation headless (CLI TIA, Codesys)\n- Tests unitaires sur émulateur (PLCSIM, CodeSys Sim)\n- Analyse statique : nommage, complexité, bad patterns\n- Artefact versionné : projet compilé + hash\n- Déploiement contrôlé : approbation + fenêtre maintenance\n- Rollback rapide via version précédente signée",
+      "imageUrl": "/training/plc-programming/slide-57.jpg"
+    },
+    {
+      "position": 58,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Simulation PLC",
+      "bodyMd": "- PLCSIM (Siemens) — émulateur intégré TIA\n- PLCSIM Advanced — 16 CPUs simulées en réseau\n- Codesys Simulation — inclus dans l'IDE\n- Rockwell RSLogix Emulate\n- Dev sans matériel, non-régression, formation\n- Limite : pas d'E/S physiques, pas de temps réel matériel exact",
+      "imageUrl": "/training/plc-programming/slide-58.jpg"
+    },
+    {
+      "position": 59,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Tests unitaires PLC",
+      "bodyMd": "- Frameworks : IEC61131 UnitTest, Codesys TestManager\n- Injecter inputs, vérifier outputs attendus\n- Coverage : quelles branches sont testées\n- Non-régression à chaque évolution\n- Idéal pour bibliothèques\n- Long terme : moins de bugs prod",
+      "imageUrl": "/training/plc-programming/slide-59.jpg"
+    },
+    {
+      "position": 60,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Optimisation temps de cycle",
+      "bodyMd": "- Mesurer AVANT d'optimiser (min/max/moyen sur 1000 cycles)\n- Identifier OB coûteux (profiling constructeur)\n- Réduire accès mémoire répétés\n- Optimiser boucles ST (éviter FOR imbriqués)\n- Déporter gros calculs sur OB temporisé lent\n- Vérifier après optim que le comportement est identique",
+      "imageUrl": "/training/plc-programming/slide-60.jpg"
+    },
+    {
+      "position": 61,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Analyse scan overrun",
+      "bodyMd": "- Scan overrun : cycle non fini avant prochain déclenchement\n- Symptômes : LED CPU orange, alarmes, comportement erratique\n- Compteur ScanOverrunsCnt (peut monter très vite)\n- Causes : OB temporisé lourd, boucle non bornée\n- Solution : profiling + refactoring\n- Marge 30-50 % sur temps cycle nominal",
+      "imageUrl": "/training/plc-programming/slide-61.jpg"
+    },
+    {
+      "position": 62,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Diagnostic avancé",
+      "bodyMd": "- Web server CPU : dashboard état, LEDs, tables I/O\n- SNMP : monitoring depuis supervision réseau\n- Diagnostic buffer : événements horodatés\n- Vues : Device View, PLC Status\n- Log Viewer + export historian\n- Crash : dump mémoire + support constructeur",
+      "imageUrl": "/training/plc-programming/slide-62.jpg"
+    },
+    {
+      "position": 63,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Migration entre marques",
+      "bodyMd": "- Rare mais parfois imposée (fin de vie, standardisation)\n- Cartographie fonctionnelle → réimplantation, pas ligne à ligne\n- Différences : types, timers, DB vs tags\n- Outils de conversion : fiabilité limitée (< 60 %)\n- Tests exhaustifs post-migration\n- Former l'équipe sur la nouvelle plateforme avant",
+      "imageUrl": "/training/plc-programming/slide-63.jpg"
+    },
+    {
+      "position": 64,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Documentation et traçabilité",
+      "bodyMd": "- Spec fonctionnelle : ce que la machine doit faire\n- Spec technique : comment le PLC le fait\n- Matrice fonctions ↔ blocs : traçabilité inverse\n- Journal des changements versionné\n- Doc générée auto (commentaires code → HTML)\n- Obligatoire secteurs régulés (pharma, food, énergie)",
+      "imageUrl": "/training/plc-programming/slide-64.jpg"
+    },
+    {
+      "position": 65,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Étude de cas — station de pompage",
+      "bodyMd": "- 4 pompes en parallèle + réservoir + capteurs niveau\n- Objectif : maintenir niveau [40%-80%] + équilibrer usure\n- Cyclage entre pompes : rotation quotidienne\n- Détection panne : capteur débit incohérent → pompe suivante\n- Régulation PID sur niveau (setpoint 60 %)\n- HMI : synoptique + tendances + historique alarmes\n\n💡 Un exemple courant en formation. Bien maîtriser ce squelette.",
+      "imageUrl": "/training/plc-programming/slide-65.jpg"
+    },
+    {
+      "position": 66,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": null,
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "Les 5 idées à emporter.",
+      "imageUrl": "/training/plc-programming/slide-66.jpg"
+    },
+    {
+      "position": 67,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "MRP est un protocole :",
+            "options": [
+              "Redondance réseau en anneau",
+              "Programmation métier",
+              "Config OPC UA"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "L'IEC 62443 définit :",
+            "options": [
+              "Langages de programmation",
+              "Niveaux de sécurité SL-1 à SL-4",
+              "Format fichiers projet"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un scan overrun signifie :",
+            "options": [
+              "Cycle plus court que prévu",
+              "Cycle dépassé son budget temps",
+              "Programme mis à jour"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "La DMZ OT/IT sert à :",
+            "options": [
+              "Segmenter les zones et contrôler flux",
+              "Encrypter le programme PLC",
+              "Doubler la CPU"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Un test unitaire PLC vérifie :",
+            "options": [
+              "Que le hardware est branché",
+              "Qu'un bloc renvoie la sortie attendue",
+              "Consommation électrique"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "PRP est un mécanisme de :",
+            "options": [
+              "Programmation Ladder",
+              "Redondance réseau parallèle 0ms",
+              "Compression données"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "imageUrl": "/training/plc-programming/slide-67.jpg"
+    },
+    {
+      "position": 68,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "notes": null,
+      "quiz": null,
+      "title": "En résumé",
+      "bodyMd": "3 niveaux · 5 langages · 3 protocoles · IEC 62443.",
+      "imageUrl": "/training/plc-programming/slide-68.jpg"
+    },
+    {
+      "position": 69,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "notes": null,
+      "quiz": null,
+      "title": "Passer à l'action",
+      "bodyMd": "Rejouer les quiz, mini-projet, convention nommage.",
+      "imageUrl": "/training/plc-programming/slide-69.jpg"
+    }
+  ]
+}
