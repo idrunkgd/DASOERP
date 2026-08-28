@@ -23,7 +23,8 @@ const COURSES = [
   "sql-server",
   "ssrs",
   "aveva-report",
-  "isa-standards"
+  "isa-standards",
+  "gamp5"
 ];
 
 const prisma = new PrismaClient();
