@@ -24,7 +24,8 @@ const COURSES = [
   "ssrs",
   "aveva-report",
   "isa-standards",
-  "gamp5"
+  "gamp5",
+  "csv-validation"
 ];
 
 const prisma = new PrismaClient();

@@ -1,0 +1,390 @@
+{
+  "slug": "csv-validation",
+  "title": "Validation systèmes informatisés (CSV)",
+  "subtitle": "Computer System Validation en GxP",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "Validation systèmes informatisés (CSV)",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "La validation de systèmes informatisés (Computer System Validation, CSV) est le processus formel qui prouve à FDA/EMA qu'un système informatique utilisé en pharma fait bien ce qu'il est censé faire. C'est un projet transverse qui touche business, IT, QA, engineering. Bien mené : 10-15% du coût projet. Mal mené : 40%+ + retards + non-conformités.\n\n**Cadre GAMP 5** — V-model, catégories 1-5, IQ/OQ/PQ — les fondamentaux du cours GAMP 5.\n\n**Documentation obligatoire** — Validation Plan, URS, FS, DS, Test Protocols, Test Reports, VSR.\n\n**Rôles clés** — Business Owner, System Owner, QA, Validation Lead, IT — chacun a ses responsabilités.\n\n**Cycle de vie complet** — Planning → Development → Testing → Release → Operation → Retirement.\n\n**Change control continu** — Toute modification post-release passe par change control formel.\n\n**À retenir :** CSV n'est pas 'faire des tests' — c'est un cadre projet transverse qui garantit qualité + conformité + auditabilité tout au long du cycle de vie du système.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Rôles et responsabilités CSV",
+      "bodyMd": "La validation est un travail d'équipe. Confondre les rôles = décisions bloquées, tests non signés, projet qui traîne. Chaque rôle a un mandat précis et des documents qu'il approuve.\n\n**Business Owner** — Représente le métier utilisateur. Approuve l'URS et le PQ. Répond à 'est-ce que le système fait ce qu'on lui demande ?'.\n\n**System Owner** — Responsable technique du système. Approuve FS, DS, IQ, OQ. Répond à 'est-ce que le système fonctionne bien techniquement ?'.\n\n**QA (Quality Assurance)** — Garant de la conformité GxP. Approuve tous les documents + valide l'ensemble. Approuve le Validation Summary Report.\n\n**Validation Lead** — Chef de projet validation. Coordonne, planifie, tracks les livrables. Souvent externe consultant.\n\n**IT** — Fournit et opère l'infrastructure. Réalise l'IQ. Assure maintenance et backups.\n\n**À retenir :** Le Validation Lead est souvent le rôle sous-estimé — bon Validation Lead = projet fluide, mauvais = chaos documentaire. Investir dans ce rôle.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Validation Plan — le document racine",
+      "bodyMd": "Le Validation Plan (VP) est le document racine du projet. Il décrit : QUOI valider (scope), COMMENT (approche, catégorie GAMP), QUAND (planning), QUI (rôles et responsabilités), OÙ (environnements dev/test/prod), avec QUELS DOCUMENTS (livrables). Approuvé avant tout autre document du projet.\n\n**Scope** — Système validé, fonctionnalités incluses/exclues, boundaries avec autres systèmes.\n\n**Approche** — Catégorie GAMP (3, 4, 5), niveau de validation (IQ seul si low risk, IQ+OQ+PQ classic).\n\n**Livrables** — Liste : URS, FS, DS, Test Protocols IQ/OQ/PQ, Test Reports, VSR.\n\n**Timeline** — Jalons validation vs jalons projet global. Ne pas sous-estimer la validation (souvent 30-40% du temps projet).\n\n**Roles matrix** — Qui rédige, qui review, qui approuve — pour chaque document.\n\n**À retenir :** Un Validation Plan bien fait = 1 mois d'investissement qui économise 6 mois de flou en cours de projet. Le sauter = catastrophe garantie.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "URS — la voix du métier",
+      "bodyMd": "L'URS (User Requirements Specification) exprime les besoins métier sans jargon technique. Un utilisateur métier doit pouvoir le lire et dire 'oui, c'est ce que je veux'. Rédigé par le Business Owner + Validation Lead, approuvé par le Business Owner + QA.\n\n**Fonctionnalités métier** — Ex : 'L'opérateur doit pouvoir enregistrer un batch avec ID lot, date, quantité produite et 5 mesures qualité.'\n\n**Contraintes réglementaires** — Ex : 'Chaque enregistrement doit être horodaté, signé électroniquement, et non modifiable après signature.'\n\n**Performance** — Ex : 'Le système doit supporter 100 utilisateurs concurrents avec temps de réponse < 2 secondes.'\n\n**Interfaces** — Ex : 'Le système doit envoyer les résultats vers ERP SAP via B2MML ProductionPerformance.'\n\n**Critères d'acceptation** — Chaque requirement doit être testable. 'Le système doit être ergonomique' ≠ testable. 'Bouton A visible en 1 clic' = testable.\n\n**À retenir :** L'URS est LA source de vérité du besoin. Un URS mou = système inutilisable. Investir 2 semaines à bien rédiger l'URS avec les utilisateurs finaux.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "CSV en validation =",
+            "options": [
+              "Computer System Validation (pas Comma Separated Values ici)",
+              "CSV Excel",
+              "Aucun rapport"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "But du CSV pharma :",
+            "options": [
+              "Prouver qu'un système informatisé est fiable pour usage GxP",
+              "Convertir Excel",
+              "Migrer BDD"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Basé sur :",
+            "options": [
+              "GAMP 5 + 21 CFR Part 11 + Annexe 11",
+              "Bureautique",
+              "Windows"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Cycle typique :",
+            "options": [
+              "Planning → URS → FS/DS → tests IQ/OQ/PQ → validation report",
+              "Impossible",
+              "Ad-hoc"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Validation Plan :",
+            "options": [
+              "Document racine — scope, timeline, responsibles, approche",
+              "Optionnel",
+              "Automatique"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Roles :",
+            "options": [
+              "Business Owner, System Owner, QA, IT, Validation Lead",
+              "Un seul owner",
+              "Aucun"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/csv-validation/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Test Protocols — l'art de bien tester",
+      "bodyMd": "Un test protocol (IQ, OQ, PQ) est un document formel décrivant les tests à effectuer, avec critères d'acceptation clairs. Approuvé AVANT exécution. Le testeur ne fait qu'exécuter et documenter — pas d'improvisation.\n\n**Structure standard** — Header (system, version, date), Objectives, Pre-requisites, Test steps numérotés, Expected result par step, Actual result column, Pass/Fail, Comments.\n\n**Steps atomiques** — Chaque step = 1 action + 1 vérification. Trop complexe = ambigu à exécuter et documenter.\n\n**Critères d'acceptation** — Explicites, mesurables. 'Le rapport s'affiche' → 'Le rapport s'affiche en <5s avec les 12 colonnes attendues et les données du batch 12345'.\n\n**Preuves** — Screenshots, exports fichiers, valeurs relevées. À joindre au test protocol après exécution.\n\n**Signatures** — Testeur (exécuté), Reviewer (vérifié), QA (approuvé). Sans les 3, protocole invalide.\n\n**À retenir :** Un test protocol qui laisse place à l'interprétation = tests non reproductibles = validation non défendable en audit. Rigueur = protection.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Déviations — quand ça ne se passe pas comme prévu",
+      "bodyMd": "Une déviation = un test échoue, ou un résultat inattendu. Pas de panique — ce n'est pas la fin de la validation. La déviation doit être documentée, analysée (cause racine), résolue (correction + re-test), tracée dans le Validation Summary Report. Une validation sans aucune déviation est louche.\n\n**Documentation immédiate** — Formulaire déviation : ce qui s'est passé, quand, contexte, impact.\n\n**Cause racine (root cause)** — Analyse : bug système, mauvaise spec, erreur testeur, environnement dev vs prod. Utilisez 5 Whys.\n\n**Impact assessment** — L'écart impacte-t-il la validation d'autres tests ? La sécurité patient ? La qualité data ?\n\n**Correction + retest** — Fix appliqué, retest exécuté, résultat documenté. Signature QA sur résolution.\n\n**Trace VSR** — Toutes les déviations listées dans le Validation Summary Report avec leur statut.\n\n**À retenir :** Une déviation bien gérée renforce la crédibilité de la validation. Une déviation cachée ou mal gérée = warning letter garantie en audit.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Risk assessment :",
+            "options": [
+              "Analyse impact patient + business avant validation",
+              "Optionnel",
+              "Automatique"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Test protocol :",
+            "options": [
+              "Document approuvé listant tests + critères d'acceptation",
+              "Improvisation",
+              "Ad-hoc"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Deviation :",
+            "options": [
+              "Écart entre attendu et observé — à documenter + résoudre",
+              "Optionnel",
+              "Ignorable"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Validation Summary Report :",
+            "options": [
+              "Synthèse finale : ce qui a été validé, résultats, statut",
+              "Optionnel",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Traceability :",
+            "options": [
+              "URS → Test → Result, matrice à maintenir",
+              "Excel figé",
+              "Automatique"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Signature approbateur :",
+            "options": [
+              "QA + System Owner minimum, souvent + Business Owner",
+              "Un seul",
+              "Aucune"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/csv-validation/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Continuous validation",
+      "bodyMd": "Un système validé le jour du go-live peut cesser de l'être 6 mois après si on n'entretient pas la validation. La continuous validation = periodic review + change control + monitoring pour maintenir l'état validé tout au long de la vie du système.\n\n**Periodic Review** — Revue annuelle minimum : le système fait-il toujours ce qui a été validé ? Documentation à jour ? Changes tracés ?\n\n**Change Control formel** — Toute modification (patch, config, upgrade, nouvelle fonction) → impact assessment → tests régression → ré-approbation.\n\n**Monitoring en prod** — Uptime, performance, incidents, warnings — tracker pour détecter dérive.\n\n**Training** — Nouveaux users formés + certificats. Rafraîchissement annuel.\n\n**Backup + DR tests** — Tests de restauration réguliers. Un backup non testé n'existe pas.\n\n**À retenir :** La validation initiale coûte 100. La maintenance annuelle 10-20. Sans maintenance, la validation initiale devient obsolète en 12-18 mois — obligé de tout refaire.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Cloud, SaaS, Agile et validation",
+      "bodyMd": "GAMP 5 a été révisé en 2022 pour intégrer cloud, SaaS et Agile. Ce ne sont plus des exceptions — ce sont les normes. Les principes CSV restent, l'application évolue.\n\n**Cloud infrastructure** — Provider (AWS, Azure) qualifié via audit + SLA + audit rights. Shared responsibility model : validation client + provider.\n\n**SaaS applications** — Provider fournit sa documentation validation (audit, tests). Client complète pour son usage spécifique (URS + PQ).\n\n**Agile development** — Compatible avec GAMP : sprints planifiés + validation par lot fonctionnel + traceability continue via outils (Jira + validation).\n\n**DevOps + continuous deployment** — Compatible avec CI/CD tant que : environments qualifiés, tests automatisés validés, releases tracées.\n\n**Documentation à jour** — L'agilité rapide impose des outils qui gardent la doc synchronisée avec le code — sinon audit désastreux.\n\n**À retenir :** La modernité (Cloud, SaaS, Agile) n'est plus incompatible avec la validation pharma — GAMP 5 s'y est adapté. Choisir les bons outils est crucial.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "System retirement :",
+            "options": [
+              "Processus formel de mise hors service avec archivage data",
+              "Impossible",
+              "Suppression seule"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Continuous validation :",
+            "options": [
+              "Revue périodique + change control + monitoring",
+              "Une fois pour toutes",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Cloud + validation :",
+            "options": [
+              "Provider doit être qualifié + SLA + Audit rights",
+              "Impossible",
+              "Sans contraintes"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Agile validation :",
+            "options": [
+              "Sprints + validation par lot, coexistence GAMP possible",
+              "Impossible",
+              "Waterfall obligatoire"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "SaaS validation :",
+            "options": [
+              "Provider fournit docs validation, client complète pour son usage",
+              "Impossible",
+              "100% client"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Coût typique :",
+            "options": [
+              "10-40% du coût projet informatique en pharma",
+              "Marginal",
+              "0"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/csv-validation/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Passer à l'action",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Compléter avec le cours GAMP 5 pour la profondeur normative\n- Faire un stage validation sur un projet pharma existant (LIMS, MES, ELN)\n- Se familiariser avec outils modernes : Kneat, ValGenesis, ComplianceQuest\n- Se certifier Computer System Validation (via ISPE, Regulatory Focus)\n\n💡 CSV est un skill rare et bien payé en pharma. Un ingénieur qui parle CSV + GAMP + Data Integrity est immédiatement précieux dans tout projet pharma.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-21.jpg"
+    }
+  ]
+}
