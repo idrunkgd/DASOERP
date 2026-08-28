@@ -1,0 +1,560 @@
+{
+  "slug": "tia-portal",
+  "title": "TIA Portal (Siemens)",
+  "subtitle": "IDE unifié Siemens — programmation, HMI, drives, réseau",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "TIA Portal",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "TIA Portal est l'environnement de développement unifié Siemens depuis 2010 : configuration matérielle, programmation PLC, HMI, drives, réseau — tout dans un seul outil. La courbe d'apprentissage est raide mais la productivité une fois maîtrisée est élevée. Cette formation vous fait passer du premier écran vide à un projet industriel déployé.\n\n**Comprendre l'architecture TIA** — Devices, Networks, Projects, bibliothèques globales et locales.\n\n**Programmer en LAD/FBD/SCL** — Les trois langages majeurs de la plateforme, avec les particularités SIMATIC.\n\n**Concevoir une HMI Comfort ou Unified** — Écrans, tags, animations, alarmes, recettes.\n\n**Maîtriser mise en service et diagnostic** — Go Online, Watch tables, Trace, Diagnostic Buffer, Web server.\n\n**Industrialiser avec Openness** — Automatiser génération de blocs, imports UDT, CI/CD Siemens.\n\n**À retenir :** TIA n'est pas juste 'Step7 nouvelle version'. C'est une refonte complète du modèle de projet — apprendre TIA après Step7 demande de désapprendre certains réflexes.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Prérequis et environnement de lab",
+      "bodyMd": "- Bases automatisme (variables, cycle scan, langages IEC) — cf. cours 'Programmation PLC générique'\n- Windows 10/11 Pro 64-bit, 16 Go RAM minimum recommandé pour TIA V17+\n- Licence TIA Professional (ou Trial 21 jours pour la formation)\n- PLCSIM Advanced installé pour simuler S7-1500 sans matériel\n- Optionnel : CPU S7-1215C DP/DP réelle + IHM KTP700 pour les TP hardware\n\n💡 TIA est gourmand en ressources. SSD obligatoire, RAM 32 Go conseillée pour les gros projets multi-CPU.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le fil rouge : ligne de mélange MIX-01",
+      "bodyMd": "Une ligne de mélange agroalimentaire : 3 cuves de matières premières (poudres et liquides), 1 cuve de mélange équipée d'un agitateur, une vanne de vidange vers l'emballage. Le procédé pilote un cycle batch : dosage → mélange → vidange → nettoyage. On voit ainsi séquentiel (SFC), FB objet (Motor, Valve, PID_Loop), régulation (température, vitesse agitateur) et HMI (recettes, tendances, alarmes).\n\n**Instrumentation** — 3 débitmètres, 1 sonde température cuve, 1 sonde niveau, 4 vannes tout-ou-rien, 1 vanne motorisée\n\n**Actionneurs** — 3 pompes doseuses, 1 moteur agitateur variateur, 1 résistance de chauffage\n\n**IHM** — Synoptique + gestion recettes (30 produits) + tendances + historique alarmes\n\n**Fonctions à programmer** — Cycle batch SFC, régulation PID température, gestion recette, alarmes ISA-18.2\n\n**À retenir :** Le fil rouge est enrichi à chaque niveau — d'abord programmé en LAD basique, puis restructuré en FB, puis rendu redondé et cybersécurisé.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TIA Portal — c'est quoi exactement ?",
+      "bodyMd": "TIA Portal (Totally Integrated Automation Portal) est l'environnement d'ingénierie Siemens depuis 2010. Il unifie dans un seul outil la programmation PLC (STEP 7), la conception HMI (WinCC), la config drives (Startdrive), la mise en réseau (Profinet). Un projet TIA = un fichier .ap<version> qui contient TOUT le projet automatisme.\n\n**Un seul projet, plusieurs équipements** — PLC + HMI + drives + réseau vivent ensemble. Cohérence des tags garantie.\n\n**Bibliothèques centralisées** — Global Library (Siemens) + Corporate Library (votre entreprise) + Project Library (local).\n\n**Versionnement du produit TIA** — V13, V15, V16, V17, V18, V19. Compatible ascendant mais pas descendant — piège classique.\n\n**Editions** — Basic (S7-1200 uniquement), Professional (toute la gamme), Comfort (HMI intégré).\n\n**Extensions** — PLCSIM Advanced, Safety Advanced (F-PLC), Openness (automatisation), Multiuser Engineering.\n\n**À retenir :** Toujours noter la VERSION TIA d'un projet dans le nom du fichier ou un README. Ouvrir un projet V15 avec V13 = impossible, avec V17 = migration automatique irréversible.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "STEP 7 classique vs TIA Portal",
+      "bodyMd": "**STEP 7 CLASSIC (SIMATIC Manager)**\n- L'IDE historique (2005-2010) pour S7-300/400\n- Un projet = un dossier avec sous-dossiers hardware/prog/hmi séparés\n- STL (Statement List), LAD, FBD, SCL — SCL en add-on payant\n- WinCC flexible pour HMI (produit distinct)\n- Configuration réseau = NetPro (outil séparé)\n- Fin de support Siemens 2027 — migration recommandée\n\n**TIA PORTAL**\n- L'IDE moderne (depuis 2010) pour toute la gamme S7-1200/1500 + 300/400\n- Un projet = un fichier .ap<version> avec tout intégré\n- LAD, FBD, SCL (intégré), STL (déprécié en 1500)\n- WinCC Comfort/Advanced/Unified intégré\n- Configuration réseau au niveau projet\n- Version courante V19 (2025) — feuille de route active\n\n**À retenir :** Un projet Step7 se migre vers TIA via un convertisseur intégré, mais 20-30 % du code demande une revue manuelle. Ne pas planifier une migration en 2 semaines.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Devices, Networks, Projects",
+      "bodyMd": "TIA se navigue en 3 vues principales : Devices & networks (vue matérielle), Project tree (vue arborescente logique), Portal view (assistant tâches). Chaque device a son propre sous-arbre : Program blocks, PLC tags, PLC data types, Watch tables, Traces.\n\n**Devices & Networks (Network view)** — Vue graphique des CPU + HMI + IO devices + connections. Drag & drop pour créer des liens Profinet/Profibus.\n\n**Project Tree (Portal View)** — Arborescence complète : projet > device > Program blocks / Technology objects / PLC tags / Watch tables.\n\n**Program blocks (par CPU)** — OB (Organization Blocks), FB (Function Blocks), FC (Functions), DB (Data Blocks).\n\n**PLC tags** — Variables globales avec adresse absolue. Base pour les Watch tables et l'IHM.\n\n**PLC data types (UDT)** — Types utilisateur STRUCT réutilisables. Cœur de la maintenabilité d'un gros projet.\n\n**À retenir :** Un bon projet TIA est bien découpé : un FB par équipement, un DB d'instance par équipement, des UDT pour les données transversales. Éviter d'écrire tout dans OB1.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Configuration matérielle (HW Config)",
+      "bodyMd": "Dans TIA, on drag-and-drop les modules du catalogue vers un rack virtuel : CPU au slot 1, alim au slot 0, puis modules TOR/analogiques/spéciaux dans les slots suivants. On configure les propriétés de chaque module (câblage, filtrage, plages analogiques), l'adresse IP de la CPU, les paramètres Profinet.\n\n**CPU + alim + modules** — Choisir la référence exacte (article number). Les propriétés doivent correspondre au matériel réel.\n\n**Adressage automatique ou manuel** — Par défaut TIA affecte %I0.0, %I0.1... TIA autorise le remapping mais l'ordre naturel évite les erreurs.\n\n**Profinet (nom du device)** — Chaque device a un 'device name' unique sur le réseau. Attention aux doublons — CPU en STOP.\n\n**Diagnostic intégré** — Chaque module renvoie son état, ses défauts (câble coupé, court-circuit) au diagnostic buffer CPU.\n\n**Simulation avant hardware** — PLCSIM permet de développer sans matériel réel. Modules simulés fonctionnels à 95 %.\n\n**À retenir :** La HW Config doit correspondre EXACTEMENT au matériel réel (référence, firmware). Sinon la CPU refuse le démarrage — 'device configuration mismatch' au diagnostic.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "S7-1200 vs S7-1500",
+      "bodyMd": "**S7-1200 (compact)**\n- CPU compacte avec E/S intégrées + option modules\n- Cible : machines OEM, applications petites/moyennes (jusqu'à 100 E/S)\n- Ethernet natif, Profinet contrôleur limité\n- Coût faible (~800-1500 €)\n- PLCSIM V1 (moins avancé que Advanced)\n- Web server basique, OPC UA option payante\n\n**S7-1500 (modulaire)**\n- CPU + fond de panier + modules E/S dédiés\n- Cible : lignes de production, projets 500-10000 E/S\n- Ethernet + Profinet contrôleur multi-devices, MRP intégré\n- Coût élevé (3000-15000 €)\n- PLCSIM Advanced multi-CPU, sim réseau\n- Web server riche, OPC UA serveur intégré\n\n**À retenir :** S7-1200 pour une petite machine OEM à répliquer. S7-1500 dès qu'il y a plusieurs E/S rack, des redondances, du diagnostic avancé. La marche entre les deux n'est pas trivial.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Blocs OB / FB / FC / DB",
+      "bodyMd": "TIA (comme Step7) organise le code en blocs, chacun avec un rôle précis. Confondre OB, FB, FC et DB est l'erreur numéro un des débutants — chacun a des règles différentes de mémoire et d'appel.\n\n**OB (Organization Block)** — Bloc racine appelé par l'OS de la CPU : OB1 (cyclique), OB35 (temporisé 100ms), OB40 (alarme matérielle), OB80 (erreur cycle). N'a pas de mémoire propre entre appels.\n\n**FB (Function Block)** — Bloc programme AVEC mémoire persistante (DB d'instance obligatoire). Utilisé pour les objets métier : FB_Motor, FB_PID_Loop.\n\n**FC (Function)** — Bloc programme SANS mémoire (les variables locales sont détruites au retour). Pour fonctions pures : calcul, conversion, sub-routine simple.\n\n**DB (Data Block)** — Bloc de données pures, pas de code. Deux types : DB global (adressable par tous) et DB d'instance (attaché à un FB spécifique).\n\n**À retenir :** Règle simple : mémoire persistante nécessaire → FB. Fonction pure → FC. Racine appelée par CPU → OB. Stockage → DB. Toute autre combinaison est un anti-pattern.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "SCL (Structured Control Language) — le ST Siemens",
+      "bodyMd": "SCL est la variante Siemens de Structured Text. La syntaxe est proche du Pascal, avec quelques ajouts propres à TIA : accès aux blocs par adresse symbolique, appels aux fonctions système SFB/SFC, gestion des blocs de données globaux.\n\n```\n(* SCL — bloc FB_Level_Regulation\n   Régule le niveau d'une cuve entre setpoint bas et haut *)\n\nFUNCTION_BLOCK \"FB_Level_Regulation\"\nVAR_INPUT\n    Level_Actual  : REAL;    // Mesure niveau %\n    SP_Low        : REAL;    // Seuil bas %\n    SP_High       : REAL;    // Seuil haut %\n    Manual_Mode   : BOOL;\nEND_VAR\nVAR_OUTPUT\n    Pump_Cmd      : BOOL;    // Commande pompe\n    Alarm_Empty   : BOOL;\n    Alarm_Full    : BOOL;\nEND_VAR\nVAR\n    State         : INT := 0;  // 0=idle, 1=filling, 2=full\nEND_VAR\n\n// Hystérésis : démarrage sous SP_Low, arrêt au-dessus de SP_High\nIF NOT Manual_Mode THEN\n    IF Level_Actual < SP_Low THEN\n        Pump_Cmd := TRUE;\n        State := 1;\n    ELSIF Level_Actual > SP_High THEN\n        Pump_Cmd := FALSE;\n        State := 2;\n    END_IF;\nEND_IF;\n\n// Alarmes\nAlarm_Empty := Level_Actual < 5.0;\nAlarm_Full  := Level_Actual > 95.0;\n```\n\n**À retenir :** SCL est le langage de choix pour toute logique non triviale. Réserver LAD pour l'interlock lu par la maintenance élec. Les projets TIA modernes sont ~70 % SCL, ~30 % LAD.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "PLC tags et Data Blocks",
+      "bodyMd": "TIA distingue deux zones mémoire pour les variables : les PLC tags (mémoire M, I, Q — équivalent des memento Step7) et les Data blocks (mémoire DB — structurée). Le choix impacte la performance, la lisibilité et la maintenabilité.\n\n**PLC tags** — Variables globales avec adresse absolue directe (%M100.0, %MW10). Rapides mais peu structurées. Utiliser pour flags simples.\n\n**DB globaux** — Blocs de données structurés, adressage symbolique (Data_Alarms.Pump1_Fault). Recommandé pour la logique métier.\n\n**DB d'instance** — Créés automatiquement à l'appel d'un FB. Stockent l'état persistant de l'instance. Ne pas modifier manuellement.\n\n**Retentive vs volatile** — Une variable retentive garde sa valeur après coupure d'alimentation. À paramétrer explicitement par variable.\n\n**Optimized vs Standard access** — S7-1500 : Optimized = accès symbolique, structure interne masquée. Standard = adresse absolue exposée.\n\n**À retenir :** Toujours utiliser DB globaux structurés + accès Optimized sur S7-1500. Les PLC tags M restent utiles pour les flags système et le mapping I/O uniquement.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "HMI Comfort — première page synoptique",
+      "bodyMd": "TIA intègre WinCC Comfort/Advanced pour dessiner des IHM. Les tags HMI sont automatiquement synchronisés avec les PLC tags via la connexion PLC-HMI. On dessine des écrans (Screens), on ajoute des objets (buttons, IO fields, graphiques), on lie chaque objet à un tag.\n\n**Screens (écrans)** — Chaque écran est une page HMI. Root Screen = page d'accueil. Navigation via boutons + Change Screen.\n\n**Tags HMI** — Lien vers un PLC tag ou un DB global. Le tag HMI hérite du type et de la description PLC.\n\n**Objets graphiques** — Buttons, IO fields (numérique/texte), bars (jauges), symbols (moteurs, vannes).\n\n**Animations** — Un objet change de couleur/visibilité selon un tag. Ex : moteur rouge si en défaut, vert si en marche.\n\n**Alarms + trends** — Alarm view (log alarmes actives + historique), Trend view (courbes tendances multi-tags).\n\n**À retenir :** Un synoptique efficace n'est pas beau — il est LISIBLE. Codes couleur constants (rouge=défaut, vert=marche, gris=arrêt), tailles proportionnelles à l'importance, pas d'animation gratuite.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Compile + Download + Go Online",
+      "bodyMd": "- COMPILE (Ctrl+B) : vérifie la syntaxe + génère le binaire. Erreurs listées dans la fenêtre Inspector\n- DOWNLOAD : envoie le binaire à la CPU. Choisir Hardware/Software/All selon l'ampleur des modifs\n- GO ONLINE (Ctrl+K) : mode monitoring temps réel. Les valeurs des tags sont visibles en direct dans les blocs\n- Watch tables : lecture temps réel de N tags dans une table dédiée. Peuvent contenir des forçages\n- Trace : capture d'échantillons haute fréquence pour analyse offline (500 ms max sur S7-1500)\n- Cross-references : où telle variable est utilisée dans tout le projet. Indispensable pour analyser un impact\n\n💡 TOUJOURS compiler avant Go Online. Un mismatch entre projet et CPU produit un comportement erratique — apparemment 'ça marche' mais ce n'est pas ce que vous voyez.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "TIA Portal est l'IDE Siemens depuis :",
+            "options": [
+              "2005",
+              "2010 (Wonderware retiré)",
+              "2018"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "OB1 est :",
+            "options": [
+              "Un bloc de données",
+              "Le bloc programme cyclique principal",
+              "Un timer intégré"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "SCL en TIA est équivalent à :",
+            "options": [
+              "Ladder Diagram",
+              "Structured Text (IEC 61131-3)",
+              "SFC"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un DB d'instance sur un FB TIA :",
+            "options": [
+              "Est global à tout le programme",
+              "Est dédié à cette instance et stocke son état",
+              "Est partagé entre instances"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "S7-1500 vs S7-300 :",
+            "options": [
+              "1500 est plus ancien",
+              "1500 est la gamme moderne, 300 en fin de vie",
+              "300 supporte SCL, pas 1500"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Compiler puis Go Online sert à :",
+            "options": [
+              "Vérifier syntaxe + télécharger + monitor live",
+              "Envoyer un mail à Siemens",
+              "Publier sur cloud"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/tia-portal/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "SCL avancé — batch séquentiel",
+      "bodyMd": "Le pattern classique pour un procédé batch : une machine à états sous forme de CASE OF, chaque état ayant sa condition de transition et ses actions. C'est plus lisible qu'un SFC quand la logique reste séquentielle simple.\n\n```\nFUNCTION_BLOCK \"FB_Mix_Sequence\"\nVAR\n    State         : INT := 0;\n    Dosing_Timer  : TON;\n    Mixing_Timer  : TON;\nEND_VAR\nVAR_INPUT\n    Start_Batch   : BOOL;\n    Level_Cuve    : REAL;\nEND_VAR\nVAR_OUTPUT\n    Pump_Doseur1  : BOOL;\n    Agitator      : BOOL;\n    Valve_Drain   : BOOL;\n    State_Text    : STRING;\nEND_VAR\n\nCASE State OF\n    0: // Idle\n       State_Text := 'En attente';\n       IF Start_Batch THEN State := 10; END_IF;\n\n    10: // Dosage matière 1\n       State_Text := 'Dosage doseur 1';\n       Pump_Doseur1 := TRUE;\n       IF Level_Cuve >= 25.0 THEN\n           Pump_Doseur1 := FALSE;\n           State := 20;\n       END_IF;\n\n    20: // Mélange\n       State_Text := 'Mélange en cours';\n       Agitator := TRUE;\n       Mixing_Timer(IN := TRUE, PT := T#3m);\n       IF Mixing_Timer.Q THEN\n           Agitator := FALSE;\n           Mixing_Timer(IN := FALSE);\n           State := 30;\n       END_IF;\n\n    30: // Vidange\n       State_Text := 'Vidange vers emballage';\n       Valve_Drain := TRUE;\n       IF Level_Cuve < 5.0 THEN\n           Valve_Drain := FALSE;\n           State := 0;   // Retour idle, prêt pour prochain batch\n       END_IF;\nEND_CASE;\n```\n\n**À retenir :** Un CASE OF est plus simple qu'un SFC pour < 10 états. Au-delà, migrer vers SFC ou plusieurs FB séparés — sinon le CASE devient illisible.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "UDT SIMATIC — le contrat d'un équipement",
+      "bodyMd": "Une UDT (User Data Type) est un STRUCT réutilisable. Bien conçue, elle sert d'interface entre le PLC, l'HMI et le SCADA — chacun sait exactement quoi lire et écrire. Convention : 3 sections _Cmd (IHM→PLC), _Fb (PLC→IHM), _Cfg (paramètres persistants).\n\n```\nTYPE \"UDT_Pump\"\nVERSION : 0.1\n    STRUCT\n        // ─── Commandes (IHM/SCADA → PLC) ───\n        Cmd : STRUCT\n            Start       : BOOL := FALSE;\n            Stop        : BOOL := FALSE;\n            Reset       : BOOL := FALSE;\n            Auto_Mode   : BOOL := TRUE;\n            Sp_Speed    : REAL := 50.0;    // Hz consigne\n        END_STRUCT;\n\n        // ─── Retours (PLC → IHM/SCADA) ───\n        Fb : STRUCT\n            Running       : BOOL;\n            Tripped       : BOOL;\n            Ready         : BOOL;\n            Speed_Actual  : REAL;\n            Current_A     : REAL;\n            Runtime_H     : DINT;    // Heures cumulées\n            Last_Trip     : DT;      // Timestamp dernier défaut\n        END_STRUCT;\n\n        // ─── Configuration (persistante en NV) ───\n        Cfg : STRUCT\n            Speed_Min     : REAL := 10.0;\n            Speed_Max     : REAL := 60.0;\n            Overload_Delay: TIME := T#5s;\n            Priority      : INT  := 1;\n        END_STRUCT;\n    END_STRUCT;\nEND_TYPE\n```\n\n**À retenir :** UDT bien versionnée = maintenance facile. Ajouter un champ = évolution non cassante. Renommer/supprimer = tous les usages cassent — versionner avec un doc.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "PLC Message Class — alarmes système Siemens",
+      "bodyMd": "Depuis TIA V13, Siemens propose un système d'alarmes structuré : les Program Alarms. Chaque alarme est déclarée avec un ID unique, une classe (gravité), un texte multilingue et des variables associées. L'HMI récupère directement les alarmes via la connexion PLC — pas besoin de recréer chaque tag alarme séparément.\n\n**Classes d'alarmes** — System, Errors, Warnings, Notifications. Personnalisables (couleur, ack requis, priorité).\n\n**Program_Alarm() dans SCL** — Instruction native TIA pour déclencher une alarme. Passer l'ID, la classe et les variables associées.\n\n**Alarm buffer CPU** — 1024 événements horodatés stockés dans la CPU. Débordement possible sur cadence rapide — attention à ne pas alarmer à chaque scan.\n\n**Intégration HMI automatique** — L'HMI Comfort/Unified voit les alarmes du PLC sans re-déclaration. Cohérence PLC↔HMI garantie.\n\n**Export vers SCADA** — OPC UA A&C (Alarms and Conditions) expose les alarmes vers WinCC OA ou tout SCADA tiers compatible.\n\n**À retenir :** Toujours passer par Program_Alarm plutôt que de faire une gestion custom via des bool. Bénéfice : cohérence PLC↔HMI↔SCADA + audit trail natif + multilingue gratuit.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "OPC UA sur S7-1500 — serveur intégré",
+      "bodyMd": "Depuis firmware V2.0, les S7-1500 embarquent un serveur OPC UA natif. Plus besoin de KEPServerEx ou de tag serveur externe : les DB globaux et les PLC tags sont automatiquement exposés selon les règles configurables. Sécurité (x509, chiffrement) et Companion Specs (PackML, etc.) supportées.\n\n**Activation** — Dans HW Config → Protection & Security → OPC UA → Server. Choisir port (par défaut 4840) + niveau sécurité.\n\n**Exposer un DB** — Attribut 'OPC UA' à cocher sur le DB. Optionnellement filtrer variable par variable.\n\n**Sécurité** — Certificats x509 auto-signés par la CPU. Authentification anonyme (dev) ou par credentials (prod).\n\n**Companion Specs** — Support PackML (packaging), Umati (machine-tool), Robotics. Modèle info standardisé transversal.\n\n**Client OPC UA** — Un S7-1500 peut aussi être client (fonction 'OPC UA Client') pour interroger un autre serveur — cf. UAExpert pour debug.\n\n**À retenir :** OPC UA remplace S7 communication + DCOM + connecteurs propriétaires. En 2026, un projet greenfield expose ses données via OPC UA — les connectors legacy sont pour l'existant.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Web server + Diagnostic Buffer",
+      "bodyMd": "- Web server (port 80/443) : dashboard HTML natif de la CPU — état modules, LEDs virtuelles, tags observables\n- Personnalisable : pages custom en HTML avec accès aux variables via macros AWP\n- Authentification obligatoire en prod (users + password + HTTPS)\n- Diagnostic Buffer : ~3200 événements horodatés (redémarrage, alarmes module, perte comm)\n- Toujours l'exporter en cas d'incident AVANT de relancer la CPU\n- Trace : capture haute résolution (< 1 ms) pour analyse offline d'un phénomène fugace\n\n💡 Un Diagnostic Buffer exporté après crash contient la réponse à 80 % des incidents. Le format est natif TIA — s'ouvre offline sans avoir besoin d'aller sur site.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TIA Openness — automatisation par C#",
+      "bodyMd": "TIA Openness est l'API .NET (C#) qui pilote TIA Portal depuis un programme externe. On peut créer un projet, importer des UDT depuis un CSV, générer des DB depuis Excel, exporter le programme pour Git, comparer 2 versions. Devenu indispensable pour l'industrialisation.\n\n**Bibliothèque Siemens.Engineering.dll** — Référencer cette DLL dans un projet Visual Studio C# — accès complet à l'objet Project TIA.\n\n**Cas d'usage 1 : import UDT en masse** — Un CSV de 200 signaux → 200 UDT auto-générées en 30 secondes.\n\n**Cas d'usage 2 : export texte pour Git** — Chaque bloc exporté en XML → commit et diff Git → code review sur PR.\n\n**Cas d'usage 3 : compilation headless** — Un runner CI compile le projet sans ouvrir TIA. Vérifie que le projet builds proprement.\n\n**Cas d'usage 4 : audit tags** — Script qui vérifie qu'aucun tag n'est orphelin (déclaré mais non utilisé).\n\n**À retenir :** Openness change la donne : un projet TIA industrialisé avec Openness a 10× moins de bugs qu'un projet manuel. L'investissement initial (~1 semaine dev) est vite amorti.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Une UDT SIMATIC est :",
+            "options": [
+              "Un type utilisateur STRUCT réutilisable",
+              "Un DB global",
+              "Un type Ethernet"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "PLCSIM Advanced permet :",
+            "options": [
+              "Simuler des CPU en réseau, tests non-régression",
+              "Uniquement dessiner des HMI",
+              "Configurer un firewall"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "OPC UA côté S7-1500 :",
+            "options": [
+              "Serveur intégré à la CPU depuis firmware V2",
+              "Nécessite un CPX externe",
+              "Payant en supplément uniquement"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Une PLC Message Class :",
+            "options": [
+              "Est une bibliothèque HMI",
+              "Regroupe alarmes par domaine avec ack, gravité, latching",
+              "Sert au routing OPC UA"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Diagnostic Buffer :",
+            "options": [
+              "Trace horodatée des événements CPU",
+              "Historique de licences",
+              "Cache réseau"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "TIA Openness API :",
+            "options": [
+              "Automatise TIA depuis C# (ex import UDT, générer bloc)",
+              "Ouvre TIA au grand public",
+              "Convertit en Rockwell"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/tia-portal/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Siemens H systems — la redondance CPU",
+      "bodyMd": "Un système H (High-availability) est composé de deux CPU S7-1500H (ou 400H historique) reliées par câble sync haute vitesse. Les deux CPU exécutent le même programme en parallèle, synchronisées à chaque instruction. En cas de défaillance de la CPU maître, la secondaire prend le relais en <100 ms sans perte d'état ni interruption du procédé.\n\n**Sync Link** — Câble optique dédié entre les 2 CPU. Perte du sync = alarme + dégradation (une seule CPU active).\n\n**Synchronisation instruction par instruction** — Chaque instruction exécutée est validée par les 2 CPU. Si divergence, safe state.\n\n**Bascule automatique** — Détection défaut CPU maître → CPU secondaire prend le relais en <100 ms, aucune E/S ratée.\n\n**Programme identique** — Le même code s'exécute sur les 2 CPU. Une seule programmation dans TIA.\n\n**Coût élevé** — ×2 hardware CPU + câbles sync + licence redondance + downtime prévu pour tests bascule annuels.\n\n**À retenir :** H systems se justifient quand une minute d'arrêt coûte >>> le prix de la redondance (pharma continu, énergie). Sinon, un simplex + maintenance rapide est plus économique.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-29.jpg"
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "F-PLC S7-1500F — sécurité fonctionnelle",
+      "bodyMd": "Une F-CPU est une CPU classique + un cœur F (Fail-safe) qui exécute en parallèle le programme de sécurité. Le F-cœur a deux processeurs qui s'auto-comparent : la moindre divergence → passage immédiat en état sûr. Certifié SIL 3 selon IEC 61508 et Cat. 4 PL e selon ISO 13849.\n\n**F-modules E/S** — Modules dédiés avec 2 canaux redondés + diagnostic (câble coupé, court-circuit). Coût 2× module standard.\n\n**Bibliothèque F** — Blocs certifiés Siemens uniquement : F_EStop, F_2_out_of_3, F_MutingLight. Impossible d'écrire ses propres blocs F.\n\n**Programme F séparé** — Bloc F-OB1 (cyclique F, ~20 ms), F-DB, F-FB. Différent du programme standard qui continue en parallèle.\n\n**Signature F** — Chaque bloc F a une signature (hash). Toute modification impose une re-signature + nouveau download → revalidation.\n\n**Documentation obligatoire** — Rapport de sécurité, matrice de vérification, essais d'acceptation (FAT/SAT). Audit par TÜV ou similaire.\n\n**À retenir :** Programmer en F-PLC n'est pas 'programmer prudemment' : c'est appliquer une méthodologie certifiée avec des blocs pré-validés. Un projet F sans certification externe = juridiquement indéfendable en cas d'accident.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-30.jpg"
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Multiuser Engineering",
+      "bodyMd": "Depuis TIA V15, Multiuser Engineering permet à plusieurs devs de travailler simultanément sur le même projet. Un serveur central héberge le projet, chaque dev fait un check-out des blocs qu'il modifie, commit, et TIA merge automatiquement les changements des autres. Fin des projets solo — enfin.\n\n**Serveur Multiuser** — Un service Windows héberge le projet Multiuser. Base SQLite en interne + gestion des locks.\n\n**Local session** — Chaque dev crée une session locale à partir du serveur. Il voit toutes les modifs des autres devs à jour.\n\n**Check-out granulaire** — On check-out un bloc précis (FB, DB, HMI screen). Les autres devs voient qu'il est locké.\n\n**Commit + Update** — Commit envoie les modifs au serveur. Update récupère les changements des autres. Conflits résolus par 3-way merge.\n\n**Historique** — Chaque commit est historisé (auteur, date, description). Rollback possible sur un bloc.\n\n**À retenir :** Multiuser change tout pour les gros projets (>50k lignes SCL). Un dev seul n'a pas besoin — mais dès qu'il y a 2 devs, l'investissement initial est vite rentabilisé.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-31.jpg"
+    },
+    {
+      "position": 32,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TIA Openness — script d'import UDT en masse",
+      "bodyMd": "Cas classique : le client fournit un CSV de 200 signaux avec type, unité, valeur défaut. Plutôt que de créer 200 UDT à la main dans TIA, on écrit un script C# Openness qui les génère en 30 secondes.\n\n```\nusing Siemens.Engineering;\nusing Siemens.Engineering.SW;\nusing Siemens.Engineering.SW.Types;\nusing System.IO;\n\nclass Program\n{\n    static void Main(string[] args)\n    {\n        // 1. Ouverture du projet TIA\n        using (var portal = new TiaPortal(TiaPortalMode.WithUserInterface))\n        {\n            var project = portal.Projects.Open(\n                new FileInfo(@\"C:\\Projects\\WTP01.ap18\"));\n            var software = ((PlcSoftware)project.Devices[0]\n                .DeviceItems[1].GetService<SoftwareContainer>().Software);\n\n            // 2. Lecture du CSV\n            var lines = File.ReadAllLines(\"signals.csv\");\n            foreach (var line in lines.Skip(1))\n            {\n                var cols = line.Split(';');\n                var name = cols[0];      // Ex: \"Motor_Pump1\"\n                var type = cols[1];      // Ex: \"UDT_Motor\"\n\n                // 3. Génération du DB d'instance associé\n                var xml = GenerateUdtXml(name, type);\n                software.BlockGroup.Blocks.Import(xml, ImportOptions.Override);\n            }\n\n            project.Save();\n            Console.WriteLine($\"{lines.Length - 1} UDT créées\");\n        }\n    }\n    // GenerateUdtXml : construit un XML d'UDT au format TIA\n}\n```\n\n**À retenir :** Openness fait gagner des jours de travail sur les projets standardisés. La courbe d'apprentissage est raide (~1 semaine C# pour un dev PLC) mais l'investissement rentabilise dès le 3e projet.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-32.jpg"
+    },
+    {
+      "position": 33,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Migration Step7 classique → TIA Portal",
+      "bodyMd": "Fin de support Step7 classique en 2027 : tous les projets 300/400 doivent migrer vers TIA. Siemens propose un convertisseur intégré, mais 20-30 % du code demande une revue manuelle. Anticipation obligatoire.\n\n**Convertisseur intégré TIA** — Menu Project → Import → STEP 7 project. Convertit HW, blocs LAD/FBD, symboles. STL converti mais souvent incorrect en 1500.\n\n**Ce qui passe automatiquement** — LAD/FBD/SCL, DB globaux, symboles, connexions Profinet. HW config si CPU compatible ciblée.\n\n**Ce qui demande revue manuelle** — STL → SCL (traduction non triviale), M memory intensifs → refonte en DB, drivers 3rd-party non supportés.\n\n**Ce qu'il faut refaire** — HMI (WinCC flexible ≠ WinCC Comfort), connexions S7 spéciales, alarmes custom.\n\n**Effort typique** — 1 semaine pour convertir + 3-6 semaines pour reviewer/adapter + 2 semaines pour tester. Total 2-3 mois pour un projet moyen.\n\n**À retenir :** Ne pas planifier une migration Step7→TIA en dessous de 2 mois. Les surprises viennent des blocs STL, des drivers de communication et des HMI — pas de la conversion elle-même.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-33.jpg"
+    },
+    {
+      "position": 34,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Cybersécurité S7-1500 — les mesures pratiques",
+      "bodyMd": "- Protection level du programme : Read/write protection avec mot de passe fort (16+ char)\n- Access Level : bloquer HTTP/HTTPS non authentifié, désactiver services non utilisés (FTP, telnet)\n- Certificat CPU : générer un x509 propre à la CPU pour OPC UA + Web server\n- Firmware à jour : appliquer les patches Siemens Security Advisories (SSA) mensuels\n- Réseau OT segmenté : VLAN dédié, firewall vers IT, DMZ pour SCADA et historian\n- Backup projet + config off-site : indispensable en cas de ransomware sur le poste TIA\n\n💡 Siemens publie chaque mois des Security Advisories (SSA-XXXXXX). S'abonner à la newsletter est le minimum vital pour rester à jour.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-34.jpg"
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-35.jpg"
+    },
+    {
+      "position": 36,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Siemens H systems garantissent :",
+            "options": [
+              "Bascule automatique <100 ms sans perte",
+              "Meilleure IHM",
+              "Réduction du câblage"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Un F-CPU S7-1500F :",
+            "options": [
+              "A deux processeurs qui s'auto-comparent, SIL 3 possible",
+              "Est juste une CPU classique renforcée",
+              "Ne supporte pas les blocs classiques"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Multiuser Engineering permet :",
+            "options": [
+              "Plusieurs devs sur le même projet TIA en check-in/out",
+              "Un HMI multi-langue",
+              "Débogueur multi-CPU"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Migration Step7 classique → TIA :",
+            "options": [
+              "Automatique 100 %",
+              "Convertisseur intégré + revue manuelle nécessaire",
+              "Impossible"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "TIA Openness scripting utilise :",
+            "options": [
+              "Python",
+              "C# (.NET) via l'API",
+              "PowerShell natif"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "WinCC Unified est :",
+            "options": [
+              "Le successeur web natif de Comfort/Advanced",
+              "Une version light de WinCC OA",
+              "Une simulation"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/tia-portal/slide-36.jpg"
+    },
+    {
+      "position": 37,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-37.jpg"
+    },
+    {
+      "position": 38,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Passer à l'action",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 % à chaque niveau\n- Installer TIA Portal Trial + PLCSIM Advanced et programmer le fil rouge MIX-01\n- Lire les Siemens Application Notes AS (48434). Ex 'PLC programming style guide' — référence chez Siemens\n- S'abonner aux Security Advisories Siemens (obligatoire en prod)\n- Pour un projet greenfield en 2026 : partir sur S7-1500 + OPC UA + Openness dès le début\n\n💡 TIA a une courbe d'apprentissage longue (3-6 mois pour être productif). Après, la productivité est très supérieure aux IDE concurrents pour du Siemens.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/tia-portal/slide-38.jpg"
+    }
+  ]
+}

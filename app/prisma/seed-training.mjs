@@ -11,7 +11,8 @@ import path from "node:path";
 
 const COURSES = [
   "aveva-system-platform-2023",
-  "plc-programming"
+  "plc-programming",
+  "tia-portal"
 ];
 
 const prisma = new PrismaClient();
