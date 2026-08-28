@@ -1,0 +1,410 @@
+{
+  "slug": "highbyte",
+  "title": "Highbyte Intelligence Hub",
+  "subtitle": "DataOps industriel entre OT et IT",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "Highbyte Intelligence Hub",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "Highbyte est une plateforme DataOps industrielle créée en 2018. Elle ingère les données des couches OT (PLC, historian, SCADA), les contextualise avec un modèle métier (asset hierarchy, ISA-95), et les délivre vers les systèmes IT (data lake, cloud, MES, ML). C'est LA brique manquante entre le terrain et les analytics — le rôle qu'aucun outil ne remplissait bien avant.\n\n**Ingérer depuis OT** — OPC UA, MQTT/Sparkplug B, Modbus, historian, PLC directement.\n\n**Modéliser en objets métier** — Templates + instances : Pompe1, Cuve_A, Ligne_3. Structure hiérarchique ISA-95.\n\n**Transformer et enrichir** — Calculs, agrégations, contextualisation avec ordonnancement, recettes.\n\n**Distribuer vers IT** — Kafka, Snowflake, Databricks, cloud APIs, historians modernes.\n\n**Gouvernance** — Traçabilité, versioning modèles, audit, RBAC.\n\n**À retenir :** Highbyte est le DataOps qui structure la data OT pour les data scientists. Sans lui, un projet IIoT-Analytics dérive vers 'sauver le SCADA en CSV pour Databricks'.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Le rôle de Highbyte — le maillon manquant",
+      "bodyMd": "Historiquement, les données OT (PLC, SCADA) et IT (data lake, ML) vivent dans des mondes séparés. Les tentatives d'intégration se faisaient via des scripts custom, des CSV, des liaisons ODBC fragiles. Highbyte structure cette intégration avec un outil dédié : ingestion multi-protocoles OT → modèle métier → distribution multi-cible IT.\n\n**Historique** — Créé 2018 par des anciens de PTC et GE. Cible spécifique : la couche entre OT et IT.\n\n**Position dans l'architecture** — Couche 3.5 du Purdue Model. Entre OT (0-3) et IT (4-5). Complète MQTT/Sparkplug pour la contextualisation.\n\n**Approche low-code** — Config via UI web, JSON export. Programmation JavaScript pour transformations complexes.\n\n**Léger** — ~200 MB binaire, tourne sur Windows/Linux/Docker. Edge industriel (Rev-Pi, Moxa) ou serveur.\n\n**Pricing** — Licence commerciale — pas d'édition gratuite. Trial 30 jours pour PoC.\n\n**À retenir :** Highbyte occupe une niche précise : DataOps entre OT et IT. Ne pas confondre avec un MQTT broker (Highbyte peut publier vers MQTT) ni un data lake (Highbyte alimente le data lake).",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Highbyte vs MQTT broker",
+      "bodyMd": "**MQTT BROKER (HiveMQ/Mosquitto)**\n- Rôle : transport pub/sub des messages\n- Pas de logique métier\n- Payload libre (JSON, bytes) — pas d'interprétation\n- Scalable en millions de connexions\n- Persistence limitée (last value retained)\n- Cible : couche transport IIoT\n\n**HIGHBYTE INTELLIGENCE HUB**\n- Rôle : modélisation, contextualisation, distribution\n- Templates métier (Pompe, Cuve, Ligne)\n- Transformations : calculs, agrégations, JS\n- Scalable en milliers d'instances modélisées\n- Persistence configurable + intégration historians\n- Cible : couche DataOps entre OT et IT\n\n**À retenir :** Pattern 2026 : PLC → MQTT/Sparkplug B → HiveMQ → Highbyte → Snowflake/Kafka. HiveMQ transporte, Highbyte structure et enrichit.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Installation et premier pipeline",
+      "bodyMd": "Highbyte s'installe en 5 minutes : télécharger le binaire, lancer, ouvrir le navigateur sur localhost:8443. L'interface est web moderne. Premier réflexe : ajouter un connecteur source, un connecteur destination, un pipeline entre les deux.\n\n**Download** — highbyte.com — trial 30 jours. Binaires Windows/Linux/macOS/ARM (Rev-Pi, Moxa).\n\n**Lancement** — highbyte-hub.exe (Windows) ou ./highbyte-hub (Linux). Web UI sur 8443, admin/admin par défaut.\n\n**Ajouter une source OPC UA** — Connectors → New → OPC UA → URL opc.tcp://plc:4840 + auth. Test connexion.\n\n**Ajouter une destination** — Log stdout (dev) ou MQTT/Kafka/Snowflake (prod). Test.\n\n**Créer un pipeline** — Pipelines → New → source Pump1.Speed → destination log. Save + activate. Voir les valeurs qui défilent.\n\n**À retenir :** Le PoC Highbyte est rapide (1 journée pour un premier pipeline fonctionnel). La vraie valeur vient de la modélisation et des transformations — voir niveaux 2 et 3.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Connectors disponibles",
+      "bodyMd": "- OPC UA : client + serveur (expose des données transformées comme un serveur)\n- MQTT : 3.1.1 et 5, Sparkplug B natif, TLS + certificats\n- Modbus TCP + RTU\n- SQL : SQL Server, PostgreSQL, MySQL, Oracle\n- REST API : GET/POST/PUT sur JSON\n- Fichiers : CSV, JSON, XML — pour intégration legacy\n- Cloud : Snowflake, Databricks, Azure IoT Hub, AWS IoT Core, Google Pub/Sub\n- Kafka : produce et consume avec Avro/Protobuf via Schema Registry\n\n💡 La liste des connectors s'enrichit chaque release. Vérifier la doc Highbyte pour la dernière version — nouveaux connecteurs souvent ajoutés.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Highbyte Intelligence Hub est :",
+            "options": [
+              "Un DataOps industriel",
+              "Un PLC",
+              "Un OS"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Highbyte cible :",
+            "options": [
+              "Ingestion + transformation + delivery data OT",
+              "Uniquement stockage",
+              "Programmation PLC"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Un pipeline Highbyte :",
+            "options": [
+              "Source → transformation → destination",
+              "Uniquement source",
+              "Compile PLC"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "UNS (Unified Namespace) =",
+            "options": [
+              "Point unique de vérité data pour l'usine",
+              "PLC réseau",
+              "SCADA"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Highbyte se déploie :",
+            "options": [
+              "Edge/on-prem/cloud, léger (~200 MB)",
+              "Uniquement cloud",
+              "Uniquement Windows Server"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Un modeler Highbyte :",
+            "options": [
+              "Définit la structure des objets métier (asset model)",
+              "Programme le PLC",
+              "Rendu 3D"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/highbyte/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Modelling en templates et instances",
+      "bodyMd": "Un projet Highbyte sans modelling = pipelines à plat, ingérables au-delà de 20 sources. La bonne pratique : définir des templates (structures d'objets métier) puis instancier N fois pour chaque équipement. Comme un FB en PLC ou une classe en programmation.\n\n**Template = classe** — Ex 'Motor_Template' avec attributs Speed, Current, RunTime_H, State. Interface figée.\n\n**Instance = objet** — Ex 'Motor_Pump1' héritant du template, avec ses propres tags OPC UA branchés.\n\n**Hiérarchie ISA-95** — Enterprise > Site > Area > Line > Cell > Equipment. Standard normalisé mondial.\n\n**Réutilisation** — Ajouter un 5e moteur = instancier le template, pointer les tags. 5 min au lieu de 2h.\n\n**Versioning** — Modifier un template propage les évolutions à toutes les instances. Attention aux changements cassants.\n\n**À retenir :** Investir dans le modelling en début de projet économise 80% du temps sur toutes les évolutions futures. C'est LA clé d'un projet Highbyte durable.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Transformation JavaScript — calcul dérivé",
+      "bodyMd": "Highbyte permet des transformations en JavaScript sur les données qui transitent. Utile pour : conversion d'unités, calcul dérivé (débit = pression × k), agrégation temporelle, enrichissement contextuel (ajouter un ID de recette actif).\n\n```\n// Transformation JavaScript dans un pipeline Highbyte\n// Enrichit les mesures brutes avec des calculs et contexte\n\nfunction transform(input) {\n    // input = objet avec attributs de l'instance\n    // ex : { speed_hz: 45.2, current_a: 12.5, timestamp: 1704102000000 }\n\n    const output = { ...input };\n\n    // 1. Conversion unité\n    output.speed_rpm = input.speed_hz * 60;\n\n    // 2. Puissance approx (P = U * I * cos_phi)\n    output.power_kw = (400 * input.current_a * 0.85) / 1000;\n\n    // 3. Efficacité relative\n    if (input.speed_hz > 0) {\n        output.efficiency_pct = (output.power_kw / (input.speed_hz * 0.15)) * 100;\n    }\n\n    // 4. Ajout timestamp UTC ISO\n    output.timestamp_iso = new Date(input.timestamp).toISOString();\n\n    // 5. Détection anomalie simple\n    output.anomaly = (input.current_a > 20) || (input.speed_hz < 5 && input.current_a > 5);\n\n    // 6. Contexte : ID recette active (lu depuis autre variable de session)\n    output.recipe_id = ctx.get(\"current_recipe_id\");\n\n    return output;\n}\n```\n\n**À retenir :** Les transformations JavaScript sont puissantes mais ne pas en abuser. Logique complexe = maintenance difficile. Préférer des transformations simples enchaînées.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "UNS — Unified Namespace",
+      "bodyMd": "UNS (Unified Namespace) est un concept promu par Walker Reynolds et adopté par la communauté MQTT/Sparkplug. Idée : un point unique de vérité pour toutes les données d'une entreprise, structuré en hiérarchie unique, accessible en pub/sub. Highbyte est un outil de choix pour construire un UNS.\n\n**Un seul point de vérité** — Toutes les applications OT/IT/MES/ERP lisent depuis le même UNS. Fin des silos data.\n\n**Structure hiérarchique** — Enterprise/Site/Area/Line/Cell — ISA-95. Chaque équipement a son chemin unique.\n\n**Modèle event-driven** — Données publiées quand elles changent. Consumers pull ou subscribe. Fin du polling.\n\n**Report by exception** — Un capteur publie uniquement quand sa valeur change (avec deadband). Économie 80-95% de trafic.\n\n**Facilement extensible** — Ajouter un asset = créer son chemin, publier. Aucune migration schema requise.\n\n**À retenir :** UNS + MQTT Sparkplug B + Highbyte = le pattern architecture industrie 4.0 en 2026. Standard émergent qui remplace les intégrations point-à-point historiques.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Connectors Highbyte :",
+            "options": [
+              "OPC UA, MQTT, Modbus, REST, SQL, Kafka, Snowflake…",
+              "Uniquement Modbus",
+              "Cloud only"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Templates dans Highbyte :",
+            "options": [
+              "Structure réutilisable d'un asset (Pompe, Cuve)",
+              "Fichier config",
+              "Backup"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Instances vs templates :",
+            "options": [
+              "Template = classe, instance = objet avec données réelles",
+              "Identiques",
+              "Templates n'existent pas"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Transformations :",
+            "options": [
+              "Filtres, calculs, agrégations, JavaScript expressions",
+              "Uniquement copie",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Modelling standard :",
+            "options": [
+              "ISA-95 asset hierarchy, PackML, custom",
+              "Aucun standard",
+              "SQL uniquement"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Cas d'usage typique :",
+            "options": [
+              "OT → Snowflake/Databricks/data lake avec contextualisation",
+              "PLC → PLC",
+              "Backup"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/highbyte/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Highbyte cluster et haute disponibilité",
+      "bodyMd": "Highbyte peut se déployer en cluster de plusieurs instances qui répliquent leurs configs et se relaient en cas de panne. Complète l'architecture avec load balancer en amont. Depuis 2023 la fédération multi-site est aussi supportée.\n\n**Cluster local (LAN)** — 3+ instances en cluster, config répliquée, un manager principal. Bascule automatique en 5-10s.\n\n**Fédération multi-site** — Un hub central + N hubs edge sur les sites. Synchro configs + agrégation données.\n\n**Backup et restore** — Export config JSON versionné en Git. Restore trivial.\n\n**Monitoring** — Metrics Prometheus natif. Endpoints healthcheck. Intégration Grafana.\n\n**Dimensionnement** — 1 instance moyenne : 10k tags actifs, 500 pipelines. Scaler horizontalement au-delà.\n\n**À retenir :** Highbyte cluster est simple à déployer mais demande une réflexion architecture. Un cluster mal placé = SPOF réseau ou dépendance externe critique.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "API REST + CI/CD",
+      "bodyMd": "Highbyte expose une API REST complète — création/modification/suppression de connectors, pipelines, templates. Permet CI/CD : la config vit en Git, un job de déploiement l'applique via API. Traçabilité complète des changements.\n\n**Endpoints REST** — GET/POST/PUT/DELETE sur /api/v1/connectors, /pipelines, /templates. Auth token.\n\n**Export JSON** — Toute la config est exportable en JSON. Un projet = un dossier de fichiers versionnable.\n\n**Import via API** — Script bash / Python qui POST les JSON dans l'ordre. Idempotent.\n\n**CI/CD pattern** — Feature branch → PR → tests unitaires (validation JSON schema) → merge → deploy staging → prod.\n\n**Rollback** — Git revert + redeploy. En cas de désastre : restore d'un backup config antérieur.\n\n**À retenir :** Un projet Highbyte industrialisé (Git + CI/CD) a 10× moins d'incidents qu'un projet 'clique dans l'UI et sauvegarde de temps en temps'.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Highbyte cluster :",
+            "options": [
+              "Instances multiples en HA, fédération",
+              "Un seul serveur uniquement",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Governance data avec Highbyte :",
+            "options": [
+              "Traçabilité + audit + versioning modèles",
+              "Optionnel",
+              "Uniquement lecture"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "REST API Highbyte :",
+            "options": [
+              "Contrôle complet du hub via API + CI/CD possible",
+              "Config manuelle uniquement",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Comparaison avec MQTT broker :",
+            "options": [
+              "Highbyte = orchestrator, MQTT = transport — complémentaires",
+              "Identiques",
+              "Mutuellement exclusifs"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "MQTT + Sparkplug B + Highbyte :",
+            "options": [
+              "Pattern IIoT référence 2026",
+              "Incompatibles",
+              "Ancien"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Intégration cloud :",
+            "options": [
+              "Snowflake, Databricks, Kafka, S3, Kinesis, Google BigQuery",
+              "Uniquement AWS",
+              "Aucune"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/highbyte/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Passer à l'action",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Télécharger Highbyte trial 30 jours et faire un pipeline OPC UA → Snowflake sur un cas réel\n- Lire l'ebook Highbyte 'Guide to UNS' — référence dans le domaine\n- Regarder les vidéos Walker Reynolds sur UNS — vulgarisation excellente\n- Pour un projet IIoT-analytics 2026 : évaluer Highbyte + HiveMQ + Sparkplug B + Snowflake\n\n💡 Highbyte est un skill niche mais très recherché. Un projet UNS réussi vous positionne sur les projets industrie 4.0 les plus intéressants.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/highbyte/slide-23.jpg"
+    }
+  ]
+}

@@ -17,7 +17,8 @@ const COURSES = [
   "siemens-hardware",
   "industrial-protocols",
   "networking",
-  "hivemq"
+  "hivemq",
+  "highbyte"
 ];
 
 const prisma = new PrismaClient();
