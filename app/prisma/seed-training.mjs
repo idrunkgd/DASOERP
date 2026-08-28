@@ -19,22 +19,7 @@ async function upsertCourse(slug) {
   try {
     raw = readFileSync(jsonPath, "utf8");
   } catch (e) {
-    console.warn(`[seed-training] JSON introuvable (${jsonPath}) : ${e?.code ?? ""} ${e?.message ?? ""} — skip`);
-    // Diagnostic : lister ce que contient prisma/seed-data pour comprendre
-    try {
-      const { readdirSync, existsSync } = await import("node:fs");
-      const seedDir = path.join(process.cwd(), "prisma", "seed-data");
-      if (existsSync(seedDir)) {
-        console.warn(`[seed-training] contenu de ${seedDir} : ${readdirSync(seedDir).join(", ")}`);
-      } else {
-        console.warn(`[seed-training] le dossier ${seedDir} n'existe pas`);
-        const prismaDir = path.join(process.cwd(), "prisma");
-        if (existsSync(prismaDir)) {
-          console.warn(`[seed-training] contenu de ${prismaDir} : ${readdirSync(prismaDir).join(", ")}`);
-        }
-      }
-      console.warn(`[seed-training] cwd = ${process.cwd()}`);
-    } catch { /* ignore */ }
+    console.warn(`[seed-training] JSON introuvable pour ${slug} (${jsonPath}) : ${e?.code ?? ""} — skip`);
     return;
   }
   const data = JSON.parse(raw);
