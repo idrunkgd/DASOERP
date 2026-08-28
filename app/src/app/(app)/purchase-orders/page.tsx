@@ -15,21 +15,37 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
   CANCELLED:    { label: "Annulé",      cls: "bg-rose-100 text-rose-800" }
 };
 
-export default async function PurchaseOrdersPage() {
+export default async function PurchaseOrdersPage({
+  searchParams
+}: { searchParams: { projectId?: string } }) {
   await requirePermissionOrRedirect("purchases.read");
 
-  const orders = await prisma.purchaseOrder.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { supplier: { select: { name: true } } }
-  });
+  const projectFilter = searchParams.projectId ?? undefined;
+  const [orders, filteredProject] = await Promise.all([
+    prisma.purchaseOrder.findMany({
+      where: projectFilter ? { projectId: projectFilter } : undefined,
+      orderBy: { createdAt: "desc" },
+      include: {
+        supplier: { select: { name: true } },
+        project: { select: { reference: true, title: true } }
+      }
+    }),
+    projectFilter
+      ? prisma.project.findUnique({ where: { id: projectFilter }, select: { reference: true, title: true } })
+      : Promise.resolve(null)
+  ]);
 
   return (
     <div>
       <PageHeader
         title="Bons de commande"
-        subtitle="Documents formels envoyés aux fournisseurs — réf PO-AAAA-NNNN"
+        subtitle={
+          filteredProject
+            ? <>Filtré sur le projet <strong>{filteredProject.reference}</strong> — {filteredProject.title}. <Link href="/purchase-orders" className="text-indigoaccent hover:underline">Voir tous</Link></>
+            : "Documents formels envoyés aux fournisseurs — réf PO-AAAA-NNNN"
+        }
         actions={
-          <Link href="/purchase-orders/new" className="btn-primary text-sm inline-flex items-center gap-1">
+          <Link href={`/purchase-orders/new${projectFilter ? `?projectId=${projectFilter}` : ""}`} className="btn-primary text-sm inline-flex items-center gap-1">
             <Plus className="w-4 h-4" /> Nouveau PO
           </Link>
         }
@@ -59,7 +75,9 @@ export default async function PurchaseOrdersPage() {
                     </div>
                     <div className="text-xs text-midnight-700 mt-0.5 truncate">{o.title}</div>
                     <div className="text-[10px] text-midnight-500 mt-0.5">
-                      {o.supplier?.name ?? o.supplierName ?? "—"} · créé le {formatDate(o.createdAt)}
+                      {o.supplier?.name ?? o.supplierName ?? "—"}
+                      {o.project && <> · projet <Link href={`/projects/${o.projectId}`} className="text-indigoaccent hover:underline">{o.project.reference}</Link></>}
+                      {" · "}créé le {formatDate(o.createdAt)}
                     </div>
                   </div>
                   <div className="text-right text-xs flex-shrink-0">

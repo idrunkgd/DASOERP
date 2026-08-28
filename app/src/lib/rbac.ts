@@ -425,9 +425,9 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
         { value: "timesheet.self.write", label: "Saisir ses heures" },
         { value: "timesheet.validate",   label: "Valider les timesheets" }
       ]},
-      { menuLabel: "Achats", href: "/purchases", perms: [
-        { value: "purchases.read",  label: "Voir les achats" },
-        { value: "purchases.write", label: "Créer & modifier les achats" }
+      { menuLabel: "Bons de commande", href: "/purchase-orders", perms: [
+        { value: "purchases.read",  label: "Voir les bons de commande" },
+        { value: "purchases.write", label: "Créer, modifier & envoyer les PO" }
       ]},
       { menuLabel: "Notes de frais", href: "/expenses", perms: [
         { value: "expenses.read",    label: "Voir les notes de frais" },

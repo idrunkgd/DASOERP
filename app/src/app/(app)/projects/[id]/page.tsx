@@ -21,7 +21,12 @@ export default async function ProjectDetail({ params }: { params: { id: string }
       members: { include: { user: true } },
       milestones: { orderBy: { expectedAt: "asc" } },
       timesheetEntries: { include: { user: true }, orderBy: { date: "desc" }, take: 10 },
-      purchases: { orderBy: { purchaseDate: "desc" }, take: 10 }
+      purchases: { orderBy: { purchaseDate: "desc" }, take: 10 },
+      purchaseOrders: {
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        include: { supplier: { select: { name: true } } }
+      }
     }
   });
   if (!project) notFound();
@@ -111,7 +116,8 @@ export default async function ProjectDetail({ params }: { params: { id: string }
             <h3 className="font-semibold mb-2">Liens</h3>
             {project.sourceOffer && <Row k="Offre source" v={<Link href={`/offers/${project.sourceOffer.id}`} className="text-indigoaccent hover:underline">{project.sourceOffer.reference}</Link>} />}
             <Link href={`/timesheet?projectId=${project.id}`} className="block text-indigoaccent hover:underline">→ Voir les timesheets</Link>
-            <Link href={`/purchases?projectId=${project.id}`} className="block text-indigoaccent hover:underline">→ Voir les achats</Link>
+            <Link href={`/purchase-orders?projectId=${project.id}`} className="block text-indigoaccent hover:underline">→ Bons de commande ({project.purchaseOrders.length})</Link>
+            <Link href={`/purchase-orders/new?projectId=${project.id}`} className="block text-indigoaccent hover:underline">+ Nouveau bon de commande</Link>
             <Link href={`/planning?projectId=${project.id}`} className="block text-indigoaccent hover:underline">→ Voir le planning</Link>
           </div>
         </aside>

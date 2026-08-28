@@ -18,6 +18,7 @@ export interface POLineInput {
 export interface POFormInitial {
   id?: string;                     // présent = mode édition
   title: string;
+  projectId?: string | null;
   supplierId?: string | null;
   supplierName?: string | null;
   contactName?: string | null;
@@ -32,12 +33,15 @@ export interface POFormInitial {
 
 export function POForm({
   initial,
-  suppliers
+  suppliers,
+  projects
 }: {
   initial: POFormInitial;
   suppliers: Array<{ id: string; name: string }>;
+  projects: Array<{ id: string; reference: string; title: string }>;
 }) {
   const [title, setTitle] = useState(initial.title);
+  const [projectId, setProjectId] = useState<string>(initial.projectId ?? "");
   const [supplierId, setSupplierId] = useState<string>(initial.supplierId ?? "");
   const [supplierName, setSupplierName] = useState(initial.supplierName ?? "");
   const [contactName, setContactName] = useState(initial.contactName ?? "");
@@ -83,6 +87,7 @@ export function POForm({
 
     const fd = new FormData();
     fd.set("title", title);
+    fd.set("projectId", projectId);
     fd.set("supplierId", supplierId);
     fd.set("supplierName", supplierName);
     fd.set("contactName", contactName);
@@ -119,6 +124,14 @@ export function POForm({
         <div>
           <label className="label">Titre / objet du PO *</label>
           <input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={300} className="input" placeholder="Commande matériel PLC — mission Yara" />
+        </div>
+        <div>
+          <label className="label">Projet lié (optionnel)</label>
+          <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="input">
+            <option value="">— Aucun (achat hors projet) —</option>
+            {projects.map((p) => <option key={p.id} value={p.id}>{p.reference} — {p.title}</option>)}
+          </select>
+          <p className="text-[10px] text-midnight-500 mt-1">Rattacher un PO à un projet permet de suivre le budget d'achats depuis la fiche projet.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
@@ -169,23 +182,26 @@ export function POForm({
             <tbody>
               {lines.map((l, i) => {
                 const total = (l.quantity * l.unitPriceHt).toFixed(2);
-                return (
-                  <tr key={i} className="border-t border-border align-top">
+                // Chaque ligne = 2 tr : la 1re avec les champs numériques,
+                // la 2e avec la description sur toute la largeur (colspan).
+                // Solution : description systématiquement visible pour éviter
+                // le bug d'affichage quand on stackait input+input dans le même td.
+                return [
+                  <tr key={`${i}-row`} className="border-t border-border align-top">
                     <td className="py-2 pr-2">
-                      <input value={l.label} onChange={(e) => updateLine(i, { label: e.target.value })} required className="input text-xs w-full" placeholder="Automate S7-1200 CPU 1214C" />
-                      <input value={l.description ?? ""} onChange={(e) => updateLine(i, { description: e.target.value })} className="input text-[11px] w-full mt-1 text-midnight-500" placeholder="Description longue (optionnel)" />
+                      <input value={l.label} onChange={(e) => updateLine(i, { label: e.target.value })} required className="input text-xs w-full h-9" placeholder="Désignation (ex: Automate S7-1200 CPU 1214C)" />
                     </td>
                     <td className="py-2 px-2 text-right">
-                      <input type="number" step="0.001" min="0" value={l.quantity} onChange={(e) => updateLine(i, { quantity: parseFloat(e.target.value) || 0 })} className="input text-xs text-right w-full" />
+                      <input type="number" step="0.001" min="0" value={l.quantity} onChange={(e) => updateLine(i, { quantity: parseFloat(e.target.value) || 0 })} className="input text-xs text-right w-full h-9" />
                     </td>
                     <td className="py-2 px-2">
-                      <input value={l.unit ?? ""} onChange={(e) => updateLine(i, { unit: e.target.value })} className="input text-xs w-full" placeholder="pce" />
+                      <input value={l.unit ?? ""} onChange={(e) => updateLine(i, { unit: e.target.value })} className="input text-xs w-full h-9" placeholder="pce" />
                     </td>
                     <td className="py-2 px-2 text-right">
-                      <input type="number" step="0.01" min="0" value={l.unitPriceHt} onChange={(e) => updateLine(i, { unitPriceHt: parseFloat(e.target.value) || 0 })} className="input text-xs text-right w-full" />
+                      <input type="number" step="0.01" min="0" value={l.unitPriceHt} onChange={(e) => updateLine(i, { unitPriceHt: parseFloat(e.target.value) || 0 })} className="input text-xs text-right w-full h-9" />
                     </td>
                     <td className="py-2 px-2 text-right">
-                      <input type="number" step="0.01" min="0" max="100" value={l.vatRate} onChange={(e) => updateLine(i, { vatRate: parseFloat(e.target.value) || 0 })} className="input text-xs text-right w-full" />
+                      <input type="number" step="0.01" min="0" max="100" value={l.vatRate} onChange={(e) => updateLine(i, { vatRate: parseFloat(e.target.value) || 0 })} className="input text-xs text-right w-full h-9" />
                     </td>
                     <td className="py-2 px-2 text-right tabular-nums font-semibold">{total}</td>
                     <td className="py-2 pl-2">
@@ -195,8 +211,19 @@ export function POForm({
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
+                  </tr>,
+                  <tr key={`${i}-desc`} className="border-b border-border/40">
+                    <td colSpan={7} className="pb-3 pt-0 pr-2">
+                      <textarea
+                        value={l.description ?? ""}
+                        onChange={(e) => updateLine(i, { description: e.target.value })}
+                        rows={1}
+                        className="w-full text-[11px] px-3 py-1.5 rounded-lg border border-border bg-white text-midnight-600 focus:outline-none focus:ring-2 focus:ring-indigoaccent/40 focus:border-indigoaccent resize-y"
+                        placeholder="↳ Description / détail (optionnel — visible sur le PDF sous la désignation)"
+                      />
+                    </td>
                   </tr>
-                );
+                ];
               })}
             </tbody>
           </table>

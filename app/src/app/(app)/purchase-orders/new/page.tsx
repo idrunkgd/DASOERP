@@ -7,12 +7,20 @@ import { POForm } from "../po-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewPurchaseOrderPage() {
+export default async function NewPurchaseOrderPage({
+  searchParams
+}: { searchParams: { projectId?: string } }) {
   await requirePermissionOrRedirect("purchases.write");
-  const suppliers = await prisma.company.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true }
-  });
+  const [suppliers, projects] = await Promise.all([
+    prisma.company.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true }
+    }),
+    prisma.project.findMany({
+      orderBy: { createdAt: "desc" },
+      select: { id: true, reference: true, title: true }
+    })
+  ]);
 
   return (
     <div>
@@ -27,8 +35,10 @@ export default async function NewPurchaseOrderPage() {
       />
       <POForm
         suppliers={suppliers}
+        projects={projects}
         initial={{
           title: "",
+          projectId: searchParams.projectId ?? null,
           currency: "EUR",
           lines: []
         }}

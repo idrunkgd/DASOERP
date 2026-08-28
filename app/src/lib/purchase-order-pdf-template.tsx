@@ -103,6 +103,7 @@ export interface PurchaseOrderPdfData {
   status: string;
   currency: string;
   createdAt: Date;
+  projectRef: string | null;
   sentAt: Date | null;
   deliveryDate: Date | null;
   deliveryAddress: string | null;
@@ -211,6 +212,11 @@ export function PurchaseOrderPdfDocument({ data }: { data: PurchaseOrderPdfData 
 
         {/* Titre de la commande */}
         <Text style={s.sectionTitle}>Objet — {pdfSafe(data.title)}</Text>
+        {data.projectRef && (
+          <Text style={{ fontSize: 9, color: C.grey, marginTop: -4, marginBottom: 8 }}>
+            Projet lié : <Text style={{ fontFamily: "Helvetica-Bold", color: C.ink }}>{pdfSafe(data.projectRef)}</Text>
+          </Text>
+        )}
 
         {/* Tableau des lignes */}
         <View style={s.tHeadRow}>

@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
     where: { id },
     include: {
       supplier: true,
+      project: { select: { reference: true, title: true } },
       lines: { orderBy: { position: "asc" } }
     }
   });
@@ -38,6 +39,7 @@ export async function GET(req: NextRequest) {
     deliveryAddress: po.deliveryAddress,
     paymentTerms: po.paymentTerms,
     notes: po.notes,
+    projectRef: po.project ? `${po.project.reference} — ${po.project.title}` : null,
     supplier: {
       name: po.supplier?.name ?? po.supplierName ?? "Fournisseur non renseigné",
       vatNumber: po.supplier?.vatNumber,

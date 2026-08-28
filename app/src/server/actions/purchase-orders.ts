@@ -35,6 +35,7 @@ const LineSchema = z.object({
 
 const CreateSchema = z.object({
   title: z.string().min(1).max(300),
+  projectId: z.preprocess((v) => (v === "" || v == null ? null : v), z.string().nullable().optional()),
   supplierId: z.preprocess((v) => (v === "" || v == null ? null : v), z.string().nullable().optional()),
   supplierName: z.string().optional().nullable().transform((v) => v?.trim() || null),
   contactName: z.string().optional().nullable().transform((v) => v?.trim() || null),
@@ -87,6 +88,7 @@ export async function createPurchaseOrder(formData: FormData) {
       title: parsed.title,
       status: "DRAFT",
       supplierId: parsed.supplierId ?? null,
+      projectId: parsed.projectId ?? null,
       supplierName: parsed.supplierName,
       contactName: parsed.contactName,
       contactEmail: parsed.contactEmail,

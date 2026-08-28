@@ -10,12 +10,13 @@ export const dynamic = "force-dynamic";
 
 export default async function EditPurchaseOrderPage({ params }: { params: { id: string } }) {
   await requirePermissionOrRedirect("purchases.write");
-  const [po, suppliers] = await Promise.all([
+  const [po, suppliers, projects] = await Promise.all([
     prisma.purchaseOrder.findUnique({
       where: { id: params.id },
       include: { lines: { orderBy: { position: "asc" } } }
     }),
-    prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } })
+    prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.project.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, reference: true, title: true } })
   ]);
   if (!po) notFound();
   if (po.status !== "DRAFT") {
@@ -43,9 +44,11 @@ export default async function EditPurchaseOrderPage({ params }: { params: { id: 
       />
       <POForm
         suppliers={suppliers}
+        projects={projects}
         initial={{
           id: po.id,
           title: po.title,
+          projectId: po.projectId,
           supplierId: po.supplierId,
           supplierName: po.supplierName,
           contactName: po.contactName,

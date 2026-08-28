@@ -26,6 +26,7 @@ export default async function PurchaseOrderDetailPage({ params }: { params: { id
     where: { id: params.id },
     include: {
       supplier: true,
+      project: { select: { id: true, reference: true, title: true } },
       lines: { orderBy: { position: "asc" } },
       createdBy: { select: { firstName: true, lastName: true } },
       sentBy: { select: { firstName: true, lastName: true } }
@@ -93,6 +94,16 @@ export default async function PurchaseOrderDetailPage({ params }: { params: { id
                 currency={po.currency}
                 pdfUrl={pdfUrl}
               />
+            </div>
+          )}
+
+          {po.project && (
+            <div className="card p-4 text-xs">
+              <h3 className="font-semibold text-sm mb-2">Projet lié</h3>
+              <Link href={`/projects/${po.project.id}`} className="font-medium text-indigoaccent hover:underline">
+                {po.project.reference}
+              </Link>
+              <div className="text-midnight-500 mt-0.5">{po.project.title}</div>
             </div>
           )}
 

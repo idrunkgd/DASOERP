@@ -2971,6 +2971,9 @@ model PurchaseOrder {
 
   supplierId     String?
   supplier       Company?            @relation("CompanyAsPOSupplier", fields: [supplierId], references: [id], onDelete: SetNull)
+  /// Projet lié optionnel — permet de tracer l'achat contre un budget projet
+  projectId      String?
+  project        Project?            @relation("ProjectPurchaseOrders", fields: [projectId], references: [id], onDelete: SetNull)
   /// Nom fournisseur en texte libre (si pas d'entrée Company)
   supplierName   String?
   /// Contact chez le fournisseur — nom + email pour l'envoi
@@ -3010,6 +3013,7 @@ model PurchaseOrder {
 
   @@index([status])
   @@index([supplierId])
+  @@index([projectId])
   @@index([createdAt])
 }
 
