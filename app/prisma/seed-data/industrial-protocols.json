@@ -1,0 +1,440 @@
+{
+  "slug": "industrial-protocols",
+  "title": "Protocoles industriels",
+  "subtitle": "Modbus · OPC UA · MQTT · BACnet",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "Protocoles industriels",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "Le paysage des protocoles industriels est vaste et fragmenté. Modbus (1979) domine par sa simplicité, OPC UA (2008) prend le relais moderne, MQTT (2013) vient du monde IoT, BACnet règne sur le bâtiment. Cette formation vous fait naviguer entre ces 4 protocoles majeurs, comprendre leurs forces et limites, et savoir quand utiliser lequel.\n\n**Modbus RTU/TCP** — Le protocole universel legacy — simple, partout, mais sans sécurité.\n\n**OPC UA** — Le standard moderne d'interopérabilité industrielle — modèle info riche, sécurité native.\n\n**MQTT** — Le protocole IoT léger — pub/sub, broker central, idéal cloud et edge.\n\n**BACnet** — Le standard du bâtiment intelligent — HVAC, éclairage, contrôle d'accès.\n\n**Choisir intelligemment** — Chaque protocole a son usage. Le mauvais choix se paie 5 ans après en migration coûteuse.\n\n**À retenir :** Un ingénieur industriel 2026 doit savoir dialoguer en Modbus, OPC UA et MQTT. BACnet reste utile pour ceux qui touchent au bâtiment.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modbus — l'histoire et le principe",
+      "bodyMd": "Modbus a été créé par Modicon en 1979 pour dialoguer avec ses PLC 984. Le principe : un maître interroge séquentiellement des esclaves, chacun avec une adresse (1-247). Les données sont organisées en 4 tables : coils (bits en écriture), discrete inputs (bits lecture seule), holding registers (mots), input registers (mots lecture seule).\n\n**Modèle maître/esclave** — Un seul maître, N esclaves. Chaque échange = requête maître + réponse esclave. Pas de push spontané.\n\n**4 tables de données** — Coils 00001-09999 (1 bit RW), Discrete Inputs 10001-19999 (1 bit RO), Input Registers 30001-39999 (16 bits RO), Holding Registers 40001-49999 (16 bits RW).\n\n**Codes fonction** — 01 (read coils), 02 (read discrete inputs), 03 (read holding), 04 (read input), 05 (write single coil), 06 (write single register), 15/16 (write multiple).\n\n**Timeout et retry** — Typiquement 1s de timeout maître, 3 retries avant considérer esclave HS.\n\n**Sécurité inexistante** — Pas de chiffrement, pas d'authentification. Modbus/TLS existe mais peu adopté. Isoler réseau OT.\n\n**À retenir :** Modbus reste standard mais dangereux en cybersécurité — segmentation réseau + firewall OT/IT obligatoires en 2026.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modbus RTU vs Modbus TCP",
+      "bodyMd": "**MODBUS RTU (série)**\n- Transport RS-485 multi-drop, RS-232 point à point\n- Adresses esclaves 1-247 sur le bus\n- Trames binaires optimisées bande passante\n- Vitesses 9.6-115.2 kbit/s typiques\n- CRC-16 pour intégrité trame\n- Cible : équipements simples, longues distances, coût minime\n\n**MODBUS TCP (Ethernet)**\n- Transport TCP/IP port 502\n- Chaque esclave = une IP + Unit ID (compat gateway RTU)\n- Trame encapsulée dans un MBAP header\n- Bande passante Ethernet standard\n- Intégrité assurée par TCP (checksum layer)\n- Cible : intégration SCADA, historian, systèmes IT\n\n**À retenir :** Modbus RTU pour équipements terrain (variateurs, capteurs, bornes). Modbus TCP dès qu'on rentre dans le réseau Ethernet de supervision.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modbus TCP — trame Read Holding Registers",
+      "bodyMd": "Un exemple concret : le maître demande à l'esclave IP 192.168.1.50 (unit ID 1) 2 registres à partir de l'adresse 107. On voit la structure MBAP (Modbus Application Protocol) qui encapsule la PDU (Protocol Data Unit).\n\n```\nREQUÊTE MAÎTRE → ESCLAVE (12 bytes)\n─────────────────────────────────────────────────\nBytes  Contenu                        Valeur hexa\n─────────────────────────────────────────────────\n 0-1   Transaction ID                 00 01\n 2-3   Protocol ID (toujours 00 00)   00 00\n 4-5   Length (nb bytes qui suivent)  00 06\n 6     Unit ID (adresse esclave)      01\n 7     Function code (03 = read HR)   03\n 8-9   Adresse départ registre         00 6B  → décimal 107\n 10-11 Nombre de registres            00 02\n\nRÉPONSE ESCLAVE → MAÎTRE (11 bytes)\n─────────────────────────────────────────────────\nBytes  Contenu                        Valeur hexa\n─────────────────────────────────────────────────\n 0-1   Transaction ID (recopié)       00 01\n 2-3   Protocol ID                    00 00\n 4-5   Length                         00 05\n 6     Unit ID                        01\n 7     Function code                  03\n 8     Byte count (nb data bytes)     04\n 9-10  Registre 107 (valeur)          01 F4  → décimal 500\n 11-12 Registre 108 (valeur)          00 32  → décimal 50\n\nEN CAS D'ERREUR — RÉPONSE EXCEPTION\n─────────────────────────────────────────────────\n 7     Function code + 0x80           83  (03 | 80)\n 8     Exception code                 02  (Illegal Data Address)\n```\n\n**À retenir :** Toujours vérifier le function code de la réponse : bit 7 mis = exception. Le byte suivant contient le code d'erreur (1=fonction illégale, 2=adresse illégale, 3=data illégale, 4=slave failure).",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Client Modbus TCP en Python",
+      "bodyMd": "En pratique, on utilise une bibliothèque cliente. En Python, pymodbus est le standard. En 20 lignes on lit des registres, gère les erreurs, sauve dans une base.\n\n```\nfrom pymodbus.client import ModbusTcpClient\nimport time\n\n# Connexion au device\nclient = ModbusTcpClient('192.168.1.50', port=502)\n\nif not client.connect():\n    print(\"Impossible de se connecter\")\n    exit(1)\n\ntry:\n    # Lire 2 holding registers à partir de l'adresse 107\n    result = client.read_holding_registers(\n        address=107,\n        count=2,\n        slave=1\n    )\n\n    if result.isError():\n        print(f\"Erreur Modbus : {result}\")\n    else:\n        # result.registers = liste des valeurs\n        level  = result.registers[0]  # Registre 107\n        flow   = result.registers[1]  # Registre 108\n        print(f\"Niveau cuve = {level}\")\n        print(f\"Débit pompe = {flow}\")\n\n        # Écrire une consigne dans le registre 200\n        client.write_register(address=200, value=750, slave=1)\n\nfinally:\n    client.close()\n```\n\n**À retenir :** En production : entourer tout de try/except, timeout court (1s), retry x3, log les échecs. pymodbus gère la sync/async — préférer async pour scaler.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modbus — pièges et bonnes pratiques",
+      "bodyMd": "- Endianness : certains devices envoient LSB first, d'autres MSB first — tester avec quelques registres connus\n- Adressage 0-based vs 1-based : Holding Register 40001 = adresse 0 en pratique. Confusion fréquente\n- Types 32 bits sur 2 registres : REAL, DINT — attention à l'ordre des mots (ABCD vs BADC vs CDAB vs DCBA)\n- Gateway RTU → TCP : convertit série vers Ethernet, utile pour intégrer legacy — Unit ID important\n- Timeout par défaut souvent trop court en TCP over WAN (>200 ms latence) — ajuster\n- Poll cycle : > 500 ms typique, sinon l'esclave sature. Adapter selon criticité de la data\n\n💡 Toujours tester l'endianness et l'offset avec un registre dont on connaît la valeur (ex un compteur horaire) avant de faire confiance à la datasheet.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Modbus est un protocole :",
+            "options": [
+              "Récent (2020+)",
+              "Historique (1979), simple, universel",
+              "Propriétaire Siemens"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Modbus RTU utilise :",
+            "options": [
+              "Ethernet TCP",
+              "Série RS-485",
+              "Bluetooth"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Modbus TCP port :",
+            "options": [
+              "80",
+              "502",
+              "1883"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un maître Modbus :",
+            "options": [
+              "Initie toutes les requêtes",
+              "Attend passivement",
+              "Reçoit broadcast"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "4 tables Modbus :",
+            "options": [
+              "Coils, Discrete, Holding, Input Registers",
+              "Read, Write, Delete, Update",
+              "TCP, UDP, HTTP, MQTT"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Codes fonction 03/06/16 :",
+            "options": [
+              "Read holding, Write single, Write multiple",
+              "Lire fichier",
+              "Chiffrer"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/industrial-protocols/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "OPC UA — pourquoi ça change tout",
+      "bodyMd": "OPC UA (Unified Architecture) a été publié en 2008 par l'OPC Foundation pour remplacer les OPC DA/HDA/AE historiques qui reposaient sur DCOM Windows. UA sur TCP standard, indépendant OS (Windows, Linux, embarqué), avec un modèle d'information riche (Objects, Variables, Methods, Events), sécurité native (x509, chiffrement, signature) et interopérabilité normalisée par les Companion Specs.\n\n**Modèle client/server + pub/sub** — Client/server pour les requêtes ponctuelles. Pub/sub pour les flux temps réel efficaces (MQTT ou UDP).\n\n**Address space** — Espace de noms hiérarchique navigable. Un client peut découvrir la structure sans connaissance préalable.\n\n**Sécurité intégrée** — Certificats x509 auto-signés ou CA. Chiffrement AES + signature. Authentification anonyme, credentials, ou x509 client.\n\n**Companion Specs** — Profils standardisés par métier : PackML (packaging), Umati (machine-tool), Robotics, DI (Device Integration).\n\n**Indépendant plateforme** — OPC UA parle à Siemens S7-1500, Rockwell CompactLogix, robot ABB, capteur IO-Link. Fin des drivers propriétaires.\n\n**À retenir :** OPC UA en 2026 est LE choix pour l'interopérabilité industrielle. Un projet greenfield expose ses données via OPC UA. Modbus reste pour les équipements simples et l'existant.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "OPC UA information model",
+      "bodyMd": "L'information model OPC UA structure les données en objets métier. Contrairement à Modbus où on lit 'registre 107 = 500' sans savoir ce que ça représente, OPC UA expose 'Pump1.Speed = 500 RPM avec status Good'.\n\n**Objects** — Représentent des équipements ou entités : Pump1, Motor2, Tank_A. Peuvent avoir sous-objets.\n\n**Variables** — Données numériques : Speed, Temperature, Level. Ont une valeur + un timestamp + un status.\n\n**Methods** — Actions invocables : StartPump, ResetAlarms, TransferBatch. Prennent params in/out.\n\n**Events** — Notifications : AlarmOccurred, MaintenanceDue. Le serveur push au(x) client(s) abonné(s).\n\n**References** — Liens entre nodes : Pump1 HasComponent Motor2. Permet de modéliser des relations complexes.\n\n**À retenir :** L'information model est le vrai atout d'OPC UA. Un SCADA reçoit une variable avec sa description, son unité, ses seuils, ses relations — plus besoin de doc externe.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Client OPC UA en Python",
+      "bodyMd": "opcua-asyncio est la bibliothèque cliente moderne pour Python. Elle gère client/server, sécurité, subscriptions. Voici un client qui se connecte, découvre les nodes, s'abonne à des variables.\n\n```\nimport asyncio\nfrom asyncua import Client, ua\n\nasync def main():\n    url = \"opc.tcp://192.168.1.50:4840\"\n\n    async with Client(url=url) as client:\n        # Auth : anonyme ici, en prod utiliser certificat ou credentials\n        # client.set_user(\"admin\"); client.set_password(\"...\")\n        # await client.set_security_string(\"Basic256Sha256,...\")\n\n        # Browse root\n        root = client.nodes.root\n        print(\"Root children :\")\n        for child in await root.get_children():\n            print(\"  \", await child.read_display_name())\n\n        # Lecture d'une variable spécifique\n        node = client.get_node(\"ns=2;s=Pump1.Speed_Actual\")\n        val = await node.read_value()\n        print(f\"Vitesse pompe 1 = {val} RPM\")\n\n        # Écriture\n        setpoint = client.get_node(\"ns=2;s=Pump1.Sp_Speed\")\n        await setpoint.write_value(ua.Variant(75.0, ua.VariantType.Float))\n\n        # Subscription à un changement (push, pas polling)\n        class SubHandler:\n            def datachange_notification(self, node, val, data):\n                print(f\"→ {node} changé = {val}\")\n\n        sub = await client.create_subscription(500, SubHandler())\n        await sub.subscribe_data_change(node)\n\n        # Garder connecté 30s\n        await asyncio.sleep(30)\n\nasyncio.run(main())\n```\n\n**À retenir :** En production : gérer reconnexion automatique, timeout, exception handling. Le subscription (push) est bien plus efficace que le polling en boucle.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "OPC UA sécurité en pratique",
+      "bodyMd": "- Auth : anonymous (dev), username/password (simple), certificat x509 client (production)\n- Security policy : None, Basic128Rsa15, Basic256, Basic256Sha256 — les 2 dernières recommandées\n- Certificats serveur : générés à la création du serveur, à trust côté client (whitelisting)\n- Certificats client : à créer et trust côté serveur — étape souvent oubliée\n- TrustList : liste des certs approuvés. Mettre à jour à chaque révocation\n- Audit : logs des accès (connexion, échec auth, actions) — obligatoire GxP\n\n💡 Un serveur OPC UA en 'None' (pas de sécurité) est équivalent à un serveur Modbus : vulnérable. Toujours activer au minimum Basic256Sha256 + auth username en prod.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "OPC UA est édité par :",
+            "options": [
+              "OPC Foundation (standard ouvert)",
+              "Microsoft",
+              "Siemens uniquement"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "OPC UA sécurité :",
+            "options": [
+              "Chiffrement + signature + certificats x509",
+              "Simple mot de passe",
+              "Aucune"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "OPC UA information model :",
+            "options": [
+              "Objects, Variables, Methods, Events navigables",
+              "Uniquement variables",
+              "XML statique"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Sub/Publish OPC UA :",
+            "options": [
+              "Client s'abonne, serveur notifie sur changement",
+              "Polling forcé",
+              "Broadcast permanent"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Companion Specs :",
+            "options": [
+              "Profils métier standardisés (PackML, Robotics…)",
+              "Extensions payantes",
+              "Firmware"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "OPC UA cible :",
+            "options": [
+              "Interopérabilité industrielle transverse marques",
+              "Uniquement Siemens",
+              "Domestique"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/industrial-protocols/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "MQTT — le protocole IoT industriel",
+      "bodyMd": "MQTT (Message Queuing Telemetry Transport) a été créé par IBM et Arcom en 1999 pour surveiller un pipeline pétrolier via satellite (bande passante minimale, latence élevée). Devenu standard OASIS, il domine l'IoT industriel. Modèle pub/sub avec broker central, topics hiérarchiques, QoS 0/1/2, payload libre (JSON typique).\n\n**Broker central** — Mosquitto, HiveMQ, EMQX, AWS IoT Core, Azure IoT Hub. Reçoit les publish, distribue aux subscribers.\n\n**Topics hiérarchiques** — Ex 'factory/lineA/machine1/temperature'. Wildcards + (un niveau) et # (tous les sous-niveaux).\n\n**QoS 0/1/2** — QoS 0 : at-most-once (rapide, perte possible). QoS 1 : at-least-once (peut dupliquer). QoS 2 : exactly-once (coûteux).\n\n**Payload** — Libre — bytes. JSON courant en IoT industriel. Binaire compact possible (Protobuf, MessagePack).\n\n**Retained messages + Last Will** — Retain : broker garde la dernière valeur, envoyée à tout nouveau subscriber. LWT : message envoyé si le client se déconnecte inopiniement.\n\n**À retenir :** MQTT excelle pour les scénarios IoT edge → cloud, sensor → dashboard. Il complète OPC UA (industriel PLC ↔ SCADA), ne le remplace pas.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "BACnet — le protocole du bâtiment intelligent",
+      "bodyMd": "BACnet (Building Automation Control network) a été normalisé ASHRAE en 1995, ISO 16484-5. C'est le protocole standard pour l'automatisation du bâtiment : chauffage/ventilation/clim (HVAC), éclairage, sécurité incendie, contrôle d'accès, comptage énergie. Modèle objet (BACnet Object) avec propriétés, alarmes intégrées, planning natif.\n\n**BACnet Objects** — Analog Input/Output/Value, Binary Input/Output/Value, Schedule, Trend Log, Alarm. ~40 types normalisés.\n\n**Transports** — BACnet/IP (UDP port 47808 = 0xBAC0), BACnet MS/TP (RS-485), BACnet Ethernet, BACnet PTP.\n\n**Discovery** — Who-Is / I-Am pour découvrir les devices sur le réseau. Automatique, pas besoin de configuration statique.\n\n**Read/Write Property** — Instructions pour lire/écrire les propriétés d'un objet (Present Value, Description, Units…).\n\n**Companion Specs OPC UA** — OPC UA for BACnet mapping — permet d'exposer BACnet dans un serveur OPC UA. Convergence bâtiment/industriel.\n\n**À retenir :** BACnet est SPECIFIQUE au bâtiment. Ne pas l'utiliser en automation process. Mais tout ingénieur travaillant sur des bâtiments industriels finira par croiser BACnet.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Architectures hybrides — choisir combiner",
+      "bodyMd": "- PLC ↔ SCADA : OPC UA — standard interopérable, sécurité intégrée\n- Capteur simple ↔ PLC : Modbus RTU ou IO-Link — coût minime, universel\n- Ligne production ↔ Cloud : MQTT — léger, event-driven, scalable\n- Bâtiment (HVAC, éclairage) : BACnet/IP\n- Historian ↔ ERP : REST API ou OPC UA A&C — sécurisé, standardisé\n- Edge computing : MQTT vers cloud + OPC UA vers PLC local, pont dans les 2 sens\n\n💡 Un système industriel 2026 utilise typiquement 3-4 protocoles complémentaires. Le rôle de l'ingénieur intégration est de choisir intelligemment et documenter.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "MQTT est :",
+            "options": [
+              "Protocole pub/sub léger, IoT industriel",
+              "SCADA propriétaire",
+              "Ethernet physique"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "MQTT broker central =",
+            "options": [
+              "Router qui distribue les messages par topic",
+              "Client final",
+              "Base de données"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "MQTT QoS 2 :",
+            "options": [
+              "Exactly-once garanti, coût réseau",
+              "Best-effort",
+              "Pas de garantie"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "MQTT port par défaut :",
+            "options": [
+              "502",
+              "1883 (8883 pour TLS)",
+              "80"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "BACnet cible :",
+            "options": [
+              "Bâtiment intelligent (HVAC, éclairage)",
+              "Automation process",
+              "Réseau OT PLC"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "BACnet/IP fonctionne sur :",
+            "options": [
+              "UDP port 47808",
+              "TCP port 502",
+              "Série RS-485 uniquement"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/industrial-protocols/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Passer à l'action",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Installer Wireshark et sniffer un vrai bus Modbus TCP + OPC UA pour comprendre les trames\n- Lire la spec Modbus (100 pages) + naviguer opcfoundation.org pour Companion Specs OPC UA\n- Monter un broker MQTT local (Mosquitto) et le peupler avec un script Python\n- Pour un projet greenfield 2026 : PLC↔SCADA en OPC UA, edge→cloud en MQTT, capteurs simples en Modbus RTU\n\n💡 Un ingénieur qui maîtrise ces 4 protocoles est immédiatement productif en intégration industrielle — c'est un skill de plus en plus rare et recherché.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/industrial-protocols/slide-26.jpg"
+    }
+  ]
+}

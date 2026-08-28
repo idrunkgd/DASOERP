@@ -14,7 +14,8 @@ const COURSES = [
   "plc-programming",
   "tia-portal",
   "wincc-scada",
-  "siemens-hardware"
+  "siemens-hardware",
+  "industrial-protocols"
 ];
 
 const prisma = new PrismaClient();
