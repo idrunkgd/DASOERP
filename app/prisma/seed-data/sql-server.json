@@ -1,0 +1,410 @@
+{
+  "slug": "sql-server",
+  "title": "SQL Server (Application + Query)",
+  "subtitle": "Développement + requêtes + performance + HA",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "SQL Server (Application + Query)",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "SQL Server est le SGBD Microsoft. Dominant en entreprise Windows, il équipe une part majeure des applications métier, MES, ERP, et sert de base à SSRS, SSIS, SSAS. Cette formation vous fait passer de 'je fais des SELECT' à 'j'écris des procédures optimisées et je conçois un schéma robuste'.\n\n**SQL basics** — SELECT/INSERT/UPDATE/DELETE, WHERE, ORDER BY, JOINs — la base indispensable.\n\n**Modélisation** — Normalisation, clés primaires/étrangères, index, contraintes.\n\n**T-SQL avancé** — Procédures stockées, CTE, window functions, transactions.\n\n**Performance** — Query plans, index tuning, columnstore, stats à jour.\n\n**Prod-ready** — Backups, réplication, Always On, sécurité, monitoring.\n\n**À retenir :** SQL Server est 90% même syntaxe qu'ANSI SQL + 10% T-SQL Microsoft. Maîtriser T-SQL = productivité immédiate sur toute l'infra Windows/Microsoft.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "SELECT, WHERE, ORDER BY, LIMIT",
+      "bodyMd": "La lecture d'une table se fait avec SELECT. On peut filtrer (WHERE), trier (ORDER BY), limiter (TOP en T-SQL), agréger (COUNT). C'est 80% du SQL au quotidien.\n\n```\n-- Lister toutes les colonnes de tous les batches (à éviter en prod)\nSELECT * FROM Batches;\n\n-- Sélectionner uniquement les colonnes utiles + filtrer\nSELECT BatchId, ProductCode, StartTime, EndTime, Status\nFROM Batches\nWHERE StartTime >= '2026-01-01'\n  AND Status = 'Completed'\nORDER BY StartTime DESC;\n\n-- Top 100 batches les plus récents\nSELECT TOP 100 BatchId, ProductCode, StartTime\nFROM Batches\nORDER BY StartTime DESC;\n\n-- Compter par produit\nSELECT ProductCode, COUNT(*) AS BatchCount\nFROM Batches\nWHERE StartTime >= '2026-01-01'\nGROUP BY ProductCode\nORDER BY BatchCount DESC;\n\n-- Recherche pattern\nSELECT * FROM Products\nWHERE ProductName LIKE 'Yaourt%'\n  AND UnitPrice BETWEEN 1.0 AND 5.0;\n```\n\n**À retenir :** Toujours nommer les colonnes explicitement en prod (jamais SELECT *) : robuste aux évolutions de schéma + réseau moins chargé + query plan plus optimal.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "JOIN — combiner plusieurs tables",
+      "bodyMd": "Un schéma relationnel bien conçu = plusieurs tables reliées par des clés étrangères. Pour reconstruire l'information, on utilise JOIN. INNER JOIN (intersection), LEFT JOIN (garde toutes les lignes de gauche), FULL OUTER (garde tout).\n\n```\n-- Schéma :\n-- Batches (BatchId, ProductId, StartTime, EndTime)\n-- Products (ProductId, ProductCode, ProductName)\n-- Alarms (AlarmId, BatchId, Timestamp, Message, Severity)\n\n-- INNER JOIN : batches avec leur produit (perd les orphelins)\nSELECT b.BatchId, p.ProductName, b.StartTime\nFROM Batches b\nINNER JOIN Products p ON p.ProductId = b.ProductId\nWHERE b.StartTime >= '2026-01-01';\n\n-- LEFT JOIN : tous les batches, avec produit si connu (NULL sinon)\nSELECT b.BatchId, p.ProductName, b.StartTime\nFROM Batches b\nLEFT JOIN Products p ON p.ProductId = b.ProductId;\n\n-- JOIN multiple : batches + produit + alarmes critiques\nSELECT b.BatchId, p.ProductName, COUNT(a.AlarmId) AS CriticalAlarms\nFROM Batches b\nINNER JOIN Products p ON p.ProductId = b.ProductId\nLEFT JOIN Alarms a ON a.BatchId = b.BatchId AND a.Severity = 'Critical'\nWHERE b.StartTime >= '2026-01-01'\nGROUP BY b.BatchId, p.ProductName\nHAVING COUNT(a.AlarmId) > 0\nORDER BY CriticalAlarms DESC;\n```\n\n**À retenir :** Toujours qualifier les colonnes en JOIN (b.BatchId, p.ProductName). Sinon en cas d'ambiguïté (colonnes de même nom), l'erreur est perturbante.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modélisation — clés et contraintes",
+      "bodyMd": "Un schéma SQL Server professionnel a des clés primaires, des clés étrangères avec contraintes, des NOT NULL sur les champs obligatoires, des CHECK sur les invariants métier. Ces contraintes empêchent d'insérer de la data invalide — protection en dernière ligne.\n\n**PRIMARY KEY** — Identifiant unique de ligne. Souvent INT IDENTITY (auto-incrémenté) ou UNIQUEIDENTIFIER (GUID).\n\n**FOREIGN KEY** — Référence une PK d'une autre table. ON DELETE CASCADE (efface les enfants) ou RESTRICT (bloque).\n\n**NOT NULL** — Rendre un champ obligatoire. Prévient les lignes incomplètes.\n\n**UNIQUE** — Contrainte d'unicité sur une colonne ou combinaison (ex email unique par tenant).\n\n**CHECK** — Contrainte métier arbitraire (ex Age BETWEEN 0 AND 150, Status IN ('Active','Completed')).\n\n**À retenir :** Les contraintes DB > la validation applicative. L'app peut avoir un bug, oublier de valider — la DB, elle, refuse toujours l'insertion invalide.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "SQL Server est édité par :",
+            "options": [
+              "Oracle",
+              "Microsoft",
+              "Postgres org"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "T-SQL est :",
+            "options": [
+              "Le dialecte SQL de SQL Server",
+              "Un langage OS",
+              "JavaScript"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "SELECT * FROM Products :",
+            "options": [
+              "Récupère toutes les lignes/colonnes de Products",
+              "Efface la table",
+              "Ajoute une ligne"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "WHERE sert à :",
+            "options": [
+              "Filtrer les lignes selon une condition",
+              "Trier",
+              "Grouper"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "ORDER BY sert à :",
+            "options": [
+              "Trier les résultats ASC ou DESC",
+              "Filtrer",
+              "Joindre"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "JOIN combine :",
+            "options": [
+              "Des lignes de 2+ tables selon condition",
+              "Deux databases",
+              "SQL et XML"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/sql-server/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "CTE + Window Functions",
+      "bodyMd": "CTE (Common Table Expression) = requête temporaire lisible. Window functions = calculs sur une 'fenêtre' de lignes (ranking, running totals) sans GROUP BY. Deux outils qui simplifient massivement les requêtes analytiques.\n\n```\n-- CTE : lisibilité + réutilisation\nWITH RecentBatches AS (\n    SELECT BatchId, ProductId, StartTime\n    FROM Batches\n    WHERE StartTime >= DATEADD(day, -30, GETDATE())\n),\nBatchStats AS (\n    SELECT ProductId,\n           COUNT(*) AS BatchCount,\n           MIN(StartTime) AS FirstBatch,\n           MAX(StartTime) AS LastBatch\n    FROM RecentBatches\n    GROUP BY ProductId\n)\nSELECT p.ProductName, bs.BatchCount, bs.FirstBatch, bs.LastBatch\nFROM BatchStats bs\nINNER JOIN Products p ON p.ProductId = bs.ProductId\nORDER BY bs.BatchCount DESC;\n\n-- Window functions : ranking + running total\nSELECT\n    BatchId,\n    ProductCode,\n    Yield_Kg,\n    -- Rang global\n    ROW_NUMBER() OVER (ORDER BY Yield_Kg DESC) AS RankGlobal,\n    -- Rang par produit\n    ROW_NUMBER() OVER (PARTITION BY ProductCode ORDER BY Yield_Kg DESC) AS RankInProduct,\n    -- Yield cumulé du mois\n    SUM(Yield_Kg) OVER (\n        PARTITION BY ProductCode\n        ORDER BY StartTime\n        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n    ) AS CumulativeYield\nFROM Batches\nWHERE StartTime >= '2026-01-01'\nORDER BY ProductCode, StartTime;\n```\n\n**À retenir :** Les CTE rendent les requêtes complexes lisibles. Les window functions font en 1 ligne ce qui prendrait 20 lignes avec sub-selects. Ces 2 features valent leur poids en productivité.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Stored Procedure — encapsuler une opération",
+      "bodyMd": "Une stored procedure est un bloc de T-SQL compilé et stocké dans la DB. Avantages : appelable par nom, paramètres typés, sécurisée contre SQL injection, planifiable (query plan mémorisé), auditable.\n\n```\nCREATE OR ALTER PROCEDURE sp_CreateBatch\n    @ProductCode NVARCHAR(20),\n    @Quantity_Kg DECIMAL(10,2),\n    @OperatorId INT,\n    @BatchId INT OUTPUT\nAS\nBEGIN\n    SET NOCOUNT ON;\n\n    DECLARE @ProductId INT;\n    -- Vérifier que le produit existe\n    SELECT @ProductId = ProductId\n    FROM Products\n    WHERE ProductCode = @ProductCode;\n\n    IF @ProductId IS NULL\n    BEGIN\n        RAISERROR('Product code % not found', 16, 1, @ProductCode);\n        RETURN;\n    END\n\n    -- Vérifier quantité\n    IF @Quantity_Kg <= 0\n    BEGIN\n        RAISERROR('Quantity must be > 0', 16, 1);\n        RETURN;\n    END\n\n    -- Insertion atomique + récupération ID\n    INSERT INTO Batches (ProductId, StartTime, PlannedQuantity_Kg, OperatorId, Status)\n    VALUES (@ProductId, GETDATE(), @Quantity_Kg, @OperatorId, 'Started');\n\n    SET @BatchId = SCOPE_IDENTITY();\n\n    -- Audit\n    INSERT INTO AuditLog (Timestamp, UserId, Action, Details)\n    VALUES (GETDATE(), @OperatorId, 'CreateBatch', 'BatchId=' + CAST(@BatchId AS NVARCHAR));\nEND\n\n-- Appel\nDECLARE @NewBatchId INT;\nEXEC sp_CreateBatch @ProductCode = 'YAG-STR', @Quantity_Kg = 500, @OperatorId = 42,\n                    @BatchId = @NewBatchId OUTPUT;\nSELECT @NewBatchId AS CreatedBatchId;\n```\n\n**À retenir :** Une procédure stockée = une API métier sur la BDD. Application appelle sp_CreateBatch(...), pas de SQL direct. Sécurisé + auditable + évolutif.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Index — accélérer les lectures",
+      "bodyMd": "Sans index, chaque WHERE fait un table scan (parcours de toutes les lignes). Un index bien placé transforme une requête de 30 secondes en 30 ms. Mais un index a un coût : ralentit les INSERT/UPDATE/DELETE et consomme du disque.\n\n**Clustered index** — Physiquement trié sur disque. 1 seul par table. Par défaut sur la PK. Le plus performant pour les range scans.\n\n**Non-clustered index** — Index séparé pointant vers les lignes. N par table. Sur les colonnes de WHERE/JOIN/ORDER BY fréquentes.\n\n**Composite index** — Sur plusieurs colonnes (ex ProductId, StartTime). Ordre des colonnes crucial.\n\n**Covering index** — Inclut TOUTES les colonnes de la requête → pas de lookup vers la table. Requêtes très rapides.\n\n**Coût** — Chaque INSERT/UPDATE/DELETE doit mettre à jour tous les index. 10 index sur une table = 10× coût des writes.\n\n**À retenir :** Un index bien placé : facteur 100 sur les reads. Un index de trop : facteur 5 sur les writes. Toujours mesurer avant d'ajouter.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Clé primaire :",
+            "options": [
+              "Identifiant unique de ligne, indexé auto",
+              "Champ optionnel",
+              "Index secondaire"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Foreign Key :",
+            "options": [
+              "Contrainte référentielle vers une autre table",
+              "Optionnelle",
+              "Toujours indexée"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "GROUP BY sert à :",
+            "options": [
+              "Agréger des lignes par valeur commune",
+              "Trier",
+              "Filtrer"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "COUNT/SUM/AVG :",
+            "options": [
+              "Fonctions d'agrégation",
+              "Toujours renvoient 1",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Index sur colonne :",
+            "options": [
+              "Accélère SELECT/JOIN/WHERE, ralentit INSERT/UPDATE",
+              "Toujours néfaste",
+              "Automatique"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Transaction ACID :",
+            "options": [
+              "Atomicity, Consistency, Isolation, Durability",
+              "Uniquement Atomicity",
+              "Async"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/sql-server/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Query plans — comprendre le moteur",
+      "bodyMd": "Un query plan est la stratégie d'exécution choisie par SQL Server pour une requête. On y voit l'ordre des opérations, les index utilisés, les estimations vs réel, les coûts relatifs. Sans query plan, tuner une requête = deviner. Avec, on cible.\n\n**Activer l'affichage** — SET SHOWPLAN_XML ON ou Ctrl+M dans SSMS (Include Actual Execution Plan).\n\n**Types d'opérations** — Index Seek (bon), Index Scan (moyen), Table Scan (mauvais), Hash Join (grosses données), Nested Loop (petites).\n\n**Coûts relatifs** — % du coût total par opération. Cibler les 20% des ops qui coûtent 80% du temps.\n\n**Estimations vs réel** — Différence énorme = statistiques obsolètes (UPDATE STATISTICS).\n\n**Missing index hints** — SQL Server suggère parfois un index qui accélérerait — à évaluer, pas à appliquer aveuglément.\n\n**À retenir :** 50% des requêtes lentes se règlent avec le bon index + stats à jour. Le query plan te dit lequel manque. Toujours regarder AVANT de deviner.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Always On Availability Groups",
+      "bodyMd": "Always On AG (depuis SQL Server 2012) permet de répliquer un ensemble de bases (Availability Group) sur plusieurs répliques (jusqu'à 8). Bascule automatique en cas de crash primary. Read-only sur les replicas pour offloader les lectures.\n\n**Primary + secondaries** — 1 primary en RW, 1-8 secondaires en RO. Réplication synchrone (0 perte) ou asynchrone (perf).\n\n**Windows Server Failover Clustering** — Base sous-jacente. Détecte pannes primary, bascule listener automatiquement.\n\n**Listener virtual name** — Nom DNS + IP virtuelle qui pointe vers le primary. L'app y accède, elle ignore la topologie.\n\n**Read-only routing** — Les clients avec ApplicationIntent=ReadOnly sont routés vers un secondary. Offloading reporting.\n\n**Basic AG vs Enterprise** — Basic (Standard Edition) : 1 secondary, no read-only. Enterprise : 8 secondaries + toutes features.\n\n**À retenir :** Always On AG est le standard 2020s pour HA SQL Server. Réplication log-shipping historique reste utilisé pour disaster recovery inter-site.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Backups + Recovery — la survie de la data",
+      "bodyMd": "- Full backup : hebdomadaire minimum, snapshot complet de la base\n- Differential backup : entre 2 full, capture les changements — plus rapide\n- Log backup : toutes les 15 min en mode FULL recovery — point-in-time restore possible\n- Règle 3-2-1 : 3 copies, 2 supports (disque + tape/cloud), 1 off-site\n- Test de restore mensuel — un backup non testé n'est pas un backup\n- RPO (Recovery Point Objective) : perte data max acceptable. RTO (Recovery Time) : temps pour restaurer\n\n💡 Documenter procédure de restore. Le jour où ça arrive, personne n'a le temps de réfléchir — on suit la procédure testée. Pas de procédure = catastrophe.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Query plan :",
+            "options": [
+              "Décomposition d'exécution — indispensable pour tuning",
+              "Uniquement pour DBAs",
+              "Inaccessible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Stored procedure vs SQL raw :",
+            "options": [
+              "SP = compilé + réutilisable + audité, moins vulnérable SQL injection",
+              "Identique",
+              "SP obsolète"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Réplication SQL Server :",
+            "options": [
+              "Log shipping, Always On AG, Merge — plusieurs patterns HA/DR",
+              "Impossible",
+              "Toujours async"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Backup 3-2-1 :",
+            "options": [
+              "3 copies, 2 supports, 1 off-site — standard IT",
+              "Uniquement local",
+              "1 copie suffit"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "SQL injection prevention :",
+            "options": [
+              "Paramétrer les requêtes, jamais concaténer strings user input",
+              "Impossible à éviter",
+              "SP uniquement"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Columnstore index :",
+            "options": [
+              "Optimisé analytics OLAP, 10-100× plus rapide sur grosses agrégations",
+              "Ancien",
+              "Inutile"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/sql-server/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Passer à l'action",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Installer SQL Server Developer Edition (gratuit) + SSMS et refaire les exercices\n- Analyser un query plan de votre app en prod — identifier un index manquant\n- Écrire une stored procedure pour une opération critique — plus jamais de SQL direct côté app\n- Vérifier vos backups : sont-ils testés récemment ? Sinon, planifier un exercice de restore\n\n💡 SQL Server est mature, documenté, avec une communauté énorme. Le SQL bien écrit reste précieux — les LLMs ne remplacent pas le vrai talent SQL.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/sql-server/slide-23.jpg"
+    }
+  ]
+}

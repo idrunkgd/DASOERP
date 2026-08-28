@@ -19,7 +19,8 @@ const COURSES = [
   "networking",
   "hivemq",
   "highbyte",
-  "openshift"
+  "openshift",
+  "sql-server"
 ];
 
 const prisma = new PrismaClient();
