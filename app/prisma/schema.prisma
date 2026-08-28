@@ -3079,6 +3079,9 @@ model CourseSlide {
   section  String?         // Ex: "NIVEAU 1 · DÉBUTANT"
   title    String
   bodyMd   String          @db.Text
+  /// URL vers l'image rendue de la slide (ex: capture PDF du PPTX).
+  /// Prioritaire sur bodyMd dans le viewer si présent.
+  imageUrl String?
   notes    String?         @db.Text // Speaker notes (admin only)
   /// Payload quiz (kind = QUIZ) : { questions: [{prompt, options[], correctIndex}] }
   quiz     Json?

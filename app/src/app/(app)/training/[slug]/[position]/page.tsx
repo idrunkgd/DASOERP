@@ -21,7 +21,7 @@ export default async function SlideViewer({
     select: {
       id: true, slug: true, title: true,
       slides: {
-        select: { id: true, position: true, kind: true, section: true, title: true, bodyMd: true, quiz: true }
+        select: { id: true, position: true, kind: true, section: true, title: true, bodyMd: true, imageUrl: true, quiz: true }
       }
     }
   });
@@ -58,9 +58,22 @@ export default async function SlideViewer({
         }
       />
 
-      {/* Corps de la slide — quiz interactif ou contenu texte */}
+      {/* Corps de la slide :
+          - QUIZ → runner interactif (avec image du PPT au-dessus pour contexte si dispo)
+          - CONTENT → image PPT si disponible, sinon texte brut extrait */}
       {slide.kind === "QUIZ" && quizQuestions?.length ? (
-        <QuizRunner slideId={slide.id} questions={quizQuestions} />
+        <>
+          {slide.imageUrl && (
+            <div className="card p-2 mb-4 flex justify-center bg-midnight-50/30">
+              <img src={slide.imageUrl} alt={slide.title} className="max-w-full rounded" />
+            </div>
+          )}
+          <QuizRunner slideId={slide.id} questions={quizQuestions} />
+        </>
+      ) : slide.imageUrl ? (
+        <div className="card p-2 flex justify-center bg-midnight-50/30">
+          <img src={slide.imageUrl} alt={slide.title} className="max-w-full rounded shadow-sm" />
+        </div>
       ) : (
         <article className="card p-6 md:p-8 prose prose-sm max-w-none text-midnight-900 whitespace-pre-wrap">
           {slide.bodyMd || <em className="text-midnight-400">Contenu non renseigné.</em>}

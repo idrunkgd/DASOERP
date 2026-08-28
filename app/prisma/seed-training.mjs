@@ -49,6 +49,7 @@ async function upsertCourse(slug) {
         section: s.section,
         title: s.title,
         bodyMd: s.bodyMd,
+        imageUrl: s.imageUrl ?? null,
         notes: s.notes,
         quiz: s.quiz
       }))

@@ -20,6 +20,7 @@ interface SeedSlide {
   section: string | null;
   title: string;
   bodyMd: string;
+  imageUrl?: string | null;
   notes: string | null;
   quiz: { questions: Array<{ prompt: string; options: string[]; correctIndex: number }> } | null;
 }
@@ -79,6 +80,7 @@ export async function importCourseFromSeed(slug: string) {
         section: s.section,
         title: s.title,
         bodyMd: s.bodyMd,
+        imageUrl: s.imageUrl ?? null,
         notes: s.notes,
         quiz: s.quiz as any
       }))
