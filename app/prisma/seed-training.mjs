@@ -18,7 +18,8 @@ const COURSES = [
   "industrial-protocols",
   "networking",
   "hivemq",
-  "highbyte"
+  "highbyte",
+  "openshift"
 ];
 
 const prisma = new PrismaClient();
