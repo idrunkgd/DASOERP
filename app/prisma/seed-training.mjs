@@ -16,7 +16,8 @@ const COURSES = [
   "wincc-scada",
   "siemens-hardware",
   "industrial-protocols",
-  "networking"
+  "networking",
+  "hivemq"
 ];
 
 const prisma = new PrismaClient();

@@ -1,0 +1,410 @@
+{
+  "slug": "hivemq",
+  "title": "HiveMQ",
+  "subtitle": "Broker MQTT enterprise pour IIoT",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "HiveMQ",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "HiveMQ est le broker MQTT enterprise leader du marché. Utilisé par BMW, Airbus, Liberty Global, il gère des millions de connexions concurrentes avec des SLA production. Cette formation vous fait passer de zéro à un déploiement HiveMQ cluster sécurisé en prod, avec extensions Kafka pour l'ingestion cloud.\n\n**Comprendre MQTT en profondeur** — Topics, QoS, retained, LWT, session, keep-alive.\n\n**Installer et configurer HiveMQ** — Edition Community, Enterprise, Cloud — quand chacune convient.\n\n**Sécuriser en production** — TLS, auth username/pw, x509, custom extension JWT.\n\n**Déployer en cluster HA** — Multi-nodes, persistence RocksDB, load balancing.\n\n**Intégrer aux systèmes IT** — Extension Kafka pour ingestion cloud, Snowflake, Kinesis.\n\n**À retenir :** MQTT est trivial en concept, subtil en production. Un déploiement mal fait tombe sous charge — un bien fait tourne 5 ans sans intervention.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "MQTT — les fondamentaux",
+      "bodyMd": "MQTT (Message Queuing Telemetry Transport) a été créé par IBM et Arcom en 1999 pour surveiller un pipeline pétrolier via satellite. Bande passante minimale, latence élevée. Devenu standard OASIS, il domine l'IoT industriel. Modèle pub/sub avec broker central, protocole minuscule (overhead 2 bytes).\n\n**Pub/sub via broker central** — Les producers publient sur des topics, les consumers s'y abonnent. Broker route les messages.\n\n**Topics hiérarchiques** — Ex 'factory/lineA/machine1/temperature'. Séparateur /. Case-sensitive. Longueur libre.\n\n**QoS 0/1/2** — 0 = at-most-once (fire and forget). 1 = at-least-once (peut dupliquer). 2 = exactly-once (coûteux).\n\n**Retained messages** — Broker garde la dernière valeur d'un topic. Nouveau subscriber la reçoit immédiatement.\n\n**Last Will Testament** — Message envoyé automatiquement si le client se déconnecte anormalement (crash, timeout).\n\n**À retenir :** MQTT excelle en IoT car overhead minimal (2 bytes en QoS 0) et gestion connexions instables (retry auto). Coût : pas de garantie ordre inter-topics.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "HiveMQ Community vs Enterprise",
+      "bodyMd": "**HiveMQ COMMUNITY (open source)**\n- Broker single-node, gratuit, Apache 2.0\n- MQTT 3.1, 3.1.1, 5.0 supportés\n- Extensions Java custom possibles\n- Pas de cluster natif — un seul node\n- Cible : dev, test, petit déploiement <10k connexions\n- Pas de support commercial\n\n**HiveMQ ENTERPRISE (payant)**\n- Cluster HA natif, multi-nodes\n- Extensions officielles : Kafka, Kinesis, Snowflake, Google Pub/Sub\n- Console web admin + monitoring intégré\n- Persistence disque RocksDB, réplication cluster\n- Cible : prod, IIoT critique, 100k-10M connexions\n- Support 24/7 SLA garanti\n\n**À retenir :** Community pour valider un POC, Enterprise dès qu'on passe en prod critique. HiveMQ Cloud (SaaS) = alternative pour ne pas gérer l'infra.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Publier/subscribe avec paho-mqtt",
+      "bodyMd": "paho-mqtt est LA bibliothèque cliente Python MQTT — développée par Eclipse Foundation. Elle gère connexion, retry, QoS, TLS. En 30 lignes on a un capteur simulé qui publie une température toutes les 5s.\n\n```\nimport paho.mqtt.client as mqtt\nimport json\nimport time\nimport random\n\n# ─── Producer : capteur simulé ───\nproducer = mqtt.Client(client_id=\"sensor-line-A-01\")\nproducer.username_pw_set(\"dev_user\", \"dev_password\")\nproducer.tls_set()  # TLS activé si port 8883\n\nproducer.connect(\"hivemq.factory.lan\", port=8883, keepalive=60)\n\nwhile True:\n    reading = {\n        \"timestamp\": int(time.time() * 1000),\n        \"temperature\": round(20 + random.random() * 15, 2),\n        \"vibration\": round(random.random() * 0.5, 3),\n        \"status\": \"ok\"\n    }\n    producer.publish(\n        topic=\"factory/lineA/machine1/telemetry\",\n        payload=json.dumps(reading),\n        qos=1,\n        retain=True   # dernier reading dispo pour tout nouvel abonné\n    )\n    time.sleep(5)\n\n# ─── Consumer : dashboard ───\ndef on_message(client, userdata, msg):\n    payload = json.loads(msg.payload)\n    print(f\"{msg.topic} → {payload}\")\n\nconsumer = mqtt.Client(client_id=\"dashboard-01\")\nconsumer.username_pw_set(\"dashboard_user\", \"dashboard_password\")\nconsumer.tls_set()\nconsumer.on_message = on_message\n\nconsumer.connect(\"hivemq.factory.lan\", port=8883, keepalive=60)\nconsumer.subscribe(\"factory/lineA/#\", qos=1)  # tous les topics sous lineA\nconsumer.loop_forever()\n```\n\n**À retenir :** En production : gérer reconnexion auto (paho le fait), certificats TLS (jamais tls_insecure=True), et logs client-side pour diagnostiquer.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Wildcards dans les subscriptions",
+      "bodyMd": "- '+' : match exactement un niveau (factory/+/temperature capte factory/lineA/temperature ET factory/lineB/temperature)\n- '#' : match tous les sous-niveaux, doit être en fin de topic (factory/# capte tout sous factory/)\n- Impossible d'utiliser '+' et '#' à publish — uniquement pour subscribe\n- Subscription sans wildcard = topic exact\n- Attention aux abonnements trop larges (# à la racine) — peut noyer le consumer\n- Broker filtre côté serveur — le consumer reçoit uniquement les matches\n\n💡 En production, éviter '#' racine. Structurer les topics pour permettre des abonnements ciblés — c'est la différence entre un système scalable et un système qui saturera.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "HiveMQ est :",
+            "options": [
+              "Un broker MQTT enterprise",
+              "Un langage",
+              "Un OS"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "MQTT signifie :",
+            "options": [
+              "Message Queuing Telemetry Transport",
+              "Multi-Queue TCP",
+              "Massive Query TT"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Un topic MQTT est :",
+            "options": [
+              "Un chemin hiérarchique de subscription",
+              "Une adresse IP",
+              "Un port TCP"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "QoS 0 signifie :",
+            "options": [
+              "At-most-once, peut perdre",
+              "Exactly-once",
+              "Fiable"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Port MQTT non-TLS :",
+            "options": [
+              "502",
+              "1883",
+              "8080"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Retained message :",
+            "options": [
+              "Broker garde la dernière valeur pour nouveau subscriber",
+              "Suppression auto",
+              "Log local"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/hivemq/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Sécurité MQTT en production",
+      "bodyMd": "MQTT non sécurisé = vulnérable. TLS obligatoire en prod. Authentification par credentials (simple) ou certificats x509 (recommandé). Fine-grained ACL sur topics pour limiter qui peut publier/subscribe où.\n\n**TLS 1.3 minimum** — Port 8883 obligatoire. Certificat CA propre à l'organisation. Bannir TLS < 1.2.\n\n**Auth username/password** — Passe encore mais préférer x509 client cert pour IoT. Rotation des credentials trimestrielle.\n\n**Auth x509 client cert** — Chaque device a son certificat unique. Révocation via CRL ou OCSP. Perte device = révoquer son cert.\n\n**ACL par topic** — Restreindre publish/subscribe par utilisateur. Ex 'sensor-*' ne peut publier que sur 'factory/+/telemetry'.\n\n**Custom auth extension** — HiveMQ permet d'écrire une extension Java custom (ex JWT, LDAP, Keycloak). Puissant pour infra existante.\n\n**À retenir :** Un broker MQTT en prod sans TLS + auth stricte = compromis en 24h. Toujours partir d'une matrice qui publie quoi où, avant même le code.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Sparkplug B — le standard IIoT",
+      "bodyMd": "Sparkplug B est une spec OSS Eclipse au-dessus de MQTT qui apporte : payload binaire compact (Protocol Buffers), gestion d'état natif (birth/death), structure de topics normalisée (spBv1.0/group/edge/device). Cursor Automation + Ignition l'ont popularisé. HiveMQ le supporte nativement.\n\n**Topics normalisés** — Structure fixe : spBv1.0/{group_id}/{message_type}/{edge_node_id}/{device_id}.\n\n**Messages types** — NBIRTH/NDEATH (edge node), DBIRTH/DDEATH (device), NDATA/DDATA (data updates), NCMD/DCMD (commands).\n\n**Payload Protobuf** — Compact, versionné, self-describing. Types natifs : bool, int32, int64, float, double, string, bytes.\n\n**State management** — Broker sait qui est online (BIRTH reçu) et offline (DEATH via LWT). Fin des états incertains.\n\n**Adoption** — Ignition, Ignition Edge, HiveMQ, AWS IoT SiteWise. Standard émergent pour IIoT 2024+.\n\n**À retenir :** Sparkplug B corrige les faiblesses MQTT nu pour l'industriel : payload structuré + gestion d'état + convention topics. À privilégier en greenfield IIoT.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "HiveMQ Cloud vs Edge :",
+            "options": [
+              "Cloud managé vs edge on-prem",
+              "Identique",
+              "Alternatives incompatibles"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Wildcard + dans topic :",
+            "options": [
+              "Un seul niveau (factory/+/temp)",
+              "Tous les niveaux",
+              "Exact match"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Wildcard # dans topic :",
+            "options": [
+              "Tous les sous-niveaux (factory/#)",
+              "Un niveau",
+              "Chiffre uniquement"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Last Will Testament (LWT) :",
+            "options": [
+              "Message envoyé si client se déconnecte anormalement",
+              "Testament écrit",
+              "Login"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "HiveMQ Sparkplug B :",
+            "options": [
+              "Standard IIoT au-dessus de MQTT (état + payload structuré)",
+              "Chiffrement",
+              "Base de données"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Auth MQTT :",
+            "options": [
+              "Anonyme, credentials, x509, custom (JWT)",
+              "Uniquement anonyme",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/hivemq/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "HiveMQ cluster HA",
+      "bodyMd": "En Enterprise, HiveMQ tourne en cluster multi-nodes. Chaque node peut recevoir des connexions, les subscriptions sont répliquées, les messages routés entre nodes. Load balancer (F5, HAProxy) en amont distribue les nouvelles connexions.\n\n**Discovery** — Nodes se découvrent via broadcast, DNS ou config statique. Ajout de node à chaud possible.\n\n**Réplication** — Subscriptions et retained messages répliqués sur tous les nodes. QoS 1/2 persistés RocksDB.\n\n**Sticky sessions** — Un client reste sur le même node tant qu'il est connecté. Reconnexion peut aller sur autre node.\n\n**Split brain** — Consensus algorithm (Raft-like) évite le split brain en cas de partition réseau. Nodes minoritaires refusent connexions.\n\n**Dimensionnement** — 1M connexions = ~4 nodes 16 vCPU/64 Go RAM. 10M = ~40 nodes. Scaling horizontal linéaire.\n\n**À retenir :** Un cluster HiveMQ bien dimensionné supporte 10M+ connexions sans se plaindre. Sous-dimensionnement = latence + drops. Toujours prévoir 30% headroom.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Extension Kafka — le pont vers l'IT",
+      "bodyMd": "L'extension HiveMQ Kafka relaie automatiquement les messages MQTT vers un cluster Kafka. Topic MQTT → topic Kafka avec mapping configurable. Permet d'exploiter tout l'écosystème Kafka (Kafka Streams, Connect vers S3/Snowflake, ksqlDB) sur les données IIoT.\n\n**Mapping topics** — Configuration YAML : factory/+/temperature → kafka topic 'factory-temperature'. Transformations JSONPath possibles.\n\n**Payload conversion** — Passthrough (bytes tels quels) ou transformation JSON → Avro pour Schema Registry Kafka.\n\n**Cluster Kafka cible** — Broker Kafka on-prem (Confluent, Apache) ou managé (MSK, Confluent Cloud). Auth SASL, TLS.\n\n**Backpressure** — Si Kafka lent : queue interne HiveMQ + retry. Config timeout et taille max queue critique.\n\n**Cas d'usage** — Ingestion IIoT vers data lake, alertes en temps réel (Kafka Streams), machine learning (features en temps réel).\n\n**À retenir :** L'extension Kafka fait de HiveMQ le point d'entrée IIoT vers l'IT. Design pattern moderne : MQTT edge → HiveMQ cluster → Kafka → analytics/ML/storage.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Monitoring et tuning HiveMQ",
+      "bodyMd": "- Metrics : connexions actives, msg/s in/out, latence publish, latence delivery, backpressure\n- Prometheus + Grafana natif via extension Prometheus\n- Alertes sur : latence > 100ms, connections drops > 5%/min, queue > 80% capacité\n- Tuning JVM : heap 8-16 Go typique, G1GC, GC pauses < 100 ms\n- Tuning OS : file descriptors 100k+, TCP tuning, network buffers\n- Backups RocksDB : snapshot périodique persistance + config\n\n💡 Un broker MQTT en prod DOIT être monitoré. Sans metrics, on ne voit pas la dégradation lente avant qu'il soit trop tard. Prometheus + Grafana + alertes = base.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "HiveMQ cluster :",
+            "options": [
+              "Plusieurs nodes en HA, load-balancing subscribers",
+              "Un seul serveur",
+              "Base SQL"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Persistence en HiveMQ :",
+            "options": [
+              "Messages persistés disque + en cluster (RocksDB)",
+              "Uniquement RAM",
+              "S3 obligatoire"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "HiveMQ Enterprise Extensions :",
+            "options": [
+              "Plugins pour Kafka, Snowflake, Kinesis, custom auth",
+              "Payant obligatoire",
+              "Un cours"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "MQTT 5 vs 3.1.1 :",
+            "options": [
+              "MQTT 5 ajoute properties, session expiry, shared subs",
+              "Identiques",
+              "Incompatibles"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Shared subscriptions :",
+            "options": [
+              "Plusieurs consumers se partagent un topic (load balance)",
+              "Impossible",
+              "Uniquement MQTT 3"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "HiveMQ vs Mosquitto :",
+            "options": [
+              "HiveMQ enterprise (cluster, extensions), Mosquitto simple/OSS",
+              "Identiques",
+              "Incompatibles"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/hivemq/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Passer à l'action",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Installer HiveMQ Community en Docker et jouer avec MQTT Explorer\n- Lire la HiveMQ MQTT Essentials series — référence gratuite\n- Pour un projet IIoT greenfield 2026 : Sparkplug B + HiveMQ Cloud + extension Kafka vers Snowflake\n- S'inscrire à HiveMQ Academy — formation gratuite en ligne\n\n💡 L'IIoT explose. Savoir concevoir une architecture MQTT + broker + ingestion cloud est un skill rare et valorisé.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/hivemq/slide-23.jpg"
+    }
+  ]
+}
