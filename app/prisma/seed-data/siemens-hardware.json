@@ -1,0 +1,470 @@
+{
+  "slug": "siemens-hardware",
+  "title": "Matériel PLC Siemens",
+  "subtitle": "SIMATIC : S7-300/400 vers S7-1500 + ET 200 périphérie",
+  "level": "Débutant à Expert",
+  "duration": "3 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "Matériel PLC Siemens",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-01.jpg"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "Le matériel SIMATIC est riche : 4 gammes CPU actives + une gamme historique, dizaines de modules E/S, périphériques déportés ET 200, F-modules sécurité, redondance H. Cette formation vous fait naviguer entre les gammes, comprendre quand choisir laquelle, et devenir efficace en câblage/mise en service.\n\n**Gammes CPU actives** — S7-1200 (compact), S7-1500 (modulaire), S7-1500F (sécurité), S7-1500H (redondance).\n\n**Périphérie déportée** — ET 200SP (haute densité), ET 200MP (blockstyle S7-1500 similaire), ET 200S (fin de vie).\n\n**Modules E/S** — TOR standard, analogique, technologique (comptage rapide, PWM), sécurité F, communication.\n\n**Dimensionnement** — Choisir CPU + alim + modules + accessoires selon besoins projet, avec marge évolution.\n\n**Mise en service** — Câblage propre, adressage Profinet, tests de sanity avant download programme.\n\n**À retenir :** SIMATIC = investissement 15-20 ans en production. Choisir la bonne gamme au départ économise 3× le coût initial en cycle de vie.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-02.jpg"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-03.jpg"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Prérequis et environnement de lab",
+      "bodyMd": "- Notions d'électricité industrielle : 24 VDC, câblage 3 fils, blindage, terre\n- Base cours 'Programmation PLC générique' et 'TIA Portal' recommandée\n- Multimètre + pince ampèremétrique pour le câblage\n- Documentation technique SIMATIC (téléchargeable Siemens Industry Online Support)\n- TIA Portal V17+ + PLCSIM Advanced pour la simulation\n\n💡 Le hardware Siemens est excellent en documentation. Chaque module a une datasheet PDF de 40+ pages — la lire avant intervention évite bien des erreurs.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-04.jpg"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-05.jpg"
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Les 4 gammes CPU SIMATIC actives",
+      "bodyMd": "**S7-1200 (compact 2012+)**\n- CPU compacte format brique avec E/S intégrées\n- Signal Boards + Signal Modules extensibles\n- Ethernet + Profinet contrôleur limité\n- Cible : machines OEM 100-500 E/S, coût maîtrisé\n- Positionnement : successeur du S7-200\n- Coût ~800-1500 €\n\n**S7-1500 (modulaire 2013+)**\n- CPU sur fond de panier + modules E/S dédiés\n- Fonctions technologiques (motion, comptage, PID) intégrées\n- Ethernet + Profinet contrôleur multi-devices, MRP intégré\n- Cible : lignes de production, projets 500-10000 E/S\n- Positionnement : successeur du S7-300\n- Coût 3000-15000 €\n\n**À retenir :** Règle simple : machine unique OEM → 1200. Ligne de production, atelier, système redondé → 1500. La bascule 1200→1500 dans un projet coûte cher, choisir bien la première fois.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-06.jpg"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Anatomie d'une station S7-1500",
+      "bodyMd": "Un rack S7-1500 = PS (Power Supply) + CPU + modules E/S + accessoires. Chaque élément se clipse sur un rail DIN et s'interconnecte via un connecteur U (U-shape) qui forme le fond de panier.\n\n**PS (alim)** — PS 25W ou PS 60W. Convertit 120/230 VAC → 24 VDC + 5 VDC bus interne. Dimensionner selon conso totale.\n\n**CPU** — 1511, 1513, 1515, 1516, 1517, 1518 (CPU numérotées croissant en performance/mémoire).\n\n**Modules E/S** — SM 321 (TOR entrées), SM 322 (TOR sorties), SM 331 (analog entrées), SM 332 (analog sorties).\n\n**Modules technologiques** — TM (Technology Module) : comptage rapide, positionnement, PWM, encodeurs incrémentaux.\n\n**Modules communication** — CP (Communication Processor) : Profibus, Profinet, industrial Ethernet, GSM/GPRS.\n\n**À retenir :** Le fond de panier U-shape est autoporteur : les modules se raccordent au bus interne via ce connecteur clipsé. Perte d'un connecteur = perte de tous les modules à droite.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-07.jpg"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Dimensionner l'alimentation",
+      "bodyMd": "L'alimentation SIMATIC (PS module) fournit du 5 V DC au fond de panier pour alimenter les électroniques modules + 24 V DC en sortie pour les capteurs et pré-actionneurs. Sous-dimensionner = redémarrages aléatoires en charge.\n\n**Consommation modules** — Chaque module consomme en 5 V (bus interne) — indiqué en mA sur la datasheet. Faire la somme.\n\n**Marge de sécurité** — Prendre 30% de marge minimum. Un PS 25W peut fournir ~5A en 5V — vérifier vs total.\n\n**Alim 24V séparée** — Ne pas alimenter les E/S sur le PS SIMATIC (courant limité). Prévoir une alim 24V industrielle dédiée.\n\n**Redondance** — PS 100W avec deux modules PS 60W en parallèle possible sur S7-1500 (redondance chaud).\n\n**Diagnostic PS** — LEDs état + relais alarme + signal digital vers CPU si module en défaut.\n\n**À retenir :** Une alim sous-dimensionnée = bombe à retardement. Elle marche à l'installation puis lâche 6 mois après quand on ajoute des modules. Toujours 30% de marge minimum.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modules TOR (SM 321 / SM 322)",
+      "bodyMd": "- SM 321 DI (Digital Input) 24 VDC : 16 ou 32 entrées, filtrage anti-parasites configurable 0.1-20 ms\n- SM 322 DO (Digital Output) : sorties relais (2A/230V) ou transistor (0.5A/24V)\n- Câblage : borne + retour commun (M) ou individuel selon le module\n- Diagnostic module : LED par voie + signal défaut vers CPU (câble coupé, court-circuit)\n- Isolation galvanique typique 500V entre voies et bus (protège la CPU)\n- Adresses byte.bit : %I0.0 à %I0.7 pour la première voie, etc.\n\n💡 Utiliser toujours les modules 32 voies quand possible : moins cher au canal, moins d'encombrement rack.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-09.jpg"
+    },
+    {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modules analogiques (SM 331 / SM 332)",
+      "bodyMd": "Les modules analog convertissent les grandeurs continues (4-20 mA, 0-10 V, thermocouples PT100) en valeurs numériques utilisables par la CPU. Résolution 12 à 16 bits, temps de conversion variable, isolation galvanique.\n\n**SM 331 AI** — 4, 8 ou 16 voies analogiques. Types configurables par voie : 4-20 mA, 0-10 V, PT100, thermocouple J/K/T.\n\n**SM 332 AO** — 2, 4 ou 8 voies analogiques de sortie. 4-20 mA ou 0-10 V. Pour piloter variateurs, vannes proportionnelles.\n\n**Résolution** — 12 à 16 bits selon module. Pleine échelle 0-27648 (12 bits) ou -32768/+32767 (signé).\n\n**Temps de conversion** — 1 à 200 ms selon module et filtrage. Compromis vitesse/précision.\n\n**Câblage 2/3/4 fils** — PT100 en 3 fils (compensation câble), thermocouple en 2 fils avec compensation soudure froide.\n\n**À retenir :** Le 4-20 mA est LE standard industriel : détection fil coupé (I=0), immunité aux chutes de tension longue distance. Éviter le 0-10 V au-delà de 10-20 mètres.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-10.jpg"
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Adressage Profinet et device names",
+      "bodyMd": "Profinet est le protocole industriel Ethernet Siemens. Chaque device (CPU, module déporté, HMI, drive) a un nom unique (device name) + une adresse IP. Le nom est attribué à la mise en service via TIA — pas le hardware directement.\n\n**Device name** — Chaîne unique sur le réseau : ex 'et200sp-1'. Sensible à la casse, lettres/chiffres/- autorisés.\n\n**IP address** — Assignée par la CPU contrôleur au démarrage (DHCP-like) ou fixée en HW config.\n\n**Attribution du nom** — Menu TIA 'Assign device name' → scanner le réseau → attribuer le nom au device physique (via MAC).\n\n**Doublons de nom** — Deux devices avec le même nom = alarme + CPU en défaut. Attention au clonage projet.\n\n**Diagnostic Profinet** — PN Explorer, TIA online, LED status devices, diagnostic buffer CPU pour les erreurs comm.\n\n**À retenir :** L'oubli le plus fréquent en mise en service : les device names non attribués. La CPU voit les devices en 'unknown' et refuse de démarrer. Toujours passer par Assign device name avant download.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-11.jpg"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-12.jpg"
+    },
+    {
+      "position": 13,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "S7-1500 est édité par :",
+            "options": [
+              "Rockwell",
+              "Siemens",
+              "Schneider"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "SIMATIC S7-300 est :",
+            "options": [
+              "Nouvelle gamme 2024",
+              "Gamme historique en fin de vie",
+              "PLC de sécurité uniquement"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "L'alimentation PS 25W fournit :",
+            "options": [
+              "5 V DC pour le fond de panier",
+              "24 V DC en sortie",
+              "230 V AC"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un module TOR SM 321 lit :",
+            "options": [
+              "Entrées analogiques",
+              "Entrées TOR 24 VDC",
+              "Comm série"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Le fond de panier S7-1500 utilise :",
+            "options": [
+              "Backplane U-shape",
+              "Rail DIN + connecteur",
+              "USB en série"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "CPU 1515-2 PN est :",
+            "options": [
+              "S7-1500 milieu de gamme",
+              "S7-300",
+              "S7-400"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/siemens-hardware/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "ET 200 — la périphérie déportée",
+      "bodyMd": "Plutôt que de câbler 200 fils vers l'armoire centrale, on déporte des stations ET 200 près des équipements. Un seul câble Profinet relie les stations au contrôleur. Économie massive en câble et en montage, ainsi que meilleure fiabilité.\n\n**ET 200SP** — Haute densité, blockstyle format S7-1500. Recommandé pour tous nouveaux projets 2020+.\n\n**ET 200MP** — Format identique à un rack S7-1500. Pratique pour homogénéiser l'apparence armoire.\n\n**ET 200S** — Ancienne gamme, fin de vie 2027. À éviter en nouveau projet.\n\n**ET 200pro** — Pour montage direct sur machine (IP67), sans armoire. Zones humides, ateliers modification fréquente.\n\n**Communication** — Profinet cyclic (RT) 1-10ms, isochronous (IRT) < 1ms pour motion synchronized.\n\n**À retenir :** En 2026, un projet nouveau utilise ET 200SP + Profinet. ET 200MP si contrainte visuelle. Éviter ET 200S (fin de vie) et Profibus (déprécié).",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Profinet vs Profibus",
+      "bodyMd": "**PROFIBUS (RS-485 série)**\n- Gamme historique 1993-2015\n- Câble spécifique (blindé, 2 fils torsadés, terminateurs)\n- Vitesses 9.6 kbit/s à 12 Mbit/s\n- Fin de fabrication annoncée Siemens (support jusqu'à 2030 environ)\n- Cible en 2026 : migration urgente sur nouveaux projets\n- Encore massif dans l'existant industriel\n\n**PROFINET (Ethernet)**\n- Ethernet industriel — RJ45 standard, câble Cat5e/6\n- 100 Mbit/s à 1 Gbit/s (jusqu'à 10 Gbit/s en TSN)\n- Cyclic Real-Time (RT) déterministe 1-10 ms\n- Isochronous Real-Time (IRT) < 1 ms pour motion\n- Cible en 2026 : standard pour tous nouveaux projets\n- Compatible OPC UA, MRP, PROFIsafe\n\n**À retenir :** Toute nouvelle installation en 2026 doit être Profinet. Profibus reste pour rétrofit sur existant — mais planifier la migration à moyen terme.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-16.jpg"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Modules technologiques (TM)",
+      "bodyMd": "- TM Count 2x24V : comptage rapide jusqu'à 1 MHz — impossible en scan classique\n- TM Pulse : génération PWM ou trains d'impulsions pour pas-à-pas\n- TM PosInput : lecture encodeur incrémental ou SSI absolu\n- TM ECC : contrôleur de moteur DC intégré (petites puissances)\n- TM MFP : Multi-Function Platform — programmable en C pour algorithmes custom\n- Bus arrière traité en priorité par la CPU pour latence <1 ms\n\n💡 Un TM Count coûte plus cher qu'un module TOR standard mais évite d'écrire du code de comptage haute vitesse — plus rapide, plus fiable, moins de bug.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-17.jpg"
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Signal Board 1200 — extension compacte",
+      "bodyMd": "Une S7-1200 est une CPU compacte avec E/S intégrées. Quand il manque 2 E/S mais qu'on ne veut pas monter un rack de modules, on visse un Signal Board directement sur la face de la CPU — 2 E/S supplémentaires sans surcoût d'encombrement.\n\n**Format compact** — Cassette qui se clipse sur la face avant CPU, connecteur borne à ressort.\n\n**Types disponibles** — 2 DI/2 DO 24V, 1 AI 12 bits, 1 AO 12 bits, communication RS-485/232.\n\n**Limitation à 1 SB par CPU** — Une CPU 1200 accepte 1 seul Signal Board — au-delà, prévoir des SM classiques.\n\n**Coût** — 50-150 € vs 200-400 € pour un SM avec rack. Optimal pour ajouter juste ce qui manque.\n\n**Non disponible en S7-1500** — S7-1500 exige des SM sur rack. Signal Board reste spécifique 1200.\n\n**À retenir :** Signal Board = solution élégante pour un besoin ponctuel limité. Idéal pour '2 E/S manquantes en fin de projet' — évite un rack supplémentaire.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "ET 200SP est :",
+            "options": [
+              "Périphérie déportée haute densité",
+              "CPU",
+              "HMI"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Profinet vs Profibus :",
+            "options": [
+              "Profinet Ethernet, Profibus série",
+              "Identiques",
+              "Profibus plus rapide"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Module analogique SM 331 :",
+            "options": [
+              "8 entrées 4-20 mA ou 0-10 V",
+              "8 sorties TOR",
+              "Comm Modbus"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Signal Board 1200 :",
+            "options": [
+              "Extension E/S compacte sur CPU 1200",
+              "Alim",
+              "Adaptateur bus"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "MMC (memory card) :",
+            "options": [
+              "Stocke programme + config CPU",
+              "Uniquement licences",
+              "Réserve batterie"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "PROFIsafe utilise :",
+            "options": [
+              "Profinet/bus normal + protocole sécurisé au-dessus",
+              "Un câble dédié",
+              "Sans lien avec Profinet"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/siemens-hardware/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "S7-1500H — redondance CPU",
+      "bodyMd": "Un système H utilise 2 CPU S7-1500H reliées par câble sync fibre optique. Les 2 exécutent le même programme en parallèle, la CPU secondaire prend le relais en <100 ms si le maître défaille. Investissement significatif mais indispensable en criticité vitale.\n\n**Deux CPU + sync link** — H-Sync : câbles fibre optique redondants entre les 2 CPU. Perte des 2 = dégradation.\n\n**Racks séparés** — Chaque CPU sur son propre rack + alim + modules. Séparation physique pour panne d'alim, incendie.\n\n**Bascule automatique** — Détection défaut CPU maître via sync link → CPU secondaire prend le relais en <100 ms.\n\n**E/S partagées** — Modules E/S accessibles aux 2 CPU via Profinet (ET 200SP HF avec 2 IM redondées).\n\n**Coût élevé** — ×2 CPU + ×2 IM ET 200 + câbles fibre + licence redondance. Justifiable si arrêt = >10k € /min.\n\n**À retenir :** H systems justifiés uniquement si arrêt coûte >>> redondance. Pour la plupart des lignes de production, un simplex + rechange rapide est plus économique.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "F-CPU et F-modules — sécurité fonctionnelle",
+      "bodyMd": "Une F-CPU S7-1500F contient un cœur F (Fail-safe) qui exécute en parallèle le programme sécurité. Deux processeurs internes s'auto-comparent — la moindre divergence → passage immédiat en état sûr. Les F-modules E/S ont 2 canaux redondés et diagnostic intégré.\n\n**F-CPU** — S7-1512F, 1515F, 1516F, 1517F. Fonctionne aussi comme CPU standard pour la logique procédé non-safety.\n\n**F-modules E/S** — SM 326 DI F (entrées sûres 24V), SM 326 DO F (sorties sûres), F-Analog. 2 canaux redondés + diagnostic câble.\n\n**Certification SIL** — SIL 3 selon IEC 61508. Cat. 4 PL e selon ISO 13849. Documentation TÜV disponible Siemens.\n\n**PROFIsafe** — Protocole safety qui encapsule les données F dans Profinet/Profibus normal. Détection de perte trame.\n\n**État sûr = 0** — Convention : sortie F passe à 0 (dé-énergisé) en cas de défaut. L'actionneur revient à sa position de repos.\n\n**À retenir :** F-PLC ≠ PLC classique + prudence. C'est du matériel certifié + programme certifié + tests d'acceptation validés par organisme (TÜV, exida). Sans cela : pas de valeur juridique en cas d'accident.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "ATEX — zones explosives",
+      "bodyMd": "- Directive ATEX 2014/34/EU pour équipements en atmosphère explosive\n- Zones 0/1/2 (gaz) et 20/21/22 (poussières) selon fréquence présence explosif\n- Modules SIMATIC Ex : SM 331/332 Ex avec barrières intrinsèquement sûres intégrées\n- Alimentation limitée en énergie pour éviter l'ignition (Ex-i = intrinsically safe)\n- Certification obligatoire IECEx + marquage CE + documentation ATEX\n- Câblage bleu (convention couleur circuits Ex-i) + barrières séparation zone sûre/dangereuse\n\n💡 L'ATEX est un domaine réglementé strict. Ne pas improviser — toujours travailler avec un bureau d'études certifié + suivre les procédures de mise en service documentées.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Migration S7-300 → S7-1500",
+      "bodyMd": "S7-300 est en fin de vie chez Siemens. La migration vers S7-1500 n'est pas triviale : hardware complètement différent, différences de programmation subtiles, HMI à revoir, communications à porter. Planifier ~2-3 mois par projet.\n\n**Hardware** — Nouveau rack, nouvelle alim, nouveaux modules. Récupération ~10-20% des modules 300 sur 1500.\n\n**Programme** — Migration via TIA. STL → SCL (revue manuelle), M memory → DB (refonte).\n\n**HMI** — WinCC flexible → WinCC Comfort/Unified. Refonte partielle.\n\n**Communications** — Profibus (300) → Profinet (1500). Câbles + drivers à changer.\n\n**Effort réel** — 2-3 mois pour un projet moyen (500 E/S, HMI, 1 CPU). Sous-estimer = catastrophe.\n\n**À retenir :** Anticiper les migrations 300→1500 sur 2026-2028. Ne pas attendre l'arrêt de support pour lancer — trop tard, plus de composants.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "H systems S7-1500H nécessitent :",
+            "options": [
+              "Sync link fibre entre 2 CPU H",
+              "1 CPU seule",
+              "Alim redondée uniquement"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "F-CPU S7-1500F garantit :",
+            "options": [
+              "SIL 3 selon IEC 61508 pour fonctions sécurité",
+              "Meilleure vitesse programme",
+              "Redondance réseau"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Modules Ex sécurité intrinsèque :",
+            "options": [
+              "Pour zones ATEX (poussières inflammables)",
+              "Overclockables",
+              "Sans intérêt"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Migration S7-300 → S7-1500 :",
+            "options": [
+              "Nécessite refonte HW + programme, effort majeur",
+              "Automatique",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Distributed IO Profinet :",
+            "options": [
+              "ET 200SP/MP/M avec sync <1ms possible",
+              "Uniquement bus USB",
+              "Câble parallèle"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Firmware update S7-1500 :",
+            "options": [
+              "Via TIA Portal ou carte mémoire, procédure documentée",
+              "Automatique en ligne",
+              "Impossible"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": "/training/siemens-hardware/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Passer à l'action",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Télécharger le Siemens Selection Tool + naviguer les datasheets S7-1500/ET 200SP\n- Cartographier votre parc : quels PLC ? quelles fins de support prévues ? quelles migrations à planifier ?\n- Pour projet nouveau 2026 : S7-1500 + ET 200SP + Profinet + OPC UA — le pack de référence\n- Anticiper migrations 300 → 1500 sur 2026-2028\n\n💡 SIMATIC est un investissement long. Choisir bien au départ économise 3× le coût initial en cycle de vie 15-20 ans.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/siemens-hardware/slide-29.jpg"
+    }
+  ]
+}

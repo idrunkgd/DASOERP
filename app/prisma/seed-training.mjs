@@ -13,7 +13,8 @@ const COURSES = [
   "aveva-system-platform-2023",
   "plc-programming",
   "tia-portal",
-  "wincc-scada"
+  "wincc-scada",
+  "siemens-hardware"
 ];
 
 const prisma = new PrismaClient();
