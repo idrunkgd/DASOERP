@@ -74,4 +74,4 @@ HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=5 \
 # Appliquer migrations Prisma au démarrage puis lancer Next standalone.
 # On utilise le CLI bundled dans l'image (pas `npx`) → pas de download au boot,
 # et garantie que la version utilisée est exactement celle de package.json (5.22).
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node prisma/seed-training.mjs && node server.js"]

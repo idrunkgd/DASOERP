@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermissionOrRedirect, requireSession, getUserEffectivePermissions } from "@/lib/rbac";
+import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { GraduationCap, CheckCircle2, Clock, PlayCircle } from "lucide-react";
-import { ImportAvevaButton } from "./import-aveva-button";
+// Le cours AVEVA est semé automatiquement au démarrage du conteneur
+// (voir prisma/seed-training.mjs + Dockerfile CMD). Plus de bouton d'import.
 
 export const dynamic = "force-dynamic";
 
 export default async function TrainingPage() {
   const session = await requirePermissionOrRedirect("training.read");
-  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
-  const canManage = perms.includes("training.manage");
 
   const [courses, myProgress] = await Promise.all([
     prisma.course.findMany({
@@ -31,13 +30,11 @@ export default async function TrainingPage() {
       <PageHeader
         title="Formations techniques"
         subtitle="Cours slide-by-slide avec quiz interactifs — ta progression est sauvegardée"
-        actions={canManage ? <ImportAvevaButton /> : undefined}
       />
 
       {courses.length === 0 ? (
         <div className="card p-10 text-center text-sm text-midnight-500 italic">
-          Aucun cours publié.{" "}
-          {canManage && <>Clique sur « Importer la formation AVEVA » pour créer le premier.</>}
+          Aucun cours publié pour l'instant.
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

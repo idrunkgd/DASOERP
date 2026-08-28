@@ -39,8 +39,9 @@ interface SeedCourse {
 export async function importCourseFromSeed(slug: string) {
   const session = await requirePermission("training.manage");
 
-  // /src/lib/seed/<slug>.json — lu depuis le filesystem au runtime
-  const filePath = path.join(process.cwd(), "src", "lib", "seed", `${slug}.json`);
+  // prisma/seed-data/<slug>.json — dossier partagé avec le seed automatique
+  // exécuté au démarrage du conteneur (voir Dockerfile).
+  const filePath = path.join(process.cwd(), "prisma", "seed-data", `${slug}.json`);
   let raw: string;
   try {
     raw = await fs.readFile(filePath, "utf8");
