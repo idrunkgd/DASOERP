@@ -59,17 +59,11 @@ export default async function SlideViewer({
       />
 
       {/* Corps de la slide :
-          - QUIZ → runner interactif (avec image du PPT au-dessus pour contexte si dispo)
+          - QUIZ → runner interactif seul (pas d'image du PPT — l'user répond
+            directement dans l'interface)
           - CONTENT → image PPT si disponible, sinon texte brut extrait */}
       {slide.kind === "QUIZ" && quizQuestions?.length ? (
-        <>
-          {slide.imageUrl && (
-            <div className="card p-2 mb-4 flex justify-center bg-midnight-50/30">
-              <img src={slide.imageUrl} alt={slide.title} className="max-w-full rounded" />
-            </div>
-          )}
-          <QuizRunner slideId={slide.id} questions={quizQuestions} />
-        </>
+        <QuizRunner slideId={slide.id} questions={quizQuestions} />
       ) : slide.imageUrl ? (
         <div className="card p-2 flex justify-center bg-midnight-50/30">
           <img src={slide.imageUrl} alt={slide.title} className="max-w-full rounded shadow-sm" />
