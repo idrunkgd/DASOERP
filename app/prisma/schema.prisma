@@ -299,6 +299,8 @@ model User {
   validatedTimesheets TimesheetEntry[]   @relation("TimesheetValidator")
   planningEntries     PlanningEntry[]
   purchasesCreated    Purchase[]         @relation("PurchaseCreator")
+  purchaseOrdersCreated PurchaseOrder[]   @relation("POCreator")
+  purchaseOrdersSent    PurchaseOrder[]   @relation("POSender")
   attachmentsUploaded Attachment[]       @relation("AttachmentUploader")
   auditLogs           ActivityLog[]      @relation("ActivityLogActor")
   contactInteractions ContactInteraction[]
@@ -444,6 +446,7 @@ model Company {
   offers      Offer[]
   projects    Project[]
   purchases   Purchase[]    @relation("CompanyAsSupplier")
+  purchaseOrders PurchaseOrder[] @relation("CompanyAsPOSupplier")
   attachments Attachment[]  @relation("CompanyAttachments")
   missions    MissionRequest[]
   // Missions T&M exécutées chez ce client (consultant placé)
@@ -2942,4 +2945,88 @@ model DocumentSignature {
   @@index([userId, status])
   @@index([documentId, status])
   @@index([versionId, status])
+}
+
+// ═════════════════════════════════════════════════════════════════
+// Bons de commande fournisseur — Purchase Orders
+// ═════════════════════════════════════════════════════════════════
+// Distincts du modèle Purchase (qui trace une DÉPENSE réalisée).
+// Un PO est un document formel qu'on envoie au fournisseur AVANT
+// facturation : engagement d'achat avec réf, lignes, dates, total.
+// Workflow : DRAFT → SENT → ACKNOWLEDGED → RECEIVED (ou CANCELLED).
+
+enum PurchaseOrderStatus {
+  DRAFT         // brouillon, modifiable
+  SENT          // envoyé au fournisseur (mail parti)
+  ACKNOWLEDGED  // fournisseur a confirmé
+  RECEIVED      // marchandise/service livré
+  CANCELLED     // annulé
+}
+
+model PurchaseOrder {
+  id             String              @id @default(cuid())
+  reference      String              @unique  // PO-2026-0001
+  title          String                       // "Commande matériel PLC — Yara"
+  status         PurchaseOrderStatus @default(DRAFT)
+
+  supplierId     String?
+  supplier       Company?            @relation("CompanyAsPOSupplier", fields: [supplierId], references: [id], onDelete: SetNull)
+  /// Nom fournisseur en texte libre (si pas d'entrée Company)
+  supplierName   String?
+  /// Contact chez le fournisseur — nom + email pour l'envoi
+  contactName    String?
+  contactEmail   String?
+
+  /// Adresse de livraison (peut différer de Dasolabs — chez un client, chantier, etc.)
+  deliveryAddress String?
+  /// Date de livraison souhaitée
+  deliveryDate    DateTime?           @db.Date
+  /// Termes de paiement (ex: "30 jours net" — snapshot au moment de l'envoi)
+  paymentTerms    String?
+  /// Notes / conditions particulières
+  notes           String?
+
+  /// Snapshot du total au moment de l'émission — évite le recalcul si un
+  /// ligne change plus tard alors que le PO a déjà été envoyé.
+  totalHt         Decimal             @default(0) @db.Decimal(12, 2)
+  totalVat        Decimal             @default(0) @db.Decimal(12, 2)
+  totalTtc        Decimal             @default(0) @db.Decimal(12, 2)
+  currency        String              @default("EUR")
+
+  lines           PurchaseOrderLine[]
+
+  sentAt          DateTime?
+  sentBy          User?               @relation("POSender", fields: [sentById], references: [id], onDelete: SetNull)
+  sentById        String?
+  acknowledgedAt  DateTime?
+  receivedAt      DateTime?
+  cancelledAt     DateTime?
+  cancelledReason String?
+
+  createdById    String?
+  createdBy      User?                @relation("POCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([status])
+  @@index([supplierId])
+  @@index([createdAt])
+}
+
+model PurchaseOrderLine {
+  id             String        @id @default(cuid())
+  orderId        String
+  order          PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  position       Int           @default(0)
+  label          String                              // "Automate Siemens S7-1200 CPU 1214C"
+  description    String?                             // ligne longue optionnelle
+  quantity       Decimal       @default(1) @db.Decimal(10, 3)
+  unit           String?                             // "pièce", "h", "kg", "jour"
+  unitPriceHt    Decimal       @default(0) @db.Decimal(12, 2)
+  vatRate        Decimal       @default(21) @db.Decimal(5, 2)
+  totalHt        Decimal       @default(0) @db.Decimal(12, 2)
+
+  createdAt      DateTime      @default(now())
+
+  @@index([orderId, position])
 }

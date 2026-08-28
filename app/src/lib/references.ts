@@ -39,6 +39,14 @@ export async function nextMissionExecReference(year = new Date().getFullYear()):
   return `MIS-${year}-${String(count + 1).padStart(4, "0")}`;
 }
 
+/** Référence d'un bon de commande fournisseur : PO-AAAA-NNNN */
+export async function nextPurchaseOrderReference(year = new Date().getFullYear()): Promise<string> {
+  const start = new Date(year, 0, 1);
+  const end = new Date(year + 1, 0, 1);
+  const count = await prisma.purchaseOrder.count({ where: { createdAt: { gte: start, lt: end } } });
+  return `PO-${year}-${String(count + 1).padStart(4, "0")}`;
+}
+
 export async function nextProjectReference(year = new Date().getFullYear()): Promise<string> {
   const start = new Date(year, 0, 1);
   const end = new Date(year + 1, 0, 1);

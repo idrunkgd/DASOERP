@@ -59,6 +59,7 @@ const SECTIONS: Section[] = [
       { href: "/projects",    label: "Projets",               icon: FolderKanban,    perm: "projects.read" },
       { href: "/timesheet",   label: "Timesheets",            icon: Clock,           perm: "timesheet.self.write" },
       { href: "/purchases",   label: "Achats",                icon: ShoppingCart,    perm: "purchases.read" },
+      { href: "/purchase-orders", label: "Bons de commande", icon: FileText,     perm: "purchases.read" },
       { href: "/planning",    label: "Planning",              icon: CalendarRange,   perm: "planning.read" }
     ]
   },
