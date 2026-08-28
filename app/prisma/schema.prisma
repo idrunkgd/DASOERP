@@ -800,6 +800,7 @@ model Project {
   milestones         BillingMilestone[]
   timesheetEntries   TimesheetEntry[]
   purchases          Purchase[]
+  purchaseOrders     PurchaseOrder[]    @relation("ProjectPurchaseOrders")
   planningEntries    PlanningEntry[]
   attachments        Attachment[]   @relation("ProjectAttachments")
   reviews            ConsultantReview[] @relation("ProjectReviews")
