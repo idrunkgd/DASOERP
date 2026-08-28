@@ -27,11 +27,11 @@ export default async function PurchaseOrdersPage({
       orderBy: { createdAt: "desc" },
       include: {
         supplier: { select: { name: true } },
-        project: { select: { reference: true, title: true } }
+        project: { select: { reference: true, name: true } }
       }
     }),
     projectFilter
-      ? prisma.project.findUnique({ where: { id: projectFilter }, select: { reference: true, title: true } })
+      ? prisma.project.findUnique({ where: { id: projectFilter }, select: { reference: true, name: true } })
       : Promise.resolve(null)
   ]);
 
@@ -41,7 +41,7 @@ export default async function PurchaseOrdersPage({
         title="Bons de commande"
         subtitle={
           filteredProject
-            ? <>Filtré sur le projet <strong>{filteredProject.reference}</strong> — {filteredProject.title}. <Link href="/purchase-orders" className="text-indigoaccent hover:underline">Voir tous</Link></>
+            ? <>Filtré sur le projet <strong>{filteredProject.reference}</strong> — {filteredProject.name}. <Link href="/purchase-orders" className="text-indigoaccent hover:underline">Voir tous</Link></>
             : "Documents formels envoyés aux fournisseurs — réf PO-AAAA-NNNN"
         }
         actions={

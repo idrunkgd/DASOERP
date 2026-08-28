@@ -18,7 +18,7 @@ export default async function NewPurchaseOrderPage({
     }),
     prisma.project.findMany({
       orderBy: { createdAt: "desc" },
-      select: { id: true, reference: true, title: true }
+      select: { id: true, reference: true, name: true }
     })
   ]);
 

@@ -26,7 +26,7 @@ export default async function PurchaseOrderDetailPage({ params }: { params: { id
     where: { id: params.id },
     include: {
       supplier: true,
-      project: { select: { id: true, reference: true, title: true } },
+      project: { select: { id: true, reference: true, name: true } },
       lines: { orderBy: { position: "asc" } },
       createdBy: { select: { firstName: true, lastName: true } },
       sentBy: { select: { firstName: true, lastName: true } }
@@ -103,7 +103,7 @@ export default async function PurchaseOrderDetailPage({ params }: { params: { id
               <Link href={`/projects/${po.project.id}`} className="font-medium text-indigoaccent hover:underline">
                 {po.project.reference}
               </Link>
-              <div className="text-midnight-500 mt-0.5">{po.project.title}</div>
+              <div className="text-midnight-500 mt-0.5">{po.project.name}</div>
             </div>
           )}
 

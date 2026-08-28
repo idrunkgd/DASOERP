@@ -16,7 +16,7 @@ export default async function EditPurchaseOrderPage({ params }: { params: { id: 
       include: { lines: { orderBy: { position: "asc" } } }
     }),
     prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
-    prisma.project.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, reference: true, title: true } })
+    prisma.project.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, reference: true, name: true } })
   ]);
   if (!po) notFound();
   if (po.status !== "DRAFT") {

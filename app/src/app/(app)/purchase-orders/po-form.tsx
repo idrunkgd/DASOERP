@@ -38,7 +38,7 @@ export function POForm({
 }: {
   initial: POFormInitial;
   suppliers: Array<{ id: string; name: string }>;
-  projects: Array<{ id: string; reference: string; title: string }>;
+  projects: Array<{ id: string; reference: string; name: string }>;
 }) {
   const [title, setTitle] = useState(initial.title);
   const [projectId, setProjectId] = useState<string>(initial.projectId ?? "");
@@ -129,7 +129,7 @@ export function POForm({
           <label className="label">Projet lié (optionnel)</label>
           <select value={projectId} onChange={(e) => setProjectId(e.target.value)} className="input">
             <option value="">— Aucun (achat hors projet) —</option>
-            {projects.map((p) => <option key={p.id} value={p.id}>{p.reference} — {p.title}</option>)}
+            {projects.map((p) => <option key={p.id} value={p.id}>{p.reference} — {p.name}</option>)}
           </select>
           <p className="text-[10px] text-midnight-500 mt-1">Rattacher un PO à un projet permet de suivre le budget d'achats depuis la fiche projet.</p>
         </div>
