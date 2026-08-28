@@ -30,6 +30,7 @@ export type Permission =
   | "fleet.read"      | "fleet.manage"
   | "contracts.read"  | "contracts.manage"
   | "policies.read"   | "policies.manage"
+  | "training.read"   | "training.manage"
   | "audit.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
@@ -55,6 +56,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "leaves.read","leaves.write","leaves.approve","fleet.read","fleet.manage",
     "contracts.read","contracts.manage",
     "policies.read","policies.manage",
+    "training.read","training.manage",
     "audit.read"
   ],
   MANAGER: [
@@ -78,6 +80,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "leaves.read","leaves.write","leaves.approve","fleet.read","fleet.manage",
     "contracts.read","contracts.manage",
     "policies.read","policies.manage",
+    "training.read","training.manage",
     "audit.read"
   ],
   COMMERCIAL: [
@@ -95,7 +98,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "documents.read","documents.write",
     "expenses.read","expenses.write",
     "leaves.read","leaves.write","fleet.read",
-    "policies.read"
+    "policies.read","training.read"
   ],
   CONSULTANT: [
     "companies.read",
@@ -111,7 +114,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "tests.take",
     "expenses.read","expenses.write",
     "leaves.read","leaves.write","fleet.read",
-    "policies.read"
+    "policies.read","training.read"
   ],
   FINANCE: [
     "companies.read",
@@ -309,7 +312,9 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
     { value: "contracts.read",  label: "Contrats (lecture)" },
     { value: "contracts.manage",label: "Contrats (créer templates et générer)" },
     { value: "policies.read",   label: "Chartes & politiques (voir + signer les miens)" },
-    { value: "policies.manage", label: "Chartes & politiques (uploader et assigner)" }
+    { value: "policies.manage", label: "Chartes & politiques (uploader et assigner)" },
+    { value: "training.read",   label: "Formations techniques (suivre + passer les quiz)" },
+    { value: "training.manage", label: "Formations techniques (créer / éditer les cours)" }
   ]}
 ];
 
@@ -475,6 +480,10 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Chartes & politiques", href: "/policies", perms: [
         { value: "policies.read",   label: "Voir les politiques + signer les miennes" },
         { value: "policies.manage", label: "Uploader / éditer / assigner à signature" }
+      ]},
+      { menuLabel: "Formations techniques", href: "/training", perms: [
+        { value: "training.read",   label: "Suivre les cours + passer les quiz" },
+        { value: "training.manage", label: "Créer / éditer les cours (admin)" }
       ]}
     ]
   },

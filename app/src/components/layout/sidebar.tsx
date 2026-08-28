@@ -78,7 +78,8 @@ const SECTIONS: Section[] = [
       { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" },
       { href: "/fleet",       label: "Flotte véhicules", icon: Car,            perm: "fleet.read" },
       { href: "/contracts",   label: "Contrats",         icon: FileSignature,  perm: "contracts.read" },
-      { href: "/policies",    label: "Chartes & politiques", icon: FileText,   perm: "policies.read" }
+      { href: "/policies",    label: "Chartes & politiques", icon: FileText,   perm: "policies.read" },
+      { href: "/training",    label: "Formations techniques", icon: GraduationCap, perm: "training.read" }
     ]
   },
   {

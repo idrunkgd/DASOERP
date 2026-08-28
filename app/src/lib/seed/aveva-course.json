@@ -1,0 +1,1026 @@
+{
+  "slug": "aveva-system-platform-2023",
+  "title": "AVEVA System Platform",
+  "subtitle": "Formation complète — Débutant · Intermédiaire · Expert",
+  "level": "Débutant à Expert",
+  "duration": "3 à 4 jours (≈ 24 h)",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "d",
+      "bodyMd": "DASOLABS  ·  PARCOURS DE FORMATION\n\nAVEVA System Platform\nFormation complète — Débutant · Intermédiaire · Expert\n\nVERSION COUVERTE\nDURÉE\n2023 / 2023 R2\n3 à 4 jours (≈ 24 h)\nPUBLIC\nFORMAT\nAutomaticiens & ingénieurs OT\nThéorie · Démos · TP guidés",
+      "notes": "Formation complete AVEVA System Platform 2023 R2 - Dasolabs. Presenter le formateur, le deroule sur 3-4 jours et le fonctionnement des TP.",
+      "quiz": null
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Objectifs de la formation",
+      "bodyMd": "À l'issue du parcours, vous êtes capable de concevoir, déployer et maintenir une application System Platform de production.\n\n1\n3\nComprendre\nConstruire\nConnecter\nLe modèle ArchestrA, l'architecture de la Galaxy et le rôle de chaque composant de la suite.\nUne bibliothèque de templates réutilisables, des symboles paramétrés et une ViewApp InTouch OMI.\nAutomates et systèmes tiers via les OI Servers, OPC UA, l'Historian et les couches MES/UNS.\n\n4\n5\n6\nSécuriser\nIndustrialiser\nQualifier\nLe modèle d'authentification, les rôles, les permissions d'attributs et le durcissement réseau.\nRedondance, dimensionnement, Galaxy Dump/Load, gouvernance de bibliothèque et migration de version.\nDocumenter et tester une application en environnement réglementé (GAMP 5, IQ/OQ/PQ, Part 11).",
+      "notes": "Insister sur le fait que le parcours est cumulatif : chaque niveau reprend le lab du precedent.",
+      "quiz": null
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le parcours en trois niveaux",
+      "bodyMd": "Un seul fil rouge : la station de traitement d'eau « WTP-01 », enrichie de niveau en niveau.\n\n01\n02\n03\nDébutant\nIntermédiaire\nExpert\n≈ 8 h · théorie + TP\n≈ 8 h · théorie + TP\n≈ 8 h · théorie + TP\nConcepts ArchestrA & Galaxy\nIDE, templates, instances\nConnexion automate (OI Server)\nPremière ViewApp OMI\nDéploiement\nUDA & extensions d'attributs\nAlarmes et historisation\nScripting QuickScript.NET\nSymboles paramétrés & HP-HMI\nHistorian & sécurité\nArchitectures & redondance\nPerformance et diagnostic\nDump/Load, industrialisation\nMigration & cybersécurité\nQualification GxP, MES/UNS",
+      "notes": "Le fil rouge WTP-01 sert de support a tous les TP. Ne pas changer de cas d'usage en cours de route.",
+      "quiz": null
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Prérequis et environnement de lab",
+      "bodyMd": "Prérequis participants\nPoste de lab (par binôme)\nCulture automatisme : lecture d'un programme automate, notion d'E/S, de scan et de temps de cycle\nBases SCADA/HMI (InTouch, WinCC, Citect ou équivalent)\nWindows Server : services, comptes, pare-feu, gestion des rôles\nNotions de réseau industriel : adressage IP, VLAN, ports\nAucune connaissance préalable d'ArchestrA n'est requise\n\nÉlément\nConfiguration retenue\n\nOS\nWindows Server 2022 (ou Win 11 Pro)\n\nRAM / CPU\n16 Go / 4 vCPU minimum\n\nBase de données\nSQL Server 2019+ (Galaxy Repository)\n\nLogiciel\nAVEVA System Platform 2023 R2 — licence dev\n\nRôle machine\nGR Node + Runtime + IDE sur la même VM\n\nSource de données\nOI Simulator / OPC UA simulateur\n\nPOINT D'ATTENTION\n\nUne VM « tout-en-un » convient pour la formation mais ne représente pas une architecture de production : nous verrons au niveau 3 pourquoi séparer GR, runtime et clients.\nSNAPSHOT\nPrendre un snapshot de la VM à la fin de chaque niveau : cela permet de reprendre un TP raté sans bloquer le groupe.",
+      "notes": "Verifier avant le J1 que chaque poste demarre la Galaxy et que la licence de dev est active.",
+      "quiz": null
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Comment lire ce support",
+      "bodyMd": "Cinq types de contenus alternent tout au long du document.\n\nThéorie\n\nLe concept, le vocabulaire officiel AVEVA et le pourquoi.\n◆\n\nMaquette d'écran\n\nReproduction schématique de l'interface pour se repérer avant la démo live.\n▣\n\nExemple\n\nCas concret issu du fil rouge WTP-01, avec valeurs et code réels.\n▶\n\nTravaux pratiques\n\nExercice guidé, durée annoncée, livrable vérifiable.\n★\n\nPiège / bonne pratique\n\nErreur classique rencontrée en projet et manière de l'éviter.\n!",
+      "notes": "Expliquer les pictos une fois pour toutes.",
+      "quiz": null
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "INTRODUCTION",
+      "title": "Le fil rouge : station WTP-01",
+      "bodyMd": "Un procédé volontairement simple, mais qui contient tous les cas de figure d'un projet réel.\n\nBâche brute\nPompe P-101\nFiltration\nDosage\nBâche traitée\n\nLT-101\n+ variateur\nPT-201 / PT-202\nFCV-301, AT-301\nLT-401\nCe que ce procédé impose\nObjets ArchestrA correspondants\n2 pompes identiques → réutilisation par template\nMesures analogiques à mettre à l'échelle et à historiser\nVanne de régulation → boucle PID et consigne opérateur\nAlarmes de niveau haut/bas et de défaut moteur\nSéquence de démarrage/arrêt → scripting\nTraçabilité de lot → Historian + rapport\n\nÉquipement\nTemplate dérivé\n\nPompes P-101 / P-102\n$WTP_Pump (de $UserDefined)\n\nTransmetteurs LT/PT/AT\n$WTP_AnalogIn (de $UserDefined)\n\nVanne FCV-301\n$WTP_ControlValve\n\nLigne / zone\n$Area  →  Area_Filtration\n\nAutomate\n$OPCUAClient  →  DDE_PLC01",
+      "notes": "Dessiner le P&ID au tableau si le groupe est peu familier des procedes.",
+      "quiz": null
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1",
+      "title": "",
+      "bodyMd": "1\n\nDébutant\n\nComprendre le modèle ArchestrA et produire une première application déployée.\n\nConcepts & vocabulaire\nGalaxy et IDE\nTemplates et instances\n01\n02\n03\nConnexion aux données\nPremière ViewApp OMI\nDéploiement\n04\n05\n06",
+      "notes": "Environ 8 heures : 5 h de theorie/demos, 3 h de TP.",
+      "quiz": null
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Ce que vous saurez faire à la fin du niveau 1",
+      "bodyMd": "◆\n◆\n◆\nDécrire l'architecture\nCréer une Galaxy\nModéliser\nNommer chaque composant de la suite et dire sur quelle machine il s'installe.\nInstaller, configurer le Galaxy Repository et créer une Galaxy vierge ou depuis un .cab.\nCréer un template dérivé, l'instancier, organiser le modèle en Areas.\n\n◆\n◆\n◆\nConnecter\nVisualiser\nDéployer\nDéclarer un OI Server, créer les DI Objects et lier un attribut à une adresse automate.\nConstruire une ViewApp OMI avec un layout, des panes et un premier synoptique.\nDéployer en cascade, lire les statuts et vérifier les valeurs dans Object Viewer.",
+      "notes": "Faire un tour de table des attentes avant de demarrer.",
+      "quiz": null
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "AVEVA System Platform, qu'est-ce que c'est ?",
+      "bodyMd": "Ce n'est pas « un SCADA de plus » : c'est une plateforme de modélisation d'usine sur laquelle on construit un SCADA.\nUn SCADA classique\nAVEVA System Platform\n\nOn dessine des écrans, on crée des tags à plat\nLa logique est dans les scripts d'écran\nDupliquer un équipement = copier/coller\nUne modification = N corrections manuelles\nL'application vit sur une machine\nOn modélise des équipements (objets), pas des tags\nLa logique est portée par l'objet, réutilisable\nDupliquer = instancier un template\nUne modification du template se propage à toutes les instances\nL'application est déployée sur N machines depuis un référentiel central\n\nÀ RETENIR\nSystem Platform apporte trois choses qu'un SCADA plat n'a pas : un modèle objet hérité (templates → instances), un référentiel unique de configuration (la Galaxy) et un déploiement distribué piloté depuis ce référentiel. Tout le reste — graphiques, alarmes, historisation — découle de ces trois piliers.",
+      "notes": "Point cle : la difference avec InTouch classique est le modele objet et le deploiement centralise.",
+      "quiz": null
+    },
+    {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "De Wonderware à AVEVA : repères de versions",
+      "bodyMd": "Le parc installé est hétérogène ; savoir dater une Galaxy évite bien des surprises en intervention.\n\n2014 R2\n2017 U3\n2020 R2\n2023\n2023 R2\nWonderware System Platform. ArchestrA IDE, InTouch classique.\nIndustrial Graphics, InTouch OMI apparaît. Encore très répandu.\nMarque AVEVA. OMI mature, Historian intégré, Insight cloud.\nLicensing AVEVA Flex, nouvelles apps OMI, sécurité renforcée.\nOMI Web Client, gRPC en remplacement de DCOM, alarme LATCH, multilingue.\n\nSujet\n2017 U3\n2020 R2\n2023 R2\n\nClient web\nNon\nInsight (cloud)\nOMI Web Client\n\nCommunication runtime\nDCOM / SuiteLink\nDCOM / SuiteLink\ngRPC (DCOM réduit)\n\nLicence\nFichier local\nLicense Server\nAVEVA Flex / CONNECT\n\nMultilingue graphique\nPartiel\nPartiel\nChaînes traduisibles",
+      "notes": "Preciser que 2017 U3 est encore tres present chez les clients industriels.",
+      "quiz": null
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Les composants de la suite",
+      "bodyMd": "System Platform est un bundle : on installe uniquement les rôles utiles à chaque machine.\n\nAS\nOMI\nHMI\nHIS\nApplication Server\nInTouch OMI\nInTouch HMI\nAVEVA Historian\nLe cœur ArchestrA : Galaxy, IDE, moteurs d'exécution, objets applicatifs. C'est le « cerveau » de l'application.\nClient de visualisation moderne : ViewApps, layouts, panes, apps OMI (alarmes, tendances, navigation).\nLe client historique (WindowMaker / WindowViewer), toujours supporté et intégrable dans la Galaxy.\nHistorisation temps réel sur SQL Server : données process, alarmes, événements, résumés.\n\nHC\nOI\nSMC\nSM\nHistorian Client / Insight\nOI Servers / Communication Drivers\nSystem Management Console\nAVEVA System Monitor\nAnalyse : Trend, Query, Workbook Excel, et Insight pour le cloud et le mobile.\nPasserelles vers les automates et les systèmes tiers (Siemens, Rockwell, Modbus, OPC UA…).\nConsole d'administration : OI Servers, Historian, journaux (Log Viewer), licences.\nSupervision de la santé de la plateforme : services, licences, ressources, alertes.",
+      "notes": "Faire dire au groupe quel composant ils ont deja utilise.",
+      "quiz": null
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Architecture type d'une installation",
+      "bodyMd": "Qui parle à qui, et sur quelle machine chaque brique s'exécute.\n\nClients\nInTouch OMI · OMI Web Client · Historian Client · Insight\n\nDescendant\nconsignes,\ncommandes,\nécritures\nMontant\nmesures,\nalarmes,\névénements\nServeurs applicatifs\nGalaxy Repository (SQL) · AppEngine(s) · Historian\n\nAcquisition\nOI Servers · OPC UA · communication drivers\n\nContrôle-commande\nAutomates, variateurs, instruments, systèmes tiers",
+      "notes": "Sur une VM de formation tout est fusionne ; en production on separe.",
+      "quiz": null
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Le modèle ArchestrA en une image",
+      "bodyMd": "Un objet encapsule tout ce qui concerne un équipement : données, logique, alarmes, historisation, graphique.\n\nAttributs\nGraphique\n\nPV, SP, Cmd, État…\n\nSymbole associé à l'objet\n$WTP_Pump\n\nun objet = un équipement\nExtensions\nSécurité\n\nAlarme, historique, E/S\nClassification des attributs\n\nScripts\nDéploiement\n\nSéquences, calculs, interlocks\nCible d'exécution\n\nCONSÉQUENCE DIRECTE\nUne modification faite sur le template (nouvelle alarme, correction de script, nouveau symbole) est héritée par les 40 pompes de l'usine. C'est le principal gain de productivité de la plateforme.",
+      "notes": "C'est LA slide a bien faire passer : tout le reste en decoule.",
+      "quiz": null
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "La Galaxy et le Galaxy Repository",
+      "bodyMd": "Définitions\n\nSQL Server Management Studio\n\nFichier\nÉdition\nRequête\n\nGalaxy\n1\nL'ensemble de l'application : tous les objets, templates, graphiques, plateformes et leur configuration. Une usine = généralement une Galaxy.\nDatabases\n■\n\nWTP_GALAXY\n▣\nTables (configuration des objets)\n▫\n\nGalaxy Repository (GR)\n2\nCheckpoints / historique des versions\n▫\nLe service + la base SQL Server qui stocke la Galaxy. Il tourne sur une seule machine : le GR Node.\nGraphiques industriels\n▫\nRuntime (Historian)\n▣\n\nGR Node\nA2ALMDB (alarmes historisées)\n▣\n3\nLa machine qui héberge le référentiel. Elle n'a pas besoin d'être puissante mais elle doit être sauvegardée.\n\nBootstrap\n4\n\nLe socle d'exécution ArchestrA installé sur chaque machine qui doit héberger ou exécuter des objets.\nSAUVEGARDE\nDeux sauvegardes différentes : le backup SQL du GR (restauration technique) et le Galaxy Backup / fichier .cab depuis l'IDE (portable, versionnable, transmissible au client).",
+      "notes": "Insister : la Galaxy est une base SQL. Sauvegarde SQL = sauvegarde de l'application.",
+      "quiz": null
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Templates et instances",
+      "bodyMd": "La distinction la plus structurante de la plateforme — et la plus souvent mal comprise.\n\nTEMPLATE\nINSTANCES\n$WTP_Pump\nP_101   ·   P_102\nSe reconnaît au préfixe $\nVit uniquement en configuration : ne se déploie jamais\nPorte les attributs, scripts, alarmes, symboles communs\nPeut être verrouillé (locked) pour interdire la modification côté instance\nUne modification est propagée à toute sa descendance\nJamais de $ ; 32 caractères max, au moins une lettre, pas d'espace\nReprésentent un équipement réel de l'usine\nSeules les instances sont déployées dans le runtime\nNe surchargent que ce qui leur est propre : adresse E/S, seuils, libellé\nSe rangent dans une Area du modèle\ninstancier\n\nRÈGLE D'OR\nTout ce qui est identique entre deux équipements va dans le template. Tout ce qui les distingue va dans l'instance. Rien d'autre.",
+      "notes": "Rappeler la regle des 32 caracteres et l'interdiction du $ sur une instance.",
+      "quiz": null
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Dérivation : construire sa bibliothèque",
+      "bodyMd": "On ne modifie jamais un objet de base AVEVA : on en dérive un template maison, puis on l'affine.\n\n$UserDefined\n$DSL_Equipment\n$DSL_Motor\n$WTP_Pump\n\nBase AVEVA (verrouillée)\nSocle Dasolabs : nomenclature, attributs communs, entêtes\nAjoute marche/arrêt, défaut, compteur horaire\nSpécifique projet : débit, variateur, interlocks\nCe qu'on gagne\nLes règles à connaître\nUne correction sur $DSL_Equipment descend dans toute la bibliothèque\nLa nomenclature d'entreprise est imposée par construction\nLe passage d'un projet à l'autre réutilise les deux premiers niveaux\nLes objets AVEVA restent intacts → migration de version facilitée\nUn attribut hérité peut être verrouillé (locked) au niveau parent : l'enfant ne peut plus le changer\n« Unlock » sur un attribut casse le lien d'héritage pour cet attribut uniquement\n3 à 4 niveaux de dérivation maximum : au-delà, la maintenance devient illisible\nRenommer un template en cours de projet est coûteux : figer la nomenclature dès le départ",
+      "notes": "Montrer la vue Derivation dans l'IDE en direct.",
+      "quiz": null
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Les trois vues de l'IDE",
+      "bodyMd": "Le même contenu, trois angles de lecture. Savoir dans quelle vue on se trouve évite 80 % des confusions de débutant.\n\nModel View\nDerivation View\nDeployment View\nOrganisation fonctionnelle de l'usine : Areas et objets applicatifs. C'est la vue de travail quotidienne de l'ingénieur procédé.\nArbre d'héritage des templates. On y voit d'où vient un objet et qui hérite de lui.\nOù s'exécute quoi : plateformes, moteurs, areas hébergées. C'est la vue de l'exploitant / intégrateur.\n\nUsine ▸ Filtration ▸ P_101\n$UserDefined ▸ $DSL_Motor ▸ $WTP_Pump\nGR_NODE ▸ AppEngine1 ▸ Area_Filtration\n\nPIÈGE CLASSIQUE\nUn objet créé mais non affecté à une Area apparaît dans « Unassigned Area » ; un objet non affecté à un moteur reste dans « Unassigned Host » et ne se déploiera jamais.",
+      "notes": "Astuce : les stagiaires cherchent souvent un objet dans la mauvaise vue.",
+      "quiz": null
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Visite guidée de l'ArchestrA IDE",
+      "bodyMd": "Maquette de l'écran principal — repères à connaître avant la démonstration en direct.\n\nArchestrA IDE  —  Galaxy : WTP_GALAXY  —  utilisateur : DefaultUser\n\nGalaxy\nÉdition\nAffichage\nObjet\nFenêtre\nAide\n\nTemplate Toolbox\nÉditeur d'objet — $WTP_Pump\nModel View\nApplication\nWTP_GALAXY\n■\n\n■\nGeneral\nUDAs\nScripts\nObject Info\nGraphics\nUI\n$UserDefined\n▫\nArea_Pompage\n▣\n\nAttribut\nType\nCatégorie\nValeur\n$DSL_Equipment\n▫\n\nP_101\n▫\n\nPV_Flow\nFloat\nCalculated\n0.0\n$DSL_Motor\n▫\nP_102\n▫\n\nCmd_Start\nBoolean\nWriteable\nFalse\n\n$WTP_Pump\n▫\nLT_101\n▫\n\nSts_Running\nBoolean\nCalculated\nFalse\n$WTP_AnalogIn\n▫\nArea_Filtration\n▣\n\nSts_Fault\nBoolean\nCalculated\nFalse\nSystem\n■\nPT_201\n▫\n\nSP_Speed\nFloat\nWriteable\n0.0\n$WinPlatform\n▫\nPT_202\n▫\n\nHours_Run\nFloat\nCalculated\n0.0\n$AppEngine\n▫\nArea_Dosage\n▣\n\nInterlock_OK\nBoolean\nCalculated\nTrue\n$Area\n▫\nFCV_301\n▫\n\nTag_Desc\nString\nWriteable\n\"Pompe\"\nDevice Integration\n■\nAT_301\n▫\n$OPCUAClient\n▫\nUnassigned Area\n▣\n$OPCUAClientDevice\n▫\nBoîte à outils : la bibliothèque de templates\nÉditeur : configuration de l'objet sélectionné\nModel View : l'usine telle qu'on la découpe",
+      "notes": "Ouvrir l'IDE en parallele et pointer chaque zone.",
+      "quiz": null
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "La hiérarchie de déploiement",
+      "bodyMd": "Galaxy ▸ WinPlatform ▸ AppEngine ▸ Area ▸ objets applicatifs. Chaque niveau a un rôle précis.\n\nGalaxy\nLe périmètre applicatif complet\n\nWinPlatform\nUne machine physique ou virtuelle exécutant le Bootstrap\n\nAppEngine\nUn processus d'exécution, avec sa période de scan (scan period)\n\nArea\nRegroupement logique et périmètre de propagation des alarmes\n\nObjets applicatifs\nP_101, LT_101, FCV_301… les équipements modélisés\n\nRÈGLE DE DIMENSIONNEMENT\nUn AppEngine = un processus. On répartit les objets sur plusieurs engines pour isoler les criticités et lisser la charge CPU (voir niveau 3).",
+      "notes": "Bien distinguer hierarchie de deploiement (ou ca tourne) et hierarchie de modele (comment c'est organise).",
+      "quiz": null
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Installation : rôles machines et Configurator",
+      "bodyMd": "L'installateur pose les binaires ; c'est le Configurator qui décide ce que la machine devient.\n\nRôle\nCe qu'il apporte\nAVEVA System Platform Configurator\n\nComposants\nGalaxy Repository — paramètres\nGalaxy Repository\nHéberge la base SQL de configuration. Un seul par Galaxy.\nApplication Server\n▣\n\nParamètre\nValeur\n\nRuntime (Bootstrap)\nPermet à la machine d'héberger une WinPlatform et d'exécuter des objets.\n\nGalaxy Repository\n✔\n\nServeur SQL\n(local)\\SQLEXPRESS\nBootstrap / Runtime\n✔\n\nAuthentification\nWindows\n\nIDE\nPoste de développement, se connecte au GR à distance.\nHistorian\n▣\n\nDossier de données\nD:\\ArchestrA\\Data\nHistorian Server\n\n✔\n\nHistorian\nServeur d'historisation (SQL + services de stockage).\nCompte de service\nArchestrA\\aaAdmin\nCommunication Drivers\n▣\n\nPort\nTCP 1433 / 5100\n\nHistorian Client\nOutils d'analyse : Trend, Query, Workbook Excel.\nOI Gateway\n✔\n\nÉtat\nConfiguré ✔\nSystem Monitor\n▣\n\nOI Server\nPasserelle de communication vers les automates.\nAgent local\n○\n\nSystem Monitor\nAgent de supervision de la santé de la plateforme.\n\nBONNE PRATIQUE\nPIÈGE\nCréer un compte de service dédié (ArchestrA User Account) avec mot de passe non expirant, et le documenter dans le dossier d'installation.\nChanger le nom d'une machine après installation casse la Galaxy. Nommer les serveurs AVANT d'installer System Platform.",
+      "notes": "Montrer le Configurator sur la VM.",
+      "quiz": null
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Le catalogue d'objets de base",
+      "bodyMd": "Les templates fournis par AVEVA — ceux dont on dérive tout le reste.\n\n$WinPlatform\n$AppEngine\n$Area\n$UserDefined\n$AnalogDevice\nReprésente une machine. Porte le Bootstrap, la redondance de plateforme et les paramètres réseau.\nMoteur d'exécution : période de scan, checkpoint, redondance, statistiques de charge.\nRegroupement logique. Point de collecte et de propagation des alarmes.\nL'objet à tout faire : on y ajoute ses propres attributs. Base de 90 % des templates métier.\nObjet préconfiguré pour une mesure analogique ($DiscreteDevice pour le TOR). Rapide mais peu flexible.\n\n$InTouchViewApp\n$ViewApp\n$OPCUAClient\n$RedundantDIObject\n$Sequencer\nEncapsule une application InTouch classique gérée depuis la Galaxy.\nApplication InTouch OMI : écrans, layouts, navigation.\nDINetwork : la connexion vers un serveur de communication ($DDESuiteLinkClient pour SuiteLink).\nBascule automatique entre deux sources de données identiques (niveau 3).\nObjet avancé de séquence ; $AnalogDeviceEx pour les régulations enrichies.\n\nCONSEIL DE MISE EN ŒUVRE\nRésistez à la tentation d'utiliser $AnalogDevice « parce que c'est plus rapide » : sur un projet qui vit plusieurs années, un $UserDefined dérivé maison coûte moins cher en maintenance.",
+      "notes": "Ne pas chercher a tout retenir : $UserDefined couvre 80 % des besoins.",
+      "quiz": null
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Cycle de vie d'un objet : check-out / check-in",
+      "bodyMd": "La Galaxy est un référentiel partagé : on y travaille comme dans un gestionnaire de sources.\n\n1\n2\n3\n4\nCheck-out\nModification\nCheck-in\nDéploiement\n\nL'objet est verrouillé à votre nom. Personne d'autre ne peut le modifier.\nAttributs, scripts, extensions, graphiques. Les changements ne sont pas encore visibles des autres.\nPublication dans la Galaxy avec un commentaire de version. L'objet redevient disponible.\nEnvoi de la configuration validée vers le runtime. Sans déploiement, rien ne change en exploitation.\nStatuts visibles dans l'IDE\n\nIndicateur\nSignification\nCE QUI BLOQUE UN DÉPLOIEMENT\n\nCadenas fermé\nObjet checked-out par un autre utilisateur\nUn objet ne peut être déployé que s'il est checked-in et sans erreur. En équipe, la règle est simple : on ne quitte jamais l'IDE en laissant des objets checked-out — sinon le collègue est bloqué et l'administrateur devra forcer un « undo check-out ».\n\nCrayon\nObjet checked-out par vous, en cours d'édition\n\nCarré jaune\nConfiguration modifiée, non déployée\n\nIcône pleine\nDéployé et à jour\n\nCroix rouge\nObjet en erreur : à corriger avant déploiement",
+      "notes": "Montrer le cadenas dans l'IDE et l'ecran Object Info.",
+      "quiz": null
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Conventions de nommage",
+      "bodyMd": "Décidées une fois, appliquées partout : c'est ce qui rend une Galaxy lisible trois ans plus tard.\n\nCe que la convention doit garantir\nÉlément\nFormat\nExemple\n\nTemplate socle\n$DSL_<famille>\n$DSL_Motor\nUn nom d'instance doit correspondre au repère du P&ID / de la liste d'E/S\nTri alphabétique = tri fonctionnel dans le Model View\nAucun accent, aucun espace, aucun caractère spécial\n32 caractères maximum, au moins une lettre, jamais de $ en tête d'instance\nLe nom ne doit pas encoder l'emplacement physique (un équipement déménage, un nom non)\n\nTemplate projet\n$<projet>_<type>\n$WTP_Pump\n\nInstance\n<type>_<repère>\nP_101\n\nArea\nArea_<fonction>\nArea_Filtration\n\nEngine\nAE_<usage>\nAE_Process01\n\nPlateforme\nPLT_<nom machine>\nPLT_SRVAPP01\n\nSymbole\nsym_<type>_<variante>\nsym_Pump_Vertical\n\nRETOUR D'EXPÉRIENCE\n\nLIVRABLE PROJET\nRenommer un objet déjà déployé et historisé fait perdre le lien avec les données Historian correspondantes. La convention se fige avant le premier déploiement, pas après.\nFormaliser la convention dans un document « Standard de nomenclature » validé par le client dès la phase de conception.",
+      "notes": "Adapter la convention au standard du client s'il en a un (KKS, ISA...).",
+      "quiz": null
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "",
+      "bodyMd": "TP 1.1 — Créer la Galaxy et son squelette\n★  TP  ·  45 min\nObjectif\n\nRésultat attendu — Deployment View\n\nDisposer d'une Galaxy fonctionnelle contenant la structure de déploiement et le découpage en Areas du fil rouge WTP-01.\nWTP_GALAXY\n■\nPLT_VM_FORMATION\n▣\n\nCréer la Galaxy\nAE_Process01\n1\n▣\nIDE ▸ Galaxy ▸ New Galaxy. Nom : WTP_GALAXY, type « Base_Application_Server ».\nArea_Pompage\n▫\nArea_Filtration\n▫\n\nCréer la WinPlatform\n2\nInstancier $WinPlatform, la renommer PLT_<nom de votre VM>, la déployer.\nArea_Dosage\n▫\nUnassigned Host\n▣\n\nCréer l'AppEngine\n3\nInstancier $AppEngine ▸ AE_Process01, l'assigner à la plateforme (Deployment View).\n\nCréer les 3 Areas\n4\nArea_Pompage, Area_Filtration, Area_Dosage, assignées à AE_Process01.\n\nCRITÈRE DE RÉUSSITE\nLes icônes de la Deployment View sont pleines (déployé) et le System Management Console montre la plateforme « On Scan ».\n\nCheck-in et déployer\n5\nCheck-in de tous les objets, puis déploiement en cascade depuis la plateforme.",
+      "notes": "Passer dans les rangs ; le point bloquant habituel est la connexion SQL.",
+      "quiz": null
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Se connecter aux automates : OI Servers et DI Objects",
+      "bodyMd": "Deux mondes complémentaires : le serveur de communication (hors Galaxy) et sa représentation objet (dans la Galaxy).\n\nAutomate\nOI Server\nDINetwork\nDIDevice\n\nS7-1500 / ControlLogix\nconfiguré dans le SMC\nobjet Galaxy\nun automate = un objet\nLe OI Server (System Management Console)\nLe DI Object (Galaxy)\nService Windows indépendant de la Galaxy\nUn driver par famille d'automate (OI.SIDIRECT, OI.ABCIP, OI.MBTCP, OI Gateway pour OPC UA)\nOn y déclare la voie de communication, l'adresse IP, le rack/slot et les groupes de scan\nSe teste seul avec un client OPC ou l'outil de diagnostic du driver\nDINetwork : représente le serveur de communication dans la Galaxy (ex. $OPCUAClient)\nDIDevice : représente un équipement joignable par ce serveur\nSe déploie sur une WinPlatform comme n'importe quel objet\nPorte la qualité de la donnée et l'état de la communication\nC'est lui qui rend l'adresse automate référençable par un attribut d'objet",
+      "notes": "Bien montrer que le OI Server se configure dans le SMC, pas dans l'IDE.",
+      "quiz": null
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Les attributs : type, catégorie, qualité",
+      "bodyMd": "Tout, dans System Platform, se ramène à un attribut adressable par un chemin : Objet.Attribut.Champ.\n\nChemin d'accès et champs\nCatégorie\nComportement\n\nCalculated\nValeur produite par l'objet (script, extension) ; non modifiable de l'extérieur\n\nRéférences d'attributs\n\nCalculated Retentive\nIdem, mais la valeur survit à un redémarrage du moteur\nP_101.PV_Flow                ' la valeur\nP_101.PV_Flow.EngUnits       ' l'unité\nP_101.PV_Flow.HiHi           ' le seuil TTH\nP_101.PV_Flow.Quality        ' la qualité OPC\nP_101.Sts_Running            ' un booléen d'état\nArea_Pompage.Alarm.Count     ' alarmes de la zone\nMe.SP_Speed                  ' référence relative\n\nWriteable\nModifiable par un opérateur ou un script externe\n\nWriteable Retentive\nModifiable et persistante (consignes, seuils réglés en exploitation)\n\nConstant\nFigé à la configuration\n\nQualité et état de scan\nPIÈGE\nChoisir « Writeable » par défaut pour tous les attributs est une erreur fréquente : cela ouvre l'écriture à n'importe quel client et rend le diagnostic impossible (« qui a écrit cette valeur ? »). Réserver Writeable aux consignes réellement pilotées, et protéger le reste en Calculated.\nGood / Uncertain / Bad / Initializing : la qualité remonte de l'automate jusqu'au graphique\nOnScan / OffScan : un objet OffScan n'exécute ni script ni acquisition\nUn attribut lié à une adresse invalide reste en Bad, sans message d'erreur bloquant",
+      "notes": "Montrer Object Viewer en parallele.",
+      "quiz": null
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Lier un attribut à une adresse automate",
+      "bodyMd": "L'extension « Input » ou « I/O » transforme un attribut en point d'acquisition.\nExemple concret — LT_101\n\nAjouter l'extension\n1\nOnglet UDAs ▸ sélectionner l'attribut ▸ cocher « Input » (lecture) ou « Output » / « InputOutput ».\n\nParamètre\nValeur\n\nRenseigner la source\n\nAttribut\nLT_101.PV\n2\nChamp « Source » : <DIObject>.<Groupe>.<Item> — par exemple PLC01.Scan1.DB10,REAL0.\n\nType\nFloat, Calculated\n\nExtension\nInput\n\nDéfinir la mise à l'échelle\n3\nLinear scaling : brut 0–27648 → échelle 0–100 m³/h, avec unité d'ingénierie.\n\nSource\nPLC01.Scan_500ms.DB20,REAL4\n\nRaw min / max\n0 / 27648\n\nContrôler la période\n4\n\nEng min / max\n0.0 / 5.0\nLa fréquence de rafraîchissement est celle du groupe de scan du OI Server, pas celle de l'AppEngine.\n\nEngUnits\nm\n\nVérifier\n5\n\nDeadband\n0,02 m\nAprès déploiement, contrôler valeur et qualité dans Object Viewer.\n\nASTUCE\n\nPIÈGE\nMettre l'adresse dans un attribut de type String au niveau de l'instance rend le mapping lisible et exportable en CSV.\nUne mise à l'échelle définie côté automate ET côté System Platform donne une double conversion silencieuse.",
+      "notes": "Faire ecrire la reference complete au tableau.",
+      "quiz": null
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "",
+      "bodyMd": "TP 1.2 — Connecter la source de données\n★  TP  ·  50 min\nObjectif\n\nObject Viewer — vérification\n\nFaire remonter une mesure réelle depuis un serveur OPC UA de simulation jusqu'à un attribut d'objet, avec une qualité « Good ».\n\nRéférence\nValeur\nQualité\nHeure\n\nLT_101.PV\n3,42\nGood\n10:14:22\n\nConfigurer OI Gateway\nLT_101.PV.EngUnits\nm\nGood\n10:14:22\n1\nSMC ▸ OI Gateway ▸ nouvelle configuration OPC UA vers le simulateur, tester la connexion.\n\nPLC01.ScanState\nOnScan\nGood\n10:14:20\n\nOPCUA_01.Connected\nTrue\nGood\n10:12:01\n\nCréer le DINetwork\n2\nInstancier $OPCUAClient ▸ OPCUA_01, renseigner l'endpoint, déployer.\n\nCréer le DIDevice\n3\nInstancier $OPCUAClientDevice ▸ PLC01, définir le groupe de scan à 500 ms.\n\nCréer LT_101\n4\n\nDériver $WTP_AnalogIn de $UserDefined, ajouter l'UDA « PV » (Float) avec extension Input.\nSI LA QUALITÉ RESTE BAD\n1) le DIDevice est-il OnScan ?  2) l'item existe-t-il côté serveur (tester avec un client OPC) ?  3) la syntaxe de la source est-elle exacte ?  4) le pare-feu laisse-t-il passer le port du serveur ?\n\nMapper et déployer\n5\nRenseigner la source, l'échelle 0–5 m, déployer l'objet.\n\nVérifier\n6\nObject Viewer : LT_101.PV varie et LT_101.PV.Quality vaut Good.",
+      "notes": "Si aucun automate n'est disponible, utiliser l'OI Simulator ou un serveur OPC UA de simulation.",
+      "quiz": null
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Premiers graphiques industriels",
+      "bodyMd": "Un symbole est un objet graphique réutilisable, stocké dans le Graphic Toolbox ou porté par un objet.\n\n1\n2\n3\nGraphic Toolbox\nSymbole d'objet\nBibliothèques fournies\nBibliothèque centrale des symboles, organisée en dossiers. C'est là que vivent les symboles génériques.\nUn symbole peut être attaché au template : chaque instance affiche alors ses propres valeurs, sans re-câblage.\nSymbols Library et Situational Awareness Library : équipements, vannes, réservoirs, indicateurs HP-HMI.\nLes animations disponibles\nCustom Properties\nVisibilité, clignotement, transparence\nCouleur de remplissage / de ligne / de texte\nRemplissage proportionnel (niveau de cuve)\nPosition, rotation, taille\nSaisie utilisateur (analogique, discrète, chaîne)\nAction sur clic, pop-up, navigation\nUne Custom Property est une variable interne au symbole. Elle permet de créer un symbole générique — par exemple sym_Pump — et de ne lui passer, à l'utilisation, que la référence de l'objet à afficher.\n\n' Custom Property du symbole\nObjectRef  (Type : ObjectName)  =  \"P_101\"\n\n' Utilisation dans une animation\nFill color  ←  ObjectRef.Sts_Running\nText        ←  ObjectRef.Tag_Desc\nVisibility  ←  ObjectRef.Sts_Fault",
+      "notes": "Rester simple ici : l'approfondissement est au niveau 2.",
+      "quiz": null
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "InTouch OMI : ViewApp, Layout, Panes",
+      "bodyMd": "OMI ne raisonne pas en « fenêtres » mais en zones d'écran alimentées par du contenu.\n\nScreen Profile\nLayout — écran principal\n1\n\nDécrit le poste physique : nombre d'écrans, résolutions. Un poste de conduite 3 écrans ≠ une tablette.\n\nPane « Header » — navigation, alarme active, utilisateur\n\nLayout\n\n2\nDécoupe un écran en panes (zones rectangulaires). Un layout peut être responsive.\nPane\n« Détail »\nfaceplate\n\nPane\nPane « Process »\nsynoptique principal\n3\nZone d'affichage. Chaque pane reçoit un contenu : synoptique, app d'alarmes, tendance, document, page web.\n\nContent / Apps OMI\n4\nCe qu'on met dans un pane : symbole, Alarm App, Trend App, navigation, contenu externe.\n\nPane « Alarmes » — Alarm App OMI\n\nViewApp\n5\nL'assemblage complet, dérivé de $ViewApp, déployé sur une plateforme cliente.",
+      "notes": "C'est le changement de paradigme le plus deroutant pour un habitue d'InTouch classique.",
+      "quiz": null
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "",
+      "bodyMd": "TP 1.3 — Première ViewApp OMI\n★  TP  ·  45 min\nObjectif\n\nInTouch OMI — VA_WTP_Conduite (runtime)\n\nAfficher la mesure LT_101 du TP précédent dans une ViewApp OMI, avec un bandeau de navigation et une liste d'alarmes.\n\nWTP-01   ▸   Vue générale\nOP01  ·  10:14\n\nCréer la ViewApp\n1\n\nDériver $ViewApp ▸ VA_WTP_Conduite, lancer l'assistant d'initialisation.\n\nAssocier le Screen Profile\n3,42 m\n2\nFaceplate\nChoisir « Single monitor 1920×1080 » et lui affecter un layout à 4 panes.\n\nNiveau bâche brute\n\nCréer le synoptique\n3\nNouveau symbole sym_WTP_Overview : une cuve, un indicateur numérique lié à LT_101.PV.\nLT-101\n\nAlimenter les panes\n\n4\nProcess ▸ sym_WTP_Overview ; Alarmes ▸ Alarm App ; Header ▸ Navigation App.\n▲  10:12:04   LT-101   Niveau haut   ·   Non acquittée\n\nPrévisualiser\n5\n\nBouton Preview de l'IDE : vérifier l'affichage sans déployer.\nCRITÈRE DE RÉUSSITE\n\nDéployer\nLa valeur affichée suit celle d'Object Viewer, sans redémarrage manuel.\n6\nDéployer la ViewApp sur la plateforme, la lancer avec InTouch OMI ViewApp Manager.",
+      "notes": "Objectif : voir la donnee du TP 1.2 s'afficher a l'ecran.",
+      "quiz": null
+    },
+    {
+      "position": 32,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Le déploiement en détail",
+      "bodyMd": "Déployer, c'est envoyer la configuration validée vers les machines cibles et démarrer les objets.\nLes modes de déploiement\nCe qui se passe réellement\n\nMode\nEffet\n\nValidation\n1\nLe GR vérifie que tous les objets sont checked-in et sans erreur.\n\nDeploy (cascade)\nDéploie l'objet et toute sa descendance dans la hiérarchie de déploiement\n\nGénération du package\n\nDeploy (objet seul)\nNe déploie que l'objet sélectionné : plus rapide, plus risqué\n2\nLe GR construit les fichiers runtime de chaque objet.\n\nRedeploy\nUndeploy puis Deploy : coupe l'exécution, remet à zéro les valeurs retentives\n\nTransfert\n\n3\nUndeploy\nRetire l'objet du runtime ; la configuration reste dans la Galaxy\nLes packages sont envoyés au Bootstrap de la machine cible.\n\nOn Scan / Off Scan\nDémarre ou suspend l'exécution sans retirer l'objet\n\nChargement\n4\nL'AppEngine instancie les objets en mémoire, exécute Startup puis OnScan.\n\nExécution\nEN PRODUCTION\n5\nUn « Redeploy » de plateforme coupe la supervision. Toute intervention se planifie et se documente — c'est un point de contrôle systématique en environnement réglementé.\nÀ chaque scan, l'engine appelle Execute sur chaque objet OnScan.",
+      "notes": "Expliquer la difference entre deploy cascade et deploy d'un seul objet.",
+      "quiz": null
+    },
+    {
+      "position": 33,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Les huit pièges du débutant",
+      "bodyMd": "Ils reviennent sur presque tous les premiers projets. Les connaître, c'est déjà les éviter.\n\n1\n2\n3\n4\nModifier un objet de base AVEVA\nTout mettre dans une seule Area\nUn seul AppEngine pour tout\nNommer après coup\nToujours dériver. Sinon la migration de version devient un chantier.\nL'Area porte les alarmes : un découpage grossier rend l'exploitation illisible.\nUne erreur de script bloque alors toute l'application.\nRenommer un objet historisé casse le lien avec ses données.\n\n5\n6\n7\n8\nAttributs tous Writeable\nOublier le check-in\nScripts dans les graphiques\nPas de sauvegarde .cab\nOuvre l'écriture à tous les clients et rend le diagnostic impossible.\nLes objets checked-out bloquent le déploiement et les collègues.\nLa logique appartient à l'objet, pas au symbole : sinon elle n'est ni réutilisable ni testable.\nLe backup SQL seul ne permet pas de rejouer facilement une version antérieure.",
+      "notes": "Demander au groupe s'ils en ont deja rencontre.",
+      "quiz": null
+    },
+    {
+      "position": 34,
+      "kind": "QUIZ",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Quiz de fin de niveau 1",
+      "bodyMd": "",
+      "notes": "Reponses : 1-b, 2-c, 3-b, 4-c, 5-b, 6-b.",
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quel élément stocke la configuration de toute l'application ?",
+            "options": [
+              "L'AppEngine",
+              "Le Galaxy Repository",
+              "Le Bootstrap"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un template peut-il être déployé dans le runtime ?",
+            "options": [
+              "Oui, comme une instance",
+              "Oui, s'il est verrouillé",
+              "Non, jamais"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Où se configure la voie de communication vers l'automate ?",
+            "options": [
+              "Dans l'IDE",
+              "Dans le System Management Console",
+              "Dans la ViewApp"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Que se passe-t-il si un objet reste checked-out ?",
+            "options": [
+              "Rien",
+              "Il n'est pas déployable et bloque les autres",
+              "Il passe OffScan"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Quelle vue montre l'arbre d'héritage des templates ?",
+            "options": [
+              "Model View",
+              "Derivation View",
+              "Deployment View"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Une modification de template se propage…",
+            "options": [
+              "Après redémarrage",
+              "À toutes ses instances au déploiement",
+              "Jamais"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      }
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "Les cinq idées à emporter\nVous savez maintenant\n\nLa Galaxy est le référentiel unique\nCompétence\nStatut\n1\nConfiguration, versions, graphiques : tout y est. On la sauvegarde en SQL et en .cab.\n\nCréer et sauvegarder une Galaxy\nAcquis\n\nDériver un template et l'instancier\nAcquis\n\nOn modélise, on ne dessine pas\n2\nL'objet porte les données, la logique et le graphique. Le synoptique n'est qu'une vue.\n\nOrganiser un modèle en Areas\nAcquis\n\nConnecter une source de données\nAcquis\n\nTemplate pour le commun, instance pour le spécifique\n3\n\nConstruire une ViewApp simple\nAcquis\nC'est la règle qui conditionne toute la maintenabilité du projet.\n\nDéployer et vérifier\nAcquis\n\nDeux hiérarchies distinctes\n4\n\nAlarmes, scripts, historisation\nNiveau 2\nLe modèle décrit l'usine ; le déploiement décrit où le code s'exécute.\n\nRedondance, migration, GxP\nNiveau 3\n\nRien n'existe tant que ce n'est pas déployé\n5\nCheck-in puis déploiement : deux étapes toujours nécessaires.",
+      "notes": "Verifier que chacun a une Galaxy fonctionnelle avant de passer au niveau 2.",
+      "quiz": null
+    },
+    {
+      "position": 36,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "",
+      "bodyMd": "2\n\nIntermédiaire\n\nConstruire une bibliothèque d'objets riche : alarmes, historisation, scripts, symboles paramétrés.\n\nUDA & extensions\nAlarmes\nScripting QuickScript.NET\n01\n02\n03\nObject Wizards\nSymboles & HP-HMI\nHistorian & sécurité\n04\n05\n06",
+      "notes": "Niveau le plus dense : environ 8 h dont 4 h de TP.",
+      "quiz": null
+    },
+    {
+      "position": 37,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Objectifs du niveau 2",
+      "bodyMd": "On passe de « ça marche » à « c'est industrialisable ».\n\n◆\n◆\n◆\nConcevoir un template complet\nMaîtriser le scripting\nParamétrer les symboles\nAttributs, extensions, alarmes, historisation, script et symbole dans un seul objet réutilisable.\nChoisir le bon type d'exécution et le bon déclencheur ; écrire du code lisible et sûr.\nCustom properties, animations, faceplates : un symbole, N équipements.\n\n◆\n◆\n◆\nStructurer les alarmes\nExploiter l'Historian\nSécuriser l'application\nPriorités, zones, acquittement, rationalisation. Éviter le mur d'alarmes.\nHistoriser proprement, construire tendances et rapports d'exploitation.\nAuthentification, rôles, permissions et classification des attributs.",
+      "notes": "Rappeler que le fil rouge reprend la Galaxy du niveau 1.",
+      "quiz": null
+    },
+    {
+      "position": 38,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Concevoir sa bibliothèque de templates",
+      "bodyMd": "Avant d'écrire la moindre ligne, on décide ce qui est commun à l'entreprise, au projet et à l'équipement.\n\nNiveau entreprise\n$DSL_Equipment — nomenclature, attributs de traçabilité, en-têtes de script, conventions d'unités. Ne change jamais d'un projet à l'autre.\n\n1\n\nNiveau famille\n$DSL_Motor, $DSL_Valve, $DSL_AnalogIn — comportements génériques : marche/arrêt, défaut, compteur horaire, mise à l'échelle, alarmes standard.\n\n2\n\nNiveau projet\n$WTP_Pump, $WTP_ControlValve — spécificités du site : interlocks procédé, seuils, libellés, symbole métier.\n\n3\n\nInstances\nP_101, P_102, FCV_301 — uniquement l'adresse d'E/S, le repère, les seuils réglés et l'affectation à une Area.\n\n4\n\nCRITÈRE DE VALIDATION\nSi l'ajout d'un 41ᵉ moteur au projet demande plus de cinq minutes, la bibliothèque est mal découpée.",
+      "notes": "Faire dessiner l'arbre de derivation par les stagiaires sur leur propre parc.",
+      "quiz": null
+    },
+    {
+      "position": 39,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Les User Defined Attributes (UDA)",
+      "bodyMd": "L'UDA est la brique élémentaire du modèle : c'est là qu'on décide de la nature et des droits d'une donnée.\n\nChoisir la bonne catégorie\nType de données\nUsage typique\n\nBoolean\nÉtats, commandes, défauts\n\nCatégorie\nÀ utiliser pour\n\nInteger\nCompteurs, codes d'état, numéro de recette\n\nCalculated\nRésultat de script ou d'acquisition\n\nFloat / Double\nMesures analogiques, consignes, calculs\n\nCalculated Retentive\nCompteurs horaires, totalisateurs\n\nString\nLibellés, numéros de lot, adresses d'E/S\n\nWriteable\nCommandes ponctuelles depuis l'IHM\n\nTime / ElapsedTime\nHorodatages, durées de fonctionnement\n\nWriteable Retentive\nConsignes, seuils réglables en ligne\n\nInternationalized String\nLibellés multilingues (2023 R2)\n\nConstant\nParamètres figés à la configuration\n\nBONNE PRATIQUE DE NOMMAGE\nPIÈGE\nPréfixer les UDA par leur rôle rend le modèle auto-documenté et les scripts lisibles :\nPV_ mesure · SP_ consigne · Cmd_ commande · Sts_ état · Alm_ alarme · Cfg_ paramètre · Tot_ totalisateur\nAjouter un UDA à un template verrouillé oblige à un check-in du template puis à un redéploiement de toutes ses instances. Prévoir large dès la conception : quelques attributs de réserve coûtent moins cher qu'une reprise de 200 objets en production.",
+      "notes": "Insister sur Retentive : sur un redemarrage engine, les consignes doivent survivre.",
+      "quiz": null
+    },
+    {
+      "position": 40,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Les extensions d'attributs",
+      "bodyMd": "Une extension ajoute un comportement à un attribut existant, sans écrire une ligne de code.\n\nInput\nOutput\nInputOutput\nLecture depuis une source externe (DI Object, autre objet). Ajoute mise à l'échelle et gestion de la qualité.\nÉcriture vers une source externe : commande d'un moteur, consigne envoyée à l'automate.\nLecture et écriture sur la même adresse : consigne modifiable des deux côtés.\n\nAlarm\nHistory\nStatistics\nTransforme un booléen en alarme, ou pose des seuils sur un analogique (LoLo, Lo, Hi, HiHi, Rate, Deviation).\nHistorise l'attribut dans l'Historian : mode de stockage, deadband, forçage périodique.\nCalcule min, max, moyenne et écart-type glissants sur l'attribut.\nExemple : l'attribut PV de LT_101 cumule trois extensions\n\nExtension\nParamètre clé\nValeur\nEffet\n\nInput\nSource / échelle\nPLC01.Scan_500ms.DB20,REAL4  ·  0–5 m\nAlimente PV toutes les 500 ms\n\nAlarm\nSeuils Hi / HiHi\n4,2 m  ·  4,7 m\nGénère 2 alarmes de priorité 500 et 250\n\nHistory\nMode / deadband\nDelta  ·  0,02 m\nStocke uniquement les variations utiles",
+      "notes": "Montrer la case a cocher dans l'onglet UDAs.",
+      "quiz": null
+    },
+    {
+      "position": 41,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Les alarmes : structure et vocabulaire",
+      "bodyMd": "Une alarme mal conçue coûte plus cher qu'une alarme absente : elle détourne l'attention de l'opérateur.\nAnatomie d'une alarme\nCycle de vie\n\nPropriété\nRôle\n\nNORMAL\n\nPriority (1–999)\n1 = le plus urgent. Détermine la couleur et l'ordre d'affichage\n\nfranchissement du seuil\n\nCategory\nType : Discrete, Level, Rate of change, Deviation, Bad value\n\nUNACK / ACTIVE\n\nArea\nZone de rattachement : filtre principal côté opérateur\n\nacquittement opérateur\n\nDescription\nMessage vu par l'opérateur : doit dire quoi faire, pas ce qui est\n\nACK / ACTIVE\n\nState\nUNACK_ALM, ACK_ALM, UNACK_RTN, NORMAL\n\nla mesure repasse sous le seuil\n\nLatched (2023 R2)\nL'alarme reste affichée après retour normal jusqu'à sa prise en compte\n\nRETOUR NORMAL\n\nRÈGLE DE RÉDACTION\n\nMauvais : « LT101 HIHI ».\nBon : « Bâche brute — niveau très haut : arrêter l'alimentation P-101 ».\nLe message doit contenir l'équipement, la nature du problème et l'action attendue.\nOBJECTIF EEMUA 191\nMoins de 6 alarmes par heure et par opérateur en régime établi, et moins de 10 alarmes dans les 10 minutes suivant un incident. Au-delà, l'opérateur cesse de les lire.",
+      "notes": "Reference : ISA-18.2 et EEMUA 191 pour la rationalisation.",
+      "quiz": null
+    },
+    {
+      "position": 42,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Configurer les alarmes d'un objet",
+      "bodyMd": "Toute la configuration se fait dans l'extension Alarm de l'attribut concerné.\n\nPropagation par les Areas\nÉditeur d'objet — $WTP_AnalogIn ▸ PV\n\nGeneral\nUDAs\nScripts\nGraphics\nChaque objet remonte ses alarmes à son Area\nL'Area agrège le compte et la plus haute priorité active\nUne Area peut être imbriquée dans une autre\nLes clients OMI s'abonnent à une ou plusieurs Areas\nC'est le mécanisme de filtrage par atelier / ligne / utilité\n\nSeuil\nActif\nValeur\nPriorité\nDeadband\n\nLoLo\n✔\n0,30\n250\n0,05\n\nLo\n✔\n0,60\n500\n0,05\n\nHi\n✔\n4,20\n500\n0,05\n\nHiHi\n✔\n4,70\n250\n0,05\n\nRate of change\n—\n—\n—\n—\n\nAttributs d'Area utiles\n\nBad value\n✔\n—\n750\n—\nArea_Pompage.Alarm.Active     ' True si alarme active\nArea_Pompage.Alarm.Count      ' nombre d'alarmes\nArea_Pompage.Alarm.Priority   ' priorité la plus haute\nArea_Pompage.Alarm.Unacked    ' non acquittées\n\nPIÈGE CLASSIQUE\nUn deadband nul sur une mesure bruitée génère des centaines d'alarmes intempestives. Régler le deadband et, si besoin, un délai d'apparition (On-delay).",
+      "notes": "Montrer la propagation d'alarme par Area.",
+      "quiz": null
+    },
+    {
+      "position": 43,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Historiser proprement",
+      "bodyMd": "L'extension History décide de ce qui part vers l'Historian — et de la taille de la base dans trois ans.\n\nChoisir son mode\nParamètre\nCe qu'il fait\n\nStorage type\nDelta (sur variation) ou Cyclic (à période fixe)\n\nDelta — par défaut\n\nValue deadband\nVariation minimale, en % d'échelle, pour déclencher un stockage\nStocke sur variation significative. Idéal pour 90 % des mesures : volume maîtrisé, courbes fidèles.\n\nTime deadband\nDurée minimale entre deux stockages\n\nRate deadband\nFiltre les variations lentes (swinging door)\n\nForced storage period\nForce un point même sans variation : garantit la continuité des courbes\n\nCyclic\n\nInterpolation\nStepped (TOR, états) ou Linear (mesures continues)\nStocke à intervalle fixe. Réservé aux données réglementaires exigeant un pas garanti (traçabilité de lot).\n\nCE QU'ON HISTORISE VRAIMENT\nToutes les mesures procédé, les états de marche, les consignes et les commandes opérateur. Pas les variables intermédiaires de calcul, ni les bits de vie, ni les compteurs de scan : ils gonflent la base sans jamais être relus.\n\nORDRE DE GRANDEUR\n2 000 tags en Delta, deadband 1 %, procédé stable ≈ 1 à 3 Go/an. Les mêmes tags en Cyclic 1 s ≈ 60 Go/an. Le choix se fait tag par tag, pas globalement.",
+      "notes": "Faire calculer l'ordre de grandeur du volume avec le groupe.",
+      "quiz": null
+    },
+    {
+      "position": 44,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "QuickScript.NET : anatomie d'un script",
+      "bodyMd": "Un script appartient à un objet, s'exécute sur un AppEngine et suit un cycle strict.\n\nCe qu'un script peut manipuler\nÉlément\nRôle\n\nNom du script\nIdentifiant unique dans l'objet ; apparaît dans les journaux d'erreur\nSes propres attributs, via Me.<Attribut>\nLes attributs d'autres objets, par référence directe ou indirecte\nLes fonctions du langage : chaînes, maths, dates, conversions\nLes bibliothèques .NET importées dans la Galaxy (niveau 3)\nLes journaux : LogMessage, LogWarning, LogError\n\nExecution type\nQuand le script est appelé dans le cycle de vie de l'objet\n\nExpression / Trigger\nCondition qui déclenche l'exécution\n\nTrigger period\nPériode, pour un déclencheur Periodic\n\nDeclarations\nVariables locales persistantes entre deux exécutions\n\nBody\nLe code proprement dit\n\nStructure minimale\n\n' Declarations\nDIM iCount AS INTEGER;\n\n' Body\nIF Me.Sts_Running AND NOT Me.Sts_Fault THEN\n    Me.Tot_Hours = Me.Tot_Hours + 0.000278;\nENDIF;\nPOINT DE VIGILANCE\nLe script s'exécute à la période de scan de l'AppEngine hôte (souvent 500 ms ou 1 s), pas à la période de l'automate. Un script ne remplace jamais une logique de sécurité : celle-ci reste dans l'automate.",
+      "notes": "Rappeler que le script tourne a la periode de scan de l'engine hote.",
+      "quiz": null
+    },
+    {
+      "position": 45,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Les cinq types d'exécution",
+      "bodyMd": "Choisir le mauvais type est la première cause de script instable au déploiement.\nType\nQuand il est appelé\nÀ utiliser pour\nÀ éviter\n\nStartup\nÀ la mise en mémoire de l'objet (déploiement, démarrage de la plateforme ou de l'engine).\nInstancier des objets .NET / COM uniquement.\nPas d'accès base, fichiers ou référence dynamique.\n\nOnScan\nAu premier passage OnScan de l'objet.\nInitialiser des attributs locaux.\nLes attributs hors engine ne sont pas encore disponibles.\n\nExecute\nÀ chaque scan de l'AppEngine tant que l'objet est OnScan.\nC'est ici que va 95 % du code métier.\nAttention au temps d'exécution : il consomme le scan.\n\nOffScan\nQuand l'objet passe hors scan.\nNettoyage, remise à zéro d'états.\nNe pas y écrire vers l'automate.\n\nShutdown\nAvant retrait de la mémoire.\nLibérer les objets .NET / COM créés au Startup.\nExécution non garantie sur arrêt brutal.",
+      "notes": "Source : documentation AVEVA Application Server Scripting Guide.",
+      "quiz": null
+    },
+    {
+      "position": 46,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Les six déclencheurs du type Execute",
+      "bodyMd": "Le déclencheur conditionne la charge CPU autant que le comportement fonctionnel.\n\nPeriodic\nOn True\nOn False\nToutes les N secondes, indépendamment de toute condition.\n\n▶ Totalisateur horaire, calcul de moyenne glissante.\nUne fois, au passage de faux à vrai.\n\n▶ Lancer une séquence de démarrage sur appui bouton.\nUne fois, au passage de vrai à faux.\n\n▶ Journaliser l'arrêt d'un équipement.\n\nWhile True\nWhile False\nData Change\nÀ chaque scan tant que l'expression est vraie.\n\n▶ Maintenir une régulation, incrémenter un temps de marche.\nÀ chaque scan tant que l'expression est fausse.\n\n▶ Surveiller une absence de communication.\nQuand la valeur (ou la qualité) change entre deux scans.\n\n▶ Réagir à un changement de consigne opérateur.\n\nRÈGLE DE PERFORMANCE\n« While True » sur une expression toujours vraie équivaut à un script exécuté à chaque scan : sur 400 objets, c'est la première cause de saturation d'un AppEngine.",
+      "notes": "Faire deviner le bon trigger sur des exemples avant de donner la reponse.",
+      "quiz": null
+    },
+    {
+      "position": 47,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Exemple commenté : séquence de démarrage pompe",
+      "bodyMd": "Script Execute / On True porté par le template $WTP_Pump.\n\nCe que l'exemple illustre\n' ============================================================\n' Script     : Seq_Demarrage\n' Objet      : $WTP_Pump\n' Type       : Execute      Trigger : On True\n' Expression : Me.Cmd_Start\n' ============================================================\n\n' 1. Contrôle des conditions de permissivité\nIF NOT Me.Interlock_OK THEN\n    Me.Msg_Last = \"Démarrage refusé : interlock actif\";\n    Me.Cmd_Start = False;\n    LogWarning(Me.Tag_Desc + \" : démarrage refusé (interlock)\");\n    EXIT FUNCTION;\nENDIF;\n\n' 2. Contrôle du défaut moteur\nIF Me.Sts_Fault THEN\n    Me.Msg_Last = \"Démarrage refusé : défaut moteur non acquitté\";\n    Me.Cmd_Start = False;\n    EXIT FUNCTION;\nENDIF;\n\n' 3. Envoi de la commande et horodatage\nMe.Out_Run      = True;\nMe.Time_LastStart = SystemTimeUTC;\nMe.Cnt_Starts   = Me.Cnt_Starts + 1;\nMe.Msg_Last     = \"Démarrage lancé\";\nUn en-tête normalisé : qui, quoi, quel déclencheur\nLes conditions bloquantes traitées en premier, avec sortie anticipée\nUn message opérateur systématique en cas de refus\nL'horodatage en UTC, jamais en heure locale\nUne commande retombée volontairement (Cmd_Start = False) : le bouton est fugitif\nAucune boucle, aucune attente : le script rend la main immédiatement\n\nHEURE UTC\nMélanger heure locale et UTC provoque des décalages d'une heure lors des changements d'heure — un classique en audit.",
+      "notes": "Faire lire le script ligne a ligne par un stagiaire.",
+      "quiz": null
+    },
+    {
+      "position": 48,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Scripting : bonnes pratiques et anti-patterns",
+      "bodyMd": "À faire\nÀ éviter\n\nUn script = une responsabilité, nommé explicitement\nMettre les conditions bloquantes en tête avec sortie anticipée\nPréfixer et commenter : le script sera relu par quelqu'un d'autre\nJournaliser les décisions importantes (LogMessage / LogWarning)\nTester la qualité des données avant de les utiliser\nGarder la logique de sécurité dans l'automate\nMesurer le temps d'exécution sur l'AppEngine après déploiement\nBoucles longues ou attentes actives : elles bloquent tout l'engine\nAccès base de données ou fichier dans un script Execute\nÉcrire dans les attributs d'un autre objet sans nécessité\nRecopier le même script dans 30 instances au lieu du template\nUtiliser des noms d'objets en dur : préférer Me. et les références indirectes\nPlacer la logique métier dans un script de symbole graphique\nIgnorer la qualité : un calcul sur une donnée Bad produit un résultat faux, pas une erreur",
+      "notes": "Chaque anti-pattern correspond a un incident reel deja vu en projet.",
+      "quiz": null
+    },
+    {
+      "position": 49,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "",
+      "bodyMd": "TP 2.1 — Le template $WTP_Pump complet\n★  TP  ·  75 min\nObjectif\n\nUDA\nType\nCatégorie\nExt.\n\nProduire un template de pompe réutilisable, complet : attributs, extensions d'E/S, alarmes, historisation et séquence de démarrage. Puis l'instancier deux fois.\nCmd_Start\nBoolean\nWriteable\n—\n\nCmd_Stop\nBoolean\nWriteable\n—\n\nOut_Run\nBoolean\nCalculated\nOutput\n\nDériver le template\n1\n\nSts_Running\nBoolean\nCalculated\nInput\n$UserDefined ▸ $DSL_Motor ▸ $WTP_Pump.\n\nSts_Fault\nBoolean\nCalculated\nIn + Alm\n\nCréer les UDA\n2\n\nInterlock_OK\nBoolean\nCalculated\nInput\nCmd_Start, Cmd_Stop, Sts_Running, Sts_Fault, Interlock_OK, PV_Flow, SP_Speed, Tot_Hours, Cnt_Starts, Msg_Last, Tag_Desc.\n\nPV_Flow\nFloat\nCalculated\nIn+Alm+His\n\nAjouter les extensions\n3\n\nSP_Speed\nFloat\nWrit. Ret.\nOutput\nInput sur Sts_Running / Sts_Fault / PV_Flow, Output sur Out_Run et SP_Speed.\n\nTot_Hours\nFloat\nCalc. Ret.\nHistory\n\nConfigurer les alarmes\n4\n\nAlarme discrète sur Sts_Fault (priorité 250) ; seuils Lo/Hi sur PV_Flow.\nCnt_Starts\nInteger\nCalc. Ret.\n—\n\nHistoriser\nMsg_Last\nString\nCalculated\n—\n5\nPV_Flow en Delta 1 %, Sts_Running en Delta, Tot_Hours en cyclique 1 min.\n\nTag_Desc\nString\nWriteable\n—\n\nÉcrire la séquence\n6\nScript Seq_Demarrage (On True sur Cmd_Start) et Seq_Arret (On True sur Cmd_Stop).\n\nCRITÈRE DE RÉUSSITE\n\nInstancier\n7\nP_101 démarre depuis Object Viewer, refuse le démarrage si Interlock_OK est faux, et son compteur horaire s'incrémente.\nCréer P_101 et P_102 dans Area_Pompage, mapper leurs adresses, déployer.",
+      "notes": "TP central du niveau 2 : tout le reste s'appuie dessus.",
+      "quiz": null
+    },
+    {
+      "position": 50,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Références directes, relatives et dynamiques",
+      "bodyMd": "Savoir désigner un attribut sans écrire son nom en dur, c'est ce qui rend un template vraiment générique.\n\nRéférence directe\nRéférence relative\nRéférence indirecte\nRéférence dynamique\nLe nom est écrit en dur.\n\nP_101.Sts_Running\n\nSimple, mais rend le template inutilisable ailleurs.\nMe. désigne l'objet courant, MyArea son Area, MyEngine son moteur.\n\nMe.Sts_Running\nMyArea.Alarm.Count\nUn attribut de type ObjectName ou String porte le nom de la cible.\n\nMe.Ref_Amont.PV\n\nRésolue au déploiement.\nConstruite à l'exécution dans un script.\n\nDIM r AS IndirectDisc;\nr.BindTo(\"P_\" + sNum + \".Sts_Running\");\nCas d'usage typique : chaîner deux équipements\n\n' Sur le template : Ref_Amont est un UDA de type ObjectName\n' Sur l'instance P_102 : Ref_Amont = \"P_101\"\n\nIF Me.Ref_Amont.Sts_Running AND NOT Me.Sts_Running THEN\n    Me.Interlock_OK = True;      ' la pompe amont tourne, on peut démarrer\nENDIF;\nCOÛT DES RÉFÉRENCES DYNAMIQUES\nChaque BindTo crée un abonnement à l'exécution. Sur des centaines d'objets, cela pèse sur l'engine et complique le diagnostic. Réserver ce mécanisme aux cas réellement variables.",
+      "notes": "La reference dynamique est puissante mais couteuse : ne pas en abuser.",
+      "quiz": null
+    },
+    {
+      "position": 51,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Object Wizards : un template, plusieurs variantes",
+      "bodyMd": "Plutôt que trois templates de pompe, un seul avec un assistant de configuration.\nLes briques disponibles\n\nAssistant — création d'une instance de $WTP_Pump\n\nChoice Group\nType d'entraînement\n1\nUn choix exclusif présenté en boutons radio : « Pompe simple / avec variateur / avec débitmètre ».\nDémarrage direct\n\nDémarreur progressif\n\nOption\nVariateur de vitesse\n2\n\nUne case à cocher indépendante : « Compteur horaire », « Alarme de débit ».\nOptions\nCompteur horaire\n\nWizard Content\n3\nMesure de débit + alarmes\n\nCe que chaque choix rend visible : attributs, extensions, scripts, éléments graphiques.\nSuivi vibratoire\n\nCréer\n\nAttribute Override\n4\nValeurs imposées par un choix : seuils, unités, libellés par défaut.\n\nBÉNÉFICE MESURÉ\nUn assistant bien conçu divise par trois le temps d'instanciation et supprime les oublis de configuration.",
+      "notes": "Fonctionnalite tres sous-utilisee en projet, et pourtant tres rentable.",
+      "quiz": null
+    },
+    {
+      "position": 52,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "",
+      "bodyMd": "TP 2.2 — Ajouter un assistant à $WTP_Pump\n★  TP  ·  40 min\nRésultat attendu\n\nOuvrir l'onglet UI\n1\nSur le template $WTP_Pump, activer la configuration de l'assistant.\n\nAttribut\nP_103 (VSD)\nP_104 (direct)\n\nCmd_Start\nPrésent\nPrésent\n\nCréer un Choice Group\n2\n« Entraînement » avec trois choix : direct, progressif, variateur.\n\nSP_Speed\nPrésent\nAbsent\n\nPV_Flow\nPrésent\nAbsent\n\nConditionner les attributs\n3\n\nAlarmes débit\nActives\nAbsentes\nSP_Speed et son extension Output n'apparaissent que pour le choix « variateur ».\n\nTot_Hours\nPrésent\nPrésent\n\nAjouter une Option\n4\n« Mesure de débit » qui active PV_Flow, ses alarmes et son historisation.\n\nCE QU'IL FAUT OBSERVER\nLes deux instances dérivent du même template : une correction de la séquence de démarrage bénéficie aux deux, quelle que soit leur variante.\n\nTester\n5\nCréer P_103 avec variateur + débit, puis P_104 en direct sans débit. Comparer les deux objets.\n\nPIÈGE\nUn assistant modifié après instanciation ne reconfigure pas rétroactivement les instances existantes.",
+      "notes": "TP court, tres visuel, bon apres la pause.",
+      "quiz": null
+    },
+    {
+      "position": 53,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Symboles paramétrés : un dessin, N équipements",
+      "bodyMd": "Le symbole ne connaît pas P_101 : il connaît « l'objet qu'on lui passe ».\n\nCréer la Custom Property\n1\nsym_Pump\nType ObjectName, nommée par exemple ObjRef. C'est le paramètre d'entrée du symbole.\n' Custom properties du symbole sym_Pump\nObjRef      : ObjectName   ' l'objet à afficher\nShowFlow    : Boolean      ' afficher le débit ?\nOrientation : String       ' \"H\" ou \"V\"\n\n' Animations\nFill color     ←  ObjRef.Sts_Running\nBlink          ←  ObjRef.Sts_Fault\nText value     ←  ObjRef.PV_Flow\nVisibility     ←  ShowFlow\nTooltip        ←  ObjRef.Tag_Desc\nAction on click →  Show faceplate(ObjRef)\n\nCâbler les animations\n2\nToutes les animations référencent ObjRef.<Attribut>, jamais un nom d'objet en dur.\n\nAjouter les états visuels\n3\nArrêt (gris), marche (vert), défaut (rouge clignotant), non communicant (hachuré).\n\nPrévoir l'interaction\n4\nClic gauche : ouvrir le faceplate. Info-bulle : repère + état + valeur.\n\nSYMBOLE D'OBJET OU SYMBOLE DE TOOLBOX ?\nUn symbole rangé dans le template ($WTP_Pump ▸ Graphics) est automatiquement lié à l'instance : rien à paramétrer au dessin. Un symbole de Graphic Toolbox est plus souple mais demande de renseigner ObjRef à chaque usage. En pratique : symbole d'objet pour les équipements, toolbox pour les éléments génériques (cadres, en-têtes, légendes).\n\nRéutiliser\n5\nSur le synoptique, une instance du symbole par pompe ; on ne renseigne que ObjRef.",
+      "notes": "Demonstration : glisser le meme symbole sur deux pompes differentes.",
+      "quiz": null
+    },
+    {
+      "position": 54,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Conception d'IHM haute performance",
+      "bodyMd": "La couleur est une ressource rare : elle doit signifier quelque chose.\nLes cinq principes\nAvant / après sur le fil rouge\nFond gris neutre, procédé en gris moyen : la couleur est réservée aux anomalies\nPas de 3D, pas de dégradé, pas de texture : ils ajoutent du bruit sans information\nHiérarchie à quatre niveaux : vue usine ▸ vue atelier ▸ vue unité ▸ faceplate\nLes indicateurs analogiques montrent la valeur ET sa position dans la plage de fonctionnement\nAucune information codée uniquement par la couleur (daltonisme, écrans dégradés)\n\nAVANT\nAPRÈS\n\nTout est coloré : rien ne ressort\nUne seule couleur : l'anomalie\n\nGAIN DOCUMENTÉ\nLes retours d'expérience publiés sur les refontes HP-HMI font état d'une détection d'anomalie deux à trois fois plus rapide et d'une réduction sensible des erreurs de conduite. L'investissement porte surtout sur la conception, pas sur la technique.\nPalette d'état recommandée\n\nNormal\nAlarme basse priorité\nAlarme haute priorité\nHors service\nSélection",
+      "notes": "Referentiels : ISA-101, EEMUA 201, Situational Awareness Library fournie par AVEVA.",
+      "quiz": null
+    },
+    {
+      "position": 55,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "",
+      "bodyMd": "TP 2.3 — Symbole de pompe paramétré\n★  TP  ·  50 min\n\nCréer le symbole\nsym_Pump_Faceplate — P_101\n1\n\nDans $WTP_Pump ▸ Graphics, créer sym_Pump avec un corps, une flèche de sens et une étiquette.\nP-101  ·  Pompe alimentation\n\nAjouter les états\n2\n\nAnimation de couleur de remplissage : gris (arrêt), vert sombre (marche), rouge (défaut).\nÉtat : EN MARCHE\nDébit  42,7 m³/h\n\nAfficher les valeurs\n3\nZone de texte liée à Me.PV_Flow avec deux décimales et l'unité.\n\nParamètre\nValeur\n\nGérer la qualité\n\nConsigne de vitesse\n72,0 %\n4\nMotif hachuré si Me.PV_Flow.Quality n'est pas Good.\n\nCompteur horaire\n1 284,6 h\n\nCréer le faceplate\nNombre de démarrages\n312\n5\n\nSymbole sym_Pump_Faceplate : marche/arrêt, consigne de vitesse, compteur horaire, dernier message.\nInterlock\nOK\n\nDernier message\nDémarrage lancé\n\nRelier\n6\nClic gauche sur sym_Pump ▸ ouvrir le faceplate dans un pane dédié.\n\nDémarrer\nArrêter\n\nVérifier\n\n7\nCRITÈRE DE RÉUSSITE\nPoser deux instances du symbole (P_101, P_102) sur le synoptique et confirmer l'indépendance des affichages.\nLe même symbole affiche P_101 et P_102 avec des états différents, sans aucune duplication de dessin.",
+      "notes": "Verifier que personne ne cable une reference en dur.",
+      "quiz": null
+    },
+    {
+      "position": 56,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "InTouch OMI : les apps et la navigation",
+      "bodyMd": "OMI fournit des composants prêts à l'emploi qu'on assemble dans les panes.\n\nAlarm App\nTrend App\nNavigation App\nListe d'alarmes filtrable par Area, priorité, état. Acquittement, commentaire, tri, export.\nTendance temps réel et historique, multi-courbes, avec accès direct à l'Historian.\nArborescence ou bandeau de navigation généré à partir du modèle (Areas et objets).\n\nContent Presenter\nExternal Content\nOMI Web Client\nAffiche dynamiquement le symbole associé à l'objet sélectionné : un pane, N faceplates.\nPDF de procédure, page web, vidéo de caméra, tableur : intégrés dans un pane.\nDepuis 2023 R2, la ViewApp est consultable dans un navigateur, sans installation cliente.\nModèle de navigation recommandé\n\nVue usine\nVue atelier\nVue unité\nFaceplate\n\nSynoptique global, indicateurs clés, alarmes agrégées par zone\nUne zone du procédé, équipements et mesures principales\nDétail d'un ensemble : boucles de régulation, séquences\nUn équipement : commandes, paramètres, historique récent\nRègle : trois clics maximum entre la vue usine et n'importe quel équipement.",
+      "notes": "Montrer l'ajout d'une Alarm App et son filtre par Area.",
+      "quiz": null
+    },
+    {
+      "position": 57,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "",
+      "bodyMd": "TP 2.4 — ViewApp de conduite complète\n★  TP  ·  45 min\n\nReprendre VA_WTP_Conduite\nVA_WTP_Conduite — runtime\n1\n\nPasser le layout à quatre panes : header, process, détail, alarmes.\n\nWTP-01 ▸ Pompage\n1 alarme active\n\nPane Header\n2\n\nNavigation App + date/heure + utilisateur connecté + bandeau d'alarme la plus prioritaire.\n\nPane Process\n3\nSynoptique WTP-01 avec sym_Pump ×2, la cuve animée et les mesures analogiques.\n\nFaceplate\nP-102\n\nPane Détail\nP-101\nP-102\n4\nContent Presenter : affiche le faceplate de l'objet sélectionné dans le synoptique.\n\nPane Alarmes\n5\n\nAlarm App filtrée sur les Areas du site, tri par priorité puis par horodatage.\n■ 10:41:07   P-102   Défaut moteur   Prio 250   Non acq.\n▲ 10:12:04   LT-101   Niveau haut   Prio 500   Acquittée\n\nTester la navigation\n6\nVue usine ▸ atelier pompage ▸ P_101 : vérifier la règle des trois clics.\n\nCRITÈRE DE RÉUSSITE\nSélectionner P-102 dans le synoptique met à jour le pane de détail sans changer d'écran.",
+      "notes": "TP d'integration : tout ce qui precede se retrouve a l'ecran.",
+      "quiz": null
+    },
+    {
+      "position": 58,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "AVEVA Historian : comment ça marche",
+      "bodyMd": "Un moteur de stockage temps réel adossé à SQL Server, optimisé pour les séries temporelles.\n\nObjets ASP\nIDAS\nStorage Engine\nSQL Server\nClients\n\nextension History\nacquisition + buffer\nfichiers .dat historisés\nmétadonnées, alarmes\nTrend, Insight\nLes points à connaître\nModes de récupération de valeur\nIDAS = le composant d'acquisition. Il assure le store-and-forward : si le lien vers le serveur tombe, les données sont bufferisées localement puis rejouées\nLes données process ne vivent pas dans des tables SQL : elles sont dans des fichiers propriétaires, interrogeables en SQL via des vues\nAlarmes et événements, eux, sont bien en base relationnelle\nLes résumés (summaries) précalculent moyennes, min, max horaires ou journaliers\n\nMode\nCe qu'il renvoie\n\nDelta\nUniquement les points réellement stockés\n\nCyclic\nUn point par intervalle demandé\n\nFull\nLes deux combinés\n\nInterpolated\nValeur reconstruite à l'instant demandé\n\nBestFit\nOptimisé pour l'affichage d'une courbe",
+      "notes": "Preciser que les donnees process ne sont pas dans des tables SQL classiques mais dans des fichiers histoire.",
+      "quiz": null
+    },
+    {
+      "position": 59,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Exploiter les données historisées",
+      "bodyMd": "Trois outils, trois usages : diagnostic, reporting et diffusion.\n\n1\n2\n3\nHistorian Client Trend\nHistorian Client Query\nWorkbook Excel\nAnalyse fine : superposition de courbes, curseurs, zoom, comparaison de périodes. L'outil du diagnostic d'incident.\nGénérateur de requêtes SQL sur les vues de l'Historian. Produit le SQL qu'on réutilise ailleurs.\nExtraction directe dans Excel avec rafraîchissement : le format préféré des équipes production.\n\nCe qu'on met dans un rapport d'exploitation\nRequête type\n-- Moyenne horaire du débit P-101 sur les dernières 24 h\nSELECT  DateTime, TagName, Value\nFROM    v_AnalogHistory\nWHERE   TagName = 'P_101.PV_Flow'\n  AND   DateTime >= DateAdd(hour, -24, GetDate())\n  AND   wwRetrievalMode = 'Cyclic'\n  AND   wwCycleCount    = 24\nORDER BY DateTime;\nVolumes traités par équipe\nTemps de marche et nombre de démarrages par pompe\nTop 10 des alarmes par fréquence\nTaux de disponibilité de la ligne\nÉcarts de consigne significatifs",
+      "notes": "Montrer une requete SQL simple sur la vue History.",
+      "quiz": null
+    },
+    {
+      "position": 60,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "",
+      "bodyMd": "TP 2.5 — Tendance et rapport d'exploitation\n★  TP  ·  40 min\n\nVérifier l'historisation\nHistorian Client Trend\n1\n\nSMC ▸ Historian ▸ contrôler que P_101.PV_Flow et LT_101.PV remontent bien.\n\nCréer une tendance\n2\n\nHistorian Client Trend : superposer débit P-101, niveau LT-101 et état de marche sur 2 h.\n\nAnalyser un événement\n3\n\nRepérer le pic de niveau, poser un curseur, relever les valeurs exactes.\n\nConstruire la requête\n\n4\n\nHistorian Client Query : moyenne horaire du débit sur 24 h, mode Cyclic.\n\nExporter vers Excel\n5\n— P_101.PV_Flow (m³/h)      - - LT_101.PV (m)\nWorkbook Excel : produire un tableau des heures de marche des deux pompes.\n\nIntégrer dans OMI\n6\n\nAjouter une Trend App dans un pane de la ViewApp avec les deux courbes préconfigurées.\nCRITÈRE DE RÉUSSITE\nLa tendance affiche des données continues sur 2 h sans trou, et le rapport Excel se rafraîchit d'un clic.",
+      "notes": "Si l'Historian n'est pas installe, faire le TP en demonstration.",
+      "quiz": null
+    },
+    {
+      "position": 61,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Sécurité : les modes d'authentification",
+      "bodyMd": "Le mode se choisit au niveau de la Galaxy et conditionne toute la gestion des utilisateurs.\n\nNone\nGalaxy authentication\nOS User based\nOS Group based\nAucune authentification. Tout le monde peut tout faire. Réservé aux maquettes de laboratoire.\nComptes gérés dans la Galaxy elle-même. Simple, autonome, mais un annuaire de plus à administrer.\nLes utilisateurs Windows sont déclarés un par un dans la Galaxy et associés à des rôles.\nLes rôles Galaxy sont mappés sur des groupes Active Directory. Recommandé en production.\n\nRECOMMANDATION\nÀ ANTICIPER\nEn production : OS Group based. Les arrivées et départs se gèrent dans l'AD, la politique de mot de passe est celle de l'entreprise, et l'audit est centralisé. La Galaxy ne connaît que des groupes, jamais des personnes.\nChanger de mode d'authentification sur une Galaxy en exploitation impose de reconfigurer tous les rôles et de retester les accès. Ce choix se fait en phase de conception, avec l'IT du client.\n\nCritère\nNone\nGalaxy\nOS User\nOS Group\n\nTraçabilité des actions\nAucune\nPartielle\nComplète\nComplète\n\nCoût d'administration\nNul\nÉlevé\nÉlevé\nFaible",
+      "notes": "Source : documentation AVEVA Application Server - Authentication modes.",
+      "quiz": null
+    },
+    {
+      "position": 62,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Rôles, permissions et classification des attributs",
+      "bodyMd": "Deux mécanismes complémentaires : qui a le droit, et sur quoi.\nLes rôles Galaxy\nLa classification des attributs\n\nPermission\nCe qu'elle autorise\nClassification\nContrôle appliqué\n\nCan Modify Application\nCréer et modifier templates et instances dans l'IDE\nFree Access\nÉcriture libre, sans contrôle\n\nCan Modify Deployed\nModifier un objet déjà déployé\nOperate\nRéservé au rôle Operate\n\nOperate\nAgir sur les attributs classés Operate depuis l'IHM\nSecured Write\nDemande la ré-authentification de l'opérateur\n\nTune\nAjuster les paramètres de réglage (gains, seuils)\nVerified Write\nRé-authentification + validation par un second utilisateur\n\nConfigure\nModifier les paramètres de configuration en ligne\nTune / Configure\nRéservés aux rôles correspondants\n\nCan Deploy\nDéclencher un déploiement\nRead Only\nAucune écriture possible\n\nEXEMPLE SUR LE FIL ROUGE\nVERIFIED WRITE\nCmd_Start en Operate · SP_Speed en Secured Write · les seuils d'alarme en Tune · l'adresse d'E/S en Configure. Un opérateur peut démarrer la pompe, pas déplacer un seuil de sécurité.\nC'est le mécanisme de double signature électronique attendu par la réglementation pharmaceutique : deux identités distinctes pour une action critique.",
+      "notes": "Faire le lien avec la partie 21 CFR Part 11 du niveau 3.",
+      "quiz": null
+    },
+    {
+      "position": 63,
+      "kind": "QUIZ",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Quiz de fin de niveau 2",
+      "bodyMd": "",
+      "notes": "Reponses : 1-c, 2-b, 3-b, 4-c, 5-b, 6-c.",
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quel type d'exécution porte l'essentiel du code métier ?",
+            "options": [
+              "Startup",
+              "OnScan",
+              "Execute"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Quel déclencheur pour incrémenter un compteur horaire ?",
+            "options": [
+              "On True",
+              "While True ou Periodic",
+              "Data Change"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Que fait un deadband nul sur une mesure bruitée ?",
+            "options": [
+              "Rien",
+              "Il inonde l'Historian et les alarmes",
+              "Il lisse le signal"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Comment rendre un symbole réutilisable sur N pompes ?",
+            "options": [
+              "Le dupliquer",
+              "Un script par instance",
+              "Une Custom Property de type ObjectName"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Quel mode d'authentification en production ?",
+            "options": [
+              "Galaxy authentication",
+              "OS Group based",
+              "None"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Quelle classification impose une double signature ?",
+            "options": [
+              "Operate",
+              "Secured Write",
+              "Verified Write"
+            ],
+            "correctIndex": 2
+          }
+        ]
+      }
+    },
+    {
+      "position": 64,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "Ce que contient maintenant votre Galaxy\nLes réflexes acquis\nUn arbre de dérivation à trois niveaux, réutilisable d'un projet à l'autre\nUn template de pompe complet avec assistant de configuration\nDes alarmes hiérarchisées et rattachées à des Areas\nUne stratégie d'historisation explicite, tag par tag\nDes symboles paramétrés et un faceplate générique\nUne ViewApp de conduite à quatre panes\nUn modèle de sécurité par rôles et par classification d'attributs\n\nToujours se demander « template ou instance ? »\n1\nAvant d'ajouter quoi que ce soit.\n\nChoisir le déclencheur avant d'écrire le script\n2\nLe type d'exécution conditionne la stabilité.\n\nHistoriser ce qui sera relu\n3\nPas ce qui est disponible.\n\nUne alarme = une action attendue\n4\nSinon c'est un événement, pas une alarme.\n\nAucune référence en dur dans un symbole\n5\nToujours une Custom Property.\n\nPROCHAINE ÉTAPE\nLe niveau 3 fait passer cette application du laboratoire à la production.",
+      "notes": "Point d'etape : la Galaxy contient maintenant une vraie bibliotheque.",
+      "quiz": null
+    },
+    {
+      "position": 65,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "",
+      "bodyMd": "3\n\nExpert\n\nPasser du laboratoire à la production : architecture, disponibilité, sécurité, cycle de vie.\n\nArchitectures & redondance\nPerformance & diagnostic\nCybersécurité\n01\n02\n03\nIndustrialisation\nMigration & qualification\nIntégration MES / UNS\n04\n05\n06",
+      "notes": "Niveau destine a ceux qui concoivent et exploitent, pas seulement a ceux qui developpent.",
+      "quiz": null
+    },
+    {
+      "position": 66,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Objectifs du niveau 3",
+      "bodyMd": "Les questions qu'on vous posera en revue de conception, en audit et en astreinte.\n\n◆\n◆\n◆\nDimensionner\nRendre disponible\nDurcir\nChoisir une topologie, répartir les objets, calibrer les scan rates et anticiper la charge.\nRedondance de plateformes, d'engines, de sources de données et d'historisation.\nRéseau, comptes, ports, gRPC, segmentation IEC 62443 et gestion des correctifs.\n\n◆\n◆\n◆\nDiagnostiquer\nIndustrialiser\nQualifier et intégrer\nLire les statistiques d'un engine, exploiter les journaux, remonter à la cause d'une lenteur.\nDump/Load, gouvernance de bibliothèque, versions, migration de version maîtrisée.\nGAMP 5, Part 11, et ouverture vers MES, ERP et Unified Namespace.",
+      "notes": "Adapter la profondeur selon que le groupe est integrateur ou exploitant.",
+      "quiz": null
+    },
+    {
+      "position": 67,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Trois topologies de référence",
+      "bodyMd": "Le choix se fait sur la criticité, la taille du parc et les contraintes d'exploitation — pas sur le budget seul.\n\nNœud unique\nDistribuée\nRedondante multi-site\nGR + runtime + Historian + IHM sur une seule machine.\nGR séparé, un ou plusieurs serveurs applicatifs, Historian dédié, postes clients.\nPlateformes et engines redondants, Historian en tiers, réplication vers un serveur central.\nQUAND\nQUAND\nQUAND\nPetit site, ≤ 500 objets, arrêt toléré.\nSite industriel courant, 500 à 5 000 objets.\nProduction continue, exigence de disponibilité, multi-usines.\nÀ SAVOIR\nÀ SAVOIR\nÀ SAVOIR\nAucune tolérance de panne. Toute intervention coupe la supervision.\nStandard recommandé. Chaque rôle se dimensionne et se maintient séparément.\nCoût et complexité justifiés seulement par une exigence formalisée.",
+      "notes": "Faire positionner chaque stagiaire sur la topologie de son site.",
+      "quiz": null
+    },
+    {
+      "position": 68,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Dimensionner : les règles qui comptent",
+      "bodyMd": "Un AppEngine saturé se manifeste par des scans en retard, pas par un message d'erreur.\n\nComment répartir les objets\nIndicateur\nRepère de conception\n\nObjets par AppEngine\n300 à 1 000 selon la complexité des scripts\nPar criticité : un engine dédié aux équipements critiques, isolé des autres\nPar période : ne pas mélanger du 200 ms et du 5 s dans le même engine\nPar zone géographique ou fonctionnelle, pour cadrer les interventions\nPar source : les DI Objects d'un même automate sur le même engine\nGarder un engine « bac à sable » pour les objets en cours de mise au point\n\nPériode de scan\n500 ms pour le procédé, 1 à 5 s pour les utilités\n\nCharge CPU d'un engine\nRester sous 60 % en régime établi\n\nScan Overruns\nZéro. Tout dépassement est un signal d'alerte\n\nTags historisés par serveur\n50 000 à 100 000 selon la fréquence\n\nClients OMI par serveur\n10 à 20 sessions RDS par serveur applicatif\n\nTEST DE CHARGE\nPIÈGE\nAvant la mise en service : déployer l'application complète, simuler les E/S à pleine cadence, et observer les compteurs de l'engine pendant 24 h. C'est le seul moyen fiable de valider un dimensionnement.\nAjouter des objets à un engine existant est indolore… jusqu'au jour où le scan déborde. Surveiller en continu ScanOverrun et TimeIdle plutôt que de découvrir le problème en exploitation.",
+      "notes": "Ces valeurs sont des ordres de grandeur : toujours valider par un test de charge.",
+      "quiz": null
+    },
+    {
+      "position": 69,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Redondance d'AppEngine",
+      "bodyMd": "Deux plateformes, un engine actif, un engine en veille synchronisée.\n\nPLT_SRVAPP01\nPLT_SRVAPP02\n\nRedundancy Message Channel  (réseau dédié)\nAE_Process01  —  ACTIF\nAE_Process01  —  VEILLE\nSynchronisation continue des valeurs, des états d'alarme et des attributs retentifs\nCe qui déclenche un basculement\nLes points de conception\nPerte du nœud actif (arrêt, redémarrage, panne matérielle)\nPerte de la communication vers les sources de données\nBasculement manuel demandé par l'exploitant (maintenance planifiée)\nDéfaillance du service ArchestrA sur le nœud actif\nLe RMC doit être un lien physique dédié, distinct du réseau de supervision\nLes deux plateformes doivent avoir la même version et les mêmes correctifs\nLe basculement n'est pas instantané : quelques secondes de transition\nLes scripts doivent supporter une reprise à chaud sans état incohérent\nTester le basculement avant la mise en service, puis périodiquement",
+      "notes": "Le RMC est un reseau dedie : c'est un point de conception souvent neglige.",
+      "quiz": null
+    },
+    {
+      "position": 70,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Redonder les données et l'historisation",
+      "bodyMd": "La redondance d'engine ne protège pas la donnée : il faut la traiter séparément.\n\n1\n2\n3\nRedundant DI Object\nHistorian redondant\nTiered Historian\nDeux sources identiques (deux OI Servers, deux CPU d'automate). L'objet bascule automatiquement sur la source saine et signale l'état de chaque voie.\nDeux serveurs historisant en parallèle, avec réconciliation. Ou un serveur unique dont l'IDAS bufferise en store-and-forward pendant l'indisponibilité.\nHistorians locaux par site qui répliquent vers un Historian d'entreprise : résilience réseau et vision consolidée.\nCe qui reste non redondé — et qu'il faut assumer\n\nComposant\nEffet d'une panne\nParade\n\nGalaxy Repository\nPlus de configuration ni de déploiement ; le runtime continue de tourner\nSauvegarde SQL + .cab, VM restaurable, RTO documenté\n\nPoste client OMI\nPerte de visualisation locale\nPostes multiples, RDS, OMI Web Client\n\nRéseau usine\nPerte d'acquisition\nChemins réseau redondants, store-and-forward",
+      "notes": "Beaucoup de projets redondent l'engine et oublient l'acquisition.",
+      "quiz": null
+    },
+    {
+      "position": 71,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Architecture redondante complète",
+      "bodyMd": "Schéma de référence pour un site à production continue.\n\nNiveau 3 — Entreprise\n\nHistorian entreprise\nMES / ERP\nBroker UNS / MQTT\nAVEVA CONNECT / Insight\n\nNiveau 2 — Supervision\n\nGalaxy Repository\nAppEngine actif\nAppEngine veille\nHistorian A  /  Historian B\n\nServeur RDS — clients OMI\nPostes de conduite\nOMI Web Client\nSystem Monitor\n\nNiveau 1 — Contrôle\n\nOI Server A (redondé)\nOI Server B (redondé)\nAutomates redondants — OPC UA / protocoles natifs\n\nNiveau 0 — Terrain\n\nInstrumentation, variateurs, capteurs, actionneurs",
+      "notes": "Slide de reference a garder pour les revues de conception.",
+      "quiz": null
+    },
+    {
+      "position": 72,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Virtualisation, RDS et postes clients",
+      "bodyMd": "La quasi-totalité des installations récentes sont virtualisées : ce qui compte, ce sont les règles de placement.\nBonnes pratiques de virtualisation\nLes modes d'accès client\nNe jamais placer les deux nœuds d'une paire redondante sur le même hôte physique\nRéserver la CPU et la RAM (pas de surallocation) sur les serveurs applicatifs\nProscrire les snapshots à chaud sur l'Historian et le GR : risque de corruption\nSynchroniser l'heure sur une source unique — les décalages faussent l'historisation\nDocumenter le plan de reprise : quelle VM, quelle sauvegarde, quel délai\n\nMode\nUsage\n\nClient lourd local\nPoste de conduite en salle de contrôle\n\nSession RDS\nPostes multiples mutualisés, mise à jour centralisée\n\nOMI Web Client\nConsultation depuis un navigateur, atelier ou bureau\n\nInsight / CONNECT\nIndicateurs et tendances hors site, mobile\n\nLICENCES\nOMI WEB CLIENT (2023 R2)\nLe modèle AVEVA Flex compte les sessions et les tags, pas les machines. Un déploiement RDS mal cadré consomme des licences plus vite que prévu : valider le décompte avant la mise en service.\nIl ne remplace pas le client lourd pour la conduite critique : le périmètre fonctionnel est plus restreint. C'est un excellent outil de consultation et de supervision déportée.",
+      "notes": "Le point le plus sensible en VM : les snapshots a chaud sur un serveur d'historisation.",
+      "quiz": null
+    },
+    {
+      "position": 73,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Réseau : ce que change gRPC en 2023 R2",
+      "bodyMd": "La dépendance historique à DCOM était le principal point de friction avec les équipes IT.\n\nAvant : DCOM\nDepuis 2023 R2 : gRPC\nPorts dynamiques : ouverture de plages entières en pare-feu\nConfiguration DCOM fastidieuse et fragile\nSensible aux changements de domaine et de compte\nMal vu des équipes sécurité, difficile à faire passer en DMZ\nCommunication sur des ports fixes et documentés\nChiffrement TLS natif entre composants\nRègles de pare-feu simples et auditables\nTraversée de DMZ et d'infrastructures segmentées facilitée\nDCOM reste utilisé par certains composants hérités : vérifier au cas par cas\nSegmentation type IEC 62443\n\nZone Terrain\nZone Contrôle\nZone Supervision\nDMZ industrielle\nZone Entreprise\n⇄\n⇄\n⇄\n⇄\nAutomates, instruments\nOI Servers, engines\nGR, Historian, clients\nRéplication, passerelles\nMES, ERP, cloud\nChaque flux traversant une frontière de zone doit être documenté : source, destination, port, protocole, justification.",
+      "notes": "Argument commercial fort aupres des DSI.",
+      "quiz": null
+    },
+    {
+      "position": 74,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Cybersécurité : les dix points de contrôle",
+      "bodyMd": "Ce qu'un auditeur vérifiera sur une installation System Platform.\n\n1\n2\n3\n4\n5\nComptes de service dédiés\nAuthentification OS Group\nSuppression des comptes par défaut\nCorrectifs à jour\nPare-feu restrictif\nPas de compte administrateur partagé ; mot de passe géré en coffre-fort.\nRôles Galaxy mappés sur l'Active Directory, jamais de comptes locaux.\nDefaultUser désactivé après la mise en service.\nPatches AVEVA et Windows appliqués selon un calendrier validé.\nSeuls les ports nécessaires sont ouverts, dans un sens documenté.\n\n6\n7\n8\n9\n10\nAntivirus configuré\nSauvegardes testées\nJournalisation centralisée\nAccès distants tracés\nMédia amovibles contrôlés\nExclusions AVEVA appliquées, sinon corruption et pertes de performance.\nRestaurer une fois par an, pas seulement sauvegarder.\nLogs ArchestrA et Windows remontés vers un collecteur.\nVPN nominatif, pas d'outil de prise en main non maîtrisé.\nClés USB bloquées ou passées par une station de décontamination.\n\nEXCLUSIONS ANTIVIRUS\nLes dossiers de données ArchestrA et Historian doivent être exclus de l'analyse temps réel : c'est une recommandation constructeur, pas une facilité. Sans exclusion, on observe des corruptions de fichiers historiques et des chutes de performance importantes.",
+      "notes": "Utiliser cette liste comme grille d'audit chez le client.",
+      "quiz": null
+    },
+    {
+      "position": 75,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Scripting expert : ouvrir vers .NET",
+      "bodyMd": "QuickScript.NET peut appeler des assemblies importées dans la Galaxy — puissance réelle, risques réels.\n\nImporter l'assembly\n1\nModèle d'appel sécurisé\nIDE ▸ Galaxy ▸ Import ▸ Script Function Library. La DLL est stockée dans la Galaxy et distribuée au déploiement.\n' Appel encadré d'une bibliothèque externe\nDIM sResult AS STRING;\nDIM dtStart AS TIME;\n\ndtStart = SystemTimeUTC;\n\nTRY\n    sResult = DSL_Lib.GetBatchId(Me.Tag_Desc);\nCATCH\n    sResult = \"\";\n    LogError(\"GetBatchId : \" + ExceptionMessage);\nENDTRY;\n\nIF sResult <> \"\" THEN\n    Me.Batch_Id = sResult;\nENDIF;\n\nIF (SystemTimeUTC - dtStart) > 0.2 THEN\n    LogWarning(\"Appel externe lent : \" + Me.Tag);\nENDIF;\n\nDéclarer l'usage\n2\nL'assembly devient utilisable dans les scripts de tous les objets de la Galaxy.\n\nEncadrer les appels\n3\nTout appel externe est enveloppé dans une gestion d'erreur et un contrôle de durée.\n\nIsoler\n4\nPlacer les objets qui appellent du code externe sur un AppEngine dédié.\n\nVersionner\n5\nLa DLL suit le cycle de vie de la Galaxy : une version de DLL = une version d'application.\n\nRÈGLE ABSOLUE\nAucun appel bloquant dans un script : une requête réseau lente fige l'AppEngine entier.",
+      "notes": "Insister sur le fait qu'une exception non geree peut planter l'engine.",
+      "quiz": null
+    },
+    {
+      "position": 76,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Diagnostiquer les performances d'un AppEngine",
+      "bodyMd": "Quatre compteurs suffisent à savoir si un moteur est en bonne santé.\n\nAttribut de l'engine\nLecture\nObject Viewer — AE_Process01\n\nScanOverrunsCnt\nNombre de scans en retard. Doit rester à zéro\n\nAttribut\nValeur\nQualité\n\nAE_Process01.ScanOverrunsCnt\n0\nGood\n\nScanState / OnScan\nL'engine exécute-t-il réellement ?\n\nAE_Process01.TimeIdle\n62 %\nGood\n\nTimeIdle\nMarge disponible dans le cycle. Sous 20 %, il faut agir\n\nAE_Process01.ExecutionTimeAvg\n184 ms\nGood\n\nExecutionTimeAvg / Max\nDurée moyenne et pic du cycle d'exécution\nAE_Process01.ExecutionTimeMax\n410 ms\nGood\n\nAE_Process01.ObjectCnt\n412\nGood\n\nCheckpointFailedCnt\nÉchecs de sauvegarde d'état : disque ou droits en cause\n\nAE_Process01.ScanPeriod\n500 ms\nGood\n\nDÉMARCHE DE DIAGNOSTIC\n1) l'engine déborde-t-il ? 2) quel objet consomme le plus (statistiques par objet) ? 3) quel script dans cet objet ? 4) le script fait-il un accès externe, une boucle, une référence dynamique ? La cause est presque toujours à cette quatrième étape.\n\nSYSTEM MONITOR\nIl surveille en continu services, licences, espace disque et santé des nœuds, et alerte par courriel avant que l'exploitation ne s'en aperçoive.",
+      "notes": "Montrer ces attributs dans Object Viewer sur la VM.",
+      "quiz": null
+    },
+    {
+      "position": 77,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Journaux : trouver l'information utile",
+      "bodyMd": "Le Log Viewer contient la réponse à la plupart des incidents — encore faut-il filtrer.\n\nMéthode\nSMC — Log Viewer\n\nFichier\nAffichage\nFiltre\nAide\nFiltrer d'abord par horodatage de l'incident\nPuis par niveau : Error, puis Warning\nRemonter au premier message anormal, pas au dernier\nActiver un Log Flag ciblé pour reproduire le problème\nDésactiver le Log Flag ensuite : il génère un volume important\nExporter le journal avant tout redémarrage\n\nHorodatage\nNiveau\nComposant\nMessage\n\n10:41:07.221\nError\naaEngine\nScript Seq_Demarrage : référence non résolue\n\n10:41:07.198\nWarning\naaEngine\nScan overrun sur AE_Process01 (612 ms)\n\n10:40:55.004\nInfo\nDIObject\nPLC01 : reconnexion réussie\n\n10:40:51.870\nError\nDIObject\nPLC01 : timeout de lecture Scan_500ms\n\n10:38:12.445\nInfo\nBootstrap\nDéploiement de P_103 terminé\n\n10:31:02.101\nWarning\naaGR\nObjet P_104 checked-out depuis 4 h\n\nRÉFLEXE D'ASTREINTE\nAvant de redémarrer quoi que ce soit : exporter le Log Viewer, capturer l'état d'Object Viewer et noter l'heure exacte. Un redémarrage efface souvent la seule preuve exploitable de la cause.",
+      "notes": "Montrer l'activation d'un log flag et rappeler de le desactiver ensuite.",
+      "quiz": null
+    },
+    {
+      "position": 78,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Arbre de décision : « la valeur ne remonte plus »",
+      "bodyMd": "Le diagnostic le plus fréquent, résolu en descendant la chaîne dans l'ordre.\n\nVérifier la Custom Property / la référence du symbole\n1.  Le symbole affiche-t-il autre chose que l'objet ?\n\nLe problème est côté graphique, pas côté données\n2.  Object Viewer montre-t-il la bonne valeur ?\n\nSi Bad : descendre au DI Object\n3.  La qualité de l'attribut est-elle Good ?\n\nSinon : redéployer, vérifier l'endpoint\n4.  Le DIDevice est-il OnScan et connecté ?\n\nSinon : adresse ou droits côté automate\n5.  Le OI Server voit-il l'item (client OPC de test) ?\n\nSinon : réseau, pare-feu, câblage\n6.  L'automate répond-il au ping / au port ?",
+      "notes": "Faire jouer le scenario en debranchant le simulateur.",
+      "quiz": null
+    },
+    {
+      "position": 79,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Galaxy Dump / Load : l'outil d'industrialisation",
+      "bodyMd": "Exporter la configuration en CSV, la modifier en masse dans Excel, la réimporter.\n\nDump\n1\nExtrait de CSV\nIDE ▸ Galaxy ▸ Export ▸ Galaxy Dump : sélectionner les objets, obtenir un CSV par template.\n;Object,Template,ContainedName,Area,Tag_Desc,IO_Address,Hi,HiHi\nP_101,$WTP_Pump,,Area_Pompage,Pompe alim. 1,PLC01.DB10.0,45,52\nP_102,$WTP_Pump,,Area_Pompage,Pompe alim. 2,PLC01.DB10.4,45,52\nP_201,$WTP_Pump,,Area_Filtration,Pompe filtre 1,PLC01.DB12.0,30,36\nP_202,$WTP_Pump,,Area_Filtration,Pompe filtre 2,PLC01.DB12.4,30,36\n\nModifier\n2\nDans Excel : générer les 40 instances, renseigner adresses d'E/S, repères, seuils et Areas.\n\nContrôler\n3\n\nVérifier l'unicité des noms, la longueur (32 caractères), l'absence d'accents et de doublons.\nCE QUE DUMP/LOAD NE FAIT PAS\nIl ne crée ni ne modifie les templates, ni les graphiques, ni les scripts. Il agit sur la configuration des instances et de leurs attributs — c'est déjà l'essentiel du travail répétitif.\n\nLoad\n4\nIDE ▸ Galaxy ▸ Import ▸ Galaxy Load : création ou mise à jour des instances.\n\nVérifier\n5\nConsulter le rapport d'import : chaque ligne rejetée est motivée.\n\nGAIN TYPIQUE\n\nDéployer\n6\nCréer 200 instances à la main : environ deux jours. Par Dump/Load : deux heures, avec une traçabilité complète du fichier source.\nDéploiement en cascade des nouvelles instances.",
+      "notes": "C'est le gain de productivite le plus spectaculaire du niveau 3.",
+      "quiz": null
+    },
+    {
+      "position": 80,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "",
+      "bodyMd": "TP 3.1 — Instanciation en masse par Dump/Load\n★  TP  ·  45 min\nErreurs d'import les plus fréquentes\n\nExporter\n1\nGalaxy Dump sur P_101 et P_102 pour obtenir le gabarit CSV du template $WTP_Pump.\n\nMessage\nCause\n\nGénérer\n2\n\nObject already exists\nNom déjà utilisé dans la Galaxy\nDans Excel, produire 20 instances P_201 à P_220 avec adresses incrémentales et Areas alternées.\n\nInvalid object name\nEspace, accent ou plus de 32 caractères\n\nContrôler\n3\n\nVérifier noms, longueurs, doublons ; sauvegarder en CSV encodage UTF-8.\nTemplate not found\nTemplate absent ou mal orthographié\n\nArea does not exist\nArea à créer avant l'import\n\nImporter\n4\nGalaxy Load ; lire attentivement le rapport d'import.\n\nAttribute not found\nColonne ne correspondant à aucun UDA\n\nCorriger\n5\nReprendre les lignes rejetées, réimporter uniquement celles-ci.\n\nCRITÈRE DE RÉUSSITE\n\nDéployer et vérifier\nLes 20 instances existent, sont réparties dans les bonnes Areas, déployées, et leur adresse d'E/S correspond exactement au fichier source — qui devient de fait la liste d'E/S de référence du projet.\n6\nDéploiement en cascade puis contrôle de 3 instances au hasard dans Object Viewer.",
+      "notes": "Preparer un CSV de secours au cas ou un stagiaire bloque sur Excel.",
+      "quiz": null
+    },
+    {
+      "position": 81,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Gouverner sa bibliothèque d'objets",
+      "bodyMd": "Une bibliothèque sans règles devient, en trois projets, un dossier de templates que plus personne n'ose toucher.\n\nUn propriétaire identifié\nUn versionnement explicite\nUne Galaxy de référence\nUne personne valide toute évolution de la bibliothèque socle. Sans propriétaire, il n'y a pas de standard.\nChaque livraison de bibliothèque porte un numéro et un journal des modifications, exporté en .cab.\nUne Galaxy « bibliothèque » distincte des Galaxies projet, d'où l'on importe les templates.\n\nUne documentation vivante\nDes tests de non-régression\nUne politique de rétro-portage\nPour chaque template : rôle, attributs, alarmes, dépendances, exemple d'usage.\nUn jeu d'instances de test rejoué avant chaque publication de version.\nDécider explicitement si une correction remonte dans les projets déjà livrés.\nCycle de livraison recommandé\n\n1\n2\n3\n4\n5\n\nDemande d'évolution\nDéveloppement en Galaxy de référence\nTests de non-régression\nPublication .cab versionnée\nImport dans les projets",
+      "notes": "Sujet directement lie a l'activite de Dasolabs : la bibliotheque est un actif.",
+      "quiz": null
+    },
+    {
+      "position": 82,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Migrer une application vers 2023 R2",
+      "bodyMd": "Une migration ne s'improvise pas : elle se prépare comme un projet à part entière.\nLes points durs récurrents\n\nInventorier\n1\nVersion actuelle, correctifs, OI Servers, scripts .NET, contrôles ActiveX, applications InTouch embarquées.\nContrôles ActiveX et scripts .NET non compatibles avec la nouvelle version\nHorodatages : passage local / UTC entre versions, à vérifier sur les données historisées\nSymboles InTouch classiques dont le rendu change subtilement\nOI Servers dont le driver n'existe plus sous le même nom\nLicences : le modèle Flex ne se transpose pas automatiquement depuis l'ancien\nComptes de service et droits DCOM/gRPC à reconfigurer\n\nVérifier la compatibilité\n2\nMatrice de compatibilité AVEVA : OS, SQL Server, drivers, matériel. Les contrôles obsolètes sont le point dur.\n\nCloner l'existant\n3\nRestaurer la Galaxy de production sur une plateforme de test isolée, à l'identique.\n\nMigrer à blanc\n4\nExécuter la migration sur le clone, relever chaque anomalie, écrire les correctifs.\n\nTester fonctionnellement\n5\nRejouer les scénarios d'exploitation : alarmes, historisation, séquences, droits, rapports.\n\nPlanifier la bascule\n\n6\nRÈGLE\nFenêtre d'arrêt, procédure de retour arrière, critères de décision go / no-go.\nAucune migration directe en production, jamais. Le clone de test n'est pas une option de confort : c'est la seule façon de connaître le coût réel avant de s'engager.\n\nBasculer et surveiller\n7\nMigration en production, puis surveillance renforcée pendant plusieurs jours.",
+      "notes": "Exemple vecu : migration InTouch 2017 vers 2023 avec correction d'un bug d'horodatage UTC.",
+      "quiz": null
+    },
+    {
+      "position": 83,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Qualification en environnement réglementé",
+      "bodyMd": "En pharmaceutique et en chimie fine, l'application n'est utilisable qu'une fois qualifiée.\n\nBesoins utilisateurs\nQualification de performance : l'application en conditions réelles\nURS\nPQ\n\nSpécifications fonctionnelles et de conception\nQualification opérationnelle : chaque fonction est testée et tracée\nFS / DS\nOQ\n\nDéveloppement de la Galaxy\nQualification d'installation : versions, licences, comptes, topologie\nRéalisation\nIQ\nV-model GAMP 5\nCe que System Platform apporte\nChaque spécification a son test de qualification en vis-à-vis\nTraçabilité exigée : matrice URS ▸ FS ▸ test ▸ résultat\nToute anomalie est enregistrée, analysée et re-testée\nLes protocoles sont approuvés avant exécution, jamais après\nJournal des modifications d'objets dans la Galaxy (qui, quand, quoi)\nSecured Write et Verified Write pour la signature électronique\nHistorisation des alarmes et des actions opérateur\nGalaxy Dump comme preuve documentaire de la configuration testée",
+      "notes": "Dasolabs produit ce type de protocole : IQ/OQ pour migration InTouch.",
+      "quiz": null
+    },
+    {
+      "position": 84,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "21 CFR Part 11 : ce qui est attendu",
+      "bodyMd": "Les enregistrements électroniques doivent être aussi fiables qu'un registre papier signé.\n\nExigence\nTraduction concrète\nMise en œuvre dans System Platform\n\nIdentification unique\nChaque action est attribuable à une personne\nAuthentification OS Group, comptes nominatifs, aucun compte partagé\n\nSignature électronique\nLes actions critiques sont signées\nSecured Write (1 signature) et Verified Write (2 signatures)\n\nAudit trail\nToute création ou modification est tracée et inaltérable\nJournal Galaxy, historisation des événements, alarmes en base\n\nContrôle d'accès\nChacun n'a que les droits nécessaires\nRôles Galaxy, classification des attributs, groupes AD\n\nRétention et lisibilité\nLes données restent exploitables sur la durée légale\nHistorian avec politique d'archivage documentée et restauration testée\n\nGestion du changement\nToute évolution est justifiée, testée et approuvée\nCheck-in commenté, versions .cab, protocoles de re-qualification\n\nPOSITION HONNÊTE VIS-À-VIS DU CLIENT\nAucun logiciel n'est « conforme Part 11 » à lui seul. La conformité résulte de la configuration, des procédures et de la documentation. Le rôle de l'intégrateur est de fournir les mécanismes techniques et les preuves ; la responsabilité réglementaire reste celle de l'exploitant.",
+      "notes": "Ne pas promettre la conformite : la conformite est celle du systeme dans son ensemble, pas du logiciel.",
+      "quiz": null
+    },
+    {
+      "position": 85,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Ouvrir System Platform vers le SI",
+      "bodyMd": "La supervision n'est plus une île : elle alimente le MES, l'ERP et les plateformes de données.\n\nOPC UA\nSQL\nWeb / REST\nServeur et client. Le standard d'échange OT le plus universel, avec sécurité intégrée.\nLecture et écriture en base depuis les scripts ou via l'Historian. Attention aux appels bloquants.\nAppels de services depuis des scripts .NET : réception d'ordres de fabrication, remontée d'indicateurs.\n\nMQTT / Sparkplug B\nAVEVA MES / Batch\nCONNECT / Insight\nPublication événementielle vers un broker : la brique de base d'un Unified Namespace.\nIntégration native pour la traçabilité de lot, la généalogie et les recettes.\nPublication cloud des données historisées : tableaux de bord et accès mobile.\n\nPRINCIPE DIRECTEUR\nSystem Platform reste la source de vérité du modèle d'usine : c'est lui qui sait qu'un capteur appartient à une pompe, qui appartient à une ligne. Toute intégration doit préserver ce contexte — sans lui, on n'exporte que des nombres.\nTrois questions à poser avant toute intégration : qui est propriétaire de la donnée, à quelle fréquence elle doit circuler, et que se passe-t-il si le lien tombe.",
+      "notes": "Sujet en forte demande chez les clients industriels.",
+      "quiz": null
+    },
+    {
+      "position": 86,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "System Platform dans un Unified Namespace",
+      "bodyMd": "Le modèle objet de la Galaxy est un excellent point de départ pour une hiérarchie UNS.\n\nModèle Galaxy\nPublisher\nBroker MQTT\nConsommateurs\n\nArea ▸ objet ▸ attribut\ncontexte industriel\nscript .NET, OI Gateway\nou connecteur MQTT\nSparkplug B\nMES, BI,\nIA, apps\nCorrespondance naturelle des hiérarchies\nPoints d'attention\n\nPublier sur événement, pas en scrutation : c'est tout l'intérêt du modèle\nLe contexte (unité, plage, qualité, horodatage) doit voyager avec la valeur\nSens des flux : par défaut, System Platform publie et ne consomme pas les commandes\nLe broker n'est pas un historien : conserver l'Historian pour la donnée de référence\nSécuriser le lien : TLS, authentification, droits par topic\nGalaxy                    →  Topic MQTT\n───────────────────────────────────────────────\nSite WTP                  →  wtp/\n  Area_Pompage            →  wtp/pompage/\n    P_101                 →  wtp/pompage/p101/\n      PV_Flow             →  wtp/pompage/p101/flow\n      Sts_Running         →  wtp/pompage/p101/running",
+      "notes": "Sujet en lien direct avec les projets UNS conduits par l'equipe.",
+      "quiz": null
+    },
+    {
+      "position": 87,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "",
+      "bodyMd": "TP 3.2 — Publier vers un broker MQTT\n★  TP  ·  45 min\n\nInstaller le broker\n1\nCharge utile publiée\nMosquitto local sur la VM, port 1883 ; vérifier avec MQTT Explorer.\n{\n  \"tag\":       \"P_101.PV_Flow\",\n  \"value\":     42.7,\n  \"unit\":      \"m3/h\",\n  \"quality\":   \"Good\",\n  \"timestamp\": \"2026-08-28T08:41:07.221Z\",\n  \"asset\":     \"WTP/Pompage/P-101\",\n  \"desc\":      \"Pompe alimentation 1\"\n}\n\nDéfinir la hiérarchie\n2\nÉcrire la table de correspondance Galaxy ▸ topics avant d'écrire la moindre ligne.\n\nCréer l'objet publisher\n3\nTemplate $DSL_MqttPublisher avec les attributs de configuration (broker, port, préfixe de topic).\n\nÉcrire le script\n4\nPOURQUOI CE FORMAT\nExecute / Data Change sur les attributs surveillés, appel de la bibliothèque MQTT encadré par TRY/CATCH.\nUn consommateur qui reçoit ce message n'a besoin d'aucune connaissance de la Galaxy : la valeur arrive avec son unité, sa qualité, son heure et son appartenance. C'est ce qui distingue un UNS d'un simple export de tags.\n\nPublier le contexte\n5\nCharge utile JSON : valeur, unité, qualité, horodatage UTC, repère de l'équipement.\n\nVérifier\n\n6\nCRITÈRE DE RÉUSSITE\nDans MQTT Explorer : les topics apparaissent et se mettent à jour sur variation uniquement.\nArrêter le broker ne perturbe ni l'AppEngine ni la supervision : la publication échoue proprement et repart au retour du service.",
+      "notes": "Utiliser Mosquitto en local et MQTT Explorer pour la verification.",
+      "quiz": null
+    },
+    {
+      "position": 88,
+      "kind": "QUIZ",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Quiz de fin de niveau 3",
+      "bodyMd": "",
+      "notes": "Reponses : 1-b, 2-c, 3-b, 4-b, 5-c, 6-b.",
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quel compteur trahit un AppEngine saturé ?",
+            "options": [
+              "ObjectCnt",
+              "ScanOverrunsCnt",
+              "CheckpointCnt"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Le RMC d'une paire redondante doit être…",
+            "options": [
+              "sur le réseau de supervision",
+              "sur le réseau automate",
+              "un lien physique dédié"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Que fait Galaxy Dump / Load ?",
+            "options": [
+              "Il migre la version",
+              "Il exporte et réimporte la configuration des instances",
+              "Il sauvegarde les graphiques"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Quelle classification impose deux signatures ?",
+            "options": [
+              "Secured Write",
+              "Verified Write",
+              "Operate"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Que change gRPC en 2023 R2 ?",
+            "options": [
+              "La vitesse d'affichage",
+              "Le modèle de licence",
+              "La dépendance à DCOM et les règles de pare-feu"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Une migration se teste…",
+            "options": [
+              "directement en production hors production",
+              "sur un clone restauré de la Galaxy de production",
+              "sur une Galaxy vierge"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      }
+    },
+    {
+      "position": 89,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "Les cinq convictions à emporter\nGrille d'auto-évaluation\n\nLa disponibilité se conçoit, elle ne s'ajoute pas\nSavoir-faire\nNiveau\n1\nRedondance, dimensionnement et plan de reprise sont des décisions d'architecture initiales.\n\nChoisir et justifier une topologie\nExpert\n\nConcevoir une redondance complète\nExpert\n\nCe qui n'est pas mesuré n'est pas maîtrisé\n2\nScanOverrun, TimeIdle et System Monitor sont des indicateurs d'exploitation, pas de mise au point.\n\nDiagnostiquer un engine saturé\nExpert\n\nIndustrialiser par Dump/Load\nExpert\n\nL'industrialisation est un gain immédiat\n3\nDump/Load et gouvernance de bibliothèque se rentabilisent dès le premier projet.\n\nPiloter une migration de version\nExpert\n\nConstituer un dossier de qualification\nExpert\n\nUne migration est un projet\n4\nInventaire, clone, test, bascule, surveillance. Jamais d'improvisation en production.\n\nIntégrer vers MES / UNS\nExpert\n\nLa donnée doit garder son contexte\n5\nC'est ce qui rend l'ouverture vers le MES et l'UNS réellement utile.",
+      "notes": "Conclure sur le fait que le niveau 3 est un travail d'equipe : OT, IT, qualite.",
+      "quiz": null
+    },
+    {
+      "position": 90,
+      "kind": "CONTENT",
+      "section": "CLÔTURE",
+      "title": "Matrice de compétences des trois niveaux",
+      "bodyMd": "À utiliser comme grille d'auto-positionnement avant et après la formation.\n\nDomaine\nDébutant\nIntermédiaire\nExpert\n\nModélisation\nInstancier un template\nConcevoir une bibliothèque dérivée\nGouverner et versionner la bibliothèque\n\nDonnées\nLier un attribut à une E/S\nExtensions, alarmes, historisation\nRedondance de sources, tiered Historian\n\nLogique\nLire un script\nÉcrire des scripts fiables\nIntégrer du .NET sous contrôle\n\nVisualisation\nCréer une ViewApp simple\nSymboles paramétrés, HP-HMI\nArchitecture cliente, RDS, Web Client\n\nExploitation\nDéployer et vérifier\nSécurité par rôles\nDiagnostic, performance, astreinte\n\nCycle de vie\nSauvegarder une Galaxy\nDocumenter la configuration\nMigration, qualification, intégration SI\n\nCOMMENT PROGRESSER APRÈS LA FORMATION\nLa compétence se consolide sur un projet réel, pas en salle. La séquence la plus efficace : refaire seul le fil rouge WTP-01 de bout en bout, puis reprendre une application existante et la critiquer avec la grille des trois niveaux.",
+      "notes": "Distribuer cette grille en debut de formation et la refaire remplir a la fin.",
+      "quiz": null
+    },
+    {
+      "position": 91,
+      "kind": "CONTENT",
+      "section": "CLÔTURE",
+      "title": "Checklist d'un projet System Platform",
+      "bodyMd": "Du cahier des charges à la réception, les points de contrôle qui évitent les mauvaises surprises.\n\nConception\nDéveloppement\nIntégration\nRéception\nTopologie et dimensionnement validés\nBibliothèque dérivée en trois niveaux\nTests unitaires par template\nProtocoles IQ/OQ exécutés et signés\n☐\n☐\n☐\n☐\nConvention de nommage figée\nStratégie d'alarmes rationalisée\nTest de charge sur 24 h\nSauvegardes SQL et .cab testées\n☐\n☐\n☐\n☐\nMode d'authentification arrêté avec l'IT\nPlan d'historisation tag par tag\nTest de basculement redondance\nDocumentation d'exploitation remise\n☐\n☐\n☐\n☐\nListe d'E/S structurée et versionnée\nSymboles paramétrés, aucune référence en dur\nJeu de tests de non-régression\nFormation des équipes réalisée\n☐\n☐\n☐\n☐",
+      "notes": "Cette checklist peut servir de trame de revue de projet.",
+      "quiz": null
+    },
+    {
+      "position": 92,
+      "kind": "CONTENT",
+      "section": "CLÔTURE",
+      "title": "Ressources pour aller plus loin",
+      "bodyMd": "1\n2\n3\nDocumentation officielle\nAVEVA Knowledge & Support\nAVEVA Learning Academy\ndocs.aveva.com — guides Application Server, OMI, Historian, Deployment & Security. La référence à consulter en premier.\nsoftwaresupport.aveva.com — tech notes, correctifs, matrices de compatibilité, base d'incidents résolus.\nCursus certifiants Application Server, OMI et Historian ; utile pour valider formellement les acquis.\n\n4\n5\n6\nCommunity AVEVA\nNormes de référence\nEnvironnement d'entraînement\ncommunity.aveva.com — échanges entre intégrateurs, retours d'expérience sur les versions récentes.\nISA-101 (IHM), ISA-18.2 et EEMUA 191 (alarmes), IEC 62443 (cybersécurité OT), GAMP 5 (qualification).\nLicence développeur AVEVA + simulateur OPC UA : un lab personnel reste le meilleur investissement.\n\nUNE SEULE SOURCE FAIT FOI\nLes versions évoluent : vérifier systématiquement le comportement décrit ici contre la documentation de la version exactement déployée chez le client.",
+      "notes": "Preciser que la documentation officielle est la seule source qui fasse foi.",
+      "quiz": null
+    },
+    {
+      "position": 93,
+      "kind": "CONTENT",
+      "section": "CLÔTURE",
+      "title": "Évaluation et suite du parcours",
+      "bodyMd": "Évaluation de la formation\nModules d'approfondissement possibles\nAVEVA Historian avancé : réplication, résumés, dimensionnement\nInTouch OMI : conception d'IHM haute performance appliquée à un site\nCybersécurité OT et segmentation IEC 62443\nMigration de parc : méthodologie et outillage\nQualification GxP : rédaction des protocoles IQ/OQ\nUnified Namespace : architecture et mise en œuvre\n\nQuiz final\n1\nLes trois quiz de niveau, repris en une évaluation de 20 questions.\n\nMise en situation\n2\nReprendre le fil rouge WTP-01 et ajouter un nouvel équipement de bout en bout, seul.\n\nRevue de code croisée\n3\nChaque binôme relit la bibliothèque d'un autre binôme avec la grille des bonnes pratiques.\n\nRetour à chaud\n4\nACCOMPAGNEMENT POST-FORMATION\nQuestionnaire de satisfaction et recueil des sujets à approfondir.\nLe passage en projet réel est le moment où les questions les plus utiles apparaissent. Un point de suivi à trois semaines, sur le projet du stagiaire, vaut souvent une journée de formation supplémentaire.",
+      "notes": "Recuperer les evaluations avant le depart des stagiaires.",
+      "quiz": null
+    },
+    {
+      "position": 94,
+      "kind": "CONTENT",
+      "section": null,
+      "title": "d",
+      "bodyMd": "Merci\nTrois niveaux, un seul fil rouge : la station WTP-01.\nLa suite se joue maintenant sur vos projets.\n\nFORMATION CONÇUE ET ANIMÉE PAR\nDOMAINE\nDasolabs\nAutomatisation & digitalisation industrielle\n\nSUPPORT\nPÉRIMÈTRE\nVersion 1.0 — août 2026\nAVEVA System Platform 2023 / 2023 R2",
+      "notes": "Remercier, rappeler les coordonnees et proposer le suivi a trois semaines.",
+      "quiz": null
+    }
+  ]
+}
