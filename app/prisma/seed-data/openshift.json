@@ -20,7 +20,7 @@
       "kind": "CONTENT",
       "section": "INTRODUCTION",
       "title": "Objectifs de la formation",
-      "bodyMd": "OpenShift est la distribution Kubernetes enterprise de Red Hat (aussi appelée OKD en open source, OpenShift Container Platform en payant). Elle ajoute à Kubernetes : outil ligne cluster de développement, gestion multi-tenant, sécurité renforcée, Routes simplifiées, opérateurs. Utilisée par les banques, industries, gouvernements pour du cloud on-prem.\n\n**Kubernetes fondamentaux** — Pods, Deployments, Services, Ingress — les briques universelles.\n\n**OpenShift specifics** — Routes, Projects, SCC (Security Context Constraints), Templates.\n\n**Sécurité renforcée** — Par défaut : non-root, immutable images, network policies, image scanning.\n\n**Écosystème Operators** — Applications packagées avec logique de déploiement et de gestion via CRD.\n\n**GitOps + CI/CD** — ArgoCD, Tekton Pipelines — le pattern cloud-native mature.\n\n**À retenir :** OpenShift = Kubernetes + tooling enterprise. Si votre org paye Red Hat, c'est pertinent. Sinon Kubernetes vanilla + outils open source équivalents (ArgoCD, Ingress, etc.).",
+      "bodyMd": "OpenShift = distribution Kubernetes enterprise de Red Hat. Ajoute à K8s : tooling, gestion multi-tenant, sécurité renforcée, Routes simplifiées, opérateurs. Utilisée par banques, industries, gouvernements pour du cloud on-prem.\n\n**Kubernetes fondamentaux** — Pods, Deployments, Services, Ingress — briques universelles.\n\n**OpenShift specifics** — Routes, Projects, SCC (Security Context Constraints), Templates.\n\n**Sécurité renforcée** — Par défaut : non-root, immutable images, network policies, image scanning.\n\n**Écosystème Operators** — Applications packagées avec logique déploiement et gestion via CRD.\n\n**GitOps + CI/CD** — ArgoCD, Tekton Pipelines — pattern cloud-native mature.\n\n**À retenir :** OpenShift = Kubernetes + tooling enterprise. Si votre org paye Red Hat, c'est pertinent. Sinon Kubernetes vanilla + outils open source équivalents.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-02.jpg"
@@ -50,7 +50,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "Kubernetes en 5 minutes",
-      "bodyMd": "Kubernetes orchestre des containers Docker/CRI à travers un cluster de nodes. Un master orchestre, des workers exécutent. Toute la config est déclarative en YAML : on décrit l'état désiré, Kubernetes converge vers cet état.\n\n**Pod** — Unité atomique de déploiement. 1+ containers partageant network + storage. Éphémère par nature.\n\n**Deployment** — Gère le cycle de vie : N replicas d'un pod, rolling updates, rollbacks. Ce qu'on utilise à 90%.\n\n**Service** — Endpoint stable qui load-balance vers les pods matching un selector. IP virtuelle.\n\n**Namespace / Project** — Isolation logique — un ns par app, par équipe, par env (dev/test/prod).\n\n**Node** — Une machine (VM ou bare metal) qui exécute des pods. Le cluster en a de 3 à des centaines.\n\n**À retenir :** Kubernetes = orchestrateur déclaratif. On dit 'je veux 3 replicas de mon app', il s'arrange pour que ce soit toujours vrai — même si un node crashe.",
+      "bodyMd": "Kubernetes orchestre des containers Docker/CRI à travers un cluster de nodes. Master orchestre, workers exécutent. Config déclarative en YAML : on décrit l'état désiré, K8s converge.\n\n**Pod** — Unité atomique. 1+ containers partageant network + storage. Éphémère.\n\n**Deployment** — Cycle de vie : N replicas, rolling updates, rollbacks. 90 % des cas.\n\n**Service** — Endpoint stable qui load-balance vers pods matching un selector. IP virtuelle.\n\n**Namespace / Project** — Isolation logique — un ns par app, équipe, env.\n\n**Node** — Machine (VM ou bare metal) qui exécute des pods.\n\n**À retenir :** Kubernetes = orchestrateur déclaratif. 'Je veux 3 replicas de mon app' — il s'arrange pour que ce soit toujours vrai, même si un node crashe.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-05.jpg"
@@ -59,8 +59,8 @@
       "position": 6,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "OpenShift vs Kubernetes vanilla",
-      "bodyMd": "**KUBERNETES VANILLA**\n- Open source pur (K8s upstream)\n- kubectl CLI\n- Ingress à configurer manuellement (Nginx, Traefik)\n- Namespaces : concept K8s natif\n- Sécurité par défaut : permissive (root autorisé)\n- Écosystème modulaire — à assembler soi-même\n\n**OPENSHIFT**\n- Distribution enterprise Red Hat basée sur K8s\n- oc CLI (superset kubectl) + web console\n- Routes : Ingress simplifié natif\n- Projects : namespaces + defaults sécurité + quotas\n- Sécurité par défaut : non-root, immutable, SCC\n- Ecosystem intégré : Operators, Pipelines, GitOps\n\n**À retenir :** OpenShift = K8s + battery included. Coût licence Red Hat en échange de : moins de config, plus de sécurité par défaut, écosystème unifié.",
+      "title": "Premier Deployment en YAML",
+      "bodyMd": "Tout dans K8s/OpenShift est YAML. Voici le minimum pour déployer nginx en 3 replicas + Service + Route OpenShift.\n\n```\n# Deployment : 3 replicas nginx\napiVersion: apps/v1\nkind: Deployment\nmetadata: { name: nginx-app }\nspec:\n  replicas: 3\n  selector: { matchLabels: { app: nginx } }\n  template:\n    metadata: { labels: { app: nginx } }\n    spec:\n      containers:\n      - name: nginx\n        image: nginxinc/nginx-unprivileged:alpine\n        ports: [{ containerPort: 8080 }]\n        resources:\n          requests: { cpu: 100m, memory: 128Mi }\n          limits:   { cpu: 500m, memory: 256Mi }\n---\n# Service : endpoint interne\napiVersion: v1\nkind: Service\nmetadata: { name: nginx-svc }\nspec:\n  selector: { app: nginx }\n  ports: [{ port: 80, targetPort: 8080 }]\n---\n# Route OpenShift : URL publique HTTPS\napiVersion: route.openshift.io/v1\nkind: Route\nmetadata: { name: nginx-route }\nspec:\n  to: { kind: Service, name: nginx-svc }\n  port: { targetPort: 80 }\n  tls: { termination: edge, insecureEdgeTerminationPolicy: Redirect }\n\n# Déploiement\noc project my-project\noc apply -f nginx-all.yaml\noc get pods,svc,route\n```\n\n**À retenir :** Un déploiement OpenShift = 3 objets : Deployment + Service + Route. Le pattern à mémoriser.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-06.jpg"
@@ -69,8 +69,8 @@
       "position": 7,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Premier Deployment en YAML",
-      "bodyMd": "Tout dans Kubernetes/OpenShift est YAML. Voici le YAML minimal pour déployer une image nginx en 3 replicas, exposée en interne via un Service, et en externe via une Route OpenShift.\n\n```\n# 1. Deployment : 3 replicas nginx\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: nginx-app\nspec:\n  replicas: 3\n  selector:\n    matchLabels: { app: nginx }\n  template:\n    metadata:\n      labels: { app: nginx }\n    spec:\n      containers:\n      - name: nginx\n        image: nginxinc/nginx-unprivileged:alpine\n        ports: [{ containerPort: 8080 }]\n        resources:\n          requests: { cpu: 100m, memory: 128Mi }\n          limits:   { cpu: 500m, memory: 256Mi }\n---\n# 2. Service : endpoint interne stable\napiVersion: v1\nkind: Service\nmetadata:\n  name: nginx-svc\nspec:\n  selector: { app: nginx }\n  ports: [{ port: 80, targetPort: 8080 }]\n---\n# 3. Route OpenShift : expose en HTTPS externe\napiVersion: route.openshift.io/v1\nkind: Route\nmetadata:\n  name: nginx-route\nspec:\n  to: { kind: Service, name: nginx-svc }\n  port: { targetPort: 80 }\n  tls: { termination: edge, insecureEdgeTerminationPolicy: Redirect }\n\n# Déploiement :\noc project my-project\noc apply -f nginx-all.yaml\noc get pods,svc,route\n```\n\n**À retenir :** Un déploiement OpenShift = 3 objets : Deployment (les pods) + Service (endpoint interne) + Route (URL publique). Le pattern à mémoriser.",
+      "title": "TP N1-1 : Installer OpenShift Local + déployer nginx",
+      "bodyMd": "**Contexte :** OpenShift Local (Code Ready Containers) installé. 16 Go RAM minimum. Windows/Mac/Linux.\n\n**Consigne :** 1) Démarrer OpenShift Local : crc start. 2) Se connecter : eval $(crc oc-env). 3) Créer un projet : oc new-project demo. 4) Appliquer le YAML nginx complet (Deployment + Service + Route). 5) Vérifier : oc get pods (3 running), oc get svc, oc get route. 6) Ouvrir l'URL Route dans le navigateur → page nginx visible. 7) Scaler : oc scale deployment nginx-app --replicas=5 → vérifier 5 pods.\n\n**Attendu :** 3 pods nginx running, URL Route fonctionnelle en HTTPS. Scaling à 5 pods immédiat. Web console OpenShift affiche le projet complet.\n\n💡 crc setup pour premier setup. Console URL affichée à la fin de crc start. Kubeadmin password affiché aussi. En cas de souci : oc describe pod <name>.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-07.jpg"
@@ -79,8 +79,8 @@
       "position": 8,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "oc CLI — les commandes essentielles",
-      "bodyMd": "- oc login https://api.cluster.example.com — authentification\n- oc project my-app — changer de namespace/project\n- oc get pods, oc get svc, oc get routes — lister les ressources\n- oc describe pod my-pod — détails + événements récents\n- oc logs my-pod-abc123 -f — voir les logs en tail\n- oc rsh my-pod-abc123 — shell dans le pod\n- oc apply -f config.yaml — créer/mettre à jour des ressources\n- oc delete pod my-pod — forcer redémarrage (le deployment recrée)\n\n💡 oc et kubectl acceptent presque tous les mêmes arguments. oc est un superset qui ajoute Route, Project, Template. Migrer kubectl → oc = transparent.",
+      "title": "TP N1-2 : Diagnostiquer un pod en défaut",
+      "bodyMd": "**Contexte :** Suite TP N1-1. Modifier le YAML pour introduire une erreur (image inexistante : nginx-typo:alpine).\n\n**Consigne :** 1) Appliquer le YAML fautif. 2) Constater : oc get pods → ImagePullBackOff. 3) Investiguer : oc describe pod <name> → voir la vraie cause dans Events. 4) Voir les logs : oc logs <pod> (peut être vide). 5) Corriger l'image dans le YAML, réappliquer. 6) Vérifier retour à Running en <1 min.\n\n**Attendu :** Diagnostic ImagePullBackOff identifié en <5 min. Logs, events, describe utilisés dans le bon ordre. Correction et validation.\n\n💡 oc get events --sort-by='.lastTimestamp' pour timeline. Un pod peut être en Pending (scheduling), Running (OK), CrashLoopBackOff (crash répété), Error, ImagePullBackOff, etc.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-08.jpg"
@@ -105,34 +105,34 @@
       "quiz": {
         "questions": [
           {
-            "prompt": "OpenShift est édité par :",
+            "prompt": "OpenShift =",
             "options": [
-              "Google",
-              "Red Hat",
-              "Microsoft"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "OpenShift est basé sur :",
-            "options": [
-              "Kubernetes + Red Hat additions",
+              "Kubernetes Red Hat",
               "Docker Swarm",
               "Nomad"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Un Pod =",
+            "prompt": "Basé sur :",
             "options": [
-              "Un ou plusieurs containers déployés ensemble",
-              "Un serveur physique",
-              "Une VM"
+              "Kubernetes + Red Hat",
+              "Docker",
+              "LXC"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "kubectl est :",
+            "prompt": "Pod =",
+            "options": [
+              "1+ containers ensemble",
+              "Serveur physique",
+              "VM"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "kubectl =",
             "options": [
               "CLI Kubernetes",
               "IDE",
@@ -141,19 +141,19 @@
             "correctIndex": 0
           },
           {
-            "prompt": "oc est :",
+            "prompt": "oc =",
             "options": [
-              "CLI OpenShift (superset de kubectl)",
-              "Uniquement pour Windows",
+              "CLI OpenShift",
+              "Windows only",
               "Ancien"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Un Deployment gère :",
+            "prompt": "Deployment gère :",
             "options": [
-              "Cycle de vie de N replicas de pods",
-              "Uniquement 1 pod",
+              "N replicas pods",
+              "1 pod",
               "Storage"
             ],
             "correctIndex": 0
@@ -177,7 +177,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
       "title": "ConfigMaps et Secrets",
-      "bodyMd": "Un container doit être immutable — pas de config compilée dedans. Les valeurs runtime (URL de base, credentials) sont injectées via ConfigMaps (non-sensible) ou Secrets (sensible, chiffré at rest). Deux façons d'injecter : variables d'environnement ou fichiers montés.\n\n**ConfigMap** — Clé/valeurs non-sensibles : DB_HOST, LOG_LEVEL, FEATURE_FLAG_X. Modifiable sans rebuild image.\n\n**Secret** — Clé/valeurs sensibles : passwords, API keys, certificats. Base64 encodés (pas chiffrés natif — utiliser Vault ou Sealed Secrets).\n\n**Injection env vars** — envFrom → toutes les clés d'un ConfigMap/Secret exposées comme env vars.\n\n**Injection fichiers** — volumeMounts → chaque clé devient un fichier dans le pod (utile pour configs multi-lignes).\n\n**Reload** — Modifier un ConfigMap ne restart pas les pods automatiquement — utiliser Reloader ou rolling restart manuel.\n\n**À retenir :** Jamais de credential en dur dans l'image. Toujours ConfigMap (public) + Secret (sensible). En prod : Vault/ExternalSecrets pour rotation.",
+      "bodyMd": "Container doit être immutable — pas de config compilée dedans. Valeurs runtime injectées via ConfigMaps (non-sensible) ou Secrets (sensible, chiffré at rest). Deux façons : env vars ou fichiers montés.\n\n**ConfigMap** — Clé/valeurs non-sensibles : DB_HOST, LOG_LEVEL, FEATURE_FLAG. Modifiable sans rebuild.\n\n**Secret** — Clé/valeurs sensibles : passwords, API keys. Base64 encodé (pas chiffré natif — utiliser Vault ou Sealed Secrets).\n\n**Injection env vars** — envFrom → toutes les clés exposées comme env vars.\n\n**Injection fichiers** — volumeMounts → chaque clé devient un fichier.\n\n**Reload** — Modifier ConfigMap ne restart pas les pods auto — utiliser Reloader ou rolling restart manuel.\n\n**À retenir :** Jamais de credential en dur dans l'image. Toujours ConfigMap (public) + Secret (sensible). En prod : Vault/ExternalSecrets pour rotation.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-12.jpg"
@@ -186,8 +186,8 @@
       "position": 13,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Persistent Volumes — le stockage",
-      "bodyMd": "Les pods sont éphémères — leur filesystem meurt avec eux. Pour persister (BDD, uploads), on utilise Persistent Volumes (PV) : disques provisionnés par le cluster. Un pod réclame un volume via un PersistentVolumeClaim (PVC).\n\n**PV = disque** — Provisionné par l'admin (NFS, iSCSI, EBS, Ceph) ou dynamiquement via StorageClass.\n\n**PVC = demande** — Le développeur demande 'j'ai besoin de 10 Gi en ReadWriteOnce'. Kubernetes bind à un PV.\n\n**Modes d'accès** — ReadWriteOnce (RWO, un seul node), ReadOnlyMany, ReadWriteMany (partagé).\n\n**StorageClass** — Provisionnement dynamique : le PV se crée à la demande selon la StorageClass (fast SSD, standard, cheap).\n\n**Cycle de vie** — PVC delete → PV Retain (garde) ou Delete (efface) selon reclaim policy. Attention à ne pas perdre la data.\n\n**À retenir :** Un pod BDD DOIT avoir un PVC — sinon toute la data disparaît au premier restart. Toujours vérifier le reclaim policy avant de delete un PVC.",
+      "title": "TP N2-1 : App Django + Postgres + secrets",
+      "bodyMd": "**Contexte :** Suite TP N1. Créer un nouveau projet. Image Django simple + Postgres.\n\n**Consigne :** 1) Créer un Secret 'postgres-creds' : POSTGRES_USER=django, POSTGRES_PASSWORD=<random>, POSTGRES_DB=myapp. 2) Créer un PVC 'postgres-data' 5 Gi. 3) Deployment postgres avec Secret injecté en env vars + PVC monté sur /var/lib/postgresql. 4) Service postgres ClusterIP. 5) Deployment Django avec Secret injecté + DATABASE_URL construit depuis les env vars. 6) Route pour l'app Django. 7) Tester : ouvrir l'URL, créer un objet Django (admin), redémarrer Postgres → l'objet persiste.\n\n**Attendu :** App Django accessible via HTTPS. Persistance testée par restart Postgres. Password jamais en clair dans les logs. Secret rotation possible (créer nouveau, delete pods).\n\n💡 Django image : minutephp/django-example ou custom Docker. Postgres image : postgres:15. PVC : accessModes ReadWriteOnce + storageClassName selon cluster.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-13.jpg"
@@ -196,8 +196,8 @@
       "position": 14,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "RBAC — sécuriser l'accès",
-      "bodyMd": "- Role : permissions dans un namespace (ex 'read pods, logs')\n- ClusterRole : permissions cluster-wide (ex 'admin toute la plateforme')\n- RoleBinding : lie un Role à un user/group/serviceAccount dans un ns\n- ClusterRoleBinding : idem au niveau cluster\n- ServiceAccount : identité pour un pod (permet aux apps d'appeler l'API K8s)\n- OAuth OpenShift : intégration LDAP/AD/GitHub/Google via oauth-provider\n\n💡 Principe du moindre privilège : commencer par 'view' pour les devs, promoter vers 'edit' au cas par cas. 'admin' = uniquement les ops.",
+      "title": "TP N2-2 : RBAC pour équipe dev",
+      "bodyMd": "**Contexte :** Suite TP N2-1. Objectif : donner à un dev 'alice' un accès view sur le projet demo sans lui laisser tout modifier.\n\n**Consigne :** 1) Créer un user 'alice' (via htpasswd ou IdP). 2) Créer un Role 'read-only-app' : verbs [get, list, watch] sur pods, services, deployments. 3) Créer un RoleBinding : alice → read-only-app dans namespace demo. 4) Se connecter en alice : oc login. 5) Tester : oc get pods → OK, oc delete pod X → refused. 6) Vérifier via oc auth can-i.\n\n**Attendu :** Alice peut lire mais pas modifier. Web console UI adapte (boutons grisés). Audit log OpenShift enregistre les tentatives refusées.\n\n💡 htpasswd pour dev/test. oc adm policy add-role-to-user pour raccourci. oc whoami --show-token pour vérifier session. oc auth can-i --list pour voir permissions.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-14.jpg"
@@ -224,7 +224,7 @@
           {
             "prompt": "Service ClusterIP :",
             "options": [
-              "Endpoint interne au cluster, load-balance vers pods",
+              "Endpoint interne cluster",
               "Public Internet",
               "Storage"
             ],
@@ -233,44 +233,44 @@
           {
             "prompt": "Route OpenShift =",
             "options": [
-              "Ingress simplifié Red Hat, expose une app en HTTP(S)",
+              "Ingress simplifié Red Hat",
               "Réseau bas niveau",
               "Backup"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "ConfigMap sert à :",
+            "prompt": "ConfigMap :",
             "options": [
-              "Injecter configuration non-secret dans pods",
-              "Uniquement secrets",
-              "Stockage disque"
+              "Config non-secret dans pods",
+              "Secrets only",
+              "Storage"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Secret sert à :",
+            "prompt": "Secret :",
             "options": [
-              "Injecter passwords/tokens/certs chiffrés dans pods",
+              "Passwords/tokens/certs chiffrés",
               "Config publique",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Persistent Volume :",
+            "prompt": "PVC :",
             "options": [
-              "Stockage persistant réclamé par un pod via PVC",
-              "Uniquement RAM",
+              "Réclamation PV pour pod",
+              "RAM only",
               "S3 forcé"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Namespaces / Projects :",
+            "prompt": "Projects :",
             "options": [
-              "Isolation logique des ressources par équipe/app",
-              "Uniquement admin",
+              "Isolation namespace + defaults + quotas",
+              "Admin only",
               "Physique"
             ],
             "correctIndex": 0
@@ -293,8 +293,8 @@
       "position": 18,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Operators — la logique métier packagée",
-      "bodyMd": "Un Operator est un pattern K8s : un controller custom qui watche une Custom Resource Definition (CRD) et pilote le déploiement d'une app complexe. Ex : PostgresCluster CRD → Operator crée les pods DB primaire+replicas, gère backups, upgrades, failover.\n\n**CRD (Custom Resource Definition)** — Extension de l'API K8s avec un nouveau type d'objet. Ex 'PostgresCluster', 'KafkaCluster'.\n\n**Controller** — Programme qui watche la CRD et fait converger vers l'état déclaré. Souvent écrit en Go avec Operator SDK.\n\n**OperatorHub** — Marketplace Red Hat de 200+ Operators : Postgres, Kafka, MongoDB, ArgoCD, Prometheus, Cert-Manager…\n\n**Levels de maturité** — 1 (install) → 2 (upgrade) → 3 (full lifecycle) → 4 (deep insights) → 5 (auto pilot).\n\n**Écrire son Operator** — Operator SDK (Go, Ansible, Helm). Utile pour packager une app maison avec sa logique de déploiement.\n\n**À retenir :** Un Operator transforme une app 'complexe à déployer' en 'apply un YAML de 10 lignes'. Investir dans les Operators du marché = énorme accélérateur.",
+      "title": "Operators — logique métier packagée",
+      "bodyMd": "Operator = pattern K8s : controller custom qui watche une CRD et pilote une app complexe. Ex : PostgresCluster CRD → Operator crée pods DB primaire+replicas, gère backups, upgrades, failover.\n\n**CRD** — Extension API K8s avec nouveau type. Ex 'PostgresCluster', 'KafkaCluster'.\n\n**Controller** — Programme qui watche la CRD et fait converger. Souvent Go + Operator SDK.\n\n**OperatorHub** — Marketplace Red Hat de 200+ Operators : Postgres, Kafka, MongoDB, ArgoCD, Prometheus, Cert-Manager.\n\n**Levels de maturité** — 1 install → 2 upgrade → 3 full lifecycle → 4 deep insights → 5 auto pilot.\n\n**Écrire son Operator** — Operator SDK (Go, Ansible, Helm).\n\n**À retenir :** Un Operator transforme une app 'complexe à déployer' en 'apply un YAML de 10 lignes'. Investir dans les Operators du marché = énorme accélérateur.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-18.jpg"
@@ -304,7 +304,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
       "title": "GitOps avec ArgoCD",
-      "bodyMd": "GitOps : la source de vérité est Git. Toute la config du cluster (Deployments, Services, ConfigMaps) vit dans un repo. Un outil (ArgoCD) reconcile en permanence : si l'état cluster diverge de Git, il applique Git. Aucun apply manuel — tout passe par PR.\n\n**ArgoCD** — Le standard de facto en 2026. Installé en Operator sur OpenShift, il watche N repos Git.\n\n**Application CRD** — Une Application ArgoCD = pointe vers un dossier Git → un namespace cible. Sync manuel ou auto.\n\n**Multi-env** — Un repo par env (dev/test/prod) ou un repo avec dossiers /overlays/dev, /overlays/prod (Kustomize).\n\n**Rollback** — Git revert → ArgoCD apply automatiquement. Rollback en 30 secondes.\n\n**Sync waves** — Ordre de déploiement contrôlé — CRD d'abord, puis apps, puis routes.\n\n**À retenir :** GitOps = pas de kubectl apply manuel en prod. Toute modification passe par PR + review + merge → ArgoCD déploie. Traçabilité totale, rollback instantané.",
+      "bodyMd": "GitOps : la source de vérité est Git. Config cluster vit dans un repo. ArgoCD reconcile en permanence : si l'état cluster diverge de Git, il applique Git. Aucun apply manuel — tout passe par PR.\n\n**ArgoCD** — Standard de facto 2026. Installé en Operator, watche N repos Git.\n\n**Application CRD** — Une Application = pointe vers dossier Git → un namespace. Sync manuel ou auto.\n\n**Multi-env** — Un repo par env ou un repo avec /overlays/dev, /overlays/prod (Kustomize).\n\n**Rollback** — Git revert → ArgoCD apply auto. 30 secondes.\n\n**Sync waves** — Ordre de déploiement contrôlé — CRD d'abord, puis apps, puis routes.\n\n**À retenir :** GitOps = pas de kubectl apply manuel en prod. Toute modif passe par PR + review + merge → ArgoCD déploie. Traçabilité totale, rollback instantané.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-19.jpg"
@@ -313,8 +313,8 @@
       "position": 20,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Production hardening",
-      "bodyMd": "- Resource requests + limits sur TOUS les containers — sinon un container fou tue le node\n- Liveness + readiness probes — K8s sait quand restart ou stopper le trafic\n- PodDisruptionBudget — garantir min N replicas pendant les maintenances\n- NetworkPolicies — restrictions réseau entre pods (deny all default)\n- HPA (Horizontal Pod Autoscaler) — scaler auto selon CPU/mémoire/custom metrics\n- Monitoring : Prometheus + Grafana + alertes PagerDuty/Slack\n- Logs centralisés : Loki/Elastic + retention adaptée\n- Backups : Velero pour ressources, snapshot PV pour data\n\n💡 Un cluster K8s sans monitoring + alertes = bombe à retardement. Investir 1 semaine à setup Prometheus/Grafana en fin de projet = base non négociable.",
+      "title": "TP N3-1 : GitOps avec ArgoCD",
+      "bodyMd": "**Contexte :** OpenShift Local + GitHub. Installer ArgoCD via OperatorHub.\n\n**Consigne :** 1) Installer ArgoCD Operator. 2) Créer un repo GitHub 'ocp-config' avec le YAML nginx du TP N1. 3) Créer une Application ArgoCD pointant vers ce repo (sync auto). 4) Vérifier que ArgoCD déploie nginx dans le cluster. 5) Modifier replicas=5 dans Git, commit, push. 6) ArgoCD sync → 5 pods dans le cluster en 30s. 7) Simuler un rollback : git revert, push → ArgoCD revient à 3 pods.\n\n**Attendu :** Cycle GitOps complet fonctionnel. Modif Git → cluster mis à jour en <2 min. Rollback via Git revert. Aucun kubectl apply manuel utilisé.\n\n💡 ArgoCD Route pour UI web. Application CRD : source.repoURL + source.path + destination.namespace + syncPolicy.automated. GitHub repo public pour simplifier.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-20.jpg"
@@ -339,19 +339,19 @@
       "quiz": {
         "questions": [
           {
-            "prompt": "Operator pattern :",
+            "prompt": "Operator =",
             "options": [
-              "Automatise déploiement + gestion apps complexes via CRD",
-              "Uniquement lecture",
+              "Automatise apps complexes via CRD",
+              "Lecture only",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "GitOps avec ArgoCD :",
+            "prompt": "ArgoCD =",
             "options": [
-              "Config déclarative en Git, apply auto sur cluster",
-              "Config manuelle uniquement",
+              "GitOps déclaratif",
+              "Config manuelle",
               "Backup"
             ],
             "correctIndex": 0
@@ -359,17 +359,17 @@
           {
             "prompt": "Node autoscaler :",
             "options": [
-              "Ajoute/supprime nodes selon charge automatiquement",
-              "Manuel uniquement",
+              "Ajoute nodes selon charge",
+              "Manuel only",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "OpenShift Service Mesh :",
+            "prompt": "Service Mesh :",
             "options": [
-              "Istio-based, sécurité mTLS, observability",
-              "Uniquement TCP raw",
+              "Istio, mTLS, observability",
+              "TCP raw",
               "Impossible"
             ],
             "correctIndex": 0
@@ -377,17 +377,17 @@
           {
             "prompt": "Multi-tenancy :",
             "options": [
-              "RBAC + Network Policies + resource quotas par tenant",
+              "RBAC + Network Policies + quotas",
               "Impossible",
-              "Uniquement admin"
+              "Admin only"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "OpenShift Pipelines =",
             "options": [
-              "Tekton pour CI/CD cloud-native",
-              "Jenkins uniquement",
+              "Tekton CI/CD cloud-native",
+              "Jenkins only",
               "Bash"
             ],
             "correctIndex": 0
@@ -410,8 +410,8 @@
       "position": 24,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Installer OpenShift Local (Code Ready Containers) pour tester en local\n- Refaire le fil rouge : app web + Postgres + Route + monitoring\n- Lire le Kubernetes Patterns de Bilgin Ibryam — les patterns intemporels\n- Certifier CKAD (Kubernetes Application Developer) — reconnu industrie\n\n💡 Kubernetes est devenu la couche standard de déploiement moderne. Que ce soit OpenShift, EKS, AKS, GKE ou vanilla, les concepts sont identiques.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz\n- Refaire les TPs dans OpenShift Local\n- Livre Kubernetes Patterns (Bilgin Ibryam)\n- Certifier CKAD (Certified Kubernetes Application Developer)\n- Explorer OperatorHub — 200+ Operators disponibles\n\n💡 K8s est devenu la couche standard de déploiement moderne. OpenShift, EKS, AKS, GKE, vanilla — concepts identiques.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/openshift/slide-24.jpg"
