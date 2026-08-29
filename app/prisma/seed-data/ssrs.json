@@ -19,8 +19,8 @@
       "position": 2,
       "kind": "CONTENT",
       "section": "INTRODUCTION",
-      "title": "Objectifs de la formation",
-      "bodyMd": "SSRS (SQL Server Reporting Services) est l'outil Microsoft de reporting opérationnel. Inclus dans les licences SQL Server, il génère des rapports paramétrés, planifiés, envoyés par mail, imprimables. Complète bien Power BI (analytique interactif) pour les besoins opérationnels formels (rapports batch quotidiens, factures, bulletins).\n\n**SSDT (SQL Server Data Tools)** — L'IDE Visual Studio pour créer des rapports RDL.\n\n**Datasets + connections** — Requêtes SQL (T-SQL, MDX) qui alimentent les rapports.\n\n**Layout tablix** — Combine Table, Matrix, List. Groupings, agrégats, sub-reports.\n\n**Parameters + expressions** — Interactivité + logique VB.NET pour formats conditionnels.\n\n**Publication + subscriptions** — Report Manager, envoi mail auto, data-driven subs.\n\n**À retenir :** SSRS reste indispensable en 2026 pour le reporting opérationnel formel : factures, bulletins de paie, rapports batch. Power BI complète pour l'analytique explorer.",
+      "title": "Objectifs",
+      "bodyMd": "SSRS = outil Microsoft de reporting opérationnel. Inclus dans les licences SQL Server, génère des rapports paramétrés, planifiés, envoyés par mail, imprimables. Complète Power BI pour les besoins opérationnels formels (rapports batch quotidiens, factures, bulletins).\n\n**SSDT** — L'IDE Visual Studio pour créer des rapports RDL.\n\n**Datasets + connections** — Requêtes SQL (T-SQL, MDX) qui alimentent.\n\n**Layout tablix** — Combine Table, Matrix, List. Groupings, agrégats, sub-reports.\n\n**Parameters + expressions** — Interactivité + logique VB.NET pour formats conditionnels.\n\n**Publication + subscriptions** — Report Manager, envoi mail auto, data-driven subs.\n\n**À retenir :** SSRS reste indispensable en 2026 pour reporting opérationnel formel : factures, bulletins de paie, rapports batch. Power BI complète pour analytics.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-02.jpg"
@@ -50,7 +50,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "L'écosystème SSRS",
-      "bodyMd": "SSRS est un ensemble de 3 composants : le Report Server (moteur d'exécution), le portail web Report Manager (publication + browse), et l'IDE SSDT (dev des rapports). Un rapport = un fichier .rdl (XML) déployé sur le server.\n\n**Report Server** — Windows service qui exécute les rapports, stocke les .rdl, gère les subscriptions.\n\n**Report Manager / portail web** — URL http://server/Reports — les utilisateurs browsent, exécutent, s'abonnent.\n\n**SSDT (SQL Server Data Tools)** — Extension Visual Studio pour dev des .rdl. Free download Microsoft.\n\n**Report Builder** — Outil simplifié pour analystes non-devs. Crée des .rdl mais moins puissant que SSDT.\n\n**Base de données interne** — 2 databases ReportServer + ReportServerTempDB stockent config + snapshots + subscriptions.\n\n**À retenir :** Pour le dev pro : SSDT. Pour les analystes métier : Report Builder. Le rendu est identique — les 2 produisent des .rdl compatibles.",
+      "bodyMd": "SSRS = ensemble de 3 composants : Report Server (moteur), portail Report Manager (publication), IDE SSDT (dev). Un rapport = un fichier .rdl (XML) déployé sur le server.\n\n**Report Server** — Windows service qui exécute, stocke les .rdl, gère subscriptions.\n\n**Report Manager / portail web** — http://server/Reports — users browsent, exécutent, s'abonnent.\n\n**SSDT** — Extension Visual Studio pour dev .rdl. Free download Microsoft.\n\n**Report Builder** — Outil simplifié pour analystes. Crée .rdl moins puissant que SSDT.\n\n**Base interne** — 2 databases ReportServer + ReportServerTempDB stockent config + snapshots.\n\n**À retenir :** Pour dev pro : SSDT. Pour analystes métier : Report Builder. Rendu identique — les 2 produisent .rdl compatibles.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-05.jpg"
@@ -59,8 +59,8 @@
       "position": 6,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Premier rapport — batches du jour",
-      "bodyMd": "Un rapport SSRS suit 4 étapes : (1) créer une connexion à la BDD source, (2) écrire une requête dataset, (3) glisser un tablix sur le canvas et lier les colonnes, (4) déployer vers le Report Server.\n\n```\n-- Dataset SQL : batches du jour avec produit + alarmes\nSELECT\n    b.BatchId,\n    b.StartTime,\n    b.EndTime,\n    p.ProductCode,\n    p.ProductName,\n    b.PlannedQuantity_Kg,\n    b.ActualQuantity_Kg,\n    b.Status,\n    (SELECT COUNT(*) FROM Alarms a WHERE a.BatchId = b.BatchId) AS AlarmCount,\n    CASE WHEN b.ActualQuantity_Kg >= b.PlannedQuantity_Kg * 0.95\n         THEN 'OK' ELSE 'Deficit' END AS QualityFlag\nFROM Batches b\nINNER JOIN Products p ON p.ProductId = b.ProductId\nWHERE b.StartTime >= CAST(GETDATE() AS DATE)\nORDER BY b.StartTime;\n\n-- Dans SSDT :\n-- 1. New Project → Report Server Project\n-- 2. Add → Data Source → Connect to SQL Server\n-- 3. Add → Dataset → paste query above\n-- 4. Toolbox → Table → drag on canvas\n-- 5. Bind columns : BatchId, StartTime, ProductName, ActualQuantity_Kg, AlarmCount\n-- 6. Add group by ProductName + subtotal SUM(ActualQuantity_Kg)\n-- 7. Preview (F5) → verify data\n-- 8. Right-click project → Deploy → to http://reportserver/ReportServer\n```\n\n**À retenir :** Le vrai travail SSRS est dans la requête SQL. Un dataset bien pensé = 80% du rapport prêt. Éviter les post-calculs dans SSRS quand SQL peut le faire.",
+      "title": "TP N1-1 : Installer SSDT + premier rapport",
+      "bodyMd": "**Contexte :** SQL Server + SSRS installés (via SQL Server Installation). SSDT (SQL Server Data Tools) via Visual Studio Community. La DB ProductionMIX du cours SQL Server.\n\n**Consigne :** 1) Ouvrir SSDT → New Project → Report Server Project. 2) Add Data Source vers ProductionMIX. 3) Add Dataset avec la requête 'Batches du jour + produit + nb alarmes'. 4) Drag une Table sur canvas, lier BatchId, ProductName, ActualQuantity_Kg, AlarmCount. 5) Ajouter un group par ProductName + total SUM(ActualQuantity_Kg). 6) Preview (F5) → vérifier données. 7) Deploy vers http://localhost/ReportServer. 8) Ouvrir Report Manager et exécuter.\n\n**Attendu :** Rapport visible dans le portail SSRS. Affiche les batches groupés par produit avec totaux. Exécution répétable.\n\n💡 Report Server URL configurée dans Reporting Services Configuration Manager. Chaîne de connexion dataset : 'Server=.;Database=ProductionMIX;Trusted_Connection=True'.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-06.jpg"
@@ -69,42 +69,32 @@
       "position": 7,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Tablix — Table + Matrix + List",
-      "bodyMd": "- Table : lignes/colonnes fixes — le tableau classique\n- Matrix : pivot table dynamique (rows/columns créées à partir data)\n- List : layout libre pour chaque row (ex fiche produit)\n- Tablix = objet unifié qui combine les 3 — depuis SSRS 2008\n- Grouping : regrouper lignes par une expression, avec header/footer par groupe\n- Aggregates : =Sum(Fields!Quantity.Value) — 10+ fonctions (Avg, Min, Max, Count…)\n\n💡 Toujours définir la Sort au niveau du dataset (ORDER BY SQL) plutôt qu'au niveau tablix — plus rapide, moins de charge sur SSRS.",
+      "title": "TP N1-2 : Formatage + agrégats",
+      "bodyMd": "**Contexte :** Suite TP N1-1.\n\n**Consigne :** 1) Formater les nombres : ActualQuantity_Kg en format 'N2' avec unité kg. 2) Colorer conditionnellement AlarmCount : rouge si > 5, orange si 1-5, vert si 0. 3) Ajouter un footer par groupe avec total qty + moyenne. 4) Ajouter un total général en fin de rapport. 5) Ajouter en-tête entreprise (logo image + nom).\n\n**Attendu :** Rapport pro-looking avec couleurs conditionnelles, totaux, en-tête. Export PDF net.\n\n💡 Property 'Color' → Expression VB.NET : =IIF(Fields!AlarmCount.Value > 5, 'Red', IIF(Fields!AlarmCount.Value > 0, 'Orange', 'Green')). Sum() + Avg() pour agrégats. Image → embedded ou external URL.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-07.jpg"
     },
     {
       "position": 8,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/ssrs/slide-08.jpg"
-    },
-    {
-      "position": 9,
       "kind": "QUIZ",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Quiz de fin de niveau 1",
+      "title": "Quiz N1",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "SSRS signifie :",
+            "prompt": "SSRS =",
             "options": [
               "SQL Server Reporting Services",
-              "Simple Server Reports",
-              "SAP Server"
+              "Simple Server",
+              "SAP"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "SSRS est fourni par :",
+            "prompt": "Édité par :",
             "options": [
               "Microsoft",
               "Oracle",
@@ -113,28 +103,28 @@
             "correctIndex": 0
           },
           {
-            "prompt": "L'IDE de dev SSRS :",
+            "prompt": "IDE dev SSRS :",
             "options": [
-              "SQL Server Data Tools (SSDT)",
-              "Visual Basic",
+              "SSDT",
+              "VB",
               "SSMS"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "RDL est :",
+            "prompt": "RDL :",
             "options": [
-              "Format XML des rapports SSRS",
-              "Runtime debugger",
-              "Base de données"
+              "Format XML rapports",
+              "Debugger",
+              "BDD"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Un dataset SSRS :",
+            "prompt": "Dataset :",
             "options": [
-              "Requête SQL qui alimente le rapport",
-              "Fichier statique",
+              "Requête SQL rapport",
+              "Fichier",
               "Backup"
             ],
             "correctIndex": 0
@@ -142,7 +132,7 @@
           {
             "prompt": "Report Manager :",
             "options": [
-              "Portail web pour publier et exécuter rapports",
+              "Portail web",
               "IDE",
               "OS"
             ],
@@ -150,14 +140,24 @@
           }
         ]
       },
+      "imageUrl": "/training/ssrs/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
       "imageUrl": "/training/ssrs/slide-09.jpg"
     },
     {
       "position": 10,
       "kind": "CONTENT",
-      "section": "NIVEAU 2",
-      "title": "Intermédiaire",
-      "bodyMd": "",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Expressions VB.NET",
+      "bodyMd": "Expressions SSRS = syntaxe VB.NET. Commencent par '='. Permettent : formatage conditionnel, calculs dérivés, agrégats custom, texte dynamique.\n\n```\n' Simple\n=Fields!ProductName.Value\n\n' Concaténation\n=Fields!ProductCode.Value & \" - \" & Fields!ProductName.Value\n\n' Formatage : monétaire\n=Format(Fields!UnitPrice.Value, \"C2\")\n\n' Formatage : date\n=Format(Fields!StartTime.Value, \"dd/MM/yyyy HH:mm\")\n\n' Conditionnel : couleur\n=IIF(Fields!QualityFlag.Value = \"OK\", \"Green\", \"Red\")\n\n' Agrégats\n=Sum(Fields!Quantity.Value)               ' Somme tablix\n=Sum(Fields!Quantity.Value, \"MyGroup\")    ' Par groupe\n=Avg(Fields!Yield.Value)\n=Count(Fields!BatchId.Value)\n\n' Calcul dérivé\n=Fields!ActualQuantity.Value / Fields!PlannedQuantity.Value\n\n' Logique complexe\n=IIF(\n    Fields!Status.Value = \"Completed\" AND Fields!AlarmCount.Value = 0,\n    \"OK\",\n    IIF(Fields!AlarmCount.Value > 5, \"Critical\", \"Warning\")\n)\n\n' Contexte\n=User!UserID\n=Globals!ExecutionTime\n```\n\n**À retenir :** Expressions SSRS puissantes mais moins performantes que SQL. Toujours préférer faire les calculs en dataset (SQL) plutôt qu'en expression.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-10.jpg"
@@ -166,8 +166,8 @@
       "position": 11,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Parameters — l'interactivité",
-      "bodyMd": "Les parameters permettent à l'utilisateur de filtrer le rapport à l'exécution (date, produit, site). Ils apparaissent en haut du rapport comme dropdown ou textbox. Coup double : l'utilisateur voit ce qu'il veut, et la requête SQL filtre côté serveur (perf).\n\n**Types** — Text (libre), DateTime, Integer, Boolean, Multi-value (liste).\n\n**Values from query** — Le dropdown est peuplé par une requête (ex SELECT DISTINCT ProductCode FROM Products).\n\n**Default value** — Fixe ou calculé (ex =DateAdd('d', -7, Today()) pour dernière semaine).\n\n**Multi-value** — L'utilisateur peut sélectionner N valeurs, ajouter WHERE Col IN (@param) dans le SQL.\n\n**Hidden parameters** — Passés par sub-report ou URL, invisibles à l'utilisateur.\n\n**À retenir :** Un rapport bien paramétré = 1 fichier .rdl qui remplace 20 rapports figés. Investir dans les parameters au design initial.",
+      "title": "TP N2-1 : Parameters + cascading",
+      "bodyMd": "**Contexte :** Suite TP N1.\n\n**Consigne :** 1) Ajouter parameter @DateFrom (Date, default = today-7). 2) Modifier dataset pour filtrer par @DateFrom. 3) Ajouter parameter @ProductCode (dropdown from query DISTINCT). 4) Ajouter parameter @OperatorId cascading : dropdown from query WHERE ProductCode = @ProductCode. 5) Tester : sélection produit met à jour la liste d'opérateurs.\n\n**Attendu :** 3 parameters interactifs en tête de rapport. Cascading fonctionne : changement produit → nouveau dropdown opérateurs.\n\n💡 Parameters → Add. Available values → From query. Dependent parameter : available values query = SELECT DISTINCT OperatorId FROM Batches WHERE ProductCode = @ProductCode.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-11.jpg"
@@ -176,43 +176,23 @@
       "position": 12,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Cascading parameters",
-      "bodyMd": "Cascading parameters : le choix d'un paramètre 1 (Site) filtre les valeurs disponibles pour le paramètre 2 (Ligne dans le site). Améliore drastiquement l'UX pour les hiérarchies (site → ligne → machine, région → pays → ville).\n\n**Ordre des params** — Site avant Line — le premier ne dépend de rien, le suivant filtre par le premier.\n\n**Dataset dépendant** — Le dataset qui alimente Line inclut WHERE SiteId = @Site → Values from query.\n\n**Refresh à chaque changement** — Modifier Site → SSRS re-query le dataset de Line → dropdown se met à jour.\n\n**Perf** — Chaque changement = query. Cache des lookups si volume élevé.\n\n**Multi-cascade** — Site → Line → Machine → possible, pas de limite pratique.\n\n**À retenir :** Cascading = must-have pour les rapports hiérarchiques. Sans, l'utilisateur voit une liste de 500 lignes à chercher — pas ergonomique.",
+      "title": "TP N2-2 : Sub-report détail par batch",
+      "bodyMd": "**Contexte :** Suite TP N2-1.\n\n**Consigne :** 1) Créer un 2e rapport BatchDetail.rdl avec parameter @BatchId. 2) Requête : SELECT * FROM Alarms WHERE BatchId = @BatchId + Query Batch info. 3) Dans le rapport principal : action sur cellule BatchId → 'Go to report' → BatchDetail passant @BatchId. 4) Publier les 2 rapports. 5) Tester le drill-down.\n\n**Attendu :** Click sur un BatchId dans le rapport principal → ouvre BatchDetail avec les alarmes de ce batch précis.\n\n💡 Action → Go to Report → select BatchDetail. Paramètre à passer : =Fields!BatchId.Value. Bouton Retour navigation nativement.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-12.jpg"
     },
     {
       "position": 13,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Expressions VB.NET dans SSRS",
-      "bodyMd": "Les expressions SSRS utilisent la syntaxe VB.NET. Commencent par '='. Permettent : formatage conditionnel, calculs dérivés, agrégats custom, texte dynamique.\n\n```\n' Simple : afficher un champ\n=Fields!ProductName.Value\n\n' Concaténation\n=Fields!ProductCode.Value & \" - \" & Fields!ProductName.Value\n\n' Formatage : monétaire\n=Format(Fields!UnitPrice.Value, \"C2\")   ' → 5,50 €\n\n' Formatage : date\n=Format(Fields!StartTime.Value, \"dd/MM/yyyy HH:mm\")\n\n' Conditionnel : couleur du texte\n=IIF(Fields!QualityFlag.Value = \"OK\", \"Green\", \"Red\")\n\n' Agrégats\n=Sum(Fields!Quantity.Value)                          ' Somme tablix\n=Sum(Fields!Quantity.Value, \"MyGroup\")               ' Somme par groupe\n=Sum(Fields!Quantity.Value, \"MyDataset\")             ' Somme dataset entier\n=Avg(Fields!Yield.Value)\n=Count(Fields!BatchId.Value)\n\n' Calcul dérivé\n=Fields!ActualQuantity.Value / Fields!PlannedQuantity.Value\n\n' Logique complexe\n=IIF(\n    Fields!Status.Value = \"Completed\" AND Fields!AlarmCount.Value = 0,\n    \"OK\",\n    IIF(Fields!AlarmCount.Value > 5, \"Critical\", \"Warning\")\n)\n\n' Contexte : nom d'utilisateur, date exécution\n=User!UserID\n=Globals!ExecutionTime\n=Report Server URL: & Globals!ReportServerUrl\n```\n\n**À retenir :** Les expressions SSRS sont puissantes mais moins performantes que du SQL. Toujours préférer faire les calculs en dataset (SQL) plutôt qu'en expression (SSRS).",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/ssrs/slide-13.jpg"
-    },
-    {
-      "position": 14,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/ssrs/slide-14.jpg"
-    },
-    {
-      "position": 15,
       "kind": "QUIZ",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Quiz de fin de niveau 2",
+      "title": "Quiz N2",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Tablix =",
+            "prompt": "Tablix :",
             "options": [
               "Table + Matrix + List combinés",
               "Textbox",
@@ -221,27 +201,27 @@
             "correctIndex": 0
           },
           {
-            "prompt": "Parameters SSRS :",
+            "prompt": "Parameters :",
             "options": [
-              "Entrées interactives pour filtrer le rapport",
+              "Entrées interactives filtre",
               "Options SSMS",
-              "Config XML"
+              "Config"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Cascading parameters :",
+            "prompt": "Cascading :",
             "options": [
-              "Un paramètre filtre le choix du suivant (ex Site → Ligne)",
+              "Param filtre le suivant",
               "Impossible",
-              "Uniquement SSDT"
+              "SSDT only"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Expression syntax SSRS :",
+            "prompt": "Expression syntax :",
             "options": [
-              "=Fields!Name.Value + logique VB.NET",
+              "=Fields!Name.Value VB.NET",
               "T-SQL",
               "Python"
             ],
@@ -250,7 +230,7 @@
           {
             "prompt": "Grouping tablix :",
             "options": [
-              "Regroupe lignes par expression, agrégats à chaque niveau",
+              "Regroupe lignes + agrégats",
               "Impossible",
               "Manuel"
             ],
@@ -259,7 +239,7 @@
           {
             "prompt": "Sub-report :",
             "options": [
-              "Rapport intégré dans un autre rapport avec params",
+              "Rapport dans rapport avec params",
               "PDF",
               "Image"
             ],
@@ -267,71 +247,61 @@
           }
         ]
       },
-      "imageUrl": "/training/ssrs/slide-15.jpg"
+      "imageUrl": "/training/ssrs/slide-13.jpg"
     },
     {
-      "position": 16,
+      "position": 14,
       "kind": "CONTENT",
       "section": "NIVEAU 3",
       "title": "Expert",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
+      "imageUrl": "/training/ssrs/slide-14.jpg"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Subscriptions data-driven",
+      "bodyMd": "Data-driven subscription : une requête SQL détermine params + destinataires. Ex : 100 emails avec chacun ses batches du jour, 1 seule config.\n\n**Requête destinataires** — SELECT Email, ProductCode FROM Subscribers WHERE Active = 1\n\n**Mapping** — Chaque colonne mappée à un paramètre ou destinataire\n\n**Planning** — Cron-like : daily 6am, weekly Monday, monthly 1st\n\n**Formats** — PDF (default), Excel, CSV, XML, Word\n\n**Destinations** — SMTP, file share Windows, SharePoint, custom extension\n\n**À retenir :** Data-driven = puissance industrielle. Investir dans le pattern dès qu'il y a plus de 5 destinataires différenciés.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-15.jpg"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-1 : Data-driven subscription",
+      "bodyMd": "**Contexte :** SSRS Enterprise Edition (requis pour data-driven). Base Subscribers avec Email + ProductFilter par utilisateur.\n\n**Consigne :** 1) Créer table Subscribers (10 utilisateurs, chacun 1-3 produits d'intérêt). 2) Sur le rapport MonthlyProduction : créer Data-driven subscription. 3) Query destinataires : SELECT Email, ProductCode FROM Subscribers WHERE Active = 1. 4) Mapping : Email → destinataire, ProductCode → parameter @ProductCode. 5) Format PDF, planning daily 7am. 6) Tester en manual exec + vérifier les mails reçus.\n\n**Attendu :** 10 mails envoyés chaque jour à 7h, chacun avec le rapport filtré selon le/les produits d'intérêt du user. Modification d'un subscriber = automatiquement pris en compte le lendemain.\n\n💡 Data-driven subscription : Enterprise Edition uniquement. Configuration email SMTP dans Report Server Configuration. Test avec sendmail local (papercut smtp).",
+      "notes": null,
+      "quiz": null,
       "imageUrl": "/training/ssrs/slide-16.jpg"
     },
     {
       "position": 17,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Subscriptions — envoi automatique",
-      "bodyMd": "Une subscription envoie automatiquement un rapport à un destinataire selon un planning. Format PDF/Excel/Word/CSV. Destination email, share Windows, SharePoint. Deux types : classique (paramètres figés) et data-driven (paramètres et destinataires viennent d'une requête).\n\n**Classique** — Un abonnement = un rapport + params fixes + destinataires fixes + planning. Configuration par un user.\n\n**Data-driven** — Une requête SQL détermine params + destinataires. Ex 100 emails avec chacun ses batches du jour, 1 seule config.\n\n**Planning** — Cron-like : daily 6am, weekly Monday, monthly 1st, événement DB (bien plus rare).\n\n**Formats** — PDF (default), Excel (avec formatage), CSV, XML, Word. Le rendu diffère un peu selon format.\n\n**Destinations** — SMTP (mail), file share Windows, SharePoint, custom (via extension).\n\n**À retenir :** Data-driven subscriptions = puissance industrielle : 1 config alimente 100+ envois différentiés. Investir dans le pattern dès qu'il y a plus de 5 destinataires.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/ssrs/slide-17.jpg"
-    },
-    {
-      "position": 18,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Performance et caching",
-      "bodyMd": "- Report caching : chaque exécution garde le résultat X min → réutilise pour même params\n- Snapshots : rendu pré-calculé stocké → affichage instantané, données statiques\n- Shared datasets : cache des requêtes réutilisées par plusieurs rapports\n- Report execution log : identifier les rapports lents dans ExecutionLog3 view\n- SQL Query tuning : 80% de la perf vient du SQL — appliquer les leçons du cours SQL Server\n- Load balancing scale-out : plusieurs Report Servers derrière un load balancer\n\n💡 Un rapport de 20s en peak = 100 users bloqués. Snapshots + caching + SQL tuning résout la plupart des cas. Sinon scale-out.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/ssrs/slide-18.jpg"
-    },
-    {
-      "position": 19,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Récapitulatif du niveau 3",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/ssrs/slide-19.jpg"
-    },
-    {
-      "position": 20,
       "kind": "QUIZ",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Quiz de fin de niveau 3",
+      "title": "Quiz N3",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Subscription SSRS :",
+            "prompt": "Subscription :",
             "options": [
-              "Envoi automatique par mail/fichier selon planning",
+              "Envoi auto par mail/fichier",
               "Login",
               "Backup"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Data-driven subscription :",
+            "prompt": "Data-driven sub :",
             "options": [
-              "Params + destinataires viennent d'une requête SQL",
-              "Manuel uniquement",
+              "Params + destinataires depuis SQL",
+              "Manuel only",
               "Impossible"
             ],
             "correctIndex": 0
@@ -339,62 +309,62 @@
           {
             "prompt": "Report caching :",
             "options": [
-              "Snapshot pré-calculé pour éviter rejouer requête",
+              "Snapshot pré-calculé",
               "Impossible",
-              "Toujours actif"
+              "Toujours"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "SSRS sur SQL Server 2016+ :",
+            "prompt": "SSRS 2016+ :",
             "options": [
-              "Mobile-friendly, KPI, portail web moderne",
-              "Uniquement PDF",
+              "Mobile-friendly, KPI, portail moderne",
+              "PDF only",
               "Ancien"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Migration Power BI :",
+            "prompt": "vs Power BI :",
             "options": [
-              "Complémentaires en 2026 — SSRS operational, PBI analytics",
-              "SSRS obsolète",
+              "SSRS operational, PBI analytics",
+              "Obsolète",
               "Identiques"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "SSRS + Active Directory :",
+            "prompt": "AD :",
             "options": [
-              "RBAC natif via groupes AD sur folders/rapports",
+              "RBAC via groupes AD",
               "Impossible",
-              "Manuel uniquement"
+              "Manuel"
             ],
             "correctIndex": 0
           }
         ]
       },
-      "imageUrl": "/training/ssrs/slide-20.jpg"
+      "imageUrl": "/training/ssrs/slide-17.jpg"
     },
     {
-      "position": 21,
+      "position": 18,
       "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "En résumé",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/ssrs/slide-21.jpg"
+      "imageUrl": "/training/ssrs/slide-18.jpg"
     },
     {
-      "position": 22,
+      "position": 19,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Installer SSDT gratuit + créer un rapport de production journalier\n- Créer une data-driven subscription pour envoyer un rapport personnalisé à 20 users\n- Lire l'ExecutionLog3 de votre serveur SSRS — identifier les rapports lents\n- Complémenter avec Power BI pour l'analytique interactif — les 2 sont amis en 2026\n\n💡 SSRS est un skill mature et durable. Bien fait, il tourne 10 ans sans intervention majeure — c'est ce qu'on demande à un outil opérationnel.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz\n- Refaire les 5 TPs dans SSDT\n- Créer un rapport journalier de production\n- Data-driven subscription pour 10+ users\n- Complémenter avec Power BI pour analytics\n\n💡 SSRS mature et durable. Bien fait, tourne 10 ans sans intervention.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/ssrs/slide-22.jpg"
+      "imageUrl": "/training/ssrs/slide-19.jpg"
     }
   ]
 }
