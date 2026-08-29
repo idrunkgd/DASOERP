@@ -19,8 +19,8 @@
       "position": 2,
       "kind": "CONTENT",
       "section": "INTRODUCTION",
-      "title": "Objectifs de la formation",
-      "bodyMd": "GAMP 5 (Good Automated Manufacturing Practice v5) est le référentiel mondial pour la validation des systèmes informatisés dans l'industrie pharmaceutique. Publié par ISPE, il structure le cycle en V (specs → tests), classe les systèmes en 5 catégories de risque, et interface avec les réglementations FDA (21 CFR Part 11) et EMA. Sans GAMP, impossible de commercialiser un médicament dont la production repose sur du logiciel.\n\n**Contexte réglementaire** — FDA (US), EMA (EU), ANVISA (Brésil), PMDA (Japon). Convergence sur GAMP.\n\n**Cycle de vie V-model** — URS → FS → DS → code → IQ → OQ → PQ. Chaque niveau spec = niveau test correspondant.\n\n**5 catégories de risque** — OS (cat 1), firmware (cat 2), OTS non configuré (cat 3), configuré (cat 4), custom (cat 5).\n\n**Data Integrity ALCOA+** — Principes de qualité de la donnée : traçable, lisible, contemporain, original, exact, complet, cohérent, durable, disponible.\n\n**Signatures électroniques 21 CFR Part 11** — Auth 2 composants, horodatage, non-répudiable — remplace la signature papier.\n\n**À retenir :** GAMP 5 = passage obligé pour toute automatisation pharma. Bien fait = validation en 3 mois. Mal fait = 12 mois + audit défavorable = commercialisation retardée.",
+      "title": "Objectifs",
+      "bodyMd": "GAMP 5 (Good Automated Manufacturing Practice v5) = référentiel mondial pour la validation des systèmes informatisés dans l'industrie pharmaceutique. Publié par ISPE. Structure le cycle en V, classe les systèmes en 5 catégories, interface avec FDA (21 CFR Part 11) et EMA. Sans GAMP, impossible de commercialiser un médicament dont la production repose sur du logiciel.\n\n**Contexte réglementaire** — FDA (US), EMA (EU), ANVISA, PMDA. Convergence sur GAMP.\n\n**V-model** — URS → FS → DS → code → IQ → OQ → PQ. Chaque niveau spec = niveau test correspondant.\n\n**5 catégories** — OS (cat 1), firmware (cat 2), OTS non configuré (cat 3), configuré (cat 4), custom (cat 5).\n\n**ALCOA+** — Attributable, Legible, Contemporaneous, Original, Accurate, Complete, Consistent, Enduring, Available.\n\n**E-signatures 21 CFR Part 11** — Auth 2 composants + horodatage + non-répudiable.\n\n**À retenir :** GAMP 5 = passage obligé pour toute automatisation pharma. Bien fait = validation 3 mois. Mal fait = 12 mois + audit défavorable = commercialisation retardée.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-02.jpg"
@@ -50,7 +50,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "Le paysage réglementaire pharma",
-      "bodyMd": "L'industrie pharmaceutique est fortement régulée : chaque médicament produit doit garantir sa qualité et sa traçabilité. Les autorités (FDA aux US, EMA en Europe) exigent que TOUS les systèmes informatisés utilisés dans la production, le contrôle qualité, la libération lot soient validés. GAMP 5 fournit la méthode standard reconnue par toutes ces autorités.\n\n**FDA — 21 CFR Part 11** — Enregistrements électroniques + signatures électroniques. Depuis 1997. Standard mondial de facto.\n\n**EMA — EudraLex Vol 4 Annexe 11** — Systèmes informatisés en pharma. Version européenne, convergente avec FDA.\n\n**GxP** — Good x Practice : GMP (Manufacturing), GLP (Laboratory), GCP (Clinical), GDP (Distribution).\n\n**Inspections** — FDA warning letters, EMA inspections. Publication publique des manquements. Impact business majeur.\n\n**Risque business** — Une non-conformité en validation = arrêt commercialisation, rappel de lots, class action. Coût 10M€+ typique.\n\n**À retenir :** GAMP n'est pas une contrainte administrative — c'est ce qui protège l'entreprise pharma des catastrophes (rappels, warning letters, arrêt commercialisation).",
+      "bodyMd": "Industrie pharma = fortement régulée. Chaque médicament produit doit garantir qualité et traçabilité. FDA aux US, EMA en Europe. Toutes les autorités exigent validation des systèmes informatisés. GAMP 5 fournit la méthode standard reconnue mondialement.\n\n**FDA — 21 CFR Part 11** — Enregistrements électroniques + signatures électroniques. Depuis 1997. Standard mondial de facto.\n\n**EMA — EudraLex Vol 4 Annexe 11** — Systèmes informatisés pharma. Version européenne, convergente.\n\n**GxP** — Good x Practice : GMP, GLP, GCP, GDP.\n\n**Inspections** — FDA warning letters, EMA inspections. Publication publique. Impact business majeur.\n\n**Risque business** — Non-conformité = arrêt commercialisation, rappels, class action. Coût 10M€+ typique.\n\n**À retenir :** GAMP n'est pas une contrainte administrative — c'est ce qui protège l'entreprise pharma des catastrophes.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-05.jpg"
@@ -59,8 +59,8 @@
       "position": 6,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Le V-model — cycle de vie validation",
-      "bodyMd": "Le V-model organise les documents en descente (analyse et design) puis les tests en remontée. Chaque niveau de spécification a son niveau de test correspondant. Cette symétrie garantit qu'aucun besoin métier n'est oublié dans les tests et qu'aucun test n'est fait sans lien à un besoin.\n\n**Descente : specs** — URS (User) → FS (Functional) → DS (Design). Du besoin métier vers l'implémentation.\n\n**Remontée : tests** — Unit test → IQ → OQ → PQ. De l'implémentation vers la validation du besoin métier.\n\n**URS ↔ PQ** — Le PQ (Performance Qualification) valide que les User Requirements sont satisfaits en production.\n\n**FS ↔ OQ** — L'OQ (Operational Qualification) valide que les Functions marchent selon spec.\n\n**DS ↔ IQ** — L'IQ (Installation Qualification) valide que le Design est correctement installé.\n\n**À retenir :** Le V-model impose la Traceability Matrix : chaque URS → FS → DS → test → résultat. Manquer un lien = manquer un besoin = validation invalide.",
+      "title": "Le V-model",
+      "bodyMd": "Le V-model organise les documents en descente (analyse/design) puis les tests en remontée. Chaque niveau spec a son niveau test correspondant. Symétrie garantit qu'aucun besoin métier n'est oublié dans les tests.\n\n**Descente : specs** — URS (User) → FS (Functional) → DS (Design). Du besoin vers l'impl.\n\n**Remontée : tests** — Unit test → IQ → OQ → PQ. De l'impl vers la validation métier.\n\n**URS ↔ PQ** — PQ (Performance Qualification) valide que les URS sont satisfaits en prod.\n\n**FS ↔ OQ** — OQ (Operational Qualification) valide que les Functions marchent selon spec.\n\n**DS ↔ IQ** — IQ (Installation Qualification) valide que le Design est correctement installé.\n\n**À retenir :** V-model impose la Traceability Matrix : chaque URS → FS → DS → test → résultat. Manquer un lien = manquer un besoin = validation invalide.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-06.jpg"
@@ -69,8 +69,8 @@
       "position": 7,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Catégories 3, 4, 5 — le plus important",
-      "bodyMd": "**CATEGORIES 3 (OTS non configuré) + 4 (configuré)**\n- Cat 3 : Off-the-shelf sans customisation (Excel, Word)\n- Cat 4 : OTS avec configuration (SAP paramétré, WinCC config)\n- Effort validation : léger à modéré (souvent IQ + OQ + PQ)\n- Documentation : URS + FS + Test protocols\n- Change control : plus léger\n- Le cas majoritaire : ~80% des systèmes\n\n**CATEGORY 5 (custom developed)**\n- Code custom écrit spécifiquement pour le projet\n- Ex : code custom Python, macros Excel VBA complexes, PLC custom\n- Effort validation : maximum (spec détaillée + tests unitaires + IQ/OQ/PQ)\n- Documentation : URS + FS + DS + Test protocols + code reviews\n- Change control : formel avec impact assessment\n- Réservé aux cas où OTS + config ne suffisent pas\n\n**À retenir :** Choisir Cat 3/4 quand possible — bien moins de validation. Cat 5 dernier recours car documentation lourde + risque maintenance. Justifier ce choix dans l'URS.",
+      "title": "TP N1-1 : Rédiger un URS pharma",
+      "bodyMd": "**Contexte :** Vous devez rédiger l'URS pour un système MES qui va gérer la production de comprimés dans une nouvelle usine.\n\n**Consigne :** 1) Structurer l'URS en sections : contexte, périmètre, fonctionnalités attendues, contraintes réglementaires, performance, interfaces. 2) Rédiger 20 requirements testables (ex : 'Le système doit permettre à l'opérateur d'enregistrer un batch avec ID lot, date, quantité, 5 mesures qualité, en moins de 3 minutes'). 3) Chaque requirement : identifier (URS-001), texte, critère d'acceptation, priorité. 4) Faire relire par un métier pour valider la clarté.\n\n**Attendu :** URS de 20 pages avec 20 requirements testables. Métier confirme 'oui, c'est ce que je veux'. Prêt pour approbation formelle.\n\n💡 Modèle URS sur ISPE. Éviter 'ergonomique', 'facile', 'rapide' sans critère chiffré. Utiliser 'shall' au lieu de 'should' en anglais formel.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-07.jpg"
@@ -79,8 +79,8 @@
       "position": 8,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
+      "title": "TP N1-2 : Classer 5 systèmes en catégories GAMP",
+      "bodyMd": "**Contexte :** Vous avez 5 systèmes à valider : Windows Server 2022, PostgreSQL 15, Application Excel avec macros VBA custom, SAP paramétré, Application Django custom développée en interne.\n\n**Consigne :** Classer chaque système en catégorie GAMP (1-5) : 1 (Infrastructure), 2 (Firmware), 3 (Non-configured), 4 (Configured), 5 (Custom). Justifier chaque choix. Estimer l'effort de validation associé (léger/modéré/élevé).\n\n**Attendu :** Tableau avec 5 systèmes + catégorie + justification + effort estimé. Défendable en audit.\n\n💡 Windows Server = cat 1. PostgreSQL = cat 3 (utilisé tel quel). Excel + macros = cat 5 (le code VBA custom). SAP paramétré = cat 4. Django custom = cat 5.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-08.jpg"
@@ -89,33 +89,33 @@
       "position": 9,
       "kind": "QUIZ",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Quiz de fin de niveau 1",
+      "title": "Quiz N1",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "GAMP est édité par :",
+            "prompt": "GAMP =",
             "options": [
-              "ISPE (International Society for Pharmaceutical Engineering)",
+              "ISPE",
               "FDA",
               "EMA"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "GAMP signifie :",
+            "prompt": "GAMP =",
             "options": [
               "Good Automated Manufacturing Practice",
-              "Global Automation Mgmt Plan",
+              "GAP",
               "General"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Version courante :",
+            "prompt": "Version :",
             "options": [
-              "GAMP 5 (2022 revision)",
+              "GAMP 5 (2022)",
               "GAMP 3",
               "GAMP 10"
             ],
@@ -124,26 +124,26 @@
           {
             "prompt": "Cible :",
             "options": [
-              "Systèmes informatisés en environnement GxP (pharma)",
-              "Bureautique",
-              "Sites web"
+              "Systèmes informatisés GxP",
+              "Bureau",
+              "Web"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "V-model =",
+            "prompt": "V-model :",
             "options": [
-              "Life-cycle validation en V (specs → tests)",
+              "Cycle validation en V",
               "Version",
               "Voltage"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Categories 1-5 :",
+            "prompt": "5 catégories :",
             "options": [
-              "Classification risque des systèmes (OS→config→custom)",
-              "Levels de sécurité",
+              "Classification risque OS→config→custom",
+              "Levels sécurité",
               "Ranks"
             ],
             "correctIndex": 0
@@ -166,8 +166,8 @@
       "position": 11,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "IQ / OQ / PQ — les 3 phases de qualification",
-      "bodyMd": "IQ, OQ, PQ sont 3 phases successives qui prouvent que le système est correctement installé, fonctionne selon spec, et satisfait les besoins métier en conditions réelles. Chaque phase = un protocole écrit + exécution + rapport signé.\n\n**IQ (Installation Qualification)** — Vérifier l'installation : version software, patches, config OS, connexions réseau, hardware conforme. Documenter par screenshots + valeurs relevées.\n\n**OQ (Operational Qualification)** — Vérifier chaque fonction du système : create user, générer rapport, sauvegarde, alarme, authentification. Cas normaux + cas d'erreur.\n\n**PQ (Performance Qualification)** — Vérifier que le système fait le job dans les conditions réelles : charges normales, workflow complet, plusieurs users.\n\n**Protocoles + rapports** — Chaque phase = protocole approuvé avant exécution + rapport signé après. Traçabilité complète.\n\n**Exécution** — Testeur exécute chaque étape et documente : PASS/FAIL + preuves. Approbateur revoit et signe.\n\n**À retenir :** IQ/OQ/PQ prend du temps (2-6 mois selon complexité) mais est obligatoire. Automatiser les tests répétables = investissement rentable long terme.",
+      "title": "IQ / OQ / PQ",
+      "bodyMd": "IQ, OQ, PQ = 3 phases successives qui prouvent que le système est correctement installé, fonctionne selon spec, et satisfait les besoins métier en conditions réelles. Chaque phase = protocole écrit + exécution + rapport signé.\n\n**IQ (Installation Qualification)** — Vérifier installation : version software, patches, config OS, connexions, hardware conforme.\n\n**OQ (Operational Qualification)** — Vérifier chaque fonction : create user, générer rapport, sauvegarde, alarme, auth. Cas normaux + erreurs.\n\n**PQ (Performance Qualification)** — Vérifier que le système fait le job en conditions réelles : charges normales, workflow complet, plusieurs users.\n\n**Protocoles + rapports** — Chaque phase = protocole approuvé avant + rapport signé après.\n\n**Exécution** — Testeur exécute chaque étape et documente : PASS/FAIL + preuves. Approbateur revoit et signe.\n\n**À retenir :** IQ/OQ/PQ prend du temps (2-6 mois) mais obligatoire. Automatiser les tests répétables = investissement rentable long terme.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-11.jpg"
@@ -176,8 +176,8 @@
       "position": 12,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Traceability Matrix — la colonne vertébrale",
-      "bodyMd": "La Traceability Matrix relie chaque User Requirement à sa Functional Specification, à sa Design Specification, à ses tests IQ/OQ/PQ et à leurs résultats. Elle prouve que rien n'a été oublié et que chaque test a un but métier. C'est le document que l'auditeur ouvre en premier.\n\n**Structure typique** — 1 ligne par URS. Colonnes : URS ID, FS ID, DS ID, IQ tests, OQ tests, PQ tests, statut.\n\n**Maintenance vivante** — Chaque modification impacte la matrice. Doit refléter l'état réel — pas juste être créée puis oubliée.\n\n**Owner : QA validation** — Ce n'est pas au dev de la maintenir — c'est au QA validation.\n\n**Audit-ready** — Un auditeur demande 'montrez-moi la validation de tel URS' — la matrice doit répondre en 30 secondes.\n\n**Outils** — Excel possible pour petits projets. Outils spécialisés (Kneat, ValGenesis, ComplianceQuest) pour l'entreprise.\n\n**À retenir :** Une traceability matrix incomplète ou obsolète = warning letter garantie. Investir dans les outils qui l'automatisent = ROI massif.",
+      "title": "TP N2-1 : Écrire un test protocol OQ",
+      "bodyMd": "**Contexte :** Vous validez un LIMS. Un URS 'LIMS-042 : L'utilisateur doit pouvoir importer un résultat d'analyse depuis un fichier CSV et le lier au batch correspondant, avec audit trail'.\n\n**Consigne :** Rédiger le protocole OQ correspondant. Structure : (a) Header (système, version, dates), (b) Objectives, (c) Pre-requisites, (d) 10 test steps numérotés avec Expected + Actual + Pass/Fail, (e) Signatures (testeur, reviewer, QA), (f) Traceability matrix vers URS-042.\n\n**Attendu :** Protocole de 5-8 pages, chaque step atomique et testable. Reviewer peut exécuter sans questions. QA approuve le protocole avant exécution.\n\n💡 Steps atomiques : 'Cliquer sur Import → naviguer vers testfile.csv → cliquer OK'. Expected : 'Message Import successful, 5 résultats liés au batch 12345'. Pas d'ambiguïté.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-12.jpg"
@@ -186,8 +186,8 @@
       "position": 13,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
-      "bodyMd": "",
+      "title": "TP N2-2 : Traceability matrix",
+      "bodyMd": "**Contexte :** 5 URS + 8 FS + 6 DS + 12 tests IQ/OQ/PQ.\n\n**Consigne :** Créer une matrice Excel : lignes = URS-001 à URS-005. Colonnes = FS ID, DS ID, IQ tests, OQ tests, PQ tests, statut (PASS/FAIL/OPEN). Remplir avec des mappings cohérents. Ajouter une colonne 'Coverage %' calculée : (nb tests PASS / nb tests total) * 100.\n\n**Attendu :** Matrice complète et cohérente. Chaque URS couvert par ≥ 1 test. Coverage = 100% quand tous les tests PASS. Audit peut suivre URS-001 → test → résultat en 30 secondes.\n\n💡 Excel simple suffit pour petit projet. Outils spécialisés : Kneat, ValGenesis, ComplianceQuest pour gros projets. Formules Excel : COUNTIF pour compter les PASS.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-13.jpg"
@@ -196,7 +196,7 @@
       "position": 14,
       "kind": "QUIZ",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Quiz de fin de niveau 2",
+      "title": "Quiz N2",
       "bodyMd": "",
       "notes": null,
       "quiz": {
@@ -204,54 +204,54 @@
           {
             "prompt": "URS =",
             "options": [
-              "User Requirements Specification — le besoin métier",
-              "Uninterruptible Recovery System",
-              "UI Reference"
+              "User Requirements Specification",
+              "UPS",
+              "UI"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "FS =",
             "options": [
-              "Functional Specification — comment on répond au besoin",
+              "Functional Specification",
               "File System",
-              "Financial Statement"
+              "Financial"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "DS =",
             "options": [
-              "Design Specification — comment on l'implémente",
+              "Design Specification",
               "Data Store",
               "Deployment"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "IQ / OQ / PQ :",
+            "prompt": "IQ/OQ/PQ :",
             "options": [
-              "Installation / Operational / Performance Qualification",
+              "Installation/Operational/Performance Qual",
               "Impossible",
               "Redondant"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Traceability matrix :",
+            "prompt": "Traceability :",
             "options": [
-              "URS ↔ FS ↔ DS ↔ Tests, obligatoire",
+              "URS ↔ FS ↔ DS ↔ Tests obligatoire",
               "Optionnelle",
-              "Automatique"
+              "Auto"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "Category 3 :",
             "options": [
-              "Non-configured products (Off-the-shelf, ex Windows)",
-              "Custom code",
-              "OS uniquement"
+              "Non-configured products (OTS)",
+              "Custom",
+              "OS only"
             ],
             "correctIndex": 0
           }
@@ -273,8 +273,8 @@
       "position": 16,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "21 CFR Part 11 — enregistrements électroniques",
-      "bodyMd": "21 CFR Part 11 (1997) définit les exigences pour qu'un enregistrement électronique + une signature électronique aient valeur légale équivalente au papier. Ça touche à peu près TOUS les systèmes en pharma : LIMS, MES, ELN, ERP, SCADA. Non-conformité = rejet des données par la FDA.\n\n**Enregistrements électroniques** — Immuables, protégés contre modification, avec audit trail.\n\n**Signatures électroniques** — Auth 2 composants (user + password), horodatée, non-répudiable, liée au document.\n\n**Access controls** — RBAC strict — qui peut lire, modifier, approuver. Comptes personnels (pas de compte partagé).\n\n**Audit trail** — Toute action (create, modify, delete, approve) journalisée avec who/when/what/why. Immutable.\n\n**Backups + archivage** — Copies sécurisées, testées, avec plans de restauration. Durée légale de conservation (typiquement lifetime + 30 ans pour pharma).\n\n**À retenir :** 21 CFR Part 11 n'est pas juste 'signer électroniquement'. C'est un système complet — audit trail + auth forte + accès contrôlés + backups. Sans TOUT ça, non-conforme.",
+      "title": "21 CFR Part 11",
+      "bodyMd": "21 CFR Part 11 (1997) définit les exigences pour qu'un enregistrement électronique + signature électronique aient valeur légale équivalente au papier. Ça touche à peu près TOUS les systèmes en pharma : LIMS, MES, ELN, ERP, SCADA.\n\n**E-records** — Immuables, protégés contre modification, avec audit trail.\n\n**E-signatures** — Auth 2 composants (user + password), horodatée, non-répudiable, liée au document.\n\n**Access controls** — RBAC strict — qui peut lire, modifier, approuver. Comptes personnels (pas partagés).\n\n**Audit trail** — Toute action (create, modify, delete, approve) journalisée. Immutable.\n\n**Backups + archivage** — Copies sécurisées, testées, plans de restauration. Durée légale : lifetime + 30 ans pharma.\n\n**À retenir :** 21 CFR Part 11 = système complet — audit trail + auth forte + accès contrôlés + backups. Sans TOUT ça, non-conforme.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-16.jpg"
@@ -283,8 +283,8 @@
       "position": 17,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Data Integrity ALCOA+",
-      "bodyMd": "- Attributable : chaque donnée identifie clairement qui l'a créée/modifiée\n- Legible : lisible, restant lisible dans le temps (pas de format propriétaire perdu)\n- Contemporaneous : datée au moment de la mesure/action (pas rétroactive)\n- Original : source authentique, ou copie certifiée conforme\n- Accurate : conforme à la réalité mesurée, sans altération\n- Complete : sans manquement, tous les résultats (y compris échecs)\n- Consistent : format cohérent, unités uniformes\n- Enduring : conservée pendant toute la durée réglementaire\n- Available : accessible pour audit ou inspection à tout moment\n\n💡 ALCOA+ est le check-list à passer sur TOUTE donnée pharma. Un data breach ou une donnée modifiée sans trace = warning letter.",
+      "title": "ALCOA+ — les 9 principes",
+      "bodyMd": "1. Attributable : chaque donnée identifie qui l'a créée/modifiée\n2. Legible : lisible, restant lisible dans le temps\n3. Contemporaneous : datée au moment de l'action (pas rétroactive)\n4. Original : source authentique ou copie certifiée\n5. Accurate : conforme à la réalité mesurée\n6. Complete : sans manquement, y compris échecs\n7. Consistent : format cohérent, unités uniformes\n8. Enduring : conservée pendant durée réglementaire\n9. Available : accessible pour audit à tout moment\n\n⚠ ALCOA+ = check-list à passer sur TOUTE donnée pharma. Un data breach ou modification sans trace = warning letter FDA.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-17.jpg"
@@ -293,8 +293,8 @@
       "position": 18,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Récapitulatif du niveau 3",
-      "bodyMd": "",
+      "title": "TP N3-1 : Audit checklist ALCOA+",
+      "bodyMd": "**Contexte :** Vous préparez une inspection FDA. Vérifier vos 10 systèmes critiques contre ALCOA+.\n\n**Consigne :** 1) Créer une checklist ALCOA+ : 9 principes × 10 systèmes = 90 cases. 2) Pour chaque case : évaluer OUI/NON/PARTIEL avec preuve. 3) Identifier les gaps (cases non OUI). 4) Prioriser les corrections par risque. 5) Plan d'action avec dates + responsables.\n\n**Attendu :** Checklist complétée. Gaps identifiés. Plan d'action pour combler avant inspection. Documentation défendable.\n\n💡 Preuves : screenshots, logs, tests, procédures. Priorité par gravité + probabilité. Certains gaps se corrigent en heures, d'autres en mois.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-18.jpg"
@@ -303,7 +303,7 @@
       "position": 19,
       "kind": "QUIZ",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Quiz de fin de niveau 3",
+      "title": "Quiz N3",
       "bodyMd": "",
       "notes": null,
       "quiz": {
@@ -311,34 +311,34 @@
           {
             "prompt": "21 CFR Part 11 :",
             "options": [
-              "Réglementation FDA sur les enregistrements électroniques",
-              "Norme électrique",
-              "Standard réseau"
+              "Réglementation FDA e-records",
+              "Norme élec",
+              "Réseau"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Signature électronique 21 CFR :",
+            "prompt": "E-sig 21 CFR :",
             "options": [
-              "Auth 2 composants (user+password), horodatage, non-répudiable",
+              "Auth 2 composants + horodatage + non-répu",
               "Simple",
-              "Papier suffisant"
+              "Papier"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "Audit trail :",
             "options": [
-              "Log complet des modifications, immuable, revue périodique",
+              "Log immuable modifications",
               "Optionnel",
-              "Automatique"
+              "Auto"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Data integrity ALCOA+ :",
+            "prompt": "ALCOA+ :",
             "options": [
-              "Attributable, Legible, Contemporaneous, Original, Accurate + 4 attributs",
+              "9 principes qualité data",
               "Simple",
               "Aucun"
             ],
@@ -347,7 +347,7 @@
           {
             "prompt": "Change control :",
             "options": [
-              "Processus formel pour tout changement système en prod",
+              "Processus formel prod",
               "Optionnel",
               "Rapide"
             ],
@@ -356,9 +356,9 @@
           {
             "prompt": "Periodic review :",
             "options": [
-              "Revue périodique du système validé (annuelle typique)",
+              "Revue annuelle système validé",
               "Impossible",
-              "Automatique"
+              "Auto"
             ],
             "correctIndex": 0
           }
@@ -380,8 +380,8 @@
       "position": 21,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Se procurer GAMP 5 (ISPE, ~200€) et lire les chapitres clés\n- Faire un stage validation sur un projet pharma existant — l'apprentissage par la pratique\n- S'inscrire à une conférence ISPE ou une formation GxP en présentiel\n- Certifier CSV (Computer System Validation) — reconnu industrie pharma\n\n💡 GAMP 5 + expérience validation = profils rares et bien payés en pharma. Investissement formation qui rapporte vite.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz\n- Refaire les 5 TPs\n- Se procurer GAMP 5 (ISPE, ~200€)\n- Stage validation sur un projet pharma existant\n- Certifier CSV — reconnu industrie\n\n💡 GAMP 5 + expérience validation = profils rares et bien payés en pharma.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/gamp5/slide-21.jpg"
