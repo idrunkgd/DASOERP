@@ -369,9 +369,9 @@
     {
       "position": 20,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "En résumé",
-      "bodyMd": "",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "L'ISA — qui est-ce ?",
+      "bodyMd": "L'ISA est une organisation professionnelle mondiale des automaticiens. Elle publie des normes qui structurent l'automatisation industrielle depuis 40 ans. ISA-88, ISA-95, ISA-101, ISA-18.2, ISA-99 (cybersécurité).\n\n**ISA-88 (1995)** — Batch control. Recettes, équipements, exécution. Fondation du batch pharma/chimie.\n\n**ISA-95 (2000+)** — Enterprise-Control System Integration. Modèle 5 niveaux (0-4). Base MES ↔ ERP.\n\n**ISA-101 (2015)** — HMI design + gestion événements. Standards de rendu et couleurs.\n\n**ISA-18.2 (2009)** — Alarm management. Rationalisation, priorités, cycle de vie.\n\n**ISA-99 / IEC 62443** — Cybersecurity industrielle. Zones, conduits, niveaux de sécurité.\n\n**À retenir :** Un architecte MES/OT sans connaissance ISA = danger. Ces normes traduisent 40 ans de retours d'expérience. Les ignorer = réinventer les erreurs des autres.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-20.jpg"
@@ -379,12 +379,102 @@
     {
       "position": 21,
       "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Modèle des 5 niveaux ISA-95",
+      "bodyMd": "ISA-95 structure l'usine en 5 niveaux hiérarchiques. Chaque niveau a un rôle, une timescale, des interlocuteurs. Confondre les niveaux = mauvais choix technologique (SCADA au niveau ERP = catastrophe).\n\n**Niveau 0 — Terrain** — Capteurs, actionneurs, moteurs. Temps réel milliseconde.\n\n**Niveau 1 — Contrôle** — PLC, DCS. Temps réel <100ms. Boucles régulation.\n\n**Niveau 2 — Supervision** — SCADA, HMI. Temps réel seconde. Opérateurs.\n\n**Niveau 3 — MES/MOM** — Manufacturing Execution System. Temps minute-heure. Ordres fabrication, batch, qualité.\n\n**Niveau 4 — Business** — ERP, PLM. Temps jour-mois. Finance, RH, planning stratégique.\n\n**À retenir :** Règle d'or : chaque système à sa place. Ne jamais mélanger la timescale ERP avec le temps réel SCADA. C'est le job du MES (niveau 3) de faire l'interface.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TP N1-3 : Cartographier un système existant",
+      "bodyMd": "**Contexte :** Usine agroalimentaire : 3 lignes de production, PLC Siemens, SCADA Wonderware, ERP SAP, un vieux Excel qui fait office de MES.\n\n**Consigne :** 1) Interviewer 3 personnes : opérateur, superviseur, directeur usine. 2) Dessiner architecture ISA-95 actuelle : 5 niveaux, systèmes en place, interfaces. 3) Identifier les gaps : que fait Excel qui devrait être MES ? Où sont les données perdues ? 4) Recommander : quel outil MES envisager ? Roadmap 3 phases.\n\n**Attendu :** Cartographie ISA-95 actuelle + cible. Gap analysis + roadmap. Livrable clair pour direction usine.\n\n💡 90% des usines ont un 'niveau 2.5' bricolé en Excel/Access. C'est ce niveau qui plombe la fiabilité de la data. Le remplacer par un vrai MES = ROI énorme.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "ISA-88 en détail",
+      "bodyMd": "ISA-88 sépare la RECETTE (le procédé — mêler A + B à 60°C pendant 30 min) de l'ÉQUIPEMENT (les cuves, vannes, capteurs). Cette séparation permet la même recette de tourner sur plusieurs lignes.\n\n**Recipe hierarchy** — General → Site → Master → Control. General = comment on fait le produit. Master = comment sur telle ligne. Control = ce qui tourne maintenant.\n\n**Equipment hierarchy** — Enterprise → Site → Area → Process Cell → Unit → Equipment Module → Control Module.\n\n**Procedure hierarchy** — Procedure → Unit Procedure → Operation → Phase.\n\n**Phase = unité atomique** — Une phase = une action indivisible : Heat, Charge, Discharge, Mix, Sample.\n\n**Batch execution** — Le batch exécute la recette en instanciant les phases sur l'équipement disponible.\n\n**À retenir :** ISA-88 investit dans une abstraction (recette ↔ équipement) qui paie sur 10-20 ans : ajouter un produit = ajouter une recette, pas modifier tout le PLC.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-3 : Écrire une PackML State Machine",
+      "bodyMd": "**Contexte :** Ligne d'emballage à automatiser. Adopter PackML (norme OMAC + ISA-88).\n\n**Consigne :** 1) Décrire les 17 états PackML : Aborted, Stopped, Idle, Running, Held… etc. 2) Modéliser les transitions autorisées entre états. 3) Traduire en Grafcet ou State Machine dans un PLC Siemens (TIA Portal). 4) Ajouter les modes : Auto, Manual, Cleaning. 5) HMI avec pastille état + boutons transitions autorisées.\n\n**Attendu :** State Machine PackML implémentée. Opérateur voit clairement l'état + actions dispo. Debug simplifié : un problème = un état bien défini.\n\n💡 Piège : autoriser des transitions non standard = incompatibilité avec MES qui suit PackML strict. Coller à la norme même si tentant de simplifier.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-4 : Recette S88 yaourt (recette Master)",
+      "bodyMd": "**Contexte :** Yaourt fraise. Ligne A avec 2 cuves + fermenteur. Standardiser la recette selon ISA-88.\n\n**Consigne :** 1) Recipe Header : nom, version, ingrédients (lait, ferments, fraise). 2) Formula : quantités par lot 500L. 3) Procedure : Unit Procedure 'Préparation' + 'Fermentation' + 'Conditionnement'. 4) Chaque unit procedure → Operations → Phases. 5) Ex Phase : Heat (Target 42°C, Rate 2°C/min, Hold 30min). 6) Documenter en XML B2MML.\n\n**Attendu :** Recette Master S88 documentée. Lisible par MES + PLC. Prête pour instanciation Control Recipe à chaque batch.\n\n💡 B2MML est verbeux mais standard MESA. Outils : Rockwell FactoryTalk Batch, Siemens SIMATIC Batch, ou custom sur PLC + MES.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "B2MML et intégration MES ↔ ERP",
+      "bodyMd": "B2MML (Business To Manufacturing Markup Language) = implémentation XML de ISA-95. Format standard pour échanger : ordres fabrication, matières, personnel, équipement, résultats production.\n\n**12 schémas B2MML** — OperationsSchedule, MaterialTransaction, PersonnelInformation, Equipment… un XSD par domaine.\n\n**Publish-Subscribe pattern** — ERP publie 'nouvel ordre' → MES consomme. MES publie 'batch terminé' → ERP consomme.\n\n**REST + JSON** — Beaucoup d'implémentations modernes utilisent le modèle B2MML mais en JSON REST.\n\n**Message broker** — Kafka, RabbitMQ souvent utilisés pour découpler ERP ↔ MES.\n\n**Idempotence** — Design pour handle : rejeu, doublons, retard. Erreurs réseau = normales à ce niveau.\n\n**À retenir :** B2MML n'est pas obligatoire mais si vous partez from scratch, l'utiliser = compatibilité future + docs standard + moins de custom mapping.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-2 : Intégration SAP ↔ MES en B2MML",
+      "bodyMd": "**Contexte :** Nouveau projet MES pharma. SAP existant. Il faut échanger ordres, résultats, consommations matières.\n\n**Consigne :** 1) Lister 5 messages à échanger : ProductionSchedule (ERP→MES), ProductionPerformance (MES→ERP), MaterialConsumption (MES→ERP), MaterialInventory (ERP→MES), PersonnelSchedule (ERP→MES). 2) Pour chaque : sens, format B2MML, fréquence, mécanisme (REST/broker). 3) Design idempotence : chaque message a un UUID. 4) Retry policy : 3 essais + DLQ. 5) Monitoring : dashboard latence + erreurs.\n\n**Attendu :** Architecture flux MES ↔ SAP documentée. Idempotence + retry + monitoring. Prête pour dev.\n\n💡 Piège : temps réel entre ERP et MES = irréaliste. Fréquences typiques : ProductionSchedule = 1/jour, Performance = fin de lot, MaterialConsumption = fin de shift.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Adopter ISA — les 10 premières décisions",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-29.jpg"
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "Passer à l'action — 30 jours",
       "bodyMd": "- Rejouer les 3 quiz\n- Lire ISA-95 Part 1 et ISA-88 Part 1\n- Cartographier votre système actuel\n- Exiger conformité ISA-88/95 dans cahiers des charges\n- Certifier ISA — reconnu mondialement\n\n💡 Ingénieur qui parle ISA-88/95 = immédiatement précieux en projet MES/manufacturing.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/isa-standards/slide-21.jpg"
+      "imageUrl": "/training/isa-standards/slide-30.jpg"
     }
   ]
 }

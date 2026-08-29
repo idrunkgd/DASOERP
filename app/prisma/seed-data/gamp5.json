@@ -369,8 +369,8 @@
     {
       "position": 20,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "En résumé",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "FDA vs EMA",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
@@ -379,12 +379,102 @@
     {
       "position": 21,
       "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Les 5 catégories en détail",
+      "bodyMd": "La catégorie détermine tout : docs à produire, tests à passer, coût de la validation. Se tromper = soit sur-valider (gaspillage), soit sous-valider (audit failure).\n\n**Catégorie 1 — Infrastructure** — OS Windows/Linux, hyperviseurs. Validation légère : IQ seulement. Effort : 1-2 semaines.\n\n**Catégorie 2 — Firmware (obsolète)** — Fusionnée avec 3 en GAMP 5 v2. Historique.\n\n**Catégorie 3 — OTS non configuré** — Utilisé tel quel out-of-the-box. Ex : Windows Server. IQ + OQ light. Effort : 2-4 semaines.\n\n**Catégorie 4 — Configuré** — SAP paramétré, LIMS configuré, MES paramétré. Full IQ/OQ/PQ sur la config. Effort : 3-6 mois.\n\n**Catégorie 5 — Custom** — Développement spécifique. Full V-model + code review + unit tests + IQ/OQ/PQ. Effort : 6-12 mois.\n\n**À retenir :** Règle d'or : mieux vaut sur-classer (cat 5 par défaut si doute) que sous-classer. Audit préfère prudence.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TP N1-3 : Rédiger une Functional Specification",
+      "bodyMd": "**Contexte :** Suite TP N1-1 (URS MES). Vous devez maintenant traduire les 20 URS en Functional Specifications.\n\n**Consigne :** 1) Pour chaque URS, écrire 1 à 3 FS qui la couvrent. Structure : FS-XXX-YY, description fonctionnelle, IHM associée, règles métier, cas d'erreur. 2) Ajouter une colonne 'URS traçabilité' liant FS ↔ URS. 3) Faire relire par un architecte technique pour valider la faisabilité. 4) Prévoir les cas limites (batch avec 0 mesures, quantité négative, ID lot dupliqué).\n\n**Attendu :** FS de 30-50 pages couvrant toutes les URS. Cas d'erreur documentés. Architecte confirme 'techniquement réalisable'.\n\n💡 FS = QUOI le système fait, pas COMMENT. Le COMMENT vient dans le DS (Design Specification). Éviter 'utiliser React' dans une FS — ça, c'est DS.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Change control post-validation",
+      "bodyMd": "Une fois validé, le système est figé — sauf change control formel. Un patch OS, une nouvelle version, un nouveau user, une config modifiée = tous passent par change control. Sans quoi, la validation est cassée dès la première modif.\n\n**CR (Change Request)** — Doc formel : quoi, pourquoi, quel impact, quels tests régression.\n\n**Impact assessment** — QA + System Owner évaluent impact sur validation. Décision : minor / major / critical.\n\n**Tests régression** — Minor = pas de tests. Major = OQ ciblé. Critical = full IQ/OQ/PQ.\n\n**Approbations** — CAB (Change Advisory Board) : QA, System Owner, IT, Business.\n\n**Documentation à jour** — URS, FS, DS, protocoles — tout ce qui bouge doit être mis à jour.\n\n**À retenir :** Change control = tueur silencieux de validation. Boîte pharma qui laisse dériver = un jour audit + warning letter.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-3 : Gérer un change control",
+      "bodyMd": "**Contexte :** Faille Log4j critique. Votre LIMS validé utilise Log4j. Il faut patcher immédiatement.\n\n**Consigne :** 1) Rédiger CR : contexte urgence, patch, impact fonctionnel (aucun attendu), tests régression proposés. 2) Convoquer CAB en urgence (2h). 3) Décision : critical (sécurité) mais patch de type minor (bug fix bibliothèque). Test régression : OQ ciblé sur upload/download + audit trail. 4) Exécuter patch en TEST puis PROD. 5) Rapport final signé.\n\n**Attendu :** CR + décision CAB documentés en < 24h. Patch appliqué. Tests régression PASS. Système reste validé. Log4j fixé.\n\n💡 Sécurité vs conformité : la sécurité passe toujours en premier (risque patient > risque doc). Mais docs doivent suivre dans les jours qui suivent.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Cloud & SaaS — validation moderne",
+      "bodyMd": "AWS, Azure, GCP, SaaS pharma (Veeva Vault, Sparta, MasterControl…) — la validation cloud change les règles. Le provider fait une partie du boulot, mais le client reste responsable devant FDA.\n\n**Shared responsibility model** — Provider : hardware, OS, patches infra. Client : config, users, data, tests.\n\n**Provider qualification** — Audit provider : SOC 2, ISO 27001, GxP-ready. Contrat SLA + audit rights.\n\n**Docs fournies par provider** — Utilisez Vendor Qualification Package. Complétez avec vos propres tests.\n\n**Data residency** — Où sont vos data ? Contraintes RGPD + pharma (parfois obligation UE).\n\n**Sortie fournisseur** — Data export + destruction. À prévoir dans le contrat dès le début.\n\n**À retenir :** Cloud validé = SLA + audit rights + Vendor Qualification + tests client. Sans ces 4, la responsabilité reste 100% chez vous en cas d'audit.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-2 : Simuler une inspection FDA",
+      "bodyMd": "**Contexte :** Inspection FDA annoncée dans 30 jours. Vous êtes System Owner du LIMS.\n\n**Consigne :** 1) Préparer un dossier complet : URS, FS, DS, protocoles IQ/OQ/PQ, VSR, Periodic Reviews, Change Controls, formation users. 2) Simuler audit : un collègue joue le rôle inspecteur, pose 20 questions typiques : 'Montrez-moi l'audit trail sur le lot X du 15/03', 'Où est la formation de l'utilisateur qui a signé cette action ?'. 3) Chronométrer : chaque réponse doit venir en < 5 min. 4) Identifier les gaps (question sans réponse rapide). 5) Plan de remédiation.\n\n**Attendu :** Audit blanc joué. Gaps identifiés. Corrections engagées avant vrai audit. Confiance équipe.\n\n💡 Inspector FDA typique : rapide, précis, méthodique. Il note tout. Répondre avec docs, pas 'de mémoire'. Un 'je ne sais pas' est mieux qu'un mensonge.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Validation Waterfall vs Agile",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Check-list Go-Live pharma",
+      "bodyMd": "1. Validation Plan signé\n2. URS + FS + DS approuvés\n3. IQ + OQ + PQ exécutés, PASS ou déviations résolues\n4. Traceability matrix 100% couverte\n5. VSR signé QA + System Owner + Business Owner\n6. Formation users tracée (certificats)\n7. Backups + DR testés\n8. Support opérationnel en place\n9. Change control process actif\n10. Audit trail testé et actif\n11. Documentation archivée\n12. Comm go-live à toutes les parties prenantes\n\n⚠ Un seul item manquant = report du go-live. Pas de compromis en pharma.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/gamp5/slide-29.jpg"
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "Passer à l'action — 30 jours",
       "bodyMd": "- Rejouer les 3 quiz\n- Refaire les 5 TPs\n- Se procurer GAMP 5 (ISPE, ~200€)\n- Stage validation sur un projet pharma existant\n- Certifier CSV — reconnu industrie\n\n💡 GAMP 5 + expérience validation = profils rares et bien payés en pharma.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/gamp5/slide-21.jpg"
+      "imageUrl": "/training/gamp5/slide-30.jpg"
     }
   ]
 }

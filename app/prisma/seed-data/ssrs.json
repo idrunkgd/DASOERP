@@ -349,9 +349,9 @@
     {
       "position": 18,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "En résumé",
-      "bodyMd": "",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "L'architecture SSRS",
+      "bodyMd": "SSRS = un serveur web IIS + une base de config (ReportServer DB) + un moteur de rendering + un designer (SSDT). Comprendre l'archi = savoir où chercher quand ça bug.\n\n**Report Server** — Service Windows, héberge le portail /reports et le web service /reportserver.\n\n**ReportServer DB** — Base SQL Server qui stocke définitions RDL, subscriptions, permissions, historique exécutions.\n\n**ReportServerTempDB** — Cache et sessions temporaires. Purgeable.\n\n**SSDT (SQL Server Data Tools)** — Extension Visual Studio pour designer les rapports .rdl.\n\n**Report Builder** — Alternative à SSDT, plus simple, pour power users métier.\n\n**À retenir :** Bug SSRS ? Vérifier logs Report Server (LogFiles/ReportServer_*.log), puis event viewer Windows, puis SQL Profiler sur ReportServer DB.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/ssrs/slide-18.jpg"
@@ -359,12 +359,112 @@
     {
       "position": 19,
       "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Anatomie d'un rapport RDL",
+      "bodyMd": "Un fichier .rdl (Report Definition Language) est un XML structuré. Comprendre sa structure = pouvoir debug, modifier en masse, générer par script.\n\n**DataSources** — Connexions BDD : SQL Server, Oracle, ODBC, XML, SharePoint list…\n\n**DataSets** — Requêtes qui alimentent le rapport. Peut être SQL, MDX, DAX, ou stored procedure.\n\n**Parameters** — @StartDate, @Site, @Product… bindés aux datasets.\n\n**Report Items** — Textbox, Tablix (table+matrix), Chart, Image, Rectangle, Subreport.\n\n**Code + Custom Assembly** — Fonctions VB embarquées ou DLL référencées pour logique complexe.\n\n**À retenir :** Ouvre un .rdl en Notepad++ : c'est du XML éditable. Pratique pour find/replace massif ou migration depuis un script.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TP N1-3 : Publier + partager un rapport",
+      "bodyMd": "**Contexte :** Rapport 'Ventes mensuelles' développé en SSDT. Il faut le déployer sur le serveur prod et donner accès à 15 commerciaux.\n\n**Consigne :** 1) Déployer depuis SSDT vers /Ventes/Mensuel. 2) Créer un groupe AD 'SSRS_Ventes_Read'. 3) Ajouter les 15 commerciaux au groupe. 4) Sur le portail /reports : sécurité du folder /Ventes = groupe AD en Browser. 5) Envoyer URL aux users. 6) Tester avec un compte user (pas admin) que ça fonctionne.\n\n**Attendu :** Rapport accessible par les 15 users. Aucun autre user ne peut voir. Sécurité gérée par AD (pas SSRS local).\n\n💡 Ne JAMAIS mettre 'Everyone' en Browser — on est en pharma/entreprise, pas en démo. Préférer groupes AD à users individuels : facilite les entrées/sorties.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Expressions et fonctions VB",
+      "bodyMd": "Les expressions VB dans SSRS permettent : formatage conditionnel, calculs, agrégats custom, logique conditionnelle. Elles s'écrivent dans les propriétés (Color, Font, Value, Visibility) et dans le pane Code du rapport.\n\n**Expressions inline** — =IIF(Fields!Ecart.Value < 0, \"Red\", \"Black\") pour colorer selon signe.\n\n**Fonctions built-in** — Sum, Avg, Count, RunningValue, First, Last, Previous. Toutes scopées par groupe.\n\n**Fonctions personnalisées** — Onglet Code du rapport : Public Function IsWeekend(d as Date) as Boolean → utilisable partout.\n\n**Assemblies externes** — Référencer une DLL .NET pour logique complexe (rare, réservé cas particuliers).\n\n**Scope** — Sum(Fields!Qty.Value, \"GroupSite\") somme dans le scope du groupe Site.\n\n**À retenir :** 90% des besoins tenu par IIF + Sum scopé + RunningValue. Aller au-delà : réévaluer si SSRS est bien l'outil, ou si c'est du dev applicatif déguisé.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-3 : Formatage conditionnel + drill-down",
+      "bodyMd": "**Contexte :** Rapport 'KPI Sites' listant 10 sites avec CA, marge, écart budget. Directeur veut : ligne rouge si écart < -5%, cliquer un site → détail par produit.\n\n**Consigne :** 1) Sur la ligne 'Écart', mettre Color = =IIF(Fields!Ecart.Value < -0.05, \"Red\", \"Black\"). 2) BackgroundColor idem avec teinte plus pâle. 3) Créer un sous-rapport 'DetailSite' paramétré par @SiteId. 4) Sur la textbox 'Nom du site' : Action = Go to Report → DetailSite → @SiteId = Fields!SiteId.Value. 5) Publier + tester.\n\n**Attendu :** Rapport principal avec ligne rouge sur sites en écart. Clic sur nom du site → détail par produit s'ouvre. Retour possible avec bouton Back du portail.\n\n💡 Attention : Action Go to Report ne fonctionne QUE dans le portail SSRS, pas en export PDF/Excel. Pour PDF interactif, envisager un lien URL vers le portail à la place.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-4 : Optimiser un rapport lent",
+      "bodyMd": "**Contexte :** Rapport 'Historique batchs annuel' met 5 minutes à s'afficher. Le boss veut < 10 sec.\n\n**Consigne :** 1) Activer ExecutionLog3 (view SQL sur ReportServer DB) : identifier temps data retrieval vs rendering. 2) Si data retrieval > 80% : optimiser le dataset (index, WHERE plus sélectif, stored proc). 3) Si rendering > 50% : réduire nb lignes affichées (agrégation, top N), éviter subreports en boucle. 4) Cache : activer Snapshot toutes les nuits pour l'année N-1. 5) Ré-tester : cible < 10 sec.\n\n**Attendu :** Temps affichage < 10 sec. ExecutionLog documenté pour référence future. Users satisfaits.\n\n💡 Piège classique : dataset qui ramène 50k lignes pour afficher 100 agrégées. Faire l'agrégation en SQL, pas en SSRS. Snapshots = magie pour rapports historiques figés.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Subscriptions — automatiser la diffusion",
+      "bodyMd": "Subscription = déclenchement automatique du rapport à intervalle défini, avec livraison par mail, fichier partagé, ou SharePoint. Standard SSRS pour reporting périodique (daily, weekly, monthly).\n\n**Subscription standard** — Un rapport → 1 destinataire ou groupe fixe. Simple, configurable en 2 min.\n\n**Data-driven subscription** — Enterprise/Std uniquement. Un rapport → N destinataires avec params différents. Ex : rapport 'ventes site' envoyé à 10 responsables site avec leur param.\n\n**Formats** — PDF, Excel, Word, CSV, XML, TIFF. PDF = plus safe pour figer.\n\n**Delivery** — Email (SMTP), file share, SharePoint list.\n\n**Schedule** — Cron-like : minutes, heures, jours, jour du mois. Attention timezone serveur.\n\n**À retenir :** Subscription = ROI énorme pour reporting régulier. Configurée bien, elle tourne des années sans maintenance. Configurée mal, elle spam la mailbox à 3h du matin.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-2 : Data-driven subscription",
+      "bodyMd": "**Contexte :** Rapport 'Performance mensuelle' avec param @SiteId. Le directeur veut : le 1er de chaque mois à 6h, chaque responsable site reçoit son rapport avec SON site.\n\n**Consigne :** 1) Créer table SubscriptionSites (SiteId, ResponsableEmail, ResponsableName). 2) Insérer 10 lignes. 3) Créer data-driven subscription : query = SELECT * FROM SubscriptionSites. 4) Mapper : To = ResponsableEmail, @SiteId = SiteId. 5) Schedule : Every month on day 1 at 06:00. 6) Format = PDF. 7) Tester en changeant temporairement le schedule à +5 min.\n\n**Attendu :** 10 mails envoyés le 1er du mois. Chaque responsable reçoit son PDF avec ses données. Sans intervention manuelle.\n\n💡 Data-driven = feature SSRS Enterprise uniquement (pas Standard). Vérifier ta licence. Si Std : script PowerShell qui appelle le web service en boucle.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Check-list rapport prod",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "SSRS vs Power BI vs Grafana",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/ssrs/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "Passer à l'action — 30 jours",
       "bodyMd": "- Rejouer les 3 quiz\n- Refaire les 5 TPs dans SSDT\n- Créer un rapport journalier de production\n- Data-driven subscription pour 10+ users\n- Complémenter avec Power BI pour analytics\n\n💡 SSRS mature et durable. Bien fait, tourne 10 ans sans intervention.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/ssrs/slide-19.jpg"
+      "imageUrl": "/training/ssrs/slide-29.jpg"
     }
   ]
 }

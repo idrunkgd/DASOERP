@@ -349,9 +349,9 @@
     {
       "position": 18,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "En résumé",
-      "bodyMd": "",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Architecture AVEVA Report",
+      "bodyMd": "AVEVA Report (ex-Dream Report) = 3 briques : Studio (designer), Runtime (exécution + planif), Web Portal (consultation). Comprendre les 3 = savoir où déployer et où débugger.\n\n**Studio** — Éditeur graphique où tu conçois le rapport. Poste ingénieur, licence désignée.\n\n**Runtime** — Service Windows qui exécute les rapports selon triggers (temps, événements, batch). Serveur dédié.\n\n**Web Portal** — Portail HTML accessible en réseau où les users consultent, filtrent, téléchargent.\n\n**Sources de données** — OSIsoft PI, AVEVA Historian, InfluxDB, SQL Server, ODBC, OPC UA, MQTT — 30+ connecteurs.\n\n**Formats de sortie** — PDF, Excel, HTML, Word, CSV. Auto-envoi par mail/SharePoint/FTP.\n\n**À retenir :** Runtime licence par CAL (Concurrent Access Licence) — dimensionner selon nombre de rapports simultanés max, pas nombre total.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-18.jpg"
@@ -359,12 +359,112 @@
     {
       "position": 19,
       "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Les objets clés du designer",
+      "bodyMd": "Tout rapport se construit avec quelques objets clés bien maîtrisés. Les connaître = savoir traduire un besoin métier en rapport.\n\n**Statistical Objects** — Sum, Avg, Min, Max, Count, StdDev sur une période — la base des KPI.\n\n**Historical Data Table** — Table de valeurs horodatées d'un tag. Idéal pour trends et audit trail.\n\n**Batch List / Batch Detail** — Interroge le module Batch (S88). Rapports lots parfaits pour pharma.\n\n**Alarm List** — Sortie ISA-18.2 des alarmes sur période, par acquittement, par priorité.\n\n**SQL Object** — Résultat d'une requête SQL libre. Puissant pour joindre historian + BDD métier.\n\n**À retenir :** 90% des rapports usine se font avec Statistical + Historical + Alarm + Batch. Les autres objets sont niche.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TP N1-3 : Multi-source (historian + SQL)",
+      "bodyMd": "**Contexte :** Vous devez faire un rapport 'Production quotidienne' qui affiche : production réelle (historian tag), production planifiée (base ERP SQL), écart calculé.\n\n**Consigne :** 1) Créer Data Source #1 : historian AVEVA. 2) Créer Data Source #2 : SQL Server BDD ERP. 3) Statistical Object avec Sum tag 'Production_Compteur' pour la période. 4) SQL Object : SELECT PlannedQty FROM ProductionPlan WHERE Day = @date. 5) Textbox Écart : =[Sum_Production] - [Planned]. 6) Coloration : rouge si Écart < -5%, vert sinon.\n\n**Attendu :** Rapport avec 3 valeurs : réel, planifié, écart coloré. Data provient de 2 sources hétérogènes fusionnées.\n\n💡 Timezone à surveiller : historian souvent UTC, SQL souvent local. Aligner avant de comparer, sinon écart fantôme d'1h à minuit.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Templates et paramètres",
+      "bodyMd": "Templates = même mise en page, données différentes selon params. Économie de temps massive : au lieu de 30 rapports par site, 1 template + 1 param Site.\n\n**Parameters** — @Date, @Shift, @Site, @Batch. Bindés aux objets pour filtrer dynamiquement.\n\n**Time period params** — @StartTime, @EndTime. Peuvent être relatifs : 'Last 24h', 'This shift', 'MTD'.\n\n**Cascading** — Sélection @Site filtre la liste des @Line disponibles. Améliore l'UX.\n\n**Default values** — Toujours définir des valeurs par défaut sensées. Sinon rapport plante ou vide.\n\n**Validation** — Contrôler cohérence (Start < End, période raisonnable). Éviter query de 10 ans qui plombe le serveur.\n\n**À retenir :** 1 template bien fait = économie de 10-20 rapports. Investir 2 jours dans le template = gagner 20 jours de maintenance.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-3 : OEE par équipe/shift",
+      "bodyMd": "**Contexte :** Machine ligne 3 : tag 'Etat' (0=arrêt, 1=marche), tag 'Compteur_Prod', tag 'Compteur_Rebut'. OEE = Availability × Performance × Quality.\n\n**Consigne :** 1) Availability = temps marche / temps planifié. Statistical Object sur 'Etat' avec filtre =1. 2) Performance = production réelle / cadence théorique * temps marche. 3) Quality = (production - rebut) / production. 4) OEE = A × P × Q en %. 5) Comparaison 3 shifts sur graphique bar. 6) Param @Shift : Matin/Après-midi/Nuit + Tous.\n\n**Attendu :** Rapport OEE tri-shift comparatif. Chaque KPI décliné. Cible OEE affichée en ligne. Alarme visuelle si < 65%.\n\n💡 OEE < 40% = alerte : soit calcul faux, soit machine vraiment en catastrophe. Vérifier les temps planifiés (pauses ? maintenance ?).",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-4 : Batch report GxP pharma",
+      "bodyMd": "**Contexte :** Batch de comprimés dans un MES pharma. À la fin, générer un Batch Report signé pour libération QA.\n\n**Consigne :** 1) Trigger : événement 'BatchEnd' du module Batch. 2) Header : BatchID, produit, quantité, dates start/end, opérateur. 3) Body : trend température/pression/pH pendant tout le lot + statistiques Min/Max/Avg avec alarmes de dépassement. 4) Section 'Deviations' listant toutes les alarmes du lot. 5) Signature électronique 21 CFR Part 11 embarquée. 6) Livraison : PDF + archive GxP + notif QA par mail.\n\n**Attendu :** Batch Report auto-généré à fin lot. QA reçoit + signe électroniquement. Archivage lifetime + 30 ans. Zéro intervention manuelle.\n\n💡 E-signature 21 CFR : auth 2 composants + non-répudiable. AVEVA Report v6+ supporte natif. Vérifier version + licence e-signature.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Portal web + mobile",
+      "bodyMd": "Le Web Portal AVEVA Report offre : consultation, filtrage, téléchargement, souscription — depuis un browser. Extension mobile pour terrain. Auth AD/SSO/SAML.\n\n**Rôles + sécurité** — Groupes AD → permissions folder → visibilité rapports. Séparation prod / dev.\n\n**Filtres + params dynamiques** — Users appliquent params sans intervention IT. Autonomie métier.\n\n**Souscriptions self-service** — User s'abonne à un rapport → mail automatique selon fréquence.\n\n**Widgets embed** — Extraire un objet du rapport dans un dashboard tiers (iframe / API).\n\n**REST API** — Trigger rapport programmatique, récup PDF, alimenter d'autres systèmes.\n\n**À retenir :** Portal = adoption. Sans portal, tu génères de beaux PDF que personne ne lit. Avec portal + notif, l'info arrive à ceux qui décident.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-2 : Portal + SSO Azure AD",
+      "bodyMd": "**Contexte :** Portal AVEVA Report accessible à 200 users. Login local casse-pieds. Objectif : SSO Azure AD.\n\n**Consigne :** 1) Créer une App Registration Azure AD 'AVEVA Report Portal'. 2) Configurer SAML avec URL de redirection portal. 3) Mapper claims : email, groups. 4) Côté portal : activer SSO SAML, upload metadata Azure. 5) Créer mapping groups AD → rôles portal. 6) Tester avec 3 comptes différents (admin, user, viewer). 7) Documenter procédure onboarding new user.\n\n**Attendu :** Users se connectent avec compte Azure AD. Rôles portal auto-affectés selon groupes AD. Aucun login local à gérer.\n\n💡 SSO échec fréquent : mismatch claim 'email' vs 'upn'. Utiliser Fiddler ou dev tools pour capturer SAML response et voir les claims réels.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "AVEVA Report vs SSRS vs PowerBI",
+      "bodyMd": "**AVEVA Report**\n- Historian-native (PI, AVEVA)\n- Batch reports GxP top niveau\n- Alarmes ISA-18.2 gérées\n- Trigger événement usine\n- Licence Runtime + CAL\n\n**SSRS + PowerBI**\n- SQL-first\n- Rapports business + finance\n- Interactivité forte (PowerBI)\n- Trigger temps/manuel\n- Licences SQL Server / Pro\n\n**À retenir :** Reporting usine + réglementaire → AVEVA Report. Business + finance → SSRS/PowerBI. Rare que ce soit un ou l'autre : coexistence fréquente.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Check-list rapport prod",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/aveva-report/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "Passer à l'action — 30 jours",
       "bodyMd": "- Rejouer les 3 quiz\n- Trial AVEVA Report + refaire les 5 TPs\n- Explorer les 20+ templates fournis\n- Comparer AVEVA Report vs Grafana + Ignition\n- Se former GxP si secteur pharma/agro\n\n💡 Skill niche recherché pour l'industrie AVEVA-first.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-19.jpg"
+      "imageUrl": "/training/aveva-report/slide-29.jpg"
     }
   ]
 }

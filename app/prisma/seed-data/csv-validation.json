@@ -349,9 +349,9 @@
     {
       "position": 18,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "En résumé",
-      "bodyMd": "",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "URS — l'art de bien commencer",
+      "bodyMd": "L'URS (User Requirements Specification) = le fondement. Si tes URS sont floues, ta validation sera floue. Un bon URS est testable, versionné, approuvé par le métier ET par QA.\n\n**Testable** — Chaque URS doit pouvoir devenir un test avec critère PASS/FAIL clair.\n\n**Traçable** — Un identifiant unique URS-XXX-YY. Cité dans FS, DS, tests, VSR.\n\n**Non redondant** — Un besoin = une URS. Fusionner les doublons.\n\n**Priorité** — Must / Should / Could / Won't (MoSCoW). Concentre l'effort sur les Must.\n\n**Approuvé formellement** — Signature Business Owner + QA. Toute modif post-approbation = change control.\n\n**À retenir :** Écrire un bon URS prend 20% du projet. Le sauter = payer 200% du projet en retards et corrections.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-18.jpg"
@@ -359,12 +359,112 @@
     {
       "position": 19,
       "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TP N1-3 : Reprendre un URS mal écrit",
+      "bodyMd": "**Contexte :** URS existant d'un ancien projet, 50 pages : 'le système doit être ergonomique', 'les rapports doivent être rapides', 'l'audit trail doit être conforme'.\n\n**Consigne :** 1) Identifier 10 URS non testables. 2) Réécrire chacune en version testable : 'Le portail doit répondre en < 2 secondes pour une page listant 100 lignes, sur un poste standard'. 3) Ajouter critère d'acceptation chiffré. 4) Faire relire par métier + QA. 5) Comparer avant/après : combien de risques éliminés ?\n\n**Attendu :** 10 URS améliorées, testables. Métier et QA valident. Base pour tests de validation solide.\n\n💡 Piège : trop chiffrer sans justif = surchif. '< 2 sec' = raisonnable. '< 100 ms' = arbitraire et coûteux. Chiffrer selon impact utilisateur réel.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-19.jpg"
+    },
+    {
+      "position": 20,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "L'exécution des tests IQ/OQ/PQ",
+      "bodyMd": "Un protocole approuvé n'est rien tant qu'il n'est pas exécuté. L'exécution est un exercice discipliné : chaque step suivi, chaque résultat documenté, chaque déviation gérée. Un testeur pressé qui coche au feeling = validation invalide.\n\n**Préparation** — Environnement propre (test isolé, data connues), protocole imprimé, testeur formé.\n\n**Exécution pas à pas** — Un step à la fois. Screenshot si pertinent. Ne pas grouper 5 steps 'ça marche tout'.\n\n**Documentation contemporaine** — Résultat écrit AU MOMENT du test. Pas 2h après.\n\n**Deviation immediate** — Si écart : arrêter, ouvrir déviation, ne pas 'passer' le test.\n\n**Signatures** — Testeur exécute + signe. Reviewer relit + signe. QA approuve + signe.\n\n**À retenir :** En audit FDA, l'inspecteur peut re-executer un step au hasard devant vous. Si vos résultats étaient bidon, ça se voit dans les 5 minutes.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-20.jpg"
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-3 : Exécuter un protocole OQ complet",
+      "bodyMd": "**Contexte :** Protocole OQ approuvé sur LIMS : 30 test steps. Vous êtes le testeur.\n\n**Consigne :** 1) Vérifier prérequis : environnement TEST, data connues, licence LIMS active. 2) Exécuter les 30 steps dans l'ordre. Pour chaque : lire step, exécuter, comparer Expected vs Actual, noter PASS/FAIL. 3) Screenshot pour les 5 steps critiques (create user, sign batch, delete rejected). 4) Si FAIL : arrêter, documenter déviation. 5) Terminer : signer chaque page + signature finale + rapport OQ.\n\n**Attendu :** OQ exécuté proprement. Toutes les évidences archivées. Prêt pour signature QA.\n\n💡 Discipline > vitesse. Un testeur qui met 3 jours en respectant la méthode > un testeur qui met 4h en trichant. L'audit voit tout.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-21.jpg"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-4 : Rédiger un traceability report",
+      "bodyMd": "**Contexte :** Fin validation LIMS. 50 URS, 80 FS, 60 DS, 200 tests exécutés.\n\n**Consigne :** 1) Créer matrice Excel : lignes = URS. Colonnes = FS, DS, tests IQ, OQ, PQ, statut. 2) Remplir tous les mappings — un URS peut couvrir plusieurs tests, un test peut couvrir plusieurs URS. 3) Ajouter formules : 'Coverage URS' = COUNTIF tests PASS liés. 4) Filtrer les URS sans test : gap analysis. 5) Rapport final : 100% URS testés PASS ?\n\n**Attendu :** Matrice Excel complète. Zéro URS non testé. Audit peut naviguer URS → test → résultat en < 30 sec.\n\n💡 Outils : Excel ok pour < 200 URS. Au-delà : Jira + Xray, ValGenesis, Kneat. La matrice DOIT être maintenue à jour à chaque change control.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Data Integrity — ALCOA+ concrètement",
+      "bodyMd": "Data Integrity = capacité de la donnée à être fiable, traçable et durable. Les warning letters FDA depuis 2015 sont massivement sur data integrity. Comprendre ALCOA+ concrètement = éviter la faute la plus fréquente.\n\n**Attributable** — Comptes personnels obligatoires. Pas de 'admin/admin' partagé. Chaque action = un user identifié.\n\n**Contemporaneous** — Écriture au moment de l'action. Pas de saisie 'batch le lundi pour les données du weekend'.\n\n**Original / Copie certifiée** — Data brute conservée. Si copie : hash + validation.\n\n**Audit trail complet** — Toute modification tracée : quoi, qui, quand, pourquoi. Immuable.\n\n**Backup + Restore testés** — Backup non testé n'existe pas. Tester restore régulièrement.\n\n**À retenir :** Data Integrity 2024 : la FDA regarde les métadonnées (audit trail Excel, timestamps fichiers) autant que la donnée. Le lab qui backdate un résultat = audit failure garanti.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-2 : Audit data integrity Excel",
+      "bodyMd": "**Contexte :** Labo utilise Excel pour tracer 30 mesures qualité/jour. 5 techniciens partagent 1 poste + 1 login.\n\n**Consigne :** 1) Auditer contre ALCOA+ : cocher chaque principe. 2) Identifier les gaps : login partagé (non-Attributable), pas d'audit trail (Excel standard n'en a pas), backup weekly seulement (non-Enduring). 3) Proposer 3 solutions : passer à un ELN validé, mettre Excel dans une share avec versioning + audit trail, ou tracer manuellement. 4) Estimer coût/délai/risque de chaque. 5) Recommandation à la direction.\n\n**Attendu :** Audit ALCOA+ chiffré. 3 options avec pros/cons. Direction peut décider en connaissance de cause.\n\n💡 Excel isolated = NON. Excel + SharePoint validé + audit trail = potentiellement OK pour cat 4. ELN = idéal si budget.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-3 : Valider un SaaS pharma",
+      "bodyMd": "**Contexte :** Direction veut adopter Veeva Vault Quality (SaaS pharma). Vous êtes Validation Lead.\n\n**Consigne :** 1) Demander Vendor Qualification Package Veeva : SOC 2, ISO 27001, GxP audit. 2) Signer un Quality Agreement avec Veeva : responsabilités, notifications de release, audit rights, exit clause. 3) Client-side : valider config (workflows, users, permissions), tests OQ ciblés config, PQ business processes. 4) Gérer les upgrades Veeva : chaque release trimestrielle = mini validation. 5) Plan continuous : Periodic Review annuelle.\n\n**Attendu :** Veeva SaaS validé. Docs justifiant validation en audit. Process upgrade défini.\n\n💡 Veeva et autres SaaS pharma matures = ~30% de l'effort d'une validation on-premise. Choisir un vendor GxP-ready divise le coût par 3.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Agile + validation — le mariage moderne",
+      "bodyMd": "Agile pharma = possible depuis GAMP 5 v2 (2022) qui l'encourage. Clé : docs vivants versionnés, tests automatisés, DoD (Definition of Done) qui inclut la validation, sprint reviews avec QA.\n\n**URS = product backlog** — User stories = URS. Priorisées, versionnées, testables.\n\n**Definition of Done** — Chaque story livrée = code + tests unit + tests OQ ciblés + docs à jour + QA sign-off.\n\n**CI/CD contrôlé** — Deploy PROD via CI, mais pipeline audité + approval gate QA obligatoire.\n\n**Automated regression** — Tests OQ dans la CI. Chaque commit = régression validée.\n\n**Documentation as code** — URS/FS/DS en Markdown versionnés Git. Traceability via labels/tags.\n\n**À retenir :** Agile validation exige maturité DevOps + culture qualité. Sans ces deux, retour à Waterfall. Avec, économies massives et time-to-market divisé.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Ma première mission CSV — check-list 30 jours",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "En résumé",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/csv-validation/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "Passer à l'action — 30 jours",
       "bodyMd": "- Rejouer les 3 quiz\n- Complémenter avec cours GAMP 5\n- Refaire les 5 TPs — VP, RA, deviation, VSR, Periodic Review\n- Stage validation sur projet pharma existant\n- Certifier CSV via ISPE\n\n💡 CSV = skill rare et bien payé en pharma. CSV + GAMP + Data Integrity = profil précieux.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/csv-validation/slide-19.jpg"
+      "imageUrl": "/training/csv-validation/slide-29.jpg"
     }
   ]
 }
