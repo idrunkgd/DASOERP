@@ -19,8 +19,8 @@
       "position": 2,
       "kind": "CONTENT",
       "section": "INTRODUCTION",
-      "title": "Objectifs de la formation",
-      "bodyMd": "Les normes ISA-88 (batch control) et ISA-95 (intégration MES/ERP) définissent le vocabulaire et les modèles standards du manufacturing moderne. Adoptées massivement dans pharma, agroalimentaire, chimie, elles structurent la conception des systèmes MES, MOM, SCADA. Ignorer ces normes = risquer d'être incompatible avec les clients et intégrateurs.\n\n**ISA-95 (IEC 62264)** — Intégration Enterprise (ERP) ↔ Manufacturing (MES/SCADA). Hiérarchie, object model, interfaces.\n\n**ISA-88** — Batch control : procédés discontinus (yaourt, médicament, peinture). Modèle physique + procédural + process.\n\n**PackML** — Application ISA-88 pour machines packaging. 17 états normalisés.\n\n**Complémentaires** — ISA-95 macro entreprise, ISA-88 zoom batch spécifique.\n\n**Adoption** — Standard de facto pharma/agro/chimie. Souvent obligatoire en appels d'offres.\n\n**À retenir :** Un projet MES 2026 sans ISA-95 = impossible à intégrer avec l'ERP client. Un projet batch sans ISA-88 = non maintenable, non réutilisable.",
+      "title": "Objectifs",
+      "bodyMd": "ISA-88 (batch control) et ISA-95 (intégration MES/ERP) définissent le vocabulaire et modèles standards du manufacturing moderne. Adoptées massivement dans pharma, agro, chimie, elles structurent la conception des systèmes MES, MOM, SCADA. Ignorer ces normes = risquer incompatibilité avec clients et intégrateurs.\n\n**ISA-95 (IEC 62264)** — Intégration Enterprise (ERP) ↔ Manufacturing (MES/SCADA). Hiérarchie, object model, interfaces.\n\n**ISA-88** — Batch control : procédés discontinus (yaourt, médicament, peinture). 3 modèles.\n\n**PackML** — Application ISA-88 pour machines packaging. 17 états normalisés.\n\n**Complémentaires** — ISA-95 macro entreprise, ISA-88 zoom batch spécifique.\n\n**Adoption** — Standard de facto pharma/agro/chimie. Souvent obligatoire en appels d'offres.\n\n**À retenir :** Projet MES 2026 sans ISA-95 = impossible à intégrer avec ERP client. Projet batch sans ISA-88 = non maintenable.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-02.jpg"
@@ -50,7 +50,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "ISA-95 — le pont ERP ↔ MES",
-      "bodyMd": "ISA-95 (aussi IEC 62264) définit un vocabulaire commun et des interfaces standards entre les systèmes business (ERP, PLM) et les systèmes manufacturing (MES, SCADA, PLC). Créée en 2000, adoptée mondialement. Publiée en 5 parties (concepts, object model, activities, attributes, transactions).\n\n**Part 1 : Concepts** — Vocabulaire de base. Niveaux (0-5), object model général.\n\n**Part 2 : Object Model** — Objets : Personnel, Role, Equipment, Material, ProcessSegment, avec propriétés et relations.\n\n**Part 3 : Activities** — Activités du niveau 3 (MOM) : ProductionOperationsMgmt, MaintenanceMgmt, QualityMgmt, InventoryMgmt.\n\n**Part 4 : Attributes** — Détail des attributs de chaque objet — spécifie exactement quoi échanger.\n\n**Part 5 : Transactions** — Transactions B2MML (XML) pour l'échange ERP ↔ MES : ProductionSchedule, ProductionPerformance...\n\n**À retenir :** ISA-95 fournit un vocabulaire et des schémas XML. Ce n'est pas un logiciel — c'est une norme conceptuelle qui structure l'architecture. Les MES modernes (Wonderware MES, Rockwell FactoryTalk, SAP ME) l'implémentent.",
+      "bodyMd": "ISA-95 (aussi IEC 62264) définit un vocabulaire commun et interfaces standards entre les systèmes business (ERP, PLM) et manufacturing (MES, SCADA, PLC). Créée en 2000, publiée en 5 parties.\n\n**Part 1 : Concepts** — Vocabulaire de base. Niveaux (0-5), object model général.\n\n**Part 2 : Object Model** — Objets : Personnel, Role, Equipment, Material, ProcessSegment.\n\n**Part 3 : Activities** — Activités niveau 3 (MOM) : ProductionOps, MaintenanceOps, QualityOps, InventoryOps.\n\n**Part 4 : Attributes** — Détail des attributs — spécifie quoi échanger.\n\n**Part 5 : Transactions** — B2MML (XML) pour l'échange ERP ↔ MES : ProductionSchedule, ProductionPerformance.\n\n**À retenir :** ISA-95 fournit vocabulaire et schémas XML. Ce n'est pas un logiciel — c'est une norme conceptuelle qui structure l'architecture.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-05.jpg"
@@ -59,8 +59,8 @@
       "position": 6,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "La hiérarchie fonctionnelle 5 niveaux",
-      "bodyMd": "ISA-95 organise l'entreprise en 5 niveaux, de 0 (procédé) à 4 (business). Chaque niveau a un rôle défini et des interfaces avec le suivant. Ce modèle structure toutes les architectures modernes et joue le rôle de langue commune entre IT et OT.\n\n**Level 0 : Procédé physique** — Capteurs, actionneurs, moteurs, vannes. Le physique.\n\n**Level 1 : Sensing / manipulation** — PLC individuels qui pilotent une machine ou une cellule.\n\n**Level 2 : Monitoring / supervision** — SCADA, HMI. Vision globale, historisation courte.\n\n**Level 3 : MOM (Manufacturing Operations)** — MES, batch, quality, maintenance, warehouse. Cœur de la valeur ajoutée.\n\n**Level 4 : Business planning** — ERP (SAP, Oracle), PLM. Vue enterprise, financier, achats.\n\n**À retenir :** Le level 3 est le grand oublié — beaucoup pensent 'ERP directement au PLC'. En pratique, il faut le MES pour orchestrer, tracer, exécuter les ordres de fabrication.",
+      "title": "La hiérarchie 5 niveaux",
+      "bodyMd": "ISA-95 organise l'entreprise en 5 niveaux, de 0 (procédé) à 4 (business). Chaque niveau a un rôle défini et des interfaces avec le suivant.\n\n**Level 0 : Procédé physique** — Capteurs, actionneurs, moteurs, vannes.\n\n**Level 1 : Sensing / manipulation** — PLC individuels qui pilotent machines/cellules.\n\n**Level 2 : Monitoring / supervision** — SCADA, HMI. Vision globale, historisation courte.\n\n**Level 3 : MOM** — MES, batch, quality, maintenance, warehouse.\n\n**Level 4 : Business planning** — ERP (SAP, Oracle), PLM. Vue enterprise.\n\n**À retenir :** Le level 3 est le grand oublié — beaucoup pensent 'ERP directement au PLC'. En pratique, il faut le MES pour orchestrer, tracer, exécuter.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-06.jpg"
@@ -69,8 +69,8 @@
       "position": 7,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Object Model ISA-95",
-      "bodyMd": "L'object model définit les entités persistantes du manufacturing : qui (Personnel, Role), quoi (Material, Equipment), comment (ProcessSegment). Chaque objet a des propriétés normalisées et des relations. Un MES conforme ISA-95 implémente ces objets et expose leurs transactions via B2MML.\n\n**Personnel + Role** — Qui travaille, avec quelles compétences/certifications. Base pour audit trail et RBAC.\n\n**Equipment + Class** — Ligne, cellule, machine — avec sa classe (moule, mélangeur, remplisseuse). Base pour OEE.\n\n**Material + Class + Lot** — Ce qui entre (matières premières) et sort (produits). Traçabilité batch/lot.\n\n**ProcessSegment** — Étape générique du procédé (ex 'mélanger', 'chauffer'). Ressources nécessaires + capacités.\n\n**OperationsDefinition** — Recette concrète : suite de ProcessSegment avec paramètres. Base pour ISA-88.\n\n**À retenir :** Ces objets structurent un MES. Les implémenter proprement = interfacabilité et évolutivité garanties. Les mal implémenter = MES rigide et coûteux à faire évoluer.",
+      "title": "TP N1-1 : Cartographier votre système actuel selon ISA-95",
+      "bodyMd": "**Contexte :** Vous travaillez chez un industriel avec : SAP ERP, WinCC OA SCADA, 20 PLC S7-1500 sur ligne production, Excel de production journalière, aucun MES formalisé.\n\n**Consigne :** 1) Dessiner un schéma des 5 niveaux ISA-95 avec vos systèmes existants. 2) Identifier les gaps : quel niveau est absent ? quels flux sont directs L1 → L4 (mauvais) ? 3) Proposer une architecture cible : ajouter un MES niveau 3, formaliser les échanges via B2MML. 4) Estimer l'effort et le ROI.\n\n**Attendu :** Schéma actuel + cible + gaps identifiés + plan de refonte + business case simplifié. Argumenté et défendable devant direction.\n\n💡 Outil : PowerPoint ou draw.io. Gaps typiques : pas de MES = Excel + copier/coller = perte de temps + erreurs + pas de traçabilité. ROI MES : réduction 30% temps admin + 50% erreurs.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-07.jpg"
@@ -79,8 +79,8 @@
       "position": 8,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
+      "title": "TP N1-2 : Modéliser des Objects ISA-95",
+      "bodyMd": "**Contexte :** Vous concevez le MES pour une usine de yaourts. Instancier les objets ISA-95.\n\n**Consigne :** 1) Personnel : lister 3 rôles (Operator, Supervisor, QualityAgent) + leurs Skills et Certifications. 2) Equipment : lister 5 équipements (Cuve_A, Cuve_B, Mixer, Filler, Palletizer) + leur Class et Capacity. 3) Material : lister 5 matières premières + 3 produits finis avec leurs Lots. 4) ProcessSegment : définir 4 segments (Mixing, Filling, Packaging, Palletizing) + ressources nécessaires. 5) Formaliser en XML B2MML.\n\n**Attendu :** Fichier XML B2MML minimaliste mais valide. Représente proprement le domaine. Peut être importé dans un MES conforme ISA-95.\n\n💡 Schemas B2MML : github.com/MESA-International. Namespace xmlns='http://www.mesa.org/xml/B2MML-V0600'. Utiliser XMLSpy ou VSCode avec XSD validation.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-08.jpg"
@@ -89,44 +89,44 @@
       "position": 9,
       "kind": "QUIZ",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Quiz de fin de niveau 1",
+      "title": "Quiz N1",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "ISA-95 est édité par :",
+            "prompt": "ISA-95 édité par :",
             "options": [
-              "ISA (International Society of Automation)",
+              "ISA",
               "IEC",
               "Microsoft"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "ISA-95 concerne :",
+            "prompt": "ISA-95 :",
             "options": [
-              "Intégration entreprise ↔ contrôle (MES ↔ ERP)",
-              "Cybersécurité",
-              "PLC uniquement"
+              "Intégration MES ↔ ERP",
+              "Cybersec",
+              "PLC only"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "5 niveaux hiérarchie :",
+            "prompt": "5 niveaux :",
             "options": [
-              "Enterprise → Site → Area → Line/Cell → Equipment",
-              "Serveur → PC → Mobile",
-              "Aucun standard"
+              "Enterprise → Site → Area → Line → Equipment",
+              "Serveur → PC",
+              "Aucun"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "B2MML =",
             "options": [
-              "Business To Manufacturing Markup Language (schéma XML ISA-95)",
+              "Business To Manufacturing Markup",
               "Business Manager",
-              "Backup ML"
+              "Backup"
             ],
             "correctIndex": 0
           },
@@ -134,7 +134,7 @@
             "prompt": "Object model :",
             "options": [
               "Personnel, Equipment, Material, ProcessSegment",
-              "Uniquement Equipment",
+              "Equipment only",
               "Aucun"
             ],
             "correctIndex": 0
@@ -142,9 +142,9 @@
           {
             "prompt": "Cible :",
             "options": [
-              "Vocabulaire commun + interfaces MES/ERP/PLM",
+              "Vocab commun + interfaces MES/ERP/PLM",
               "PLC nu",
-              "Bureautique"
+              "Bureau"
             ],
             "correctIndex": 0
           }
@@ -167,7 +167,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
       "title": "ISA-88 — les 3 modèles",
-      "bodyMd": "ISA-88 structure le batch control en 3 modèles orthogonaux : Physical (comment est fait l'équipement), Procedural (comment on l'utilise), Process (ce qu'on produit). Le génie : ces 3 modèles peuvent évoluer indépendamment. On peut changer la recette sans toucher l'équipement, et vice versa.\n\n**Modèle Physique** — Enterprise > Site > Area > Process Cell > Unit > Equipment Module > Control Module. Ce qui est câblé.\n\n**Modèle Procédural** — Procedure > Unit Procedure > Operation > Phase. Ce qu'on fait avec l'équipement.\n\n**Modèle Process** — Process > Process Stage > Process Operation > Process Action. Le point de vue chimiste/formulateur.\n\n**Séparation orthogonale** — Une même Phase (Chauffer à 60°C) peut être invoquée par 10 recettes différentes. Réutilisation maximale.\n\n**Recette générale/site/master/control** — 4 niveaux d'abstraction de la recette : chimiste → site → équipement → runtime.\n\n**À retenir :** L'orthogonalité des 3 modèles est LE génie d'ISA-88. Sans elle, chaque nouvelle recette = refonte de tout le code. Avec elle, ajouter un produit = combiner des Phases existantes.",
+      "bodyMd": "ISA-88 structure le batch control en 3 modèles orthogonaux : Physical (comment est fait l'équipement), Procedural (comment on l'utilise), Process (ce qu'on produit). Le génie : ces 3 modèles évoluent indépendamment.\n\n**Modèle Physique** — Enterprise > Site > Area > Process Cell > Unit > Equipment Module > Control Module. Ce qui est câblé.\n\n**Modèle Procédural** — Procedure > Unit Procedure > Operation > Phase. Ce qu'on fait.\n\n**Modèle Process** — Process > Process Stage > Process Operation > Process Action. Point de vue chimiste.\n\n**Séparation orthogonale** — Une Phase (Chauffer à 60°C) peut être invoquée par 10 recettes différentes. Réutilisation.\n\n**4 niveaux de recette** — Générale → Site → Master → Control. Du chimiste vers le runtime.\n\n**À retenir :** L'orthogonalité des 3 modèles = LE génie d'ISA-88. Sans elle, chaque nouvelle recette = refonte de tout le code. Avec, ajouter un produit = combiner des Phases existantes.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-11.jpg"
@@ -176,8 +176,8 @@
       "position": 12,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "PackML — ISA-88 appliqué au packaging",
-      "bodyMd": "PackML est une application concrète d'ISA-88 pour les machines de packaging (remplisseuses, fardeleuses, encaisseuses). Défini par OMAC (Organization for Machine Automation and Control), il normalise notamment le state model (17 états standardisés), les modes machine (Auto/Manual/Maintenance), et les données PackTags.\n\n**State model 17 états** — Stopped, Idle, Starting, Running, Held, Suspended, Complete, Aborted, etc. Transitions normalisées.\n\n**Modes machine** — Producing, Standby, Manual, Cleaning, Maintenance. Chacun avec ses états valides.\n\n**PackTags** — Structure de tags standard (Status, Alarms, Counters, Parameters). Toute machine PackML expose les mêmes.\n\n**Interoperability** — Un MES parle à N machines PackML sans intégration custom — les tags sont identiques.\n\n**Adoption** — Fortement adoptée US et Europe. Souvent exigée dans les cahiers des charges packaging.\n\n**À retenir :** PackML transforme le packaging d'un chaos d'intégrations point-à-point en un écosystème plug-and-play. Machine PackML + MES PackML-aware = intégration en heures, pas en semaines.",
+      "title": "PackML — ISA-88 pour packaging",
+      "bodyMd": "PackML = application concrète d'ISA-88 pour machines packaging (remplisseuses, encaisseuses). OMAC. Normalise state model (17 états), modes machine, données PackTags.\n\n**State model 17 états** — Stopped, Idle, Starting, Running, Held, Suspended, Complete, Aborted...\n\n**Modes** — Producing, Standby, Manual, Cleaning, Maintenance.\n\n**PackTags** — Structure de tags standard (Status, Alarms, Counters, Parameters).\n\n**Interoperability** — MES parle à N machines PackML sans intégration custom.\n\n**Adoption** — Fortement US et Europe. Souvent exigée cahiers des charges.\n\n**À retenir :** PackML transforme le packaging d'un chaos d'intégrations point-à-point en un écosystème plug-and-play.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-12.jpg"
@@ -186,95 +186,95 @@
       "position": 13,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
-      "bodyMd": "",
+      "title": "TP N2-1 : Recette S88 pour yaourt",
+      "bodyMd": "**Contexte :** Vous concevez la recette de production d'un yaourt à la fraise.\n\n**Consigne :** 1) Modèle Procédural : Procedure 'Yogurt_Strawberry' → 3 Unit Procedures (Mixing, Fermentation, Packaging). 2) Chaque UP contient des Operations. 3) Chaque Operation contient des Phases (Add_Ingredient, Heat, Cool, Stir, Fill, Cap, Palletize). 4) Paramétrer chaque Phase (quantité, température, durée). 5) Écrire la recette en format ISA-88 (Master Recipe). 6) Vérifier réutilisation : la Phase 'Heat' devrait être identique pour un yaourt fraise ou nature.\n\n**Attendu :** Recette structurée en 4 niveaux Procedural. Phases réutilisables. Peut créer un yaourt vanille en dupliquant la recette et changeant seulement 3 paramètres.\n\n💡 Format Master Recipe : XML ISA-88.02. Éditeurs commerciaux : Rockwell FactoryTalk Batch, Siemens SIMATIC Batch, Emerson DeltaV Batch.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-13.jpg"
     },
     {
       "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-2 : Implémenter le state model PackML",
+      "bodyMd": "**Contexte :** Vous concevez le PLC d'une remplisseuse PackML.\n\n**Consigne :** 1) En Structured Text : coder les 17 états PackML avec CASE OF. 2) Implémenter les transitions autorisées entre états (voir table PackML V3.0). 3) Créer une UDT_PackML avec les tags standards (Status.State, Status.Mode, Alarms.Count, Counters.Production...). 4) Tester chaque transition avec le PLCSIM Advanced.\n\n**Attendu :** State model PackML complet et testé. Transitions strictement conformes. Un SCADA PackML-aware peut piloter la machine sans intégration custom.\n\n💡 Table transitions PackML V3.0 : omac.org. Certains constructeurs (Bosch, Krones) fournissent des libraries PackML prêtes.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/isa-standards/slide-14.jpg"
+    },
+    {
+      "position": 15,
       "kind": "QUIZ",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Quiz de fin de niveau 2",
+      "title": "Quiz N2",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "ISA-88 concerne :",
+            "prompt": "ISA-88 :",
             "options": [
-              "Batch control (procédés discontinus)",
-              "Cybersécurité",
+              "Batch control",
+              "Cybersec",
               "Réseau"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "3 modèles ISA-88 :",
+            "prompt": "3 modèles S88 :",
             "options": [
               "Physique, Procedural, Process",
-              "Financier",
+              "Finance",
               "Software"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Procedural model :",
+            "prompt": "Procedural :",
             "options": [
-              "Procedure → Unit Procedure → Operation → Phase",
-              "Uniquement Procedure",
+              "Procedure → Unit Proc → Operation → Phase",
+              "Procedure only",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "PackML basé sur :",
+            "prompt": "PackML :",
             "options": [
-              "ISA-88 + OMAC, pour machines packaging",
-              "ISA-95 uniquement",
+              "ISA-88 + OMAC packaging",
+              "ISA-95 only",
               "Aucune norme"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "State model PackML :",
+            "prompt": "State PackML :",
             "options": [
-              "17 états normalisés (Stopped, Running, Held, Complete...)",
-              "Aucun état",
+              "17 états normalisés",
+              "Aucun",
               "Custom"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Bénéfices ISA-88 :",
+            "prompt": "Bénéfices S88 :",
             "options": [
-              "Réutilisation, flexibilité recettes, maintenabilité",
-              "Coût seul",
+              "Réutilisation, flexibilité, maintenabilité",
+              "Coût",
               "Aucun"
             ],
             "correctIndex": 0
           }
         ]
       },
-      "imageUrl": "/training/isa-standards/slide-14.jpg"
-    },
-    {
-      "position": 15,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3",
-      "title": "Expert",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
       "imageUrl": "/training/isa-standards/slide-15.jpg"
     },
     {
       "position": 16,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "MOM — Manufacturing Operations Management",
-      "bodyMd": "MOM regroupe les activités du niveau 3 : Production Operations, Maintenance, Quality, Inventory. C'est le cœur opérationnel — au-dessus du SCADA (niveau 2), en-dessous de l'ERP (niveau 4). Souvent implémenté par un MES (Manufacturing Execution System) + des modules complémentaires (CMMS, LIMS, WMS).\n\n**Production Ops Mgmt** — Exécution des ordres de fabrication, ordonnancement fin, tracking OEE, historisation batch.\n\n**Maintenance Ops Mgmt** — Interventions préventives et curatives, gestion des pièces, MTBF/MTTR — souvent GMAO/CMMS.\n\n**Quality Ops Mgmt** — Contrôles qualité, SPC (Statistical Process Control), non-conformités, CAPA — souvent LIMS.\n\n**Inventory Ops Mgmt** — Stocks matières + en-cours + produits finis, traçabilité lot, kanban électronique — souvent WMS.\n\n**Intégration transverse** — Ces 4 domaines dialoguent : une non-conformité qualité génère une intervention maintenance.\n\n**À retenir :** MOM est le domaine à plus forte valeur ajoutée moderne. Un MES bien fait au niveau MOM transforme radicalement l'exploitation industrielle.",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-16.jpg"
@@ -283,8 +283,8 @@
       "position": 17,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Cas d'usage — production pharmaceutique",
-      "bodyMd": "En pharmaceutique, on produit par batches de médicaments. Chaque batch doit être traçable pour audit FDA/EMA. ISA-88 structure la recette (Procedural model), ISA-95 orchestre l'ordre de fabrication ERP → MES → SCADA/PLC. Le tout dans le cadre GxP/GAMP 5.\n\n**L'ERP crée l'OF** — SAP crée un ordre 'Produire 1000 flacons de Product-X'. Envoi B2MML → MES.\n\n**MES compose la recette** — Sélectionne Master Recipe de Product-X, l'adapte au site (Control Recipe). Assigne équipement.\n\n**SCADA/PLC exécute** — Reçoit la Control Recipe (ISA-88), pilote les Phases. Retour temps réel : Phase started/completed, valeurs mesurées.\n\n**Traçabilité complète** — Toutes les données horodatées, signées électroniquement. Génération automatique du batch record PDF (200+ pages).\n\n**Retour ERP** — MES envoie ProductionPerformance B2MML à SAP → mise à jour stocks + facturation + libération lot.\n\n**À retenir :** Ce flux ERP → MES → PLC → historisation → batch record est la colonne vertébrale de toute production pharma moderne. Sans ISA-88/95, impossible à structurer proprement.",
+      "title": "Cas d'usage — production pharma",
+      "bodyMd": "En pharma, on produit par batches de médicaments. Traçabilité pour audit FDA/EMA. ISA-88 structure la recette (Procedural), ISA-95 orchestre l'OF ERP → MES → SCADA/PLC. Tout dans le cadre GxP/GAMP 5.\n\n**L'ERP crée l'OF** — SAP crée 'Produire 1000 flacons Product-X'. B2MML → MES.\n\n**MES compose la recette** — Master Recipe → Control Recipe. Assigne équipement.\n\n**SCADA/PLC exécute** — Reçoit la Control Recipe (ISA-88), pilote les Phases. Retour temps réel.\n\n**Traçabilité complète** — Toutes données horodatées, signées. Génération automatique batch record PDF.\n\n**Retour ERP** — MES envoie ProductionPerformance B2MML à SAP → stocks + facturation + libération.\n\n**À retenir :** Ce flux ERP → MES → PLC → historisation → batch record est la colonne vertébrale de toute production pharma moderne.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-17.jpg"
@@ -293,8 +293,8 @@
       "position": 18,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Récapitulatif du niveau 3",
-      "bodyMd": "",
+      "title": "TP N3-1 : Architecte MES pharma",
+      "bodyMd": "**Contexte :** Consultant chez industriel pharma. Ligne de production continue. Objectif : concevoir architecture MES conforme ISA-88 + ISA-95 + GAMP 5.\n\n**Consigne :** 1) Diagramme d'architecture les 5 niveaux ISA-95 + composants MES. 2) Identifier les 4 sub-systems MOM (Production, Maintenance, Quality, Inventory). 3) Concevoir workflow OF : ERP → MES → SCADA/PLC → historian → batch record. 4) Documenter les échanges B2MML clés. 5) Aligner avec GAMP 5 : catégorie, URS, tests IQ/OQ/PQ.\n\n**Attendu :** Document d'architecture cohérent, aligné ISA-88/95 + GAMP 5. Défendable en audit FDA. Base d'un appel d'offre MES.\n\n💡 Réutiliser draw.io ou Lucidchart. Références : ISA-95 Part 3 pour les 4 sub-systems. GAMP 5 pour cadre validation. Standard-of-standards : ISPE Baseline Guides.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-18.jpg"
@@ -303,15 +303,15 @@
       "position": 19,
       "kind": "QUIZ",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Quiz de fin de niveau 3",
+      "title": "Quiz N3",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "ISA-95 + ISA-88 combinés :",
+            "prompt": "S88 + S95 :",
             "options": [
-              "ISA-95 macro (entreprise), ISA-88 batch spécifique",
+              "S95 macro, S88 batch",
               "Identiques",
               "Incompatibles"
             ],
@@ -327,29 +327,29 @@
             "correctIndex": 0
           },
           {
-            "prompt": "MOM (Manufacturing Operations Management) :",
+            "prompt": "MOM =",
             "options": [
-              "Niveau 3 ISA-95, entre ERP et contrôle",
-              "Nouveau nom pour ERP",
+              "Level 3 ISA-95 entre ERP et contrôle",
+              "Nouveau ERP",
               "Marketing"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Recette S88 = ",
+            "prompt": "Recette S88 =",
             "options": [
-              "Séquence de phases paramétrées pour produire un produit",
-              "Fichier config",
+              "Séquence phases paramétrées",
+              "Config",
               "Backup"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Implémentation pratique :",
+            "prompt": "Implémentation :",
             "options": [
-              "MES + PLC + SCADA structurés selon ISA-88/95",
+              "MES + PLC + SCADA structurés S88/95",
               "Théorie pure",
-              "Impossible en pratique"
+              "Impossible"
             ],
             "correctIndex": 0
           },
@@ -380,8 +380,8 @@
       "position": 21,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Lire ISA-95 Part 1 (concepts) et ISA-88 Part 1 — 200 pages qui structurent la vue\n- Cartographier votre système actuel selon la hiérarchie 5 niveaux — identifier les gaps\n- Pour un nouveau projet MES : exiger conformité ISA-88/95 dans le cahier des charges\n- Certifier ISA — reconnu mondialement pour les ingénieurs manufacturing\n\n💡 ISA-88/95 sont plus jamais concrets qu'ils n'en ont l'air. Un ingénieur qui parle ce langage est immédiatement précieux dans un projet MES/manufacturing.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz\n- Lire ISA-95 Part 1 et ISA-88 Part 1\n- Cartographier votre système actuel\n- Exiger conformité ISA-88/95 dans cahiers des charges\n- Certifier ISA — reconnu mondialement\n\n💡 Ingénieur qui parle ISA-88/95 = immédiatement précieux en projet MES/manufacturing.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/isa-standards/slide-21.jpg"
