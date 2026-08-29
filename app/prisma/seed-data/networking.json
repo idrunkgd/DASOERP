@@ -1,7 +1,7 @@
 {
   "slug": "networking",
   "title": "Réseau OSI / TCP",
-  "subtitle": "Modèles, IP, TCP/UDP, sécurité, réseaux industriels",
+  "subtitle": "Formation self-service — Modèles, IP, TCP/UDP, sécurité, réseaux industriels",
   "level": "Débutant à Expert",
   "duration": "3 jours (≈ 24 h)",
   "slides": [
@@ -20,7 +20,7 @@
       "kind": "CONTENT",
       "section": "INTRODUCTION",
       "title": "Objectifs de la formation",
-      "bodyMd": "Le réseau est devenu la base de tout : PLCs, SCADA, cloud, MES, ERP dialoguent en TCP/IP. Un ingénieur industriel 2026 doit maîtriser au minimum les couches OSI, IP, TCP/UDP, DHCP/DNS, VLANs, TLS. Sans cela, impossible de diagnostiquer une lenteur SCADA ou de sécuriser une architecture OT.\n\n**Modèles OSI et TCP/IP** — Comprendre les 7 couches, savoir où intervenir selon le problème.\n\n**IP et routage** — IPv4/v6, subnetting, VLANs, ACLs, routage entre réseaux OT et IT.\n\n**TCP vs UDP** — Quand utiliser lequel, ports, séquencement, handshake.\n\n**Services applicatifs** — DHCP, DNS, HTTP/HTTPS, SSH, TLS — ce qui fait tourner Internet et intranet.\n\n**Réseaux industriels spécifiques** — MRP, PRP, HSR, TSN — pour les besoins déterministes.\n\n**À retenir :** 50% des problèmes 'PLC ne répond pas' sont en réalité des problèmes réseau. Maîtriser le réseau = économiser des semaines de troubleshooting.",
+      "bodyMd": "Le réseau est la base de tout : PLCs, SCADA, cloud, MES, ERP dialoguent en TCP/IP. Un ingénieur industriel 2026 doit maîtriser OSI, IP, TCP/UDP, DHCP/DNS, VLANs, TLS. Sans cela, impossible de diagnostiquer une lenteur SCADA ou de sécuriser une architecture OT.\n\n**OSI + TCP/IP** — Comprendre les 7 couches, savoir où intervenir.\n\n**IP et routage** — IPv4/v6, subnetting, VLANs, ACLs, routage OT/IT.\n\n**TCP vs UDP** — Quand utiliser lequel, ports, séquencement.\n\n**Services applicatifs** — DHCP, DNS, HTTP/HTTPS, SSH, TLS.\n\n**Réseaux industriels** — MRP, PRP, HSR, TSN — besoins déterministes.\n\n**À retenir :** 50 % des problèmes 'PLC ne répond pas' sont en réalité des problèmes réseau. Maîtriser le réseau = économiser des semaines de troubleshooting.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-02.jpg"
@@ -49,8 +49,8 @@
       "position": 5,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Le modèle OSI — les 7 couches",
-      "bodyMd": "OSI (Open Systems Interconnection) structure la communication en 7 couches, chacune ne parlant qu'à la suivante et à la précédente. C'est une abstraction pédagogique — dans la pratique, on utilise le modèle TCP/IP à 4 couches. Mais OSI reste LE vocabulaire universel du réseau.\n\n**Couche 7 - Application** — HTTP, FTP, SMTP, DNS, Modbus, OPC UA. Ce que voit l'utilisateur/programme.\n\n**Couche 6 - Présentation** — Format des données : encodage, chiffrement (TLS techniquement partagée avec Session).\n\n**Couche 5 - Session** — Établissement et gestion des sessions. RPC, SIP.\n\n**Couche 4 - Transport** — TCP (fiable), UDP (rapide). Ports, séquencement, contrôle de flux.\n\n**Couche 3 - Réseau** — IP (adressage et routage). Router entre réseaux.\n\n**Couche 2 - Liaison** — Ethernet, WiFi, MAC addresses. Switch travaille ici.\n\n**Couche 1 - Physique** — Câble RJ45, fibre optique, radio. Modulation, tension.\n\n**À retenir :** Toujours localiser le problème dans la bonne couche avant d'agir. Un ping qui échoue = couche 3 (IP). Un port fermé = couche 4 (TCP). Une page qui ne charge pas = couche 7 (HTTP).",
+      "title": "Le modèle OSI — 7 couches",
+      "bodyMd": "OSI structure la communication en 7 couches, chacune ne parlant qu'à la suivante. Abstraction pédagogique — dans la pratique, on utilise le modèle TCP/IP à 4 couches. Mais OSI reste LE vocabulaire universel du réseau.\n\n**7 - Application** — HTTP, FTP, SMTP, DNS, Modbus, OPC UA. Ce que voit l'user/programme.\n\n**6 - Présentation** — Format données : encodage, chiffrement (TLS techniquement partagée avec Session).\n\n**5 - Session** — Établissement/gestion sessions. RPC, SIP.\n\n**4 - Transport** — TCP (fiable), UDP (rapide). Ports, séquencement, contrôle de flux.\n\n**3 - Réseau** — IP (adressage et routage). Router entre réseaux.\n\n**2 - Liaison** — Ethernet, WiFi, MAC. Switch travaille ici.\n\n**1 - Physique** — Câble RJ45, fibre, radio.\n\n**À retenir :** Toujours localiser le problème dans la bonne couche. Ping échoue = couche 3 (IP). Port fermé = couche 4 (TCP). Page ne charge pas = couche 7 (HTTP).",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-05.jpg"
@@ -60,7 +60,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "TCP vs UDP",
-      "bodyMd": "**TCP (Transmission Control Protocol)**\n- Connexion (3-way handshake : SYN, SYN-ACK, ACK)\n- Fiable : accusés de réception, retransmission auto\n- Ordonné : les segments arrivent dans l'ordre\n- Contrôle de flux et congestion\n- Overhead : ~40 bytes par segment\n- Cible : HTTP, HTTPS, SMTP, SSH, Modbus TCP\n\n**UDP (User Datagram Protocol)**\n- Sans connexion, chaque datagramme indépendant\n- Best-effort — pas de garantie de livraison\n- Non ordonné : les datagrammes peuvent arriver dans le désordre\n- Aucun contrôle de flux\n- Overhead : ~8 bytes par datagramme\n- Cible : DNS, DHCP, VoIP, streaming, MQTT-SN, Profinet\n\n**À retenir :** TCP quand la fiabilité importe (transfert fichier, requête business). UDP quand la vitesse importe et qu'on peut perdre 1 datagramme (voix, mesures temps réel).",
+      "bodyMd": "**TCP**\n- Connexion (3-way handshake : SYN, SYN-ACK, ACK)\n- Fiable : accusés + retransmission auto\n- Ordonné\n- Contrôle de flux et congestion\n- Overhead ~40 bytes/segment\n- Cible : HTTP, HTTPS, SSH, Modbus TCP\n\n**UDP**\n- Sans connexion, datagramme indépendant\n- Best-effort — pas de garantie\n- Non ordonné\n- Aucun contrôle de flux\n- Overhead ~8 bytes/datagramme\n- Cible : DNS, DHCP, VoIP, streaming, MQTT-SN, Profinet\n\n**À retenir :** TCP quand la fiabilité importe. UDP quand la vitesse importe et qu'on peut perdre 1 datagramme (voix, mesures temps réel).",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-06.jpg"
@@ -70,7 +70,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "IP — l'adressage universel",
-      "bodyMd": "IP (Internet Protocol) attribue une adresse unique à chaque host sur le réseau. IPv4 utilise 32 bits (4.3 milliards d'adresses), IPv6 utilise 128 bits (3.4 × 10^38 adresses). Chaque adresse est composée d'une partie réseau + une partie host, définie par le subnet mask.\n\n**IPv4** — Ex 192.168.1.100. 4 octets, chacun 0-255. Réseau + host séparé par le masque.\n\n**Subnet mask** — Ex 255.255.255.0 (/24). Les bits à 1 = partie réseau, les 0 = partie host. Ici 254 hosts par subnet.\n\n**Adresses privées** — 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Non routées sur Internet, utilisées en LAN.\n\n**Adresses spéciales** — 127.0.0.1 = localhost. Broadcast = 255.255.255.255 (LAN) ou dernière IP du subnet.\n\n**IPv6** — Ex 2001:db8::1. 8 groupes de 4 hexa. Aucune pénurie possible en pratique. Adoption industrielle lente.\n\n**À retenir :** En interne on utilise toujours des IP privées (10.x, 192.168.x, 172.16-31.x). Un routeur (NAT) les traduit en IP publique pour aller sur Internet.",
+      "bodyMd": "IP attribue une adresse unique à chaque host. IPv4 : 32 bits (4.3 milliards). IPv6 : 128 bits (3.4 × 10^38). Chaque adresse a une partie réseau + une partie host, définie par le subnet mask.\n\n**IPv4** — Ex 192.168.1.100. 4 octets 0-255. Réseau + host séparé par le masque.\n\n**Subnet mask** — Ex 255.255.255.0 (/24). Bits à 1 = réseau, 0 = host. Ici 254 hosts par subnet.\n\n**Adresses privées** — 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Non routées Internet, utilisées LAN.\n\n**Adresses spéciales** — 127.0.0.1 = localhost. Broadcast = 255.255.255.255 ou dernière IP du subnet.\n\n**IPv6** — Ex 2001:db8::1. 8 groupes hexa. Aucune pénurie. Adoption industrielle lente.\n\n**À retenir :** En interne, IP privées (10.x, 192.168.x, 172.16-31.x). NAT traduit en IP publique pour Internet.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-07.jpg"
@@ -79,8 +79,8 @@
       "position": 8,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Ports TCP/UDP — les entrées d'un host",
-      "bodyMd": "- 0-1023 : Well-known ports (HTTP 80, HTTPS 443, SSH 22, Modbus 502, OPC UA 4840)\n- 1024-49151 : Registered ports (souvent utilisés par des applications spécifiques)\n- 49152-65535 : Dynamic/ephemeral ports (choisis par le client à chaque connexion)\n- Un serveur écoute sur un port fixe (ex :502 pour Modbus)\n- Un client se connecte depuis un port éphémère vers le port serveur\n- Une même machine peut faire tourner N services sur N ports simultanément\n\n💡 netstat -an (ou ss -an sur Linux) liste tous les ports ouverts et connexions établies — indispensable pour diagnostiquer 'quel process écoute où'.",
+      "title": "Wireshark — sniffer une trame",
+      "bodyMd": "Wireshark capture toutes les trames et les décode couche par couche. Indispensable pour diagnostiquer 'ça ne marche pas'.\n\n```\n# Sur Linux :\nsudo wireshark   # GUI\nsudo tshark -i eth0 -f \"tcp port 502\" -c 10   # CLI\n\n# Filtres de CAPTURE (à l'entrée) :\ntcp port 502              # Modbus TCP\nudp port 47808            # BACnet/IP\nhost 192.168.1.50         # Trafic vers/depuis cet host\nnot port 22               # Exclure SSH\n\n# Filtres d'AFFICHAGE (après capture) :\ntcp.port == 502\nip.addr == 192.168.1.50\ntcp.flags.syn == 1 && tcp.flags.ack == 0\n\n# Décodage typique d'une trame :\n#   Frame 234: 74 bytes on wire\n#   Ethernet II — Src 00:1a:2b → Dst 00:1a:2c\n#   IP — Src 192.168.1.100 → Dst 192.168.1.50, TTL 64\n#   TCP — Src port 45678 → Dst port 502\n#   Modbus/TCP — Function 03, Read Holding, ref 107, count 2\n```\n\n**À retenir :** Wireshark = LE couteau suisse du diagnostic. 10 min de capture élimine 90 % des hypothèses. À maîtriser absolument.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-08.jpg"
@@ -89,8 +89,8 @@
       "position": 9,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Wireshark — sniffer une trame",
-      "bodyMd": "Wireshark capture toutes les trames qui passent sur une interface réseau et les décode couche par couche. Indispensable pour diagnostiquer 'ça ne marche pas' — on voit exactement qui parle à qui, avec quoi, et où ça bloque.\n\n```\n# Sur Linux :\nsudo wireshark   # GUI\nsudo tshark -i eth0 -f \"tcp port 502\" -c 10   # CLI, capture Modbus TCP\n\n# Filtres de capture (à l'entrée) :\ntcp port 502            # Modbus TCP\nudp port 47808          # BACnet/IP\nhost 192.168.1.50       # Trafic vers/depuis cet host\nnot port 22             # Exclure SSH\n\n# Filtres d'affichage (après capture) :\ntcp.port == 502\nip.addr == 192.168.1.50\ntcp.flags.syn == 1 && tcp.flags.ack == 0   # SYN sans ACK = tentative connexion\n\n# Ce que Wireshark révèle par trame :\n#   Frame 234: 74 bytes on wire, captured\n#   Ethernet II — Src 00:1a:2b:3c:4d:5e → Dst 00:1a:2b:3c:4d:5f\n#   IP — Src 192.168.1.100 → Dst 192.168.1.50, TTL 64\n#   TCP — Src port 45678 → Dst port 502, Seq 1, Ack 1, Len 6\n#   Modbus/TCP — Function 03, Read Holding Registers,\n#                 Reference 107, Word count 2\n```\n\n**À retenir :** Wireshark est LE couteau suisse du diagnostic réseau. 10 min de capture élimine 90% des hypothèses. À maîtriser absolument.",
+      "title": "TP N1-1 : Capturer un ping avec Wireshark",
+      "bodyMd": "**Contexte :** Wireshark installé sur votre poste. Windows : Npcap requis. Linux : sudo requis.\n\n**Consigne :** 1) Lancer Wireshark sur l'interface principale. 2) Filtre capture 'icmp'. 3) Depuis un terminal : ping 8.8.8.8 (5 fois). 4) Repérer les 5 requêtes ICMP Echo Request + 5 réponses ICMP Echo Reply. 5) Cliquer sur une trame → analyser les couches OSI décodées : Ethernet II (MAC), IP (source, destination, TTL), ICMP (type, code, séquence). 6) Bonus : identifier le TTL = 64 (Linux) ou 128 (Windows) selon votre OS.\n\n**Attendu :** 10 trames ICMP dans Wireshark (5 requêtes + 5 réponses). Structure OSI clairement visible dans le panneau détails. Peut expliquer chaque champ à voix haute.\n\n💡 Filtre d'affichage : 'icmp'. Décoder = clic sur trame + panneau du bas. TTL diminue à chaque saut de routeur — si vous voyez 55, ça a fait 9 sauts.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-09.jpg"
@@ -99,14 +99,24 @@
       "position": 10,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
+      "title": "TP N1-2 : Diagnostic 'PLC ne répond pas'",
+      "bodyMd": "**Contexte :** Un PLC S7-1500 configuré avec IP 192.168.1.10 sur le switch principal. Le SCADA sur 192.168.1.100 rapporte 'PLC déconnecté'.\n\n**Consigne :** Diagnostiquer méthodiquement en 5 étapes : 1) Couche 1 (physique) : LED Ethernet PLC + LED switch → vérifier connectique. 2) Couche 2 (liaison) : depuis SCADA, arp -a → vérifier que la MAC PLC est bien vue. 3) Couche 3 (réseau) : ping 192.168.1.10 → si OK, IP joignable. 4) Couche 4 (transport) : nc -zv 192.168.1.10 102 (port S7) → vérifier que le port est ouvert. 5) Couche 7 (appli) : essayer une connexion S7 depuis TIA → identifier l'erreur applicative.\n\n**Attendu :** Diagnostic terminé en < 15 min. Cause identifiée à la bonne couche : câble débranché (L1), config IP fausse (L3), firewall bloque port (L4), ou programme PLC en STOP (L7). Solution appliquée + validation.\n\n💡 Ping échoue = couche 3 (IP, subnet). Ping OK + port fermé = couche 4 (firewall). Port OK + service ne répond pas = couche 7 (application). Toujours descendre couche par couche.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-10.jpg"
     },
     {
       "position": 11,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/networking/slide-11.jpg"
+    },
+    {
+      "position": 12,
       "kind": "QUIZ",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "Quiz de fin de niveau 1",
@@ -115,7 +125,7 @@
       "quiz": {
         "questions": [
           {
-            "prompt": "Le modèle OSI compte :",
+            "prompt": "OSI compte :",
             "options": [
               "5 couches",
               "7 couches",
@@ -126,41 +136,41 @@
           {
             "prompt": "TCP est :",
             "options": [
-              "Connexionless",
+              "Connectionless",
               "Connexion + fiabilité + ordre",
-              "Broadcast pur"
+              "Broadcast"
             ],
             "correctIndex": 1
           },
           {
             "prompt": "UDP est :",
             "options": [
-              "Fiable et ordonné",
-              "Best-effort, léger, sans connexion",
+              "Fiable",
+              "Best-effort léger",
               "Chiffré"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "IPv4 est encodée sur :",
+            "prompt": "IPv4 encodée sur :",
             "options": [
-              "16 bits",
-              "32 bits",
-              "128 bits"
+              "16",
+              "32",
+              "128"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Adresse MAC :",
+            "prompt": "MAC :",
             "options": [
-              "48 bits, unique par carte réseau",
+              "48 bits unique carte",
               "IP alternative",
               "Hostname"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Port TCP HTTP :",
+            "prompt": "Port HTTP :",
             "options": [
               "80",
               "443",
@@ -170,24 +180,14 @@
           }
         ]
       },
-      "imageUrl": "/training/networking/slide-11.jpg"
-    },
-    {
-      "position": 12,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2",
-      "title": "Intermédiaire",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
       "imageUrl": "/training/networking/slide-12.jpg"
     },
     {
       "position": 13,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "VLAN — segmenter logiquement",
-      "bodyMd": "Un VLAN (Virtual LAN) est un regroupement logique de ports switch (ou hosts) partageant le même broadcast domain, indépendamment de la topologie physique. Permet de séparer des flux (VoIP, IT, OT, guest) sur les mêmes câbles/switches. Bases IEEE 802.1Q avec tag 12 bits (4094 VLANs possibles).\n\n**Access ports** — Assignés à un seul VLAN. Le host branché n'a pas conscience du VLAN, il voit un LAN normal.\n\n**Trunk ports** — Portent plusieurs VLANs. Utilisés entre switches ou vers un routeur inter-VLAN.\n\n**Tag 802.1Q** — 4 bytes ajoutés à la trame Ethernet identifient le VLAN. Ajouté par le switch en trunk, retiré en access.\n\n**Native VLAN** — Le VLAN sans tag sur un trunk. Souvent VLAN 1 par défaut — bonne pratique : le changer.\n\n**Inter-VLAN routing** — Deux VLANs isolés ne peuvent pas dialoguer sauf via un routeur (ou switch L3) qui route entre les subnets IP correspondants.\n\n**À retenir :** En OT industriel : VLAN dédié PLC, VLAN dédié HMI, VLAN dédié SCADA. Firewall entre eux. Un compromis PLC ne compromet pas le SCADA.",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-13.jpg"
@@ -196,8 +196,8 @@
       "position": 14,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "DNS et DHCP — les services silencieux",
-      "bodyMd": "DHCP (Dynamic Host Configuration Protocol) fournit IP + subnet + gateway + DNS automatiquement aux hosts au démarrage. DNS (Domain Name System) résout les noms lisibles (server1.dasolabs.local) en IP. Sans eux, un réseau moderne est ingérable.\n\n**DHCP process** — DISCOVER (client cherche) → OFFER (serveur propose) → REQUEST (client accepte) → ACK (serveur confirme). Lease durée typique 24h.\n\n**DHCP static vs dynamic** — Certains hosts (serveurs, PLC) doivent avoir une IP fixe. Deux méthodes : IP statique côté host, ou reservation DHCP par MAC.\n\n**DNS forward** — Résolution nom → IP. Cache client + serveur. TTL contrôle la durée de vie de la réponse.\n\n**DNS reverse** — Résolution IP → nom via PTR record. Utilisé en logs, audit, monitoring.\n\n**En OT** — Souvent pas de DHCP (IPs statiques pour cohérence) et pas de DNS externe (résolution locale via hosts file ou DNS interne).\n\n**À retenir :** Une IP fixe sur un PLC + une entrée DNS correspondante dans le DNS interne = maintenance facilitée. On peut ping 'plc-mixer' au lieu de mémoriser 10.20.30.42.",
+      "title": "VLAN — segmenter logiquement",
+      "bodyMd": "Un VLAN regroupe logiquement des ports switch (ou hosts) partageant le même broadcast domain, indépendamment de la topologie physique. Permet de séparer des flux sur les mêmes câbles/switches. IEEE 802.1Q avec tag 12 bits (4094 VLANs possibles).\n\n**Access ports** — Assignés à un seul VLAN. Host branché n'a pas conscience du VLAN.\n\n**Trunk ports** — Portent plusieurs VLANs. Utilisés entre switches ou vers un routeur inter-VLAN.\n\n**Tag 802.1Q** — 4 bytes ajoutés à la trame Ethernet identifient le VLAN. Ajouté en trunk, retiré en access.\n\n**Native VLAN** — Le VLAN sans tag sur un trunk. Souvent VLAN 1 par défaut — bonne pratique : le changer.\n\n**Inter-VLAN routing** — Deux VLANs isolés ne dialoguent pas sans routeur (ou switch L3) qui route entre subnets IP.\n\n**À retenir :** En OT industriel : VLAN dédié PLC, HMI, SCADA. Firewall entre eux. Compromis PLC ne compromet pas le SCADA.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-14.jpg"
@@ -206,8 +206,8 @@
       "position": 15,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "TLS — le chiffrement moderne",
-      "bodyMd": "TLS (Transport Layer Security) est le successeur de SSL. Version courante 1.3 (2018), utilisée par HTTPS, OPC UA sécurisé, MQTT sur port 8883. Le principe : handshake initial pour établir des clés de session, puis chiffrement symétrique du trafic. Basé sur des certificats x509 pour l'authentification.\n\n**Handshake TLS 1.3** — 1 RTT au lieu de 2 en TLS 1.2. Client hello + server hello + change cipher + finished.\n\n**Certificats x509** — Contient nom + clé publique + validité + signature d'une autorité (CA). Trust chain jusqu'à root CA.\n\n**Chiffrement symétrique** — AES-256-GCM typique. Clés dérivées du handshake, uniques par session. PFS (Perfect Forward Secrecy).\n\n**Auth mutuelle (mTLS)** — Client présente aussi son certificat. Utilisé en OPC UA, microservices, IoT industriel.\n\n**Cyphersuite** — Ex TLS_AES_256_GCM_SHA384. Négociée au handshake. Bannir les cyphersuites obsolètes (RC4, MD5).\n\n**À retenir :** En 2026, tout flux qui traverse un réseau non-fiable (Internet, OT/IT bridge) doit être TLS 1.3 avec certificats valides. Le http:// simple = vulnérable.",
+      "title": "TLS 1.3 — le chiffrement moderne",
+      "bodyMd": "TLS (Transport Layer Security) est le successeur de SSL. Version courante 1.3 (2018). Handshake pour établir clés de session, puis chiffrement symétrique. Basé sur certificats x509 pour authentification.\n\n**Handshake 1.3** — 1 RTT au lieu de 2 en 1.2. Client hello + server hello + change cipher + finished.\n\n**Certificats x509** — Contient nom + clé publique + validité + signature CA. Trust chain jusqu'à root CA.\n\n**Chiffrement symétrique** — AES-256-GCM typique. Clés dérivées, uniques par session. PFS (Perfect Forward Secrecy).\n\n**mTLS** — Client présente aussi son certificat. Utilisé en OPC UA, microservices, IoT industriel.\n\n**Cyphersuite** — Ex TLS_AES_256_GCM_SHA384. Bannir les obsolètes (RC4, MD5).\n\n**À retenir :** En 2026, tout flux qui traverse un réseau non-fiable doit être TLS 1.3 avec certificats valides. Le http:// simple = vulnérable.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-15.jpg"
@@ -216,8 +216,8 @@
       "position": 16,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Firewalls stateful et ACL",
-      "bodyMd": "- Stateful : suit l'état des connexions (SYN, ESTABLISHED, TIME_WAIT) — plus intelligent que stateless\n- Autorise automatiquement les réponses aux flux sortants ouverts\n- ACL (Access Control List) : règles listées top-down, first match wins\n- Approche 'default deny' : bloquer tout par défaut, autoriser explicitement\n- Logs : chaque paquet bloqué journalisé pour audit et diagnostic\n- NGFW (Next-Gen Firewall) : ajoute DPI (Deep Packet Inspection), IDS/IPS, filtrage applicatif\n\n💡 Un firewall mal configuré est pire qu'un pas de firewall du tout : faux sentiment de sécurité. Toujours tester les règles avec des scanners externes (nmap, tests d'intrusion).",
+      "title": "Firewall stateful — les règles",
+      "bodyMd": "1. Stateful : suit l'état des connexions (SYN, ESTABLISHED, TIME_WAIT)\n2. Autorise auto les réponses aux flux sortants ouverts\n3. ACL : règles top-down, first match wins\n4. Approche 'default deny' : bloquer tout, autoriser explicitement\n5. Logs : chaque paquet bloqué journalisé pour audit et diagnostic\n6. NGFW : DPI, IDS/IPS, filtrage applicatif au-dessus\n7. Documentation matrice : source → destination → port → justification\n8. Tests réguliers avec nmap depuis extérieur\n9. Revue trimestrielle des règles (nettoyage progressif)\n10. Alerte sur trafic bloqué anormal (SIEM)\n\n⚠ Un firewall mal configuré = pire qu'un pas de firewall (faux sentiment de sécurité). Toujours tester avec scanners externes (nmap).",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-16.jpg"
@@ -226,14 +226,34 @@
       "position": 17,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
-      "bodyMd": "",
+      "title": "TP N2-1 : Configurer un subnet + VLAN",
+      "bodyMd": "**Contexte :** GNS3 ou EVE-NG installé (simulateur réseau gratuit). Créer une topologie avec 2 switches et 4 hosts.\n\n**Consigne :** 1) Créer 2 VLANs sur le switch : VLAN 10 (PLC, subnet 192.168.10.0/24) et VLAN 20 (HMI, subnet 192.168.20.0/24). 2) Assigner 2 hosts au VLAN 10 (avec IP 192.168.10.10 et .11) et 2 au VLAN 20. 3) Test isolation : ping du VLAN 10 vers VLAN 20 = échec (bon). 4) Ajouter un routeur L3 entre les 2 VLANs. 5) Test inter-VLAN : maintenant le ping fonctionne. 6) Ajouter une ACL sur le routeur : autoriser HMI → PLC sur port 502 uniquement, bloquer le reste.\n\n**Attendu :** Isolation VLAN vérifiée par ping. Inter-VLAN routing fonctionne. ACL testée : Modbus TCP passe, autres ports bloqués. Documentation matrice à jour.\n\n💡 GNS3 tuto : gns3.com/software/getting-started. Switch Cisco IOS : 'vlan 10' 'interface FastEthernet 0/1' 'switchport mode access' 'switchport access vlan 10'. Router-on-a-stick pour inter-VLAN.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-17.jpg"
     },
     {
       "position": 18,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-2 : Analyser un handshake TLS",
+      "bodyMd": "**Contexte :** Wireshark installé. Navigateur Chrome/Firefox.\n\n**Consigne :** 1) Lancer Wireshark. 2) Filtre 'tls'. 3) Naviguer vers https://www.google.com. 4) Identifier les 3 phases du handshake TLS 1.3 : Client Hello, Server Hello, Change Cipher Spec + Finished. 5) Dans le Client Hello : repérer les cyphersuites proposées. 6) Dans le Server Hello : la cyphersuite choisie. 7) Après le handshake : les paquets 'Application Data' sont chiffrés (contenu illisible dans Wireshark). 8) Comparer avec une visite HTTP simple (site en http://) → tout est en clair.\n\n**Attendu :** Handshake TLS 1.3 identifié dans Wireshark. Peut nommer chaque phase. Comprend pourquoi les données chiffrées sont illisibles sans clé de session. Contraste flagrant HTTP vs HTTPS visible.\n\n💡 TLS 1.3 est plus compact que 1.2 (1 RTT). Un site qui utilise TLS 1.2 (plus vieux) sera reconnaissable — 2 RTTs de handshake. Chrome DevTools → Security montre la version TLS.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/networking/slide-18.jpg"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/networking/slide-19.jpg"
+    },
+    {
+      "position": 20,
       "kind": "QUIZ",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
       "title": "Quiz de fin de niveau 2",
@@ -242,9 +262,9 @@
       "quiz": {
         "questions": [
           {
-            "prompt": "Subnet mask /24 =",
+            "prompt": "Mask /24 :",
             "options": [
-              "255.255.255.0 → 254 hosts",
+              "255.255.255.0",
               "255.255.0.0",
               "255.0.0.0"
             ],
@@ -253,26 +273,26 @@
           {
             "prompt": "VLAN sert à :",
             "options": [
-              "Isoler logiquement des flux sur le même câble physique",
-              "Doubler la bande passante",
+              "Isoler flux même câble",
+              "Doubler BP",
               "Chiffrer"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Un switch travaille en :",
+            "prompt": "Switch travaille en :",
             "options": [
-              "Couche 2 (MAC)",
-              "Couche 3 (IP)",
+              "Couche 2",
+              "Couche 3",
               "Couche 7"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Un router travaille en :",
+            "prompt": "Router travaille en :",
             "options": [
               "Couche 2",
-              "Couche 3 (IP), route entre subnets",
+              "Couche 3",
               "Couche 4"
             ],
             "correctIndex": 1
@@ -289,42 +309,22 @@
           {
             "prompt": "DHCP fournit :",
             "options": [
-              "IP + subnet + gateway + DNS auto au host",
-              "Mot de passe",
+              "IP + subnet + gateway + DNS",
+              "Password",
               "Chiffrement"
             ],
             "correctIndex": 0
           }
         ]
       },
-      "imageUrl": "/training/networking/slide-18.jpg"
-    },
-    {
-      "position": 19,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3",
-      "title": "Expert",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/networking/slide-19.jpg"
-    },
-    {
-      "position": 20,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "MRP, PRP, HSR — redondance industrielle",
-      "bodyMd": "Un réseau industriel typique ne peut pas se permettre une perte de communication même de 100 ms. Trois protocoles normalisés IEC 62439 permettent de tolérer la coupure d'un câble ou d'un switch sans perte de données, avec des trade-offs distincts.\n\n**MRP (Media Redundancy Protocol)** — Anneau logique de switches. Un manager coupe un lien pour éviter la boucle. Sur coupure : bascule 200 ms.\n\n**PRP (Parallel Redundancy Protocol)** — 2 réseaux totalement séparés. Chaque trame émise en double. Filtrage à la réception. 0 ms de bascule.\n\n**HSR (High-availability Seamless Redundancy)** — Anneau + duplication trames. 0 ms de bascule comme PRP, moins de câbles.\n\n**Choix pratique** — MRP = compromis coût/dispo. PRP = criticité maximale (safety, énergie). HSR = anneau économique zéro perte.\n\n**Diagnostic complexe** — Un anneau MRP mal configuré = boucle broadcast = tempête. Toujours documenter le manager et surveiller.\n\n**À retenir :** MRP protège contre une coupure câble. PRP contre une défaillance switch. Choisir selon le niveau de criticité et le budget infrastructure.",
-      "notes": null,
-      "quiz": null,
       "imageUrl": "/training/networking/slide-20.jpg"
     },
     {
       "position": 21,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "TSN — Ethernet déterministe",
-      "bodyMd": "TSN (Time-Sensitive Networking) est un ensemble d'extensions IEEE 802.1 (Qbv, Qbu, Qcc, Qch) qui apportent le déterminisme à Ethernet. Pendant longtemps, chaque protocole industriel (Profinet, EtherCAT, EtherNet/IP) avait sa version 'temps réel'. TSN uniformise sur Ethernet standard, ouvrant la convergence OT/IT.\n\n**802.1Qbv Time-aware shaper** — Réserve des time slots dans le cycle Ethernet pour les flux critiques. Bornes garanties.\n\n**802.1Qbu Frame preemption** — Interrompt une trame en cours pour laisser passer une trame haute priorité.\n\n**802.1AS Time sync** — Synchronisation horloge à la microseconde entre tous les nœuds (basé PTP).\n\n**802.1Qcc Stream reservation** — Configuration centralisée des flux garantis.\n\n**Adoption** — Siemens, B&R, Bosch Rexroth adoptent progressivement. Encore émergent, mais standard 2027-2030.\n\n**À retenir :** TSN va remplacer les Profinet IRT / EtherCAT / EtherNet/IP CIP Sync propriétaires. Convergence OT/IT enfin possible sur un vrai Ethernet standard.",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-21.jpg"
@@ -333,8 +333,8 @@
       "position": 22,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Segmentation OT/IT et DMZ industrielle",
-      "bodyMd": "Un réseau OT (Operational Technology) doit être isolé du réseau IT (Information Technology) tout en permettant les flux nécessaires (SCADA → historian, ordonnancement ERP → PLC). La DMZ industrielle est la zone tampon où résident les proxies et les historians répliqués.\n\n**Modèle Purdue** — Couches 0 (process) → 5 (enterprise). Firewalls entre couches. DMZ entre 3.5 et 4.\n\n**Proxies dans la DMZ** — SCADA proxy, historian réplica, OPC UA gateway. Filtres et sanitize les flux OT → IT.\n\n**Data diode** — Composant hardware qui n'autorise qu'un sens de flux (typiquement OT → IT). Sécurité maximale.\n\n**Whitelist stricte** — Aucun flux autorisé par défaut. Chaque flux nécessaire justifié + documenté + audité.\n\n**Monitoring** — IDS/IPS dans la DMZ, SIEM centralisé, alertes sur anomalies (trafic inhabituel, tentative de connexion refusée).\n\n**À retenir :** Un ransomware qui infecte l'IT ne doit JAMAIS atteindre l'OT. La DMZ industrielle bien conçue est ce qui a évité les catastrophes en 2021-2024 pour les industriels préparés.",
+      "title": "MRP / PRP / HSR",
+      "bodyMd": "Un réseau industriel ne peut pas se permettre une perte de communication même de 100 ms. Trois protocoles permettent de tolérer coupures câble ou défaillance switch.\n\n**MRP (Media Redundancy Protocol)** — Anneau logique de switches, manager coupe un lien pour éviter la boucle. Bascule 200 ms.\n\n**PRP (Parallel Redundancy Protocol)** — 2 réseaux séparés. Chaque trame émise en double. Bascule 0 ms.\n\n**HSR (High-availability Seamless)** — Anneau + duplication. Bascule 0 ms, moins de câbles que PRP.\n\n**Choix pratique** — MRP = coût/dispo. PRP = criticité maximale. HSR = anneau économique zéro perte.\n\n**Diagnostic complexe** — Anneau mal configuré = boucle broadcast = tempête. Documenter le manager.\n\n**À retenir :** MRP protège d'une coupure câble. PRP protège aussi d'un switch défaillant. Choix selon criticité et budget.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-22.jpg"
@@ -343,14 +343,44 @@
       "position": 23,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Récapitulatif du niveau 3",
-      "bodyMd": "",
+      "title": "TSN — Ethernet déterministe",
+      "bodyMd": "TSN (Time-Sensitive Networking) = extensions IEEE 802.1 (Qbv, Qbu, Qcc) qui apportent le déterminisme à Ethernet. Uniformise sur Ethernet standard, ouvrant la convergence OT/IT.\n\n**802.1Qbv Time-aware shaper** — Réserve des time slots dans le cycle Ethernet pour les flux critiques. Bornes garanties.\n\n**802.1Qbu Frame preemption** — Interrompt une trame en cours pour laisser passer une trame haute priorité.\n\n**802.1AS Time sync** — Sync horloge à la microseconde entre nœuds (basé PTP).\n\n**802.1Qcc Stream reservation** — Configuration centralisée des flux garantis.\n\n**Adoption** — Siemens, B&R, Bosch Rexroth adoptent. Encore émergent, standard 2027-2030.\n\n**À retenir :** TSN va remplacer Profinet IRT / EtherCAT / EtherNet/IP CIP Sync propriétaires. Convergence OT/IT enfin possible sur vrai Ethernet standard.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/networking/slide-23.jpg"
     },
     {
       "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Segmentation OT/IT — architecture DMZ",
+      "bodyMd": "Usine avec 200 PLC, 20 SCADA, 5 MES, ERP SAP. Objectif : isoler l'OT de l'IT tout en permettant les flux nécessaires (SCADA→historian, ordonnancement ERP→PLC). Modèle Purdue.\n\n```\nARCHITECTURE OT / IT SÉGMENTÉE\n\nLevel 5 (Business) — Enterprise Zone\n  ├── ERP SAP + Exchange + Office 365\n  └── VLAN 5, Firewall standard IT\n\nLevel 4 (Business logistics)\n  ├── MES Manager, planning, reporting\n  └── VLAN 4\n\n═══════════════ DMZ INDUSTRIELLE (Level 3.5) ═══════════════\n  ├── Historian réplica (data read-only depuis OT)\n  ├── SCADA proxy (accès distant)\n  ├── OPC UA gateway (encapsule + auth)\n  ├── Data diode possible (flux OT → IT uniquement)\n  └── VLAN 35, Firewall NGFW dédié DPI + IDS\n\nLevel 3 (MOM)\n  ├── MES exec, historian primaire, quality\n  └── VLAN 3\n\nLevel 2 (SCADA)\n  ├── WinCC Unified 2 serveurs redondants\n  └── VLAN 2\n\nLevel 1 (Control)\n  ├── PLC S7-1500 hot standby\n  └── VLAN 1\n\nLevel 0 (Process)\n  └── Capteurs, actionneurs — pas de VLAN, câblage direct\n\nFirewalls entre chaque niveau, monitoring SIEM central,\ntests d'intrusion annuels par équipe rouge\n```\n\nCette architecture protège l'OT du ransomware qui s'attaque à l'IT. La DMZ industrielle est la zone tampon où les données OT sont exposées de manière contrôlée. Data diode = protection maximale (physiquement unidirectionnel).\n\n**À retenir :** Un ransomware qui infecte l'IT ne doit JAMAIS atteindre l'OT. La DMZ industrielle bien conçue = ce qui a évité les catastrophes en 2021-2024 pour les industriels préparés.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/networking/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-1 : Simuler MRP dans GNS3",
+      "bodyMd": "**Contexte :** GNS3 avec 3 switches supportant MRP simulé (ou Cisco avec ring protocol équivalent).\n\n**Consigne :** 1) Créer un anneau de 3 switches. 2) Ajouter un host sur chaque switch (host1 sur SW1, host2 sur SW2, host3 sur SW3). 3) Activer MRP : SW1 = manager, SW2 et SW3 = clients. 4) Ping continu host1 → host3. 5) Couper le câble entre SW1 et SW3 (interface shutdown). 6) Mesurer le nombre de pings perdus pendant la bascule (typiquement <5 pings à 1 par sec, soit ~200 ms). 7) Rétablir le câble : retour à la topologie initiale.\n\n**Attendu :** Anneau MRP fonctionnel. Bascule mesurée < 300 ms. Aucune tempête broadcast pendant la reconfiguration. Documentation du test avec captures.\n\n💡 Sur Cisco : 'mrp ring 1' 'primary-port' 'secondary-port'. Sur Siemens SCALANCE : configuration via web interface. MRP nécessite matériel compatible — pas tous les switches le supportent.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/networking/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Récapitulatif du niveau 3",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/networking/slide-26.jpg"
+    },
+    {
+      "position": 27,
       "kind": "QUIZ",
       "section": "NIVEAU 3 · EXPERT",
       "title": "Quiz de fin de niveau 3",
@@ -359,54 +389,54 @@
       "quiz": {
         "questions": [
           {
-            "prompt": "TLS 1.3 =",
+            "prompt": "TLS 1.3 :",
             "options": [
-              "Chiffrement moderne, PFS, handshake réduit",
+              "Chiffrement moderne PFS",
               "Ancien SSL",
-              "Protocole série"
+              "Série"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Un firewall stateful :",
+            "prompt": "Firewall stateful :",
             "options": [
-              "Suit l'état des connexions, autorise les réponses aux flux ouverts",
-              "Vérifie chaque paquet indépendamment",
+              "Suit état connexions",
+              "Vérifie paquet indép",
               "N'existe pas"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "IPv6 est encodé sur :",
+            "prompt": "IPv6 encodé sur :",
             "options": [
-              "128 bits — plus d'IP possible en pratique",
-              "32 bits",
-              "64 bits"
+              "128",
+              "32",
+              "64"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "MRP (Media Redundancy Protocol) :",
+            "prompt": "MRP :",
             "options": [
-              "Anneau réseau industriel avec bascule 200 ms",
+              "Anneau industriel 200ms",
               "IP mobile",
               "Chiffrement"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Segmentation OT/IT via DMZ :",
+            "prompt": "DMZ OT/IT :",
             "options": [
-              "Proxies/historiens répliqués, whitelist stricte, data diode possible",
+              "Proxies, whitelist, data diode",
               "Optionnelle",
-              "Un simple VLAN suffit"
+              "VLAN seul"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "TSN (Time-Sensitive Networking) :",
+            "prompt": "TSN :",
             "options": [
-              "Ethernet déterministe, sub-ms garanti, futur des réseaux industriels",
+              "Ethernet déterministe sub-ms",
               "Vieux protocole",
               "Impossible"
             ],
@@ -414,27 +444,27 @@
           }
         ]
       },
-      "imageUrl": "/training/networking/slide-24.jpg"
+      "imageUrl": "/training/networking/slide-27.jpg"
     },
     {
-      "position": 25,
+      "position": 28,
       "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "En résumé",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/networking/slide-25.jpg"
+      "imageUrl": "/training/networking/slide-28.jpg"
     },
     {
-      "position": 26,
+      "position": 29,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Installer Wireshark et capturer 1h de trafic OT en écoute passive — analyser les patterns\n- Cartographier votre réseau : quels VLANs, quels flux OT/IT, quels firewalls entre\n- Vérifier que le TLS 1.3 est actif partout où il devrait l'être (OPC UA, HTTPS SCADA, MQTT)\n- Lire IEC 62443-3-3 pour aligner votre segmentation avec les standards\n\n💡 Un ingénieur qui parle IT et OT couramment est immédiatement précieux dans un projet industrie 4.0 — c'est un profil rare.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Refaire les 5 TPs — Wireshark, VLANs, TLS, MRP\n- Installer Wireshark et capturer 1h de trafic OT en écoute passive\n- Cartographier votre réseau : VLANs, flux OT/IT, firewalls\n- Vérifier TLS 1.3 actif partout (OPC UA, HTTPS SCADA, MQTT)\n- Lire IEC 62443-3-3 pour aligner segmentation avec standards\n\n💡 Un ingénieur qui parle IT et OT est immédiatement précieux dans un projet industrie 4.0 — profil rare.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/networking/slide-26.jpg"
+      "imageUrl": "/training/networking/slide-29.jpg"
     }
   ]
 }
