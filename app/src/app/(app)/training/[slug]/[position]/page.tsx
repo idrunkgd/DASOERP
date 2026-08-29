@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { ChevronLeft, ChevronRight, List } from "lucide-react";
 import { QuizRunner, type QuizQuestion } from "./quiz-runner";
 import { ProgressTracker } from "./progress-tracker";
+import { KeyboardNav } from "./keyboard-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,11 @@ export default async function SlideViewer({
     <div>
       {/* Marque cette slide comme vue au premier rendu */}
       <ProgressTracker courseId={course.id} slidePosition={pos} />
+      {/* Navigation clavier ← / → */}
+      <KeyboardNav
+        prevHref={prev ? `/training/${course.slug}/${prev.position}` : null}
+        nextHref={next ? `/training/${course.slug}/${next.position}` : null}
+      />
 
       <PageHeader
         title={slide.title}
@@ -58,21 +64,46 @@ export default async function SlideViewer({
         }
       />
 
-      {/* Corps de la slide :
+      {/* Corps de la slide avec flèches latérales de navigation :
           - QUIZ → runner interactif seul (pas d'image du PPT — l'user répond
             directement dans l'interface)
           - CONTENT → image PPT si disponible, sinon texte brut extrait */}
-      {slide.kind === "QUIZ" && quizQuestions?.length ? (
-        <QuizRunner slideId={slide.id} questions={quizQuestions} />
-      ) : slide.imageUrl ? (
-        <div className="card p-2 flex justify-center bg-midnight-50/30">
-          <img src={slide.imageUrl} alt={slide.title} className="max-w-full rounded shadow-sm" />
-        </div>
-      ) : (
-        <article className="card p-6 md:p-8 prose prose-sm max-w-none text-midnight-900 whitespace-pre-wrap">
-          {slide.bodyMd || <em className="text-midnight-400">Contenu non renseigné.</em>}
-        </article>
-      )}
+      <div className="relative">
+        {/* Flèche gauche */}
+        {prev && (
+          <Link
+            href={`/training/${course.slug}/${prev.position}`}
+            aria-label={`Slide précédente : ${prev.title}`}
+            title={`← ${prev.position}. ${prev.title}`}
+            className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-4 lg:-left-6 z-10 w-11 h-11 rounded-full bg-white border border-midnight-200 shadow-md items-center justify-center text-midnight-600 hover:bg-indigoaccent hover:text-white hover:border-indigoaccent transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+        )}
+        {/* Flèche droite */}
+        {next && (
+          <Link
+            href={`/training/${course.slug}/${next.position}`}
+            aria-label={`Slide suivante : ${next.title}`}
+            title={`${next.position}. ${next.title} →`}
+            className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-4 lg:-right-6 z-10 w-11 h-11 rounded-full bg-white border border-midnight-200 shadow-md items-center justify-center text-midnight-600 hover:bg-indigoaccent hover:text-white hover:border-indigoaccent transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </Link>
+        )}
+
+        {slide.kind === "QUIZ" && quizQuestions?.length ? (
+          <QuizRunner slideId={slide.id} questions={quizQuestions} />
+        ) : slide.imageUrl ? (
+          <div className="card p-2 flex justify-center bg-midnight-50/30">
+            <img src={slide.imageUrl} alt={slide.title} className="max-w-full rounded shadow-sm" />
+          </div>
+        ) : (
+          <article className="card p-6 md:p-8 prose prose-sm max-w-none text-midnight-900 whitespace-pre-wrap">
+            {slide.bodyMd || <em className="text-midnight-400">Contenu non renseigné.</em>}
+          </article>
+        )}
+      </div>
 
       {/* Navigation prev / next */}
       <div className="flex items-center justify-between mt-6 gap-3">

@@ -5,7 +5,6 @@ import type { Role } from "@prisma/client";
 import type { Permission } from "@/lib/rbac";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
-import { ChatWidget } from "./chat-widget";
 import { CommandPalette } from "./command-palette";
 import { FavoritesBar, type Favorite } from "./favorites-bar";
 
@@ -78,7 +77,6 @@ export function LayoutShell({
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
 
-      {!restricted && <ChatWidget />}
       {!restricted && <CommandPalette />}
     </div>
   );
