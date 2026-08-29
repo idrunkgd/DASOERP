@@ -19,8 +19,8 @@
       "position": 2,
       "kind": "CONTENT",
       "section": "INTRODUCTION",
-      "title": "Objectifs de la formation",
-      "bodyMd": "AVEVA Report (né Dream Report, racheté par AVEVA en 2019) est LA solution de reporting spécialisée pour l'industrie process. Contrairement à Power BI (analytique) ou SSRS (opérationnel Microsoft), AVEVA Report est optimisé pour les sources data industrielles (historian, OPC UA, PI System) et les calculs métier (OEE, MTBF, batch reports, downtime analysis).\n\n**Sources data industrielles** — Historian AVEVA (ex Wonderware), OPC UA, PI System, SQL, CSV. Support natif time-series.\n\n**Calculs métier prêts** — OEE, MTBF, MTTR, batch yields, energy KPIs — pas besoin de formules custom.\n\n**Templates industry** — Batch, shift, environmental, energy, quality — 20+ templates prêts à personnaliser.\n\n**Triggers multiples** — Planning, événement historian, alarme, réception mail, appel REST.\n\n**Distribution large** — Mail, portail web, FTP, SharePoint, cloud, REST push.\n\n**À retenir :** AVEVA Report excelle sur ce que SSRS/Power BI font mal : rapports batch industriels avec sources historian. Complémentaire, pas concurrent.",
+      "title": "Objectifs",
+      "bodyMd": "AVEVA Report (né Dream Report, racheté 2019) = solution reporting spécialisée industrie process. Contrairement à Power BI (analytique) ou SSRS (opérationnel MS), AVEVA Report est optimisé pour sources data industrielles (historian, OPC UA, PI System) et calculs métier (OEE, MTBF, batch reports).\n\n**Sources industrielles** — Historian AVEVA (ex Wonderware), OPC UA, PI System, SQL, CSV.\n\n**Calculs métier prêts** — OEE, MTBF, MTTR, batch yields, energy KPIs — pas besoin formules custom.\n\n**Templates industry** — Batch, shift, environmental, energy, quality — 20+ prêts.\n\n**Triggers multiples** — Planning, événement historian, alarme, réception mail, REST.\n\n**Distribution large** — Mail, portail web, FTP, SharePoint, cloud.\n\n**À retenir :** AVEVA Report excelle où SSRS/Power BI font mal : rapports batch industriels avec sources historian. Complémentaire.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-02.jpg"
@@ -49,8 +49,8 @@
       "position": 5,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Histoire et positionnement",
-      "bodyMd": "Dream Report a été créé par Ocean Data Systems en 2003, spécialement pour combler le vide entre SCADA et reporting. AVEVA l'a acquis en 2019 pour compléter son offre (System Platform, Historian, InTouch OMI). Renommé 'AVEVA Reports for Operations', il reste connu sous 'Dream Report' dans la communauté.\n\n**Positionnement** — Entre SCADA (temps réel) et BI (analytique long terme). Reporting opérationnel quotidien.\n\n**Différence vs Power BI** — AVEVA Report cible sources historian + calculs métier. Power BI cible analytique interactif + big data.\n\n**Différence vs SSRS** — AVEVA Report natif industriel. SSRS meilleur sur BDD SQL Server généralistes.\n\n**Compatibility** — AVEVA Historian, OSIsoft PI, InTouch, System Platform, OPC UA, SQL Server, Oracle.\n\n**Licensing** — Bundle avec AVEVA System Platform ou standalone. Prix élevé — cible entreprise.\n\n**À retenir :** AVEVA Report est un investissement pertinent quand l'infrastructure est déjà AVEVA. Sinon, évaluer les alternatives (Ignition Reporting, Grafana, Power BI) selon budget et compétences internes.",
+      "title": "AVEVA Report vs SSRS vs Power BI",
+      "bodyMd": "**AVEVA REPORT**\n- Sources historian natives\n- Calculs métier prêts (OEE, MTBF, batch)\n- Templates industry\n- Coût élevé — entreprise\n- Rapports batch industriels\n- GxP intégré\n\n**SSRS + POWER BI**\n- SSRS : reporting MS opérationnel\n- Power BI : analytique + dashboards\n- Sources : SQL, Excel, cloud, APIs\n- Coûts modérés\n- Rapports business + KPIs\n- Compliance à ajouter\n\n**À retenir :** Usine industrielle AVEVA-first : AVEVA Report. IT enterprise multi-source : SSRS + Power BI. Souvent les 2 coexistent.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-05.jpg"
@@ -59,8 +59,8 @@
       "position": 6,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "AVEVA Report vs SSRS vs Power BI",
-      "bodyMd": "**AVEVA REPORT**\n- Sources historian natives (AVEVA, PI, OSIsoft)\n- Calculs métier prêts (OEE, MTBF, batch)\n- Templates industry pré-configurés\n- Coût élevé — cible entreprise\n- Rapports batch industriels\n- Compliance GxP intégrée\n\n**SSRS + POWER BI**\n- SSRS : reporting Microsoft opérationnel — inclus SQL Server\n- Power BI : analytique + dashboards + self-service BI\n- Sources : SQL, Excel, cloud, APIs\n- Coûts modérés (SSRS inclus, PBI licences user)\n- Rapports business + finance + KPIs enterprise\n- Compliance : à ajouter en surcouche\n\n**À retenir :** Pour une usine industrielle AVEVA-first : AVEVA Report. Pour l'IT enterprise multi-source : SSRS + Power BI. Souvent les deux coexistent.",
+      "title": "TP N1-1 : Installer + premier rapport",
+      "bodyMd": "**Contexte :** Trial AVEVA Report 30 jours téléchargé. Un simulateur OPC UA (Prosys) ou fichier CSV avec des données industrielles simulées.\n\n**Consigne :** 1) Installer AVEVA Report + Studio Designer. 2) Connecter à Prosys OPC UA (ou importer un CSV). 3) Créer 3 Data Objects : Tank_Temperature, Pump_Speed, Batch_Yield (chacun sur 8h). 4) Ajouter des Statistics : Min/Max/Avg pour chaque. 5) Layout : bandeau haut avec logo, tableau des stats au centre, chart température en bas. 6) Publish + tester.\n\n**Attendu :** Rapport batch simple généré. Affiche les 3 mesures avec stats et chart. Export PDF proper.\n\n💡 Studio Designer : IDE Windows. Data Object : source + interval + calcul. Chart : glisser depuis toolbox + lier Data Object.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-06.jpg"
@@ -69,72 +69,62 @@
       "position": 7,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Premier rapport — étapes",
-      "bodyMd": "- 1. Studio Designer : IDE Windows pour créer les rapports (.dr)\n- 2. Data Sources : connecter historian AVEVA (URL + auth), OPC UA (endpoint), SQL (connection string)\n- 3. Data Objects : définir les tags/queries à récupérer (ex Tank_A.Temperature sur 8h)\n- 4. Statistics : ajouter des calculs (min, max, avg, sum sur intervalle)\n- 5. Report Layout : glisser objets sur canvas (chart, table, KPI card, text)\n- 6. Publish : déployer sur AVEVA Report Server + tester exécution\n\n💡 Toujours nommer clairement les Data Objects (Tank_A_Temperature_8h_Avg) pour retrouver rapidement quand le rapport grossit.",
+      "title": "TP N1-2 : Template shift report",
+      "bodyMd": "**Contexte :** AVEVA Report + templates natifs.\n\n**Consigne :** 1) Ouvrir le template 'Shift Report' fourni. 2) Personnaliser : logo entreprise, couleurs, colonnes pertinentes pour votre usine. 3) Adapter les Data Objects aux tags de votre historian. 4) Publier. 5) Comparer temps de dev : template = 1h vs from-scratch = 8h.\n\n**Attendu :** Shift report opérationnel en <2h. Personnalisé aux couleurs entreprise. Utilise 60-80% du template + 20-40% custom.\n\n💡 20+ templates dans le dossier Samples. Structure typique : header logo + summary KPIs + tables production + charts trend + footer signature.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-07.jpg"
     },
     {
       "position": 8,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-08.jpg"
-    },
-    {
-      "position": 9,
       "kind": "QUIZ",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Quiz de fin de niveau 1",
+      "title": "Quiz N1",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "AVEVA Report est :",
+            "prompt": "AVEVA Report =",
             "options": [
-              "Outil de reporting AVEVA (ex-Dream Report)",
+              "Outil reporting AVEVA (ex-Dream Report)",
               "PLC",
               "SCADA"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Cible principale :",
+            "prompt": "Cible :",
             "options": [
-              "Rapports opérationnels manufacturing (batches, alarmes, OEE)",
-              "Rapports financiers",
+              "Rapports opérationnels manufacturing",
+              "Finance",
               "Bureautique"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Source data typique :",
+            "prompt": "Source :",
             "options": [
-              "Historian AVEVA (ex Wonderware), OPC UA, SQL",
-              "Uniquement Excel",
+              "Historian AVEVA, OPC UA, SQL",
+              "Excel seul",
               "Fichiers plats"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Rendu de sortie :",
+            "prompt": "Sortie :",
             "options": [
               "PDF, Excel, HTML, email",
-              "Uniquement papier",
-              "Impression 3D"
+              "Papier",
+              "3D"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "AVEVA Report vs SSRS :",
+            "prompt": "vs SSRS :",
             "options": [
-              "AVEVA plus adapté aux données historian/OPC UA",
-              "SSRS meilleur en tout",
+              "AVEVA adapté data historian",
+              "SSRS mieux",
               "Identiques"
             ],
             "correctIndex": 0
@@ -142,7 +132,7 @@
           {
             "prompt": "Nom historique :",
             "options": [
-              "Dream Report (avant rachat par AVEVA)",
+              "Dream Report",
               "SAP Report",
               "Report Manager"
             ],
@@ -150,14 +140,24 @@
           }
         ]
       },
+      "imageUrl": "/training/aveva-report/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
       "imageUrl": "/training/aveva-report/slide-09.jpg"
     },
     {
       "position": 10,
       "kind": "CONTENT",
-      "section": "NIVEAU 2",
-      "title": "Intermédiaire",
-      "bodyMd": "",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "OEE — le KPI industriel n°1",
+      "bodyMd": "OEE (Overall Equipment Effectiveness) mesure l'efficacité en combinant 3 facteurs : Availability × Performance × Quality. Objectif world-class : 85%+. Moyenne industrie : 60%.\n\n**Availability** — = Temps de marche / Temps planifié. Impact : pannes, changements de série.\n\n**Performance** — = (Production × Cycle idéal) / Temps de marche. Impact : ralentissements, micro-arrêts.\n\n**Quality** — = Bons / Total. Impact : rebuts, retouches, non-conformités.\n\n**Pièges** — Bien définir 'temps planifié' (avec ou sans pauses), 'cycle idéal' (nominal ou best case).\n\n**AVEVA Report** — Statistical Object 'OEE' pré-configuré. Configurer 3 tags source + formule auto.\n\n**À retenir :** OEE puissant mais fragile en définition. Documenter EXACTEMENT quels tags nourrissent chaque facteur — sinon 2 rapports OEE incohérents.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-10.jpg"
@@ -166,8 +166,8 @@
       "position": 11,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "OEE — Overall Equipment Effectiveness",
-      "bodyMd": "OEE (Overall Equipment Effectiveness) mesure l'efficacité d'un équipement en combinant 3 facteurs : Availability (temps de marche), Performance (vitesse réelle vs nominale), Quality (produits conformes). Formule OEE = A × P × Q. Objectif world-class : 85%+. Moyenne industrie : 60%.\n\n**Availability** — = Temps de marche réel / Temps de production planifié. Impact : pannes, changements de série, attentes.\n\n**Performance** — = (Production réelle × Temps de cycle idéal) / Temps de marche. Impact : ralentissements, micro-arrêts.\n\n**Quality** — = Produits bons / Production totale. Impact : rebuts, retouches, non-conformités.\n\n**Pièges de calcul** — Bien définir 'temps planifié' (avec ou sans pauses ?), 'temps de cycle idéal' (nominal ou best case ?).\n\n**Dans AVEVA Report** — Statistical Object 'OEE' pré-configuré. Configurer les 3 tags source + formule automatique.\n\n**À retenir :** OEE est puissant mais fragile en définition. Toujours documenter EXACTEMENT quels tags nourrissent chaque facteur — sinon 2 rapports OEE incohérents.",
+      "title": "TP N2-1 : Calculer OEE",
+      "bodyMd": "**Contexte :** Historian avec les 3 tags nécessaires : Machine_RunTime_Min, Machine_Production_Units, Machine_Good_Units.\n\n**Consigne :** 1) Créer Data Objects pour les 3 tags sur 8h de shift. 2) Créer 3 Statistical Objects : Availability (RunTime / 480), Performance (Production × Cycle idéal / RunTime), Quality (Good / Production). 3) Combiner en OEE = A × P × Q. 4) Layout : 3 gauges pour A, P, Q + gros chiffre OEE au centre. 5) Exécuter → vérifier valeurs cohérentes (60-85%).\n\n**Attendu :** Rapport OEE quotidien avec 3 facteurs + composite. Visuellement clair. Valeurs cohérentes avec la production simulée.\n\n💡 Statistical Object formule : Value_1 / Value_2. Gauge : object → linked to Statistical Object. Choose color scale : red 0-40, yellow 40-70, green 70-100.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-11.jpg"
@@ -176,95 +176,95 @@
       "position": 12,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Templates industry AVEVA Report",
-      "bodyMd": "AVEVA Report livre 20+ templates pré-configurés pour les cas d'usage classiques industriels. Batch report, shift report, downtime analysis, energy usage, environmental monitoring, quality tracking. Ils servent de base à personnaliser plutôt que partir de zéro.\n\n**Batch report** — Structure typique : header lot, courbes température/pression/débit sur durée, alarmes, deviations, signature.\n\n**Shift report** — Résumé équipe : production, temps arrêt, alarmes top 10, OEE, notes exploitant.\n\n**Downtime analysis** — Pareto des causes d'arrêt, MTBF/MTTR par équipement, tendance temporelle.\n\n**Energy usage** — Consommation par équipement/atelier, kWh/unité produite, comparaison référence.\n\n**Environmental** — Émissions, effluents, monitoring conformité réglementaire — obligatoire dans certains secteurs.\n\n**À retenir :** Investir 30 minutes à explorer les templates avant chaque nouveau projet. Souvent 60-80% est déjà fait, à personnaliser.",
+      "title": "TP N2-2 : Parameter shift + email",
+      "bodyMd": "**Contexte :** Suite TP N2-1.\n\n**Consigne :** 1) Ajouter parameter @Shift (dropdown : Morning/Afternoon/Night). 2) Adapter Data Objects pour utiliser le range de temps selon @Shift. 3) Configurer un scheduled trigger : chaque jour à 6am envoyer le OEE du shift précédent au manager production. 4) Format PDF, destinataire = email manager.\n\n**Attendu :** Manager reçoit chaque matin le OEE du shift de nuit. Cliquer sur le rapport ouvre les détails par facteur.\n\n💡 Parameter → default value expression. Schedule → configuration → SMTP. Test manual : Run With Parameters.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-12.jpg"
     },
     {
       "position": 13,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-13.jpg"
-    },
-    {
-      "position": 14,
       "kind": "QUIZ",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Quiz de fin de niveau 2",
+      "title": "Quiz N2",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Data connectors :",
+            "prompt": "Connectors :",
             "options": [
-              "Historian AVEVA/OPC UA/SQL/CSV/Excel/REST",
-              "Uniquement SQL",
+              "Historian/OPC UA/SQL/CSV/Excel/REST",
+              "SQL only",
               "Aucun"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Statistical calculations :",
+            "prompt": "Stats :",
             "options": [
-              "Moyennes, MTBF, OEE, percentiles intégrés",
-              "Manuel uniquement",
+              "Moyennes, MTBF, OEE, percentiles",
+              "Manuel",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Trigger de rapport :",
+            "prompt": "Trigger :",
             "options": [
-              "Cron, événement historian, alarme, mail entrant, REST",
-              "Uniquement manuel",
+              "Cron, événement, alarme, mail, REST",
+              "Manuel",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "OEE calc =",
+            "prompt": "OEE =",
             "options": [
               "Availability × Performance × Quality",
-              "Somme brute",
+              "Somme",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Templates industry :",
+            "prompt": "Templates :",
             "options": [
-              "Batch, shift, OEE, energy, quality — pré-configurés",
+              "Batch, shift, OEE, energy pré-configurés",
               "Aucun",
-              "Uniquement custom"
+              "Custom only"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "Multi-langue :",
             "options": [
-              "Rapports en N langues avec formats locaux",
-              "Uniquement anglais",
+              "Rapports N langues + formats locaux",
+              "Anglais only",
               "Impossible"
             ],
             "correctIndex": 0
           }
         ]
       },
+      "imageUrl": "/training/aveva-report/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
       "imageUrl": "/training/aveva-report/slide-14.jpg"
     },
     {
       "position": 15,
       "kind": "CONTENT",
-      "section": "NIVEAU 3",
-      "title": "Expert",
-      "bodyMd": "",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Triggers événement",
+      "bodyMd": "AVEVA Report peut se déclencher sur événements réels — pas seulement toutes les 6h. Fin de batch, alarme critique, réception mail, appel REST. Transforme le reporting en workflow opérationnel intégré.\n\n**Scheduled** — Cron-like : daily 6am, weekly Monday, monthly 1st.\n\n**Event-triggered** — Tag historian change → rapport se génère. Ex : Batch.Status = 'Completed' → batch report.\n\n**Alarm-triggered** — Alarme critique déclenche rapport d'incident. Envoi immédiat.\n\n**Email inbound** — Mail avec sujet 'Report last shift' → généré et retourné. Self-service par mail.\n\n**REST API** — Appli tierce POST /reports/execute → génération à la demande.\n\n**À retenir :** Event-triggered transforme le reporting de 'lit après-coup' à 'agit en temps réel'.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-15.jpg"
@@ -273,37 +273,17 @@
       "position": 16,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Triggers d'exécution — au-delà du planning",
-      "bodyMd": "AVEVA Report peut se déclencher sur événements réels — pas seulement toutes les 6h. Fin de batch dans le SCADA, alarme critique, réception mail, appel REST. Ça transforme le reporting en workflow opérationnel intégré.\n\n**Scheduled** — Cron-like : daily 6am shift, weekly Monday, monthly 1st. Le plus courant.\n\n**Event-triggered** — Un tag historian change de valeur → rapport se génère. Ex : Batch.Status = 'Completed' → batch report.\n\n**Alarm-triggered** — Une alarme critique déclenche un rapport d'incident détaillé. Envoi immédiat à l'équipe.\n\n**Email inbound** — Envoyer un mail avec sujet 'Report last shift' → rapport généré et retourné. Self-service par mail.\n\n**REST API** — Une appli tierce appelle POST /reports/execute → génération à la demande.\n\n**À retenir :** Event-triggered rapports transforment le reporting de 'lit après-coup' à 'agit en temps réel'. Un batch report reçu 5 min après fin batch est actionnable — 12h après, il finit dans un dossier.",
+      "title": "TP N3-1 : Batch report event-triggered",
+      "bodyMd": "**Contexte :** Historian + AVEVA Report avec batch report existant.\n\n**Consigne :** 1) Configurer un trigger : Batch.Status_Text = 'Completed' → génération auto. 2) Rapport détaillé du batch : recette utilisée, durée, alarmes, courbes température/pression/débit. 3) Signature électronique de l'opérateur (via prompt). 4) Envoi PDF automatique au responsable qualité. 5) Test : simuler un batch complet, vérifier réception PDF <2 min après fin.\n\n**Attendu :** Fin de batch = PDF dans la boîte mail du responsable qualité en <2 min. Signé électroniquement.\n\n💡 Trigger : Data Object → Event → Value equals 'Completed'. Signature : Interactive prompt → user + password + timestamp. GxP compliance activated.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/aveva-report/slide-16.jpg"
     },
     {
       "position": 17,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "GxP compliance — pharma / alimentaire",
-      "bodyMd": "Pharma, agroalimentaire, dispositifs médicaux imposent une traçabilité stricte des rapports : audit trail (qui a lancé, quand, avec quels params), signatures électroniques (approbateur du batch), versioning des templates, immuabilité des rapports archivés. AVEVA Report supporte tout ça en natif.\n\n**Audit trail** — Toute action (exécution, modification template, envoi) journalisée. Consultable par auditeurs.\n\n**Signatures électroniques** — Un approbateur signe le rapport final — user + password + certificat. Conforme 21 CFR Part 11 FDA.\n\n**Versioning templates** — Chaque modification d'un template est versionnée. Impossible de rejouer l'ancien template sur la nouvelle version.\n\n**Archivage immuable** — Rapport publié = PDF signé, hash SHA-256, WORM storage. Aucune modification possible.\n\n**Data integrity ALCOA+** — Attributable, Legible, Contemporaneous, Original, Accurate, Complete, Consistent, Enduring, Available. Standard pharma.\n\n**À retenir :** GxP n'est pas un skill technique optionnel — c'est un pré-requis pour bosser dans pharma/agro. AVEVA Report a les briques mais leur mise en œuvre demande méthode.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-17.jpg"
-    },
-    {
-      "position": 18,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Récapitulatif du niveau 3",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-18.jpg"
-    },
-    {
-      "position": 19,
       "kind": "QUIZ",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Quiz de fin de niveau 3",
+      "title": "Quiz N3",
       "bodyMd": "",
       "notes": null,
       "quiz": {
@@ -312,7 +292,7 @@
             "prompt": "Distribution :",
             "options": [
               "Mail, share, FTP, cloud, REST push",
-              "Uniquement papier",
+              "Papier only",
               "Impossible"
             ],
             "correctIndex": 0
@@ -320,8 +300,8 @@
           {
             "prompt": "Web viewer :",
             "options": [
-              "Portail HTML5 pour browsing rapports online",
-              "Nécessite client lourd",
+              "Portail HTML5",
+              "Client lourd",
               "Impossible"
             ],
             "correctIndex": 0
@@ -329,25 +309,25 @@
           {
             "prompt": "Historian AVEVA :",
             "options": [
-              "Time-series DB optimisée SCADA, milliards de tags",
-              "Fichier CSV",
+              "Time-series milliards de tags",
+              "CSV",
               "Cloud only"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Intégration Ignition/Cirrus Link :",
+            "prompt": "Ignition + Sparkplug B :",
             "options": [
-              "Sparkplug B → historian → AVEVA Report standard",
+              "Historian → AVEVA Report standard",
               "Impossible",
               "Manuel"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Reporting compliance GxP :",
+            "prompt": "Compliance GxP :",
             "options": [
-              "Audit trail, versioning, signatures électroniques 21 CFR Part 11",
+              "Audit trail, signatures, 21 CFR Part 11",
               "Impossible",
               "Non concerné"
             ],
@@ -356,35 +336,35 @@
           {
             "prompt": "Alternatives :",
             "options": [
-              "Power BI, SSRS, Grafana, Ignition Reporting — chacun a son usage",
-              "AVEVA Report unique",
-              "Aucun choix"
+              "Power BI, SSRS, Grafana, Ignition",
+              "Unique",
+              "Aucun"
             ],
             "correctIndex": 0
           }
         ]
       },
-      "imageUrl": "/training/aveva-report/slide-19.jpg"
+      "imageUrl": "/training/aveva-report/slide-17.jpg"
     },
     {
-      "position": 20,
+      "position": 18,
       "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "En résumé",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-20.jpg"
+      "imageUrl": "/training/aveva-report/slide-18.jpg"
     },
     {
-      "position": 21,
+      "position": 19,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Trial AVEVA Report + créer un rapport batch simple depuis un historian de dev\n- Explorer les 20+ templates fournis avant de créer un nouveau projet from scratch\n- Comparer AVEVA Report vs Grafana + Ignition sur un cas concret — choisir selon TCO\n- Se former GxP si secteur pharma/agro — indispensable\n\n💡 AVEVA Report est un skill niche recherché pour l'industrie AVEVA-first. Se démarquer en le maîtrisant vaut le coup pour ceux qui veulent bosser sur les gros projets AVEVA.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz\n- Trial AVEVA Report + refaire les 5 TPs\n- Explorer les 20+ templates fournis\n- Comparer AVEVA Report vs Grafana + Ignition\n- Se former GxP si secteur pharma/agro\n\n💡 Skill niche recherché pour l'industrie AVEVA-first.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-21.jpg"
+      "imageUrl": "/training/aveva-report/slide-19.jpg"
     }
   ]
 }
