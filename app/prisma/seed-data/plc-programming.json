@@ -1,7 +1,7 @@
 {
   "slug": "plc-programming",
   "title": "Programmation PLC générique",
-  "subtitle": "Formation complète — Débutant · Intermédiaire · Expert",
+  "subtitle": "Formation complète self-service — Débutant · Intermédiaire · Expert",
   "level": "Débutant à Expert",
   "duration": "3 jours (≈ 24 h)",
   "slides": [
@@ -20,7 +20,7 @@
       "kind": "CONTENT",
       "section": "INTRODUCTION",
       "title": "Objectifs de la formation",
-      "bodyMd": "Le PLC est le calculateur temps réel qui pilote les procédés industriels depuis 40 ans. Il n'est pas près d'être remplacé, mais son écosystème évolue vite : IEC 61131-3, communications ouvertes, cybersécurité, CI/CD. Ce parcours vous donne les fondamentaux qui restent stables et les pratiques modernes qui les prolongent.\n\n**Comprendre** — Le cycle scan, l'adressage mémoire, l'architecture matérielle.\n\n**Construire** — Un programme structuré en Function Blocks réutilisables, testables, versionnés.\n\n**Connecter** — Vers automates, capteurs, HMI et cloud via Modbus, Profinet, OPC UA.\n\n**Sécuriser** — Le programme (sécurité fonctionnelle SIL) et son environnement (IEC 62443).\n\n**Industrialiser** — Redondance, CI/CD, tests, migration entre marques.\n\n**À retenir :** Le PLC est un objet simple à comprendre mais dur à bien programmer. La qualité vient de la structure — pas de la maîtrise d'un langage particulier.",
+      "bodyMd": "Le PLC pilote les procédés industriels depuis 45 ans. Il ne va pas disparaître, mais son écosystème évolue : IEC 61131-3, comms ouvertes, cybersécurité, CI/CD, cloud. Ce parcours vous donne les fondamentaux qui restent stables ET les pratiques modernes. Format self-service : chaque section a du contenu théorique, des exemples de code réels, et des TPs pratiques à faire chez vous.\n\n**Comprendre** — Cycle scan, adressage mémoire, architecture matérielle.\n\n**Construire** — Programme structuré en Function Blocks réutilisables, testables, versionnés.\n\n**Connecter** — Automates, capteurs, HMI, cloud via Modbus, Profinet, OPC UA.\n\n**Sécuriser** — Programme (SIL) + environnement (IEC 62443).\n\n**Industrialiser** — Redondance, Git/CI/CD, tests unitaires, migration.\n\n**À retenir :** Le PLC est simple à comprendre mais dur à bien programmer. La qualité vient de la STRUCTURE — pas de la maîtrise d'un langage particulier.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-02.jpg"
@@ -40,7 +40,7 @@
       "kind": "CONTENT",
       "section": "INTRODUCTION",
       "title": "Prérequis et environnement de lab",
-      "bodyMd": "- Culture automatisme : lire un schéma élec, notion d'entrée/sortie, capteur/actionneur\n- Bases SCADA/HMI (InTouch, WinCC, Citect ou équivalent) — utile mais non bloquant\n- Windows Server basique : services, comptes locaux, pare-feu\n- Notions réseau : IP, VLAN, ports, routing simple\n- Aucun prérequis sur une marque spécifique — la formation est générique IEC 61131-3\n\n💡 Poste de lab : Windows + IDE Codesys ou TIA Portal + un émulateur (PLCSIM, Codesys Simulation) si pas de PLC physique.",
+      "bodyMd": "- Culture automatisme : lecture schéma élec, notion d'E/S, capteur/actionneur\n- Windows 10/11 avec 16 Go RAM minimum pour la simulation\n- IDE : Codesys 3.5 (gratuit, générique) — ou TIA Portal V17 trial\n- Émulateur : Codesys Control Win V3 ou PLCSIM Advanced pour Siemens\n- Notions réseau basiques : IP, ports, capacité à ping et diagnostiquer\n- Optionnel mais recommandé : Wago 750-8202 ou PLC Codesys pour TP hardware\n\n💡 Les TPs sont conçus pour tourner en simulateur — pas besoin de hardware physique pour valider les concepts.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-04.jpg"
@@ -49,8 +49,8 @@
       "position": 5,
       "kind": "CONTENT",
       "section": "INTRODUCTION",
-      "title": "Le fil rouge : station de traitement d'eau WTP-01",
-      "bodyMd": "Une station de pompage municipale : quatre pompes en parallèle qui alimentent un réservoir tampon de 2000 m³. On mesure le niveau du réservoir, le débit refoulé et la pression collecteur. Il faut maintenir le niveau entre 40 % et 80 %, équilibrer l'usure des pompes et détecter les défauts (débit incohérent, cavitation, surchauffe moteur).\n\n**Instrumentation** — 1 capteur niveau (4-20 mA), 4 débitmètres, 4 sondes température moteur, 4 contacts marche/défaut\n\n**Actionneurs** — 4 démarreurs pompe (variateur ou étoile-triangle), 1 vanne motorisée de by-pass\n\n**IHM** — Synoptique station + tendances niveau/débit + historique alarmes\n\n**Fonctions à programmer** — Régulation niveau, cyclage pompes, détection défauts, gestion alarmes, mode manuel/auto\n\n**À retenir :** Ce fil rouge revient à chaque niveau, enrichi. Vous programmez la même station 3 fois — d'abord basique, puis structurée, puis redondée.",
+      "title": "Le fil rouge : station WTP-01",
+      "bodyMd": "Station de pompage municipale : 4 pompes en parallèle qui alimentent un réservoir tampon de 2 000 m³. Instrumentation : 1 capteur niveau (4-20 mA), 4 débitmètres, 4 sondes température moteur, 4 contacts marche/défaut. Actionneurs : 4 démarreurs pompes + 1 vanne motorisée de by-pass.\n\n```\nARCHITECTURE DE COMMANDE — WTP-01\n\n┌──────────────────────────────────────────────────┐\n│               PLC S7-1500 CPU 1515-2 PN          │\n├──────────────────────────────────────────────────┤\n│  Modules E/S                                     │\n│    - SM 321 : 16 entrées TOR (contacts pompes)   │\n│    - SM 322 : 16 sorties TOR (démarreurs)        │\n│    - SM 331 : 8 entrées analog (niveau, débits)  │\n│    - SM 332 : 4 sorties analog (variateurs)      │\n├──────────────────────────────────────────────────┤\n│  Communication                                    │\n│    - Profinet contrôleur → ET 200SP terrain      │\n│    - OPC UA serveur → SCADA WinCC + Historian    │\n├──────────────────────────────────────────────────┤\n│  Programme (à concevoir dans les TPs)            │\n│    - FB_Motor  × 4 instances (une par pompe)     │\n│    - FB_Valve  × 1 instance (vanne bypass)       │\n│    - FB_PID_Level_Regulation                      │\n│    - FB_Pump_Cyclage (rotation quotidienne)      │\n│    - FB_Alarm_Manager (ISA-18.2)                 │\n└──────────────────────────────────────────────────┘\n```\n\nL'objectif : maintenir le niveau du réservoir entre 40 % et 80 %, équilibrer l'usure des 4 pompes, détecter les défauts (débit incohérent, cavitation, surchauffe moteur). Ce système est enrichi de niveau en niveau — d'abord basique, puis structuré en FB, puis redondé et cybersécurisé.\n\n**À retenir :** Vous programmez la MÊME station 3 fois — chaque niveau apporte des pratiques plus mûres. À la fin, vous savez concevoir un système industriel complet.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-05.jpg"
@@ -58,9 +58,9 @@
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "NIVEAU 1",
-      "title": "Débutant",
-      "bodyMd": "",
+      "section": "INTRODUCTION",
+      "title": "Comment suivre cette formation",
+      "bodyMd": "- Lire chaque niveau en une session (2-3h). Éviter le zapping — la logique est progressive\n- Sur chaque slide code : réécrire le code dans votre IDE, pas juste lire. Comprendre vs reconnaître\n- Faire les TPs — c'est là que ça rentre vraiment. Prévoir 2h par TP au minimum\n- Passer le quiz de fin de niveau. Objectif 80 %+, sinon relire la section concernée\n- Reprendre le fil rouge WTP-01 dans votre IDE et le programmer de A à Z après le niveau 3\n- Poser vos questions dans DasoHub → chat pour les points bloquants\n\n💡 Ne pas passer au niveau 2 sans avoir maîtrisé le niveau 1. Chaque niveau construit sur le précédent — les impasses se paient très cher plus tard.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-06.jpg"
@@ -68,9 +68,9 @@
     {
       "position": 7,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Qu'est-ce qu'un PLC, vraiment ?",
-      "bodyMd": "Un PLC (Programmable Logic Controller — automate programmable industriel) est un ordinateur temps réel conçu pour survivre en armoire à 55 °C, 24/7, avec des perturbations électromagnétiques et des cycles marche/arrêt. Il exécute un même programme des milliers de fois par seconde, avec un déterminisme fort : chaque cycle prend un temps borné et prévisible.\n\n**Robustesse matérielle** — Fanless, températures étendues, tenue vibratoire, isolation galvanique sur toutes les E/S.\n\n**Déterminisme logiciel** — Un cycle scan borné (typiquement 1 à 100 ms), un OS temps réel, un watchdog matériel.\n\n**Facilité de câblage** — Modules E/S standardisés, bornes à ressort ou vis, adressage clair I/Q/M.\n\n**Longévité** — Cycle de vie 15-25 ans en production, pièces de rechange disponibles longtemps.\n\n**À retenir :** Un PLC n'est pas un « PC industriel ». Ce qui le distingue, c'est la garantie de temps de réponse — même sous charge, même après 10 ans.",
+      "section": "NIVEAU 1",
+      "title": "Débutant",
+      "bodyMd": "",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-07.jpg"
@@ -79,8 +79,8 @@
       "position": 8,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "PC classique vs PLC : deux mondes",
-      "bodyMd": "**PC INDUSTRIEL / SERVEUR**\n- OS généraliste : Windows / Linux\n- Multitâche préemptif — temps de réponse variable\n- Pilote graphique, réseau, USB, disque\n- Applicable à traitement lourd (calcul, SGBD)\n- Redémarre en 30-120 s après coupure\n- Durée de vie 5-8 ans\n\n**PLC**\n- OS temps réel embarqué, souvent propriétaire\n- Cycle scan déterministe : 1-100 ms borné\n- E/S industrielles, watchdog matériel, isolation\n- Applicable à commande temps réel de procédé\n- Redémarre en 2-10 s + reprise sur état sauvegardé\n- Durée de vie 15-25 ans\n\n**À retenir :** Un PC excelle sur du traitement variable ; un PLC excelle sur du temps réel garanti. La bonne architecture combine les deux : PLC pour la commande, PC pour la supervision et le reporting.",
+      "title": "Qu'est-ce qu'un PLC, vraiment ?",
+      "bodyMd": "Un PLC (Programmable Logic Controller — automate programmable industriel) est un ordinateur temps réel conçu pour survivre en armoire à 55 °C, 24/7, avec perturbations électromagnétiques et cycles marche/arrêt. Il exécute le même programme des milliers de fois par seconde, avec un déterminisme fort : chaque cycle prend un temps borné et prévisible.\n\n**Robustesse matérielle** — Fanless, températures étendues, tenue vibratoire, isolation galvanique sur toutes les E/S. Certifié EMC industrielle.\n\n**Déterminisme logiciel** — Cycle scan borné (1 à 100 ms typique), OS temps réel, watchdog matériel qui coupe si dépassement.\n\n**Facilité de câblage** — Modules E/S standardisés, bornes à ressort ou vis, adressage clair I/Q/M.\n\n**Longévité** — Cycle de vie 15-25 ans en production. Siemens supporte encore des CPU 300 sorties en 1996.\n\n**À retenir :** Un PLC n'est PAS un PC industriel. Ce qui le distingue, c'est la garantie de temps de réponse — même sous charge, même après 10 ans.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-08.jpg"
@@ -89,8 +89,8 @@
       "position": 9,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Architecture matérielle d'un PLC",
-      "bodyMd": "Un PLC modulaire s'assemble en trois briques : une alimentation, une CPU et des modules d'entrées/sorties. Le tout est fixé sur un fond de panier (backplane) qui relie électriquement les modules et transporte le bus interne à haut débit.\n\n**CPU** — Processeur temps réel + mémoire programme + mémoire de données. Charge le firmware constructeur et exécute le programme utilisateur.\n\n**Alimentation** — 24 VDC ou 230 VAC en entrée, fournit du 5 V/24 V au fond de panier. Doit être dimensionnée en tenant compte de la conso maxi des modules.\n\n**Modules d'entrée** — TOR (contacts, capteurs 24V), analogiques (4-20 mA, 0-10 V), spécialisés (comptage rapide, thermocouples PT100).\n\n**Modules de sortie** — TOR relais (charges lourdes, lentes), TOR statiques (rapides), analogiques (variateurs, vannes proportionnelles).\n\n**Modules communication** — Ports Profinet/EthernetIP intégrés à la CPU, ou modules dédiés (Profibus, DeviceNet, Modbus série).\n\n**À retenir :** Le fond de panier est le point souvent oublié : dimensionner la conso totale, respecter l'ordre des modules et prévoir de la place pour évolution.",
+      "title": "PC classique vs PLC — deux mondes",
+      "bodyMd": "**PC INDUSTRIEL / SERVEUR**\n- OS généraliste : Windows / Linux\n- Multitâche préemptif — temps de réponse variable (5ms à 500ms)\n- Pilote graphique, réseau, USB, disque\n- Bien pour : traitement lourd, calcul, SGBD, ML\n- Redémarre en 30-120 s après coupure\n- Durée de vie 5-8 ans\n\n**PLC**\n- OS temps réel embarqué, souvent propriétaire\n- Cycle scan déterministe : 1-100 ms borné\n- E/S industrielles, watchdog matériel, isolation galvanique\n- Bien pour : commande temps réel de procédé\n- Redémarre en 2-10 s + reprise sur état sauvegardé\n- Durée de vie 15-25 ans\n\n**À retenir :** Un PC excelle sur traitement variable ; un PLC excelle sur temps réel garanti. La bonne architecture combine les deux : PLC pour la commande, PC pour supervision et reporting.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-09.jpg"
@@ -99,8 +99,8 @@
       "position": 10,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Entrées TOR vs analogiques",
-      "bodyMd": "**ENTRÉES TOR (TOUT OU RIEN)**\n- Deux états : 0 ou 1 (généralement 24 VDC ou 0 V)\n- Capteurs de proximité, boutons, contacts fin de course\n- Lecture instantanée, pas de conversion\n- Filtrage typique 1-10 ms contre les rebonds\n- Câblage simple : borne + retour commun\n- Peu coûteux, un module = 16 ou 32 entrées\n\n**ENTRÉES ANALOGIQUES**\n- Signal continu : 4-20 mA (courant) ou 0-10 V (tension)\n- Capteurs de niveau, pression, température, débit\n- Conversion A/N : 12 à 16 bits typique\n- Temps de conversion 1-50 ms selon module\n- Câblage soigné : blindage, mise à la terre séparée\n- Plus coûteux, un module = 4, 8 ou 16 entrées\n\n**À retenir :** Le 4-20 mA est préféré au 0-10 V en industrie : la boucle de courant détecte le fil coupé (I = 0) et est immune aux chutes de tension sur les longues distances.",
+      "title": "Architecture matérielle d'un PLC",
+      "bodyMd": "Un PLC modulaire s'assemble en 3 briques : alimentation, CPU, modules E/S. Le tout se fixe sur un rail DIN et s'interconnecte via un fond de panier (backplane).\n\n**CPU** — Processeur temps réel + mémoire programme + mémoire de données. Charge le firmware constructeur et exécute le programme utilisateur.\n\n**Alimentation (PS)** — 24 VDC ou 230 VAC en entrée, fournit 5 V/24 V au fond de panier. Dimensionner selon conso maxi.\n\n**Modules d'entrée** — TOR (contacts, capteurs 24V), analogiques (4-20 mA, 0-10 V), spécialisés (comptage rapide, thermocouples PT100).\n\n**Modules de sortie** — TOR relais (charges lourdes, lentes), TOR statiques (rapides), analogiques (variateurs, vannes proportionnelles).\n\n**Modules communication** — Ports Profinet/EthernetIP intégrés à la CPU, ou modules dédiés (Profibus, DeviceNet, Modbus série).\n\n**À retenir :** Le fond de panier est le point souvent oublié : dimensionner la conso totale, respecter l'ordre des modules et prévoir de la place pour évolution (30 % marge).",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-10.jpg"
@@ -109,8 +109,8 @@
       "position": 11,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Le cycle scan — cœur du PLC",
-      "bodyMd": "À chaque cycle, le PLC exécute une séquence fixe en 4 phases : lecture des entrées, exécution du programme, écriture des sorties, tâches système. La durée d'un cycle est bornée et mesurable ; c'est ce budget de temps qui garantit la réactivité du procédé. Un cycle typique fait 1 à 100 ms selon la CPU et la taille du programme.\n\n**1. LECTURE des entrées (PII)** — Le PLC copie l'état de toutes les entrées physiques dans une mémoire image (Process Image Input). Le programme travaille sur cette copie, pas directement sur les E/S.\n\n**2. EXÉCUTION du programme** — Le programme utilisateur s'exécute de haut en bas, tout d'un trait. Il lit la PII, écrit dans les mémoires internes (M) et dans la PIQ (Process Image Output).\n\n**3. ÉCRITURE des sorties (PIQ)** — À la fin du cycle, la PIQ est copiée sur les sorties physiques. C'est à ce moment que les actionneurs voient les nouvelles commandes.\n\n**4. Tâches système + watchdog** — Diagnostic, communication, mise à jour des tables OPC. Le watchdog vérifie que le cycle n'a pas dépassé son budget — sinon CPU en STOP.\n\n**À retenir :** Une entrée peut changer 10 fois pendant un scan : le programme ne verra qu'une seule valeur (celle lue au début du cycle). C'est ce qui rend le PLC prévisible mais qui piège les débutants.",
+      "title": "Le fond de panier — les pièges du terrain",
+      "bodyMd": "**Pourquoi :** Le fond de panier alimente et connecte tous les modules. Le sous-dimensionner cause des redémarrages aléatoires en charge — souvent 6 mois après installation, quand on ajoute des modules.\n\n**Comment :** Faire la SOMME des consommations 5 V DC de chaque module (indiquée en mA sur la datasheet). Comparer au courant fourni par le PS. Marge minimale 30 %.\n\n**Pièges :** 1) Confondre alim modules E/S (24 V externe) et alim bus interne (5 V du PS). 2) Ajouter des modules sans remesurer. 3) Ignorer les pics de démarrage (relais).\n\n**Bonnes pratiques :** 1) Choisir un PS avec 40-50 % de marge dès le début. 2) Documenter la conso projet dans le dossier. 3) Ajouter une PS redondante si production critique.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-11.jpg"
@@ -119,8 +119,8 @@
       "position": 12,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Adressage mémoire IEC 61131-3",
-      "bodyMd": "L'adressage IEC 61131-3 utilise des préfixes pour identifier la zone mémoire, puis une adresse byte.bit. On peut aussi (recommandé) utiliser un nom symbolique qui pointe vers cette adresse.\n\n```\n// Adressage direct (IEC 61131-3 standard)\n%I0.0       // Input Bit  : entrée physique 0 du module 0\n%IW10       // Input Word : 16 bits d'entrées analogiques\n%Q4.7       // Output Bit : sortie physique 7 du module 4\n%QW12       // Output Word : 16 bits de sortie\n%M100.0     // Memory Bit : mémoire interne bit\n%MW200      // Memory Word : mémoire interne word (16 bits)\n\n// Adressage symbolique (recommandé)\nPump1_Start_Cmd   AT %M100.0 : BOOL;   // Commande démarrage pompe 1\nTank_Level_Raw    AT %IW10   : INT;    // Niveau brut du capteur\nMotor1_Overload   AT %I0.3   : BOOL;   // Défaut thermique moteur 1\n\n// Programme utilise le symbole, pas l'adresse\nIF Pump1_Start_Cmd AND NOT Motor1_Overload THEN\n    Pump1_Run := TRUE;\nEND_IF;\n```\n\n**À retenir :** Toujours nommer les variables. Un projet lu 6 mois plus tard avec %I0.3 partout est illisible ; avec Motor1_Overload il se relit sans doc.",
+      "title": "Entrées TOR vs analogiques",
+      "bodyMd": "**ENTRÉES TOR (TOUT OU RIEN)**\n- Deux états : 0 ou 1 (24 VDC ou 0 V typiquement)\n- Capteurs de proximité, boutons, contacts fin de course\n- Lecture instantanée, pas de conversion\n- Filtrage typique 1-10 ms contre les rebonds\n- Câblage simple : borne + retour commun\n- Prix : 8-15 €/voie sur un module 16 voies\n\n**ENTRÉES ANALOGIQUES**\n- Signal continu : 4-20 mA ou 0-10 V\n- Capteurs niveau, pression, température, débit\n- Conversion A/N : 12 à 16 bits typique\n- Temps de conversion 1-50 ms selon module\n- Câblage soigné : blindage, terre séparée\n- Prix : 40-80 €/voie sur un module 8 voies\n\n**À retenir :** Le 4-20 mA est préféré au 0-10 V : détecte le fil coupé (I=0), immune aux chutes de tension. Utiliser 0-10 V uniquement en local < 5 m.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-12.jpg"
@@ -129,8 +129,8 @@
       "position": 13,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Types de données IEC 61131-3",
-      "bodyMd": "IEC 61131-3 définit une hiérarchie de types de données : booléens, entiers signés/non-signés de plusieurs tailles, flottants, types temporels et types composés. Choisir le bon type = économiser de la mémoire et éviter les débordements.\n\n**BOOL (1 bit)** — Contacts, bobines, drapeaux internes. Toujours préférer BOOL à INT/BYTE pour un flag.\n\n**INT / DINT (16/32 bits signés)** — Compteurs, nombres entiers courants. DINT si valeur > 32767 ou risque de débordement.\n\n**REAL / LREAL (32/64 bits IEEE 754)** — Grandeurs analogiques : température, pression, débit. LREAL rarement utile — coût CPU.\n\n**TIME / DATE / TIME_OF_DAY** — Durées et horodatages. TIME est équivalent à DINT en ms (T#1s = 1000).\n\n**STRING / ARRAY / STRUCT** — Types composés : messages, buffers, objets structurés. Base des UDT réutilisables.\n\n**À retenir :** Une erreur classique : compter des pièces en INT (max 32 767). À raison de 100 pièces/min, débordement en 5h30. Toujours DINT pour un compteur qui monte.",
+      "title": "Câblage TOR — procédure à respecter",
+      "bodyMd": "1. Vérifier tension d'alim modules (24 VDC en général)\n2. Câbler un fil bien serti + numéroté selon le schéma élec\n3. Utiliser des ferrules pour les brins multi-fils\n4. Passer les câbles E/S dans un chemin distinct des câbles de puissance\n5. Blinder les câbles longs (>5 m) et raccorder le blindage à la terre PLC\n6. Ne PAS mélanger 24V DC et 230 VAC dans le même chemin de câble\n7. Étiqueter chaque bornier avec l'adresse PLC (%I0.0, %I0.1...)\n8. Tester chaque voie avec un multimètre AVANT premier démarrage\n9. Documenter le câblage dans le dossier as-built\n\n⚠ Ne jamais brancher/débrancher un module en marche (sauf modules hot-swap explicitement documentés).",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-13.jpg"
@@ -139,8 +139,8 @@
       "position": 14,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Les 5 langages IEC 61131-3",
-      "bodyMd": "**GRAPHIQUES (héritage électro)**\n- LD (Ladder Diagram) : contacts + bobines type schéma élec\n- FBD (Function Block Diagram) : blocs connectés par signaux\n- SFC (Sequential Function Chart) : grafcet à étapes + transitions\n- Points forts : lisibilité pour maintenance et non-informaticiens\n- Points faibles : verbeux pour du calcul, du parcours de tableaux\n\n**TEXTUELS (héritage informatique)**\n- ST (Structured Text) : proche du Pascal / C, langage universel moderne\n- IL (Instruction List) : bas niveau type assembleur\n- Points forts (ST) : compact, boucles, algos, calculs complexes\n- Points faibles (ST) : moins intuitif pour maintenance élec\n- IL est déprécié : plus enseigné, plus recommandé\n\n**À retenir :** Règle pragmatique : LD pour la logique simple lue par la maintenance, ST pour les algos et les FB métier, SFC pour les séquences batch. FBD reste utile en régulation continue.",
+      "title": "Câblage 4-20 mA — la procédure propre",
+      "bodyMd": "1. Utiliser un câble PAIRE TORSADÉE BLINDÉE dédié analogique\n2. Blindage relié à la terre PLC UNIQUEMENT (pas côté capteur)\n3. Séparation minimale 30 cm avec les câbles de puissance\n4. Configurer la voie du module en 4-20 mA (via TIA / Codesys)\n5. Alimenter le transmetteur (2 fils ou 4 fils selon capteur)\n6. Vérifier à vide : 4 mA = 0 % de l'échelle. 20 mA = 100 %.\n7. Tester la boucle avec un simulateur de courant si possible\n8. Vérifier la lecture dans TIA (Value Table) — pas juste la LED verte\n9. Documenter l'échelle physique (0-100 % → 0-10 bar) dans le programme\n\n⚠ Un fil analogique proche d'un câble variateur = pollution EMC = mesure erratique. Séparation obligatoire.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-14.jpg"
@@ -149,8 +149,8 @@
       "position": 15,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Ladder Diagram — LD",
-      "bodyMd": "En LD, on lit de gauche à droite comme du courant électrique : les contacts sont en série (ET logique) ou en parallèle (OU logique), et alimentent des bobines à droite. C'est le langage le plus rapide à comprendre pour un électricien.\n\n```\n   |  Start   Stop     Overload     Pump_Run  |\n   |---| |----|/|-------|/|--------(   )------|\n   |                                          |\n   |  Pump_Run                                |\n   |---| |----+                               |\n   |          |    (self-hold via own coil)   |\n\nLigne 1 : Start (NO) ET NOT Stop (NC) ET NOT Overload → Pump_Run\nLigne 2 : Pump_Run maintient sa propre condition (mémoire)\n\nComportement :\n- Un appui Start démarre la pompe qui reste en marche.\n- Un appui Stop OU un défaut thermique coupe et déverrouille.\n- Auto-maintien classique — la logique d'un démarrage moteur en 5 lignes.\n```\n\n**À retenir :** LD reste le plus lu en maintenance. Écrivez la logique séquence/interlock en LD, gardez le ST pour les algos et calculs.",
+      "title": "Le cycle scan — cœur du PLC",
+      "bodyMd": "À chaque cycle, le PLC exécute une séquence fixe en 4 phases : lecture des entrées, exécution du programme, écriture des sorties, tâches système. La durée d'un cycle est bornée et mesurable. Cette borne garantit la réactivité du procédé.\n\n**1. LECTURE des entrées (PII)** — Le PLC copie l'état de toutes les entrées physiques dans une mémoire image (Process Image Input). Le programme travaille sur cette copie, pas sur les E/S directement.\n\n**2. EXÉCUTION du programme** — Le programme utilisateur s'exécute de haut en bas, tout d'un trait. Il lit la PII, écrit dans les mémoires internes (M) et dans la PIQ (Process Image Output).\n\n**3. ÉCRITURE des sorties (PIQ)** — À la fin du cycle, la PIQ est copiée sur les sorties physiques. C'est à ce moment que les actionneurs voient les nouvelles commandes.\n\n**4. Tâches système + watchdog** — Diagnostic, communication, MAJ tables OPC. Le watchdog vérifie que le cycle n'a pas dépassé son budget — sinon CPU passe en STOP.\n\n**À retenir :** Une entrée peut changer 10 fois pendant un scan : le programme ne verra qu'UNE seule valeur (celle lue au début du cycle). C'est ce qui rend le PLC prévisible mais qui piège les débutants.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-15.jpg"
@@ -159,8 +159,8 @@
       "position": 16,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Structured Text — ST : exemple concret",
-      "bodyMd": "ST ressemble à Pascal (fin) ou C (compact). Il gère aussi bien la logique combinatoire que les calculs, les boucles et les structures de données. C'est le langage préféré des projets récents.\n\n```\n(* Filtrage anti-rebond d'une entrée + auto-maintien de sécurité *)\nIF Emergency_Stop_NC THEN\n    // NC = normalement fermé : à 1 en fonctionnement normal\n    Motor_Enable := TRUE;\nELSE\n    // Bouton arrêt d'urgence enfoncé → arrêt immédiat, verrouillage\n    Motor_Enable := FALSE;\n    Motor_Trip_Latched := TRUE;\nEND_IF;\n\n(* Reset du latch uniquement par action explicite opérateur *)\nIF Reset_Cmd_Rising AND NOT Emergency_Stop_NC = FALSE THEN\n    Motor_Trip_Latched := FALSE;\nEND_IF;\n\n(* Commande finale du moteur *)\nMotor_Run := Start_Cmd\n             AND NOT Motor_Trip_Latched\n             AND Motor_Enable\n             AND NOT Overload_Fault;\n```\n\n**À retenir :** ST bien écrit se relit comme un pseudo-code métier. Commentaires (* ... *), un IF par action, éviter les expressions à rallonge.",
+      "title": "Cycle scan — les pièges classiques",
+      "bodyMd": "**Pourquoi :** Le cycle scan est simple en théorie mais introduit des comportements contre-intuitifs qui piègent tous les débutants venant du monde PC.\n\n**Comment :** 1) Toujours dessiner le chronogramme avant d'écrire du code sensible. 2) Se rappeler que la même variable écrite 2 fois = seule la 2e valeur compte à la fin du scan. 3) Utiliser R_TRIG/F_TRIG pour détecter les vrais événements.\n\n**Pièges :** 1) Attendre qu'une variable change 'au milieu du scan' (impossible). 2) Compter des impulsions rapides > fréquence de scan. 3) Utiliser un compteur classique là où il faut un TON.\n\n**Bonnes pratiques :** Toujours penser en 'photo instantanée' des entrées. Dessiner le chrono. Utiliser un bloc de comptage rapide (TM Count Siemens) pour les signaux > 1 kHz.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-16.jpg"
@@ -169,8 +169,8 @@
       "position": 17,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Le cycle scan piégeux — un exemple",
-      "bodyMd": "Le déterminisme du cycle scan a un revers : certaines constructions naturelles en programmation classique sont incorrectes en PLC. Voici un piège classique qu'on rencontre systématiquement chez les débutants.\n\n```\n(* PIÈGE : détection d'un front avec une variable classique *)\n\n(* Version qui SEMBLE marcher, mais qui échoue *)\nIF Input1 AND NOT Input1_Previous THEN\n    Counter := Counter + 1;   // Incrémentation sur front montant\nEND_IF;\nInput1_Previous := Input1;    // On mémorise pour le prochain scan\n\n(* Problème : ça fonctionne — MAIS le débutant oublie que Input1\n   est lu au DÉBUT du scan et ne bouge plus jusqu'à la fin.\n   Cette version est correcte. C'est celle-ci qui piège : *)\n\n(* MAUVAIS : le TOUR de scan compte pour l'incrémentation *)\nIF Sensor AND Counter = 0 THEN\n    Counter := 5;          // OK, on démarre à 5\nEND_IF;\nIF Counter > 0 THEN\n    Counter := Counter - 1;  // On décrémente\nEND_IF;\n\n(* Ce qui se passe : Counter passe à 5 au scan N, PUIS ré-évalué à 4\n   dans la même passe. On perd un scan complet à cause de l'ordre. *)\n```\n\n**À retenir :** En PLC, les affectations d'un même scan se voient dans le même scan. C'est différent d'un langage classique. Toujours dessiner le chronogramme pour vérifier.",
+      "title": "Adressage mémoire IEC 61131-3",
+      "bodyMd": "L'adressage IEC 61131-3 utilise des préfixes pour identifier la zone mémoire, puis une adresse byte.bit. On peut (et on DOIT) utiliser un nom symbolique qui pointe vers cette adresse.\n\n```\n// Adressage direct (IEC 61131-3 standard)\n%I0.0       // Input Bit  : entrée physique 0 du module 0\n%IW10       // Input Word : 16 bits d'entrées analogiques\n%Q4.7       // Output Bit : sortie physique 7 du module 4\n%QW12       // Output Word : 16 bits de sortie\n%M100.0     // Memory Bit : mémoire interne bit\n%MW200      // Memory Word : mémoire interne word (16 bits)\n\n// Adressage symbolique (OBLIGATOIRE en projet pro)\nPump1_Start_Cmd   AT %M100.0 : BOOL;   // Commande démarrage pompe 1\nTank_Level_Raw    AT %IW10   : INT;    // Niveau brut du capteur\nMotor1_Overload   AT %I0.3   : BOOL;   // Défaut thermique moteur 1\n\n// Programme utilise le symbole, pas l'adresse\nIF Pump1_Start_Cmd AND NOT Motor1_Overload THEN\n    Pump1_Run := TRUE;\nEND_IF;\n```\n\n**À retenir :** Toujours nommer les variables. Un projet lu 6 mois plus tard avec %I0.3 partout est illisible ; avec Motor1_Overload il se relit sans doc.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-17.jpg"
@@ -179,8 +179,8 @@
       "position": 18,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Timers TON / TOF / TP en pratique",
-      "bodyMd": "IEC 61131-3 définit 3 timers standards, chacun avec une sémantique précise. Confondre TON et TOF est une des erreurs les plus fréquentes en début de carrière.\n\n```\n(* TON — On-Delay Timer : sortie retardée à l'enclenchement *)\nMotor_Startup_Timer(IN := Start_Cmd, PT := T#3s);\nMotor_Run := Motor_Startup_Timer.Q;\n// Q passe à TRUE 3 secondes APRÈS que Start_Cmd = TRUE, stable.\n// Si Start_Cmd retombe avant 3s, le timer se réinitialise.\n\n(* TOF — Off-Delay Timer : sortie prolongée après retombée *)\nFan_Stop_Timer(IN := Motor_Run, PT := T#30s);\nFan_Run := Fan_Stop_Timer.Q;\n// Q suit Motor_Run à l'enclenchement, mais reste TRUE 30s après\n// que Motor_Run retombe. Utile pour un ventilateur qui doit\n// continuer à refroidir après arrêt moteur.\n\n(* TP — Pulse Timer : impulsion de durée fixe *)\nAlarm_Pulse(IN := Fault_Detected, PT := T#500ms);\nBuzzer := Alarm_Pulse.Q;\n// Q génère UNE impulsion de 500ms à chaque front montant de\n// Fault_Detected, indépendamment de la durée réelle du défaut.\n\n(* Cas d'usage : buzzer 500ms sur défaut, même si le défaut est fugace *)\n```\n\n**À retenir :** TON pour temporiser un démarrage, TOF pour prolonger une action, TP pour une impulsion calibrée. Si vous hésitez : dessiner le chronogramme d'abord.",
+      "title": "Types de données IEC 61131-3",
+      "bodyMd": "IEC 61131-3 définit une hiérarchie de types : booléens, entiers, flottants, temporels, composés. Choisir le bon type = économiser mémoire et éviter les débordements.\n\n**BOOL (1 bit)** — Contacts, bobines, drapeaux internes. Toujours préférer BOOL à INT pour un flag.\n\n**INT / DINT (16/32 bits signés)** — Compteurs, nombres entiers courants. DINT si valeur > 32 767 ou risque de débordement.\n\n**REAL / LREAL (32/64 bits IEEE 754)** — Grandeurs analogiques : température, pression, débit. LREAL rarement utile — coût CPU.\n\n**TIME / DATE / TIME_OF_DAY** — Durées et horodatages. TIME est équivalent à DINT en ms (T#1s = 1000).\n\n**STRING / ARRAY / STRUCT** — Types composés : messages, buffers, objets structurés. Base des UDT réutilisables.\n\n**À retenir :** Erreur classique : compter des pièces en INT (max 32 767). À 100 pièces/min → débordement en 5h30. Toujours DINT pour un compteur qui monte long terme.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-18.jpg"
@@ -189,8 +189,8 @@
       "position": 19,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Compteurs CTU / CTD / CTUD",
-      "bodyMd": "- CTU (Count Up) : incrémente sur front montant CU, sortie Q = TRUE quand CV ≥ PV\n- CTD (Count Down) : décrémente sur front CD, sortie Q = TRUE quand CV ≤ 0\n- CTUD (Up-Down) : les deux combinés, avec reset R et load LD\n- PV (Preset Value) : seuil de déclenchement de Q\n- CV (Current Value) : valeur courante — utiliser DINT pour compteurs à long terme\n- Applications : compte-pièces, cadence machine, cycles d'usure, cyclage pompes\n\n💡 Un compteur en INT (max 32767) déborde en quelques heures si vous comptez chaque scan. Toujours DINT pour du long terme.",
+      "title": "Débordement INT — un cas réel",
+      "bodyMd": "Machine de remplissage de flacons. Cadence 60 flacons/min. Compteur ProductCounter déclaré en INT (16 bits signés, plage -32768 à +32767). Client demande de rapporter le total produit chaque fin de shift 8h.\n\n```\n// Code initial (piège classique)\nVAR\n    ProductCounter : INT := 0;    // 16 bits signés\nEND_VAR\n\nIF Sensor_Bottle_Rising THEN\n    ProductCounter := ProductCounter + 1;\nEND_IF;\n\n// À 60 flacons/min pendant 8h :\n// 60 × 60 × 8 = 28 800 flacons — OK, sous 32 767\n\n// À 60 flacons/min pendant 9h (une heure de plus) :\n// 60 × 60 × 9 = 32 400 flacons — encore OK\n\n// À 100 flacons/min (cadence prévue en évolution) :\n// 100 × 60 × 9 = 54 000 flacons — DÉBORDEMENT\n// Le compteur repasse à -32768 puis remonte : rapport faux, jusqu'à -11 200\n\n// CORRECTION :\nVAR\n    ProductCounter : DINT := 0;   // 32 bits signés : max 2 147 483 647\nEND_VAR\n// Débordement en 400+ ans à 100 flacons/min → sans risque\n```\n\nLe débordement a été détecté 6 mois après mise en production, quand la cadence a été augmentée. Le rapport de fin de shift affichait -11 200 flacons produits. Résultat : erreurs de facturation client + audit qualité déclenché.\n\n**À retenir :** Toujours DINT pour un compteur cumul qui monte long terme. INT réservé aux valeurs qu'on RÉINITIALISE régulièrement (dans un cycle borné).",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-19.jpg"
@@ -199,8 +199,8 @@
       "position": 20,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Structurer un projet PLC — l'architecture",
-      "bodyMd": "Un projet bien structuré se maintient facilement, se relit sans documentation exhaustive et se réutilise partiellement sur les projets suivants. Trois principes : séparation des couches, un FB par équipement, un DB d'instance par équipement.\n\n**Couche procédé (logique métier)** — Modes marche, séquences batch, régulation. Écrit en ST ou SFC. Indépendant du matériel.\n\n**Couche équipement (objets métier)** — Un FB par type d'équipement : FB_Motor, FB_Valve, FB_PID_Loop. Réutilisable.\n\n**Couche matériel (I/O mapping)** — Correspondance entre les I/O physiques et les variables symboliques. Un bloc dédié.\n\n**Couche IHM (échange SCADA)** — Un DB dédié aux échanges vers l'IHM : commandes IHM → PLC, statuts PLC → IHM.\n\n**Nommage cohérent** — M_ pour moteurs, V_ pour vannes, PID_ pour régulateurs. Suffixes _Cmd, _FB, _Sp. Documenté.\n\n**À retenir :** Un projet bien structuré représente 20 % du temps à la conception initiale et fait gagner 80 % du temps sur les 5 années suivantes d'évolution et de maintenance.",
+      "title": "Les 5 langages IEC 61131-3",
+      "bodyMd": "**GRAPHIQUES (héritage électro)**\n- LD (Ladder Diagram) : contacts + bobines type schéma élec\n- FBD (Function Block Diagram) : blocs connectés par signaux\n- SFC (Sequential Function Chart) : grafcet à étapes\n- Forts : lisibilité pour maintenance et non-informaticiens\n- Faibles : verbeux pour calcul, parcours de tableaux\n\n**TEXTUELS (héritage informatique)**\n- ST (Structured Text) : proche du Pascal / C moderne\n- IL (Instruction List) : bas niveau type assembleur\n- Forts ST : compact, boucles, algos, calculs complexes\n- Faibles ST : moins intuitif pour maintenance élec\n- IL est DÉPRÉCIÉ : plus enseigné, plus recommandé\n\n**À retenir :** Règle pragmatique : LD pour la logique simple lue par la maintenance, ST pour les algos et FB métier, SFC pour les séquences batch. FBD reste utile en régulation continue.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-20.jpg"
@@ -209,14 +209,114 @@
       "position": 21,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
+      "title": "Ladder Diagram — démarrage moteur commenté",
+      "bodyMd": "En LD, on lit de gauche à droite comme du courant électrique : les contacts sont en série (ET logique) ou en parallèle (OU logique), et alimentent des bobines à droite. C'est le langage le plus rapide à comprendre pour un électricien.\n\n```\n   |  Start   Stop     Overload     Pump_Run  |\n   |---| |----|/|-------|/|--------(   )------|\n   |                                          |\n   |  Pump_Run                                |\n   |---| |----+                               |\n   |          |    (self-hold via own coil)   |\n\nLigne 1 : Start (NO) ET NOT Stop (NC) ET NOT Overload → Pump_Run\nLigne 2 : Pump_Run maintient sa propre condition (mémoire)\n\nComportement :\n- Un appui Start démarre la pompe qui reste en marche.\n- Un appui Stop OU un défaut thermique coupe et déverrouille.\n- Auto-maintien classique — la logique d'un démarrage moteur en 5 lignes.\n```\n\n**À retenir :** LD reste le plus lu en maintenance. Écrivez la logique séquence/interlock en LD, gardez le ST pour les algos et calculs.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/plc-programming/slide-21.jpg"
     },
     {
       "position": 22,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Structured Text — anti-rebond bouton",
+      "bodyMd": "ST ressemble à Pascal ou C. Il gère aussi bien la logique combinatoire que les calculs, les boucles et les structures de données. C'est le langage préféré des projets récents. Ici : filtrer un bouton mécanique pour ignorer les rebonds < 20 ms.\n\n```\n(* Filtrage anti-rebond d'un bouton mécanique\n   Un contact mécanique rebondit typiquement 5-15 ms\n   à la fermeture. Sans filtrage, on compte 3-5 fronts. *)\n\nVAR\n    Button_Raw       : BOOL;    // Contact physique\n    Button_Debounced : BOOL;    // Sortie filtrée\n    Debounce_Timer   : TON;\nEND_VAR\n\n// Le TON attend que le bouton soit stable T#20ms\n// avant de laisser passer l'état\nDebounce_Timer(IN := Button_Raw, PT := T#20ms);\n\nIF Debounce_Timer.Q THEN\n    Button_Debounced := TRUE;\nELSIF NOT Button_Raw THEN\n    Button_Debounced := FALSE;\nEND_IF;\n\n(* Chronogramme :\n   Button_Raw :  __/_/_/__/¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯____\n                     [rebonds]     [état stable]\n   Debounced  :  ________________________/¯¯¯¯¯____\n                              [20ms après stable] *)\n```\n\n**À retenir :** ST bien écrit se relit comme un pseudo-code métier. Commentaires (* ... *), un IF par action, éviter les expressions à rallonge.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-22.jpg"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Function Block Diagram — FBD",
+      "bodyMd": "En FBD, chaque bloc est une boîte avec entrées à gauche, sorties à droite. On tire des lignes entre les blocs pour connecter les signaux. Naturel pour les automaticiens habitués aux schémas P&ID ou aux régulations continues.\n\n**Bloc AND / OR / NOT** — Logique combinatoire simple. Équivalent au LD mais en boîtes.\n\n**Blocs timers / compteurs** — Mêmes TON/TOF/CTU qu'en ST/LD, présentation graphique.\n\n**Bloc PID** — Régulateur PID complet en un bloc. Entrées SP/PV, sorties MV, paramètres Kp/Ki/Kd.\n\n**Blocs métier** — Vos propres FB (Motor, Valve) apparaissent comme des blocs à réutiliser.\n\n**Cas d'usage** — Régulation continue, dataflow signal → signal. Moins adapté à la logique séquentielle.\n\n**À retenir :** FBD excelle en régulation. Pour du calcul mathématique ou un algo complexe, préférer ST — plus compact et évolutif.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-23.jpg"
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Sequential Function Chart — SFC",
+      "bodyMd": "SFC (aussi connu comme GRAFCET) représente un procédé en étapes (steps) + transitions. Chaque étape a des actions, chaque transition est une expression booléenne. Idéal pour les séquences batch (mélange, remplissage) où les états sont clairs.\n\n**Étape initiale (double cadre)** — Une seule par grafcet. Où on démarre au reset.\n\n**Actions associées** — À l'activation (une fois), cycliques (pendant l'étape), à la désactivation (une fois).\n\n**Transitions** — Expressions booléennes (contacts + timers) qui autorisent le passage à l'étape suivante.\n\n**Divergence ET / OU** — Parallélisme (ET : toutes les branches ensemble) ou choix (OU : une branche selon condition).\n\n**Surveillance temps de séjour** — Si une étape reste active > X, alarme + passage en mode dégradé.\n\n**À retenir :** SFC bien fait est très lisible pour un batch. Mais éviter les SFC de 50+ étapes — préférer plusieurs SFC hiérarchiques.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-24.jpg"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Timers TON / TOF / TP — le triptyque",
+      "bodyMd": "IEC 61131-3 définit 3 timers, chacun avec une sémantique précise. Confondre TON et TOF est une des erreurs les plus fréquentes en début de carrière.\n\n```\n(* TON — On-Delay Timer : sortie retardée à l'enclenchement *)\nMotor_Startup_Timer(IN := Start_Cmd, PT := T#3s);\nMotor_Run := Motor_Startup_Timer.Q;\n// Q passe à TRUE 3 secondes APRÈS que Start_Cmd = TRUE, stable.\n// Si Start_Cmd retombe avant 3s, le timer se réinitialise.\n\n(* TOF — Off-Delay Timer : sortie prolongée après retombée *)\nFan_Stop_Timer(IN := Motor_Run, PT := T#30s);\nFan_Run := Fan_Stop_Timer.Q;\n// Q suit Motor_Run à l'enclenchement, mais reste TRUE 30s après\n// que Motor_Run retombe. Utile pour un ventilateur qui doit\n// continuer à refroidir après arrêt moteur.\n\n(* TP — Pulse Timer : impulsion de durée fixe *)\nAlarm_Pulse(IN := Fault_Detected, PT := T#500ms);\nBuzzer := Alarm_Pulse.Q;\n// Q génère UNE impulsion de 500ms à chaque front montant de\n// Fault_Detected, indépendamment de la durée réelle du défaut.\n```\n\n**À retenir :** TON = temporiser un démarrage. TOF = prolonger une action. TP = impulsion calibrée. Si vous hésitez : dessiner le chronogramme d'abord.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-25.jpg"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Compteurs CTU / CTD / CTUD",
+      "bodyMd": "- CTU (Count Up) : incrémente sur front CU, reset R. Sortie Q = TRUE quand CV ≥ PV\n- CTD (Count Down) : décrémente sur front CD, load LD\n- CTUD (Up-Down) : combiné, avec reset R et load LD\n- PV (Preset Value) : seuil de déclenchement de Q\n- CV (Current Value) : valeur courante — utiliser DINT pour compteurs long terme\n- Applications : compte-pièces, cadence, cycles usure, cyclage pompes\n\n💡 Un compteur en INT (max 32 767) déborde en quelques heures si vous comptez chaque scan. Toujours DINT pour du long terme.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-26.jpg"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Fronts montants / descendants",
+      "bodyMd": "R_TRIG et F_TRIG détectent les fronts. Utiles pour incrémenter un compteur sur front montant, déclencher une alarme sur passage à 1, mémoriser un événement fugace.\n\n```\n(* R_TRIG : détecte le passage 0 → 1 (front montant) *)\nVAR\n    Rising_Trigger : R_TRIG;\n    Bottle_Counter : DINT := 0;\nEND_VAR\n\nRising_Trigger(CLK := Sensor_Bottle);\n\nIF Rising_Trigger.Q THEN\n    Bottle_Counter := Bottle_Counter + 1;\nEND_IF;\n// Bottle_Counter incrémente 1 fois par flacon détecté,\n// même si le capteur reste à 1 pendant plusieurs scans.\n\n(* F_TRIG : détecte le passage 1 → 0 (front descendant) *)\nVAR\n    Falling_Trigger : F_TRIG;\nEND_VAR\n\nFalling_Trigger(CLK := Emergency_Stop_NC);\n// NC = 1 en normal, passe à 0 sur appui\nIF Falling_Trigger.Q THEN\n    // Alarme uniquement au MOMENT de l'appui,\n    // pas tant que le bouton reste enfoncé.\n    Alarm_EmergencyStop := TRUE;\nEND_IF;\n```\n\n**À retenir :** Sur un signal maintenu, une action au niveau (IF X THEN...) s'exécute à chaque scan. Un front (R_TRIG/F_TRIG) s'exécute une SEULE fois par événement.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-27.jpg"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Structurer un projet PLC",
+      "bodyMd": "Un projet bien structuré se maintient facilement, se relit sans documentation exhaustive, se réutilise partiellement. Trois principes : séparation des couches, un FB par équipement, un DB d'instance par équipement.\n\n**Couche procédé** — Modes marche, séquences batch, régulation. Écrit en ST ou SFC. Indépendant du matériel.\n\n**Couche équipement** — Un FB par type d'équipement : FB_Motor, FB_Valve, FB_PID_Loop. Réutilisable.\n\n**Couche matériel (I/O mapping)** — Correspondance entre les I/O physiques et les variables symboliques. Un bloc dédié.\n\n**Couche IHM** — Un DB dédié aux échanges IHM ↔ PLC : commandes IHM → PLC, statuts PLC → IHM.\n\n**Nommage cohérent** — M_ pour moteurs, V_ pour vannes, PID_ pour régulateurs. Suffixes _Cmd, _FB, _Sp.\n\n**À retenir :** Un projet bien structuré = 20 % du temps à la conception initiale. Il fait gagner 80 % du temps sur les 5 années suivantes d'évolution et de maintenance.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-28.jpg"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TP N1-1 : Démarrage moteur en Ladder",
+      "bodyMd": "**Contexte :** Sur votre PC : Codesys 3.5 installé + Codesys Control Win V3 comme émulateur. Créer un projet vierge avec CPU Codesys Control Win V3. Ajouter 3 tags : Start_Button (BOOL), Stop_Button (BOOL), Motor_Overload (BOOL). Ajouter une sortie Motor_Run (BOOL).\n\n**Consigne :** Écrire en LD le programme de démarrage moteur : appui sur Start démarre le moteur, appui sur Stop l'arrête, un défaut Overload le coupe et verrouille jusqu'à un reset explicite.\n\n**Attendu :** Le moteur démarre au Start, reste en marche (auto-maintien), s'arrête au Stop ou Overload. Après Overload, il ne redémarre PAS tant qu'on n'a pas fait un reset explicite (bouton Reset ou nouveau Start après disparition du défaut).\n\n💡 Utilisez une bobine SET pour Motor_Trip_Latched sur Overload, RESET par Reset_Button. Le Motor_Run finale = Start ET NOT Stop ET NOT Motor_Trip_Latched.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-29.jpg"
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "TP N1-2 : Anti-rebond en Structured Text",
+      "bodyMd": "**Contexte :** Dans le projet Codesys : Ajouter un bouton simulé Push_Button qui rebondit (utilisez le simulateur ou une entrée que vous forcerez à la main). Ajouter un compteur Presses_Counter (DINT).\n\n**Consigne :** Écrire en ST le filtrage anti-rebond du bouton (fenêtre 20 ms) puis compter les appuis PROPRES sur le front montant.\n\n**Attendu :** Chaque appui du bouton (même avec rebonds) incrémente Presses_Counter d'EXACTEMENT 1. Un compteur qui reste stable pendant que le bouton est maintenu enfoncé. Un compteur qui s'incrémente à nouveau au prochain appui.\n\n💡 1) Utilisez un TON avec PT := T#20ms pour la partie filtrage. 2) Utilisez R_TRIG sur le signal FILTRÉ (pas le brut) pour l'incrémentation. 3) Testez en forçant le bouton avec des rebonds rapides.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-30.jpg"
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "NIVEAU 1 · DÉBUTANT",
+      "title": "Récapitulatif du niveau 1",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-31.jpg"
+    },
+    {
+      "position": 32,
       "kind": "QUIZ",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "Quiz de fin de niveau 1",
@@ -227,9 +327,9 @@
           {
             "prompt": "Que veut dire IEC 61131-3 ?",
             "options": [
-              "Norme connecteurs",
-              "Norme des langages de programmation PLC",
-              "Norme cybersécurité OT"
+              "Norme des connecteurs",
+              "Norme des langages PLC",
+              "Norme cybersécurité"
             ],
             "correctIndex": 1
           },
@@ -263,7 +363,7 @@
           {
             "prompt": "Un DB d'instance sert à :",
             "options": [
-              "Backup du programme",
+              "Backup programme",
               "Stocker les données propres à une instance de FB",
               "Stocker les I/O"
             ],
@@ -272,121 +372,21 @@
           {
             "prompt": "Le langage IL est :",
             "options": [
-              "Recommandé pour les nouveaux projets",
-              "Retiré en pratique de la norme",
+              "Recommandé nouveau",
+              "Retiré en pratique",
               "Le plus rapide"
             ],
             "correctIndex": 1
           }
         ]
       },
-      "imageUrl": "/training/plc-programming/slide-22.jpg"
-    },
-    {
-      "position": 23,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2",
-      "title": "Intermédiaire",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-23.jpg"
-    },
-    {
-      "position": 24,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Function Block personnalisé — le pattern moteur",
-      "bodyMd": "Un Function Block (FB) est l'équivalent PLC d'une classe : il a des entrées, des sorties et une mémoire interne persistante. Chaque instance a son propre DB d'instance qui stocke l'état. On instancie autant de fois qu'il y a d'équipements identiques.\n\n```\nFUNCTION_BLOCK FB_Motor\nVAR_INPUT\n    Start_Cmd     : BOOL;    // Commande de démarrage (front montant)\n    Stop_Cmd      : BOOL;    // Commande d'arrêt\n    Reset_Cmd     : BOOL;    // Reset défaut (front montant)\n    Overload_In   : BOOL;    // Défaut thermique du démarreur\n    Feedback_In   : BOOL;    // Retour de marche (contact auxiliaire)\nEND_VAR\n\nVAR_OUTPUT\n    Run_Out       : BOOL;    // Commande vers démarreur\n    Trip_Out      : BOOL;    // Défaut latché — pour IHM et supervision\n    Status_Word   : WORD;    // Bit 0=Run, Bit 1=Trip, Bit 2=Ready\nEND_VAR\n\nVAR\n    Trip_Latched  : BOOL;\n    Startup_Timer : TON;     // Timer feedback (démarrage doit arriver en 5s)\nEND_VAR\n\n// Détection défaut thermique — latching\nIF Overload_In THEN Trip_Latched := TRUE; END_IF;\n\n// Reset uniquement si condition défaut disparue\nIF Reset_Cmd AND NOT Overload_In THEN Trip_Latched := FALSE; END_IF;\n\n// Commande finale\nRun_Out := Start_Cmd AND NOT Stop_Cmd AND NOT Trip_Latched;\n\n// Surveillance feedback : si commandé mais pas de retour en 5s → défaut\nStartup_Timer(IN := Run_Out AND NOT Feedback_In, PT := T#5s);\nIF Startup_Timer.Q THEN Trip_Latched := TRUE; END_IF;\n\nTrip_Out := Trip_Latched;\nStatus_Word.0 := Run_Out;\nStatus_Word.1 := Trip_Latched;\nStatus_Word.2 := NOT Trip_Latched AND NOT Overload_In;\n```\n\n**À retenir :** Un FB bien conçu se réutilise sur 10 projets sans le modifier. L'interface est le contrat — on peut refactorer l'intérieur, jamais casser l'extérieur.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-24.jpg"
-    },
-    {
-      "position": 25,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Structured Text avancé — boucles + tableaux",
-      "bodyMd": "En automation, on filtre souvent une mesure bruitée par une moyenne glissante. Le pattern classique : un buffer circulaire + une somme mise à jour + une division. En ST c'est propre et compact.\n\n```\nFUNCTION_BLOCK FB_MovingAverage\nVAR_INPUT\n    Input     : REAL;       // Nouvelle mesure\n    Reset     : BOOL;\nEND_VAR\nVAR_OUTPUT\n    Output    : REAL;       // Moyenne filtrée\nEND_VAR\nVAR CONSTANT\n    N         : INT := 20;  // Fenêtre de moyennage\nEND_VAR\nVAR\n    Buffer    : ARRAY[0..19] OF REAL;\n    Index     : INT := 0;\n    Sum       : REAL := 0.0;\n    Count     : INT := 0;   // Nb d'échantillons valides\nEND_VAR\n\nIF Reset THEN\n    FOR i := 0 TO N-1 DO Buffer[i] := 0.0; END_FOR;\n    Sum := 0.0;\n    Index := 0;\n    Count := 0;\n    Output := 0.0;\n    RETURN;\nEND_IF;\n\n// Retirer l'ancien échantillon de la somme, ajouter le nouveau\nSum := Sum - Buffer[Index] + Input;\nBuffer[Index] := Input;\n\n// Avancer l'index circulairement\nIndex := (Index + 1) MOD N;\nIF Count < N THEN Count := Count + 1; END_IF;\n\n// Sortie = moyenne\nIF Count > 0 THEN Output := Sum / INT_TO_REAL(Count); END_IF;\n```\n\n**À retenir :** Un buffer circulaire évite de tout re-sommer à chaque cycle. Pour N=20 c'est marginal, pour N=1000 ça change tout — pensez performance dès le début.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-25.jpg"
-    },
-    {
-      "position": 26,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "UDT — le type Motor structuré",
-      "bodyMd": "Un UDT (User Defined Type) est un type composé de plusieurs champs typés. Plutôt que passer 15 paramètres à un FB, on passe un seul UDT. Le code se relit mieux, les évolutions sont plus faciles.\n\n```\nTYPE UDT_MotorControl :\nSTRUCT\n    // Commandes (IHM → PLC)\n    Cmd_Start        : BOOL;\n    Cmd_Stop         : BOOL;\n    Cmd_Reset        : BOOL;\n    Sp_Speed         : REAL;    // Consigne vitesse (Hz ou %)\n\n    // Retours (PLC → IHM)\n    Fb_Running       : BOOL;\n    Fb_Tripped       : BOOL;\n    Fb_Speed_Actual  : REAL;\n    Fb_Current       : REAL;\n    Fb_Runtime_H     : DINT;    // Heures de marche cumulées\n\n    // Diagnostic\n    Fault_Code       : INT;\n    Trip_Timestamp   : DT;\nEND_STRUCT\nEND_TYPE\n\n// Utilisation dans le programme principal :\nVAR\n    Pump1  : UDT_MotorControl;\n    Pump2  : UDT_MotorControl;\n    Pump3  : UDT_MotorControl;\n    Pump4  : UDT_MotorControl;\nEND_VAR\n\n// Passage à un FB : un seul paramètre pour tout l'objet\nMotorController(Motor := Pump1);\nMotorController(Motor := Pump2);\n\n// Accès aux champs\nPump1.Cmd_Start := HMI_Start_Button_Pump1;\nIF Pump1.Fb_Tripped THEN Alarm_Set(101); END_IF;\n```\n\n**À retenir :** Un UDT est un contrat. Ajouter un champ = évolution non cassante ; renommer ou supprimer = casse tous les usages. Versionner les UDT dans un doc séparé.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-26.jpg"
-    },
-    {
-      "position": 27,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Alarmes selon ISA-18.2",
-      "bodyMd": "ISA-18.2 (Management of Alarm Systems for the Process Industries) est la norme de référence pour concevoir un système d'alarmes qui aide vraiment l'opérateur. Le principe fondateur : une alarme est un signal qui demande une action. Sans action associée, ce n'est qu'une information — et ça pollue.\n\n**Rationalisation** — Chaque alarme doit avoir une cause identifiée, une conséquence si non traitée et une action de correction connue. Sinon, la retirer.\n\n**Priorisation** — 4 niveaux max : critique (urgence), haute, basse, journal. Pas plus — un opérateur ne peut hiérarchiser au-delà.\n\n**Dead-band et délai** — Éviter les alarmes qui apparaissent/disparaissent. Hystérésis 2-5 % + délai de confirmation 3-10 s.\n\n**Latching + acquittement** — L'alarme reste active jusqu'à acquittement explicite par l'opérateur, même si la condition disparaît.\n\n**Historisation** — Buffer FIFO 10 000 événements minimum + export vers historian pour analyse post-incident.\n\n**À retenir :** Un système d'alarme sain a moins de 150 alarmes par jour par opérateur. Au-delà, la vigilance décroche — les alarmes deviennent du bruit.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-27.jpg"
-    },
-    {
-      "position": 28,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Modbus TCP vs OPC UA",
-      "bodyMd": "**MODBUS TCP**\n- Simple : 4 types de données (coils, discretes, holding, input registers)\n- Ancien (1979) mais universel — implémenté partout\n- Sécurité : néant (ni auth, ni chiffrement)\n- Modèle : maître/esclave, requête/réponse\n- Latence typique : 5-50 ms sur LAN\n- Cas d'usage : équipements simples, capteurs, variateurs\n\n**OPC UA**\n- Modèle information riche : objets, variables, méthodes, événements\n- Standard IEC 62541, adopté par tous les grands constructeurs\n- Sécurité intégrée : x509 + chiffrement + signature\n- Modèle : client/serveur ET pub/sub\n- Latence typique : 10-100 ms selon config sécurité\n- Cas d'usage : SCADA, MES, cloud, interopérabilité multi-marques\n\n**À retenir :** Modbus pour dialoguer avec un équipement simple, OPC UA pour dialoguer avec un système. En 2026, un projet greenfield choisit OPC UA — Modbus reste pour l'existant et le low-cost.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-28.jpg"
-    },
-    {
-      "position": 29,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Modbus TCP — lire un holding register",
-      "bodyMd": "Un serveur Modbus expose 4 tables (coils, discrete inputs, holding registers, input registers). Une requête typique : le maître demande N registres à partir d'une adresse, l'esclave renvoie les valeurs. Format d'une requête « Read Holding Registers » (fonction 03).\n\n```\nTRAME MODBUS TCP — Read Holding Registers (fonction 03)\n────────────────────────────────────────────────────────\nBytes  | Contenu                       | Exemple hexa\n────────────────────────────────────────────────────────\n 0-1   | Transaction ID (n° de requête)| 00 01\n 2-3   | Protocol ID (toujours 0)       | 00 00\n 4-5   | Length (nb bytes qui suivent)  | 00 06\n 6     | Unit ID (adresse esclave)      | 01\n 7     | Function code                  | 03\n 8-9   | Adresse départ registre        | 00 6B  (register 107)\n 10-11 | Nombre de registres            | 00 02  (2 registres)\n\nCode PLC (Codesys / TIA — appel équivalent) :\n\nVAR\n    Client : MB_CLIENT;\n    Reg_Values : ARRAY[0..1] OF WORD;\nEND_VAR\n\nClient(\n    REQ         := TRUE,\n    IP_ADDR     := '192.168.1.50',\n    IP_PORT     := 502,\n    MB_UNIT_ID  := 1,\n    MB_DATA_ADDR:= 107,       // Register de départ\n    MB_DATA_LEN := 2,          // Nombre à lire\n    MB_DATA_PTR := ADR(Reg_Values),\n    DONE        => Done,\n    ERROR       => Err\n);\nIF Done THEN\n    Level_Tank := WORD_TO_INT(Reg_Values[0]);\n    Flow_Pump  := WORD_TO_INT(Reg_Values[1]);\nEND_IF;\n```\n\n**À retenir :** Modbus est simple mais pas robuste : pas de sécurité, timeout de 1s à gérer, retry x3 recommandés, gestion des exceptions (code fonction + 0x80).",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-29.jpg"
-    },
-    {
-      "position": 30,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "OPC UA — modèle information",
-      "bodyMd": "OPC UA n'est pas juste un protocole de communication : c'est un standard de modélisation d'information. On y expose des Objets (équipements) qui contiennent des Variables (mesures), des Méthodes (actions) et émettent des Événements (alarmes). Le tout avec sécurité intégrée et hiérarchie navigable.\n\n**Address Space** — Espace de noms hiérarchique. Un client peut naviguer /Objects/Server/Pump1/Speed sans doc préalable.\n\n**Data model** — Types définis (Variable, Object, DataType, ReferenceType). Extensible via Companion Specs métier.\n\n**Sécurité** — Authentification par certificat x509 + chiffrement AES + signature. Certificat auto-signé possible en interne.\n\n**Subscribe/Publish** — Le client s'abonne aux changements, le serveur notifie. Beaucoup plus efficace que le polling classique.\n\n**Companion Specs** — Profils métier standardisés : PackML (packaging), Robotics, Machine Vision, Injection Molding, etc.\n\n**À retenir :** OPC UA découple l'application du protocole. Un même SCADA parle à un PLC Siemens, une machine Rockwell, un robot ABB et un capteur IO-Link — tous exposent leurs données de la même manière.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-30.jpg"
-    },
-    {
-      "position": 31,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Debug live — les vraies bonnes pratiques",
-      "bodyMd": "- Watch table : lecture temps réel de variables. Utiliser plusieurs tables thématiques, pas une seule fourre-tout\n- Forçage : imposer une valeur à une E/S. Toujours logger + prévenir + retirer AVANT de partir\n- Trend recording : capture d'échantillons pour analyse offline. Idéal pour comprendre un dérive lente\n- Breakpoints (CPU récentes) : arrêter le programme sur condition. Attention : ça met le procédé sur pause !\n- Comparaison online/offline : détecter une divergence entre projet et CPU. À faire avant TOUT téléchargement\n- Après chaque intervention : commit dans Git avec le commentaire du pourquoi, pas seulement le quoi\n\n💡 Un forçage oublié un vendredi soir est un incident garanti le lundi matin. Toujours un tableau de suivi des forçages actifs partagé équipe.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-31.jpg"
-    },
-    {
-      "position": 32,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Sécurité fonctionnelle — F-PLC et SIL",
-      "bodyMd": "La sécurité fonctionnelle traite les risques que le système lui-même peut créer : un moteur qui démarre intempestivement, une vanne qui reste ouverte, une presse qui se referme. Un F-PLC (Failsafe PLC) est une CPU spéciale certifiée qui exécute un programme dédié où le moindre défaut fait passer les sorties à l'état sûr (généralement dé-énergisé).\n\n**Analyse de risque en amont** — Identification des dangers, gravité (S1-S4), fréquence, possibilité d'évitement. Aboutit à un niveau SIL cible.\n\n**SIL 1 à 4 (IEC 61508)** — SIL 1 : défaillance dangereuse toutes 10-100 ans. SIL 4 : 10⁴ à 10⁵ ans. La plupart des projets sont SIL 2 ou 3.\n\n**F-CPU + F-modules** — CPU avec deux processeurs qui s'auto-comparent. Modules E/S avec diagnostic intégré (câble coupé, court-circuit).\n\n**Programme F** — Langage restreint, blocs certifiés (F-libraries constructeur), pas d'arithmétique flottante généralement.\n\n**État sûr = dé-énergisé** — Convention : une sortie F passe à 0 en cas de défaut. L'énergie disparaît, l'actionneur revient à sa position de repos.\n\n**À retenir :** F-PLC ≠ PLC classique + prudence. C'est du matériel certifié, un programme certifié, des tests d'acceptation validés par un organisme (TÜV, UL, exida).",
-      "notes": null,
-      "quiz": null,
       "imageUrl": "/training/plc-programming/slide-32.jpg"
     },
     {
       "position": 33,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
@@ -394,6 +394,176 @@
     },
     {
       "position": 34,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Function Block — l'équivalent d'une classe",
+      "bodyMd": "Un Function Block (FB) est l'équivalent PLC d'une classe orientée objet. Il a des entrées, des sorties, et une mémoire interne persistante entre les appels. On l'instancie autant de fois qu'il y a d'équipements identiques. Interface figée = évolutions internes sans casser les appelants.\n\n**Entrées / sorties** — L'interface publique. Une fois figée, on peut ajouter mais rarement supprimer sans casser.\n\n**Mémoire interne persistante** — Variables déclarées VAR gardent leur valeur entre les scans. Base pour timers, compteurs, états.\n\n**DB d'instance obligatoire** — Chaque instance a son propre DB. FB Motor + 4 pompes = 4 DB d'instance distincts.\n\n**Réutilisation massive** — Un FB Motor bien fait sert sur 10 projets différents sans modification.\n\n**Versioning + auteur** — Métadonnées dans les commentaires du FB. Base pour bibliothèques d'entreprise.\n\n**À retenir :** Un FB bien conçu se réutilise sur 10 projets sans le modifier. L'interface est le CONTRAT — on peut refactorer l'intérieur, jamais casser l'extérieur.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-34.jpg"
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "FB Motor — l'exemple canonique",
+      "bodyMd": "Voici la structure d'un FB Motor typique. Il encapsule toute la logique de pilotage : commandes IHM, retours d'état, détection de défauts, latching. Interface simple, code réutilisable.\n\n```\nFUNCTION_BLOCK FB_Motor\nVAR_INPUT\n    Start_Cmd     : BOOL;    // Front montant = démarrage\n    Stop_Cmd      : BOOL;    // Arrêt\n    Reset_Cmd     : BOOL;    // Front montant = reset défaut\n    Overload_In   : BOOL;    // Défaut thermique démarreur\n    Feedback_In   : BOOL;    // Retour de marche (contact aux)\nEND_VAR\n\nVAR_OUTPUT\n    Run_Out       : BOOL;    // Commande vers démarreur\n    Trip_Out      : BOOL;    // Défaut latché pour IHM\n    Ready_Out     : BOOL;    // Prêt à démarrer (no fault, no feedback)\nEND_VAR\n\nVAR\n    Trip_Latched  : BOOL;\n    Startup_Timer : TON;     // Feedback doit arriver en 5 s\nEND_VAR\n\n// 1. Détection défaut thermique — latching\nIF Overload_In THEN Trip_Latched := TRUE; END_IF;\n\n// 2. Reset uniquement si condition défaut disparue\nIF Reset_Cmd AND NOT Overload_In THEN Trip_Latched := FALSE; END_IF;\n\n// 3. Commande finale\nRun_Out := Start_Cmd AND NOT Stop_Cmd AND NOT Trip_Latched;\n\n// 4. Surveillance feedback : commandé mais pas de retour en 5 s → défaut\nStartup_Timer(IN := Run_Out AND NOT Feedback_In, PT := T#5s);\nIF Startup_Timer.Q THEN Trip_Latched := TRUE; END_IF;\n\n// 5. Sorties visibles à l'IHM\nTrip_Out := Trip_Latched;\nReady_Out := NOT Trip_Latched AND NOT Overload_In;\n```\n\n**À retenir :** Ce FB Motor est réutilisable tel quel sur 90 % des projets. C'est ce qu'on appelle un COMPOSANT — une brique qu'on assemble.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-35.jpg"
+    },
+    {
+      "position": 36,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "FB deep dive — l'interface stable dans le temps",
+      "bodyMd": "**Pourquoi :** L'interface d'un FB est un CONTRAT avec tous ses appelants. Si vous cassez l'interface (renommer une entrée, changer un type), TOUS les projets qui utilisent ce FB sont cassés. Grosse dette technique.\n\n**Comment :** 1) Nommer les entrées/sorties clairement dès le début. 2) Utiliser des UDT pour grouper des paramètres liés. 3) Réserver des entrées 'future use' si possible. 4) Documenter chaque entrée/sortie avec un commentaire clair.\n\n**Pièges :** 1) Renommer une entrée après diffusion. 2) Changer un type INT → REAL. 3) Ajouter un paramètre obligatoire au milieu (breaking).\n\n**Bonnes pratiques :** Modifs non cassantes : ajouter des entrées optionnelles à la fin, ajouter des sorties. Modifs cassantes : bumper la version majeure (v1.x → v2.0) et communiquer.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-36.jpg"
+    },
+    {
+      "position": 37,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "DB d'instance vs DB global",
+      "bodyMd": "Un DB (Data Block) est un bloc de mémoire structuré. Deux types : DB d'INSTANCE (attaché à un FB, stocke son état) et DB GLOBAL (partagé, accessible par tous). Choisir le bon type conditionne la maintenabilité.\n\n**DB d'instance** — Créé automatiquement à l'appel d'un FB. Stocke SES variables VAR. Un par instance : Pump1_DB, Pump2_DB...\n\n**DB global** — Créé manuellement. Accessible par TOUS les blocs. Utilisé pour paramètres partagés, échanges IHM.\n\n**Quand utiliser instance** — État interne d'un objet métier (Motor, Valve). Encapsulation stricte.\n\n**Quand utiliser global** — Paramètres recette, échanges IHM ↔ PLC, données de traçabilité batch.\n\n**Anti-pattern** — Utiliser un DB global pour l'état d'un moteur → couplage fort, difficile à réutiliser.\n\n**À retenir :** État interne d'un objet → DB d'instance. Paramètres partagés → DB global. Mélanger les deux = spaghetti à 6 mois.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-37.jpg"
+    },
+    {
+      "position": 38,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "UDT — le contrat d'un équipement",
+      "bodyMd": "Un UDT (User Defined Type) est un STRUCT nommé, réutilisable partout. Il devient le CONTRAT entre PLC, IHM et SCADA. Pattern classique : 3 sections Cmd (IHM→PLC), Fb (PLC→IHM), Cfg (paramètres persistants).\n\n```\nTYPE UDT_MotorControl :\nSTRUCT\n    // ─── Commandes (IHM/SCADA → PLC) ───\n    Cmd : STRUCT\n        Start       : BOOL := FALSE;\n        Stop        : BOOL := FALSE;\n        Reset       : BOOL := FALSE;\n        Auto_Mode   : BOOL := TRUE;\n        Sp_Speed_Hz : REAL := 50.0;\n    END_STRUCT;\n\n    // ─── Retours (PLC → IHM/SCADA) ───\n    Fb : STRUCT\n        Running      : BOOL;\n        Tripped      : BOOL;\n        Ready        : BOOL;\n        Speed_Actual : REAL;\n        Current_A    : REAL;\n        Runtime_H    : DINT;\n        Last_Trip_DT : DT;      // Timestamp dernier défaut\n    END_STRUCT;\n\n    // ─── Config (persistante en NV) ───\n    Cfg : STRUCT\n        Speed_Min      : REAL := 10.0;\n        Speed_Max      : REAL := 60.0;\n        Overload_Delay : TIME := T#5s;\n        Priority       : INT  := 1;\n    END_STRUCT;\nEND_STRUCT;\nEND_TYPE\n\n// Instance dans le programme\nVAR\n    Pump1 : UDT_MotorControl;\n    Pump2 : UDT_MotorControl;\n    Pump3 : UDT_MotorControl;\nEND_VAR\n\n// Accès aux champs\nPump1.Cmd.Start := HMI_Pump1_Start_Button;\nIF Pump1.Fb.Tripped THEN Alarm_Set(101); END_IF;\nIF Pump1.Fb.Speed_Actual > Pump1.Cfg.Speed_Max THEN\n    // Sur-vitesse détectée\nEND_IF;\n```\n\n**À retenir :** UDT bien versionné = maintenance facile. Ajouter un champ = évolution non cassante. Renommer/supprimer = tous les usages cassent.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-38.jpg"
+    },
+    {
+      "position": 39,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "ST avancé — boucles et tableaux",
+      "bodyMd": "En automation, on filtre souvent une mesure bruitée par une moyenne glissante. Le pattern : un buffer circulaire + une somme mise à jour + une division. Compact et efficace.\n\n```\nFUNCTION_BLOCK FB_MovingAverage\nVAR_INPUT\n    Input : REAL;\n    Reset : BOOL;\nEND_VAR\nVAR_OUTPUT\n    Output : REAL;\nEND_VAR\nVAR CONSTANT\n    N : INT := 20;\nEND_VAR\nVAR\n    Buffer : ARRAY[0..19] OF REAL;\n    Index  : INT := 0;\n    Sum    : REAL := 0.0;\n    Count  : INT := 0;\nEND_VAR\n\nIF Reset THEN\n    FOR i := 0 TO N-1 DO Buffer[i] := 0.0; END_FOR;\n    Sum := 0.0; Index := 0; Count := 0; Output := 0.0;\n    RETURN;\nEND_IF;\n\n// Retirer l'ancien échantillon, ajouter le nouveau\nSum := Sum - Buffer[Index] + Input;\nBuffer[Index] := Input;\nIndex := (Index + 1) MOD N;\n\nIF Count < N THEN Count := Count + 1; END_IF;\nIF Count > 0 THEN Output := Sum / INT_TO_REAL(Count); END_IF;\n```\n\n**À retenir :** Un buffer circulaire évite de tout re-sommer à chaque cycle. Pour N=20 marginal, pour N=1000 ça change tout. Penser performance dès le début.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-39.jpg"
+    },
+    {
+      "position": 40,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "SFC en pratique — cycle de mélange",
+      "bodyMd": "Une cuve de mélange : 3 doseurs (matières A, B, C), 1 agitateur variateur, 1 vanne de vidange. Cycle de production : dosage A → dosage B → mélange 5 min → dosage C → mélange 3 min → vidange.\n\n```\nGRAFCET DU CYCLE DE MÉLANGE\n\nÉtape 0 (initiale) : ATTENTE\n  Transition : Start_Batch AND Cuve_Vide\n\nÉtape 10 : DOSAGE_A\n  Actions : Pump_A := TRUE ;  MonitorTimer(T#5min)\n  Transition : Weigh >= Recipe.QtyA\n\nÉtape 20 : DOSAGE_B\n  Actions : Pump_A := FALSE ; Pump_B := TRUE\n  Transition : Weigh >= (Recipe.QtyA + Recipe.QtyB)\n\nÉtape 30 : MELANGE_1\n  Actions : Pump_B := FALSE ; Agitator := TRUE ;\n            MixTimer1(T#5min)\n  Transition : MixTimer1.Q\n\nÉtape 40 : DOSAGE_C\n  Actions : Agitator := FALSE ; Pump_C := TRUE\n  Transition : Weigh >= Total_Weight\n\nÉtape 50 : MELANGE_2\n  Actions : Pump_C := FALSE ; Agitator := TRUE ;\n            MixTimer2(T#3min)\n  Transition : MixTimer2.Q\n\nÉtape 60 : VIDANGE\n  Actions : Agitator := FALSE ; Drain_Valve := TRUE\n  Transition : Level < 5.0\n\nÉtape 90 : FIN_BATCH\n  Actions : Drain_Valve := FALSE ; Report_Batch()\n  Transition : ACK_Batch → retour Étape 0\n```\n\nLe SFC modélise proprement une séquence linéaire de 7 étapes. Chaque étape a un rôle clair, une transition explicite. Modification d'une étape = modification LOCALE, pas de risque de casser les autres.\n\n**À retenir :** SFC est excellent pour du batch < 15 étapes. Au-delà, découper en plusieurs SFC hiérarchiques : un SFC 'orchestrateur' qui appelle des SFC 'sous-procédés'.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-40.jpg"
+    },
+    {
+      "position": 41,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Alarmes ISA-18.2 — la méthode",
+      "bodyMd": "ISA-18.2 est la norme de référence pour concevoir un système d'alarmes qui aide vraiment l'opérateur. Principe fondateur : une alarme est un signal qui demande une ACTION. Sans action associée, ce n'est qu'une information — et ça pollue.\n\n**Rationalisation** — Chaque alarme doit avoir : une cause identifiée, une conséquence si non traitée, une action de correction connue. Sinon, la retirer.\n\n**Priorisation** — 4 niveaux max : critique (urgence), haute, basse, journal. Pas plus — un opérateur ne peut hiérarchiser au-delà.\n\n**Dead-band et délai** — Éviter les alarmes qui apparaissent/disparaissent. Hystérésis 2-5 % + délai confirmation 3-10 s.\n\n**Latching + acquittement** — L'alarme reste active jusqu'à acquittement explicite par l'opérateur, même si condition disparue.\n\n**Historisation** — Buffer FIFO 10 000 événements minimum + export vers historian pour analyse post-incident.\n\n**À retenir :** Un système d'alarme sain a moins de 150 alarmes/jour/opérateur. Au-delà, la vigilance décroche — les alarmes deviennent du bruit.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-41.jpg"
+    },
+    {
+      "position": 42,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Alarme avec hystérésis + latching",
+      "bodyMd": "Une mesure bruitée oscille autour du seuil d'alarme. Sans hystérésis, l'alarme clignote 20 fois par seconde. Solution : seuil de déclenchement + seuil de retombée + latching jusqu'à acquittement.\n\n```\nFUNCTION_BLOCK FB_Alarm_High\nVAR_INPUT\n    Value        : REAL;\n    Sp_Trigger   : REAL;        // Seuil déclenchement\n    Sp_Reset     : REAL;        // Seuil retombée (Sp_Reset < Sp_Trigger)\n    Ack_Cmd      : BOOL;        // Acquittement opérateur\n    ConfirmDelay : TIME := T#3s;\nEND_VAR\nVAR_OUTPUT\n    Alarm_Active : BOOL;        // Alarme visible IHM\n    Alarm_Ack    : BOOL;        // Alarme acquittée\nEND_VAR\nVAR\n    Above_Trigger : BOOL;\n    Confirm_Timer : TON;\n    Alarm_Latched : BOOL;\n    Ack_Trigger   : R_TRIG;\nEND_VAR\n\n// Détection avec hystérésis\nIF Value > Sp_Trigger THEN Above_Trigger := TRUE;\nELSIF Value < Sp_Reset THEN Above_Trigger := FALSE;\nEND_IF;\n\n// Confirmation avant lever l'alarme\nConfirm_Timer(IN := Above_Trigger, PT := ConfirmDelay);\nIF Confirm_Timer.Q THEN Alarm_Latched := TRUE; END_IF;\n\n// Acquittement : sortie de latch uniquement si condition disparue\nAck_Trigger(CLK := Ack_Cmd);\nIF Ack_Trigger.Q AND NOT Above_Trigger THEN\n    Alarm_Latched := FALSE;\n    Alarm_Ack := TRUE;\nELSIF Above_Trigger THEN\n    Alarm_Ack := FALSE;\nEND_IF;\n\nAlarm_Active := Alarm_Latched;\n```\n\n**À retenir :** Hystérésis + délai confirmation = alarme stable. Latching + ack = trace opérationnelle. Sans ces 3 patterns, système d'alarme inutilisable.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-42.jpg"
+    },
+    {
+      "position": 43,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Communications industrielles — panorama",
+      "bodyMd": "Un PLC moderne dialogue avec 3 types de partenaires : capteurs/actionneurs terrain (bus fieldbus), autres PLC/HMI (LAN industriel), systèmes IT (Ethernet/OPC UA/MQTT). Chaque contexte a son protocole optimal.\n\n**Terrain — Modbus RTU (série)** — Simple, universel, coût minime. Cible : variateurs, capteurs low-cost, longues distances < 12 Mbit/s.\n\n**Terrain — Profinet cyclique** — Ethernet industriel déterministe. Cible : couplage étroit PLC ↔ ET 200 périphérie déportée.\n\n**PLC ↔ PLC** — OPC UA client/server pour projets récents. S7-communication legacy Siemens.\n\n**PLC ↔ SCADA** — OPC UA server sur PLC + OPC UA client sur SCADA. Standard moderne 2020s.\n\n**PLC ↔ Cloud/IT** — MQTT/Sparkplug B via broker (HiveMQ/Mosquitto). Léger, event-driven, scalable.\n\n**À retenir :** En 2026, projet greenfield : Modbus RTU en local terrain + Profinet pour périphérie + OPC UA vers SCADA + MQTT vers cloud. Modbus TCP réservé à l'existant.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-43.jpg"
+    },
+    {
+      "position": 44,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Modbus TCP — lire un capteur température",
+      "bodyMd": "Cas concret : un capteur température expose sa mesure dans le holding register 40001 (adresse 0). On veut lire la valeur toutes les secondes.\n\n```\n(* Configuration Modbus TCP client dans le PLC *)\nVAR\n    Modbus_Client : MB_CLIENT;\n    Cycle_Timer   : TON;\n    Temperature   : INT;      // Valeur brute Modbus\n    Temp_Celsius  : REAL;     // Après scaling\n    Modbus_Error  : BOOL;\nEND_VAR\n\n// Cycle 1 s\nCycle_Timer(IN := NOT Cycle_Timer.Q, PT := T#1s);\n\n// Appel Modbus sur front montant du timer\nModbus_Client(\n    REQ         := Cycle_Timer.Q,\n    IP_ADDR     := '192.168.1.100',\n    IP_PORT     := 502,\n    MB_UNIT_ID  := 1,             // ID esclave\n    MB_FCT_CODE := 3,             // Read holding registers\n    MB_DATA_ADDR:= 0,             // Registre 40001 → offset 0\n    MB_DATA_LEN := 1,             // 1 registre\n    MB_DATA_PTR := ADR(Temperature),\n    DONE        => Done,\n    BUSY        => Busy,\n    ERROR       => Modbus_Error\n);\n\n// Scaling : capteur retourne 250 pour 25.0 °C\nIF Done AND NOT Modbus_Error THEN\n    Temp_Celsius := INT_TO_REAL(Temperature) / 10.0;\nEND_IF;\n\n// Gestion défaut communication\nIF Modbus_Error THEN\n    Alarm_Set('Modbus_Comm_Lost');\nEND_IF;\n```\n\n**À retenir :** Modbus en prod : timeout 1 s, retry 3 fois avant alarme, bien gérer les erreurs. Ne jamais supposer que le lien est fiable.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-44.jpg"
+    },
+    {
+      "position": 45,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "OPC UA — le standard moderne",
+      "bodyMd": "OPC UA est LE standard 2020s pour l'interopérabilité industrielle. Contrairement à Modbus (registres numériques bruts), il expose des objets métier avec nom, unité, type. Serveur intégré nativement dans les PLC modernes (S7-1500 depuis firmware V2).\n\n**Address space** — Espace hiérarchique navigable. Ex /Objects/Pump1/Speed_Actual — le client découvre sans doc externe.\n\n**Types + méthodes** — Chaque variable a son type (REAL, DINT), son unité (m³/h), sa description. Méthodes appelables (StartPump, ResetAlarms).\n\n**Sécurité intégrée** — Certificats x509 + chiffrement AES + signature. Bannir la sécurité 'None' en prod.\n\n**Subscribe/publish** — Le client s'abonne aux changements, le serveur push. Plus efficace que le polling classique.\n\n**Companion Specs** — Profils métier : PackML (packaging), Umati (machine-tool), Robotics. Standard sectoriel.\n\n**À retenir :** Depuis firmware V2, tout S7-1500 est aussi serveur OPC UA. Activer, sécuriser, exposer les DB métier — le SCADA suit.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-45.jpg"
+    },
+    {
+      "position": 46,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Debug live — la routine du forçage",
+      "bodyMd": "1. AVANT de forcer : identifier l'impact procédé (moteur qui démarre ? vanne qui s'ouvre ?)\n2. Prévenir l'équipe présente : 'Je force I0.5 pour test — ne touchez rien'\n3. Noter le forçage dans un tableau partagé (variable, valeur, opérateur, heure)\n4. Forcer avec une justification claire : 'test alarme thermique moteur 1'\n5. Réaliser le test le plus rapidement possible\n6. RETIRER le forçage IMMÉDIATEMENT après le test\n7. Confirmer la valeur RÉELLE en lecture après retrait\n8. Mettre à jour le tableau partagé : forçage retiré, heure, opérateur\n9. En fin de session : re-vérifier qu'aucun forçage n'est resté actif\n\n⚠ Un forçage oublié un vendredi soir = incident garanti le lundi matin. Zéro exception à la règle.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-46.jpg"
+    },
+    {
+      "position": 47,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Sécurité fonctionnelle — F-PLC et SIL",
+      "bodyMd": "La sécurité fonctionnelle traite les risques que le système lui-même peut créer : moteur qui démarre intempestivement, vanne qui reste ouverte, presse qui se referme. Un F-PLC (Failsafe PLC) est une CPU certifiée qui exécute un programme dédié où le moindre défaut fait passer les sorties à l'état sûr.\n\n**Analyse de risque** — Identification des dangers, gravité, fréquence, possibilité d'évitement. Aboutit à un niveau SIL cible.\n\n**SIL 1 à 4 (IEC 61508)** — SIL 1 : défaillance dangereuse tous 10-100 ans. SIL 4 : 10⁴ à 10⁵ ans. La plupart des projets = SIL 2 ou 3.\n\n**F-CPU + F-modules** — CPU avec 2 processeurs auto-comparés. Modules E/S avec diagnostic intégré.\n\n**Programme F** — Langage restreint, blocs certifiés (F-libraries constructeur), pas de flottant en général.\n\n**État sûr = dé-énergisé** — Convention : sortie F passe à 0 en défaut. L'actionneur revient à sa position de repos.\n\n**À retenir :** F-PLC ≠ PLC classique + prudence. C'est du matériel certifié + programme certifié + tests validés par organisme (TÜV, exida). Sans cela : pas de valeur juridique en cas d'accident.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-47.jpg"
+    },
+    {
+      "position": 48,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-1 : Créer un FB Vanne réutilisable",
+      "bodyMd": "**Contexte :** Vous devez concevoir un FB_Valve réutilisable qui gère une vanne motorisée avec retour de position. Entrées à prévoir : Cmd_Open, Cmd_Close, Fbk_Opened (fin de course ouverte), Fbk_Closed (fin de course fermée). Sorties : Cmd_Motor_Open, Cmd_Motor_Close, State (Open / Closed / Moving / Fault).\n\n**Consigne :** 1) Concevoir un UDT_ValveControl avec sections Cmd / Fb / Cfg. 2) Écrire le FB_Valve en ST qui utilise cet UDT. 3) Gérer le timeout : si commandée ouverte mais Fbk_Opened n'arrive pas en 30 s → défaut latché. 4) Reset uniquement via Cmd_Reset ET les fins de course qui reviennent cohérentes.\n\n**Attendu :** Instancier 3 vannes (V1, V2, V3) dans OB1, chacune avec son propre UDT. Vérifier au watch table : cmd_open sur V1 ouvre V1 seulement. Un défaut V2 n'impacte pas V1. Un reset V1 débloque uniquement V1.\n\n💡 Utiliser un état INT (0=Closed, 1=Opening, 2=Open, 3=Closing, 4=Moving_Timeout, 5=Fault) et une machine à états CASE OF. Un TON pour chaque sens de mouvement avec PT := 30 s.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-48.jpg"
+    },
+    {
+      "position": 49,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "TP N2-2 : Client Modbus TCP en Codesys",
+      "bodyMd": "**Contexte :** Installez le simulateur ModbusPal (gratuit) ou Modbus Slave (Modbus Tools) sur votre PC. Configurez-le pour exposer 5 registres avec des valeurs connues (ex : reg 40001 = 100, reg 40002 = 200, etc). Le PLC Codesys tourne sur le même poste.\n\n**Consigne :** 1) Ajouter la bibliothèque ModbusTCP dans le projet Codesys. 2) Configurer un client Modbus TCP vers 127.0.0.1:502 avec unit ID 1. 3) Lire les 5 registres toutes les 500 ms. 4) Afficher les valeurs dans un watch table Codesys. 5) Simuler une coupure (fermer ModbusPal) → vérifier que le PLC détecte le défaut de communication.\n\n**Attendu :** Watch table Codesys affiche les 5 valeurs correspondant à ce qui est configuré dans ModbusPal. Modification côté ModbusPal → mise à jour côté PLC dans les 500 ms. Fermeture ModbusPal → variable ModbusError passe à TRUE dans les 1-3 secondes.\n\n💡 Le bloc à utiliser dépend de votre lib (ex 'ModbusMasterTcp' dans Codesys). Timeout à 1 s. Gérer la re-connexion automatique en boucle. Vérifier avec Wireshark que les trames Modbus circulent bien.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-49.jpg"
+    },
+    {
+      "position": 50,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Récapitulatif du niveau 2",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-50.jpg"
+    },
+    {
+      "position": 51,
       "kind": "QUIZ",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
       "title": "Quiz de fin de niveau 2",
@@ -424,16 +594,16 @@
             "options": [
               "Gestion des alarmes",
               "Protocoles réseau",
-              "Le grafcet"
+              "Grafcet"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "Un DB paramétrable permet :",
             "options": [
-              "Sécuriser le programme",
-              "Modifier des réglages sans re-download",
-              "Accélérer le scan"
+              "Sécuriser programme",
+              "Modifier réglages sans re-download",
+              "Accélérer scan"
             ],
             "correctIndex": 1
           },
@@ -442,125 +612,185 @@
             "options": [
               "Un DB global",
               "Un DB d'instance dédié",
-              "La RAM CPU volatile"
+              "La RAM volatile"
             ],
             "correctIndex": 1
           },
           {
             "prompt": "Une F-CPU garantit :",
             "options": [
-              "De la vitesse",
-              "Que la sortie passe à un état sûr en cas de défaut",
-              "Une meilleure IHM"
+              "Vitesse",
+              "Sortie à état sûr en cas de défaut",
+              "Meilleure IHM"
             ],
             "correctIndex": 1
           }
         ]
       },
-      "imageUrl": "/training/plc-programming/slide-34.jpg"
+      "imageUrl": "/training/plc-programming/slide-51.jpg"
     },
     {
-      "position": 35,
+      "position": 52,
       "kind": "CONTENT",
       "section": "NIVEAU 3",
       "title": "Expert",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-35.jpg"
+      "imageUrl": "/training/plc-programming/slide-52.jpg"
     },
     {
-      "position": 36,
+      "position": 53,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
       "title": "Redondance CPU — hot / warm / cold",
-      "bodyMd": "**HOT STANDBY**\n- Deux CPU synchronisées en permanence, câble sync haut débit\n- Bascule automatique en <100 ms sans perte d'état\n- RTO ≈ 100 ms · RPO = 0\n- Coût : 2× hardware + licence redondance + câblage\n- Applications : criticité vitale (pharma, énergie, chimie continue)\n\n**WARM ET COLD**\n- WARM : CPU secondaire à jour périodiquement (toutes N minutes)\n- WARM : bascule quelques secondes, éventuelle perte du dernier delta\n- WARM : RTO ≈ 2-10 s · RPO ≈ 1-5 min\n- COLD : CPU de rechange, chargement manuel après panne\n- COLD : RTO ≈ 30-120 min · RPO variable — le procédé s'arrête\n\n**À retenir :** Choisir hot standby uniquement si le coût d'un arrêt de 5 minutes dépasse le coût de la redondance. La plupart des lignes de production tournent en simplex + maintenance rapide.",
+      "bodyMd": "**HOT STANDBY**\n- Deux CPU synchronisées en permanence via câble sync fibre\n- Bascule automatique <100 ms sans perte d'état\n- RTO ≈ 100 ms · RPO = 0\n- Coût : 2× hardware CPU + licence + câbles + tests\n- Application : criticité vitale (pharma, énergie, chimie)\n\n**WARM & COLD**\n- WARM : CPU secondaire à jour périodiquement (toutes N min)\n- WARM : bascule quelques s, perte du dernier delta\n- WARM : RTO ≈ 2-10 s · RPO ≈ 1-5 min\n- COLD : CPU de rechange, chargement manuel après panne\n- COLD : RTO ≈ 30-120 min · RPO variable — procédé s'arrête\n\n**À retenir :** Hot standby uniquement si coût d'arrêt >>> coût redondance. La plupart des lignes de production tournent en simplex + maintenance rapide.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-36.jpg"
+      "imageUrl": "/training/plc-programming/slide-53.jpg"
     },
     {
-      "position": 37,
+      "position": 54,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Redondance réseau — MRP, PRP, HSR",
-      "bodyMd": "Un anneau ou une paire de réseaux parallèles permet de survivre à la coupure d'un câble ou d'un switch. Trois protocoles se partagent le marché avec des trade-offs distincts.\n\n**MRP (Media Redundancy Protocol)** — Anneau logique de switches, un manager coupe un lien pour éviter la boucle. Bascule 200 ms. Peu coûteux, largement adopté.\n\n**PRP (Parallel Redundancy Protocol)** — Deux réseaux totalement séparés. Chaque trame émise en double, filtrage à la réception. Bascule 0 ms, aucune perte.\n\n**HSR (High-availability Seamless Redundancy)** — Anneau + duplication trames. Bascule 0 ms comme PRP, moins de câbles mais topologie plus complexe.\n\n**Choix** — MRP = compromis coût/dispo courant. PRP = criticité maximale (safety, énergie). HSR = anneau économique zéro-perte.\n\n**À retenir :** MRP protège d'une coupure de câble ; PRP protège aussi d'un switch défaillant. Le mauvais choix se paie 20 ans après en pannes cachées.",
+      "title": "Redondance réseau — MRP / PRP / HSR",
+      "bodyMd": "Un réseau industriel ne peut pas se permettre une perte de communication même de 100 ms. Trois protocoles normalisés permettent de tolérer coupures câble ou défaillances switch, avec des trade-offs.\n\n**MRP (Media Redundancy Protocol)** — Anneau logique de switches, un manager coupe un lien pour éviter la boucle. Bascule 200 ms.\n\n**PRP (Parallel Redundancy Protocol)** — 2 réseaux totalement séparés. Chaque trame émise en double, filtrage à la réception. Bascule 0 ms.\n\n**HSR (High-availability Seamless Redundancy)** — Anneau + duplication trames. Bascule 0 ms comme PRP, moins de câbles.\n\n**Choix pratique** — MRP = compromis coût/dispo. PRP = criticité maximale (safety, énergie). HSR = anneau économique zéro perte.\n\n**Diagnostic complexe** — Anneau mal configuré = boucle broadcast = tempête. Toujours documenter le manager et surveiller.\n\n**À retenir :** MRP protège d'une coupure câble. PRP protège aussi d'un switch défaillant. Le mauvais choix se paie 20 ans après en pannes cachées.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-37.jpg"
+      "imageUrl": "/training/plc-programming/slide-54.jpg"
     },
     {
-      "position": 38,
+      "position": 55,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "IEC 62443 — le cadre cybersécurité OT",
-      "bodyMd": "IEC 62443 (ex-ISA-99) est la norme cadre de cybersécurité pour les Industrial Control Systems. Elle définit un vocabulaire (zone, conduit, asset), une méthode (analyse de risque, niveaux SL), des exigences produit (SL-C) et des exigences système (SL-T target). Elle est devenue obligatoire dans beaucoup d'appels d'offres, notamment secteurs régulés.\n\n**Niveaux SL-1 à SL-4** — SL-1 : protection basique (script kiddie). SL-2 : attaquant simple avec ressources modestes. SL-3 : attaquant sophistiqué avec ressources conséquentes. SL-4 : État-nation.\n\n**Zones et conduits** — Zone = ensemble d'assets partageant les mêmes exigences. Conduit = canal de communication entre zones, à protéger.\n\n**Modèle Purdue** — Couches 0 (procédé) → 5 (enterprise). Firewalls entre couches, DMZ entre 3.5 (OT) et 4 (IT).\n\n**Defense in Depth** — Multiples couches de sécurité : durcissement, segmentation, monitoring, incident response. Aucune couche unique n'est suffisante.\n\n**Cycle de vie** — Sécurité intégrée dès la conception (secure by design), pas ajoutée en fin de projet.\n\n**À retenir :** IEC 62443 est un standard cadre, pas une checklist. Une bonne mise en œuvre demande un pilote sécurité dédié qui parle IT ET OT.",
+      "title": "IEC 62443 — cadre cybersécurité OT",
+      "bodyMd": "IEC 62443 (ex-ISA-99) est la norme cadre de cybersécurité pour les Industrial Control Systems. Vocabulaire (zone, conduit, asset), méthode (analyse risque, niveaux SL), exigences produit (SL-C), système (SL-T). Souvent obligatoire dans les appels d'offres 2026.\n\n**Niveaux SL-1 à SL-4** — SL-1 : protection basique. SL-2 : attaquant simple. SL-3 : sophistiqué. SL-4 : État-nation.\n\n**Zones et conduits** — Zone = assets partageant mêmes exigences sécurité. Conduit = canal de comm entre zones, à protéger.\n\n**Modèle Purdue** — Couches 0 (process) → 5 (enterprise). Firewalls entre couches, DMZ entre 3.5 et 4.\n\n**Defense in Depth** — Multiples couches de sécurité : durcissement, segmentation, monitoring, incident response.\n\n**Cycle de vie** — Sécurité intégrée dès la conception (secure by design), pas ajoutée en fin de projet.\n\n**À retenir :** IEC 62443 est un standard cadre, pas une checklist. Bonne mise en œuvre demande un pilote sécurité dédié qui parle IT ET OT.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-38.jpg"
+      "imageUrl": "/training/plc-programming/slide-55.jpg"
     },
     {
-      "position": 39,
+      "position": 56,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Git pour PLC — le workflow",
-      "bodyMd": "Depuis 2020, la plupart des IDE PLC exportent le projet en texte (JSON, XML). C'est ce qui permet Git : diff lisible, code review, merge, branches. Le workflow classique : main = prod, develop = intégration, feature-XXX = travail, tag = release déployée.\n\n```\n# Structure d'un dépôt PLC typique\n/plc-project-wtp01\n├── .git/\n├── README.md                    # But du projet, contact, doc\n├── CHANGELOG.md                 # Journal des versions\n├── /src/\n│   ├── /objects/               # FB, DB, UDT\n│   │   ├── FB_Motor.exp\n│   │   ├── FB_PID.exp\n│   │   └── UDT_Motor.exp\n│   ├── /program/               # Programme principal\n│   │   ├── OB_Main.exp\n│   │   └── OB_Cyclic_100ms.exp\n│   └── /io/                    # Mapping I/O\n│       └── HW_Config.exp\n├── /docs/                      # Spec fonctionnelle, matrices\n├── /tests/                     # Tests unitaires\n└── /release/                   # Artefacts compilés .cab\n\n# Workflow typique\ngit checkout -b feature/add-cavitation-detection\n# ... modifs dans l'IDE ...\ngit add src/objects/FB_Motor.exp\ngit commit -m \"Add cavitation detection to FB_Motor (issue #47)\"\ngit push origin feature/add-cavitation-detection\n\n# Après code review et merge sur main :\ngit tag -a v1.4.2 -m \"Release v1.4.2 — cavitation detection\"\ngit push origin v1.4.2\n\n# Dépoiement en prod : take la version tagguée, générer le .cab, déployer\n```\n\n**À retenir :** Un commit atomique par fonctionnalité, un message clair, une code review. Les 3 règles qui changent tout — même pour un projet PLC solo.",
+      "title": "Durcissement PLC — checklist opérationnelle",
+      "bodyMd": "1. Désactiver TOUS les services non utilisés : Web server, FTP, Telnet, S7-comm ancien\n2. Mots de passe forts (16+ char) sur programme, IHM, Web server. Rotation trimestrielle\n3. Firmware à jour au dernier patch Siemens/Rockwell (abonnement Security Advisories)\n4. Certificats CPU propres (pas les auto-signés par défaut) pour OPC UA + Web server\n5. ACL Profinet : autoriser uniquement les MAC/IP attendues sur le bus terrain\n6. Segmentation réseau OT/IT via VLANs + firewall dédié\n7. Backup off-site du projet PLC + config + firmware (règle 3-2-1)\n8. Logs vers SIEM central (syslog port 514)\n9. Test d'intrusion périodique par équipe externe (annuel minimum)\n10. Formation opérateurs : phishing, ingénierie sociale, procédure incident\n\n⚠ Un point manquant dans cette liste = porte d'entrée. Les attaquants trouvent toujours le maillon faible. Zéro compromis.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-39.jpg"
+      "imageUrl": "/training/plc-programming/slide-56.jpg"
     },
     {
-      "position": 40,
+      "position": 57,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Modèle Purdue + zones/conduits",
+      "bodyMd": "Le modèle Purdue (1990) structure l'entreprise en 6 couches (0 à 5). IEC 62443 le reprend et l'affine. Chaque couche a un rôle défini, des interfaces limitées, un niveau de sécurité (SL) cible.\n\n**Level 0 - Process** — Capteurs, actionneurs. Physique. SL cible : rarement défini.\n\n**Level 1 - Basic Control** — PLC, DCS. Contrôle direct. SL cible : SL-3 souvent.\n\n**Level 2 - Area Supervisory** — SCADA local, HMI. Vision d'une zone. SL cible : SL-2 à SL-3.\n\n**Level 3 - Site Operations (MOM)** — MES, historian, batch. SL cible : SL-2.\n\n**Level 3.5 - DMZ** — Proxies, historians répliqués. Tampon entre OT et IT.\n\n**Level 4-5 - Enterprise** — ERP, PLM. IT classique. Sécurité IT standard.\n\n**À retenir :** Le trafic ne doit JAMAIS sauter directement de L1 (PLC) à L4 (ERP). Toujours passer par L2 (SCADA) → L3 (MES) → L3.5 (DMZ) → L4. Défense en profondeur.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-57.jpg"
+    },
+    {
+      "position": 58,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Git pour PLC — la structure repo",
+      "bodyMd": "Depuis 2020, les IDE PLC exportent le projet en texte (XML, JSON). Base pour Git : diff lisible, code review, merge, branches. Voici la structure recommandée pour un dépôt PLC pro.\n\n```\n# Structure recommandée d'un dépôt PLC\n/plc-project-wtp01\n├── .git/\n├── README.md                    # But du projet, contact\n├── CHANGELOG.md                 # Journal des versions\n├── /src/\n│   ├── /objects/               # FB, DB, UDT\n│   │   ├── FB_Motor.exp\n│   │   ├── FB_Valve.exp\n│   │   ├── FB_PID_Loop.exp\n│   │   ├── UDT_MotorControl.exp\n│   │   └── UDT_ValveControl.exp\n│   ├── /program/               # Programme principal\n│   │   ├── OB_Main.exp\n│   │   ├── OB_Cyclic_100ms.exp\n│   │   └── OB_Startup.exp\n│   ├── /io/                    # Mapping I/O\n│   │   ├── HW_Config.exp\n│   │   └── IO_Mapping.exp\n│   └── /libraries/             # Bibliothèques externes\n├── /docs/                      # Spec fonctionnelle, matrices\n│   ├── URS.pdf\n│   ├── FS.pdf\n│   └── IO_List.xlsx\n├── /tests/                     # Tests unitaires\n│   └── FB_Motor_Test.exp\n├── /release/                   # Artefacts compilés\n│   └── v1.4.2.cab\n└── .gitignore                  # Fichiers à ignorer\n\n# Workflow typique\ngit checkout -b feature/cavitation-detection\n# modifs dans l'IDE...\ngit add src/objects/FB_Motor.exp\ngit commit -m \"Add cavitation detection to FB_Motor (issue #47)\"\ngit push origin feature/cavitation-detection\n# → Pull Request → code review → merge sur main\n\n# Tag de release\ngit tag -a v1.4.2 -m \"Release v1.4.2 — cavitation detection\"\ngit push origin v1.4.2\n```\n\n**À retenir :** Un commit atomique par fonctionnalité, un message clair, code review. Trois règles qui changent tout — même sur un projet PLC solo.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-58.jpg"
+    },
+    {
+      "position": 59,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
       "title": "CI/CD pour PLC — pipeline type",
-      "bodyMd": "Le CI/CD PLC est encore émergent en 2026 mais les outils existent : TIA Openness (Siemens), Codesys Automation Server, ABB Automation Builder headless. Le principe : chaque commit déclenche une compilation, des tests et éventuellement un déploiement en environnement de test.\n\n**Compilation headless** — L'IDE PLC lancé en CLI depuis un runner CI (Jenkins, GitLab CI, GitHub Actions). Prend un projet, sort un binaire compilé.\n\n**Tests unitaires** — Framework type Codesys TestManager. Injecte des inputs, exécute le FB, vérifie les outputs. Non-régression à chaque commit.\n\n**Analyse statique** — Vérification nommage, complexité cyclomatique, détection de bad patterns (variables non utilisées, dead code).\n\n**Artefact versionné** — Le binaire compilé est publié dans un artefact registry avec version + hash. Traçabilité complète.\n\n**Déploiement contrôlé** — Manuel avec approbation dans une fenêtre de maintenance, ou automatique sur un environnement de test (simulator).\n\n**À retenir :** Le CI/CD PLC réduit les erreurs humaines de déploiement de 90 %. Investir 2 semaines à le monter économise des mois sur la durée d'un projet.",
+      "bodyMd": "Le CI/CD PLC devient standard 2025+. Outils : TIA Openness (Siemens), Codesys Automation Server, Rockwell FactoryTalk. Principe : chaque commit déclenche compilation, tests, éventuellement déploiement en environnement test.\n\n**Compilation headless** — L'IDE PLC lancé en CLI depuis un runner CI (Jenkins, GitLab CI, GitHub Actions). Sort un binaire compilé.\n\n**Tests unitaires** — Framework type Codesys TestManager. Inputs → FB → vérifier outputs. Non-régression à chaque commit.\n\n**Analyse statique** — Nommage, complexité cyclomatique, bad patterns (variables non utilisées, dead code).\n\n**Artefact versionné** — Binaire publié dans artefact registry avec version + hash. Traçabilité complète.\n\n**Déploiement contrôlé** — Manuel avec approbation dans fenêtre maintenance, ou automatique en test (simulator).\n\n**À retenir :** CI/CD PLC réduit les erreurs humaines de déploiement de 90 %. 2 semaines à monter = mois économisés sur la durée du projet.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-40.jpg"
+      "imageUrl": "/training/plc-programming/slide-59.jpg"
     },
     {
-      "position": 41,
+      "position": 60,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
       "title": "Test unitaire — FB Motor",
-      "bodyMd": "L'idée d'un test unitaire est simple : donner un input, exécuter le FB, vérifier l'output attendu. En cas de régression, le test échoue et bloque le pipeline CI.\n\n```\nFUNCTION_BLOCK FB_Test_Motor\nVAR\n    Motor        : FB_Motor;   // Le FB à tester\n    Test_Passed  : BOOL := TRUE;\n    Test_Name    : STRING := '';\nEND_VAR\n\n// ─── Test 1 : démarrage normal ───\nTest_Name := 'Test 1 - Normal start';\nMotor(Start_Cmd := TRUE, Stop_Cmd := FALSE, Overload_In := FALSE);\nIF NOT Motor.Run_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 1 FAILED: Run_Out should be TRUE');\nEND_IF;\n\n// ─── Test 2 : arrêt par overload ───\nTest_Name := 'Test 2 - Overload trip';\nMotor(Start_Cmd := TRUE, Stop_Cmd := FALSE, Overload_In := TRUE);\nIF Motor.Run_Out OR NOT Motor.Trip_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 2 FAILED: motor should trip on overload');\nEND_IF;\n\n// ─── Test 3 : reset ne marche que si défaut disparu ───\nTest_Name := 'Test 3 - Reset with fault present';\nMotor(Reset_Cmd := TRUE, Overload_In := TRUE);\nIF NOT Motor.Trip_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 3 FAILED: cannot reset while overload active');\nEND_IF;\n\n// ─── Test 4 : reset fonctionne après disparition défaut ───\nTest_Name := 'Test 4 - Reset after fault cleared';\nMotor(Reset_Cmd := TRUE, Overload_In := FALSE);\nIF Motor.Trip_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 4 FAILED: reset should clear trip');\nEND_IF;\n\nIF Test_Passed THEN LogInfo('All tests PASSED');\nELSE LogError('At least one test FAILED');\nEND_IF;\n```\n\n**À retenir :** Un FB testé unitairement se refactore sans crainte. La valeur des tests n'est pas visible immédiatement — elle apparaît 6 mois après quand il faut faire évoluer sans casser.",
+      "bodyMd": "Test unitaire simple : donner un input, exécuter le FB, vérifier l'output attendu. Si régression, le test échoue et bloque le pipeline CI. Long terme : moins de bugs prod, refactoring sans crainte.\n\n```\nFUNCTION_BLOCK FB_Test_Motor\nVAR\n    Motor        : FB_Motor;\n    Test_Passed  : BOOL := TRUE;\n    Test_Name    : STRING := '';\nEND_VAR\n\n// ─── Test 1 : démarrage normal ───\nTest_Name := 'Test 1 - Normal start';\nMotor(Start_Cmd := TRUE, Stop_Cmd := FALSE, Overload_In := FALSE);\nIF NOT Motor.Run_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 1 FAILED: Run_Out should be TRUE');\nEND_IF;\n\n// ─── Test 2 : arrêt par overload ───\nTest_Name := 'Test 2 - Overload trip';\nMotor(Start_Cmd := TRUE, Stop_Cmd := FALSE, Overload_In := TRUE);\nIF Motor.Run_Out OR NOT Motor.Trip_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 2 FAILED: motor should trip on overload');\nEND_IF;\n\n// ─── Test 3 : reset avec défaut présent ───\nTest_Name := 'Test 3 - Reset with fault present';\nMotor(Reset_Cmd := TRUE, Overload_In := TRUE);\nIF NOT Motor.Trip_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 3 FAILED: cannot reset while overload active');\nEND_IF;\n\n// ─── Test 4 : reset après disparition défaut ───\nTest_Name := 'Test 4 - Reset after fault cleared';\nMotor(Reset_Cmd := TRUE, Overload_In := FALSE);\nIF Motor.Trip_Out THEN\n    Test_Passed := FALSE;\n    LogError('Test 4 FAILED: reset should clear trip');\nEND_IF;\n\nIF Test_Passed THEN LogInfo('All tests PASSED');\nELSE LogError('At least one test FAILED');\nEND_IF;\n```\n\n**À retenir :** Un FB testé unitairement se refactore sans crainte. La valeur des tests apparaît 6 mois après quand il faut faire évoluer sans casser.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-41.jpg"
+      "imageUrl": "/training/plc-programming/slide-60.jpg"
     },
     {
-      "position": 42,
+      "position": 61,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
       "title": "Optimisation temps de cycle",
-      "bodyMd": "- MESURER d'abord — jamais optimiser à l'aveugle. Min/max/moyen sur 1000 cycles, profiling par OB\n- Identifier les OB coûteux via l'outil constructeur (TIA Profiler, Codesys Profiling)\n- Réduire les accès mémoire répétés — cacher un DB fréquemment lu dans une variable locale\n- Optimiser les boucles ST — éviter FOR imbriqués, préférer traiter par packets\n- Déporter les gros calculs sur un OB temporisé (100 ms ou 1 s) plutôt qu'en cyclique\n- Marger : viser 30-50 % du temps de cycle libre pour absorber les pics de comm et diagnostic\n\n💡 Un cycle serré à 95 % est une bombe à retardement — la moindre alarme réseau déclenche un scan overrun. Toujours prévoir de la marge.",
+      "bodyMd": "Un cycle scan doit être borné avec marge. Optimiser sans mesurer = deviner. La méthode : mesurer, identifier les OB coûteux, refactorer, re-mesurer.\n\n**1. Mesurer AVANT d'optimiser** — Min/max/moyen sur 1000 cycles. Profiling par OB via l'outil constructeur.\n\n**2. Identifier les coupables** — Un OB > 30 % du temps = candidat. Focus 20 % qui coûtent 80 %.\n\n**3. Refactorer intelligemment** — Cacher les accès DB fréquents dans variables locales. Éviter FOR imbriqués sans besoin.\n\n**4. Déporter le lourd** — Gros calculs sur OB temporisé 100 ms ou 1 s, pas en cyclique.\n\n**5. Vérifier après optim** — Comportement fonctionnel identique + temps réduit. Sinon refactor cassé.\n\n**À retenir :** Cycle serré à 95 % = bombe à retardement. Marge 30-50 % pour absorber les pics de comm et diagnostic. Toujours.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-42.jpg"
+      "imageUrl": "/training/plc-programming/slide-61.jpg"
     },
     {
-      "position": 43,
+      "position": 62,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Diagnostic avancé — les outils intégrés",
-      "bodyMd": "Les CPU modernes exposent des outils de diagnostic riches, souvent sous-utilisés. Web server, SNMP, syslog, log viewer local — chacun a son moment.\n\n**Web server intégré** — Dashboard HTML natif de la CPU. État des modules, LEDs virtuelles, tables I/O, tendances mémoire. À activer et sécuriser (auth, HTTPS).\n\n**Diagnostic buffer** — Buffer FIFO d'événements horodatés : redémarrage, perte communication, alarme module. Toujours l'exporter avant de relancer la CPU.\n\n**SNMP** — Le PLC expose ses métriques (CPU%, mémoire libre, état modules) via SNMP. Intégration Nagios/Zabbix/Prometheus pour supervision unifiée.\n\n**Syslog** — Envoi des événements vers un serveur central (SIEM). Requis en cybersécurité pour l'audit et l'analyse forensique.\n\n**Dump mémoire (last resort)** — En cas de crash CPU non reproductible : dump mémoire complet + support constructeur. Prévoir 2-6 semaines d'analyse.\n\n**À retenir :** Le diagnostic buffer contient la réponse à 80 % des incidents. Toujours l'exporter et l'archiver AVANT de relancer une CPU en défaut.",
+      "title": "Scan overrun — le diagnostic pas à pas",
+      "bodyMd": "Vendredi 23h : LED CPU orange sur la S7-1500 de la ligne 3. Diagnostic buffer plein d'alarmes 'ScanOverrunsCnt = 47'. Ligne arrêtée. Vous êtes d'astreinte. Objectif : redémarrer d'ici 5h avant l'équipe du matin.\n\n```\nDIAGNOSTIC — MÉTHODE PAS À PAS\n\nÉtape 1 (5 min) — Sécurisation\n  ✓ Vérifier qu'aucun opérateur n'est en zone de risque\n  ✓ Isoler énergétiquement les actionneurs commandés\n  ✓ Prévenir le responsable production\n\nÉtape 2 (10 min) — Collecte\n  ✓ Exporter le diagnostic buffer complet (fichier .dcm)\n  ✓ Screenshot des LEDs CPU et modules\n  ✓ Noter le compteur ScanOverrunsCnt avant reset\n\nÉtape 3 (15 min) — Analyse buffer\n  Les 5 derniers événements avant l'overrun :\n    22:59:43  OB Cyclic_100ms started\n    22:59:43  Modbus_Client timeout (192.168.1.50 → 3s)\n    22:59:46  Modbus_Client timeout (192.168.1.50 → 3s)\n    22:59:49  Modbus_Client timeout (192.168.1.50 → 3s)\n    22:59:52  ScanOverrun detected — CPU STOP\n\n  → Cause probable : capteur Modbus injoignable\n    → 3× timeout de 3s + traitement autres OB\n    → dépasse budget 100 ms de l'OB Cyclic\n    → cascade d'overruns\n\nÉtape 4 (30 min) — Correction terrain\n  ✓ Ping 192.168.1.50 → time out\n  ✓ Câble Ethernet capteur → vérifier LED sur switch → NON\n  ✓ Remplacer câble RJ45 → ping OK → LED verte\n\nÉtape 5 (10 min) — Redémarrage\n  ✓ Reset ScanOverrunsCnt via TIA\n  ✓ Passage CPU en RUN\n  ✓ Vérifier 10 min de cycle normal < 50 ms\n  ✓ Log incident + fiche corrective\n```\n\nL'overrun était un SYMPTÔME, pas la cause. Cause réelle : câble Ethernet dégradé qui a lâché sous la charge. Corrigé en 45 min terrain + 20 min de diagnostic — retour prod avant 5h.\n\n**À retenir :** TOUJOURS exporter le diagnostic buffer AVANT de relancer une CPU en défaut. Il contient la réponse à 80 % des incidents. Reset trop rapide = information perdue.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-43.jpg"
+      "imageUrl": "/training/plc-programming/slide-62.jpg"
     },
     {
-      "position": 44,
+      "position": 63,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Documentation et traçabilité",
+      "bodyMd": "- Spec fonctionnelle (FS) : ce que la machine doit faire (langage client)\n- Spec technique (DS) : comment le PLC le fait (langage automaticien)\n- Matrice fonctions ↔ blocs : traçabilité inverse\n- Journal des changements (CHANGELOG.md) versionné avec le code\n- Documentation auto-générée : commentaires code → HTML (Doxygen-like)\n- Obligatoire dans les secteurs régulés : pharma, agro, énergie, nucléaire\n\n💡 Un projet PLC bien documenté = 2-3 semaines investies. Un projet non documenté repris 5 ans après = 3 mois pour comprendre + 30 % de risque d'erreur.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-63.jpg"
+    },
+    {
+      "position": 64,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-1 : Setup Git pour projet PLC",
+      "bodyMd": "**Contexte :** Vous avez un projet Codesys fonctionnel (utiliser celui du TP N2). Installer Git for Windows si pas déjà. Créer un repo GitHub/GitLab privé (ou local).\n\n**Consigne :** 1) Structurer le repo selon la convention vue (src/objects, src/program, docs, tests). 2) Exporter les objets Codesys en fichiers .exp texte. 3) Ajouter un .gitignore approprié (fichiers .cache, .compiled...). 4) Faire 3 commits atomiques : 'init structure', 'add FB_Motor', 'add tests'. 5) Créer une branche 'feature/anti-cavitation', modifier FB_Motor, commit, push. 6) Simuler une PR (merge branch → main).\n\n**Attendu :** Repo GitHub avec 3 commits sur main + 1 branch feature. Historique lisible. Diff Git montre clairement les changements de FB_Motor.exp. Pouvez restaurer une version antérieure en 1 commande (git checkout).\n\n💡 Le .gitignore de base pour Codesys : *.cache, *.compiled, *.opt, *.pdd, ~*.project. Un commit = un changement logique clair. Message : 'verbe + description courte + issue si existante'.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-64.jpg"
+    },
+    {
+      "position": 65,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "TP N3-2 : Analyser un scan overrun simulé",
+      "bodyMd": "**Contexte :** Sur votre PLC Codesys : ajouter un OB temporisé à 10 ms qui contient une boucle FOR très longue (ex : boucle sur 100 000 éléments avec un calcul mathématique). Cela va provoquer un scan overrun quasi certain.\n\n**Consigne :** 1) Lancer la CPU en RUN et observer le comportement (LED, alarme, éventuellement STOP). 2) Ouvrir le diagnostic buffer et repérer les événements 'ScanOverrun'. 3) Identifier via le profiling constructeur quel OB est coupable. 4) Réduire la boucle à une taille supportable ou la déporter sur OB temporisé plus lent. 5) Re-vérifier que la CPU tourne stable avec marge >30 %.\n\n**Attendu :** Dans le diagnostic buffer : événements 'ScanOverrun' répétés. Le profiling identifie l'OB temporisé 10 ms comme coupable. Après refactor : temps de cycle < 3 ms, aucun overrun sur 1000 cycles.\n\n💡 Codesys expose 'CurrentCycleTime', 'MinCycleTime', 'MaxCycleTime'. Le rapport (MaxCycleTime / CycleTimeSetpoint) doit rester < 0.7 pour marge. Si nécessaire, déporter le calcul dans un OB temporisé à 100 ms au lieu de 10 ms.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-65.jpg"
+    },
+    {
+      "position": 66,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Cas d'étude — station de pompage",
+      "bodyMd": "Retour au fil rouge WTP-01 : 4 pompes + réservoir 2000 m³. Objectifs Niveau 3 : disponibilité 24/7 (redondance), cybersécurité IEC 62443, CI/CD sur le programme, traçabilité opérationnelle complète.\n\n```\nARCHITECTURE COMPLÈTE WTP-01 (Niveau 3)\n\n┌─────────── LEVEL 4 (Enterprise) ──────────┐\n│  ERP SAP — création OF, comptabilité       │\n└───────────────┬───────────────────────────┘\n                │ B2MML XML via web service\n┌───────────────▼───────────────── LEVEL 3.5 (DMZ) ──┐\n│  Historian réplica (WinCC IS) + Reverse Proxy       │\n└───────────────┬────────────────────────────────────┘\n                │ OPC UA UA-TCP:8083 (auth x509)\n┌───────────────▼──────────────── LEVEL 3 (MOM) ──────┐\n│  MES (WinCC OA) — ordonnancement, traçabilité       │\n│  Historian (local) — 6 mois de tendances            │\n└───────────────┬────────────────────────────────────┘\n                │ OPC UA UA-TCP:4840\n┌───────────────▼───────────── LEVEL 2 (SCADA) ───────┐\n│  WinCC Unified — synoptique opérateur               │\n│  Redondant serveur + hot standby                    │\n└───────────────┬────────────────────────────────────┘\n                │ S7 communication\n┌───────────────▼──────────── LEVEL 1 (Control) ──────┐\n│  PLC S7-1517-3 PN/DP (Hot Standby H)                │\n│    Primary + Secondary + Sync Fiber                 │\n│  ET 200SP HF (I/O redondées)                        │\n│    - MRP anneau Profinet vers terrain               │\n└───────────────┬────────────────────────────────────┘\n                │ Modbus RTU sur RS-485\n┌───────────────▼────────── LEVEL 0 (Process) ────────┐\n│  4 pompes + capteurs analog + vannes                │\n└─────────────────────────────────────────────────────┘\n\nSéparation stricte OT/IT via Firewall Palo Alto\n+ SIEM Splunk pour logs centralisés\n+ Sauvegarde off-site programme + firmware (S3)\n```\n\nCette architecture est ce qu'on attend en 2026 pour une infrastructure critique. Disponibilité 99.99 % (52 min d'arrêt/an max), cybersécurité SL-3 IEC 62443, traçabilité batch complète, CI/CD via TIA Openness + GitLab.\n\n**À retenir :** Le passage de niveau 2 à niveau 3 est un saut d'ordre 10 en complexité et coût. À réserver aux infrastructures critiques. Sinon un simplex bien maintenu suffit largement.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-66.jpg"
+    },
+    {
+      "position": 67,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
       "title": "Récapitulatif du niveau 3",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-44.jpg"
+      "imageUrl": "/training/plc-programming/slide-67.jpg"
     },
     {
-      "position": 45,
+      "position": 68,
       "kind": "QUIZ",
       "section": "NIVEAU 3 · EXPERT",
       "title": "Quiz de fin de niveau 3",
@@ -569,11 +799,11 @@
       "quiz": {
         "questions": [
           {
-            "prompt": "MRP est un protocole :",
+            "prompt": "MRP est un protocole de :",
             "options": [
-              "Redondance réseau en anneau, bascule 200 ms",
-              "Programmation métier",
-              "Configuration OPC UA"
+              "Redondance réseau en anneau 200 ms",
+              "Programmation",
+              "OPC UA"
             ],
             "correctIndex": 0
           },
@@ -581,7 +811,7 @@
             "prompt": "PRP est un mécanisme de :",
             "options": [
               "Programmation Ladder",
-              "Redondance réseau parallèle sans perte de trame",
+              "Redondance parallèle 0 ms",
               "Compression"
             ],
             "correctIndex": 1
@@ -589,62 +819,72 @@
           {
             "prompt": "L'IEC 62443 définit :",
             "options": [
-              "Langages de programmation",
-              "Niveaux de sécurité SL-1 à SL-4 pour ICS",
-              "Format des fichiers"
+              "Langages",
+              "SL-1 à SL-4 pour ICS",
+              "Formats fichier"
             ],
             "correctIndex": 1
           },
           {
             "prompt": "Un scan overrun signifie :",
             "options": [
-              "Cycle plus court que prévu",
-              "Le cycle a dépassé son budget de temps",
-              "Programme mis à jour"
+              "Cycle plus court",
+              "Cycle a dépassé son budget temps",
+              "Mis à jour"
             ],
             "correctIndex": 1
           },
           {
             "prompt": "La DMZ OT/IT sert à :",
             "options": [
-              "Segmenter les zones et contrôler les flux",
-              "Chiffrer le programme",
-              "Doubler la CPU"
+              "Segmenter les zones + contrôler flux",
+              "Encrypter programme",
+              "Doubler CPU"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Un test unitaire PLC vérifie :",
+            "prompt": "Test unitaire PLC vérifie :",
             "options": [
-              "Que le hardware est branché",
-              "Qu'un bloc renvoie la sortie attendue pour un input donné",
-              "La conso"
+              "Hardware branché",
+              "Bloc renvoie output attendu pour input donné",
+              "Consommation"
             ],
             "correctIndex": 1
           }
         ]
       },
-      "imageUrl": "/training/plc-programming/slide-45.jpg"
+      "imageUrl": "/training/plc-programming/slide-68.jpg"
     },
     {
-      "position": 46,
+      "position": 69,
       "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "En résumé",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-46.jpg"
+      "imageUrl": "/training/plc-programming/slide-69.jpg"
     },
     {
-      "position": 47,
+      "position": 70,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 % à chaque niveau, sinon revoir la section correspondante\n- Choisir un mini-projet (station simulée sur PLCSIM ou Codesys Simulation) et le programmer de A à Z avec structure propre + FB réutilisables\n- Adopter une convention de nommage cohérente sur vos projets actuels — c'est la seule chose qui se voit tout de suite\n- Basculer un vieux projet en Git pour tester : export texte, premier commit, une branche pour une modif, merge\n- Lire IEC 62443-3-3 et IEC 61508 partie 1 pour cybersécurité et sécurité fonctionnelle — 2h de lecture pour un vocabulaire commun avec les auditeurs\n\n💡 Le passage en projet réel est le vrai test. Prévoyez 3 semaines après la formation pour un point de suivi avec un formateur sur votre premier projet.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 % à chaque niveau\n- Refaire les 6 TPs from scratch dans votre IDE — sans regarder les indices\n- Programmer le fil rouge WTP-01 complet : 4 pompes + régulation PID + alarmes ISA-18.2\n- Basculer un vieux projet en Git pour tester : export texte + premier commit + branch + merge\n- Lire IEC 62443-3-3 et IEC 61508 partie 1 — 4h de lecture pour un vocabulaire commun avec auditeurs\n- Poser vos questions sur DasoHub → chat quand vous butez\n\n💡 Le passage en projet réel est le vrai test. Prévoyez 3 semaines après la formation pour un point de suivi avec un formateur sur votre premier projet.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/plc-programming/slide-47.jpg"
+      "imageUrl": "/training/plc-programming/slide-70.jpg"
+    },
+    {
+      "position": 71,
+      "kind": "CONTENT",
+      "section": "CONCLUSION",
+      "title": "Ressources complémentaires",
+      "bodyMd": "- IEC 61131-3 : Standard official (payant, ~300€ IEC.ch) ou synthèses libres sur PLCopen.org\n- PLCopen — bibliothèques FB standardisées (Motion, Safety) — https://www.plcopen.org\n- Codesys online forum + documentation — https://help.codesys.com\n- Siemens Industry Online Support (SIOS) — datasheets, application notes, forums\n- Livre de référence : 'Programming Industrial Control Systems using IEC 1131-3' de Karl-Heinz John\n- Chaîne YouTube : Realpars, RoboDK, PLC Overtime pour tutoriels pratiques\n- Communauté r/PLC sur Reddit — questions terrain, échanges international\n\n💡 L'automation est un domaine qui évolue lentement en fond (IEC 61131-3 date de 1993) mais avec des vagues récentes (cybersec, CI/CD). Rester à jour sur les vagues, maîtriser les fondamentaux.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": "/training/plc-programming/slide-71.jpg"
     }
   ]
 }
