@@ -19,8 +19,8 @@
       "position": 2,
       "kind": "CONTENT",
       "section": "INTRODUCTION",
-      "title": "Objectifs de la formation",
-      "bodyMd": "La validation de systèmes informatisés (Computer System Validation, CSV) est le processus formel qui prouve à FDA/EMA qu'un système informatique utilisé en pharma fait bien ce qu'il est censé faire. C'est un projet transverse qui touche business, IT, QA, engineering. Bien mené : 10-15% du coût projet. Mal mené : 40%+ + retards + non-conformités.\n\n**Cadre GAMP 5** — V-model, catégories 1-5, IQ/OQ/PQ — les fondamentaux du cours GAMP 5.\n\n**Documentation obligatoire** — Validation Plan, URS, FS, DS, Test Protocols, Test Reports, VSR.\n\n**Rôles clés** — Business Owner, System Owner, QA, Validation Lead, IT — chacun a ses responsabilités.\n\n**Cycle de vie complet** — Planning → Development → Testing → Release → Operation → Retirement.\n\n**Change control continu** — Toute modification post-release passe par change control formel.\n\n**À retenir :** CSV n'est pas 'faire des tests' — c'est un cadre projet transverse qui garantit qualité + conformité + auditabilité tout au long du cycle de vie du système.",
+      "title": "Objectifs",
+      "bodyMd": "CSV (Computer System Validation) = processus formel qui prouve à FDA/EMA qu'un système informatique utilisé en pharma fait bien ce qu'il est censé faire. Projet transverse business/IT/QA/engineering. Bien mené : 10-15% du coût projet. Mal mené : 40%+ + retards + non-conformités.\n\n**Cadre GAMP 5** — V-model, catégories 1-5, IQ/OQ/PQ — fondamentaux cours GAMP 5.\n\n**Documentation obligatoire** — Validation Plan, URS, FS, DS, Test Protocols, Test Reports, VSR.\n\n**Rôles clés** — Business Owner, System Owner, QA, Validation Lead, IT.\n\n**Cycle de vie** — Planning → Development → Testing → Release → Operation → Retirement.\n\n**Change control continu** — Toute modif post-release passe par change control formel.\n\n**À retenir :** CSV ≠ 'faire des tests' — c'est un cadre projet transverse qui garantit qualité + conformité + auditabilité tout au long du cycle de vie.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-02.jpg"
@@ -50,7 +50,7 @@
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
       "title": "Rôles et responsabilités CSV",
-      "bodyMd": "La validation est un travail d'équipe. Confondre les rôles = décisions bloquées, tests non signés, projet qui traîne. Chaque rôle a un mandat précis et des documents qu'il approuve.\n\n**Business Owner** — Représente le métier utilisateur. Approuve l'URS et le PQ. Répond à 'est-ce que le système fait ce qu'on lui demande ?'.\n\n**System Owner** — Responsable technique du système. Approuve FS, DS, IQ, OQ. Répond à 'est-ce que le système fonctionne bien techniquement ?'.\n\n**QA (Quality Assurance)** — Garant de la conformité GxP. Approuve tous les documents + valide l'ensemble. Approuve le Validation Summary Report.\n\n**Validation Lead** — Chef de projet validation. Coordonne, planifie, tracks les livrables. Souvent externe consultant.\n\n**IT** — Fournit et opère l'infrastructure. Réalise l'IQ. Assure maintenance et backups.\n\n**À retenir :** Le Validation Lead est souvent le rôle sous-estimé — bon Validation Lead = projet fluide, mauvais = chaos documentaire. Investir dans ce rôle.",
+      "bodyMd": "La validation est un travail d'équipe. Confondre les rôles = décisions bloquées, tests non signés, projet qui traîne. Chaque rôle a un mandat précis et des documents qu'il approuve.\n\n**Business Owner** — Représente le métier utilisateur. Approuve URS et PQ. Répond à 'est-ce que le système fait ce qu'on lui demande ?'.\n\n**System Owner** — Responsable technique. Approuve FS, DS, IQ, OQ. Répond à 'est-ce que le système fonctionne bien techniquement ?'.\n\n**QA** — Garant de la conformité GxP. Approuve tous les documents + valide l'ensemble. Approuve le VSR.\n\n**Validation Lead** — Chef de projet validation. Coordonne, planifie, tracks les livrables. Souvent externe consultant.\n\n**IT** — Fournit et opère l'infrastructure. Réalise l'IQ. Assure maintenance et backups.\n\n**À retenir :** Validation Lead est souvent le rôle sous-estimé — bon = projet fluide, mauvais = chaos documentaire. Investir dans ce rôle.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-05.jpg"
@@ -59,8 +59,8 @@
       "position": 6,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Validation Plan — le document racine",
-      "bodyMd": "Le Validation Plan (VP) est le document racine du projet. Il décrit : QUOI valider (scope), COMMENT (approche, catégorie GAMP), QUAND (planning), QUI (rôles et responsabilités), OÙ (environnements dev/test/prod), avec QUELS DOCUMENTS (livrables). Approuvé avant tout autre document du projet.\n\n**Scope** — Système validé, fonctionnalités incluses/exclues, boundaries avec autres systèmes.\n\n**Approche** — Catégorie GAMP (3, 4, 5), niveau de validation (IQ seul si low risk, IQ+OQ+PQ classic).\n\n**Livrables** — Liste : URS, FS, DS, Test Protocols IQ/OQ/PQ, Test Reports, VSR.\n\n**Timeline** — Jalons validation vs jalons projet global. Ne pas sous-estimer la validation (souvent 30-40% du temps projet).\n\n**Roles matrix** — Qui rédige, qui review, qui approuve — pour chaque document.\n\n**À retenir :** Un Validation Plan bien fait = 1 mois d'investissement qui économise 6 mois de flou en cours de projet. Le sauter = catastrophe garantie.",
+      "title": "TP N1-1 : Rédiger un Validation Plan",
+      "bodyMd": "**Contexte :** Vous êtes Validation Lead sur un projet de nouveau LIMS pharma. Scope : 500 users, 3 sites, intégration ERP + MES + LIMS legacy à retirer.\n\n**Consigne :** 1) Structurer le VP en sections : scope, approche, catégorie GAMP, livrables, timeline, rôles, environnements, procédures, critères d'acceptation. 2) Estimer la timeline : combien de mois pour URS + FS + DS + tests + go-live ? 3) Matrice roles : qui rédige, qui review, qui approuve — pour chaque doc. 4) Faire relire par System Owner et QA pour validation.\n\n**Attendu :** VP de 20-30 pages structuré. Timeline réaliste (typiquement 9-18 mois pour un LIMS). Matrice roles claire. Prêt pour approbation formelle.\n\n💡 Modèles VP sur ISPE. Sous-estimer la validation est l'erreur classique — prévoir 30-40% du temps projet total. Environnements : dev/test/prod séparés.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-06.jpg"
@@ -69,27 +69,17 @@
       "position": 7,
       "kind": "CONTENT",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "URS — la voix du métier",
-      "bodyMd": "L'URS (User Requirements Specification) exprime les besoins métier sans jargon technique. Un utilisateur métier doit pouvoir le lire et dire 'oui, c'est ce que je veux'. Rédigé par le Business Owner + Validation Lead, approuvé par le Business Owner + QA.\n\n**Fonctionnalités métier** — Ex : 'L'opérateur doit pouvoir enregistrer un batch avec ID lot, date, quantité produite et 5 mesures qualité.'\n\n**Contraintes réglementaires** — Ex : 'Chaque enregistrement doit être horodaté, signé électroniquement, et non modifiable après signature.'\n\n**Performance** — Ex : 'Le système doit supporter 100 utilisateurs concurrents avec temps de réponse < 2 secondes.'\n\n**Interfaces** — Ex : 'Le système doit envoyer les résultats vers ERP SAP via B2MML ProductionPerformance.'\n\n**Critères d'acceptation** — Chaque requirement doit être testable. 'Le système doit être ergonomique' ≠ testable. 'Bouton A visible en 1 clic' = testable.\n\n**À retenir :** L'URS est LA source de vérité du besoin. Un URS mou = système inutilisable. Investir 2 semaines à bien rédiger l'URS avec les utilisateurs finaux.",
+      "title": "TP N1-2 : Risk assessment",
+      "bodyMd": "**Contexte :** Suite TP N1-1. Vous devez faire le risk assessment du LIMS.\n\n**Consigne :** 1) Identifier 10 risques : perte de données, modification non autorisée, calcul erroné, etc. 2) Pour chaque risque : gravité (S1-S4), probabilité (P1-P4), détectabilité (D1-D4). 3) Calculer score risque (S × P × D). 4) Prioriser les tests en fonction du score. 5) Définir catégorie GAMP du LIMS (typiquement 4 si configuré, 5 si custom).\n\n**Attendu :** Tableau des 10 risques avec scores. Priorités de test claires. Catégorie GAMP justifiée avec impact sur l'effort validation.\n\n💡 Risque le plus critique : impact patient (dose erronée, résultat qualité incorrect). Prioriser les tests sur ces cas. Documenter la méthode de scoring dans le VP.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-07.jpg"
     },
     {
       "position": 8,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/csv-validation/slide-08.jpg"
-    },
-    {
-      "position": 9,
       "kind": "QUIZ",
       "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Quiz de fin de niveau 1",
+      "title": "Quiz N1",
       "bodyMd": "",
       "notes": null,
       "quiz": {
@@ -97,16 +87,16 @@
           {
             "prompt": "CSV en validation =",
             "options": [
-              "Computer System Validation (pas Comma Separated Values ici)",
-              "CSV Excel",
-              "Aucun rapport"
+              "Computer System Validation",
+              "Comma Separated",
+              "N/A"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "But du CSV pharma :",
             "options": [
-              "Prouver qu'un système informatisé est fiable pour usage GxP",
+              "Prouver système fiable GxP",
               "Convertir Excel",
               "Migrer BDD"
             ],
@@ -115,16 +105,16 @@
           {
             "prompt": "Basé sur :",
             "options": [
-              "GAMP 5 + 21 CFR Part 11 + Annexe 11",
-              "Bureautique",
+              "GAMP 5 + 21 CFR + Annexe 11",
+              "Bureau",
               "Windows"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Cycle typique :",
+            "prompt": "Cycle :",
             "options": [
-              "Planning → URS → FS/DS → tests IQ/OQ/PQ → validation report",
+              "Planning → URS → FS/DS → IQ/OQ/PQ → VSR",
               "Impossible",
               "Ad-hoc"
             ],
@@ -133,9 +123,9 @@
           {
             "prompt": "Validation Plan :",
             "options": [
-              "Document racine — scope, timeline, responsibles, approche",
+              "Doc racine scope + timeline + rôles",
               "Optionnel",
-              "Automatique"
+              "Auto"
             ],
             "correctIndex": 0
           },
@@ -143,21 +133,31 @@
             "prompt": "Roles :",
             "options": [
               "Business Owner, System Owner, QA, IT, Validation Lead",
-              "Un seul owner",
+              "Un seul",
               "Aucun"
             ],
             "correctIndex": 0
           }
         ]
       },
+      "imageUrl": "/training/csv-validation/slide-08.jpg"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "NIVEAU 2",
+      "title": "Intermédiaire",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
       "imageUrl": "/training/csv-validation/slide-09.jpg"
     },
     {
       "position": 10,
       "kind": "CONTENT",
-      "section": "NIVEAU 2",
-      "title": "Intermédiaire",
-      "bodyMd": "",
+      "section": "NIVEAU 2 · INTERMÉDIAIRE",
+      "title": "Déviations — quand ça ne se passe pas comme prévu",
+      "bodyMd": "Déviation = test échoue, ou résultat inattendu. Pas de panique. La déviation doit être documentée, analysée (cause racine), résolue (correction + re-test), tracée dans le VSR. Validation sans aucune déviation est louche.\n\n**Documentation immédiate** — Formulaire déviation : ce qui s'est passé, quand, contexte, impact.\n\n**Cause racine (5 Whys)** — Bug système, mauvaise spec, erreur testeur, environnement dev vs prod.\n\n**Impact assessment** — Écart impacte-t-il d'autres tests ? Sécurité patient ? Qualité data ?\n\n**Correction + retest** — Fix appliqué, retest exécuté, résultat documenté. Signature QA.\n\n**Trace VSR** — Toutes les déviations listées dans le VSR avec leur statut.\n\n**À retenir :** Déviation bien gérée renforce la crédibilité de la validation. Cachée ou mal gérée = warning letter garantie en audit.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-10.jpg"
@@ -166,8 +166,8 @@
       "position": 11,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Test Protocols — l'art de bien tester",
-      "bodyMd": "Un test protocol (IQ, OQ, PQ) est un document formel décrivant les tests à effectuer, avec critères d'acceptation clairs. Approuvé AVANT exécution. Le testeur ne fait qu'exécuter et documenter — pas d'improvisation.\n\n**Structure standard** — Header (system, version, date), Objectives, Pre-requisites, Test steps numérotés, Expected result par step, Actual result column, Pass/Fail, Comments.\n\n**Steps atomiques** — Chaque step = 1 action + 1 vérification. Trop complexe = ambigu à exécuter et documenter.\n\n**Critères d'acceptation** — Explicites, mesurables. 'Le rapport s'affiche' → 'Le rapport s'affiche en <5s avec les 12 colonnes attendues et les données du batch 12345'.\n\n**Preuves** — Screenshots, exports fichiers, valeurs relevées. À joindre au test protocol après exécution.\n\n**Signatures** — Testeur (exécuté), Reviewer (vérifié), QA (approuvé). Sans les 3, protocole invalide.\n\n**À retenir :** Un test protocol qui laisse place à l'interprétation = tests non reproductibles = validation non défendable en audit. Rigueur = protection.",
+      "title": "TP N2-1 : Gérer une déviation OQ",
+      "bodyMd": "**Contexte :** Vous exécutez le protocole OQ du LIMS. Test 47 : 'Sauvegarder un batch avec un ID unique'. Résultat attendu : batch sauvegardé, ID retourné. Résultat obtenu : erreur 'Duplicate ID' alors que l'ID était bien unique.\n\n**Consigne :** 1) Ouvrir un formulaire déviation. 2) Décrire précisément (screenshots, message erreur, timestamp). 3) Analyser cause racine avec 5 Whys : pourquoi duplicate ? → base pas resetée entre tests → ancien ID resté → séquence pas incrémentée → séquence en cache Python → cache pas vidé au test suivant. 4) Corriger : ajouter un cleanup script entre tests. 5) Re-exécuter test 47 : PASS. 6) Signer la déviation.\n\n**Attendu :** Déviation propre : cause racine identifiée, correction appliquée, re-test PASS. Documentation traçable en audit.\n\n💡 5 Whys : creuser jusqu'à cause racine, pas symptôme. Correction peut être : fix bug, ajouter cleanup, améliorer procédure test, améliorer spec.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-11.jpg"
@@ -176,27 +176,17 @@
       "position": 12,
       "kind": "CONTENT",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Déviations — quand ça ne se passe pas comme prévu",
-      "bodyMd": "Une déviation = un test échoue, ou un résultat inattendu. Pas de panique — ce n'est pas la fin de la validation. La déviation doit être documentée, analysée (cause racine), résolue (correction + re-test), tracée dans le Validation Summary Report. Une validation sans aucune déviation est louche.\n\n**Documentation immédiate** — Formulaire déviation : ce qui s'est passé, quand, contexte, impact.\n\n**Cause racine (root cause)** — Analyse : bug système, mauvaise spec, erreur testeur, environnement dev vs prod. Utilisez 5 Whys.\n\n**Impact assessment** — L'écart impacte-t-il la validation d'autres tests ? La sécurité patient ? La qualité data ?\n\n**Correction + retest** — Fix appliqué, retest exécuté, résultat documenté. Signature QA sur résolution.\n\n**Trace VSR** — Toutes les déviations listées dans le Validation Summary Report avec leur statut.\n\n**À retenir :** Une déviation bien gérée renforce la crédibilité de la validation. Une déviation cachée ou mal gérée = warning letter garantie en audit.",
+      "title": "TP N2-2 : Rédiger le Validation Summary Report",
+      "bodyMd": "**Contexte :** Suite. Validation LIMS terminée : 200 tests, 195 PASS, 5 déviations résolues (dont test 47).\n\n**Consigne :** 1) Structurer le VSR : Executive Summary, Scope, Approche, Résultats (par phase IQ/OQ/PQ), Déviations, Conclusion, Recommandations. 2) Résumer les 5 déviations avec statut + impact. 3) Conclusion : le système est-il validé ? Recommandations pour l'exploitation. 4) Signatures : Business Owner, System Owner, QA.\n\n**Attendu :** VSR de 30-40 pages. Auditeur peut naviguer et trouver la réponse à toute question sur la validation. Système autorisé pour la production.\n\n💡 Modèle VSR sur ISPE. Executive Summary en 1 page : lisible par direction. Une déviation ouverte = un blocage go-live jusqu'à résolution.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-12.jpg"
     },
     {
       "position": 13,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/csv-validation/slide-13.jpg"
-    },
-    {
-      "position": 14,
       "kind": "QUIZ",
       "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Quiz de fin de niveau 2",
+      "title": "Quiz N2",
       "bodyMd": "",
       "notes": null,
       "quiz": {
@@ -204,16 +194,16 @@
           {
             "prompt": "Risk assessment :",
             "options": [
-              "Analyse impact patient + business avant validation",
+              "Impact patient + business",
               "Optionnel",
-              "Automatique"
+              "Auto"
             ],
             "correctIndex": 0
           },
           {
             "prompt": "Test protocol :",
             "options": [
-              "Document approuvé listant tests + critères d'acceptation",
+              "Doc approuvé listant tests + critères",
               "Improvisation",
               "Ad-hoc"
             ],
@@ -222,16 +212,16 @@
           {
             "prompt": "Deviation :",
             "options": [
-              "Écart entre attendu et observé — à documenter + résoudre",
+              "Écart attendu/observé — documenté + résolu",
               "Optionnel",
               "Ignorable"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Validation Summary Report :",
+            "prompt": "VSR :",
             "options": [
-              "Synthèse finale : ce qui a été validé, résultats, statut",
+              "Synthèse finale validation",
               "Optionnel",
               "Impossible"
             ],
@@ -240,16 +230,16 @@
           {
             "prompt": "Traceability :",
             "options": [
-              "URS → Test → Result, matrice à maintenir",
+              "URS → Test → Result",
               "Excel figé",
-              "Automatique"
+              "Auto"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Signature approbateur :",
+            "prompt": "Approbateur :",
             "options": [
-              "QA + System Owner minimum, souvent + Business Owner",
+              "QA + System Owner + Business Owner",
               "Un seul",
               "Aucune"
             ],
@@ -257,14 +247,24 @@
           }
         ]
       },
+      "imageUrl": "/training/csv-validation/slide-13.jpg"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "NIVEAU 3",
+      "title": "Expert",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": null,
       "imageUrl": "/training/csv-validation/slide-14.jpg"
     },
     {
       "position": 15,
       "kind": "CONTENT",
-      "section": "NIVEAU 3",
-      "title": "Expert",
-      "bodyMd": "",
+      "section": "NIVEAU 3 · EXPERT",
+      "title": "Continuous validation",
+      "bodyMd": "Un système validé au go-live peut cesser de l'être 6 mois après si on n'entretient pas la validation. Continuous validation = periodic review + change control + monitoring.\n\n**Periodic Review** — Revue annuelle : le système fait-il toujours ce qui a été validé ? Doc à jour ? Changes tracés ?\n\n**Change Control formel** — Toute modif (patch, config, upgrade) → impact assessment → tests régression → ré-approbation.\n\n**Monitoring en prod** — Uptime, performance, incidents, warnings — tracker pour détecter dérive.\n\n**Training** — Nouveaux users formés + certificats. Rafraîchissement annuel.\n\n**Backup + DR tests** — Tests de restauration réguliers. Backup non testé n'existe pas.\n\n**À retenir :** Validation initiale coûte 100. Maintenance annuelle 10-20. Sans maintenance, la validation initiale devient obsolète en 12-18 mois.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-15.jpg"
@@ -273,37 +273,17 @@
       "position": 16,
       "kind": "CONTENT",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Continuous validation",
-      "bodyMd": "Un système validé le jour du go-live peut cesser de l'être 6 mois après si on n'entretient pas la validation. La continuous validation = periodic review + change control + monitoring pour maintenir l'état validé tout au long de la vie du système.\n\n**Periodic Review** — Revue annuelle minimum : le système fait-il toujours ce qui a été validé ? Documentation à jour ? Changes tracés ?\n\n**Change Control formel** — Toute modification (patch, config, upgrade, nouvelle fonction) → impact assessment → tests régression → ré-approbation.\n\n**Monitoring en prod** — Uptime, performance, incidents, warnings — tracker pour détecter dérive.\n\n**Training** — Nouveaux users formés + certificats. Rafraîchissement annuel.\n\n**Backup + DR tests** — Tests de restauration réguliers. Un backup non testé n'existe pas.\n\n**À retenir :** La validation initiale coûte 100. La maintenance annuelle 10-20. Sans maintenance, la validation initiale devient obsolète en 12-18 mois — obligé de tout refaire.",
+      "title": "TP N3-1 : Piloter une Periodic Review",
+      "bodyMd": "**Contexte :** Le LIMS est en prod depuis 12 mois. Vous devez faire la Periodic Review annuelle.\n\n**Consigne :** 1) Cartographier tous les changes depuis le go-live (patches, config, users, upgrades). 2) Vérifier que chaque change a un change control formel signé. 3) Ré-tester les fonctionnalités critiques (les 20 tests les plus importants). 4) Vérifier les backups : sont-ils testés récemment ? DR test annuel ? 5) Rédiger le Periodic Review Report avec conclusion : système toujours validé OUI/NON, actions correctives si NON.\n\n**Attendu :** Periodic Review Report signé. Système confirmé valide ou plan d'action pour re-valider. Documentation prête pour audit FDA/EMA.\n\n💡 Templates Periodic Review sur ISPE. Focus sur les changes non tracés (le vrai risque). Un système avec 50 changes non tracés n'est plus validé.",
       "notes": null,
       "quiz": null,
       "imageUrl": "/training/csv-validation/slide-16.jpg"
     },
     {
       "position": 17,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Cloud, SaaS, Agile et validation",
-      "bodyMd": "GAMP 5 a été révisé en 2022 pour intégrer cloud, SaaS et Agile. Ce ne sont plus des exceptions — ce sont les normes. Les principes CSV restent, l'application évolue.\n\n**Cloud infrastructure** — Provider (AWS, Azure) qualifié via audit + SLA + audit rights. Shared responsibility model : validation client + provider.\n\n**SaaS applications** — Provider fournit sa documentation validation (audit, tests). Client complète pour son usage spécifique (URS + PQ).\n\n**Agile development** — Compatible avec GAMP : sprints planifiés + validation par lot fonctionnel + traceability continue via outils (Jira + validation).\n\n**DevOps + continuous deployment** — Compatible avec CI/CD tant que : environments qualifiés, tests automatisés validés, releases tracées.\n\n**Documentation à jour** — L'agilité rapide impose des outils qui gardent la doc synchronisée avec le code — sinon audit désastreux.\n\n**À retenir :** La modernité (Cloud, SaaS, Agile) n'est plus incompatible avec la validation pharma — GAMP 5 s'y est adapté. Choisir les bons outils est crucial.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/csv-validation/slide-17.jpg"
-    },
-    {
-      "position": 18,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Récapitulatif du niveau 3",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/csv-validation/slide-18.jpg"
-    },
-    {
-      "position": 19,
       "kind": "QUIZ",
       "section": "NIVEAU 3 · EXPERT",
-      "title": "Quiz de fin de niveau 3",
+      "title": "Quiz N3",
       "bodyMd": "",
       "notes": null,
       "quiz": {
@@ -311,9 +291,9 @@
           {
             "prompt": "System retirement :",
             "options": [
-              "Processus formel de mise hors service avec archivage data",
+              "Mise hors service + archivage",
               "Impossible",
-              "Suppression seule"
+              "Suppression"
             ],
             "correctIndex": 0
           },
@@ -321,15 +301,15 @@
             "prompt": "Continuous validation :",
             "options": [
               "Revue périodique + change control + monitoring",
-              "Une fois pour toutes",
+              "Une fois",
               "Impossible"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Cloud + validation :",
+            "prompt": "Cloud :",
             "options": [
-              "Provider doit être qualifié + SLA + Audit rights",
+              "Provider qualifié + SLA + Audit rights",
               "Impossible",
               "Sans contraintes"
             ],
@@ -338,25 +318,25 @@
           {
             "prompt": "Agile validation :",
             "options": [
-              "Sprints + validation par lot, coexistence GAMP possible",
+              "Sprints + validation par lot",
               "Impossible",
-              "Waterfall obligatoire"
+              "Waterfall only"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "SaaS validation :",
+            "prompt": "SaaS :",
             "options": [
-              "Provider fournit docs validation, client complète pour son usage",
+              "Provider fournit docs, client complète",
               "Impossible",
               "100% client"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "Coût typique :",
+            "prompt": "Coût :",
             "options": [
-              "10-40% du coût projet informatique en pharma",
+              "10-40% du coût projet en pharma",
               "Marginal",
               "0"
             ],
@@ -364,27 +344,27 @@
           }
         ]
       },
-      "imageUrl": "/training/csv-validation/slide-19.jpg"
+      "imageUrl": "/training/csv-validation/slide-17.jpg"
     },
     {
-      "position": 20,
+      "position": 18,
       "kind": "CONTENT",
       "section": "CONCLUSION",
       "title": "En résumé",
       "bodyMd": "",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/csv-validation/slide-20.jpg"
+      "imageUrl": "/training/csv-validation/slide-18.jpg"
     },
     {
-      "position": 21,
+      "position": 19,
       "kind": "CONTENT",
       "section": "CONCLUSION",
-      "title": "Passer à l'action",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Compléter avec le cours GAMP 5 pour la profondeur normative\n- Faire un stage validation sur un projet pharma existant (LIMS, MES, ELN)\n- Se familiariser avec outils modernes : Kneat, ValGenesis, ComplianceQuest\n- Se certifier Computer System Validation (via ISPE, Regulatory Focus)\n\n💡 CSV est un skill rare et bien payé en pharma. Un ingénieur qui parle CSV + GAMP + Data Integrity est immédiatement précieux dans tout projet pharma.",
+      "title": "Passer à l'action — 30 jours",
+      "bodyMd": "- Rejouer les 3 quiz\n- Complémenter avec cours GAMP 5\n- Refaire les 5 TPs — VP, RA, deviation, VSR, Periodic Review\n- Stage validation sur projet pharma existant\n- Certifier CSV via ISPE\n\n💡 CSV = skill rare et bien payé en pharma. CSV + GAMP + Data Integrity = profil précieux.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/csv-validation/slide-21.jpg"
+      "imageUrl": "/training/csv-validation/slide-19.jpg"
     }
   ]
 }
