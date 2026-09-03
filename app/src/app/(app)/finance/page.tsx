@@ -53,7 +53,12 @@ export default async function FinancePage({ searchParams }: { searchParams: { st
       <PageHeader
         title="Finance · Tranches de facturation"
         subtitle={`${filtered.length} tranche(s)`}
-        actions={<a href={`/api/exports/milestones?status=${searchParams.status ?? ""}`} className="btn-secondary">Export CSV</a>}
+        actions={
+          <div className="flex gap-2">
+            <Link href="/finance/payments" className="btn-secondary">Historique paiements</Link>
+            <a href={`/api/exports/milestones?status=${searchParams.status ?? ""}`} className="btn-secondary">Export CSV</a>
+          </div>
+        }
       />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
