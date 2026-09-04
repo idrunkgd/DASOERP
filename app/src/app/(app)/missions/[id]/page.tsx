@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { MissionExecForm } from "./mission-exec-form";
 import { MissionExecStatusActions } from "./status-actions";
@@ -17,7 +17,10 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default async function MissionExecDetail({ params }: { params: { id: string } }) {
-  await requirePermission("consulting.read");
+  const session = await requirePermission("consulting.read");
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canWrite = perms.includes("consulting.write");
+  const canViewPrices = perms.includes("finance.view_prices");
   const m = await prisma.mission.findUnique({
     where: { id: params.id },
     include: {
@@ -31,6 +34,11 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
     }
   });
   if (!m) notFound();
+
+  // Un consultant sans droits d'écriture ne peut consulter QUE sa propre mission
+  if (!canWrite && m.consultantId !== session.user.id) {
+    redirect("/me");
+  }
 
   const [companies, consultants, contacts] = await Promise.all([
     prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
@@ -77,10 +85,14 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
         <aside className="space-y-4">
           <div className="card p-5 space-y-2 text-sm">
             <h3 className="font-semibold mb-2">Conditions</h3>
-            <Row k="Tarif facturé" v={`${formatCurrency(m.dailyRate)}/j`} />
-            <Row k="Coût interne" v={`${formatCurrency(m.dailyCost)}/j`} />
-            <Row k="Marge / jour" v={formatCurrency(Number(m.dailyRate) - Number(m.dailyCost))} />
-            <hr />
+            {canViewPrices ? (
+              <>
+                <Row k="Tarif facturé" v={`${formatCurrency(m.dailyRate)}/j`} />
+                <Row k="Coût interne" v={`${formatCurrency(m.dailyCost)}/j`} />
+                <Row k="Marge / jour" v={formatCurrency(Number(m.dailyRate) - Number(m.dailyCost))} />
+                <hr />
+              </>
+            ) : null}
             <Row k="Début" v={formatDate(m.startDate)} />
             <Row k="Fin prévue" v={formatDate(m.endDate)} />
             {m.actualEndDate && <Row k="Fin réelle" v={formatDate(m.actualEndDate)} />}
@@ -107,9 +119,13 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
             <h3 className="font-semibold mb-2">Réalisé (timesheet validés)</h3>
             <Row k="Heures" v={`${totalHours.toFixed(1)}h`} />
             <Row k="Jours" v={totalDays.toFixed(2)} />
-            <Row k="Facturable" v={formatCurrency(billed)} />
-            <Row k="Coût" v={formatCurrency(cost)} />
-            <Row k="Marge" v={<span className={margin >= 0 ? "text-emerald-700" : "text-red-700"}>{formatCurrency(margin)}</span>} />
+            {canViewPrices && (
+              <>
+                <Row k="Facturable" v={formatCurrency(billed)} />
+                <Row k="Coût" v={formatCurrency(cost)} />
+                <Row k="Marge" v={<span className={margin >= 0 ? "text-emerald-700" : "text-red-700"}>{formatCurrency(margin)}</span>} />
+              </>
+            )}
             {(m.status === "ACTIVE" || m.status === "EXTENDED") && (
               <div className="text-xs text-midnight-500 mt-2">
                 {daysLeft >= 0
@@ -119,28 +135,30 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
             )}
           </div>
 
-          <div className="card p-5 space-y-2 text-sm">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold">Tranches de facturation T&M</h3>
-              <GenerateCashflowButton missionId={m.id} />
+          {canViewPrices && (
+            <div className="card p-5 space-y-2 text-sm">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Tranches de facturation T&M</h3>
+                <GenerateCashflowButton missionId={m.id} />
+              </div>
+              {m.milestones.length === 0 ? (
+                <p className="text-midnight-500">
+                  Aucune tranche dans le cashflow. Clique <strong>« Générer les tranches manquantes »</strong> ci-dessus
+                  pour créer une tranche PLANNED par mois de la mission (jours ouvrés × TJM).
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {m.milestones.map(ms => (
+                    <li key={ms.id} className="flex justify-between">
+                      <span>{ms.label}</span>
+                      <span className="tabular-nums">{formatCurrency(ms.amount)} <span className="text-midnight-500 text-xs">{ms.status}</span></span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Link href={`/finance?missionId=${m.id}`} className="text-xs text-indigoaccent hover:underline">→ Voir dans Finance</Link>
             </div>
-            {m.milestones.length === 0 ? (
-              <p className="text-midnight-500">
-                Aucune tranche dans le cashflow. Clique <strong>« Générer les tranches manquantes »</strong> ci-dessus
-                pour créer une tranche PLANNED par mois de la mission (jours ouvrés × TJM).
-              </p>
-            ) : (
-              <ul className="space-y-1">
-                {m.milestones.map(ms => (
-                  <li key={ms.id} className="flex justify-between">
-                    <span>{ms.label}</span>
-                    <span className="tabular-nums">{formatCurrency(ms.amount)} <span className="text-midnight-500 text-xs">{ms.status}</span></span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link href={`/finance?missionId=${m.id}`} className="text-xs text-indigoaccent hover:underline">→ Voir dans Finance</Link>
-          </div>
+          )}
         </aside>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Plane } from "lucide-react";
@@ -22,7 +22,10 @@ const STATUS_TONES: Record<string, string> = {
 };
 
 export default async function MissionsPage({ searchParams }: { searchParams: { q?: string; status?: string; consultantId?: string; companyId?: string; intermediaryCompanyId?: string } }) {
-  await requirePermission("consulting.read");
+  const session = await requirePermission("consulting.read");
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canWrite = perms.includes("consulting.write");
+  const canViewPrices = perms.includes("finance.view_prices");
   const statuses = parseMulti(searchParams.status);
   const consultantIds = parseMulti(searchParams.consultantId);
   const companyIds = parseMulti(searchParams.companyId);
@@ -40,6 +43,8 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
+  // Filtre "ses missions uniquement" pour les consultants sans droit d'écriture
+  if (!canWrite) where.consultantId = session.user.id;
   const list = await prisma.mission.findMany({
     where,
     include: { consultant: true, company: true, intermediaryCompany: true, missionRequest: { select: { reference: true } } },
@@ -115,7 +120,8 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
             <thead><tr>
               <th>Réf</th><th>Titre</th><th>Consultant</th><th>Client</th>
               <th>Du</th><th>Au</th>
-              <th className="text-right">Tarif</th><th>Statut</th><th>Demande</th>
+              {canViewPrices && <th className="text-right">Tarif</th>}
+              <th>Statut</th><th>Demande</th>
             </tr></thead>
             <tbody>
               {list.map(m => (
@@ -133,7 +139,7 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
                   </td>
                   <td className="text-xs">{formatDate(m.startDate)}</td>
                   <td className="text-xs">{formatDate(m.actualEndDate ?? m.endDate)}{m.actualEndDate && <span className="text-midnight-400"> (réel)</span>}</td>
-                  <td className="text-right tabular-nums">{formatCurrency(m.dailyRate)}/j</td>
+                  {canViewPrices && <td className="text-right tabular-nums">{formatCurrency(m.dailyRate)}/j</td>}
                   <td><span className={STATUS_TONES[m.status]}>{STATUS_LABELS[m.status]}</span></td>
                   <td className="text-xs"><Link href={`/mission-requests/${m.missionRequestId}`} className="text-indigoaccent hover:underline">{m.missionRequest.reference}</Link></td>
                 </tr>

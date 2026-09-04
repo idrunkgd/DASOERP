@@ -15,6 +15,7 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
   const session = await requirePermissionOrRedirect("fleet.read");
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canManage = perms.includes("fleet.manage");
+  const canViewPrices = perms.includes("finance.view_prices");
 
   const vehicle = await prisma.vehicle.findUnique({
     where: { id: params.id },
@@ -129,7 +130,7 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
             )}
           </section>
 
-          {vehicle.category === "LEASING" && (
+          {vehicle.category === "LEASING" && canViewPrices && (
             <section className="card p-5">
               <h2 className="font-semibold text-midnight-900 mb-3">Contrat de leasing</h2>
               {canManage ? (
@@ -166,6 +167,22 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
               ) : (
                 <p className="text-sm text-midnight-500 italic">Aucun contrat renseigné.</p>
               )}
+            </section>
+          )}
+          {vehicle.category === "LEASING" && !canViewPrices && vehicle.leasingContract && (
+            <section className="card p-5">
+              <h2 className="font-semibold text-midnight-900 mb-3">Contrat de leasing</h2>
+              <dl className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <dt className="text-xs text-midnight-500">Bailleur</dt>
+                  <dd className="font-medium">{vehicle.leasingContract.lessor}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-midnight-500">Fin de contrat</dt>
+                  <dd>{vehicle.leasingContract.endDate.toLocaleDateString("fr-BE")}</dd>
+                </div>
+              </dl>
+              <p className="text-xs text-midnight-400 italic mt-3">Montants réservés à la direction opérations.</p>
             </section>
           )}
         </div>

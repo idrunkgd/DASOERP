@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermissionOrRedirect } from "@/lib/rbac";
+import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { Car, Plus, ArrowRight } from "lucide-react";
 
@@ -14,7 +14,9 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 };
 
 export default async function FleetPage() {
-  await requirePermissionOrRedirect("fleet.read");
+  const session = await requirePermissionOrRedirect("fleet.read");
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canViewPrices = perms.includes("finance.view_prices");
   const vehicles = await prisma.vehicle.findMany({
     orderBy: [{ status: "asc" }, { plate: "asc" }],
     include: {
@@ -91,9 +93,11 @@ export default async function FleetPage() {
                     {v.leasingContract ? (
                       <div className="text-xs">
                         <div>{v.leasingContract.lessor}</div>
-                        <div className="text-midnight-500">
-                          {Number(v.leasingContract.monthlyAmount).toFixed(0)} €/mois
-                        </div>
+                        {canViewPrices && (
+                          <div className="text-midnight-500">
+                            {Number(v.leasingContract.monthlyAmount).toFixed(0)} €/mois
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <span className="text-xs text-midnight-400">—</span>

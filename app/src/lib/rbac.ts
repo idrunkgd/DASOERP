@@ -15,7 +15,7 @@ export type Permission =
   | "timesheet.self.write" | "timesheet.validate"
   | "purchases.read" | "purchases.write"
   | "planning.read"  | "planning.write"
-  | "finance.read"   | "finance.write"
+  | "finance.read"   | "finance.write"   | "finance.view_prices"
   | "consulting.read"| "consulting.write"
   // ── nouvelles permissions (suppression des "ouvert à tous") ──
   | "dashboard.read"
@@ -43,7 +43,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "timesheet.self.write","timesheet.validate",
     "purchases.read","purchases.write",
     "planning.read","planning.write",
-    "finance.read","finance.write",
+    "finance.read","finance.write","finance.view_prices",
     "consulting.read","consulting.write",
     "dashboard.read",
     "applinks.read","applinks.write",
@@ -67,7 +67,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "timesheet.self.write","timesheet.validate",
     "purchases.read","purchases.write",
     "planning.read","planning.write",
-    "finance.read",
+    "finance.read","finance.view_prices",
     "consulting.read","consulting.write",
     "dashboard.read",
     "applinks.read",
@@ -90,7 +90,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "projects.read",
     "timesheet.self.write",
     "planning.read",
-    "finance.read",
+    "finance.read","finance.view_prices",
     "consulting.read","consulting.write",
     "dashboard.read",
     "applinks.read",
@@ -104,9 +104,10 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "companies.read",
     "contacts.read",
     "projects.read",
+    "consulting.read",           // ← accès à sa mission (filtré à sa fiche)
     "timesheet.self.write",
     "planning.read",
-    "purchases.read",
+    // pas de purchases.read : les POs contiennent des montants confidentiels
     "dashboard.read",
     "applinks.read",
     "reviews.read",
@@ -115,6 +116,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "expenses.read","expenses.write",
     "leaves.read","leaves.write","fleet.read",
     "policies.read","training.read"
+    // pas de finance.view_prices : ne voit pas les tarifs, marges, loyers, montants milestones
   ],
   FINANCE: [
     "companies.read",
@@ -122,7 +124,7 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "offers.read",
     "projects.read",
     "purchases.read","purchases.write",
-    "finance.read","finance.write",
+    "finance.read","finance.write","finance.view_prices",
     "planning.read",
     "timesheet.self.write",
     "dashboard.read",
@@ -279,8 +281,9 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
     { value: "planning.write",  label: "Planning (écriture)" }
   ]},
   { label: "Finances", permissions: [
-    { value: "finance.read",    label: "Facturations (lecture)" },
-    { value: "finance.write",   label: "Facturations (écriture)" }
+    { value: "finance.read",         label: "Facturations (lecture)" },
+    { value: "finance.write",        label: "Facturations (écriture)" },
+    { value: "finance.view_prices",  label: "Voir les montants confidentiels (tarifs missions, loyers véhicules, marges, milestones)" }
   ]},
   { label: "Configuration", permissions: [
     { value: "users.manage",    label: "Utilisateurs & accès" },
