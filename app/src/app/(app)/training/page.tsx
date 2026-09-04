@@ -9,7 +9,7 @@ import { GraduationCap, CheckCircle2, Clock, PlayCircle } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function TrainingPage() {
-  const session = await requirePermissionOrRedirect("training.read");
+  const session = await requirePermissionOrRedirect(["training.read", "self.read"]);
 
   const [courses, myProgress] = await Promise.all([
     prisma.course.findMany({

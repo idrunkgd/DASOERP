@@ -22,8 +22,9 @@ const STATUS_TONES: Record<string, string> = {
 };
 
 export default async function MissionsPage({ searchParams }: { searchParams: { q?: string; status?: string; consultantId?: string; companyId?: string; intermediaryCompanyId?: string } }) {
-  const session = await requirePermission("consulting.read");
+  const session = await requirePermission(["consulting.read", "self.read"]);
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const hasGlobalRead = perms.includes("consulting.read");
   const canWrite = perms.includes("consulting.write");
   const canViewPrices = perms.includes("finance.view_prices");
   const statuses = parseMulti(searchParams.status);
@@ -43,8 +44,9 @@ export default async function MissionsPage({ searchParams }: { searchParams: { q
     { title: { contains: searchParams.q, mode: "insensitive" } },
     { reference: { contains: searchParams.q, mode: "insensitive" } }
   ];
-  // Filtre "ses missions uniquement" pour les consultants sans droit d'écriture
-  if (!canWrite) where.consultantId = session.user.id;
+  // Filtre "ses missions uniquement" si l'utilisateur n'a pas la vue globale
+  // (soit qu'il a self.read au lieu de consulting.read, soit qu'il n'a pas consulting.write)
+  if (!hasGlobalRead || !canWrite) where.consultantId = session.user.id;
   const list = await prisma.mission.findMany({
     where,
     include: { consultant: true, company: true, intermediaryCompany: true, missionRequest: { select: { reference: true } } },

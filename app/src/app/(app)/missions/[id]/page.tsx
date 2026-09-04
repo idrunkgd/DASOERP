@@ -17,7 +17,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default async function MissionExecDetail({ params }: { params: { id: string } }) {
-  const session = await requirePermission("consulting.read");
+  const session = await requirePermission(["consulting.read", "self.read"]);
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canWrite = perms.includes("consulting.write");
   const canViewPrices = perms.includes("finance.view_prices");

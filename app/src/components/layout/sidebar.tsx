@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
 import { type Permission } from "@/lib/rbac";
 
-type NavItem = { href: string; label: string; icon: any; perm?: Permission; allowedRoles?: Role[] };
+type NavItem = { href: string; label: string; icon: any; perm?: Permission | Permission[]; allowedRoles?: Role[] };
 type Section = { label: string; items: NavItem[] };
 
 const SECTIONS: Section[] = [
@@ -48,7 +48,7 @@ const SECTIONS: Section[] = [
       { href: "/candidates",       label: "Candidats",            icon: UserPlus,        perm: "consulting.read" },
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },
-      { href: "/missions",         label: "Missions",             icon: Plane,           perm: "consulting.read" },
+      { href: "/missions",         label: "Missions",             icon: Plane,           perm: ["consulting.read", "self.read"] as Permission[] },
       { href: "/calendar",         label: "Calendrier",           icon: CalendarDays,    perm: "consulting.read" }
     ]
   },
@@ -59,7 +59,7 @@ const SECTIONS: Section[] = [
       { href: "/projects",    label: "Projets",               icon: FolderKanban,    perm: "projects.read" },
       { href: "/timesheet",   label: "Timesheets",            icon: Clock,           perm: "timesheet.self.write" },
       { href: "/purchase-orders", label: "Bons de commande", icon: ShoppingCart, perm: "purchases.read" },
-      { href: "/planning",    label: "Planning",              icon: CalendarRange,   perm: "planning.read" }
+      { href: "/planning",    label: "Planning",              icon: CalendarRange,   perm: ["planning.read", "self.read"] as Permission[] }
     ]
   },
   {
@@ -73,14 +73,14 @@ const SECTIONS: Section[] = [
     label: "RH & Documents",
     items: [
       { href: "/onboarding",  label: "Onboarding",       icon: GraduationCap,  perm: "onboarding.read" },
-      { href: "/leaves",      label: "Congés",           icon: Plane,          perm: "leaves.read" },
+      { href: "/leaves",      label: "Congés",           icon: Plane,          perm: ["leaves.read", "self.read"] as Permission[] },
       { href: "/sick-leaves", label: "Arrêts maladie",   icon: HeartPulse,     perm: "users.manage" },
-      { href: "/documents",   label: "Documents",        icon: Files,          perm: "documents.read" },
+      { href: "/documents",   label: "Documents",        icon: Files,          perm: ["documents.read", "self.read"] as Permission[] },
       { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" },
-      { href: "/fleet",       label: "Flotte véhicules", icon: Car,            perm: "fleet.read" },
+      { href: "/fleet",       label: "Ma voiture / Flotte", icon: Car,         perm: ["fleet.read", "self.read"] as Permission[] },
       { href: "/contracts",   label: "Contrats",         icon: FileSignature,  perm: "contracts.read" },
-      { href: "/policies",    label: "Chartes & politiques", icon: FileText,   perm: "policies.read" },
-      { href: "/training",    label: "Formations techniques", icon: GraduationCap, perm: "training.read" }
+      { href: "/policies",    label: "Chartes & politiques", icon: FileText,   perm: ["policies.read", "self.read"] as Permission[] },
+      { href: "/training",    label: "Formations techniques", icon: GraduationCap, perm: ["training.read", "self.read"] as Permission[] }
     ]
   },
   {
@@ -210,7 +210,10 @@ export function Sidebar({
         {SECTIONS.map((section) => {
           const visibleItems = section.items.filter((item) => {
             if (item.allowedRoles && !item.allowedRoles.includes(role)) return false;
-            if (item.perm && !permSet.has(item.perm)) return false;
+            if (item.perm) {
+              const needed = Array.isArray(item.perm) ? item.perm : [item.perm];
+              if (!needed.some((p) => permSet.has(p))) return false;
+            }
             return true;
           });
           if (visibleItems.length === 0) return null;

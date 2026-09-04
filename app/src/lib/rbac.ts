@@ -31,7 +31,11 @@ export type Permission =
   | "contracts.read"  | "contracts.manage"
   | "policies.read"   | "policies.manage"
   | "training.read"   | "training.manage"
-  | "audit.read";
+  | "audit.read"
+  // Umbrella "voir mes infos" — donne accès en lecture aux données qui
+  // concernent l'utilisateur (sa mission, sa voiture, son planning, ses
+  // congés, ses NDF, ses formations, ses chartes) SANS la vue globale.
+  | "self.read";
 
 const ROLE_PERMS: Record<Role, Permission[]> = {
   ADMIN: [
@@ -104,18 +108,14 @@ const ROLE_PERMS: Record<Role, Permission[]> = {
     "companies.read",
     "contacts.read",
     "projects.read",
-    "consulting.read",           // ← accès à sa mission (filtré à sa fiche)
-    "timesheet.self.write",
-    "planning.read",
-    // pas de purchases.read : les POs contiennent des montants confidentiels
+    "self.read",                 // ← accès unique à toutes ses infos perso
+    "timesheet.self.write",      // saisie de son timesheet
+    "expenses.write",            // saisir/soumettre ses notes de frais
+    "leaves.write",              // demander ses congés
+    "tests.take",
     "dashboard.read",
     "applinks.read",
-    "reviews.read",
-    "documents.read",
-    "tests.take",
-    "expenses.read","expenses.write",
-    "leaves.read","leaves.write","fleet.read",
-    "policies.read","training.read"
+    "reviews.read"
     // pas de finance.view_prices : ne voit pas les tarifs, marges, loyers, montants milestones
   ],
   FINANCE: [
@@ -221,12 +221,16 @@ export async function requireSession() {
  * Si l'utilisateur n'a pas la permission (ni par rôle, ni par grant), throw.
  * À utiliser dans les SERVER ACTIONS (l'erreur remonte au client qui peut
  * afficher un toast).
+ *
+ * Accepte aussi une liste : on autorise si AU MOINS UNE des permissions est
+ * détenue par l'utilisateur (any-of).
  */
-export async function requirePermission(perm: Permission) {
+export async function requirePermission(perm: Permission | Permission[]) {
   const session = await requireSession();
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
-  if (!perms.includes(perm)) {
-    throw new Error(`Forbidden: missing permission ${perm}`);
+  const needed = Array.isArray(perm) ? perm : [perm];
+  if (!needed.some((p) => perms.includes(p))) {
+    throw new Error(`Forbidden: missing permission ${needed.join(" | ")}`);
   }
   return session;
 }
@@ -236,11 +240,14 @@ export async function requirePermission(perm: Permission) {
  * redirige vers /me (ou vers `fallback`) plutôt que de throw. Évite de
  * faire afficher une page d'erreur à un user qui tape une URL hors de
  * ses droits — il atterrit silencieusement sur son profil.
+ *
+ * Accepte aussi une liste : autorisé si AU MOINS UNE est détenue.
  */
-export async function requirePermissionOrRedirect(perm: Permission, fallback = "/me") {
+export async function requirePermissionOrRedirect(perm: Permission | Permission[], fallback = "/me") {
   const session = await requireSession();
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
-  if (!perms.includes(perm)) redirect(fallback);
+  const needed = Array.isArray(perm) ? perm : [perm];
+  if (!needed.some((p) => perms.includes(p))) redirect(fallback);
   return session;
 }
 
@@ -284,6 +291,9 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
     { value: "finance.read",         label: "Facturations (lecture)" },
     { value: "finance.write",        label: "Facturations (écriture)" },
     { value: "finance.view_prices",  label: "Voir les montants confidentiels (tarifs missions, loyers véhicules, marges, milestones)" }
+  ]},
+  { label: "Espace personnel", permissions: [
+    { value: "self.read", label: "Voir mes infos — ma mission, ma voiture, mon planning, mes congés, mes NDF, mes formations, mes chartes" }
   ]},
   { label: "Configuration", permissions: [
     { value: "users.manage",    label: "Utilisateurs & accès" },
@@ -458,6 +468,14 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Montants confidentiels (transverse)", href: "—", perms: [
         { value: "finance.view_prices", label: "Voir les tarifs de mission, loyers véhicules, marges, montants milestones (sinon masqués)" }
       ], note: "Contrôle l'affichage des montants dans Missions, Flotte, tranches de facturation. Sans ce droit, l'utilisateur voit les infos SANS les euros." }
+    ]
+  },
+  {
+    section: "Espace personnel",
+    entries: [
+      { menuLabel: "Voir mes infos (umbrella)", href: "—", perms: [
+        { value: "self.read", label: "Voir ma mission, ma voiture, mon planning, mes congés, mes NDF, mes formations, mes chartes" }
+      ], note: "Umbrella pour les consultants. Ouvre l'accès en lecture aux données perso — SANS voir celles des autres. Fonctionne comme substitut à consulting.read, fleet.read, planning.read, leaves.read, expenses.read, policies.read, training.read, documents.read (tous scopés au self)." }
     ]
   },
   {

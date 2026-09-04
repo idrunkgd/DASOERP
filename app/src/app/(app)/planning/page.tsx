@@ -8,7 +8,7 @@ import { MonthGrid } from "./month-grid";
 export const dynamic = "force-dynamic";
 
 export default async function PlanningPage({ searchParams }: { searchParams: { month?: string; userId?: string } }) {
-  await requirePermission("planning.read");
+  await requirePermission(["planning.read", "self.read"]);
   const ref = searchParams.month ? parseISO(searchParams.month + "-01") : new Date();
   const monthStart = startOfMonth(ref);
   const monthEnd = endOfMonth(ref);

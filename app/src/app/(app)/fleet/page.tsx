@@ -14,7 +14,7 @@ const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
 };
 
 export default async function FleetPage() {
-  const session = await requirePermissionOrRedirect("fleet.read");
+  const session = await requirePermissionOrRedirect(["fleet.read", "self.read"]);
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canViewPrices = perms.includes("finance.view_prices");
   const canManage = perms.includes("fleet.manage");

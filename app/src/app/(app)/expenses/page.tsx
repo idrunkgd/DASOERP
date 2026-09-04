@@ -32,7 +32,7 @@ export default async function ExpensesPage({
 }: {
   searchParams: { mine?: string; status?: string; edit?: string };
 }) {
-  const session = await requirePermissionOrRedirect("expenses.read");
+  const session = await requirePermissionOrRedirect(["expenses.read", "self.read"]);
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const isApprover = perms.includes("expenses.approve");
   const canMarkPaid = isApprover && perms.includes("finance.write");

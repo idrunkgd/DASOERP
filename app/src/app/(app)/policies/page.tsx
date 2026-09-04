@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  * sur /policies/manage pour créer/assigner/consulter les signataires.
  */
 export default async function PoliciesPage() {
-  const session = await requirePermissionOrRedirect("policies.read");
+  const session = await requirePermissionOrRedirect(["policies.read", "self.read"]);
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canManage = perms.includes("policies.manage");
 

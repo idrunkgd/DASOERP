@@ -32,7 +32,7 @@ export default async function DocumentsPage({
 }: {
   searchParams: { q?: string; tag?: string; expiring?: string };
 }) {
-  await requirePermissionOrRedirect("documents.read");
+  await requirePermissionOrRedirect(["documents.read", "self.read"]);
 
   const q = (searchParams.q || "").trim();
   const tags = parseMulti(searchParams.tag);

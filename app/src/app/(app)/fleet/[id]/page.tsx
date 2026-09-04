@@ -12,7 +12,7 @@ import { VehicleDocUpload } from "./doc-upload";
 export const dynamic = "force-dynamic";
 
 export default async function VehicleDetailPage({ params }: { params: { id: string } }) {
-  const session = await requirePermissionOrRedirect("fleet.read");
+  const session = await requirePermissionOrRedirect(["fleet.read", "self.read"]);
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canManage = perms.includes("fleet.manage");
   const canViewPrices = perms.includes("finance.view_prices");

@@ -26,7 +26,7 @@ export default async function LeavesPage({
 }: {
   searchParams: { filter?: string };
 }) {
-  const session = await requirePermissionOrRedirect("leaves.read");
+  const session = await requirePermissionOrRedirect(["leaves.read", "self.read"]);
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canApprove = perms.includes("leaves.approve");
 
