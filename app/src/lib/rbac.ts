@@ -454,7 +454,10 @@ export const MENU_PERMISSIONS: MenuPermSection[] = [
       { menuLabel: "Facturations", href: "/finance", perms: [
         { value: "finance.read",  label: "Voir les facturations" },
         { value: "finance.write", label: "Émettre & modifier les factures" }
-      ]}
+      ]},
+      { menuLabel: "Montants confidentiels (transverse)", href: "—", perms: [
+        { value: "finance.view_prices", label: "Voir les tarifs de mission, loyers véhicules, marges, montants milestones (sinon masqués)" }
+      ], note: "Contrôle l'affichage des montants dans Missions, Flotte, tranches de facturation. Sans ce droit, l'utilisateur voit les infos SANS les euros." }
     ]
   },
   {
