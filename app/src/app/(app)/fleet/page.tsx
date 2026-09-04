@@ -17,7 +17,16 @@ export default async function FleetPage() {
   const session = await requirePermissionOrRedirect("fleet.read");
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canViewPrices = perms.includes("finance.view_prices");
+  const canManage = perms.includes("fleet.manage");
+
+  // Un utilisateur sans droit "fleet.manage" ne voit que ses propres véhicules
+  // (actuellement attribués ou passés). Ceux avec fleet.manage voient toute la flotte.
+  const vehicleWhere = canManage
+    ? {}
+    : { assignments: { some: { userId: session.user.id } } };
+
   const vehicles = await prisma.vehicle.findMany({
+    where: vehicleWhere,
     orderBy: [{ status: "asc" }, { plate: "asc" }],
     include: {
       leasingContract: { select: { lessor: true, endDate: true, monthlyAmount: true } },
@@ -35,13 +44,15 @@ export default async function FleetPage() {
   return (
     <div>
       <PageHeader
-        title="Flotte"
-        subtitle={`${active.length} véhicule${active.length > 1 ? "s" : ""} en circulation`}
-        actions={
+        title={canManage ? "Flotte" : "Mon véhicule"}
+        subtitle={canManage
+          ? `${active.length} véhicule${active.length > 1 ? "s" : ""} en circulation`
+          : "Le véhicule qui vous est attribué"}
+        actions={canManage ? (
           <Link href="/fleet/new" className="btn-primary">
             <Plus className="w-4 h-4" /> Nouveau véhicule
           </Link>
-        }
+        ) : null}
       />
 
       {active.length === 0 ? (

@@ -34,6 +34,15 @@ export default async function VehicleDetailPage({ params }: { params: { id: stri
   });
   if (!vehicle) notFound();
 
+  // Sans droit de gestion : accès uniquement au véhicule qui lui est ou lui a été attribué
+  if (!canManage) {
+    const isMine = vehicle.assignments.some((a: { userId: string }) => a.userId === session.user.id);
+    if (!isMine) {
+      const { redirect } = await import("next/navigation");
+      redirect("/fleet");
+    }
+  }
+
   const activeAssignment = vehicle.assignments.find((a) => a.endDate === null);
 
   // Users éligibles : actifs + PAS déjà attribués à un autre véhicule (règle 1 véhicule / personne)
