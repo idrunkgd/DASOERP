@@ -14,11 +14,15 @@ import { Briefcase, FolderKanban, Users as UsersIcon, AlertTriangle, Clock, Shop
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  // Requiert dashboard.read explicitement (la perm est dans les groupes par défaut).
-  const session = await requirePermissionOrRedirect("dashboard.read");
-  // Le getUserAccessGroupName est aussi gardé pour la suite (titre user).
+  // Accepte dashboard.read (vue admin/managériale) OU self.read (vue consultant).
+  // Un consultant avec self.read seul est redirigé sur /me — son vrai dashboard perso
+  // (mission, congés, NDF, formations…). Le /dashboard reste l'agrégé pipeline+marge.
+  const session = await requirePermissionOrRedirect(["dashboard.read", "self.read"]);
   const groupName = await getUserAccessGroupName(session.user.id);
   if (groupName === DEFAULT_GROUP_NAME) redirect("/me");
+  // Sans dashboard.read (donc seulement self.read), on redirige vers /me.
+  const perms = await (await import("@/lib/rbac")).getUserEffectivePermissions(session.user.id, session.user.role);
+  if (!perms.includes("dashboard.read")) redirect("/me");
 
   const [
     offersOpen, offersWonYear, offersLostYear,
