@@ -1,5 +1,9 @@
 import { cn } from "@/lib/utils";
 
+/**
+ * KPI Card — style charte : label mono uppercase discret, gros chiffre 800.
+ * Tone donne uniquement la couleur du chiffre (le fond reste blanc / rounded).
+ */
 export function KpiCard({
   label, value, hint, tone = "neutral", icon: Icon
 }: {
@@ -11,19 +15,19 @@ export function KpiCard({
 }) {
   const tones: Record<string, string> = {
     neutral: "text-midnight-900",
-    success: "text-emerald-700",
-    warning: "text-amber-700",
-    danger:  "text-red-700",
-    info:    "text-indigo-700"
+    success: "text-emerald-600",
+    warning: "text-amber-600",
+    danger:  "text-red-600",
+    info:    "text-indigoaccent"
   };
   return (
     <div className="card p-5">
       <div className="flex items-start justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-midnight-500">{label}</span>
-        {Icon && <Icon className="w-4 h-4 text-midnight-400" />}
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-midnight-400">{label}</span>
+        {Icon && <Icon className="w-4 h-4 text-midnight-300" />}
       </div>
-      <div className={cn("mt-2 text-2xl font-semibold", tones[tone])}>{value}</div>
-      {hint && <div className="text-xs text-midnight-500 mt-1">{hint}</div>}
+      <div className={cn("mt-3 text-3xl font-extrabold tracking-tight leading-none", tones[tone])}>{value}</div>
+      {hint && <div className="text-xs text-midnight-400 mt-2 font-mono">{hint}</div>}
     </div>
   );
 }

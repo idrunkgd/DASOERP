@@ -6,33 +6,47 @@ const config: Config = {
     container: { center: true, padding: "1rem", screens: { "2xl": "1400px" } },
     extend: {
       colors: {
+        // Palette officielle Dasolabs (charte graphique)
+        stellar:  "#07070D",     // stellar black — accents ultra-sombres
         midnight: {
-          DEFAULT: "#202037",
-          50: "#f3f3f7",
-          100: "#e1e1ec",
-          200: "#c2c3d6",
-          300: "#9b9cb8",
-          400: "#727496",
-          500: "#535679",
-          600: "#42445f",
-          700: "#34354c",
-          800: "#262738",
+          DEFAULT: "#202037",    // midnight indigo — fond sombre principal
+          50:  "#f1f1f6",        // silver comet
+          100: "#e5e5ee",
+          200: "#c8c9d5",
+          300: "#9394a6",
+          400: "#6b6d80",
+          500: "#4a4d6a",
+          600: "#3a3d5a",
+          700: "#2d2f4a",
+          800: "#252740",
           900: "#202037",
-          950: "#13131f"
+          950: "#07070D"
         },
-        indigoaccent: { DEFAULT: "#5b5fd6", light: "#7c80e8" },
-        success: "#16a34a",
-        warning: "#f59e0b",
-        danger: "#dc2626",
-        muted: "#f5f5f9",
-        border: "#e4e4ec",
-        ring: "#5b5fd6"
+        // Electric blue — l'accent signature de la charte
+        indigoaccent: { DEFAULT: "#3434E8", light: "#6b6bf0" },
+        electric: "#3434E8",
+        silver: "#F1F1F6",       // silver comet
+        success: "#10B981",
+        warning: "#F59E0B",
+        danger:  "#EF4444",
+        muted:   "#F1F1F6",
+        border:  "#e5e5ee",
+        ring:    "#3434E8"
       },
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"]
+        // DM Sans injectée depuis layout.tsx via next/font
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"]
+      },
+      borderRadius: {
+        lg: "10px",
+        xl: "12px",
+        "2xl": "16px"
       },
       boxShadow: {
-        card: "0 1px 2px rgba(20,20,40,.04), 0 4px 12px rgba(20,20,40,.04)"
+        card: "0 1px 2px rgba(7,7,13,.04), 0 4px 16px rgba(7,7,13,.05)",
+        cardHover: "0 8px 30px rgba(52,52,232,.12)",
+        pop: "0 12px 40px rgba(52,52,232,.18)"
       }
     }
   },

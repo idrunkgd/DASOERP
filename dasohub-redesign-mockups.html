@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>DasoHub — Redesign 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #07070D;
+    --midnight: #202037;
+    --midnight-2: #2d2f4a;
+    --blue: #3434E8;
+    --blue-lt: #6b6bf0;
+    --silver: #F1F1F6;
+    --silver-dk: #dcdce6;
+    --white: #FFFFFF;
+    --ash: #6b6d80;
+    --ash-lt: #b4b6c3;
+    --mint: #10B981;
+    --amber: #F59E0B;
+    --red: #EF4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #0a0c18 0%, #12142a 100%);
+    color: var(--white); min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'DM Mono', monospace; }
+  .slash { color: var(--blue); font-weight:900; display:inline-block; transform: skewX(-15deg); margin: 0 .15em; }
+
+  /* ─────── LANDING ─────── */
+  .landing {
+    padding: 8vh 5vw 10vh;
+    max-width: 1400px; margin: 0 auto;
+    text-align:center;
+  }
+  .landing .badge {
+    display:inline-block; padding: .5em 1.2em; border-radius:999px;
+    background: var(--blue); color:var(--white); font-weight:700; font-size:11px; letter-spacing:.15em;
+    margin-bottom: 2em;
+  }
+  .landing h1 {
+    font-size: clamp(48px, 6vw, 96px); font-weight:900; letter-spacing:-.03em;
+    line-height: 1; margin-bottom: .3em;
+  }
+  .landing h1 .accent { color: var(--blue); }
+  .landing p {
+    font-size: 20px; color: var(--ash-lt); max-width: 700px; margin: 1em auto 3em;
+    line-height:1.5;
+  }
+  .landing .nav-pills {
+    display:flex; gap: .8em; justify-content:center; flex-wrap:wrap;
+    font-size: 13px;
+  }
+  .nav-pill {
+    padding: .8em 1.4em; border-radius:999px;
+    background: rgba(255,255,255,.06); color:var(--white);
+    border: 1px solid rgba(255,255,255,.1);
+    font-weight:500; cursor:pointer;
+    transition: all .2s ease; text-decoration:none;
+  }
+  .nav-pill:hover { background:var(--blue); border-color:var(--blue); transform:translateY(-2px); }
+
+  /* ─────── MOCKUP FRAMES ─────── */
+  .mockup-section {
+    padding: 6vh 5vw;
+    max-width: 1500px; margin: 0 auto;
+  }
+  .mockup-meta {
+    display:flex; align-items:center; gap: 1.5em; margin-bottom: 2em;
+  }
+  .mockup-num {
+    font-size: 48px; font-weight:900; color: var(--blue);
+    font-family: 'DM Mono', monospace; letter-spacing:-.05em;
+  }
+  .mockup-info h2 {
+    font-size: 28px; font-weight:800; letter-spacing:-.02em;
+  }
+  .mockup-info p { color: var(--ash-lt); font-size: 14px; margin-top:.3em; }
+
+  .browser {
+    border-radius: 12px; overflow:hidden;
+    background: var(--silver);
+    box-shadow: 0 40px 100px rgba(52,52,232,.15), 0 0 0 1px rgba(255,255,255,.06);
+    position: relative;
+  }
+  .browser-bar {
+    background: #2c2f4d; padding: 12px 16px;
+    display:flex; align-items:center; gap: 8px;
+  }
+  .browser-dots { display:flex; gap: 6px; }
+  .browser-dots span {
+    width:12px; height:12px; border-radius:50%;
+    background: #4a4d6a;
+  }
+  .browser-dots span:first-child { background: #EF4444; }
+  .browser-dots span:nth-child(2) { background: #F59E0B; }
+  .browser-dots span:nth-child(3) { background: #10B981; }
+  .browser-url {
+    background: rgba(255,255,255,.05); color: var(--ash-lt);
+    padding: 6px 16px; border-radius: 6px;
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    margin-left: 12px; flex:1;
+    display:flex; align-items:center; gap:8px;
+  }
+  .browser-url::before {
+    content:'🔒'; font-size: 10px; opacity:.6;
+  }
+
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 720px; color: var(--midnight); }
+
+  /* ─────── SIDEBAR ─────── */
+  .sidebar {
+    background: var(--midnight); color: var(--white);
+    padding: 24px 16px;
+    display:flex; flex-direction:column;
+  }
+  .sidebar-logo {
+    font-size: 22px; font-weight:900; letter-spacing:-.03em;
+    margin-bottom: 32px;
+    display:flex; align-items:center; gap: 8px;
+  }
+  .sidebar-logo::after {
+    content:'/'; color: var(--blue); font-weight:900;
+    transform: skewX(-15deg); display:inline-block;
+  }
+  .sidebar-section {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    color: var(--ash-lt); text-transform:uppercase; letter-spacing:.15em;
+    margin: 24px 0 8px; padding: 0 12px;
+  }
+  .sidebar-item {
+    display:flex; align-items:center; gap: 12px;
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 14px; color: var(--ash-lt); font-weight:500;
+    cursor:pointer; transition: all .15s ease;
+    margin-bottom: 2px; text-decoration:none;
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,.05); color: var(--white); }
+  .sidebar-item.active {
+    background: var(--blue); color: var(--white);
+    box-shadow: 0 4px 12px rgba(52,52,232,.35);
+  }
+  .sidebar-item .icon { width: 18px; opacity:.8; font-size: 16px; }
+  .sidebar-item .badge {
+    margin-left:auto; background: var(--red); color:white;
+    font-size: 10px; padding: 2px 6px; border-radius: 999px;
+    font-weight:700;
+  }
+  .sidebar-user {
+    margin-top:auto; padding: 12px;
+    background: rgba(0,0,0,.2); border-radius: 10px;
+    display:flex; align-items:center; gap: 10px;
+  }
+  .avatar-mini {
+    width: 32px; height: 32px; border-radius:50%;
+    background: var(--blue); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size: 13px;
+  }
+
+  /* ─────── MAIN ─────── */
+  .main {
+    padding: 32px 40px; background: var(--silver);
+    overflow:auto;
+  }
+  .main-header {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom: 24px;
+  }
+  .pill {
+    display:inline-block; padding: 4px 12px; border-radius:999px;
+    background: var(--midnight); color:var(--white);
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing:.15em;
+    text-transform:uppercase; font-weight:600;
+    margin-bottom: 12px;
+  }
+  .pill.blue { background: var(--blue); }
+  .pill.mint { background: var(--mint); }
+  .pill.amber { background: var(--amber); }
+  .pill.red { background: var(--red); }
+  .pill.outline { background:transparent; border:1px solid var(--midnight); color:var(--midnight); }
+
+  h1.main-title {
+    font-size: 40px; font-weight:800; letter-spacing:-.02em;
+    line-height: 1;
+  }
+  .main-sub { color: var(--ash); font-size: 14px; margin-top: 6px; }
+
+  .action-btn {
+    padding: 10px 18px; border-radius: 10px; background: var(--midnight);
+    color:var(--white); font-family:'DM Sans'; font-size: 13px; font-weight:600;
+    border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+    transition: all .2s ease;
+  }
+  .action-btn:hover { background: var(--blue); transform: translateY(-1px); }
+  .action-btn.primary { background: var(--blue); }
+  .action-btn.ghost { background:transparent; border:1px solid var(--silver-dk); color:var(--midnight); }
+
+  /* ─────── CARDS ─────── */
+  .card {
+    background: var(--white); border-radius: 12px; padding: 20px;
+    border: 1px solid rgba(0,0,0,.03);
+  }
+  .grid { display:grid; gap: 16px; }
+  .cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .span-2 { grid-column: span 2; }
+
+  .kpi { text-align:left; }
+  .kpi-label {
+    font-family:'DM Mono', monospace; font-size: 10px;
+    color: var(--ash); text-transform:uppercase; letter-spacing:.15em;
+    margin-bottom: 8px;
+  }
+  .kpi-value { font-size: 36px; font-weight:800; letter-spacing:-.02em; line-height:1; }
+  .kpi-value .unit { font-size: 20px; color:var(--ash); font-weight:600; }
+  .kpi-delta {
+    font-size: 12px; color:var(--mint); font-weight:600; margin-top:4px;
+    display:inline-flex; align-items:center; gap: 4px;
+  }
+
+  /* Table */
+  .table {
+    background:var(--white); border-radius: 12px; overflow:hidden;
+  }
+  .table-head {
+    background: rgba(0,0,0,.02); padding: 12px 20px;
+    display:grid; grid-template-columns: repeat(6, 1fr);
+    font-family:'DM Mono', monospace; font-size: 10px;
+    color: var(--ash); text-transform:uppercase; letter-spacing:.15em; font-weight:600;
+  }
+  .table-row {
+    padding: 16px 20px; display:grid; grid-template-columns: repeat(6, 1fr);
+    border-top: 1px solid rgba(0,0,0,.03);
+    font-size: 13px; align-items:center;
+  }
+  .table-row:hover { background: rgba(52,52,232,.02); }
+  .table-row .name { font-weight:600; }
+  .table-row .ref { font-family:'DM Mono', monospace; font-size: 11px; color:var(--ash); }
+
+  /* Progress bar */
+  .progress {
+    height: 4px; background:var(--silver-dk); border-radius:999px; overflow:hidden;
+    margin-top: 8px;
+  }
+  .progress-fill { height:100%; background: var(--blue); border-radius:999px; }
+
+  /* Chip cluster */
+  .chips { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip-sm {
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight:600;
+    background: var(--silver); color: var(--midnight);
+  }
+  .chip-sm.blue { background: var(--blue); color:white; }
+  .chip-sm.mint { background: rgba(16,185,129,.15); color: var(--mint); }
+  .chip-sm.amber { background: rgba(245,158,11,.15); color: var(--amber); }
+  .chip-sm.red { background: rgba(239,68,68,.15); color: var(--red); }
+
+  /* Big pale number background */
+  .bg-digit {
+    position:absolute; font-size: 200px; font-weight:900;
+    color: rgba(0,0,0,.03); line-height:1; pointer-events:none;
+    top: -20px; right: 20px;
+  }
+
+  /* ─────── SCREEN 1 : DASHBOARD ─────── */
+  .dash-grid {
+    display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;
+    grid-template-rows: auto auto;
+  }
+  .dash-hero {
+    background: var(--midnight); color: var(--white); border-radius: 16px;
+    padding: 24px; position:relative; overflow:hidden;
+    grid-row: span 2;
+  }
+  .dash-hero::before {
+    content:''; position:absolute; width:300px; height:300px; border-radius:50%;
+    background: var(--blue); top:-100px; right:-80px; opacity:.4;
+    filter: blur(30px);
+  }
+  .dash-hero > * { position:relative; z-index:2; }
+  .dash-hero .pill { background: rgba(255,255,255,.1); backdrop-filter: blur(10px); }
+  .dash-hero h2 { font-size: 24px; font-weight:800; margin-top: 8px; }
+  .dash-hero .client {
+    display:flex; align-items:center; gap: 12px; margin-top: 20px;
+    padding: 12px; background: rgba(255,255,255,.05); border-radius: 10px;
+  }
+  .dash-hero .mission-days {
+    font-size: 60px; font-weight:900; letter-spacing:-.04em; margin-top: 24px;
+  }
+  .dash-hero .mission-days .unit { font-size: 18px; color: var(--blue-lt); }
+
+  .dash-card {
+    background:var(--white); border-radius: 12px; padding: 18px;
+    display:flex; flex-direction:column; gap: 8px;
+    transition: transform .2s ease;
+    cursor:pointer;
+  }
+  .dash-card:hover { transform: translateY(-2px); }
+  .dash-card .icon-wrap {
+    width: 40px; height:40px; border-radius: 10px;
+    background: rgba(52,52,232,.1); color: var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 20px; font-weight:900;
+  }
+  .dash-card .lbl {
+    font-family:'DM Mono'; font-size: 10px; color: var(--ash);
+    text-transform:uppercase; letter-spacing:.15em;
+    margin-top: 4px;
+  }
+  .dash-card .val { font-size: 28px; font-weight:800; letter-spacing:-.02em; line-height:1; margin-top:2px; }
+  .dash-card.mint .icon-wrap { background: rgba(16,185,129,.1); color: var(--mint); }
+  .dash-card.amber .icon-wrap { background: rgba(245,158,11,.1); color: var(--amber); }
+
+  /* Timesheet grid */
+  .ts-grid {
+    display:grid; grid-template-columns: 180px repeat(5, 1fr);
+    background:var(--white); border-radius: 12px; overflow:hidden;
+  }
+  .ts-grid > * {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(0,0,0,.04);
+    border-right: 1px solid rgba(0,0,0,.04);
+  }
+  .ts-header {
+    background: rgba(0,0,0,.02); font-family:'DM Mono'; font-size: 11px;
+    color: var(--ash); text-transform:uppercase; letter-spacing:.15em; font-weight:600;
+  }
+  .ts-mission {
+    display:flex; flex-direction:column;
+    background: rgba(52,52,232,.02); font-weight:600; font-size: 13px;
+  }
+  .ts-mission span { font-family:'DM Mono'; font-size: 11px; color:var(--ash); font-weight:400; }
+  .ts-hours {
+    text-align:center; font-size: 20px; font-weight:800;
+  }
+  .ts-hours.empty { color: var(--ash-lt); font-weight:400; }
+
+  /* Formation card */
+  .fmn-card {
+    background:var(--white); border-radius:12px; padding:20px;
+    position:relative; overflow:hidden;
+  }
+  .fmn-num {
+    position:absolute; top: 12px; right: 12px;
+    font-family: 'DM Mono'; font-size: 12px; color: var(--ash);
+    background: var(--silver); padding: 4px 10px; border-radius: 999px;
+  }
+  .fmn-title { font-size: 17px; font-weight:700; margin: 8px 0 4px; line-height:1.2; }
+  .fmn-meta { font-size: 12px; color: var(--ash); margin-bottom: 12px; }
+  .fmn-progress-lbl {
+    display:flex; justify-content:space-between; font-size: 11px;
+    color: var(--ash); font-family:'DM Mono';
+    margin-top: 12px;
+  }
+
+  /* Bottom nav for meta */
+  .footer-meta {
+    padding: 60px 5vw 40px;
+    max-width: 1400px; margin: 0 auto;
+    text-align:center; color: var(--ash-lt);
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    margin-top: 8vh;
+  }
+  .footer-meta strong { color:var(--white); font-weight:700; }
+  .footer-meta .slash-brand { color:var(--blue); font-weight:900; margin: 0 .3em; }
+
+  /* Charter swatches */
+  .charter {
+    padding: 8vh 5vw;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .swatches {
+    display:grid; grid-template-columns: repeat(5, 1fr); gap: 16px;
+    margin: 32px 0;
+  }
+  .swatch {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    padding: 20px;
+    color:white;
+    box-shadow: 0 20px 40px rgba(0,0,0,.2);
+  }
+  .swatch .name { font-family:'DM Mono'; font-size: 11px; letter-spacing:.15em; text-transform:uppercase; opacity:.8; }
+  .swatch .code { font-size: 20px; font-weight:800; margin-top: 2px; }
+
+  /* ─────── SCREEN 3 : NDF Mobile ─────── */
+  .ndf-list {
+    display:flex; flex-direction:column; gap: 8px;
+  }
+  .ndf-item {
+    background:var(--white); border-radius: 10px; padding: 14px 16px;
+    display:flex; align-items:center; gap: 14px;
+    transition: transform .15s ease;
+    cursor:pointer;
+  }
+  .ndf-item:hover { transform:translateX(4px); }
+  .ndf-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--silver); display:flex; align-items:center; justify-content:center;
+    font-size: 18px;
+  }
+  .ndf-body { flex:1; min-width:0; }
+  .ndf-title { font-weight:600; font-size: 14px; }
+  .ndf-sub { font-family:'DM Mono'; font-size: 11px; color: var(--ash); margin-top: 2px; }
+  .ndf-amt { font-size: 18px; font-weight:800; letter-spacing:-.02em; }
+  .fab {
+    position:absolute; bottom: 24px; right: 24px;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--blue); color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 28px; font-weight:300;
+    box-shadow: 0 12px 30px rgba(52,52,232,.4);
+    cursor:pointer; transition: transform .2s ease;
+  }
+  .fab:hover { transform: scale(1.05); }
+
+  /* Ma voiture */
+  .car-hero {
+    background: linear-gradient(135deg, var(--midnight) 0%, var(--blue) 100%);
+    border-radius: 16px; padding: 32px;
+    color:var(--white);
+    display:grid; grid-template-columns: 1fr auto; gap: 24px;
+    align-items:end;
+    position:relative; overflow:hidden;
+  }
+  .car-hero::before {
+    content:'🚗'; position:absolute; font-size: 400px;
+    right:-50px; top: -100px; opacity:.08; transform: rotate(-15deg);
+  }
+  .car-hero .plate {
+    display:inline-block; padding: 6px 14px;
+    background:var(--white); color:var(--midnight);
+    font-family:'DM Mono'; font-size: 20px; font-weight:800; letter-spacing:.1em;
+    border-radius: 6px; margin-bottom: 12px;
+  }
+  .car-hero h2 { font-size: 40px; font-weight:800; letter-spacing:-.02em; }
+  .car-hero .brand { color: var(--blue-lt); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LANDING ═══ -->
+<section class="landing">
+  <div class="badge">DASOHUB · REDESIGN 2026</div>
+  <h1>Notre outil, <span class="accent">/</span> repensé.</h1>
+  <p>Application interne Dasolabs — repensée autour de la charte graphique. DM Sans, electric blue, midnight, slash signature. Design moderne, épuré, orienté action.</p>
+  <div class="nav-pills">
+    <a class="nav-pill" href="#dashboard">01 · Dashboard</a>
+    <a class="nav-pill" href="#missions">02 · Missions</a>
+    <a class="nav-pill" href="#ndf">03 · Notes de frais</a>
+    <a class="nav-pill" href="#timesheet">04 · Timesheet</a>
+    <a class="nav-pill" href="#formations">05 · Formations</a>
+    <a class="nav-pill" href="#finance">06 · Facturations</a>
+    <a class="nav-pill" href="#voiture">07 · Ma voiture</a>
+    <a class="nav-pill" href="#charter">Palette</a>
+  </div>
+</section>
+
+<!-- ═══ CHARTER SWATCHES ═══ -->
+<section class="charter" id="charter">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">00</div>
+    <div class="mockup-info">
+      <h2>Palette &amp; typographie</h2>
+      <p>Les briques de base de la nouvelle identité digitale.</p>
+    </div>
+  </div>
+  <div class="swatches">
+    <div class="swatch" style="background:#07070D;"><span class="name">Stellar</span><span class="code">#07070D</span></div>
+    <div class="swatch" style="background:#202037;"><span class="name">Midnight</span><span class="code">#202037</span></div>
+    <div class="swatch" style="background:#3434E8;"><span class="name">Electric</span><span class="code">#3434E8</span></div>
+    <div class="swatch" style="background:#F1F1F6; color:#07070D;"><span class="name" style="opacity:.5;">Silver</span><span class="code">#F1F1F6</span></div>
+    <div class="swatch" style="background:#FFFFFF; color:#07070D; box-shadow: 0 20px 40px rgba(255,255,255,.05);"><span class="name" style="opacity:.5;">White</span><span class="code">#FFFFFF</span></div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 01 : DASHBOARD ═══ -->
+<section class="mockup-section" id="dashboard">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">01</div>
+    <div class="mockup-info">
+      <h2>Dashboard consultant</h2>
+      <p>Point d'entrée quotidien — l'essentiel en un coup d'œil.</p>
+    </div>
+  </div>
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">dasohub.dasolabs.be/dashboard</div>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-logo">dasolabs</div>
+        <div class="sidebar-section">Mon espace</div>
+        <a class="sidebar-item active"><span class="icon">◆</span> Tableau de bord</a>
+        <a class="sidebar-item"><span class="icon">◈</span> Ma mission</a>
+        <a class="sidebar-item"><span class="icon">▤</span> Timesheet</a>
+        <a class="sidebar-item"><span class="icon">☀</span> Congés</a>
+        <a class="sidebar-item"><span class="icon">€</span> Notes de frais <span class="badge">2</span></a>
+        <a class="sidebar-item"><span class="icon">◑</span> Ma voiture</a>
+        <div class="sidebar-section">Ressources</div>
+        <a class="sidebar-item"><span class="icon">✎</span> Formations</a>
+        <a class="sidebar-item"><span class="icon">§</span> Chartes <span class="badge">1</span></a>
+        <div class="sidebar-user">
+          <div class="avatar-mini">Y</div>
+          <div>
+            <div style="font-size:12px; font-weight:600;">Yoann</div>
+            <div style="font-size:10px; color:var(--ash-lt);" class="mono">consultant</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <div class="pill">Vendredi 5 sept. 2026 · Semaine 36</div>
+            <h1 class="main-title">Bonjour Yoann.</h1>
+            <div class="main-sub">Voici ce qui t'attend cette semaine.</div>
+          </div>
+          <button class="action-btn primary">+ Nouvelle note de frais</button>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-hero">
+            <div class="pill">MA MISSION ACTUELLE</div>
+            <h2>UCB — Braine-l'Alleud</h2>
+            <div class="client">
+              <div class="avatar-mini" style="background:var(--blue);">UC</div>
+              <div>
+                <div style="font-size:14px; font-weight:600;">Migration SCADA AVEVA</div>
+                <div class="mono" style="font-size:11px; color: var(--ash-lt);">Contact : F. Delvaux</div>
+              </div>
+            </div>
+            <div class="mission-days">23<span class="unit"> jours restants</span></div>
+            <div style="margin-top: 12px; font-size:12px; color: var(--ash-lt);" class="mono">Fin prévue : 07/10/2026</div>
+          </div>
+          <div class="dash-card mint">
+            <div class="icon-wrap">☀</div>
+            <div class="lbl">Congés restants</div>
+            <div class="val">12<span style="font-size:18px; color:var(--ash);">j</span></div>
+            <div style="font-size:12px; color:var(--ash); margin-top:4px;">sur 25 · anniversaire offert</div>
+          </div>
+          <div class="dash-card amber">
+            <div class="icon-wrap">€</div>
+            <div class="lbl">NDF en attente</div>
+            <div class="val">2</div>
+            <div style="font-size:12px; color:var(--ash); margin-top:4px;">142,50 € · à soumettre</div>
+          </div>
+          <div class="dash-card">
+            <div class="icon-wrap">▤</div>
+            <div class="lbl">Timesheet · semaine 36</div>
+            <div class="val">4/5<span style="font-size:16px; color:var(--ash);"> jours</span></div>
+            <div class="progress" style="margin-top:8px;"><div class="progress-fill" style="width:80%;"></div></div>
+          </div>
+          <div class="dash-card">
+            <div class="icon-wrap">✎</div>
+            <div class="lbl">Formation en cours</div>
+            <div style="font-size:15px; font-weight:600; margin-top:2px;">HighByte &amp; UNS</div>
+            <div class="progress" style="margin-top:8px;"><div class="progress-fill" style="width:65%;"></div></div>
+            <div class="progress-lbl mono" style="font-size:10px; color:var(--ash); margin-top:6px;">15/23 slides · 65 %</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 02 : MISSIONS ═══ -->
+<section class="mockup-section" id="missions">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">02</div>
+    <div class="mockup-info">
+      <h2>Missions — vue admin</h2>
+      <p>Portefeuille clients synthétique, tri, actions rapides.</p>
+    </div>
+  </div>
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">dasohub.dasolabs.be/missions</div>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-logo">dasolabs</div>
+        <div class="sidebar-section">Consultance</div>
+        <a class="sidebar-item"><span class="icon">◈</span> Candidats</a>
+        <a class="sidebar-item"><span class="icon">✓</span> Consultants</a>
+        <a class="sidebar-item active"><span class="icon">◇</span> Missions</a>
+        <a class="sidebar-item"><span class="icon">◐</span> Demandes</a>
+        <div class="sidebar-section">Projet</div>
+        <a class="sidebar-item"><span class="icon">▤</span> Timesheets</a>
+        <a class="sidebar-item"><span class="icon">§</span> Purchase Orders</a>
+        <a class="sidebar-item"><span class="icon">€</span> Facturations</a>
+        <div class="sidebar-user">
+          <div class="avatar-mini">G</div>
+          <div>
+            <div style="font-size:12px; font-weight:600;">Gérald</div>
+            <div style="font-size:10px; color:var(--ash-lt);" class="mono">admin</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <div class="pill">CONSULTANCE / MISSIONS</div>
+            <h1 class="main-title">Portefeuille clients.</h1>
+            <div class="main-sub">6 missions actives · 3 en négociation</div>
+          </div>
+          <button class="action-btn primary">+ Nouvelle mission</button>
+        </div>
+        <div class="grid cols-4" style="margin-bottom: 24px;">
+          <div class="card kpi">
+            <div class="kpi-label">Missions actives</div>
+            <div class="kpi-value">6</div>
+            <div class="kpi-delta">▲ 2 vs mois dernier</div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-label">Taux d'occupation</div>
+            <div class="kpi-value">92<span class="unit"> %</span></div>
+            <div class="kpi-delta">▲ 4 pts</div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-label">Consultants placés</div>
+            <div class="kpi-value">5</div>
+            <div class="kpi-delta" style="color:var(--ash);">stable</div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-label">Fin dans &lt; 30j</div>
+            <div class="kpi-value">2</div>
+            <div class="kpi-delta" style="color:var(--amber);">⚠ à renouveler</div>
+          </div>
+        </div>
+        <div class="chips" style="margin-bottom: 16px;">
+          <span class="chip-sm blue">Toutes · 6</span>
+          <span class="chip-sm">Actives</span>
+          <span class="chip-sm">En pause</span>
+          <span class="chip-sm">Terminées</span>
+        </div>
+        <div class="table">
+          <div class="table-head">
+            <div>Réf</div><div>Consultant</div><div>Client</div><div>Fin prévue</div><div>Statut</div><div style="text-align:right;">Tarif</div>
+          </div>
+          <div class="table-row">
+            <div class="ref">MIS-2026-014</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="avatar-mini" style="width:28px; height:28px; font-size:11px; background:var(--midnight);">Y</div>
+              <div class="name">Yoann Devestele</div>
+            </div>
+            <div>UCB Pharma</div>
+            <div class="mono" style="font-size:12px;">07 oct. 2026</div>
+            <div><span class="chip-sm mint">Active</span></div>
+            <div style="text-align:right;" class="mono"><strong>780 €</strong>/j</div>
+          </div>
+          <div class="table-row">
+            <div class="ref">MIS-2026-012</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="avatar-mini" style="width:28px; height:28px; font-size:11px; background:var(--blue);">G</div>
+              <div class="name">Gérald Devestele</div>
+            </div>
+            <div>SAFRAN Aircraft</div>
+            <div class="mono" style="font-size:12px;">31 déc. 2026</div>
+            <div><span class="chip-sm mint">Active</span></div>
+            <div style="text-align:right;" class="mono"><strong>820 €</strong>/j</div>
+          </div>
+          <div class="table-row">
+            <div class="ref">MIS-2026-011</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="avatar-mini" style="width:28px; height:28px; font-size:11px; background:var(--amber);">J</div>
+              <div class="name">Jordan Vanhoutte</div>
+            </div>
+            <div>SAFRAN Aircraft</div>
+            <div class="mono" style="font-size:12px;">14 nov. 2026</div>
+            <div><span class="chip-sm amber">Prolongée</span></div>
+            <div style="text-align:right;" class="mono"><strong>620 €</strong>/j</div>
+          </div>
+          <div class="table-row">
+            <div class="ref">MIS-2026-009</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="avatar-mini" style="width:28px; height:28px; font-size:11px; background:var(--red);">M</div>
+              <div class="name">Marlène Petit</div>
+            </div>
+            <div>UCB Pharma</div>
+            <div class="mono" style="font-size:12px;">24 sept. 2026</div>
+            <div><span class="chip-sm red">Fin &lt; 30j</span></div>
+            <div style="text-align:right;" class="mono"><strong>640 €</strong>/j</div>
+          </div>
+          <div class="table-row">
+            <div class="ref">MIS-2026-016</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="avatar-mini" style="width:28px; height:28px; font-size:11px; background:var(--mint);">A</div>
+              <div class="name">Adrien Lauwers</div>
+            </div>
+            <div>Clinigen Belgium</div>
+            <div class="mono" style="font-size:12px;">28 févr. 2027</div>
+            <div><span class="chip-sm blue">Nouveau</span></div>
+            <div style="text-align:right;" class="mono"><strong>590 €</strong>/j</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 03 : NOTES DE FRAIS ═══ -->
+<section class="mockup-section" id="ndf">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">03</div>
+    <div class="mockup-info">
+      <h2>Mes notes de frais</h2>
+      <p>Saisie rapide, historique clair, statut visible d'un coup d'œil.</p>
+    </div>
+  </div>
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">dasohub.dasolabs.be/expenses</div>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-logo">dasolabs</div>
+        <div class="sidebar-section">Mon espace</div>
+        <a class="sidebar-item"><span class="icon">◆</span> Tableau de bord</a>
+        <a class="sidebar-item"><span class="icon">◈</span> Ma mission</a>
+        <a class="sidebar-item"><span class="icon">▤</span> Timesheet</a>
+        <a class="sidebar-item"><span class="icon">☀</span> Congés</a>
+        <a class="sidebar-item active"><span class="icon">€</span> Notes de frais <span class="badge">2</span></a>
+        <a class="sidebar-item"><span class="icon">◑</span> Ma voiture</a>
+        <div class="sidebar-user">
+          <div class="avatar-mini">Y</div>
+          <div>
+            <div style="font-size:12px; font-weight:600;">Yoann</div>
+            <div style="font-size:10px; color:var(--ash-lt);" class="mono">consultant</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main" style="position:relative;">
+        <div class="main-header">
+          <div>
+            <div class="pill">MES NOTES DE FRAIS</div>
+            <h1 class="main-title">Mes dépenses.</h1>
+            <div class="main-sub">Septembre 2026 · <strong>287,40 €</strong> engagés</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="mono" style="font-size:11px; color:var(--ash); letter-spacing:.15em; text-transform:uppercase;">Prochain virement</div>
+            <div style="font-size:24px; font-weight:800; letter-spacing:-.02em;">05 oct. 2026</div>
+          </div>
+        </div>
+        <div class="chips" style="margin-bottom: 16px;">
+          <span class="chip-sm blue">Toutes · 7</span>
+          <span class="chip-sm amber">Brouillon · 2</span>
+          <span class="chip-sm">Soumises · 3</span>
+          <span class="chip-sm mint">Payées · 2</span>
+        </div>
+        <div class="ndf-list">
+          <div class="ndf-item">
+            <div class="ndf-icon" style="background:rgba(52,52,232,.1); color:var(--blue);">🚆</div>
+            <div class="ndf-body">
+              <div class="ndf-title">Train Bxl → Braine · TGV</div>
+              <div class="ndf-sub">04 sept · Client UCB</div>
+            </div>
+            <div><span class="chip-sm amber">Brouillon</span></div>
+            <div class="ndf-amt">28,50 €</div>
+          </div>
+          <div class="ndf-item">
+            <div class="ndf-icon" style="background:rgba(245,158,11,.1); color:var(--amber);">🍽</div>
+            <div class="ndf-body">
+              <div class="ndf-title">Déjeuner client · Le Kolvenier</div>
+              <div class="ndf-sub">03 sept · Client UCB</div>
+            </div>
+            <div><span class="chip-sm amber">Brouillon</span></div>
+            <div class="ndf-amt">114,00 €</div>
+          </div>
+          <div class="ndf-item">
+            <div class="ndf-icon" style="background:rgba(52,52,232,.1); color:var(--blue);">🏨</div>
+            <div class="ndf-body">
+              <div class="ndf-title">Hôtel Ibis Braine 2 nuits</div>
+              <div class="ndf-sub">01-02 sept · Client UCB</div>
+            </div>
+            <div><span class="chip-sm">Soumise</span></div>
+            <div class="ndf-amt">198,60 €</div>
+          </div>
+          <div class="ndf-item">
+            <div class="ndf-icon" style="background:rgba(16,185,129,.1); color:var(--mint);">⛽</div>
+            <div class="ndf-body">
+              <div class="ndf-title">Essence · TotalEnergies</div>
+              <div class="ndf-sub">28 août · Perso pro</div>
+            </div>
+            <div><span class="chip-sm mint">Payée</span></div>
+            <div class="ndf-amt">72,30 €</div>
+          </div>
+          <div class="ndf-item">
+            <div class="ndf-icon" style="background:rgba(52,52,232,.1); color:var(--blue);">📶</div>
+            <div class="ndf-body">
+              <div class="ndf-title">Parking chantier · SAFRAN</div>
+              <div class="ndf-sub">25 août · Frais mission</div>
+            </div>
+            <div><span class="chip-sm mint">Payée</span></div>
+            <div class="ndf-amt">14,00 €</div>
+          </div>
+        </div>
+        <div class="fab" title="Nouvelle note de frais">+</div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 04 : TIMESHEET ═══ -->
+<section class="mockup-section" id="timesheet">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">04</div>
+    <div class="mockup-info">
+      <h2>Timesheet — semaine</h2>
+      <p>Saisir ses heures en 30 secondes.</p>
+    </div>
+  </div>
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">dasohub.dasolabs.be/timesheet?week=36</div>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-logo">dasolabs</div>
+        <div class="sidebar-section">Mon espace</div>
+        <a class="sidebar-item"><span class="icon">◆</span> Tableau de bord</a>
+        <a class="sidebar-item"><span class="icon">◈</span> Ma mission</a>
+        <a class="sidebar-item active"><span class="icon">▤</span> Timesheet</a>
+        <a class="sidebar-item"><span class="icon">☀</span> Congés</a>
+        <a class="sidebar-item"><span class="icon">€</span> Notes de frais</a>
+        <a class="sidebar-item"><span class="icon">◑</span> Ma voiture</a>
+        <div class="sidebar-user">
+          <div class="avatar-mini">Y</div>
+          <div>
+            <div style="font-size:12px; font-weight:600;">Yoann</div>
+            <div style="font-size:10px; color:var(--ash-lt);" class="mono">consultant</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <div class="pill">TIMESHEET</div>
+            <h1 class="main-title">Semaine 36<span class="slash">/</span>2026</h1>
+            <div class="main-sub">Du lundi 01 au vendredi 05 septembre 2026</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn ghost">← Semaine préc.</button>
+            <button class="action-btn ghost">Suivante →</button>
+            <button class="action-btn primary">✓ Valider la semaine</button>
+          </div>
+        </div>
+        <div class="ts-grid">
+          <div class="ts-header ts-mission" style="background:rgba(0,0,0,.02);">MISSION / JOUR</div>
+          <div class="ts-header">Lun 01</div>
+          <div class="ts-header">Mar 02</div>
+          <div class="ts-header">Mer 03</div>
+          <div class="ts-header">Jeu 04</div>
+          <div class="ts-header">Ven 05</div>
+
+          <div class="ts-mission">UCB Migration SCADA <span>MIS-2026-014</span></div>
+          <div class="ts-hours">8h</div>
+          <div class="ts-hours">8h</div>
+          <div class="ts-hours">8h</div>
+          <div class="ts-hours">8h</div>
+          <div class="ts-hours empty">—</div>
+
+          <div class="ts-mission">Interne · DasoHub <span>DEV-INT-002</span></div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours">4h</div>
+
+          <div class="ts-mission">Interne · Formation <span>FORM-2026</span></div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours empty">—</div>
+          <div class="ts-hours">4h</div>
+
+          <div style="grid-column: span 6; padding: 16px 20px; background: var(--midnight); color:var(--white); border:none; display:flex; justify-content:space-between; align-items:center;">
+            <div class="mono" style="font-size:11px; letter-spacing:.15em;">TOTAL SEMAINE</div>
+            <div style="font-size: 28px; font-weight:800;">40 <span style="font-size:14px; color:var(--ash-lt); font-weight:500;">heures · 5 jours</span></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 05 : FORMATIONS ═══ -->
+<section class="mockup-section" id="formations">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">05</div>
+    <div class="mockup-info">
+      <h2>Formations techniques</h2>
+      <p>15 cours self-service, progression sauvegardée.</p>
+    </div>
+  </div>
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">dasohub.dasolabs.be/training</div>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-logo">dasolabs</div>
+        <div class="sidebar-section">Ressources</div>
+        <a class="sidebar-item active"><span class="icon">✎</span> Formations</a>
+        <a class="sidebar-item"><span class="icon">§</span> Chartes</a>
+        <a class="sidebar-item"><span class="icon">◈</span> Wiki interne</a>
+        <a class="sidebar-item"><span class="icon">◇</span> Documents RH</a>
+        <div class="sidebar-user">
+          <div class="avatar-mini">Y</div>
+          <div>
+            <div style="font-size:12px; font-weight:600;">Yoann</div>
+            <div style="font-size:10px; color:var(--ash-lt);" class="mono">consultant</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <div class="pill">FORMATIONS TECHNIQUES</div>
+            <h1 class="main-title">Le catalogue.</h1>
+            <div class="main-sub">15 cours · 445 slides · 70 TPs pratiques</div>
+          </div>
+          <div>
+            <span class="pill outline mono">2 en cours</span>
+          </div>
+        </div>
+        <div class="grid cols-3">
+          <div class="fmn-card">
+            <div class="fmn-num">01</div>
+            <div style="font-family:'DM Mono'; font-size: 10px; color:var(--blue); letter-spacing:.15em;">OT · SOCLE</div>
+            <div class="fmn-title">Programmation PLC générique</div>
+            <div class="fmn-meta">71 slides · 6 TPs · ≈ 24h</div>
+            <div class="progress"><div class="progress-fill" style="width:100%; background:var(--mint);"></div></div>
+            <div class="fmn-progress-lbl"><span>Terminé</span><span>100 %</span></div>
+          </div>
+          <div class="fmn-card">
+            <div class="fmn-num">02</div>
+            <div style="font-family:'DM Mono'; font-size: 10px; color:var(--blue); letter-spacing:.15em;">OT · SIEMENS</div>
+            <div class="fmn-title">TIA Portal</div>
+            <div class="fmn-meta">56 slides · 5 TPs · ≈ 20h</div>
+            <div class="progress"><div class="progress-fill" style="width:78%;"></div></div>
+            <div class="fmn-progress-lbl"><span>44/56 slides</span><span>78 %</span></div>
+          </div>
+          <div class="fmn-card">
+            <div class="fmn-num">03</div>
+            <div style="font-family:'DM Mono'; font-size: 10px; color:var(--blue); letter-spacing:.15em;">OT · SCADA</div>
+            <div class="fmn-title">WinCC SCADA</div>
+            <div class="fmn-meta">35 slides · 4 TPs · ≈ 12h</div>
+            <div class="progress"><div class="progress-fill" style="width:0%;"></div></div>
+            <div class="fmn-progress-lbl"><span>À commencer</span><span>0 %</span></div>
+          </div>
+          <div class="fmn-card">
+            <div class="fmn-num">04</div>
+            <div style="font-family:'DM Mono'; font-size: 10px; color:var(--blue); letter-spacing:.15em;">UNS · INTERFACE</div>
+            <div class="fmn-title">HighByte &amp; UNS</div>
+            <div class="fmn-meta">24 slides · 3 TPs · ≈ 8h</div>
+            <div class="progress"><div class="progress-fill" style="width:65%;"></div></div>
+            <div class="fmn-progress-lbl"><span>15/24 slides</span><span>65 %</span></div>
+          </div>
+          <div class="fmn-card">
+            <div class="fmn-num">05</div>
+            <div style="font-family:'DM Mono'; font-size: 10px; color:var(--blue); letter-spacing:.15em;">UNS · MESSAGERIE</div>
+            <div class="fmn-title">HiveMQ &amp; MQTT</div>
+            <div class="fmn-meta">25 slides · 3 TPs · ≈ 9h</div>
+            <div class="progress"><div class="progress-fill" style="width:0%;"></div></div>
+            <div class="fmn-progress-lbl"><span>À commencer</span><span>0 %</span></div>
+          </div>
+          <div class="fmn-card">
+            <div class="fmn-num">06</div>
+            <div style="font-family:'DM Mono'; font-size: 10px; color:var(--blue); letter-spacing:.15em;">PHARMA · VALID.</div>
+            <div class="fmn-title">GAMP 5</div>
+            <div class="fmn-meta">30 slides · 5 TPs · ≈ 12h</div>
+            <div class="progress"><div class="progress-fill" style="width:100%; background:var(--mint);"></div></div>
+            <div class="fmn-progress-lbl"><span>Terminé</span><span>100 %</span></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 06 : FACTURATIONS ═══ -->
+<section class="mockup-section" id="finance">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">06</div>
+    <div class="mockup-info">
+      <h2>Facturations — vue admin</h2>
+      <p>KPIs financiers, milestones et statuts en un écran.</p>
+    </div>
+  </div>
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">dasohub.dasolabs.be/finance</div>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-logo">dasolabs</div>
+        <div class="sidebar-section">Finances</div>
+        <a class="sidebar-item active"><span class="icon">€</span> Facturations</a>
+        <a class="sidebar-item"><span class="icon">◑</span> Historique paiements</a>
+        <a class="sidebar-item"><span class="icon">◇</span> Cashflow</a>
+        <a class="sidebar-item"><span class="icon">§</span> Purchase Orders</a>
+        <div class="sidebar-user">
+          <div class="avatar-mini">L</div>
+          <div>
+            <div style="font-size:12px; font-weight:600;">Louise</div>
+            <div style="font-size:10px; color:var(--ash-lt);" class="mono">direction ops</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <div class="pill">FINANCE / FACTURATIONS</div>
+            <h1 class="main-title">Facturations.</h1>
+            <div class="main-sub">Septembre 2026 · 24 tranches actives</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn ghost">↓ Export CSV</button>
+            <button class="action-btn primary">Historique paiements</button>
+          </div>
+        </div>
+        <div class="grid cols-4" style="margin-bottom: 24px;">
+          <div class="card kpi">
+            <div class="kpi-label">Prévu ce mois</div>
+            <div class="kpi-value">64,2<span class="unit">k€</span></div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-label">Prêt à facturer</div>
+            <div class="kpi-value" style="color:var(--amber);">18,7<span class="unit">k€</span></div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-label">Payé (2026)</div>
+            <div class="kpi-value" style="color:var(--mint);">428<span class="unit">k€</span></div>
+            <div class="kpi-delta">▲ 34 % vs 2025</div>
+          </div>
+          <div class="card kpi">
+            <div class="kpi-label">En retard</div>
+            <div class="kpi-value" style="color:var(--red);">2</div>
+            <div class="kpi-delta" style="color:var(--red);">14,4 k€</div>
+          </div>
+        </div>
+        <div class="table">
+          <div class="table-head" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;">
+            <div>Libellé</div><div>Client</div><div>Échéance</div><div>Statut</div><div style="text-align:right;">Montant</div><div></div>
+          </div>
+          <div class="table-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;">
+            <div class="name">Tranche 3/6 — SCADA UCB</div>
+            <div>UCB Pharma</div>
+            <div class="mono" style="font-size:12px;">05 oct 2026</div>
+            <div><span class="chip-sm">Prévue</span></div>
+            <div style="text-align:right;" class="mono"><strong>18 400 €</strong></div>
+            <div style="text-align:right; color:var(--ash);">⋯</div>
+          </div>
+          <div class="table-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;">
+            <div class="name">Fin phase 2 — SAFRAN</div>
+            <div>SAFRAN Aircraft</div>
+            <div class="mono" style="font-size:12px;">10 oct 2026</div>
+            <div><span class="chip-sm amber">Prête à facturer</span></div>
+            <div style="text-align:right;" class="mono"><strong>27 500 €</strong></div>
+            <div style="text-align:right; color:var(--ash);">⋯</div>
+          </div>
+          <div class="table-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;">
+            <div class="name">Prestation septembre</div>
+            <div>Clinigen</div>
+            <div class="mono" style="font-size:12px;">30 sept 2026</div>
+            <div><span class="chip-sm blue">Transmise Peppol</span></div>
+            <div style="text-align:right;" class="mono"><strong>12 300 €</strong></div>
+            <div style="text-align:right; color:var(--ash);">⋯</div>
+          </div>
+          <div class="table-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;">
+            <div class="name">Solde phase 1</div>
+            <div>UCB Pharma</div>
+            <div class="mono" style="font-size:12px;">15 sept 2026</div>
+            <div><span class="chip-sm red">En retard · 8j</span></div>
+            <div style="text-align:right;" class="mono"><strong>9 200 €</strong></div>
+            <div style="text-align:right; color:var(--ash);">⋯</div>
+          </div>
+          <div class="table-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;">
+            <div class="name">Milestone kick-off</div>
+            <div>Zoetis Belgium</div>
+            <div class="mono" style="font-size:12px;">28 août 2026</div>
+            <div><span class="chip-sm mint">Payée</span></div>
+            <div style="text-align:right;" class="mono"><strong>14 800 €</strong></div>
+            <div style="text-align:right; color:var(--ash);">⋯</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCREEN 07 : MA VOITURE ═══ -->
+<section class="mockup-section" id="voiture">
+  <div class="mockup-meta">
+    <div class="mockup-num mono">07</div>
+    <div class="mockup-info">
+      <h2>Ma voiture — vue consultant</h2>
+      <p>Toutes les infos utiles au conducteur. Zéro montant confidentiel.</p>
+    </div>
+  </div>
+  <div class="browser">
+    <div class="browser-bar">
+      <div class="browser-dots"><span></span><span></span><span></span></div>
+      <div class="browser-url">dasohub.dasolabs.be/fleet/my-vehicle</div>
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="sidebar-logo">dasolabs</div>
+        <div class="sidebar-section">Mon espace</div>
+        <a class="sidebar-item"><span class="icon">◆</span> Tableau de bord</a>
+        <a class="sidebar-item"><span class="icon">◈</span> Ma mission</a>
+        <a class="sidebar-item"><span class="icon">▤</span> Timesheet</a>
+        <a class="sidebar-item"><span class="icon">☀</span> Congés</a>
+        <a class="sidebar-item"><span class="icon">€</span> Notes de frais</a>
+        <a class="sidebar-item active"><span class="icon">◑</span> Ma voiture</a>
+        <div class="sidebar-user">
+          <div class="avatar-mini">Y</div>
+          <div>
+            <div style="font-size:12px; font-weight:600;">Yoann</div>
+            <div style="font-size:10px; color:var(--ash-lt);" class="mono">consultant</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="main-header">
+          <div>
+            <div class="pill">MA VOITURE</div>
+            <h1 class="main-title">Mon véhicule.</h1>
+          </div>
+        </div>
+        <div class="car-hero">
+          <div>
+            <span class="plate">1-XYZ-321</span>
+            <h2>BMW X1 xDrive25e</h2>
+            <div class="brand">Hybride rechargeable · 2024</div>
+          </div>
+          <button class="action-btn" style="background:var(--white); color:var(--midnight);">🆘 Urgence · Louise</button>
+        </div>
+        <div class="grid cols-3" style="margin-top:16px;">
+          <div class="card">
+            <div class="pill outline" style="margin-bottom:12px;">MAINTENANCE</div>
+            <div style="font-size:12px; color:var(--ash);" class="mono">PROCHAINE RÉVISION</div>
+            <div style="font-size: 28px; font-weight:800; letter-spacing:-.02em; margin-top:4px;">12 nov. 2026</div>
+            <div style="font-size:12px; color:var(--ash); margin-top:6px;">Rappel auto envoyé 3 semaines avant.</div>
+          </div>
+          <div class="card">
+            <div class="pill outline" style="margin-bottom:12px;">ASSURANCE</div>
+            <div style="font-size:12px; color:var(--ash);" class="mono">COMPAGNIE / N° POLICE</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">AG Insurance</div>
+            <div style="font-size:12px; color:var(--ash); font-family:'DM Mono'; margin-top:2px;">POL-2024-88412</div>
+            <div style="margin-top:12px;"><span class="chip-sm mint">Active jusqu'au 31/12/2027</span></div>
+          </div>
+          <div class="card">
+            <div class="pill outline" style="margin-bottom:12px;">LEASING</div>
+            <div style="font-size:12px; color:var(--ash);" class="mono">BAILLEUR / FIN CONTRAT</div>
+            <div style="font-size:16px; font-weight:700; margin-top:4px;">Arval Belgium</div>
+            <div style="font-size:12px; color:var(--ash); margin-top:2px;">Fin : 15/04/2028</div>
+            <div style="margin-top:12px; font-size:11px; color:var(--ash); font-style:italic;">Montants réservés à la direction ops.</div>
+          </div>
+        </div>
+        <div style="margin-top:16px; padding: 20px; background: var(--midnight); color:var(--white); border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div class="mono" style="font-size:10px; color:var(--ash-lt); letter-spacing:.15em; margin-bottom:4px;">CARBURANT</div>
+            <div style="font-size:18px; font-weight:700;">Carte TotalEnergies · 6402-XXXX-1234</div>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="action-btn" style="background:rgba(255,255,255,.1);">Perdue / volée</button>
+            <button class="action-btn primary">Historique frais</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="footer-meta">
+  <p><strong>DasoHub</strong> <span class="slash-brand">/</span> Redesign 2026 <span class="slash-brand">/</span> Direction artistique inspirée par la charte graphique Dasolabs.</p>
+  <p style="margin-top:12px; font-size:12px; opacity:.6;">DM Sans + DM Mono · Palette midnight / electric blue / silver comet · Composition orientée action.</p>
+</div>
+
+</body>
+</html>

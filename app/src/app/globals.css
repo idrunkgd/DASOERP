@@ -29,46 +29,85 @@ html, body { background: rgb(var(--background)); color: rgb(var(--foreground)); 
 .nav-scroll:hover { scrollbar-color: rgba(255, 255, 255, 0.18) transparent; }
 .nav-scroll:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); }
 
+/* ─────── Fond charte : silver comet, plus doux que blanc pur ─────── */
+:root {
+  --background: 241 241 246; /* silver comet #F1F1F6 */
+  --foreground: 32 32 55;    /* midnight indigo */
+}
+
 @layer components {
+  /* ═══ CARDS ═══ */
   .card {
-    @apply bg-white rounded-xl border border-border shadow-card;
+    @apply bg-white rounded-2xl border border-border/70 shadow-card transition-shadow;
   }
+  .card:hover { box-shadow: 0 8px 30px rgba(52,52,232,.08); }
+
+  /* ═══ INPUTS ═══ */
   .input {
-    @apply w-full h-10 px-3 rounded-lg border border-border bg-white text-sm
-           focus:outline-none focus:ring-2 focus:ring-indigoaccent/40 focus:border-indigoaccent
-           disabled:opacity-60 disabled:bg-muted;
+    @apply w-full h-10 px-3.5 rounded-xl border border-border bg-white text-sm
+           focus:outline-none focus:ring-2 focus:ring-indigoaccent/25 focus:border-indigoaccent
+           disabled:opacity-60 disabled:bg-muted transition-colors;
   }
   .label {
-    @apply block text-xs font-medium text-midnight-700 mb-1;
+    @apply block text-[10px] font-semibold text-midnight-500 uppercase tracking-widest mb-1.5 font-mono;
   }
+
+  /* ═══ BUTTONS ═══ */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg text-sm font-medium
-           transition-colors disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl text-sm font-semibold
+           transition-all disabled:opacity-50 disabled:pointer-events-none;
   }
-  .btn-primary { @apply btn bg-midnight-900 text-white hover:bg-midnight-800; }
-  .btn-secondary { @apply btn bg-white text-midnight-900 border border-border hover:bg-midnight-50; }
-  .btn-ghost { @apply btn text-midnight-700 hover:bg-midnight-50; }
-  .btn-danger { @apply btn bg-danger text-white hover:bg-red-700; }
+  .btn-primary {
+    @apply btn bg-indigoaccent text-white hover:bg-indigoaccent-light
+           shadow-[0_4px_12px_rgba(52,52,232,.25)] hover:shadow-[0_8px_20px_rgba(52,52,232,.35)]
+           hover:-translate-y-px;
+  }
+  .btn-secondary { @apply btn bg-midnight-900 text-white hover:bg-midnight-800; }
+  .btn-ghost    { @apply btn text-midnight-700 hover:bg-midnight-100; }
+  .btn-danger   { @apply btn bg-danger text-white hover:bg-red-600; }
   .btn-sm { @apply h-8 px-3 text-xs; }
 
+  /* ═══ BADGES ═══ (style pill mono charte) */
   .badge {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold;
   }
   .badge-neutral  { @apply badge bg-midnight-100 text-midnight-800; }
-  .badge-success  { @apply badge bg-emerald-100 text-emerald-800; }
+  .badge-success  { @apply badge bg-emerald-100 text-emerald-700; }
   .badge-warning  { @apply badge bg-amber-100 text-amber-800; }
-  .badge-danger   { @apply badge bg-red-100 text-red-800; }
-  .badge-info     { @apply badge bg-indigo-100 text-indigo-800; }
+  .badge-danger   { @apply badge bg-red-100 text-red-700; }
+  .badge-info     { @apply badge bg-indigoaccent/10 text-indigoaccent; }
 
+  /* ═══ PILL LABELS — signature charte (mono uppercase electric) ═══ */
+  .pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-[10px] font-semibold
+           uppercase tracking-widest font-mono;
+  }
+  .pill-blue  { @apply pill bg-indigoaccent text-white; }
+  .pill-ink   { @apply pill bg-midnight-900 text-white; }
+  .pill-outline { @apply pill border border-midnight-900 text-midnight-900; }
+  .pill-mint  { @apply pill bg-emerald-500/10 text-emerald-700; }
+  .pill-amber { @apply pill bg-amber-500/10 text-amber-700; }
+  .pill-red   { @apply pill bg-red-500/10 text-red-700; }
+
+  /* Slash accent signature charte (electric blue, incliné) */
+  .slash {
+    @apply inline-block font-black text-indigoaccent;
+    transform: skewX(-15deg);
+    margin: 0 .15em;
+  }
+
+  /* ═══ TABLES ═══ */
   .table-base { @apply w-full text-sm border-separate border-spacing-0; }
   .table-base thead th {
-    @apply text-xs font-medium text-midnight-500 uppercase tracking-wide px-3 py-2 border-b border-border;
+    @apply text-[10px] font-semibold text-midnight-400 uppercase tracking-widest px-3 py-3 border-b border-border font-mono;
     text-align: left;
   }
   .table-base thead th.text-right { text-align: right; }
   .table-base thead th.text-center { text-align: center; }
-  .table-base tbody td { @apply px-3 py-2.5 border-b border-border/50 align-middle; }
-  .table-base tbody tr:hover { @apply bg-midnight-50/50; }
-  /* numeric columns: tabular-nums + right-align */
+  .table-base tbody td { @apply px-3 py-3 border-b border-border/60 align-middle; }
+  .table-base tbody tr:hover { @apply bg-indigoaccent/[.02]; }
   .table-base td.tabular-nums, .table-base td.text-right { text-align: right; }
 }
+
+/* Utilitaire — refs mono en petit (PO-2026-001, MIS-2026-014…) */
+.ref-mono { @apply font-mono text-[11px] text-midnight-400 uppercase tracking-wide; }
