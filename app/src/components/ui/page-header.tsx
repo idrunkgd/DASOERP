@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  *   variant="flat"              — sans dégradé, minimal (pages ultra-denses)
  */
 export function PageHeader({
-  title, subtitle, actions, breadcrumb, pill, variant = "default"
+  title, subtitle, actions, breadcrumb, pill, variant = "hero"
 }: {
   title: string;
   subtitle?: React.ReactNode;
