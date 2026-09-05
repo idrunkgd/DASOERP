@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dasolabs — De la donnée industrielle à la performance opérationnelle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0E1020;
+    --ink-2: #1a1d33;
+    --blue: #3434E8;
+    --blue-lt: #8a8bff;
+    --blue-pale: #eaeafe;
+    --white: #FFFFFF;
+    --paper: #F7F7FB;
+    --paper-dk: #e5e5ee;
+    --ash: #6b6d80;
+    --ash-lt: #b4b6c3;
+    --mint: #10B981;
+    --amber: #F59E0B;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    width:100%; height:100%; overflow:hidden;
+    font-family:'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    background:#000; color:var(--ink);
+  }
+  /* Stage — 16:9 letterboxed */
+  .stage {
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .deck {
+    position:relative;
+    width:min(100vw, 177.78vh);
+    height:min(56.25vw, 100vh);
+    background:var(--paper);
+    overflow:hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,.4);
+  }
+  .slide {
+    position:absolute; inset:0;
+    padding: 3.5% 5%;
+    opacity:0; visibility:hidden;
+    transition: opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1);
+    transform: translateX(30px);
+    display:flex; flex-direction:column;
+  }
+  .slide.active {
+    opacity:1; visibility:visible; transform:translateX(0);
+    z-index:10;
+  }
+  .slide.leaving {
+    opacity:0; transform:translateX(-30px);
+  }
+
+  /* Common elements */
+  .header-row {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom: 2vh;
+  }
+  .chip {
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: .5em 1.2em;
+    background:var(--ink); color:var(--white);
+    font-weight:700; font-size:.9vw; letter-spacing:.15em;
+    border-radius:999px; text-transform:uppercase;
+  }
+  .chip.blue { background:var(--blue); }
+  .chip.white { background:var(--white); color:var(--ink); }
+  .logo-mini {
+    height:2.5vh;
+    font-weight:800; font-size:1.6vw; color:var(--ink);
+    letter-spacing:-.02em;
+  }
+  .logo-mini.white { color:var(--white); }
+
+  h1.hero { font-size:6vw; font-weight:800; line-height:1.05; letter-spacing:-.03em; }
+  h1 { font-size:4vw; font-weight:800; line-height:1.05; letter-spacing:-.02em; }
+  h2 { font-size:3vw; font-weight:700; line-height:1.1; letter-spacing:-.01em; }
+  .lead { font-size:1.3vw; color:var(--ash); font-style:italic; margin-top:1vh; }
+
+  /* Animation utilities — staggered reveal on active slide */
+  .slide .stagger { opacity:0; transform:translateY(24px); transition:all .6s cubic-bezier(.2,.7,.3,1); }
+  .slide.active .stagger { opacity:1; transform:translateY(0); }
+  .slide.active .stagger:nth-child(1) { transition-delay:.15s; }
+  .slide.active .stagger:nth-child(2) { transition-delay:.28s; }
+  .slide.active .stagger:nth-child(3) { transition-delay:.42s; }
+  .slide.active .stagger:nth-child(4) { transition-delay:.55s; }
+  .slide.active .stagger:nth-child(5) { transition-delay:.68s; }
+  .slide.active .stagger:nth-child(6) { transition-delay:.80s; }
+  .slide .grid-item { opacity:0; transform:translateY(20px) scale(.95); transition: all .55s cubic-bezier(.2,.7,.3,1); }
+  .slide.active .grid-item { opacity:1; transform:translateY(0) scale(1); }
+  .slide.active .grid-item:nth-child(1) { transition-delay:.4s; }
+  .slide.active .grid-item:nth-child(2) { transition-delay:.55s; }
+  .slide.active .grid-item:nth-child(3) { transition-delay:.7s; }
+  .slide.active .grid-item:nth-child(4) { transition-delay:.85s; }
+  .slide.active .grid-item:nth-child(5) { transition-delay:1s; }
+  .slide.active .grid-item:nth-child(6) { transition-delay:1.15s; }
+  .slide.active .grid-item:nth-child(7) { transition-delay:1.3s; }
+  .slide.active .grid-item:nth-child(8) { transition-delay:1.45s; }
+  .slide.active .grid-item:nth-child(9) { transition-delay:1.6s; }
+  .slide.active .grid-item:nth-child(10) { transition-delay:1.75s; }
+  .slide.active .grid-item:nth-child(11) { transition-delay:1.9s; }
+  .slide.active .grid-item:nth-child(12) { transition-delay:2.05s; }
+
+  /* === COVER === */
+  .cover { background:var(--ink); color:var(--white); overflow:hidden; }
+  .cover::before, .cover::after {
+    content:''; position:absolute; border-radius:50%; pointer-events:none;
+  }
+  .cover::before {
+    width:80vh; height:80vh; background:var(--blue);
+    top:-40vh; right:-25vh;
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+  .cover::after {
+    width:35vh; height:35vh; background:var(--ink-2);
+    top:20vh; right:10vh;
+    animation: floatOrb 6s ease-in-out infinite reverse;
+  }
+  @keyframes floatOrb {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-3vh, 4vh); }
+  }
+  .cover .logo-big {
+    font-size:2.8vw; font-weight:900; letter-spacing:-.03em; color:var(--white);
+    position:relative; z-index:2;
+  }
+  .cover .content {
+    margin-top:auto; margin-bottom:auto;
+    max-width:70%; position:relative; z-index:2;
+  }
+  .cover h1 { color:var(--white); font-size:5.5vw; }
+  .cover .foot {
+    color:var(--blue-lt); font-size:1.1vw;
+    position:relative; z-index:2;
+  }
+
+  /* === STATEMENT === */
+  .statement { padding: 3.5% 5%; justify-content:center; }
+  .statement h1 {
+    font-size:5.5vw; line-height:1.05; max-width:95%;
+    white-space:pre-line;
+  }
+  .statement.dark { background:var(--ink); color:var(--white); }
+  .statement.dark h1 { color:var(--white); }
+  .statement .foot { color:var(--ash); font-size:1.2vw; font-style:italic; margin-top:3vh; }
+  .statement.dark .foot { color:var(--ash-lt); }
+
+  /* === TEAM === */
+  .team-grid {
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: 2%;
+    margin-top: 2vh;
+  }
+  .team-card {
+    background:var(--white); border-radius:1.5vw; padding:2vw;
+    box-shadow: 0 4px 20px rgba(14,16,32,.06);
+    transition: transform .3s ease, box-shadow .3s ease;
+  }
+  .team-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(52,52,232,.15);
+  }
+  .avatar {
+    aspect-ratio: 1;
+    border-radius: 1vw;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 5vw; font-weight:900; color:var(--white);
+    margin-bottom:1.5vh;
+  }
+  .team-card h3 { font-size:1.8vw; margin-bottom:.3vh; }
+  .team-card .role { color:var(--blue); font-weight:700; font-size:.75vw; letter-spacing:.15em; text-transform:uppercase; margin-bottom:1vh; }
+  .team-card p { color:var(--ash); font-size:.95vw; line-height:1.5; }
+
+  /* === TIMELINE === */
+  .timeline {
+    margin-top: 6vh;
+    position:relative;
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 0 5%;
+  }
+  .timeline::before {
+    content:''; position:absolute; left:5%; right:5%; top:50%;
+    height:2px; background:var(--paper-dk); transform: translateY(-50%);
+  }
+  .tl-node { position:relative; text-align:center; z-index:2; }
+  .tl-dot {
+    width:4vw; height:4vw; border-radius:50%;
+    background:var(--blue); color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:1vw;
+    box-shadow: 0 8px 24px rgba(52,52,232,.35);
+    transition: transform .3s ease;
+  }
+  .tl-node.highlight .tl-dot { background:var(--mint); box-shadow: 0 8px 24px rgba(16,185,129,.35); }
+  .tl-node:hover .tl-dot { transform: scale(1.12); }
+  .tl-label {
+    position:absolute; left:50%; transform:translateX(-50%);
+    width:14vw; font-size:.95vw; line-height:1.3; font-weight:600;
+  }
+  .tl-node:nth-child(odd) .tl-label { bottom:calc(100% + 1.5vh); }
+  .tl-node:nth-child(even) .tl-label { top:calc(100% + 1.5vh); }
+
+  /* === MISSION OT/IT/BUSINESS === */
+  .mission-flow {
+    display:grid; grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 1.5%; align-items:stretch;
+    margin-top: 3vh;
+  }
+  .mission-block {
+    padding: 2vw; border-radius:1.5vw;
+    display:flex; flex-direction:column;
+    transition: transform .3s ease;
+  }
+  .mission-block:hover { transform: translateY(-4px); }
+  .mission-block.ot { background:var(--blue); color:var(--white); }
+  .mission-block.it { background:var(--ink); color:var(--white); }
+  .mission-block.biz { background:var(--white); color:var(--ink); border:1px solid var(--paper-dk); }
+  .mission-block h3 { font-size:3.5vw; font-weight:900; margin-bottom:.5vh; }
+  .mission-block .role {
+    font-size:.7vw; letter-spacing:.2em; opacity:.7; font-weight:700; text-transform:uppercase;
+    margin-bottom:2vh;
+  }
+  .mission-block .desc { font-size:1vw; line-height:1.4; margin-bottom:auto; }
+  .mission-block .tech { font-size:.75vw; font-style:italic; opacity:.75; margin-top:2vh; line-height:1.5; }
+  .mission-arrow {
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.5vw; color:var(--ash);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translateX(0); opacity:.5; }
+    50% { transform: translateX(4px); opacity:1; }
+  }
+
+  /* === PHASES === */
+  .phases-grid {
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 2%;
+    margin-top: 3vh; flex:1;
+  }
+  .phase-card {
+    display:flex; flex-direction:column;
+  }
+  .phase-num {
+    font-size:3.5vw; font-weight:900; color:var(--blue-lt); line-height:1;
+    margin-bottom:1vh;
+  }
+  .phase-card h3 { font-size:1.5vw; margin-bottom:1vh; }
+  .phase-line { width:2vw; height:3px; background:var(--blue); margin-bottom:1.5vh; }
+  .phase-card p { color:var(--ash); font-size:.95vw; line-height:1.5; }
+  .phases-foot {
+    margin-top:auto; padding:1vh 1.5vw;
+    background:var(--ink); color:var(--white); border-radius:.6vw;
+    display:flex; justify-content:space-between; font-size:.85vw; font-weight:600;
+  }
+  .phases-foot span:last-child { color:var(--blue-lt); }
+
+  /* === ARCHITECTURE === */
+  .arch-layout {
+    display:grid; grid-template-columns: 1fr 1fr; gap:3%;
+    margin-top:2vh; flex:1;
+  }
+  .arch-callouts { display:flex; flex-direction:column; justify-content:space-around; }
+  .arch-callout {
+    background:var(--white); border:1px solid var(--paper-dk);
+    padding: 1vw 1.5vw; border-radius:.8vw;
+    position:relative; transition:transform .3s ease;
+  }
+  .arch-callout:hover { transform: translateX(6px); border-color:var(--blue); }
+  .arch-callout .lvl { font-size:.7vw; font-weight:700; letter-spacing:.15em; color:var(--blue); text-transform:uppercase; }
+  .arch-callout .desc { font-size:.95vw; color:var(--ink); margin-top:.4vh; }
+  .arch-schema {
+    display:flex; flex-direction:column; align-items:center; gap:1vh;
+    padding: 2vh 0;
+  }
+  .arch-block {
+    padding: 1vh 1.5vw; border-radius:.6vw;
+    font-weight:700; font-size:1vw; letter-spacing:.1em;
+    text-align:center; min-width:12vw;
+  }
+  .arch-block.blue { background:var(--blue); color:var(--white); }
+  .arch-block.ink { background:var(--ink); color:var(--white); }
+  .arch-block.mint { background:var(--mint); color:var(--white); }
+  .arch-arrow { color:var(--ash); font-size:1.5vw; }
+  .arch-row { display:flex; gap:1vw; align-items:center; }
+  .arch-foot {
+    background:var(--ink); color:var(--white);
+    text-align:center; padding: .8vh 0;
+    font-weight:600; font-size:.9vw; letter-spacing:.2em;
+    border-radius:.5vw; margin-top:auto;
+  }
+
+  /* === STACK === */
+  .stack {
+    display:flex; flex-direction:column; gap:1.5vh;
+    margin-top:3vh; flex:1;
+  }
+  .stack-row {
+    display:grid; grid-template-columns: 12vw 1fr; gap:1.5vw;
+    align-items:center;
+  }
+  .stack-cat {
+    padding: .8vh 0; border-radius:.6vw;
+    text-align:center; font-weight:700; font-size:.85vw; letter-spacing:.15em;
+    color:var(--white);
+  }
+  .stack-cat.blue { background:var(--blue); }
+  .stack-cat.ink { background:var(--ink); }
+  .stack-pills { display:flex; gap:.6vw; flex-wrap:wrap; }
+  .stack-pill {
+    padding: .6vh 1.2vw; background:var(--white);
+    border:1px solid var(--paper-dk); border-radius:999px;
+    font-weight:600; font-size:.85vw; color:var(--ink);
+    transition: all .3s ease;
+  }
+  .stack-pill:hover { border-color:var(--blue); color:var(--blue); transform: translateY(-2px); }
+
+  /* === PARTNERS === */
+  .partners-grid {
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 2%;
+    margin-top:3vh;
+  }
+  .partner-card {
+    background:var(--white); border-radius:1vw; padding: 2vh 1.5vw;
+    text-align:center; transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .partner-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(52,52,232,.12); }
+  .partner-card h3 { font-size:1.5vw; margin-bottom:.5vh; }
+  .partner-card .dom { font-size:.7vw; font-weight:700; letter-spacing:.15em; color:var(--blue); text-transform:uppercase; }
+  .partner-card .role { font-size:.85vw; color:var(--ash); font-style:italic; margin-top:.5vh; }
+
+  /* === CLIENTS === */
+  .clients-grid {
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 1.5%;
+    margin-top:3vh;
+  }
+  .client-card {
+    background:var(--white); border-radius:.8vw; padding:1.5vh 1vw;
+    text-align:center; transition:transform .3s ease;
+  }
+  .client-card:hover { transform: translateY(-3px); }
+  .client-card h4 { font-size:1.3vw; font-weight:800; }
+  .client-card .sect { font-size:.65vw; font-weight:700; letter-spacing:.15em; color:var(--blue); text-transform:uppercase; margin-top:.3vh; }
+
+  /* === WHY === */
+  .why-grid {
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: 2%;
+    margin-top:3vh;
+  }
+  .why-card {
+    padding:2vw; border-radius:1vw;
+    background:var(--white);
+    display:flex; flex-direction:column;
+    transition: transform .3s ease;
+  }
+  .why-card:hover { transform: translateY(-4px); }
+  .why-card.featured { background:var(--blue); color:var(--white); }
+  .why-tag { font-size:2vw; font-weight:900; color:var(--blue); }
+  .why-card.featured .why-tag { color:var(--white); }
+  .why-card h3 { font-size:1.5vw; margin-top:1vh; margin-bottom:.5vh; }
+  .why-card .line { width:2vw; height:3px; background:var(--blue); margin: 1vh 0; }
+  .why-card.featured .line { background:var(--white); }
+  .why-card p { font-size:.95vw; line-height:1.5; color:var(--ash); }
+  .why-card.featured p { color:rgba(255,255,255,.85); }
+
+  /* === CONTACT === */
+  .contact-slide {
+    background: var(--ink); color:var(--white);
+  }
+  .contact-slide::before {
+    content:''; position:absolute;
+    width:60vh; height:60vh; border-radius:50%;
+    background:var(--blue);
+    top:-20vh; right:-15vh;
+    animation: floatOrb 8s ease-in-out infinite;
+  }
+  .contact-slide .header-row, .contact-slide .content { position:relative; z-index:2; }
+  .contact-slide h1 { color:var(--white); font-size:5vw; white-space:pre-line; }
+  .contact-grid {
+    display:grid; grid-template-columns: repeat(3, 1fr); gap: 2%;
+    margin-top: auto;
+  }
+  .contact-card {
+    padding:2.5vh 1.5vw; border-radius:1vw;
+    background:var(--ink-2); border:2px solid var(--blue);
+    text-align:center;
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .contact-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(52,52,232,.3); }
+  .contact-avatar {
+    width:5vw; height:5vw; border-radius:50%;
+    background:var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    font-size:2vw; font-weight:900; margin: 0 auto 1vh;
+  }
+  .contact-card h4 { font-size:1.4vw; color:var(--white); }
+  .contact-card .email { color:var(--blue-lt); font-size:.85vw; margin-top:.5vh; }
+  .contact-card .phone { color:var(--ash-lt); font-size:.85vw; margin-top:.3vh; }
+  .contact-foot { text-align:center; color:var(--blue-lt); font-style:italic; margin-top:2vh; font-size:1vw; }
+
+  /* === NAVIGATION === */
+  .nav-controls {
+    position:fixed; bottom:2vh; left:50%; transform:translateX(-50%);
+    display:flex; gap:1vw; align-items:center;
+    z-index:100; background:rgba(14,16,32,.7); backdrop-filter:blur(20px);
+    padding: 1vh 1.5vw; border-radius:999px;
+  }
+  .nav-btn {
+    width:2.2vw; height:2.2vw; border-radius:50%;
+    background:transparent; border:none; color:var(--white);
+    cursor:pointer; font-size:1.2vw;
+    display:flex; align-items:center; justify-content:center;
+    transition: all .2s ease;
+  }
+  .nav-btn:hover { background:var(--blue); }
+  .nav-counter { color:var(--white); font-size:.9vw; font-weight:600; min-width:3vw; text-align:center; }
+  .progress {
+    position:fixed; top:0; left:0; height:3px;
+    background:var(--blue); z-index:100;
+    transition:width .5s cubic-bezier(.2,.7,.3,1);
+  }
+  .fullscreen-btn {
+    position:fixed; top:1.5vh; right:1.5vw;
+    background:rgba(14,16,32,.7); backdrop-filter:blur(20px);
+    border:none; color:var(--white); cursor:pointer;
+    width:2.5vw; height:2.5vw; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1vw; z-index:100;
+    transition:background .2s ease;
+  }
+  .fullscreen-btn:hover { background:var(--blue); }
+
+  /* Small screens */
+  @media (max-aspect-ratio: 16/9) {
+    .deck { height:56.25vw; width:100vw; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<button class="fullscreen-btn" id="fullscreen" title="Plein écran (F)">⛶</button>
+
+<div class="stage">
+<div class="deck" id="deck">
+
+<!-- ═══ SLIDE 1 : COVER ═══ -->
+<section class="slide cover active">
+  <div class="logo-big stagger">dasolabs</div>
+  <div class="content">
+    <div class="chip white stagger" style="margin-bottom:2vh;">PRÉSENTATION 2026</div>
+    <h1 class="hero stagger" style="color:var(--white); white-space:pre-line;">De la donnée industrielle
+à la performance opérationnelle.</h1>
+  </div>
+  <div class="foot stagger">dasolabs.be</div>
+</section>
+
+<!-- ═══ SLIDE 2 : MANIFESTO ═══ -->
+<section class="slide statement">
+  <div class="header-row">
+    <div class="chip stagger">CE QU'ON FAIT</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <h1 class="hero stagger" style="white-space:pre-line; margin:auto 0;">On transforme votre donnée OT
+en valeur business.</h1>
+  <div class="foot stagger" style="color:var(--ash); font-style:italic;">
+    OT · UNS · IT — un cœur de métier clair, un écosystème complet autour.
+  </div>
+</section>
+
+<!-- ═══ SLIDE 3 : ÉQUIPE ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">L'ÉQUIPE</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">QUI SOMMES-NOUS</div>
+  <h1 class="stagger" style="margin-top:1vh;">Trois profils, une équipe complémentaire.</h1>
+  <p class="lead stagger">Des experts qui ont grandi côté terrain avant de construire Dasolabs.</p>
+  <div class="team-grid" style="margin-top:3vh;">
+    <div class="team-card grid-item">
+      <div class="avatar" style="background:var(--blue);">G</div>
+      <h3>Gérald</h3>
+      <div class="role">Founder · Management</div>
+      <p>12+ ans d'expérience en gestion de projet, conseil, commercial &amp; people management.</p>
+    </div>
+    <div class="team-card grid-item">
+      <div class="avatar" style="background:var(--ink);">Y</div>
+      <h3>Yoann</h3>
+      <div class="role">Founder · Technique</div>
+      <p>15 ans en gestion de la donnée — SCADA, AVEVA System Platform, développement d'applications, reporting, BDD.</p>
+    </div>
+    <div class="team-card grid-item">
+      <div class="avatar" style="background:var(--mint);">J</div>
+      <h3>Jordan</h3>
+      <div class="role">Associate · Automation</div>
+      <p>4 ans en projets automation. PLC et SCADA Siemens, gestion de données OT.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 4 : TIMELINE ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">NOTRE HISTOIRE</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">TROIS ANS, UN CAP CLAIR</div>
+  <h1 class="stagger" style="margin-top:1vh;">Notre histoire.</h1>
+  <p class="lead stagger">D'une idée à une équipe qui livre chez les majors industriels.</p>
+  <div class="timeline">
+    <div class="tl-node grid-item"><div class="tl-label">Création<br>de la société</div><div class="tl-dot">08 · 23</div></div>
+    <div class="tl-node grid-item"><div class="tl-dot">06 · 25</div><div class="tl-label">Prise<br>d'indépendance<br>Missions en direct</div></div>
+    <div class="tl-node grid-item highlight"><div class="tl-label">Association<br>avec Jordan<br>Expertise OT renforcée</div><div class="tl-dot">07 · 26</div></div>
+    <div class="tl-node grid-item"><div class="tl-dot">2028</div><div class="tl-label">Objectif<br>12 personnes</div></div>
+  </div>
+  <div class="stagger" style="margin-top:auto; text-align:center; color:var(--ash); font-style:italic; font-size:1vw;">
+    3 ans pour construire une équipe qui compte sur des projets à forte valeur.
+  </div>
+</section>
+
+<!-- ═══ SLIDE 5 : MISSION ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">NOTRE MISSION</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">DE LA DATA À LA VALEUR</div>
+  <h1 class="stagger" style="margin-top:1vh;">Notre mission.</h1>
+  <p class="lead stagger">On accompagne vos données de l'usine jusqu'à la décision business.</p>
+  <div class="mission-flow">
+    <div class="mission-block ot grid-item">
+      <h3>OT</h3>
+      <div class="role">Collecte</div>
+      <p class="desc">Fiabiliser et standardiser la donnée en temps réel.</p>
+      <p class="tech">PLC, OPC UA, MQTT, IoT, Capteurs, Kepware, Edge, NodeRed</p>
+    </div>
+    <div class="mission-arrow grid-item">→</div>
+    <div class="mission-block it grid-item">
+      <h3>IT</h3>
+      <div class="role">Contextualisation</div>
+      <p class="desc">Donner une vision fiable pour prendre les bonnes décisions.</p>
+      <p class="tech">SCADA, Base de données, Unified Namespace</p>
+    </div>
+    <div class="mission-arrow grid-item">→</div>
+    <div class="mission-block biz grid-item">
+      <h3>BUSINESS</h3>
+      <div class="role" style="color:var(--blue);">Valeur</div>
+      <p class="desc">Aider à la prise de décision et améliorer la productivité.</p>
+      <p class="tech">Azure Data Lake, AWS, Grafana, Power BI, IA</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 6 : PRESTATIONS ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">NOS PRESTATIONS</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">MÉTHODE PROJET</div>
+  <h1 class="stagger" style="margin-top:1vh;">Bureau d'études — on conçoit, on accompagne.</h1>
+  <p class="lead stagger">On fait ce qu'on fait très bien. Pour le reste, on active nos partenaires — sans se marcher sur les pieds.</p>
+  <div class="phases-grid">
+    <div class="phase-card grid-item">
+      <div class="phase-num">01</div>
+      <h3>Analyse &amp; Audit</h3>
+      <div class="phase-line"></div>
+      <p>Diagnostic clair du besoin et de l'existant. Cahier des charges structuré.</p>
+    </div>
+    <div class="phase-card grid-item">
+      <div class="phase-num">02</div>
+      <h3>Conception</h3>
+      <div class="phase-line"></div>
+      <p>Architecture technique, spécifications, choix des briques. Une base solide, scalable, pensée pour durer.</p>
+    </div>
+    <div class="phase-card grid-item">
+      <div class="phase-num">03</div>
+      <h3>Accompagnement</h3>
+      <div class="phase-line"></div>
+      <p>On pilote, on supervise, on garantit. L'exécution terrain (élec, chantier, intégration lourde) est portée par nos partenaires.</p>
+    </div>
+    <div class="phase-card grid-item">
+      <div class="phase-num">04</div>
+      <h3>Validation</h3>
+      <div class="phase-line"></div>
+      <p>Commissioning, FAT, SAT. On qualifie et documente pour une mise en service sans risque.</p>
+    </div>
+  </div>
+  <div class="phases-foot stagger">
+    <span>Dasolabs — cœur de projet OT &amp; UNS</span>
+    <span>Partenaires — élec, MES, IA, chantier</span>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 7 : ARCHITECTURE ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">NOS PROJETS TYPES</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">SCHÉMA D'ARCHITECTURE</div>
+  <h1 class="stagger" style="margin-top:1vh; font-size:3vw;">De l'instrumentation aux rapports — on couvre chaque niveau.</h1>
+  <div class="arch-layout">
+    <div class="arch-callouts">
+      <div class="arch-callout grid-item">
+        <div class="lvl">Reporting &amp; Data</div>
+        <div class="desc">Historisation, gestion BDD, rapports, tableaux de bord.</div>
+      </div>
+      <div class="arch-callout grid-item">
+        <div class="lvl">SCADA · Objets &amp; Synoptiques</div>
+        <div class="desc">Objets, synoptiques, connexions data, alarmes, mise en service.</div>
+      </div>
+      <div class="arch-callout grid-item">
+        <div class="lvl">PLC · Logique &amp; I/O</div>
+        <div class="desc">Logique automate, config hardware, gestion I/O, détection défauts, mise en service.</div>
+      </div>
+      <div class="arch-callout grid-item">
+        <div class="lvl">Capteurs &amp; Chantier</div>
+        <div class="desc">Choix matériel, mise en plan, montage armoire, chantier.</div>
+      </div>
+    </div>
+    <div class="arch-schema">
+      <div class="arch-block blue grid-item">REPORTS · BDD</div>
+      <div class="arch-arrow grid-item">↕</div>
+      <div class="arch-block ink grid-item">SCADA · UNS</div>
+      <div class="arch-arrow grid-item">↕</div>
+      <div class="arch-row grid-item">
+        <div class="arch-block blue">PLC</div>
+        <div class="arch-arrow">↔</div>
+        <div class="arch-block ink">HMI</div>
+      </div>
+      <div class="arch-arrow grid-item">↕</div>
+      <div class="arch-row grid-item">
+        <div class="arch-block mint">CAPTEURS</div>
+        <div class="arch-block mint">ÉQUIPEMENTS</div>
+      </div>
+    </div>
+  </div>
+  <div class="arch-foot stagger" style="margin-top:2vh;">CYCLE COMPLET : COMMISSIONING · FAT · SAT</div>
+</section>
+
+<!-- ═══ SLIDE 8 : STACK ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">NOS COMPÉTENCES</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">STACK TECHNIQUE</div>
+  <h1 class="stagger" style="margin-top:1vh;">Notre stack technique.</h1>
+  <p class="lead stagger">Nous maîtrisons les briques industrielles standards du marché.</p>
+  <div class="stack">
+    <div class="stack-row grid-item">
+      <div class="stack-cat blue">PROTOCOLES</div>
+      <div class="stack-pills">
+        <span class="stack-pill">Modbus</span><span class="stack-pill">OPC UA</span><span class="stack-pill">MQTT</span><span class="stack-pill">S7</span><span class="stack-pill">BACnet</span>
+      </div>
+    </div>
+    <div class="stack-row grid-item">
+      <div class="stack-cat ink">ACQUISITION</div>
+      <div class="stack-pills">
+        <span class="stack-pill">Siemens</span><span class="stack-pill">Kepware</span><span class="stack-pill">Rockwell</span><span class="stack-pill">Moxa</span>
+      </div>
+    </div>
+    <div class="stack-row grid-item">
+      <div class="stack-cat blue">INTERFACE OT/IT</div>
+      <div class="stack-pills">
+        <span class="stack-pill">AVEVA</span><span class="stack-pill">Litmus</span><span class="stack-pill">HighByte</span><span class="stack-pill">HiveMQ</span><span class="stack-pill">Mosquitto</span><span class="stack-pill">Panorama</span><span class="stack-pill">Node-RED</span>
+      </div>
+    </div>
+    <div class="stack-row grid-item">
+      <div class="stack-cat ink">STOCKAGE &amp; VALORISATION</div>
+      <div class="stack-pills">
+        <span class="stack-pill">SQL Server</span><span class="stack-pill">PostgreSQL</span><span class="stack-pill">SSRS</span><span class="stack-pill">Azure</span><span class="stack-pill">AWS</span><span class="stack-pill">Grafana</span><span class="stack-pill">Power BI</span><span class="stack-pill">IA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 9 : POSITIONNEMENT ═══ -->
+<section class="slide statement">
+  <div class="header-row">
+    <div class="chip stagger">NOTRE POSITIONNEMENT</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <h1 class="hero stagger" style="white-space:pre-line; margin:auto 0; font-size:5vw;">Bureau d'études.
+On conçoit, on garantit.
+On n'exécute pas — nos partenaires le font mieux.</h1>
+  <div class="foot stagger">Pas de conflit d'intérêt, pas de doublon. Chacun son métier.</div>
+</section>
+
+<!-- ═══ SLIDE 10 : PARTENAIRES ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">NOS PARTENAIRES</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">ÉCOSYSTÈME</div>
+  <h1 class="stagger" style="margin-top:1vh;">Un écosystème complet pour vos projets.</h1>
+  <p class="lead stagger">Quand un projet dépasse notre cœur de métier, on active un partenaire éprouvé.</p>
+  <div class="partners-grid">
+    <div class="partner-card grid-item">
+      <h3>AlpaFlow</h3>
+      <div class="dom">INTÉGRATION</div>
+      <div class="role">Automation &amp; MES</div>
+    </div>
+    <div class="partner-card grid-item">
+      <h3>B2C Engineering</h3>
+      <div class="dom">BUREAU D'ÉTUDES</div>
+      <div class="role">Étude &amp; pilotage projet</div>
+    </div>
+    <div class="partner-card grid-item">
+      <h3>EXA Solutions</h3>
+      <div class="dom">ÉLECTRICITÉ</div>
+      <div class="role">Chantier &amp; installations</div>
+    </div>
+    <div class="partner-card grid-item">
+      <h3>ISALYS Consulting</h3>
+      <div class="dom">CONSEIL</div>
+      <div class="role">Stratégie &amp; transformation</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 11 : CLIENTS ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">ILS NOUS FONT CONFIANCE</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">NOS CLIENTS</div>
+  <h1 class="stagger" style="margin-top:1vh;">Ils nous font confiance.</h1>
+  <p class="lead stagger">Pharma, aéronautique, chimie, eau, énergie — des environnements exigeants.</p>
+  <div class="clients-grid">
+    <div class="client-card grid-item"><h4>GSK</h4><div class="sect">Pharma</div></div>
+    <div class="client-card grid-item"><h4>UCB</h4><div class="sect">Pharma</div></div>
+    <div class="client-card grid-item"><h4>Clinigen</h4><div class="sect">Pharma</div></div>
+    <div class="client-card grid-item"><h4>LFB</h4><div class="sect">Pharma</div></div>
+    <div class="client-card grid-item"><h4>Zoetis</h4><div class="sect">Santé Animale</div></div>
+    <div class="client-card grid-item"><h4>Safran</h4><div class="sect">Aéronautique</div></div>
+    <div class="client-card grid-item"><h4>EKIUM</h4><div class="sect">Ingénierie</div></div>
+    <div class="client-card grid-item"><h4>Groupe MECA</h4><div class="sect">Mécanique</div></div>
+    <div class="client-card grid-item"><h4>Technochim</h4><div class="sect">Chimie</div></div>
+    <div class="client-card grid-item"><h4>Veolia</h4><div class="sect">Environnement</div></div>
+    <div class="client-card grid-item"><h4>Collignon Eiffage</h4><div class="sect">BTP</div></div>
+    <div class="client-card grid-item"><h4>…</h4><div class="sect">Et d'autres</div></div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 12 : POURQUOI ═══ -->
+<section class="slide">
+  <div class="header-row">
+    <div class="chip stagger">POURQUOI DASOLABS</div>
+    <div class="logo-mini stagger">dasolabs</div>
+  </div>
+  <div class="chip stagger" style="margin-top:1vh;">3 RAISONS</div>
+  <h1 class="stagger" style="margin-top:1vh;">Pourquoi nous choisir.</h1>
+  <p class="lead stagger">Ce qui nous distingue d'un intégrateur classique.</p>
+  <div class="why-grid">
+    <div class="why-card grid-item">
+      <div class="why-tag">#EXPERIENCE</div>
+      <h3>31 ans cumulés en OT &amp; IT.</h3>
+      <div class="line"></div>
+      <p>Nous avons vécu la donnée industrielle de bout en bout dans des environnements critiques : pharma, aéronautique, chimie.</p>
+    </div>
+    <div class="why-card featured grid-item">
+      <div class="why-tag">#FLEXIBILITE</div>
+      <h3>Taille humaine, engagement fort.</h3>
+      <div class="line"></div>
+      <p>Vous parlez à un décideur, jamais à un service commercial. On s'engage, on livre, on assume.</p>
+    </div>
+    <div class="why-card grid-item">
+      <div class="why-tag">#ACCOMPAGNEMENT</div>
+      <h3>Un écosystème sous la main.</h3>
+      <div class="line"></div>
+      <p>Grâce à nos partenaires (élec, MES, IA, robotique), on couvre l'ensemble de votre projet — sans multiplier vos interlocuteurs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 13 : PROMESSE ═══ -->
+<section class="slide statement dark">
+  <div class="header-row">
+    <div class="chip blue stagger">CE QU'ON PROMET</div>
+    <div class="logo-mini white stagger">dasolabs</div>
+  </div>
+  <h1 class="hero stagger" style="white-space:pre-line; margin:auto 0; font-size:5.5vw;">Livré, documenté,
+supporté.
+Comme si c'était
+chez nous.</h1>
+  <div class="foot stagger">C'est la marque Dasolabs — depuis 2023.</div>
+</section>
+
+<!-- ═══ SLIDE 14 : CONTACT ═══ -->
+<section class="slide contact-slide">
+  <div class="header-row">
+    <div class="logo-mini white stagger" style="font-size:2vw;">dasolabs</div>
+  </div>
+  <div class="content" style="max-width:60%;">
+    <div class="chip white stagger" style="margin-bottom:2vh; margin-top:2vh;">PARLONS-EN</div>
+    <h1 class="hero stagger" style="color:var(--white); white-space:pre-line; font-size:5vw;">Un projet ?
+On démarre par un café.</h1>
+  </div>
+  <div class="contact-grid" style="position:relative; z-index:2; margin-top:4vh;">
+    <div class="contact-card grid-item">
+      <div class="contact-avatar">G</div>
+      <h4>Gérald</h4>
+      <div class="email">gerald@dasolabs.be</div>
+      <div class="phone">+32 494 45 38 13</div>
+    </div>
+    <div class="contact-card grid-item">
+      <div class="contact-avatar">Y</div>
+      <h4>Yoann</h4>
+      <div class="email">yoann@dasolabs.be</div>
+      <div class="phone">+32 492 15 30 50</div>
+    </div>
+    <div class="contact-card grid-item">
+      <div class="contact-avatar">J</div>
+      <h4>Jordan</h4>
+      <div class="email">jordan@dasolabs.be</div>
+      <div class="phone">+32 498 36 72 26</div>
+    </div>
+  </div>
+  <div class="contact-foot stagger">dasolabs.be</div>
+</section>
+
+</div>
+</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" id="prev" title="Précédent (←)">‹</button>
+  <div class="nav-counter"><span id="current">1</span>/<span id="total">14</span></div>
+  <button class="nav-btn" id="next" title="Suivant (→)">›</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  document.getElementById('total').textContent = total;
+
+  function show(index, direction = 1) {
+    if (index < 0 || index >= total) return;
+    const currentSlide = slides[current];
+    const nextSlide = slides[index];
+
+    currentSlide.classList.remove('active');
+    currentSlide.classList.add('leaving');
+
+    setTimeout(() => currentSlide.classList.remove('leaving'), 600);
+
+    nextSlide.classList.add('active');
+    current = index;
+
+    document.getElementById('current').textContent = current + 1;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+
+  function next() { if (current < total - 1) show(current + 1); }
+  function prev() { if (current > 0) show(current - 1); }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { e.preventDefault(); show(0); }
+    else if (e.key === 'End') { e.preventDefault(); show(total - 1); }
+    else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); }
+    else if (e.key === 'Escape') { if (document.fullscreenElement) document.exitFullscreen(); }
+  });
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+  document.getElementById('fullscreen').addEventListener('click', toggleFullscreen);
+
+  // Initial progress
+  document.getElementById('progress').style.width = `${(1/total)*100}%`;
+</script>
+
+</body>
+</html>

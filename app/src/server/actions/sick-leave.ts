@@ -13,6 +13,9 @@ import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
 const Schema = z.object({
+  // Champ optionnel : userId ciblé — si présent, un admin RH déclare pour
+  // quelqu'un d'autre. Absent = déclaration pour soi (auto-service consultant).
+  userId:         z.string().optional().nullable().transform((v) => v || null),
   startDate:      z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   endDate:        z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   reason:         z.string().max(500).optional().nullable().transform((v) => v?.trim() || null),
@@ -28,9 +31,24 @@ export async function createSickLeave(formData: FormData) {
   if (end < start) {
     throw new Error("La date de fin ne peut pas être antérieure à la date de début");
   }
+
+  // Si un userId cible est passé et ≠ l'utilisateur courant, on exige users.manage
+  // (RH/admin). Sinon on crée pour soi. On journalise différemment pour tracer
+  // les créations "au nom de" quelqu'un d'autre.
+  const targetUserId = data.userId ?? session.user.id;
+  const isForOther = targetUserId !== session.user.id;
+  if (isForOther) {
+    const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+    if (!perms.includes("users.manage")) {
+      throw new Error("Déclaration pour un autre utilisateur réservée à un admin RH");
+    }
+    const target = await prisma.user.findUnique({ where: { id: targetUserId }, select: { id: true } });
+    if (!target) throw new Error("Utilisateur cible introuvable");
+  }
+
   const created = await prisma.sickLeave.create({
     data: {
-      userId: session.user.id,
+      userId: targetUserId,
       startDate: start,
       endDate: end,
       reason: data.reason,
@@ -43,10 +61,13 @@ export async function createSickLeave(formData: FormData) {
     action: "CREATE",
     entityType: "SickLeave",
     entityId: created.id,
-    message: `Arrêt maladie déclaré (${data.startDate} → ${data.endDate})`
+    message: isForOther
+      ? `Arrêt maladie déclaré POUR ${targetUserId} par admin (${data.startDate} → ${data.endDate})`
+      : `Arrêt maladie déclaré (${data.startDate} → ${data.endDate})`
   });
   revalidatePath("/me");
   revalidatePath("/dashboard");
+  revalidatePath("/sick-leaves");
   return { ok: true, id: created.id };
 }
 

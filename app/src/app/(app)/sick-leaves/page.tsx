@@ -4,6 +4,7 @@ import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { HeartPulse, Paperclip } from "lucide-react";
 import { DeleteSickLeaveButton } from "./delete-button";
+import { AdminCreateSickLeaveForm } from "./admin-create-form";
 
 export const dynamic = "force-dynamic";
 
@@ -31,13 +32,18 @@ export default async function SickLeavesPage({
   // On récupère TOUJOURS les 3 buckets (pour les compteurs) mais on n'affiche
   // qu'un seul groupe dans le tableau — c'est plus rapide qu'une query par
   // filtre et il n'y a jamais des milliers d'arrêts.
-  const [allLeaves] = await Promise.all([
+  const [allLeaves, users] = await Promise.all([
     prisma.sickLeave.findMany({
       include: {
         user: { select: { id: true, firstName: true, lastName: true, email: true } }
       },
       orderBy: [{ startDate: "desc" }],
       take: 500
+    }),
+    prisma.user.findMany({
+      where: { active: true, candidateProfile: { is: null } },
+      select: { id: true, firstName: true, lastName: true, email: true },
+      orderBy: [{ firstName: "asc" }]
     })
   ]);
   const active   = allLeaves.filter((l) => l.startDate <= todayStart && l.endDate >= todayStart);
@@ -52,6 +58,7 @@ export default async function SickLeavesPage({
       <PageHeader
         title="Arrêts maladie"
         subtitle="Consulte les arrêts déclarés par l'équipe et accède aux certificats."
+        actions={<AdminCreateSickLeaveForm users={users} />}
       />
 
       {/* Tabs */}
