@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserAccessGroupName, DEFAULT_GROUP_NAME } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { KpiCard } from "@/components/ui/kpi-card";
+import { HeroCard } from "@/components/ui/hero-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { projectsOverBudget } from "@/server/services/project-service";
@@ -86,11 +87,17 @@ export default async function Dashboard() {
   })));
   const overloaded = loads.filter(l => l.planned > Number(l.user.weeklyCapacityH));
 
+  const firstName = session.user.name.split(" ")[0];
+  const dateStr = new Date().toLocaleDateString("fr-BE", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+
   return (
     <div>
-      <PageHeader
-        title={`Bonjour ${session.user.name.split(" ")[0]} 👋`}
-        subtitle="Vue d'ensemble Dasolabs"
+      {/* Hero card signature charte — dégradé midnight → electric blue */}
+      <HeroCard
+        pill={dateStr.toUpperCase()}
+        title={`Bonjour ${firstName}.`}
+        subtitle="Vue d'ensemble Dasolabs — pipeline, projets, équipe, cashflow."
+        className="mb-6"
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
