@@ -144,7 +144,7 @@ export default async function SickLeavesPage({
                       <td>
                         {l.certificateUrl ? (
                           <a
-                            href={l.certificateUrl}
+                            href={`/api/sick-leaves/${l.id}/certificate`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-indigoaccent hover:underline text-xs flex items-center gap-1"

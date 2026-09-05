@@ -212,7 +212,7 @@ export function SickLeaveBlock({
                 </div>
                 {l.certificateUrl && (
                   <a
-                    href={l.certificateUrl}
+                    href={`/api/sick-leaves/${l.id}/certificate`}
                     target="_blank"
                     rel="noreferrer"
                     className="text-[11px] text-indigoaccent hover:underline"

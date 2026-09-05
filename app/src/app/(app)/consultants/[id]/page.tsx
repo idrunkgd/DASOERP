@@ -502,7 +502,7 @@ export default async function ConsultantDetail({ params, searchParams }: { param
                             <td className="text-right tabular-nums">{days}</td>
                             <td className="text-xs">
                               {s.certificateUrl
-                                ? <a href={s.certificateUrl} target="_blank" rel="noopener noreferrer" className="text-indigoaccent hover:underline">📎 Voir</a>
+                                ? <a href={`/api/sick-leaves/${s.id}/certificate`} target="_blank" rel="noopener noreferrer" className="text-indigoaccent hover:underline">📎 Voir</a>
                                 : <span className="text-midnight-400">—</span>}
                             </td>
                             <td className="text-xs text-midnight-700 truncate max-w-xs">
