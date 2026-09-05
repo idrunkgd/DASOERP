@@ -75,12 +75,33 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
             {" · issue de "}<Link href={`/mission-requests/${m.missionRequestId}`} className="text-indigoaccent hover:underline">{m.missionRequest.reference}</Link>
           </span>
         }
-        actions={<MissionExecStatusActions id={m.id} status={m.status} />}
+        actions={canWrite ? <MissionExecStatusActions id={m.id} status={m.status} /> : null}
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <MissionExecForm initial={m as any} companies={companies} consultants={consultants} contacts={contacts} />
+          {canWrite ? (
+            <MissionExecForm initial={m as any} companies={companies} consultants={consultants} contacts={contacts} />
+          ) : (
+            <div className="card p-6 space-y-4">
+              <h3 className="font-semibold text-midnight-900">Ma mission</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                <Row k="Client" v={m.company.name} />
+                {m.intermediaryCompany && <Row k="Société de portage" v={m.intermediaryCompany.name} />}
+                <Row k="Titre" v={m.title} />
+                <Row k="Référence" v={<span className="font-mono text-xs">{m.reference}</span>} />
+                <Row k="Statut" v={STATUS_LABELS[m.status]} />
+                <Row k="Localisation" v={m.workLocation ?? "—"} />
+                <Row k="Début" v={formatDate(m.startDate)} />
+                <Row k="Fin prévue" v={formatDate(m.endDate)} />
+                {m.actualEndDate && <Row k="Fin réelle" v={formatDate(m.actualEndDate)} />}
+                {m.estimatedDays && <Row k="Jours estimés" v={m.estimatedDays} />}
+              </div>
+              <div className="text-[11px] text-midnight-400 italic pt-2 border-t border-border/50">
+                Vue en lecture seule. Une modification ? Écris à Louise.
+              </div>
+            </div>
+          )}
         </div>
         <aside className="space-y-4">
           <div className="card p-5 space-y-2 text-sm">
