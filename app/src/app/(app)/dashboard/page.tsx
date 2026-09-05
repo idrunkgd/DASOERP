@@ -20,9 +20,10 @@ export default async function Dashboard() {
   const session = await requirePermissionOrRedirect(["dashboard.read", "self.read"]);
   const groupName = await getUserAccessGroupName(session.user.id);
   if (groupName === DEFAULT_GROUP_NAME) redirect("/me");
-  // Sans dashboard.read (donc seulement self.read), on redirige vers /me.
+  // Sans dashboard.read (donc seulement self.read), on redirige vers /my-hub
+  // — le vrai dashboard consultant (mission, voiture, congés, NDF, formations).
   const perms = await (await import("@/lib/rbac")).getUserEffectivePermissions(session.user.id, session.user.role);
-  if (!perms.includes("dashboard.read")) redirect("/me");
+  if (!perms.includes("dashboard.read")) redirect("/my-hub");
 
   const [
     offersOpen, offersWonYear, offersLostYear,
