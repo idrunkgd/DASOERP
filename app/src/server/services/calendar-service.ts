@@ -5,7 +5,9 @@ export type CalendarEventType =
   | "INTERVIEW_PLACEMENT"     // entretien client (rattaché à une application)
   | "REVIEW_INTERNAL"         // entretien interne consultant (ConsultantReview)
   | "MISSION_START"           // début mission T&M
-  | "MISSION_END";            // fin mission T&M (prévue ou réelle)
+  | "MISSION_END"             // fin mission T&M (prévue ou réelle)
+  | "BIRTHDAY"                // anniversaire d'un consultant (récurrent annuel)
+  | "WORK_ANNIVERSARY";       // date d'entrée chez Dasolabs (récurrent annuel)
 
 export type CalendarEvent = {
   id: string;
@@ -23,7 +25,9 @@ const TONES: Record<CalendarEventType, string> = {
   INTERVIEW_PLACEMENT: "bg-blue-200 text-blue-900 border-blue-300",
   REVIEW_INTERNAL:     "bg-violet-200 text-violet-900 border-violet-300",
   MISSION_START:       "bg-emerald-200 text-emerald-900 border-emerald-300",
-  MISSION_END:         "bg-amber-200 text-amber-900 border-amber-300"
+  MISSION_END:         "bg-amber-200 text-amber-900 border-amber-300",
+  BIRTHDAY:            "bg-pink-200 text-pink-900 border-pink-300",
+  WORK_ANNIVERSARY:    "bg-fuchsia-200 text-fuchsia-900 border-fuchsia-300"
 };
 export function eventTone(t: CalendarEventType): string { return TONES[t]; }
 
@@ -32,7 +36,9 @@ const LABELS: Record<CalendarEventType, string> = {
   INTERVIEW_PLACEMENT: "Entretien client",
   REVIEW_INTERNAL:     "Entretien interne",
   MISSION_START:       "Début mission",
-  MISSION_END:         "Fin mission"
+  MISSION_END:         "Fin mission",
+  BIRTHDAY:            "Anniversaire",
+  WORK_ANNIVERSARY:    "Date d'entrée"
 };
 export function eventLabel(t: CalendarEventType): string { return LABELS[t]; }
 
@@ -41,7 +47,7 @@ export function eventLabel(t: CalendarEventType): string { return LABELS[t]; }
  * Une seule fonction → utilisée par la page /calendar.
  */
 export async function getCalendarEvents(from: Date, to: Date): Promise<CalendarEvent[]> {
-  const [interviews, reviews, missionsStarting, missionsEnding] = await Promise.all([
+  const [interviews, reviews, missionsStarting, missionsEnding, teamDates] = await Promise.all([
     // Entretiens (recrutement direct OU placement client)
     prisma.interview.findMany({
       where: { scheduledAt: { gte: from, lte: to } },
@@ -76,6 +82,17 @@ export async function getCalendarEvents(from: Date, to: Date): Promise<CalendarE
         ]
       },
       include: { consultant: { select: { firstName: true, lastName: true } }, company: { select: { name: true } } }
+    }),
+    // Anniversaires + dates d'entrée : on récupère tous les employés actifs
+    // avec au moins une des deux dates renseignées. On projette ensuite chaque
+    // date sur l'année de la plage affichée pour créer des événements récurrents.
+    prisma.user.findMany({
+      where: {
+        active: true,
+        candidateProfile: { is: null },
+        OR: [{ birthDate: { not: null } }, { joinedAt: { not: null } }]
+      },
+      select: { id: true, firstName: true, lastName: true, birthDate: true, joinedAt: true }
     })
   ]);
 
@@ -140,6 +157,57 @@ export async function getCalendarEvents(from: Date, to: Date): Promise<CalendarE
       subtitle: `${m.consultant ? `${m.consultant.firstName} ${m.consultant.lastName} · ` : ""}${m.company.name}${m.actualEndDate ? " (réelle)" : " (prévue)"}`,
       href: `/missions/${m.id}`
     });
+  }
+
+  // ─── Anniversaires + dates d'entrée récurrents ───
+  // On projette chaque date sur toutes les années de la plage affichée, puis
+  // on filtre pour ne garder que celles qui tombent DANS la plage.
+  const yearMin = from.getUTCFullYear();
+  const yearMax = to.getUTCFullYear();
+  for (const u of teamDates) {
+    const fullName = `${u.firstName} ${u.lastName}`;
+    if (u.birthDate) {
+      const m = u.birthDate.getUTCMonth();
+      const d = u.birthDate.getUTCDate();
+      const originalYear = u.birthDate.getUTCFullYear();
+      for (let y = yearMin; y <= yearMax; y++) {
+        const projected = new Date(Date.UTC(y, m, d));
+        if (projected >= from && projected <= to) {
+          const age = y - originalYear;
+          out.push({
+            id: `bd-${u.id}-${y}`,
+            type: "BIRTHDAY",
+            date: projected,
+            title: `🎂 ${fullName}`,
+            subtitle: age > 0 ? `${age} ans` : undefined,
+            href: `/consultants/${u.id}`
+          });
+        }
+      }
+    }
+    if (u.joinedAt) {
+      const m = u.joinedAt.getUTCMonth();
+      const d = u.joinedAt.getUTCDate();
+      const originalYear = u.joinedAt.getUTCFullYear();
+      for (let y = yearMin; y <= yearMax; y++) {
+        const projected = new Date(Date.UTC(y, m, d));
+        if (projected >= from && projected <= to) {
+          const yearsIn = y - originalYear;
+          // Le jour même de l'entrée = date d'entrée. Les années suivantes = anniversaire d'ancienneté.
+          const label = yearsIn === 0
+            ? `🎉 Arrivée · ${fullName}`
+            : `🎉 ${fullName} · ${yearsIn} an${yearsIn > 1 ? "s" : ""} chez Dasolabs`;
+          out.push({
+            id: `wa-${u.id}-${y}`,
+            type: "WORK_ANNIVERSARY",
+            date: projected,
+            title: label,
+            subtitle: yearsIn === 0 ? `Bienvenue !` : `Depuis ${originalYear}`,
+            href: `/consultants/${u.id}`
+          });
+        }
+      }
+    }
   }
 
   return out.sort((a, b) => a.date.getTime() - b.date.getTime());

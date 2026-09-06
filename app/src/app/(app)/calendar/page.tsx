@@ -14,7 +14,9 @@ const TYPE_FILTERS: { value: CalendarEventType | "ALL"; label: string }[] = [
   { value: "INTERVIEW_PLACEMENT", label: "Entretiens client" },
   { value: "REVIEW_INTERNAL", label: "Entretiens internes" },
   { value: "MISSION_START", label: "Débuts mission" },
-  { value: "MISSION_END", label: "Fins mission" }
+  { value: "MISSION_END", label: "Fins mission" },
+  { value: "BIRTHDAY", label: "🎂 Anniversaires" },
+  { value: "WORK_ANNIVERSARY", label: "🎉 Dates d'entrée" }
 ];
 
 export default async function CalendarPage({ searchParams }: { searchParams: { month?: string; type?: string } }) {
@@ -43,7 +45,9 @@ export default async function CalendarPage({ searchParams }: { searchParams: { m
 
   // Compteurs par type pour la légende
   const counts: Record<CalendarEventType, number> = {
-    INTERVIEW_HIRING: 0, INTERVIEW_PLACEMENT: 0, REVIEW_INTERNAL: 0, MISSION_START: 0, MISSION_END: 0
+    INTERVIEW_HIRING: 0, INTERVIEW_PLACEMENT: 0, REVIEW_INTERNAL: 0,
+    MISSION_START: 0, MISSION_END: 0,
+    BIRTHDAY: 0, WORK_ANNIVERSARY: 0
   };
   for (const e of allEvents) counts[e.type]++;
 
@@ -68,7 +72,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: { m
         </select>
         <button className="btn-secondary">Filtrer</button>
         <div className="flex items-center gap-3 text-xs text-midnight-700 ml-auto flex-wrap">
-          {(["INTERVIEW_HIRING","INTERVIEW_PLACEMENT","REVIEW_INTERNAL","MISSION_START","MISSION_END"] as CalendarEventType[]).map(t => (
+          {(["INTERVIEW_HIRING","INTERVIEW_PLACEMENT","REVIEW_INTERNAL","MISSION_START","MISSION_END","BIRTHDAY","WORK_ANNIVERSARY"] as CalendarEventType[]).map(t => (
             <span key={t} className="flex items-center gap-1">
               <span className={cn("w-3 h-3 rounded border", eventTone(t))} />
               {eventLabel(t)} <span className="text-midnight-400">({counts[t]})</span>

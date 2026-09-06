@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dasolabs — 32 posts LinkedIn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#07070D; --midnight:#202037; --blue:#3434E8; --blue-lt:#6b6bf0;
+    --silver:#F1F1F6; --white:#FFFFFF; --ash:#6b6d80;
+    --mint:#10B981; --amber:#F59E0B; --red:#EF4444;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    font-family:'DM Sans', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #0a0c18 0%, #12142a 100%);
+    color:#fff; -webkit-font-smoothing:antialiased; padding: 4vh 4vw;
+  }
+  .mono { font-family:'DM Mono', monospace; }
+
+  .top { max-width:1400px; margin: 0 auto 40px; text-align:center; }
+  .top .badge {
+    display:inline-block; padding:.5em 1.2em; border-radius:999px;
+    background:var(--blue); color:#fff; font-weight:700; font-size:11px;
+    letter-spacing:.15em; margin-bottom:1.5em;
+  }
+  .top h1 {
+    font-size: clamp(40px, 5vw, 72px); font-weight:900; letter-spacing:-.03em; line-height:1;
+  }
+  .top p {
+    color:#b4b6c3; font-size:18px; margin:1em auto 0; max-width:640px; line-height:1.5;
+  }
+
+  /* ═════ CATEGORY FILTERS ═════ */
+  .filters {
+    max-width:1400px; margin:0 auto 32px;
+    display:flex; justify-content:center; gap:12px; flex-wrap:wrap;
+  }
+  .filter {
+    padding:12px 24px; border-radius:999px;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+    color:#fff; font-family:'DM Sans'; font-size:13px; font-weight:600;
+    cursor:pointer; transition:all .2s;
+  }
+  .filter:hover { background:rgba(52,52,232,.2); }
+  .filter.active {
+    background:var(--blue); border-color:var(--blue);
+    box-shadow:0 8px 20px rgba(52,52,232,.35);
+  }
+  .filter .count {
+    display:inline-block; margin-left:6px; opacity:.7; font-family:'DM Mono'; font-size:11px;
+  }
+
+  .cat-header {
+    max-width:1400px; margin: 60px auto 24px;
+    padding: 24px 0 20px;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+  .cat-header:first-of-type { border-top:none; }
+  .cat-header h2 {
+    font-size:32px; font-weight:900; letter-spacing:-.02em;
+    display:flex; align-items:center; gap:16px;
+  }
+  .cat-header .num {
+    font-family:'DM Mono'; font-size:20px; color:var(--blue);
+  }
+  .cat-header p { color:#9394a6; margin-top:6px; font-size:14px; }
+
+  /* ═════ POST ═════ */
+  .posts { max-width:1400px; margin:0 auto; }
+  .post {
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+    border-radius:20px; margin-bottom:32px; padding:32px;
+    display:grid; grid-template-columns: 1fr 1fr; gap:32px; align-items:start;
+  }
+  @media (max-width:900px) { .post { grid-template-columns:1fr; } }
+
+  .post.hidden { display:none; }
+
+  .post-meta {
+    display:flex; align-items:center; gap:12px; margin-bottom:16px;
+  }
+  .post-num {
+    font-family:'DM Mono'; font-weight:700; font-size:22px; color:var(--blue);
+  }
+  .post-title { font-size:18px; font-weight:700; flex:1; line-height:1.2; }
+  .post-topic {
+    display:inline-block; padding:3px 10px; border-radius:999px;
+    background:rgba(52,52,232,.15); color:var(--blue-lt);
+    font-family:'DM Mono'; font-size:10px; letter-spacing:.15em;
+    text-transform:uppercase; font-weight:600;
+  }
+
+  /* ═════ VISUAL — LinkedIn 1:1 ═════ */
+  .visual {
+    aspect-ratio:1/1; background:var(--midnight); border-radius:12px;
+    position:relative; overflow:hidden; color:white;
+    display:flex; flex-direction:column; padding:5%;
+    font-family:'DM Sans';
+  }
+  .visual::before {
+    content:''; position:absolute; pointer-events:none;
+    width:60%; height:60%; border-radius:50%;
+    background:radial-gradient(circle, var(--blue) 0%, rgba(52,52,232,0) 70%);
+    top:-20%; right:-15%; filter:blur(20px);
+  }
+  .visual::after {
+    content:''; position:absolute; pointer-events:none;
+    width:40%; height:40%; border-radius:50%;
+    background:radial-gradient(circle, rgba(107,107,240,.4) 0%, rgba(107,107,240,0) 70%);
+    bottom:-10%; left:-5%; filter:blur(30px);
+  }
+  .visual > * { position:relative; z-index:1; }
+
+  .v-brand {
+    font-family:'DM Sans'; font-weight:900; font-size:1.8vw;
+    letter-spacing:-.02em; display:flex; align-items:center; gap:8px;
+  }
+  .v-brand::after {
+    content:'/'; color:var(--blue); font-weight:900;
+    transform:skewX(-15deg); display:inline-block;
+  }
+  .v-topic {
+    font-family:'DM Mono'; font-size:.85vw; letter-spacing:.2em;
+    color:var(--blue-lt); text-transform:uppercase; font-weight:600;
+    margin-top:2vw;
+  }
+  .v-title {
+    font-weight:900; letter-spacing:-.03em; line-height:1;
+    margin-top:auto; padding-top:2vw;
+    font-size:4.4vw;
+  }
+  .v-title.small { font-size:3.6vw; }
+  .v-title.xs { font-size:3vw; }
+  .v-sub {
+    color:var(--blue-lt); font-size:1.15vw; margin-top:1vw; line-height:1.4;
+  }
+  .v-foot {
+    margin-top:2vw;
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:'DM Mono'; font-size:.7vw; letter-spacing:.2em;
+    color:rgba(255,255,255,.4); text-transform:uppercase;
+  }
+  .v-num {
+    font-family:'DM Mono'; font-weight:700;
+    font-size:15vw; color:rgba(52,52,232,.15);
+    line-height:1; letter-spacing:-.04em;
+    position:absolute; top:25%; right:-3%; z-index:0;
+  }
+  .v-pill {
+    display:inline-flex; padding:.4em 1em; border-radius:999px;
+    background:rgba(255,255,255,.1); backdrop-filter:blur(10px);
+    font-family:'DM Mono'; font-size:.7vw; letter-spacing:.2em; font-weight:600;
+    color:#fff; text-transform:uppercase; align-self:flex-start;
+    margin-bottom:1.5vw;
+  }
+  .v-pill.blue { background:var(--blue); }
+
+  .visual.light { background:var(--silver); color:var(--midnight); }
+  .visual.light::before {
+    background:radial-gradient(circle, rgba(52,52,232,.25) 0%, rgba(52,52,232,0) 70%);
+  }
+  .visual.light::after { display:none; }
+  .visual.light .v-topic { color:var(--blue); }
+  .visual.light .v-sub { color:var(--ash); }
+  .visual.light .v-foot { color:rgba(7,7,13,.3); }
+  .visual.light .v-num { color:rgba(52,52,232,.06); }
+  .visual.light .v-pill { background:var(--midnight); color:#fff; }
+
+  .visual.blue { background:var(--blue); }
+  .visual.blue::before {
+    background:radial-gradient(circle, var(--midnight) 0%, rgba(32,32,55,0) 70%);
+  }
+  .visual.blue::after {
+    background:radial-gradient(circle, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 70%);
+  }
+  .visual.blue .v-topic { color:rgba(255,255,255,.85); }
+  .visual.blue .v-sub { color:rgba(255,255,255,.8); }
+  .visual.blue .v-num { color:rgba(255,255,255,.12); }
+  .visual.blue .v-pill { background:var(--midnight); }
+
+  .v-stat { font-size:14vw; font-weight:900; line-height:.9; letter-spacing:-.04em; color:#fff; margin-top:auto; }
+  .v-stat-label {
+    font-family:'DM Mono'; font-size:1vw; letter-spacing:.2em;
+    color:var(--blue-lt); text-transform:uppercase; margin-top:1vw;
+  }
+
+  .v-list {
+    margin-top:auto; padding-top:2vw;
+    display:flex; flex-direction:column; gap:1.2vw;
+  }
+  .v-list-item {
+    display:flex; gap:1vw; align-items:baseline;
+    font-size:1.6vw; font-weight:600;
+  }
+  .v-list-item .n {
+    font-family:'DM Mono'; color:var(--blue); font-weight:700; font-size:1vw;
+  }
+  .visual.light .v-list-item .n { color:var(--blue); }
+
+  .v-split { margin-top:auto; display:grid; grid-template-columns:1fr 1fr; gap:1vw; }
+  .v-split-col {
+    padding:1.5vw; border-radius:.8vw;
+    background:rgba(255,255,255,.06); backdrop-filter:blur(10px);
+  }
+  .v-split-col.hi { background:var(--blue); }
+  .v-split-col h4 {
+    font-family:'DM Mono'; font-size:.7vw; letter-spacing:.2em;
+    color:var(--blue-lt); text-transform:uppercase; margin-bottom:.8vw;
+  }
+  .v-split-col.hi h4 { color:rgba(255,255,255,.8); }
+  .v-split-col p { font-size:1vw; line-height:1.3; font-weight:500; }
+
+  /* Quote style visual */
+  .v-quote { margin-top:auto; padding-top:2vw; }
+  .v-quote-mark { font-family:'DM Sans'; font-size:6vw; color:var(--blue); font-weight:900; line-height:.5; }
+  .v-quote-text { font-size:2vw; font-weight:600; line-height:1.2; margin-top:1vw; }
+  .v-quote-author { font-family:'DM Mono'; font-size:.85vw; letter-spacing:.2em; color:var(--blue-lt); text-transform:uppercase; margin-top:1.2vw; }
+
+  /* Big-word visual */
+  .v-word {
+    font-family:'DM Sans'; font-size:12vw; font-weight:900; line-height:.9;
+    letter-spacing:-.04em; margin-top:auto;
+    color:#fff;
+  }
+  .v-word .accent { color:var(--blue-lt); }
+
+  /* Avatar hero */
+  .v-avatar-hero {
+    margin-top:auto; display:flex; align-items:center; gap:2vw;
+  }
+  .v-avatar-big {
+    width:8vw; height:8vw; border-radius:1vw;
+    background:var(--blue); display:flex; align-items:center; justify-content:center;
+    font-size:4.5vw; font-weight:900; color:#fff;
+  }
+  .v-avatar-hero h3 { font-size:3vw; font-weight:900; line-height:1; letter-spacing:-.02em; }
+  .v-avatar-hero .role { font-family:'DM Mono'; font-size:.85vw; letter-spacing:.2em; color:var(--blue-lt); margin-top:.8vw; text-transform:uppercase; }
+
+  /* ═════ COPY BOX ═════ */
+  .copy-box { display:flex; flex-direction:column; gap:12px; }
+  .copy-label {
+    font-family:'DM Mono'; font-size:11px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--blue-lt); font-weight:600;
+  }
+  .copy-text {
+    background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.08);
+    border-radius:12px; padding:20px;
+    font-family:'DM Sans'; font-size:14px; line-height:1.6; color:#fff;
+    white-space:pre-wrap; max-height:400px; overflow-y:auto;
+    position:relative;
+  }
+  .copy-btn {
+    position:absolute; top:12px; right:12px;
+    background:var(--blue); color:white; border:none; border-radius:6px;
+    padding:6px 12px; font-family:'DM Sans'; font-size:11px; font-weight:600;
+    cursor:pointer; opacity:.85; transition:opacity .2s;
+  }
+  .copy-btn:hover { opacity:1; }
+  .copy-btn.copied { background:var(--mint); }
+  .hashtags {
+    font-family:'DM Mono'; font-size:12px; color:var(--blue-lt); word-spacing:.5em;
+  }
+  .footer {
+    max-width:1400px; margin:60px auto 20px;
+    text-align:center; color:#6b6d80; font-size:13px;
+    border-top:1px solid rgba(255,255,255,.06); padding-top:30px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="badge">DASOLABS · KIT LINKEDIN 2026</div>
+  <h1>32 posts. 3 catégories.</h1>
+  <p>Ton métier, comment tu pilotes la boîte, ton équipe. Visuels alignés sur la charte. Copies prêtes à publier — clique "Copier".</p>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <button class="filter active" data-cat="all">Tous <span class="count">32</span></button>
+  <button class="filter" data-cat="metier">Notre métier <span class="count">12</span></button>
+  <button class="filter" data-cat="pilotage">On pilote <span class="count">10</span></button>
+  <button class="filter" data-cat="equipe">Nos employés <span class="count">10</span></button>
+</div>
+
+<div class="posts" id="posts">
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CATÉGORIE 1 — NOTRE MÉTIER (BE OT)                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div class="cat-header" data-cat="metier">
+  <h2><span class="num">01</span> Notre métier — BE OT</h2>
+  <p>La donnée industrielle, l'Unified Namespace, les briques techno — nos convictions et notre expertise.</p>
+</div>
+
+<!-- 01 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">01</div><div class="post-title">L'OT en 30 secondes</div><div class="post-topic">Pédagogique</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-num">OT</div>
+      <div class="v-topic">Operational Technology</div>
+      <div class="v-title">La donnée<br/>de l'usine<br/>en temps réel.</div>
+      <div class="v-sub">Capteurs, PLC, SCADA — les briques qui font parler vos machines.</div>
+      <div class="v-foot"><span>01/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">L'OT, c'est quoi au juste ?
+
+Operational Technology. La donnée de votre usine, en temps réel.
+
+→ Les capteurs qui mesurent
+→ Les PLC qui pilotent
+→ Les SCADA qui supervisent
+→ Les alarmes qui préviennent
+
+Sans OT fiable, pas de digitalisation possible. On voit encore trop d'entreprises attaquer le "big data" ou l'IA avant même d'avoir sécurisé leur base : la donnée terrain.
+
+Chez Dasolabs, on commence toujours par là. Fiabilité, standardisation, cadence. Le reste vient après.
+
+Vous en êtes où sur votre socle OT ?
+
+#OT #Industrie40 #Automation #Dasolabs</div>
+      <button class="copy-btn">Copier</button>
+    <div class="hashtags">#OT #Industrie40 #Automation</div>
+  </div>
+</div>
+
+<!-- 02 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">02</div><div class="post-title">L'UNS, le pont OT↔IT</div><div class="post-topic">Éducatif</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Unified Namespace</div>
+      <div class="v-title">Une seule<br/>source de vérité<br/><span style="color:var(--blue);">pour votre usine.</span></div>
+      <div class="v-sub">L'UNS unifie vos données OT et les rend consommables par n'importe quelle app IT.</div>
+      <div class="v-foot"><span>02/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">L'UNS (Unified Namespace) expliqué en 30 secondes 👇
+
+Le problème : votre MES parle à votre ERP, qui parle à Power BI, qui doit taper dans le SCADA... 20 intégrations point-à-point, 20 façons de se planter.
+
+La solution : une seule source de vérité. Toutes vos données OT publiées dans un espace unifié. Tout le monde s'abonne au même flux :
+
+→ Fini les intégrations spaghetti
+→ Nouveau système ? Il s'abonne, il consomme
+→ Changement de SCADA ? Le reste continue de tourner
+→ Cloud, MES, IA : tous alimentés par la même vérité
+
+Les technos qui font ça bien aujourd'hui : HighByte, HiveMQ, Sparkplug B.
+
+Le vrai enjeu 2026, ce n'est plus "avoir de la donnée". C'est "arrêter de la dupliquer partout".
+
+#UNS #UnifiedNamespace #Industrie40 #HighByte</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#UNS #UnifiedNamespace #HighByte #HiveMQ</div>
+  </div>
+</div>
+
+<!-- 03 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">03</div><div class="post-title">3 signes que votre archi est cassée</div><div class="post-topic">Hook Problème</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Industrial Data</div>
+      <div class="v-title" style="font-size:3.8vw;">3 signes<br/>que votre archi<br/><span style="color:var(--blue-lt);">doit évoluer.</span></div>
+      <div class="v-list">
+        <div class="v-list-item"><span class="n">01</span><span>Le même chiffre change selon l'outil.</span></div>
+        <div class="v-list-item"><span class="n">02</span><span>Ajouter une source = un projet.</span></div>
+        <div class="v-list-item"><span class="n">03</span><span>Personne ne sait "d'où ça vient".</span></div>
+      </div>
+      <div class="v-foot"><span>03/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">3 signes que votre architecture data industrielle est en fin de vie 🔴
+
+1️⃣ Le même chiffre change selon l'outil
+Production totale du mois : 12 470 pièces dans le MES, 12 512 dans Power BI, 12 380 dans le rapport ERP. Personne ne sait qui a raison. Vous avez perdu la confiance dans votre propre donnée.
+
+2️⃣ Ajouter une nouvelle source = un projet
+Chaque intégration prend 3 mois. Chaque nouveau tableau, 6 semaines. Le point-à-point vous coûte plus en maintenance qu'il ne rapporte en insight.
+
+3️⃣ Personne ne sait "d'où ça vient"
+Impossible de tracer un KPI qui dérive. Impossible d'auditer en pharma sans y passer 3 semaines.
+
+Ces 3 symptômes ont un point commun : l'absence d'Unified Namespace.
+
+On accompagne des industriels sur cette bascule. Curieux ?
+
+#IndustrialData #UNS #DigitalTransformation</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#IndustrialData #UNS #DigitalTransformation</div>
+  </div>
+</div>
+
+<!-- 04 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">04</div><div class="post-title">OT + UNS + IT — le bon découpage</div><div class="post-topic">Positionnement</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Notre métier</div>
+      <div class="v-title" style="font-size:4vw;">OT.<br/>UNS.<br/>IT ← partenaires.</div>
+      <div class="v-split">
+        <div class="v-split-col hi"><h4>Ce qu'on fait</h4><p>PLC · SCADA · UNS · Reporting</p></div>
+        <div class="v-split-col"><h4>Ce qu'on délègue</h4><p>Élec · Infra IT · Chantier</p></div>
+      </div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>04/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">On nous demande souvent : "vous êtes intégrateurs ?"
+
+Non. On est bureau d'études OT.
+
+La différence est importante 👇
+
+→ On CONÇOIT votre architecture (PLC, SCADA, UNS, reporting)
+→ On PILOTE votre projet
+→ On GARANTIT le livrable
+
+Ce qu'on ne fait pas nous-mêmes :
+❌ Le tirage électrique et le câblage (nos partenaires le font)
+❌ L'infra IT (Azure, réseau bureau) (nos partenaires)
+❌ Le chantier lourd (nos partenaires)
+
+Pourquoi ce découpage ? Parce que faire semblant de tout couvrir, c'est la meilleure façon de mal faire ce dont on est vraiment expert.
+
+Notre valeur : la data OT et son passage vers l'IT via UNS.
+
+Vous cherchez un bureau d'études OT sans agenda commercial caché ? On en discute.
+
+#BureauEtudes #OT #UNS</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#BureauEtudes #OT #UNS #Industrie40</div>
+  </div>
+</div>
+
+<!-- 05 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">05</div><div class="post-title">80 % des projets IIoT stagnent</div><div class="post-topic">Data Story</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-pill blue" style="margin-top:2vw;">L'ANGLE MORT</div>
+      <div class="v-stat">80<span style="color:var(--blue-lt);">%</span></div>
+      <div class="v-stat-label">des projets IIoT ne dépassent jamais le POC.</div>
+      <div class="v-foot"><span>05/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">80 % des projets IIoT ne dépassent jamais le stade du POC. 🚨
+
+Ce n'est pas notre chiffre. McKinsey, Gartner, BCG le disent année après année.
+
+Pourquoi tant d'échecs ? On voit quatre causes chez nos clients :
+
+1. On démarre par la techno plutôt que par un cas d'usage à ROI clair
+2. On oublie que la donnée OT doit être propre AVANT tout projet analytique
+3. On confie l'archi à des consultants IT qui ne parlent pas "usine"
+4. On veut aller trop vite : POC en 3 mois, scale-up jamais planifié
+
+La bonne approche ?
+✅ Un cas d'usage concret, chiffré, validé par les ops
+✅ Un socle UNS bien construit
+✅ Une équipe qui comprend OT ET IT
+✅ Une roadmap réaliste : POC → pilote → scale
+
+Chez Dasolabs, on refuse les POC sans plan de scale. On préfère commencer petit, réussir, et vraiment faire croître.
+
+#IIoT #Industrie40</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#IIoT #Industrie40 #DigitalTransformation</div>
+  </div>
+</div>
+
+<!-- 06 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">06</div><div class="post-title">3 pièges de la digitalisation</div><div class="post-topic">Éducatif</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Digitalisation</div>
+      <div class="v-title" style="font-size:3.6vw;">3 pièges<br/>quand on digitalise<br/><span style="color:var(--blue);">son usine.</span></div>
+      <div class="v-list">
+        <div class="v-list-item" style="color:var(--midnight);"><span class="n">A</span><span>Cloud avant OT stable.</span></div>
+        <div class="v-list-item" style="color:var(--midnight);"><span class="n">B</span><span>Big Data sans use case.</span></div>
+        <div class="v-list-item" style="color:var(--midnight);"><span class="n">C</span><span>IT sans OT à la table.</span></div>
+      </div>
+      <div class="v-foot"><span>06/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Digitaliser une usine — 3 pièges qu'on voit revenir tous les mois 🚧
+
+🅰️ Aller au cloud avant d'avoir stabilisé l'OT
+Vous poussez toute votre donnée vers Azure. Génial. Sauf qu'en amont, votre acquisition PLC est instable, vos tags SCADA changent tous les 6 mois. Vous investissez dans un tableau de bord alimenté par du sable mouvant.
+
+🅱️ Big Data / IA sans use case chiffré
+"On va faire du prédictif." Sur quoi ? Pour quoi faire ? Quelle valeur business ? Un modèle qui prédit une panne 4h à l'avance quand la maintenance corrective se fait en 30 minutes, ça ne sert à personne. Le use case DOIT être business.
+
+🅲️ Projet IT sans l'OT autour de la table
+Les DSI qui pilotent seuls finissent invariablement par sous-estimer la complexité du terrain. Les automaticiens ne pensent pas assez à la scalabilité. La bonne équipe = les deux, sur le même projet, dès le kickoff.
+
+L'UNS est le pont technique entre les deux mondes.
+
+#DigitalTransformation #Industrie40</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#DigitalTransformation #OT #IT</div>
+  </div>
+</div>
+
+<!-- 07 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">07</div><div class="post-title">Validation CSV — 3 erreurs pharma</div><div class="post-topic">Expertise</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">GxP / GAMP 5</div>
+      <div class="v-title" style="font-size:3.8vw;">La validation<br/>CSV en pharma,<br/><span style="color:var(--blue-lt);">on connaît.</span></div>
+      <div class="v-sub">GAMP 5, 21 CFR Part 11, ALCOA+ — projets réels chez des majors.</div>
+      <div class="v-foot"><span>07/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Vous validez un système informatisé en pharma ?
+
+3 erreurs qu'on voit toutes les semaines chez nos clients GxP 👇
+
+🔴 URS trop vagues, non testables
+"Le système doit être ergonomique." OK. Mais comment on teste ça ? Un URS non-testable, c'est une validation qui glisse. Rédigez avec un critère mesurable ou ça vous coûtera 3 mois de retard.
+
+🔴 Data Integrity négligée sur les workflows Excel
+On sécurise le SCADA, le MES, l'ELN — et à côté, les techniciens saisissent des résultats critiques dans un Excel partagé sans audit trail. ALCOA+ ne pardonne pas.
+
+🔴 Change control abandonné après le go-live
+Un an après, 40 modifs sans traçabilité. Techniquement, votre système n'est plus le même que celui validé — et donc plus validé.
+
+La bonne validation CSV, ce n'est pas un dossier IQ/OQ/PQ posé. C'est un processus vivant.
+
+Vous avez un audit qui approche ?
+
+#Pharma #GAMP5 #CSV #DataIntegrity</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Pharma #GAMP5 #CSV #DataIntegrity</div>
+  </div>
+</div>
+
+<!-- 08 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">08</div><div class="post-title">15 ans d'OT — 3 leçons</div><div class="post-topic">Storytelling</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-pill">RETOUR D'EXPÉRIENCE</div>
+      <div class="v-title" style="color:#fff; font-size:3.8vw;">Ce que 15 ans<br/>en OT nous<br/>ont appris.</div>
+      <div class="v-sub" style="color:rgba(255,255,255,.85);">3 leçons qu'aucun cours de fac ne vous donne.</div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>08/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">15 ans à faire de l'OT industriel. 3 leçons qu'aucun cours de fac ne vous donne 👇
+
+🎓 LEÇON 1 — La belle archi ne survit pas au terrain
+Vous dessinez un beau schéma UNS. Vous arrivez sur site : le PLC n'a plus la place pour 2 tags, le réseau n'est pas segmenté, l'automaticien du client refuse qu'on touche à son projet TIA. La bonne archi, c'est celle qui accepte le compromis intelligent.
+
+🎓 LEÇON 2 — La donnée fiable coûte plus que la donnée belle
+Un dashboard Grafana joli, tout le monde peut en faire un. Une chaîne acquisition → historisation → contextualisation qui tient 5 ans sans dériver, c'est ça le vrai boulot. Et personne ne le voit — jusqu'au jour où ça casse.
+
+🎓 LEÇON 3 — Le vrai savoir-faire, c'est de savoir dire non
+Non, on ne fera pas ce cas d'usage sans avoir stabilisé la data source. Non, on ne poussera pas au cloud avant d'avoir sécurisé le réseau OT. Dire oui à tout, c'est mal faire le boulot.
+
+Vous cherchez un partenaire OT qui pense ainsi ?
+
+#OT #Industrie40 #Consulting</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#OT #Industrie40 #Consulting</div>
+  </div>
+</div>
+
+<!-- 09 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">09</div><div class="post-title">MQTT vs OPC UA — le match</div><div class="post-topic">Techno</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Protocoles industriels</div>
+      <div class="v-title" style="font-size:4vw;">MQTT<br/><span style="color:var(--blue);">vs</span><br/>OPC UA.</div>
+      <div class="v-sub">Pas un match. Deux couches différentes.</div>
+      <div class="v-foot"><span>09/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">"On doit passer au MQTT ou rester sur OPC UA ?"
+
+On nous pose la question chaque semaine.
+
+La bonne réponse : ce n'est PAS un match. Les deux ne jouent pas dans la même catégorie.
+
+📡 OPC UA
+→ Modèle d'information riche, orienté objet
+→ Idéal pour découvrir et interroger : "quels sont les capteurs disponibles sur ce PLC ?"
+→ Communication client-serveur classique
+→ Bon pour le periph OT vers le MES
+
+📨 MQTT (avec Sparkplug B)
+→ Publish/subscribe, découplé
+→ Idéal pour DIFFUSER de la donnée à N abonnés
+→ Léger, ultra-scalable
+→ Bon pour la couche UNS entre OT et IT/cloud
+
+La vraie archi moderne : OPC UA en profondeur PLC + MQTT/Sparkplug pour l'UNS.
+
+Choisir entre les deux, c'est comme choisir entre un tournevis et un marteau. Ça dépend de ce qu'on visse.
+
+#OPCUA #MQTT #SparkplugB #UNS</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#OPCUA #MQTT #SparkplugB #Industrie40</div>
+  </div>
+</div>
+
+<!-- 10 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">10</div><div class="post-title">Sparkplug B — le standard 2026</div><div class="post-topic">Techno</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-num">SPB</div>
+      <div class="v-topic">Sparkplug B</div>
+      <div class="v-title" style="font-size:3.8vw;">Le standard<br/>que tout le monde<br/><span style="color:var(--blue-lt);">va adopter.</span></div>
+      <div class="v-sub">MQTT + typage + state management = le vrai UNS.</div>
+      <div class="v-foot"><span>10/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Sparkplug B, c'est LE truc à connaître en 2026.
+
+Le MQTT vanilla, c'est bien : léger, pub/sub, scalable. Mais comment tu sais que la donnée que tu reçois est fraîche ? Qu'un client est encore vivant ? Que le format ne change pas d'un jour à l'autre ?
+
+Réponse : tu ne sais pas. Sauf si tu utilises Sparkplug B.
+
+Sparkplug B, c'est MQTT augmenté :
+✅ Typage des tags (INT, FLOAT, STRING, BOOLEAN...)
+✅ State management (Death certificate = client déconnecté)
+✅ Historique de séquence (rejeu automatique)
+✅ Encoding binaire optimisé
+✅ Compat total avec HiveMQ, HighByte, Cirrus Link…
+
+Résultat : une couche UNS industrielle qui tient la route en production.
+
+Les entreprises pionnières (Cirrus Link, Chevron, Toyota) l'utilisent déjà. Les autres suivront en 2026-2027.
+
+Chez Dasolabs, on l'implémente sur nos projets UNS depuis 2024. Vous voulez voir ce que ça donne concrètement ?
+
+#SparkplugB #MQTT #UNS #HiveMQ</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#SparkplugB #MQTT #UNS #HiveMQ</div>
+  </div>
+</div>
+
+<!-- 11 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">11</div><div class="post-title">Migration SCADA — 3 pièges</div><div class="post-topic">Éducatif</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">SCADA Migration</div>
+      <div class="v-title" style="color:#fff; font-size:3.8vw;">3 pièges<br/>qui plombent<br/>une migration SCADA.</div>
+      <div class="v-sub" style="color:rgba(255,255,255,.85);">On les évite en démarrant par un audit vraiment honnête.</div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>11/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Vous envisagez une migration SCADA (WinCC → AVEVA, Wonderware → Ignition, etc.) ? 🔄
+
+3 pièges qu'on voit à chaque projet 👇
+
+🅰️ Sous-estimer la dette technique du legacy
+"On va tout migrer en 6 mois." Faux. Les synoptiques ont 15 ans, personne ne sait pourquoi ce tag existe encore, la doc n'a pas été mise à jour depuis 2018. Comptez 30 à 50 % de temps rien que pour l'audit.
+
+🅱️ Vouloir un iso-fonctionnel
+"On refera pareil, en mieux." Non. C'est l'occasion de RATIONALISER : virer les alarmes redondantes (ISA-18.2), simplifier les faceplates, unifier les nomenclatures. Une migration iso, c'est une occasion ratée.
+
+🅲️ Oublier les opérateurs
+Vous migrez leur outil de travail quotidien. S'ils ne sont pas embarqués dans la conception → adoption zéro, retour en arrière garanti dans les 6 mois.
+
+Notre méthode : audit terrain (2 semaines) → conception avec les ops → migration par ligne, pas par étage → formation avant bascule.
+
+Migration SCADA en vue ? On peut vous accompagner.
+
+#SCADA #Migration #AVEVA #Ignition</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#SCADA #Migration #Industrie40</div>
+  </div>
+</div>
+
+<!-- 12 -->
+<div class="post" data-cat="metier">
+  <div>
+    <div class="post-meta"><div class="post-num">12</div><div class="post-title">FAT / SAT — le cycle qui rassure</div><div class="post-topic">Méthode</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Validation projet</div>
+      <div class="v-title" style="font-size:4vw;">FAT.<br/>SAT.<br/><span style="color:var(--blue);">Commissioning.</span></div>
+      <div class="v-sub">Trois étapes non-négociables sur un projet OT sérieux.</div>
+      <div class="v-foot"><span>12/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">FAT, SAT, Commissioning. On abrège tout ça un peu vite.
+
+Petit rappel pour les non-initiés — parce que ces trois étapes sont NON-NÉGOCIABLES sur un projet OT sérieux.
+
+🏭 FAT — Factory Acceptance Test
+On teste chez le fournisseur, avant livraison. Objectif : valider que la solution fait bien ce qui a été commandé. Bugs bloquants ? Ils sont corrigés avant que ça arrive sur votre site.
+
+🚛 SAT — Site Acceptance Test
+Une fois installé chez vous, on refait la même campagne — mais avec vos VRAIS process, vos vraies contraintes, vos vrais opérateurs. Ce qui marchait en atelier peut ne pas marcher en usine.
+
+⚙️ Commissioning
+Mise en route progressive : équipement par équipement, ligne par ligne, run par run. Objectif : détecter les problèmes AVANT la production sérielle.
+
+Sauter une étape ? Vous découvrez le bug en production, à 3h du matin, sous alerte SLA client. Non merci.
+
+Chez Dasolabs, on refuse les projets où le client veut zapper une des trois. Pas par rigidité — par expérience.
+
+#Commissioning #FAT #SAT #Industrie40</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Commissioning #FAT #SAT #Validation</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CATÉGORIE 2 — COMMENT ON PILOTE LA BOÎTE               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div class="cat-header" data-cat="pilotage">
+  <h2><span class="num">02</span> Comment on pilote la boîte</h2>
+  <p>DasoHub, transparence, méthode, partenaires. Ce qu'on a construit pour tenir une ESN saine.</p>
+</div>
+
+<!-- 13 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">13</div><div class="post-title">On a codé notre propre ERP</div><div class="post-topic">Backstage</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-num">HUB</div>
+      <div class="v-topic">DasoHub</div>
+      <div class="v-title" style="font-size:3.8vw;">On a codé<br/>notre propre<br/><span style="color:var(--blue-lt);">ERP.</span></div>
+      <div class="v-sub">6 mois de dev interne. Zéro SaaS générique. Un outil taillé pour nous.</div>
+      <div class="v-foot"><span>13/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">On avait 8 outils différents. On a codé le nôtre. 🛠️
+
+Excel pour les congés. Trello pour les projets. Mail pour les notes de frais. Dossier partagé pour les contrats. Ça marchait à 3. Ça craquait à 8. C'était mort à 15.
+
+On a regardé les ERP du marché. Trop chers, trop génériques, ou conçus pour des ESN de 200 personnes. Rien pour nous.
+
+Alors on l'a codé. DasoHub. 6 mois de dev interne, en parallèle des missions client.
+
+Ce qu'on y gère aujourd'hui :
+→ Missions & projets avec taux, planning, contact client
+→ Timesheets validés en 30 secondes
+→ Notes de frais scannées depuis le mobile
+→ Congés + arrêts maladie
+→ Purchase orders avec PDF et envoi mail direct
+→ Facturation client auto depuis les jours prestés
+→ Formations techniques : 15 cours + quiz + progression
+→ Chartes & politiques avec signature électronique
+→ Fleet auto : voitures, contrats, entretien
+
+C'est notre outil interne. On l'améliore chaque semaine. Et un jour, peut-être, on le vendra à d'autres petites ESN.
+
+#DevInterne #NoCode #ESN #Bootstrap</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#DevInterne #ESN #Bootstrap</div>
+  </div>
+</div>
+
+<!-- 14 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">14</div><div class="post-title">On partage nos chiffres</div><div class="post-topic">Transparence</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Transparence radicale</div>
+      <div class="v-title" style="font-size:3.8vw;">Chaque mois,<br/>on montre<br/><span style="color:var(--blue);">nos chiffres.</span></div>
+      <div class="v-sub">CA, marge, trésorerie, taux d'occupation. À toute l'équipe.</div>
+      <div class="v-foot"><span>14/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Chaque mois, on montre les chiffres de la boîte à toute l'équipe. Sans exception. 📊
+
+Notre réunion mensuelle intègre :
+→ CA du mois écoulé, cumul YTD
+→ Marge, taux d'occupation
+→ Trésorerie disponible
+→ Pipeline commercial
+→ Ce qu'on a investi (formations, outils, dev)
+
+Pourquoi cette transparence radicale ?
+
+1️⃣ Parce que sans info, personne ne peut décider intelligemment
+Un consultant qui sait que le taux d'occupation dérive, il propose des idées. Un consultant qui ne sait rien, il fait ses heures.
+
+2️⃣ Parce que la confiance se construit par la preuve
+Dire "la boîte va bien" sans jamais montrer les chiffres, ça sonne creux. Le montrer, c'est prouver.
+
+3️⃣ Parce que les bonnes décisions doivent être collectives
+Quand vient le moment de recruter, investir, refuser une mission — chacun peut peser avec les mêmes données.
+
+C'est chiant à préparer 1 fois par mois. Ça vaut mille fois le prix.
+
+#Transparence #Management #ESN</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Transparence #Management #ESN</div>
+  </div>
+</div>
+
+<!-- 15 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">15</div><div class="post-title">Note de frais en 30 secondes</div><div class="post-topic">Product story</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">DasoHub / NDF</div>
+      <div class="v-stat" style="color:#fff;">30<span style="color:rgba(255,255,255,.7);">"</span></div>
+      <div class="v-stat-label" style="color:rgba(255,255,255,.8);">Le temps qu'un consultant met pour saisir une note de frais.</div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>15/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">30 secondes pour saisir une note de frais. C'est le vrai KPI qu'on suit. ⏱️
+
+Pourquoi ce chiffre ?
+
+Parce qu'une NDF qui prend 10 minutes à saisir, c'est une NDF qui s'accumule dans un tiroir. Puis qui se perd. Puis qui n'est jamais soumise. Puis qui coûte au consultant en frustration et à la boîte en manque de traçabilité.
+
+Notre process dans DasoHub :
+1. Ouvrir l'app sur mobile (2s)
+2. Prendre le reçu en photo (5s)
+3. Choisir catégorie + projet imputé (10s)
+4. Montant + soumettre (10s)
+= 30 secondes.
+
+Louise reçoit la notif. Un clic pour valider. Virement le 5 du mois suivant.
+
+Résultat : 100 % des notes de frais sont soumises dans les 48h. Zéro perte. Compta impeccable.
+
+Ce n'est pas la techno qui compte. C'est de virer les frictions bêtes qui pourrissent la vie de l'équipe.
+
+#Ops #ESN #ProductThinking</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Ops #ProductThinking</div>
+  </div>
+</div>
+
+<!-- 16 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">16</div><div class="post-title">Louise = first line</div><div class="post-topic">Org</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">L'organisation</div>
+      <div class="v-title" style="font-size:3.6vw;">Louise :<br/>first line<br/><span style="color:var(--blue-lt);">pour tout.</span></div>
+      <div class="v-sub">Sans exception. Congé, voiture, mission, RH, admin.</div>
+      <div class="v-foot"><span>16/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Un poste RH qui change tout : Louise, direction opérations, "first line pour tout". 🙋‍♀️
+
+Le problème qu'on avait : moi (Gérald), fondateur, je faisais tout. RH, admin, congés, notes de frais, achats, matériel, coordination missions. En parallèle de mes missions client à temps plein.
+
+Résultat : les demandes de l'équipe traînaient. Certaines étaient oubliées. Ça retombait sur les consultants.
+
+La bascule : embaucher Louise en direction opérations. Avec un mandat clair.
+
+À partir de son arrivée :
+→ Congés, contrat, paie : Louise
+→ Voitures, matos, licences : Louise
+→ Difficulté sur mission : Louise (elle escalade à Gérald si stratégique)
+→ Formation, montée en compétence : Louise
+→ Opportunité commerciale : Louise (elle me la fait remonter)
+
+Résultat après 3 mois :
+✅ Délai de traitement d'une demande RH : divisé par 5
+✅ Notes de frais réglées ponctuellement chaque mois
+✅ Consultants qui se sentent VRAIMENT entendus
+
+Louise n'est pas mon assistante. Elle a un mandat. Elle décide. Et c'est ça qui change tout.
+
+#RH #Management #ESN</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#RH #Management #ESN</div>
+  </div>
+</div>
+
+<!-- 17 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">17</div><div class="post-title">On refuse des missions</div><div class="post-topic">Positionnement</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Nos critères</div>
+      <div class="v-title" style="font-size:3.8vw;">On refuse<br/>des missions.<br/><span style="color:var(--blue);">Régulièrement.</span></div>
+      <div class="v-sub">Parce que dire oui à tout, c'est mal faire.</div>
+      <div class="v-foot"><span>17/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">On refuse des missions. Régulièrement. 🚫
+
+Ce mois-ci, on a dit non à 3 clients potentiels. Pas parce qu'on est snobs. Parce que ce qu'ils nous demandaient ne collait pas.
+
+Nos critères de refus :
+
+❌ Périmètre hors de notre expertise
+On est bureau d'études OT. Si on nous demande du dev applicatif pur ou de l'infra cloud, on refuse ou on redirige vers un partenaire.
+
+❌ Client qui veut un développeur, pas un partenaire
+"Vous exécutez, vous ne réfléchissez pas." Merci, non merci. On apporte du conseil et de la conception, ou on n'y va pas.
+
+❌ Deadline irréaliste
+"On veut une archi UNS en 2 mois pour toute l'usine." Faire semblant que c'est faisable, ce serait mentir. On préfère perdre le contrat que livrer un truc bancal.
+
+❌ Prix cassé
+Notre expertise a une valeur. On négocie, on ajuste — mais on ne se brade pas. Un client qui compare au moins-disant n'est pas notre client.
+
+Résultat : notre carnet de commandes est plus petit qu'il pourrait l'être. Mais on livre bien, tous nos clients reviennent, et on dort bien la nuit.
+
+#ESN #Consulting #ValueSelling</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#ESN #Consulting</div>
+  </div>
+</div>
+
+<!-- 18 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">18</div><div class="post-title">Nos partenaires — un vrai réseau</div><div class="post-topic">Écosystème</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Écosystème</div>
+      <div class="v-title" style="color:#fff; font-size:3.6vw;">Nos partenaires<br/>font ce qu'on<br/><span style="color:var(--midnight);">ne fait pas.</span></div>
+      <div class="v-sub" style="color:rgba(255,255,255,.85);">Chacun son métier. On assume.</div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>18/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Notre force cachée ? Nos partenaires. 🤝
+
+On est bureau d'études OT. Mais un projet industriel touche à plein d'autres métiers qu'on ne prétend pas maîtriser.
+
+D'où notre écosystème de partenaires activés au cas par cas :
+
+🔌 Élec / armoires / chantier
+Nos partenaires électriciens interviennent quand le projet nécessite du tirage, du câblage, du montage d'armoire. On cadre le besoin, ils exécutent.
+
+💻 Pure IT / infra / cloud
+Réseau bureau, Azure, applicatifs corporate — pas notre métier. On travaille avec des partenaires IT qui savent le faire.
+
+🧪 Data science / IA avancée
+Les cas d'usage IA industrielle poussés (vision par ordinateur, modèles prédictifs complexes) — on a des partenaires spécialistes.
+
+📊 MES pour très gros sites
+Sur les mega-projets MES, on s'associe à des intégrateurs référencés.
+
+Pourquoi ce modèle ?
+
+Parce que le client a UN interlocuteur (nous), UN devis clair, et derrière on active les bons profils au bon moment. Sans se marcher sur les pieds. Sans conflit d'intérêt.
+
+C'est plus lent à construire qu'une SS2I qui prétend tout couvrir. Mais c'est infiniment plus solide.
+
+#Partenaires #Écosystème #BureauEtudes</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Partenaires #Écosystème</div>
+  </div>
+</div>
+
+<!-- 19 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">19</div><div class="post-title">15 formations internes</div><div class="post-topic">Formation</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Formation continue</div>
+      <div class="v-stat">15</div>
+      <div class="v-stat-label">Cours techniques self-service dispo dans le Hub.</div>
+      <div class="v-foot"><span>19/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">15 formations techniques accessibles à tout moment à tous nos consultants. Sur intercontrat, en soirée, entre 2 réunions. 🎓
+
+Les 15 cours qu'on a produits en interne :
+
+▸ Programmation PLC générique
+▸ TIA Portal
+▸ WinCC SCADA
+▸ Matériel Siemens
+▸ Protocoles industriels (OPC UA, MQTT, Modbus, BACnet)
+▸ Réseau OSI/TCP
+▸ HiveMQ & MQTT broker
+▸ HighByte Intelligence Hub
+▸ OpenShift & conteneurs
+▸ SQL Server (appli + query)
+▸ SSRS reporting
+▸ AVEVA Report
+▸ ISA-88 / ISA-95
+▸ GAMP 5
+▸ Validation systèmes informatisés (CSV)
+
+Chaque cours : 30-70 slides, quiz interactifs, TPs concrets, progression sauvegardée.
+
+Objectif : au moins 2 formations par consultant par an. Budget-heures dédié.
+
+Pourquoi ce format ?
+1. Un consultant qui grimpe en compétence = un consultant qui reste
+2. Un consultant qui grimpe en compétence = une boîte qui monte en gamme
+3. Et c'est notre marque : experts, pas simples exécutants
+
+L'expertise, ça se cultive. Pas ça se recrute.
+
+#Formation #Consulting #Culture</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Formation #Consulting #ExpertiseCulture</div>
+  </div>
+</div>
+
+<!-- 20 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">20</div><div class="post-title">Ni startup nail-biter, ni géant lent</div><div class="post-topic">Positionnement</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Notre rythme</div>
+      <div class="v-title" style="font-size:3.6vw;">Notre rythme.<br/><span style="color:var(--blue);">Ni startup,<br/>ni géant.</span></div>
+      <div class="v-sub">On construit dans la durée. Pas d'hyper-croissance forcée.</div>
+      <div class="v-foot"><span>20/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">On ne veut PAS devenir une grosse ESN. Assumé. 🏔️
+
+Le modèle qu'on refuse : lever, brûler, embaucher à outrance, se surendetter, exiger de la croissance à 40% par an, puis vendre à un fond.
+
+Notre modèle : sain, mesuré, durable.
+
+Nos règles :
+→ On grandit quand un besoin client réel le justifie, pas parce qu'un plan Excel dit qu'il faut.
+→ On refuse de bosser à perte pour "prendre des parts de marché".
+→ On investit sur les formations, l'outillage, la qualité — pas sur des budgets marketing démesurés.
+→ On sait où on veut être dans 5 ans : équipe de 10-12 personnes, référence OT/UNS en Belgique, marge saine.
+
+Pourquoi ce choix ?
+
+Parce qu'on a vu de nombreuses boîtes ex-copines s'effondrer après avoir été rachetées. Parce que la course à la croissance tue la qualité de service. Parce que 15 personnes qui travaillent bien valent 100 qui font semblant.
+
+On n'aura pas la couverture presse d'une hyper-croissance. On sera là dans 15 ans, à faire du bon boulot.
+
+C'est un choix. On l'assume.
+
+#Bootstrap #ESN #Sustainability</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Bootstrap #ESN #Sustainability</div>
+  </div>
+</div>
+
+<!-- 21 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">21</div><div class="post-title">Historique paiements = auditable</div><div class="post-topic">Backstage</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">DasoHub / Finance</div>
+      <div class="v-title" style="font-size:3.6vw;">Chaque paiement<br/>chez nous<br/><span style="color:var(--blue-lt);">est traçable.</span></div>
+      <div class="v-sub">La rigueur qu'on impose à nos clients, on se l'applique aussi.</div>
+      <div class="v-foot"><span>21/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Un ERP interne bien pensé, ça se voit sur des petits détails. Exemple : notre page "Historique paiements".
+
+Le problème : dans notre cashflow, dès qu'une ligne n'a plus de paiement futur, elle disparaît de la vue courante. C'est propre visuellement. Mais un jour, tu cherches "où est passé ce paiement de 8 400€ reçu en février ?" et... tu ne sais plus. Il n'est plus dans le cashflow.
+
+Notre solution dans DasoHub : une page dédiée qui liste TOUS les paiements passés — revenus clients + charges — même ceux dont la ligne source est masquée aujourd'hui. Avec filtres client, date, type. Total encaissé / payé / net.
+
+Résultat : traçabilité comptable et opérationnelle intégrale. Aucun mouvement ne se perd.
+
+Pourquoi je vous raconte ça ? Parce que c'est le genre de détail qui montre qu'un outil est pensé pour tenir dans le temps. Pas juste "démo qui claque".
+
+Chez Dasolabs, on impose aux systèmes de nos clients la même rigueur : rien ne disparaît sans trace. On se l'applique en interne.
+
+#ERP #Cashflow #Traçabilité</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#ERP #Cashflow #ProductThinking</div>
+  </div>
+</div>
+
+<!-- 22 -->
+<div class="post" data-cat="pilotage">
+  <div>
+    <div class="post-meta"><div class="post-num">22</div><div class="post-title">Les 4 KPI qu'on suit</div><div class="post-topic">Méthode</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Nos KPI</div>
+      <div class="v-title" style="color:#fff; font-size:3.8vw;">4 chiffres.<br/><span style="color:var(--midnight);">Chaque mois.<br/>Point.</span></div>
+      <div class="v-sub" style="color:rgba(255,255,255,.85);">Marge, occupation, trésorerie, satisfaction client.</div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>22/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">On suit 4 KPI. Un point c'est tout. 📊
+
+Beaucoup de dirigeants se noient dans les dashboards. 50 métriques, 20 courbes, 15 alertes. Impossible d'agir.
+
+Chez nous, chaque fin de mois : 4 chiffres.
+
+1️⃣ MARGE NETTE
+Pas le CA. La marge. Après tout — salaires, charges, invests, matos, formations. Si elle dérive, on comprend pourquoi avant qu'elle plonge.
+
+2️⃣ TAUX D'OCCUPATION
+Combien de jours facturables sur combien de jours dispo. C'est le pouls opérationnel : sous 75 %, on repense la stratégie commerciale. Au-dessus de 90 %, on prépare un recrutement.
+
+3️⃣ TRÉSORERIE DE SÉCURITÉ
+Combien de mois on peut vivre sans revenu. On maintient à 6 mois minimum. C'est notre coussin qui nous permet de refuser des missions merdiques sans stress.
+
+4️⃣ SATISFACTION CLIENT
+Note qualitative à chaque fin de mission. Pas un NPS générique — un debrief franc. Si c'est en dessous de 8/10, on ouvre le sujet en réunion.
+
+Ces 4 chiffres, tout le monde les voit. Ça suffit à piloter une boîte de notre taille.
+
+Le reste, c'est du bruit.
+
+#Management #KPI #ESN</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Management #KPI #ESN</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CATÉGORIE 3 — NOS EMPLOYÉS                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<div class="cat-header" data-cat="equipe">
+  <h2><span class="num">03</span> Nos employés</h2>
+  <p>L'équipe, les nouveaux, la culture, l'ambiance. Ce qui rend le boulot chez Dasolabs particulier.</p>
+</div>
+
+<!-- 23 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">23</div><div class="post-title">Deux frères, une boîte</div><div class="post-topic">Fondateurs</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Les fondateurs</div>
+      <div class="v-title" style="font-size:3.8vw;">Deux frères.<br/>Deux mondes.<br/><span style="color:var(--blue-lt);">Une même boîte.</span></div>
+      <div class="v-sub">Yoann → technique / Gérald → management. Complémentaires par nature.</div>
+      <div class="v-foot"><span>23/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">On a monté Dasolabs à deux. Deux frères. C'est notre force. 👨‍👨‍👦
+
+Yoann. 15 ans en donnée industrielle. SCADA AVEVA, développement d'applications, reporting, BDD. Il connaît les tags historian dans le détail. Il parle aux automaticiens dans leur langue.
+
+Moi (Gérald). 12 ans en gestion de projet, conseil, commercial. Je gère les relations client, la stratégie, la structure. Je fais tenir la boîte.
+
+On est différents. Complètement. Yoann préfère un mardi soir dans son labo à coder qu'un dîner d'affaires. Moi c'est l'inverse.
+
+Et c'est PRÉCISÉMENT pour ça qu'on marche.
+
+Chez Dasolabs, cette complémentarité s'incarne dans notre positionnement :
+→ L'OT (Yoann) + le management / vision (Gérald)
+→ La donnée qui marche + la relation qui dure
+→ Le contenu + le cadre
+
+Beaucoup de boîtes de conseil sont dirigées par des commerciaux qui ne parlent plus tech. Ou par des techs qui refusent de faire commercial. On est les deux. C'est ce qui nous permet de comprendre nos clients et de les servir.
+
+Deux frères. Deux mondes. Une même boîte. C'est notre marque.
+
+#Fondateurs #Family #ESN</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Fondateurs #ESN #Story</div>
+  </div>
+</div>
+
+<!-- 24 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">24</div><div class="post-title">Bienvenue Jordan</div><div class="post-topic">Onboarding</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Nouveau collègue</div>
+      <div class="v-avatar-hero">
+        <div class="v-avatar-big" style="background:var(--blue);">J</div>
+        <div>
+          <h3>Jordan.</h3>
+          <div class="role" style="color:var(--blue);">Associate · Automation</div>
+        </div>
+      </div>
+      <div class="v-foot"><span>24/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Bienvenue Jordan ! 🎉
+
+Jordan nous a rejoints en 2025 sur la mission SAFRAN et il est devenu associé de Dasolabs en juillet 2026. 4 ans d'expérience en projets automation, expertise PLC et SCADA Siemens, gestion de données OT.
+
+Pourquoi on l'a associé et pas juste "recruté" ? Parce que Jordan porte quelque chose qui va au-delà du CV : il RÉFLÉCHIT sur le métier. Sur ses missions, il ne se contente pas d'exécuter — il pose les bonnes questions, propose des améliorations, documente ce qu'il fait pour que ça serve à toute l'équipe.
+
+C'est le profil qu'on cherche : compétent techniquement, exigeant sur le résultat, à l'aise avec les clients, et surtout : qui pense la boîte comme une aventure partagée, pas comme un employeur.
+
+Bienvenue dans l'aventure, Jordan. On est vraiment contents que tu sois là.
+
+#Team #Welcome #Automation</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Team #Welcome #Dasolabs</div>
+  </div>
+</div>
+
+<!-- 25 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">25</div><div class="post-title">Bienvenue Louise</div><div class="post-topic">Onboarding</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Nouveau collègue</div>
+      <div class="v-avatar-hero">
+        <div class="v-avatar-big" style="background:var(--mint);">L</div>
+        <div>
+          <h3 style="color:#fff;">Louise.</h3>
+          <div class="role">Direction opérations</div>
+        </div>
+      </div>
+      <div class="v-foot"><span>25/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Bienvenue Louise ! 🎉
+
+Louise nous rejoint en tant que direction opérations. Un rôle central, essentiel, que je (Gérald) portais seul jusqu'ici en parallèle de mes missions client. Et honnêtement, ça ne tenait plus.
+
+Louise reprend TOUT le quotidien opérationnel :
+→ RH, contrats, congés, notes de frais
+→ Coordination missions et suivi consultants
+→ Facturation, admin, expert-comptable
+→ Voitures, matériel, outils
+
+Elle devient la first line pour toute l'équipe. Louise a un mandat pour trancher. Elle a le pouvoir de décider. Elle ne me remplace pas — elle libère mon temps pour ce que je fais mieux : la vision stratégique et la relation client.
+
+C'est un vrai changement de gouvernance chez Dasolabs. On grandit, on structure. Et cette bascule, c'est Louise qui la porte.
+
+Merci d'être là, Louise. Que le voyage commence. 🚀
+
+#Welcome #RH #Team</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Welcome #RH #Team</div>
+  </div>
+</div>
+
+<!-- 26 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">26</div><div class="post-title">Bienvenue Adrien</div><div class="post-topic">Onboarding</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Nouveau collègue</div>
+      <div class="v-avatar-hero">
+        <div class="v-avatar-big" style="background:var(--amber);">A</div>
+        <div>
+          <h3>Adrien.</h3>
+          <div class="role" style="color:var(--blue);">Consultant</div>
+        </div>
+      </div>
+      <div class="v-foot"><span>26/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Bienvenue Adrien ! 🎉
+
+Adrien rejoint Dasolabs comme consultant automation. Il a été recommandé par un client existant — ce qui reste, à mes yeux, la meilleure preuve de qualité qu'un consultant peut avoir.
+
+Ce qui nous a séduits chez Adrien :
+✓ La rigueur technique et le sens du détail
+✓ La capacité à documenter sans qu'on lui demande
+✓ L'envie d'apprendre et de partager
+✓ Un vrai souci du client final, pas juste "livrer et partir"
+
+L'équipe passe à 6 personnes avec son arrivée. Ce n'est pas anodin : chaque recrutement, on le pense comme un pari long terme. On investit du temps, de la formation, de la culture. On ne recrute PAS pour combler un besoin ponctuel.
+
+Adrien, on a hâte de te voir en action. La confiance est là. Fais-nous la briller.
+
+#Welcome #Team #Automation</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Welcome #Team #Consulting</div>
+  </div>
+</div>
+
+<!-- 27 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">27</div><div class="post-title">Le café du lundi</div><div class="post-topic">Culture</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Rituel équipe</div>
+      <div class="v-title" style="color:#fff; font-size:4vw;">Le café<br/>du lundi.<br/><span style="color:var(--midnight);">10h. Sans exception.</span></div>
+      <div class="v-sub" style="color:rgba(255,255,255,.85);">15 minutes. Personne ne parle boulot au premier tour.</div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>27/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Chez Dasolabs, il y a UN rituel non-négociable : le café du lundi. ☕
+
+10h précises. Visio pour ceux en mission, en présentiel pour ceux au bureau. 15 minutes.
+
+La règle : personne ne parle boulot au premier tour.
+
+On raconte son weekend. On rigole d'une actu absurde. On partage un truc qu'on a vu. Le neveu qui vient de naître. La galère de train. Le film qu'on a adoré.
+
+Pourquoi c'est important ?
+
+Parce que quand on est un consultant en mission, on peut passer des semaines sans voir ses collègues. On finit par les considérer comme des inconnus. Et le jour où on a besoin d'aide, on n'ose pas demander.
+
+Le café du lundi, c'est ce qui recolle l'équipe. C'est le lien qui empêche la boîte de devenir un annuaire d'individus qui bossent chacun de leur côté.
+
+C'est 15 minutes par semaine. Ça vaut mille fois le prix.
+
+#Culture #Team #Rituel</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Culture #Team #Rituel</div>
+  </div>
+</div>
+
+<!-- 28 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">28</div><div class="post-title">On a grandi de 33% cette année</div><div class="post-topic">Milestone</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-pill blue" style="margin-top:2vw;">CROISSANCE 2026</div>
+      <div class="v-stat">+33<span style="color:var(--blue-lt);">%</span></div>
+      <div class="v-stat-label">Notre équipe s'est agrandie. Doucement. Sainement.</div>
+      <div class="v-foot"><span>28/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">L'équipe Dasolabs a grandi de 33% cette année. 📈
+
+De 4 personnes en début 2026 à 6 aujourd'hui, avec l'arrivée d'Adrien (consultant) et Louise (direction opérations).
+
+Pourquoi je vous en parle ? Pas pour faire un post "vanity metrics". Mais parce que chaque nouveau recrutement est une décision qu'on prend en équipe, avec 3 critères :
+
+1️⃣ Un besoin client concret qui le justifie
+On ne recrute jamais "au cas où". On recrute parce qu'un projet précis, chez un client précis, nous demande un profil précis.
+
+2️⃣ Un profil qui apporte quelque chose à l'équipe existante
+Techniquement, humainement, culturellement. On ne cherche pas juste "un bras". On cherche quelqu'un qui rend l'équipe meilleure.
+
+3️⃣ Un rythme soutenable pour la culture
+Grandir trop vite tue la culture. Nous, on préfère 6 personnes qui se comprennent que 20 qui se croisent.
+
+Le rythme qu'on tient : +2 personnes par an, max. Ni plus, ni moins.
+
+Merci à Adrien et Louise pour la confiance. Merci à l'équipe existante d'avoir accueilli chaleureusement les nouveaux. Merci à nos clients de faire vivre tout ça.
+
+#Growth #Team #Milestone</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Growth #Team #Milestone</div>
+  </div>
+</div>
+
+<!-- 29 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">29</div><div class="post-title">Le jour off anniversaire</div><div class="post-topic">Culture</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">Petits gestes</div>
+      <div class="v-title" style="font-size:3.6vw;">Ton anniversaire ?<br/><span style="color:var(--blue);">Jour off.</span><br/>Automatique.</div>
+      <div class="v-sub">Sans décompte de congés. Sans demande à faire. Automatique.</div>
+      <div class="v-foot"><span>29/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Chez Dasolabs, ton jour d'anniversaire = jour off. 🎂
+
+Sans décompte de congés. Sans demande à faire. Automatique dans le système.
+
+C'est un petit geste. Objectivement, ça coûte 1 jour par personne par an. C'est peu.
+
+Mais symboliquement, c'est énorme. Ça dit : "on te reconnaît comme une personne, pas comme une force de travail". Ça dit : "tu as le droit de fêter ta vie, pas juste ton boulot".
+
+Ces petits gestes-là, on en accumule plusieurs :
+→ Anniversaire off automatique
+→ Après une mission dure, un déj avec Louise et Gérald pour débriefer/célébrer
+→ Café du lundi obligatoire (mais sans parler boulot au premier tour)
+→ Un budget-heures formation validé chaque année
+→ Un event de fin d'année en dîner gastronomique + hôtel
+
+C'est tout ça qui fait qu'on veut rester chez Dasolabs. Pas la comm RH grandiloquente. Les vrais gestes du quotidien.
+
+Vous cherchez une boîte qui vous voit en tant que personne ?
+
+#Culture #People #ESN</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Culture #People #ESN</div>
+  </div>
+</div>
+
+<!-- 30 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">30</div><div class="post-title">Le retour de mission = un déj</div><div class="post-topic">Culture</div></div>
+    <div class="visual">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Rituel équipe</div>
+      <div class="v-title" style="font-size:3.6vw;">Retour de<br/>mission ?<br/><span style="color:var(--blue-lt);">On célèbre.</span></div>
+      <div class="v-sub">Un déj avec Gérald et Louise. On débriefe. Vraiment.</div>
+      <div class="v-foot"><span>30/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Chez nous, quand tu finis une mission, tu vas déjeuner avec Gérald et Louise. 🍽️
+
+Ce n'est pas une "séance de RH". C'est un vrai moment. Avec un vrai repas. Dans un vrai resto (pas la sandwicherie du coin).
+
+Objectifs :
+
+1️⃣ CÉLÉBRER
+Une mission qui se termine, c'est un truc à marquer. Que ça se soit bien passé ou moins bien. Le travail, ça mérite de la reconnaissance.
+
+2️⃣ DÉBRIEFER FRANCHEMENT
+Qu'est-ce qui a marché ? Qu'est-ce qui a moins marché ? Le client, il était comment ? La techno, elle t'a plu ? Tu remettrais un pied dans ce projet ?
+
+3️⃣ PRÉPARER LA SUITE
+Qu'est-ce que tu veux faire après ? Continuer sur la même techno ? En apprendre une nouvelle ? Changer de secteur ? Une pause avant de repartir ?
+
+C'est simple. C'est humain. Ça prend 2h.
+
+Et ça change tout. Parce qu'un consultant qui se sent VU, écouté, considéré après chaque mission, c'est un consultant qui reste. Et qui ramène des amis.
+
+Le lien humain, on ne peut pas l'externaliser dans un formulaire RH.
+
+#Culture #People #Consulting</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Culture #People #Consulting</div>
+  </div>
+</div>
+
+<!-- 31 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">31</div><div class="post-title">L'event de fin d'année</div><div class="post-topic">Culture</div></div>
+    <div class="visual blue">
+      <div class="v-brand">dasolabs</div>
+      <div class="v-topic">Décembre 2026</div>
+      <div class="v-title" style="color:#fff; font-size:3.6vw;">Un dîner<br/>gastronomique.<br/><span style="color:var(--midnight);">Ensemble.</span></div>
+      <div class="v-sub" style="color:rgba(255,255,255,.85);">Bien habillé. Belle table. Bon vin. Un vrai soir.</div>
+      <div class="v-foot" style="color:rgba(255,255,255,.5);"><span>31/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Notre event de fin d'année, c'est UN dîner gastronomique. Rien de plus. Rien de moins. 🥂
+
+Pas de séminaire team-building avec activités de cohésion forcée. Pas de karting. Pas de conférence inspirante.
+
+Un dîner. Dans un restaurant étoilé ou en passe de l'être. Bien habillé. Vin en accord mets & vins. Une soirée entière ensemble. Retour possible le lendemain matin.
+
+Pourquoi ce format ?
+
+Parce qu'on est déjà ensemble sur des projets techniques toute l'année. Qu'on aime bien la technique, mais qu'on aime AUSSI les moments où on ne parle pas de PLC. Qu'on veut un moment qui donne envie de revenir l'année suivante.
+
+Un beau resto, une belle table, du temps. C'est notre marque.
+
+Cette année, on vote pour l'adresse. 3 propositions viennent. L'équipe choisit. Louise organise. Dasolabs paye.
+
+C'est simple. C'est classe. C'est nous.
+
+#Culture #Team #EndOfYear</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Culture #Team #EndOfYear</div>
+  </div>
+</div>
+
+<!-- 32 -->
+<div class="post" data-cat="equipe">
+  <div>
+    <div class="post-meta"><div class="post-num">32</div><div class="post-title">Ce qu'on cherche chez un consultant</div><div class="post-topic">Recrutement</div></div>
+    <div class="visual light">
+      <div class="v-brand" style="color:var(--midnight);">dasolabs</div>
+      <div class="v-topic">On recrute</div>
+      <div class="v-title" style="font-size:3.4vw;">Ce qu'on cherche.<br/><span style="color:var(--blue);">Ce qu'on ne veut pas.</span></div>
+      <div class="v-sub">3 vraies qualités qu'aucun CV ne montre.</div>
+      <div class="v-foot"><span>32/32</span><span>dasolabs.be</span></div>
+    </div>
+  </div>
+  <div class="copy-box">
+    <div class="copy-label">Copie</div>
+    <div class="copy-text">Ce qu'on cherche chez un consultant Dasolabs — et ce qu'on rejette. 👀
+
+CE QU'ON CHERCHE :
+
+✅ Quelqu'un qui pose des questions
+Un consultant qui débarque chez le client et déballe la solution sans avoir compris le contexte, on le renvoie chez lui. Le bon réflexe : "Pourquoi ? Depuis quand ? Qu'est-ce qui a déjà été essayé ?"
+
+✅ Quelqu'un qui documente sans qu'on lui demande
+Le savoir non-documenté est du savoir perdu. On veut des gens qui laissent une trace de ce qu'ils ont fait, pour le client et pour l'équipe.
+
+✅ Quelqu'un qui sait dire "je ne sais pas"
+Un ingénieur qui bluffe pour cacher qu'il ne connaît pas un sujet, c'est un cauchemar. Un ingénieur qui dit "je ne sais pas, je vais me renseigner" — c'est un partenaire de confiance.
+
+CE QU'ON REJETTE :
+
+❌ Le CV impressionnant, les certifications à la pelle, mais aucun projet concret raconté
+❌ L'ex-manager qui veut "faire du management" alors qu'on est une équipe plate
+❌ Celui qui compare le TJM à celui d'ailleurs sans se soucier de ce qu'il apporte
+
+On est en recrutement continu (max 2 profils par an). Si tu te reconnais dans "cherché", écris-nous. Sincèrement.
+
+#Recrutement #Consulting #ESN</div>
+    <button class="copy-btn">Copier</button>
+    <div class="hashtags">#Recrutement #Consulting #ESN</div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <p>32 posts prêts à publier · 3 catégories · Filtre en haut pour se concentrer sur un thème · Copie = clic bouton "Copier"</p>
+</div>
+
+<script>
+  // Filter tabs
+  document.querySelectorAll('.filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.post, .cat-header').forEach(el => {
+        if (cat === 'all' || el.dataset.cat === cat) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      });
+      window.scrollTo({ top: document.querySelector('.filters').offsetTop, behavior: 'smooth' });
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const txt = btn.previousElementSibling.innerText;
+      try {
+        await navigator.clipboard.writeText(txt);
+        btn.textContent = '✓ Copié';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 1500);
+      } catch (e) {
+        const r = document.createRange();
+        r.selectNode(btn.previousElementSibling);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(r);
+        document.execCommand('copy');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
