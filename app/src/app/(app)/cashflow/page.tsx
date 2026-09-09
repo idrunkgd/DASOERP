@@ -255,7 +255,7 @@ export default async function CashflowPage({
         <KpiCard
           label="Net année"
           value={formatCurrency(data.yearTotals.net)}
-          hint={`Avec sim : ${formatCurrency(data.yearTotals.netWithSim)}`}
+          hint={`Inclut factures ouvertes · Avec sim : ${formatCurrency(data.yearTotals.netWithSim)}`}
           icon={Activity}
           tone={data.yearTotals.net >= 0 ? "success" : "danger"}
         />

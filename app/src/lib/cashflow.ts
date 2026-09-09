@@ -1132,12 +1132,14 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   }
   const realBankBalance = bootstrapBalance + realPaidInflow - realPaidOutflow;
 
-  // ─── "En cours" : factures émises (INVOICED) en attente de paiement ───
+  // ─── "En cours" : factures émises en attente de paiement ───
   // On veut le total des outstanding receivables, indépendamment de l'année
   // affichée. C'est l'argent qu'on doit recevoir mais qu'on n'a pas encore.
+  // Inclut à la fois INVOICED (facturée papier/email) et TRANSMITTED (Peppol)
+  // — deux variantes du même état : facturée, en attente de paiement.
   // TVAC car c'est ce qui arrivera sur le compte bancaire.
   const inProgressMilestones = await prisma.billingMilestone.findMany({
-    where: { status: "INVOICED" as any },
+    where: { status: { in: ["INVOICED" as any, "TRANSMITTED" as any] } },
     include: {
       mission: { select: { id: true } },
       project: { select: { vatRate: true } },
