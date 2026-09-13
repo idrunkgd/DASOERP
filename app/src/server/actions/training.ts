@@ -168,3 +168,28 @@ export async function updateCourseProgress(courseId: string, slidePosition: numb
   });
   return { ok: true, completed: isLast };
 }
+
+/**
+ * Bascule la visibilité d'un cours (active on/off). Réservé aux admins qui ont
+ * la permission `training.manage`. Rend le cours invisible dans le catalogue
+ * consultant SANS supprimer les données (progression, quiz) — utile pour
+ * cacher un cours obsolète ou en cours de refonte.
+ */
+export async function toggleCourseVisibility(courseId: string) {
+  const session = await requirePermission("training.manage");
+  const course = await prisma.course.findUnique({ where: { id: courseId }, select: { id: true, title: true, active: true } });
+  if (!course) throw new Error("Cours introuvable");
+  const updated = await prisma.course.update({
+    where: { id: courseId },
+    data: { active: !course.active }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Course",
+    entityId: course.id,
+    message: `Cours "${course.title}" ${updated.active ? "publié" : "masqué"}`
+  });
+  revalidatePath("/training");
+  return { ok: true, active: updated.active };
+}

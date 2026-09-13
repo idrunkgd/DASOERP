@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { requirePermissionOrRedirect } from "@/lib/rbac";
+import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
-import { GraduationCap, CheckCircle2, Clock, PlayCircle } from "lucide-react";
+import { GraduationCap, CheckCircle2, Clock, PlayCircle, EyeOff } from "lucide-react";
+import { ToggleCourseVisibility } from "./toggle-visibility";
 // Le cours AVEVA est semé automatiquement au démarrage du conteneur
 // (voir prisma/seed-training.mjs + Dockerfile CMD). Plus de bouton d'import.
 
@@ -10,11 +11,15 @@ export const dynamic = "force-dynamic";
 
 export default async function TrainingPage() {
   const session = await requirePermissionOrRedirect(["training.read", "self.read"]);
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canManage = perms.includes("training.manage");
 
+  // Admin (training.manage) : voit TOUS les cours, actifs et masqués, avec un
+  // œil pour basculer. Consultant : ne voit que les actifs (comportement historique).
   const [courses, myProgress] = await Promise.all([
     prisma.course.findMany({
-      where: { active: true },
-      orderBy: { title: "asc" },
+      where: canManage ? {} : { active: true },
+      orderBy: [{ active: "desc" }, { title: "asc" }],
       include: {
         _count: { select: { slides: true } }
       }
@@ -43,18 +48,24 @@ export default async function TrainingPage() {
             const pct = prog ? Math.round((prog.lastSlide / c._count.slides) * 100) : 0;
             const completed = !!prog?.completedAt;
             return (
-              <Link
-                key={c.id}
-                href={`/training/${c.slug}`}
-                className="card p-5 hover:shadow-md transition-shadow group"
-              >
+              <div key={c.id} className={"relative " + (!c.active ? "opacity-60" : "")}>
+                {canManage && (
+                  <div className="absolute top-3 right-3 z-10">
+                    <ToggleCourseVisibility courseId={c.id} active={c.active} />
+                  </div>
+                )}
+                <Link
+                  href={`/training/${c.slug}`}
+                  className="card p-5 hover:shadow-md transition-shadow group block"
+                >
                 <div className="flex items-start gap-3">
                   <div className="w-11 h-11 rounded-xl bg-indigoaccent/10 text-indigoaccent flex items-center justify-center flex-shrink-0">
                     <GraduationCap className="w-5 h-5" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-midnight-900 group-hover:text-indigoaccent transition-colors">
+                  <div className="min-w-0 flex-1 pr-8">
+                    <h3 className="font-semibold text-midnight-900 group-hover:text-indigoaccent transition-colors flex items-center gap-2">
                       {c.title}
+                      {!c.active && <EyeOff className="w-3.5 h-3.5 text-midnight-400" />}
                     </h3>
                     {c.subtitle && <p className="text-xs text-midnight-500 mt-0.5 line-clamp-2">{c.subtitle}</p>}
                   </div>
@@ -86,6 +97,7 @@ export default async function TrainingPage() {
                   )}
                 </div>
               </Link>
+              </div>
             );
           })}
         </div>
