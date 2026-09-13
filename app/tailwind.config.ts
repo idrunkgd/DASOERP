@@ -34,9 +34,10 @@ const config: Config = {
         ring:    "#3434E8"
       },
       fontFamily: {
-        // DM Sans injectée depuis layout.tsx via next/font
-        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "monospace"]
+        // DM Sans + DM Mono chargés depuis Google Fonts au runtime via layout.tsx
+        // Fallbacks système en cas de non-chargement.
+        sans: ["'DM Sans'", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["'DM Mono'", "ui-monospace", "SFMono-Regular", "monospace"]
       },
       borderRadius: {
         lg: "10px",
