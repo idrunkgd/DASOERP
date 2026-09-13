@@ -209,7 +209,13 @@ export default async function CashflowPage({
               <a
                 key={y}
                 href={`/cashflow?year=${y}`}
-                className={`btn-secondary text-sm ${y === year ? "bg-indigoaccent/20 text-indigoaccent border-indigoaccent" : ""}`}
+                className={
+                  y === year
+                    // Actif : pill blanche sur le hero midnight → contraste maximal
+                    ? "inline-flex items-center justify-center h-10 px-4 rounded-xl text-sm font-semibold bg-white text-midnight-900 shadow-[0_4px_12px_rgba(255,255,255,.15)]"
+                    // Non-actif : bg semi-transparent sur le hero, texte clair
+                    : "inline-flex items-center justify-center h-10 px-4 rounded-xl text-sm font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors"
+                }
               >
                 {y}
               </a>
