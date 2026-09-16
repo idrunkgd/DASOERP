@@ -32,7 +32,10 @@ export default async function DocumentsPage({
 }: {
   searchParams: { q?: string; tag?: string; expiring?: string };
 }) {
-  await requirePermissionOrRedirect(["documents.read", "self.read"]);
+  // Documents = repo global (contrats, chartes, docs projets/clients). Exige
+  // documents.read explicitement. self.read seul ne suffit PAS — les docs
+  // perso d'un user (contrat signé, CV) sont accessibles via /me.
+  await requirePermissionOrRedirect("documents.read");
 
   const q = (searchParams.q || "").trim();
   const tags = parseMulti(searchParams.tag);

@@ -76,7 +76,7 @@ const SECTIONS: Section[] = [
       { href: "/onboarding",  label: "Onboarding",       icon: GraduationCap,  perm: "onboarding.read" },
       { href: "/leaves",      label: "Congés",           icon: Plane,          perm: ["leaves.read", "self.read"] as Permission[] },
       { href: "/sick-leaves", label: "Arrêts maladie",   icon: HeartPulse,     perm: "users.manage" },
-      { href: "/documents",   label: "Documents",        icon: Files,          perm: ["documents.read", "self.read"] as Permission[] },
+      { href: "/documents",   label: "Documents",        icon: Files,          perm: "documents.read" },
       { href: "/tests",       label: "Tests techniques", icon: ClipboardCheck, perm: "tests.manage" },
       { href: "/fleet",       label: "Ma voiture / Flotte", icon: Car,         perm: ["fleet.read", "self.read"] as Permission[] },
       { href: "/contracts",   label: "Contrats",         icon: FileSignature,  perm: "contracts.read" },
