@@ -27,6 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
+        {/* PWA — manifest + theme color + icône iOS */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#202037" />
+        <link rel="apple-touch-icon" href="/dasolabs-icon.svg" />
       </head>
       <body className="h-full antialiased font-sans">
         {children}

@@ -329,6 +329,8 @@ model User {
   vehicleAssignments   VehicleAssignment[]   @relation("VehicleAssignmentUser")
   fleetBadges          FleetBadge[]          @relation("FleetBadgeAssignedTo")
   notifications        Notification[]        @relation("UserNotifications")
+  pushSubscriptions    PushSubscription[]    @relation("UserPushSubscriptions")
+  notifPreferences     NotificationPreference[] @relation("UserNotifPrefs")
   /// Favoris épinglés dans la barre du topbar (max 10 par user, gérés côté serveur).
   favorites            UserFavorite[]        @relation("UserFavorites")
   /// Contrats (contrat de travail, avenants, NDA…) générés pour ce consultant.
@@ -2845,6 +2847,40 @@ model Notification {
 
   @@index([userId, read, createdAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])
+}
+
+// Abonnement Web Push (PWA installée + permission notifications acceptée).
+// Un user peut avoir plusieurs subscriptions (téléphone + laptop + tablette).
+// Purgées automatiquement quand l'endpoint remonte une 410 Gone (expiré).
+model PushSubscription {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation("UserPushSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+  endpoint    String    @unique              // URL push service (unique par device)
+  p256dh      String                          // clé pub client
+  auth        String                          // secret partagé
+  userAgent   String?                         // pour debug : "iPhone Safari", etc.
+  createdAt   DateTime  @default(now())
+  lastUsedAt  DateTime?
+
+  @@index([userId])
+}
+
+// Préférences de notif d'un user : par canal (in-app / email / push) et par type.
+// Si aucune ligne pour un (userId, type) donné → défauts : in-app ON, email ON,
+// push ON. Ces défauts sont raisonnables pour ne pas noyer les nouveaux users
+// en obligeant à configurer.
+model NotificationPreference {
+  id           String            @id @default(cuid())
+  userId       String
+  user         User              @relation("UserNotifPrefs", fields: [userId], references: [id], onDelete: Cascade)
+  type         NotificationType
+  inAppEnabled Boolean           @default(true)
+  emailEnabled Boolean           @default(true)
+  pushEnabled  Boolean           @default(true)
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([userId, type])
 }
 
 /// Favori épinglé par un utilisateur dans la barre du topbar.

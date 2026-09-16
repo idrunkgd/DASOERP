@@ -1,0 +1,20 @@
+{
+  "name": "DasoHub — Pilotage Dasolabs",
+  "short_name": "DasoHub",
+  "description": "L'ERP interne Dasolabs — missions, timesheets, congés, notes de frais.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F1F1F6",
+  "theme_color": "#202037",
+  "icons": [
+    {
+      "src": "/dasolabs-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "fr"
+}

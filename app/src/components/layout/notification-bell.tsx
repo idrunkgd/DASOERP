@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Bell, Check, CheckCheck, X } from "lucide-react";
 import { markNotificationRead, markAllNotificationsRead, deleteNotification } from "@/server/actions/notifications";
 import { cn } from "@/lib/utils";
+import { PushEnableButton } from "./push-setup";
 
 type Notif = {
   id: string; type: string; title: string; message: string | null; href: string | null;
@@ -114,6 +115,16 @@ export function NotificationBell() {
             )}
           </div>
 
+          <div className="px-4 py-2 border-t border-border flex items-center justify-between gap-2">
+            <PushEnableButton />
+            <Link
+              href="/me?tab=notifications"
+              onClick={() => setOpen(false)}
+              className="text-[11px] text-midnight-500 hover:text-indigoaccent"
+            >
+              ⚙ Préférences
+            </Link>
+          </div>
           <Link
             href="/notifications"
             onClick={() => setOpen(false)}

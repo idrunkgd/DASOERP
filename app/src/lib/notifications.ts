@@ -34,17 +34,67 @@ export async function createNotification(input: CreateNotifInput): Promise<void>
   const userIds = Array.isArray(input.userId) ? input.userId : [input.userId];
   if (userIds.length === 0) return;
   try {
-    await prisma.notification.createMany({
-      data: userIds.map((uid) => ({
-        userId: uid,
-        type: input.type,
-        title: input.title,
-        message: input.message ?? null,
-        href: input.href ?? null,
-        entityType: input.entityType ?? null,
-        entityId: input.entityId ?? null
-      }))
+    // 1) Écrit en base (in-app / cloche + page /notifications)
+    // On respecte la préférence inAppEnabled : si un user a explicitement
+    // désactivé ce type en in-app, on n'écrit pas.
+    const prefs = await prisma.notificationPreference.findMany({
+      where: { userId: { in: userIds }, type: input.type }
     });
+    const prefsByUser = new Map(prefs.map((p) => [p.userId, p]));
+
+    const inAppUsers = userIds.filter((uid) => {
+      const p = prefsByUser.get(uid);
+      return p ? p.inAppEnabled : true; // défaut ON
+    });
+    if (inAppUsers.length > 0) {
+      await prisma.notification.createMany({
+        data: inAppUsers.map((uid) => ({
+          userId: uid,
+          type: input.type,
+          title: input.title,
+          message: input.message ?? null,
+          href: input.href ?? null,
+          entityType: input.entityType ?? null,
+          entityId: input.entityId ?? null
+        }))
+      });
+    }
+
+    // 2) Fan-out email + push en parallèle (best-effort, jamais bloquant)
+    const usersToNotify = await prisma.user.findMany({
+      where: { id: { in: userIds }, active: true },
+      select: { id: true, email: true, firstName: true }
+    });
+    const { sendMail, renderNotifEmail } = await import("@/lib/email");
+    const { sendPushToUser } = await import("@/lib/push");
+
+    await Promise.allSettled(usersToNotify.map(async (u) => {
+      const p = prefsByUser.get(u.id);
+      const wantEmail = p ? p.emailEnabled : true;
+      const wantPush  = p ? p.pushEnabled  : true;
+
+      const tasks: Promise<any>[] = [];
+      if (wantEmail && u.email) {
+        tasks.push(sendMail({
+          to: u.email,
+          subject: `DasoHub · ${input.title}`,
+          html: renderNotifEmail({
+            title: input.title,
+            message: input.message,
+            href: input.href,
+            firstName: u.firstName
+          })
+        }));
+      }
+      if (wantPush) {
+        tasks.push(sendPushToUser(u.id, {
+          title: input.title,
+          message: input.message ?? undefined,
+          href: input.href ?? undefined
+        }));
+      }
+      await Promise.allSettled(tasks);
+    }));
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error("[notifications] createNotification failed:", err);
