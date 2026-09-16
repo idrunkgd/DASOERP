@@ -44,9 +44,18 @@ html, body { background: rgb(var(--background)); color: rgb(var(--foreground)); 
 
   /* ═══ INPUTS ═══ */
   .input {
-    @apply w-full h-10 px-3.5 rounded-xl border border-border bg-white text-sm
+    @apply w-full h-10 px-3.5 rounded-xl border border-border bg-white text-midnight-900 text-sm
            focus:outline-none focus:ring-2 focus:ring-indigoaccent/25 focus:border-indigoaccent
            disabled:opacity-60 disabled:bg-muted transition-colors;
+  }
+  /* Force fond blanc + texte foncé sur les <option> — certains OS
+     (macOS, Windows en dark mode) rendent le dropdown natif en blanc sur
+     blanc quand on ne force pas explicitement, ce qui rend les options
+     illisibles avant sélection. */
+  .input option,
+  select option {
+    background-color: #FFFFFF;
+    color: #202037;
   }
   .label {
     @apply block text-[10px] font-semibold text-midnight-500 uppercase tracking-widest mb-1.5 font-mono;
