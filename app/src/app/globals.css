@@ -112,6 +112,43 @@ html, body { background: rgb(var(--background)); color: rgb(var(--foreground)); 
 /* Utilitaire — refs mono en petit (PO-2026-001, MIS-2026-014…) */
 .ref-mono { @apply font-mono text-[11px] text-midnight-400 uppercase tracking-wide; }
 
+/* ─────── BOUTONS DANS UN HERO SOMBRE ───────
+ * Fix contraste : les btn-secondary (midnight bg) et btn-ghost (midnight text)
+ * disparaissaient sur le PageHeader hero (fond midnight/electric blue). On
+ * réinvertit automatiquement quand le bouton est descendant d'un .hero-gradient.
+ * Pas besoin de toucher les pages : la règle s'applique globalement.
+ */
+.hero-gradient .btn-secondary,
+.hero-gradient .btn-primary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  box-shadow: none;
+}
+.hero-gradient .btn-secondary:hover,
+.hero-gradient .btn-primary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: none;
+}
+.hero-gradient .btn-ghost {
+  color: rgba(255, 255, 255, 0.85);
+}
+.hero-gradient .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+/* Le "à valider" et autres call-to-actions restent bien mis en avant */
+.hero-gradient .btn-primary {
+  background: #FFFFFF;
+  color: var(--midnight, #202037);
+  border-color: transparent;
+}
+.hero-gradient .btn-primary:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
 /* ─────── DÉGRADÉS SIGNATURE CHARTE ───────
  * Le "blob" bleu vif sur fond midnight — l'effet marketing signature de
  * la charte graphique Dasolabs. Utilisable pour : slides cover, hero cards

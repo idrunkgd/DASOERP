@@ -26,7 +26,8 @@ export function KpiCard({
         <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-midnight-400">{label}</span>
         {Icon && <Icon className="w-4 h-4 text-midnight-300" />}
       </div>
-      <div className={cn("mt-3 text-3xl font-extrabold tracking-tight leading-none", tones[tone])}>{value}</div>
+      {/* Mobile : plus petit (text-xl / 20px) — sinon les gros montants EUR débordent. Desktop : text-3xl comme avant. */}
+      <div className={cn("mt-3 text-xl md:text-3xl font-extrabold tracking-tight leading-none break-words", tones[tone])}>{value}</div>
       {hint && <div className="text-xs text-midnight-400 mt-2 font-mono">{hint}</div>}
     </div>
   );
