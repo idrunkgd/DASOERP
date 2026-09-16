@@ -3,6 +3,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 import { Search, LogOut, ChevronDown, User as UserIcon, Menu, BookOpen } from "lucide-react";
 import Link from "next/link";
+import { NotificationBell } from "./notification-bell";
 
 export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: string; onToggleMenu?: () => void }) {
   const { data: session } = useSession();
@@ -60,6 +61,7 @@ export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: str
         <BookOpen className="w-4 h-4" />
         <span className="hidden md:inline">Wiki</span>
       </a>
+      <NotificationBell />
       <UserMenu name={session?.user?.name ?? ""} accessGroupName={accessGroupName} />
     </header>
   );

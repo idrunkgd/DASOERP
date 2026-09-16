@@ -68,6 +68,20 @@ export async function submitWeek(weekStartISO: string) {
     actorId: session.user.id, action: "TIMESHEET_SUBMITTED", entityType: "TimesheetEntry",
     message: `${updated.count} entrée(s) soumises pour validation (semaine ${weekStartISO.slice(0, 10)})`
   });
+  // Notifier les valideurs
+  if (updated.count > 0) {
+    const { createNotification, getUserIdsWithPermission } = await import("@/lib/notifications");
+    const validators = await getUserIdsWithPermission("timesheet.validate", session.user.id);
+    const me = await prisma.user.findUnique({ where: { id: session.user.id }, select: { firstName: true, lastName: true } });
+    await createNotification({
+      userId: validators,
+      type: "TIMESHEET_SUBMITTED",
+      title: `Timesheet à valider — ${me?.firstName ?? ""} ${me?.lastName ?? ""}`.trim(),
+      message: `${updated.count} entrée(s) · semaine du ${weekStartISO.slice(0, 10)}`,
+      href: "/timesheet/validation",
+      entityType: "TimesheetEntry"
+    });
+  }
   revalidatePath("/timesheet");
   return updated.count;
 }

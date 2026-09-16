@@ -328,6 +328,7 @@ model User {
   wikiImagesUploaded   WikiImage[]           @relation("WikiImageUploader")
   vehicleAssignments   VehicleAssignment[]   @relation("VehicleAssignmentUser")
   fleetBadges          FleetBadge[]          @relation("FleetBadgeAssignedTo")
+  notifications        Notification[]        @relation("UserNotifications")
   /// Favoris épinglés dans la barre du topbar (max 10 par user, gérés côté serveur).
   favorites            UserFavorite[]        @relation("UserFavorites")
   /// Contrats (contrat de travail, avenants, NDA…) générés pour ce consultant.
@@ -2801,6 +2802,49 @@ model FleetBadge {
   @@index([assignedUserId])
   @@index([assignedVehicleId])
   @@index([active])
+}
+
+// ─────── NOTIFICATIONS IN-APP ───────
+// Chaque événement métier qui concerne un user (NDF à valider, congé refusé,
+// charte à signer, mission qui approche de sa fin…) crée une Notification.
+// Le user la voit dans le cloche du topbar + sur /notifications.
+
+enum NotificationType {
+  EXPENSE_SUBMITTED       // Une NDF a été soumise (destinataire = approbateurs)
+  EXPENSE_APPROVED        // Ta NDF a été approuvée
+  EXPENSE_REJECTED        // Ta NDF a été refusée
+  EXPENSE_PAID            // Ta NDF a été payée
+  LEAVE_SUBMITTED         // Un congé a été demandé (destinataire = approbateurs)
+  LEAVE_APPROVED          // Ton congé a été approuvé
+  LEAVE_REJECTED          // Ton congé a été refusé
+  SICK_LEAVE_DECLARED     // Un arrêt maladie a été déclaré (RH)
+  TIMESHEET_SUBMITTED     // Un timesheet a été soumis pour validation
+  TIMESHEET_APPROVED      // Ton timesheet a été validé
+  TIMESHEET_REJECTED      // Ton timesheet a été refusé
+  POLICY_TO_SIGN          // Une charte t'a été assignée à signer
+  CONTRACT_READY          // Un contrat est prêt pour toi
+  MISSION_ENDING          // Ta mission finit dans < 60 jours
+  MISSION_ASSIGNED        // Tu as été assigné à une nouvelle mission
+  MENTIONED               // Tu as été mentionné (@)
+  OTHER
+}
+
+model Notification {
+  id          String            @id @default(cuid())
+  userId      String                                // destinataire
+  user        User              @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String                                // ex : "Nouvelle NDF à valider"
+  message     String?                               // ligne complémentaire
+  href        String?                               // URL cible (clic notif → page)
+  entityType  String?                               // Pour tracer : "ExpenseReport", "LeaveRequest"…
+  entityId    String?
+  read        Boolean           @default(false)
+  readAt      DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@index([userId, read, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 /// Favori épinglé par un utilisateur dans la barre du topbar.

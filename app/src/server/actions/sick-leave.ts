@@ -65,6 +65,30 @@ export async function createSickLeave(formData: FormData) {
       ? `Arrêt maladie déclaré POUR ${targetUserId} par admin (${data.startDate} → ${data.endDate})`
       : `Arrêt maladie déclaré (${data.startDate} → ${data.endDate})`
   });
+  // Notifier les RH (users.manage) + le sujet si déclaré par admin
+  const { createNotification, getUserIdsWithPermission } = await import("@/lib/notifications");
+  const rhIds = await getUserIdsWithPermission("users.manage", session.user.id);
+  const target = await prisma.user.findUnique({ where: { id: targetUserId }, select: { firstName: true, lastName: true } });
+  const name = target ? `${target.firstName} ${target.lastName}` : "un consultant";
+  await createNotification({
+    userId: rhIds,
+    type: "SICK_LEAVE_DECLARED",
+    title: `Arrêt maladie — ${name}`,
+    message: `${data.startDate} → ${data.endDate}${data.reason ? ` · ${data.reason}` : ""}`,
+    href: `/sick-leaves`,
+    entityType: "SickLeave", entityId: created.id
+  });
+  if (isForOther) {
+    // Prévenir aussi la personne concernée que son admin a déclaré à sa place
+    await createNotification({
+      userId: targetUserId,
+      type: "SICK_LEAVE_DECLARED",
+      title: "Un arrêt maladie a été déclaré pour toi",
+      message: `${data.startDate} → ${data.endDate}`,
+      href: `/me`,
+      entityType: "SickLeave", entityId: created.id
+    });
+  }
   revalidatePath("/me");
   revalidatePath("/dashboard");
   revalidatePath("/sick-leaves");

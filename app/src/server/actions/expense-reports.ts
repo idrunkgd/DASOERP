@@ -175,7 +175,10 @@ export async function updateExpenseReport(id: string, formData: FormData) {
 
 export async function submitExpenseReport(id: string) {
   const session = await requireSession();
-  const report = await prisma.expenseReport.findUnique({ where: { id } });
+  const report = await prisma.expenseReport.findUnique({
+    where: { id },
+    include: { user: { select: { firstName: true, lastName: true } } }
+  });
   if (!report) throw new Error("Note introuvable");
   // Seul l'auteur peut soumettre
   if (report.userId !== session.user.id) throw new Error("Forbidden");
@@ -190,6 +193,17 @@ export async function submitExpenseReport(id: string) {
     entityType: "ExpenseReport",
     entityId: id,
     message: "Note de frais soumise"
+  });
+  // Notifier les approbateurs
+  const { createNotification, getUserIdsWithPermission } = await import("@/lib/notifications");
+  const approvers = await getUserIdsWithPermission("expenses.approve", session.user.id);
+  await createNotification({
+    userId: approvers,
+    type: "EXPENSE_SUBMITTED",
+    title: `NDF à valider — ${report.user.firstName} ${report.user.lastName}`,
+    message: `${Number(report.amount).toFixed(2)} € · ${report.category}`,
+    href: `/expenses?filter=submitted`,
+    entityType: "ExpenseReport", entityId: id
   });
   revalidatePath("/expenses");
 }
@@ -256,6 +270,18 @@ export async function approveExpenseReport(id: string, approve: boolean, rejecti
     entityType: "ExpenseReport",
     entityId: id,
     message: approve ? "Note approuvée (+ cashflow planifié)" : `Note refusée (${rejectionReason ?? "n/a"})`
+  });
+  // Notifier l'auteur de la décision
+  const { createNotification } = await import("@/lib/notifications");
+  await createNotification({
+    userId: report.userId,
+    type: approve ? "EXPENSE_APPROVED" : "EXPENSE_REJECTED",
+    title: approve ? "Ta note de frais a été approuvée" : "Ta note de frais a été refusée",
+    message: approve
+      ? `${Number(report.amountTtc).toFixed(2)} € — sera payée sous peu`
+      : (rejectionReason ?? "Motif non précisé"),
+    href: `/expenses`,
+    entityType: "ExpenseReport", entityId: id
   });
   revalidatePath("/expenses");
   revalidatePath("/cashflow");
