@@ -327,6 +327,7 @@ model User {
   wikiArticlesEdited   WikiArticle[]         @relation("WikiArticleUpdatedBy")
   wikiImagesUploaded   WikiImage[]           @relation("WikiImageUploader")
   vehicleAssignments   VehicleAssignment[]   @relation("VehicleAssignmentUser")
+  fleetBadges          FleetBadge[]          @relation("FleetBadgeAssignedTo")
   /// Favoris épinglés dans la barre du topbar (max 10 par user, gérés côté serveur).
   favorites            UserFavorite[]        @relation("UserFavorites")
   /// Contrats (contrat de travail, avenants, NDA…) générés pour ce consultant.
@@ -2698,6 +2699,7 @@ model Vehicle {
   leasingContract     LeasingContract?
   assignments         VehicleAssignment[]
   documents           Document[]              @relation("DocumentVehicle")
+  fleetBadges         FleetBadge[]            @relation("FleetBadgeOnVehicle")
 
   @@index([status])
   @@index([category])
@@ -2751,6 +2753,54 @@ model VehicleAssignment {
 
   @@index([vehicleId, endDate])
   @@index([userId, endDate])
+}
+
+// ─────── FLEET BADGES & CARTES ───────
+// Badges d'accès, cartes de recharge électrique, télépéage, cartes carburant.
+// Un badge est ATTRIBUÉ à une personne (userId) et OPTIONNELLEMENT lié à
+// un véhicule (vehicleId) — certains badges suivent la personne (ex: badge
+// site client), d'autres restent avec la voiture (ex: télépéage).
+
+enum FleetBadgeType {
+  ACCESS_BADGE       // Badge d'accès parking, site client, immeuble
+  RECHARGE_CARD      // Carte de recharge véhicule électrique (Chargemap, TotalEnergies…)
+  TOLL_TAG           // Télépéage autoroute
+  FUEL_CARD          // Carte carburant
+  PARKING_CARD       // Carte parking abonnement
+  OTHER              // Autre
+}
+
+model FleetBadge {
+  id                String          @id @default(cuid())
+  type              FleetBadgeType
+  label             String                     // Libellé libre : "Chargemap Pro", "Badge UCB", "Télépéage BE"
+  identifier        String?                    // Numéro badge / carte
+  provider          String?                    // Émetteur : Chargemap, Total, Sanef, etc.
+  monthlyFee        Decimal?        @db.Decimal(10, 2)  // Abonnement mensuel indicatif
+
+  // Attribution — un badge est attaché à une personne ET/OU à un véhicule.
+  // On garde les deux nullable pour couvrir tous les cas :
+  //   - badge suit la personne uniquement (ex: badge accès bureau)
+  //   - badge suit le véhicule uniquement (ex: télépéage collé au pare-brise)
+  //   - badge personne + véhicule (ex: carte recharge liée à voiture attribuée)
+  //   - stock (ni personne ni véhicule) → dispo pour attribution future
+  assignedUserId    String?
+  assignedUser      User?           @relation("FleetBadgeAssignedTo", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  assignedVehicleId String?
+  assignedVehicle   Vehicle?        @relation("FleetBadgeOnVehicle", fields: [assignedVehicleId], references: [id], onDelete: SetNull)
+
+  startDate         DateTime?       @db.Date
+  endDate           DateTime?       @db.Date    // NULL = attribution active
+  notes             String?
+  active            Boolean         @default(true)
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([type])
+  @@index([assignedUserId])
+  @@index([assignedVehicleId])
+  @@index([active])
 }
 
 /// Favori épinglé par un utilisateur dans la barre du topbar.

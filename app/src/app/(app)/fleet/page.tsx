@@ -49,9 +49,14 @@ export default async function FleetPage() {
           ? `${active.length} véhicule${active.length > 1 ? "s" : ""} en circulation`
           : "Le véhicule qui vous est attribué"}
         actions={canManage ? (
-          <Link href="/fleet/new" className="btn-primary">
-            <Plus className="w-4 h-4" /> Nouveau véhicule
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/fleet/badges" className="btn-secondary text-sm">
+              Badges &amp; cartes
+            </Link>
+            <Link href="/fleet/new" className="btn-primary">
+              <Plus className="w-4 h-4" /> Nouveau véhicule
+            </Link>
+          </div>
         ) : null}
       />
 
