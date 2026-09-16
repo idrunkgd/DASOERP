@@ -49,6 +49,7 @@ const SECTIONS: Section[] = [
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },
       { href: "/missions",         label: "Missions",             icon: Plane,           perm: ["consulting.read", "self.read"] as Permission[] },
+      { href: "/timesheet",        label: "Timesheets",           icon: Clock,           perm: "timesheet.self.write" },
       { href: "/calendar",         label: "Calendrier",           icon: CalendarDays,    perm: "consulting.read" }
     ]
   },

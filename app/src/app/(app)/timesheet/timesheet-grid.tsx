@@ -1,10 +1,10 @@
 "use client";
-import { useMemo, useState, useTransition } from "react";
-import { upsertCell, submitWeek } from "@/server/actions/timesheets";
+import { useMemo, useState, useTransition, useCallback, useEffect } from "react";
+import { upsertCell, upsertCellsBulk, submitWeek } from "@/server/actions/timesheets";
 import { addDays, format, parseISO, isWeekend, isSameDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Entry = {
@@ -74,19 +74,74 @@ export function TimesheetGrid({
   function colTotal(d: Date) { let s = 0; for (const k of allKeys) { const e = byCell.get(cellKey(k, d)); if (e) s += e.hours; } return s; }
   const weekTotal = days.reduce((s, d) => s + colTotal(d), 0);
 
-  // Cellule active pour saisie
+  // Cellule active pour saisie (fine-tuning au clic)
   const [active, setActive] = useState<{ key: RowKey; date: string } | null>(null);
+
+  // ─── Drag & drop hebdo ───
+  // Sur une ligne, on maintient le clic et on glisse pour "peindre" plusieurs
+  // jours avec les heures par défaut de la ligne. Le comment n'est jamais
+  // demandé — la ligne mémorise seule son activityType et son défaut.
+  const [defaultHours, setDefaultHours] = useState(8);
+  const [drag, setDrag] = useState<{ key: RowKey; dates: Set<string> } | null>(null);
+  const dragActive = drag !== null;
+
+  useEffect(() => {
+    if (!dragActive) return;
+    const stop = () => {
+      if (drag && drag.dates.size > 0) {
+        const dates = Array.from(drag.dates).sort();
+        const key = drag.key;
+        const hours = defaultHours;
+        start(async () => {
+          try {
+            const r = await upsertCellsBulk({ target: key, dates, hours });
+            toast.success(`${r.touched} jour(s) rempli(s) à ${hours}h`);
+          } catch (err: any) { toast.error(err.message); }
+        });
+      }
+      setDrag(null);
+    };
+    window.addEventListener("mouseup", stop);
+    window.addEventListener("touchend", stop);
+    return () => {
+      window.removeEventListener("mouseup", stop);
+      window.removeEventListener("touchend", stop);
+    };
+  }, [dragActive, drag, defaultHours]);
+
+  const fillWeek = useCallback((key: RowKey, hours: number) => {
+    const dates = days.filter(d => !isWeekend(d)).map(d => format(d, "yyyy-MM-dd"));
+    start(async () => {
+      try {
+        const r = await upsertCellsBulk({ target: key, dates, hours });
+        toast.success(`${r.touched} jour(s) rempli(s) à ${hours}h`);
+      } catch (err: any) { toast.error(err.message); }
+    });
+  }, [days]);
 
   return (
     <div className="space-y-4">
       <div className="card p-3 flex items-center justify-between gap-3 flex-wrap">
-        <AddRowSelect
-          excludeKeys={new Set([...allKeys])}
-          projects={projects}
-          missions={missions}
-          costCenters={costCenters}
-          onAdd={(k) => setExtraRows(rs => [...rs, k])}
-        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <AddRowSelect
+            excludeKeys={new Set([...allKeys])}
+            projects={projects}
+            missions={missions}
+            costCenters={costCenters}
+            onAdd={(k) => setExtraRows(rs => [...rs, k])}
+          />
+          <div className="flex items-center gap-1.5 pl-3 border-l border-border">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-midnight-400">Défaut / jour</span>
+            <input
+              type="number" min="0" max="24" step="0.5"
+              value={defaultHours}
+              onChange={(e) => setDefaultHours(Math.max(0, Math.min(24, Number(e.target.value) || 0)))}
+              className="input h-8 w-16 text-center tabular-nums"
+              title="Heures posées lors d'un drag & drop ou 'Remplir semaine'"
+            />
+            <span className="text-xs text-midnight-500">h</span>
+          </div>
+        </div>
         <button
           disabled={pending}
           onClick={() => start(async () => {
@@ -95,6 +150,9 @@ export function TimesheetGrid({
           })}
           className="btn-primary btn-sm"
         >Soumettre la semaine</button>
+      </div>
+      <div className="text-[11px] text-midnight-500 italic px-1">
+        💡 Astuce : maintenez le clic et glissez sur une ligne pour remplir plusieurs jours à {defaultHours}h. Cliquez sur une cellule seule pour ajuster une valeur précise.
       </div>
 
       <div className="card overflow-x-auto">
@@ -128,9 +186,20 @@ export function TimesheetGrid({
                         <div className="min-w-0">
                           <div className="font-medium text-midnight-900 truncate">{row.primary}</div>
                           {row.secondary && <div className="text-xs text-midnight-500 truncate">{row.secondary}</div>}
-                          <span className={"badge-" + (row.type === "PRJ" ? "info" : row.type === "MIS" ? "warning" : "neutral") + " text-[10px] mt-0.5"}>
-                            {row.type === "PRJ" ? "Projet" : row.type === "MIS" ? "Mission" : "Centre coût"}
-                          </span>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className={"badge-" + (row.type === "PRJ" ? "info" : row.type === "MIS" ? "warning" : "neutral") + " text-[10px]"}>
+                              {row.type === "PRJ" ? "Projet" : row.type === "MIS" ? "Mission" : "Centre coût"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => fillWeek(k, defaultHours)}
+                              className="text-[10px] text-indigoaccent hover:underline flex items-center gap-0.5"
+                              title={`Remplir lun–ven à ${defaultHours}h`}
+                              disabled={pending}
+                            >
+                              <Wand2 className="w-2.5 h-2.5" /> Remplir semaine
+                            </button>
+                          </div>
                         </div>
                         {!usedKeys.has(k) && (
                           <button
@@ -147,18 +216,37 @@ export function TimesheetGrid({
                       const e = byCell.get(cellKey(k, d));
                       const wknd = isWeekend(d);
                       const approved = e?.status === "APPROVED";
-                      const submitted = e?.status === "SUBMITTED";
+                      const isDragged = drag?.key === k && drag.dates.has(dateStr);
                       return (
                         <td
                           key={dateStr}
-                          onClick={() => !approved && setActive({ key: k, date: dateStr })}
+                          onMouseDown={(ev) => {
+                            if (approved) return;
+                            if (ev.button !== 0) return;
+                            ev.preventDefault();
+                            setDrag({ key: k, dates: new Set([dateStr]) });
+                          }}
+                          onMouseEnter={() => {
+                            if (drag && drag.key === k && !approved) {
+                              setDrag({ key: k, dates: new Set([...drag.dates, dateStr]) });
+                            }
+                          }}
+                          onClick={(ev) => {
+                            // Un clic simple (sans avoir bougé) → mode fine-tuning
+                            if (!drag && !approved) {
+                              // Le clic peut arriver après un mouseup drag ; on vérifie
+                              // qu'aucun drag n'est en cours pour éviter d'ouvrir le form.
+                              setActive({ key: k, date: dateStr });
+                            }
+                          }}
                           className={cn(
-                            "border-b border-border/40 text-center align-middle cursor-pointer",
+                            "border-b border-border/40 text-center align-middle cursor-pointer select-none",
                             wknd && "bg-midnight-50/30",
                             approved && "cursor-not-allowed",
-                            isSameDay(d, new Date()) && "bg-indigoaccent/5"
+                            isSameDay(d, new Date()) && "bg-indigoaccent/5",
+                            isDragged && "bg-indigoaccent/20 ring-1 ring-indigoaccent"
                           )}
-                          title={e?.description ?? undefined}
+                          title={e?.description ?? (drag ? "Glisse pour peindre plusieurs jours" : "Clic = ajuster · Maintenir clic + glisser = remplir en lot")}
                         >
                           <CellInline
                             entry={e}
@@ -170,6 +258,7 @@ export function TimesheetGrid({
                             })}
                             target={k}
                             date={dateStr}
+                            dragPreview={isDragged ? defaultHours : undefined}
                           />
                         </td>
                       );
@@ -202,13 +291,22 @@ export function TimesheetGrid({
 }
 
 function CellInline({
-  entry, isActive, target, date, onSubmit, onCancel
+  entry, isActive, target, date, onSubmit, onCancel, dragPreview
 }: {
   entry?: Entry; isActive: boolean; target: RowKey; date: string;
   onSubmit: (fd: FormData) => void;
   onCancel: () => void;
+  /** Aperçu visuel pendant un drag actif : les heures qui seront posées au relâchement. */
+  dragPreview?: number;
 }) {
   if (!isActive) {
+    if (dragPreview !== undefined) {
+      return (
+        <span className="inline-block min-w-[44px] py-1 px-1 tabular-nums font-bold text-indigoaccent">
+          {dragPreview.toFixed(1)}
+        </span>
+      );
+    }
     if (!entry || entry.hours === 0) return <span className="text-midnight-300 text-xs">·</span>;
     const tone = entry.status === "APPROVED" ? "text-emerald-700" : entry.status === "SUBMITTED" ? "text-indigo-700" : entry.status === "REJECTED" ? "text-red-700" : "text-midnight-900";
     return (

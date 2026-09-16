@@ -170,3 +170,81 @@ export async function rejectEntry(id: string, note: string) {
   });
   revalidatePath("/timesheet");
 }
+
+/**
+ * Saisie rapide en lot — remplit N jours d'un coup pour une même cible
+ * (projet / mission / centre de coût). Utilisé par le drag & drop et le
+ * bouton "Remplir la semaine" du grid.
+ *
+ * Aucune description requise, activityType par défaut DEVELOPMENT.
+ * Les entrées existantes en APPROVED sont ignorées silencieusement pour
+ * ne pas bloquer un drag sur une semaine partiellement validée.
+ */
+const BulkSchema = z.object({
+  target: z.string().min(1),
+  dates: z.array(z.string()).min(1).max(31),   // dates au format YYYY-MM-DD
+  hours: z.coerce.number().min(0).max(24)
+});
+
+export async function upsertCellsBulk(input: { target: string; dates: string[]; hours: number }) {
+  const session = await requirePermission("timesheet.self.write");
+  const parsed = BulkSchema.parse(input);
+  const targetIds = parseTarget(parsed.target);
+  const userId = session.user.id;
+
+  const sp = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canValidate = sp.includes("timesheet.validate");
+
+  // Guards équipe / consultant
+  if (targetIds.projectId && !canValidate) {
+    const member = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId: targetIds.projectId, userId } }
+    });
+    if (!member) throw new Error("Vous ne faites pas partie de l'équipe de ce projet.");
+  }
+  if (targetIds.missionId && !canValidate) {
+    const mission = await prisma.mission.findUnique({ where: { id: targetIds.missionId }, select: { consultantId: true } });
+    if (mission?.consultantId !== userId) throw new Error("Vous n'êtes pas le consultant assigné à cette mission.");
+  }
+
+  const dateObjs = parsed.dates.map((d) => new Date(d));
+  const existing = await prisma.timesheetEntry.findMany({
+    where: {
+      userId,
+      projectId:    targetIds.projectId    ?? undefined,
+      missionId:    targetIds.missionId    ?? undefined,
+      costCenterId: targetIds.costCenterId ?? undefined,
+      date: { in: dateObjs }
+    }
+  });
+  const existingByDate = new Map(existing.map((e) => [e.date.toISOString().slice(0, 10), e]));
+
+  const ops: Promise<any>[] = [];
+  for (const d of parsed.dates) {
+    const ex = existingByDate.get(d);
+    if (parsed.hours === 0) {
+      if (ex && ex.status !== "APPROVED") {
+        ops.push(prisma.timesheetEntry.delete({ where: { id: ex.id } }));
+      }
+      continue;
+    }
+    if (ex) {
+      if (ex.status === "APPROVED") continue;  // pas touche
+      ops.push(prisma.timesheetEntry.update({ where: { id: ex.id }, data: { hours: parsed.hours } }));
+    } else {
+      ops.push(prisma.timesheetEntry.create({
+        data: {
+          userId, date: new Date(d), hours: parsed.hours,
+          activityType: "DEVELOPMENT",
+          status: "DRAFT",
+          projectId:    targetIds.projectId    ?? undefined,
+          missionId:    targetIds.missionId    ?? undefined,
+          costCenterId: targetIds.costCenterId ?? undefined
+        }
+      }));
+    }
+  }
+  await prisma.$transaction(ops as any);
+  revalidatePath("/timesheet");
+  return { touched: ops.length };
+}
