@@ -25,7 +25,9 @@ const COURSES = [
   "aveva-report",
   "isa-standards",
   "gamp5",
-  "csv-validation"
+  "csv-validation",
+  "ba4-securite-electrique",
+  "ba5-securite-electrique"
 ];
 
 const prisma = new PrismaClient();
@@ -48,13 +50,19 @@ async function upsertCourse(slug) {
         title: data.title,
         subtitle: data.subtitle ?? null,
         level: data.level ?? null,
-        duration: data.duration ?? null
+        duration: data.duration ?? null,
+        isCertifying: data.isCertifying ?? false,
+        passThreshold: data.passThreshold ?? 70,
+        certificateWording: data.certificateWording ?? null
       },
       update: {
         title: data.title,
         subtitle: data.subtitle ?? null,
         level: data.level ?? null,
-        duration: data.duration ?? null
+        duration: data.duration ?? null,
+        isCertifying: data.isCertifying ?? false,
+        passThreshold: data.passThreshold ?? 70,
+        certificateWording: data.certificateWording ?? null
       }
     });
     await tx.courseSlide.deleteMany({ where: { courseId: c.id } });

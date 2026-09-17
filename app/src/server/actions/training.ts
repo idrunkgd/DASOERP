@@ -113,7 +113,10 @@ export async function saveQuizAttempt(
 
   const slide = await prisma.courseSlide.findUnique({
     where: { id: slideId },
-    select: { id: true, courseId: true, kind: true, quiz: true }
+    select: {
+      id: true, courseId: true, kind: true, quiz: true, position: true,
+      course: { select: { id: true, isCertifying: true, passThreshold: true } }
+    }
   });
   if (!slide) throw new Error("Slide introuvable.");
   if (slide.kind !== "QUIZ") throw new Error("Cette slide n'est pas un quiz.");
@@ -138,8 +141,40 @@ export async function saveQuizAttempt(
     }
   });
 
+  // ─── Certification : cours certifiant + quiz FINAL du cours ───
+  let certificateIssued: null | { documentId: string; scorePercent: number; passed: boolean; threshold: number } = null;
+  if (slide.course.isCertifying) {
+    // On considère "quiz certifiant" = quiz avec la position la plus élevée du cours.
+    const lastQuizPos = await prisma.courseSlide.aggregate({
+      where: { courseId: slide.courseId, kind: "QUIZ" },
+      _max: { position: true }
+    });
+    const isFinalQuiz = lastQuizPos._max.position === slide.position;
+    if (isFinalQuiz) {
+      const percent = Math.round((score / questions.length) * 100);
+      const threshold = slide.course.passThreshold ?? 70;
+      if (percent >= threshold) {
+        try {
+          const { issueCertificateForUser } = await import("@/server/services/certificate-service");
+          const r = await issueCertificateForUser({
+            userId: session.user.id,
+            courseId: slide.courseId,
+            scorePercent: percent
+          });
+          certificateIssued = { documentId: r.documentId, scorePercent: percent, passed: true, threshold };
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error("[training] emission certificat échouée:", err);
+        }
+      } else {
+        certificateIssued = { documentId: "", scorePercent: percent, passed: false, threshold };
+      }
+    }
+  }
+
   revalidatePath(`/training`);
-  return { score, total: questions.length, answers };
+  revalidatePath(`/me/documents`);
+  return { score, total: questions.length, answers, certificate: certificateIssued };
 }
 
 /**

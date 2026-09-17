@@ -2,7 +2,7 @@
 // Auth obligatoire (re-check côté serveur, pas de signed URL).
 // Le fichier est lu depuis disque et streamé au client.
 import { prisma } from "@/lib/db";
-import { requireSession } from "@/lib/rbac";
+import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { createReadStream } from "fs";
 import { stat } from "fs/promises";
@@ -24,6 +24,17 @@ export async function GET(
   });
   if (!doc) {
     return new Response("Document introuvable", { status: 404 });
+  }
+
+  // Contrôle d'accès : documents.read = tout le monde y accède.
+  // Sinon (self.read seul), on autorise UNIQUEMENT si le doc lui appartient
+  // (consultantId === session.user.id).
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canReadAll = perms.includes("documents.read");
+  if (!canReadAll) {
+    if (doc.consultantId !== session.user.id) {
+      return new Response("Forbidden", { status: 403 });
+    }
   }
 
   const absolutePath = path.join(STORAGE_ROOT, doc.storagePath);
@@ -56,7 +67,7 @@ export async function GET(
   // Log (non bloquant)
   logActivity({
     actorId: session.user.id,
-    action: "VIEW",
+    action: "VIEW" as any,   // action string acceptée par l'audit trail
     entityType: "Document",
     entityId: doc.id,
     message: `Téléchargement de « ${doc.title} »`

@@ -3189,6 +3189,16 @@ model Course {
   level     String?       // Ex: "Débutant à Expert"
   duration  String?       // Ex: "3 à 4 jours (≈ 24 h)"
   active    Boolean       @default(true)
+  // ─── Certification (BA4/BA5, GAMP 5 certifiant, etc.) ───
+  /// Si true, le DERNIER quiz du cours (le plus haut position) est le quiz
+  /// certifiant : à sa validation, on calcule le score total et on émet
+  /// automatiquement un certificat PDF si passThreshold est atteint.
+  isCertifying     Boolean  @default(false)
+  /// Score minimum en % (0-100) pour valider la certification. Ex : 70.
+  passThreshold    Int      @default(70)
+  /// Texte légal imprimé sur le certificat. Ex : "Formation relative aux
+  /// risques électriques…" — laissé libre pour supporter tous les cursus.
+  certificateWording String? @db.Text
   slides    CourseSlide[]
   progress  UserCourseProgress[]
   attempts  UserQuizAttempt[]

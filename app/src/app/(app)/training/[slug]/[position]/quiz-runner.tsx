@@ -19,7 +19,7 @@ export function QuizRunner({
   questions: QuizQuestion[];
 }) {
   const [choices, setChoices] = useState<Record<number, number>>({});
-  const [result, setResult] = useState<{ score: number; total: number } | null>(null);
+  const [result, setResult] = useState<{ score: number; total: number; certificate?: any } | null>(null);
   const [pending, start] = useTransition();
 
   function selectOption(qIdx: number, oIdx: number) {
@@ -34,7 +34,12 @@ export function QuizRunner({
     start(async () => {
       try {
         const r = await saveQuizAttempt(slideId, arr);
-        setResult({ score: r.score, total: r.total });
+        setResult({ score: r.score, total: r.total, certificate: r.certificate });
+        if (r.certificate?.passed) {
+          toast.success(`🎓 Certificat émis (${r.certificate.scorePercent}%) — Mes documents`);
+        } else if (r.certificate?.passed === false) {
+          toast.error(`Score ${r.certificate.scorePercent}% < seuil ${r.certificate.threshold}% — recommence quand tu es prêt`);
+        }
       } catch (e: any) {
         if (isNextControlFlow(e)) throw e;
         toast.error(e?.message ?? "Erreur");
