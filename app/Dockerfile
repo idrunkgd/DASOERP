@@ -14,7 +14,11 @@ RUN apk add --no-cache libc6-compat openssl
 
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
-RUN npm ci --include=dev
+# On utilise `npm install` (pas `npm ci`) pour tolérer un lockfile légèrement
+# désynchronisé après ajout de deps (nodemailer, web-push, @types/*). Le lock
+# sera régénéré dans l'image ; côté hôte on peut le committer plus tard via
+# `npm install --package-lock-only` si l'on veut refigure `npm ci`.
+RUN npm install --no-audit --no-fund --include=dev
 
 # ─── Stage 2 : build ───
 FROM node:20-alpine AS builder
