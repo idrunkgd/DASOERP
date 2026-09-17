@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
@@ -7,13 +7,14 @@ import { ChevronLeft, ChevronRight, List } from "lucide-react";
 import { QuizRunner, type QuizQuestion } from "./quiz-runner";
 import { ProgressTracker } from "./progress-tracker";
 import { KeyboardNav } from "./keyboard-nav";
+import { SlideBlocks } from "@/components/training/slide-blocks";
 
 export const dynamic = "force-dynamic";
 
 export default async function SlideViewer({
   params
 }: { params: { slug: string; position: string } }) {
-  await requirePermissionOrRedirect("training.read");
+  const session = await requirePermissionOrRedirect("training.read");
   const pos = parseInt(params.position, 10);
   if (isNaN(pos) || pos < 1) notFound();
 
@@ -21,12 +22,26 @@ export default async function SlideViewer({
     where: { slug: params.slug },
     select: {
       id: true, slug: true, title: true,
+      prerequisiteCourseId: true,
       slides: {
         select: { id: true, position: true, kind: true, section: true, title: true, bodyMd: true, imageUrl: true, quiz: true }
       }
     }
   });
   if (!course) notFound();
+
+  // Gate prérequis : sans le certificat du cours prérequis, on redirige
+  // vers la page cours (qui affiche le blocage clairement).
+  if (course.prerequisiteCourseId) {
+    const cert = await prisma.document.findFirst({
+      where: {
+        consultantId: session.user.id,
+        tags: { hasEvery: ["certificat", `course:${course.prerequisiteCourseId}`] }
+      },
+      select: { id: true }
+    });
+    if (!cert) redirect(`/training/${course.slug}`);
+  }
 
   const sorted = [...course.slides].sort((a, b) => a.position - b.position);
   const slide = sorted.find((s) => s.position === pos);
@@ -99,8 +114,8 @@ export default async function SlideViewer({
             <img src={slide.imageUrl} alt={slide.title} className="max-w-full rounded shadow-sm" />
           </div>
         ) : (
-          <article className="card p-6 md:p-8 prose prose-sm max-w-none text-midnight-900 whitespace-pre-wrap">
-            {slide.bodyMd || <em className="text-midnight-400">Contenu non renseigné.</em>}
+          <article className="card p-6 md:p-8 max-w-none text-midnight-900">
+            <SlideBlocks bodyMd={slide.bodyMd || ""} />
           </article>
         )}
       </div>

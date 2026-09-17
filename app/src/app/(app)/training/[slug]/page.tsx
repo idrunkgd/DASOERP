@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, requireSession } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
-import { ArrowLeft, PlayCircle, RotateCw, CheckCircle2, FileQuestion, FileText } from "lucide-react";
+import { ArrowLeft, PlayCircle, RotateCw, CheckCircle2, FileQuestion, FileText, Lock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,8 @@ export default async function CoursePage({ params }: { params: { slug: string } 
       slides: {
         orderBy: { position: "asc" },
         select: { id: true, position: true, kind: true, section: true, title: true }
-      }
+      },
+      prerequisiteCourse: { select: { id: true, slug: true, title: true } }
     }
   });
   if (!course) notFound();
@@ -24,6 +25,20 @@ export default async function CoursePage({ params }: { params: { slug: string } 
   const progress = await prisma.userCourseProgress.findUnique({
     where: { userId_courseId: { userId: session.user.id, courseId: course.id } }
   });
+
+  // Vérification du prérequis : présence d'un Document taggé
+  // `certificat` + `course:<prerequisiteCourseId>` pour l'utilisateur.
+  let prereqPassed = true;
+  if (course.prerequisiteCourse) {
+    const cert = await prisma.document.findFirst({
+      where: {
+        consultantId: session.user.id,
+        tags: { hasEvery: ["certificat", `course:${course.prerequisiteCourse.id}`] }
+      },
+      select: { id: true }
+    });
+    prereqPassed = !!cert;
+  }
 
   // Regrouper par section pour l'affichage
   const sections = new Map<string, typeof course.slides>();
@@ -44,15 +59,37 @@ export default async function CoursePage({ params }: { params: { slug: string } 
         subtitle={course.subtitle ?? undefined}
         actions={
           <div className="flex gap-2">
-            <Link href={`/training/${course.slug}/${startPos}`} className="btn-primary text-sm inline-flex items-center gap-1">
-              {isDone ? <><RotateCw className="w-4 h-4" /> Recommencer</> : isFresh ? <><PlayCircle className="w-4 h-4" /> Commencer</> : <><PlayCircle className="w-4 h-4" /> Reprendre slide {startPos}</>}
-            </Link>
+            {prereqPassed ? (
+              <Link href={`/training/${course.slug}/${startPos}`} className="btn-primary text-sm inline-flex items-center gap-1">
+                {isDone ? <><RotateCw className="w-4 h-4" /> Recommencer</> : isFresh ? <><PlayCircle className="w-4 h-4" /> Commencer</> : <><PlayCircle className="w-4 h-4" /> Reprendre slide {startPos}</>}
+              </Link>
+            ) : (
+              <button disabled className="btn-primary text-sm inline-flex items-center gap-1 opacity-50 cursor-not-allowed">
+                <Lock className="w-4 h-4" /> Verrouillé
+              </button>
+            )}
             <Link href="/training" className="btn-ghost text-sm inline-flex items-center gap-1">
               <ArrowLeft className="w-4 h-4" /> Retour
             </Link>
           </div>
         }
       />
+
+      {!prereqPassed && course.prerequisiteCourse && (
+        <div className="mb-6 rounded-xl border-l-4 border-amber-400 bg-amber-50 p-4 flex items-start gap-3">
+          <Lock className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-amber-700 mb-1">Formation verrouillée</div>
+            <div className="text-sm text-amber-900 leading-relaxed">
+              Cette formation nécessite d'avoir réussi <strong>« {course.prerequisiteCourse.title} »</strong> au préalable.
+              {" "}
+              <Link href={`/training/${course.prerequisiteCourse.slug}`} className="underline font-semibold hover:text-amber-950">
+                Aller à la formation prérequise →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-2 mb-6 text-xs">
         {course.level && <span className="badge-neutral">{course.level}</span>}

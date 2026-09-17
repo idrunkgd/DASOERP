@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
-import { GraduationCap, CheckCircle2, Clock, PlayCircle, EyeOff } from "lucide-react";
+import { GraduationCap, CheckCircle2, Clock, PlayCircle, EyeOff, Lock } from "lucide-react";
 import { ToggleCourseVisibility } from "./toggle-visibility";
 // Le cours AVEVA est semé automatiquement au démarrage du conteneur
 // (voir prisma/seed-training.mjs + Dockerfile CMD). Plus de bouton d'import.
@@ -16,19 +16,28 @@ export default async function TrainingPage() {
 
   // Admin (training.manage) : voit TOUS les cours, actifs et masqués, avec un
   // œil pour basculer. Consultant : ne voit que les actifs (comportement historique).
-  const [courses, myProgress] = await Promise.all([
+  const [courses, myProgress, myCerts] = await Promise.all([
     prisma.course.findMany({
       where: canManage ? {} : { active: true },
       orderBy: [{ active: "desc" }, { title: "asc" }],
       include: {
-        _count: { select: { slides: true } }
+        _count: { select: { slides: true } },
+        prerequisiteCourse: { select: { id: true, title: true } }
       }
     }),
     prisma.userCourseProgress.findMany({
       where: { userId: session.user.id }
+    }),
+    prisma.document.findMany({
+      where: { consultantId: session.user.id, tags: { has: "certificat" } },
+      select: { tags: true }
     })
   ]);
   const progressByCourse = new Map(myProgress.map((p) => [p.courseId, p]));
+  // Set des courseIds pour lesquels l'user a un certificat émis
+  const certifiedCourseIds = new Set(
+    myCerts.flatMap((d) => d.tags.filter((t) => t.startsWith("course:")).map((t) => t.slice("course:".length)))
+  );
 
   return (
     <div>
@@ -47,8 +56,9 @@ export default async function TrainingPage() {
             const prog = progressByCourse.get(c.id);
             const pct = prog ? Math.round((prog.lastSlide / c._count.slides) * 100) : 0;
             const completed = !!prog?.completedAt;
+            const locked = !!c.prerequisiteCourse && !certifiedCourseIds.has(c.prerequisiteCourse.id);
             return (
-              <div key={c.id} className={"relative " + (!c.active ? "opacity-60" : "")}>
+              <div key={c.id} className={"relative " + (!c.active ? "opacity-60" : locked ? "opacity-75" : "")}>
                 {canManage && (
                   <div className="absolute top-3 right-3 z-10">
                     <ToggleCourseVisibility courseId={c.id} active={c.active} />
@@ -66,6 +76,7 @@ export default async function TrainingPage() {
                     <h3 className="font-semibold text-midnight-900 group-hover:text-indigoaccent transition-colors flex items-center gap-2">
                       {c.title}
                       {!c.active && <EyeOff className="w-3.5 h-3.5 text-midnight-400" />}
+                      {locked && <Lock className="w-3.5 h-3.5 text-amber-600" />}
                     </h3>
                     {c.subtitle && <p className="text-xs text-midnight-500 mt-0.5 line-clamp-2">{c.subtitle}</p>}
                   </div>
@@ -76,7 +87,11 @@ export default async function TrainingPage() {
                   <span className="badge-neutral">{c._count.slides} slides</span>
                 </div>
                 <div className="mt-4">
-                  {completed ? (
+                  {locked && c.prerequisiteCourse ? (
+                    <span className="inline-flex items-center gap-1 text-xs text-amber-700 font-medium">
+                      <Lock className="w-3.5 h-3.5" /> Requiert : {c.prerequisiteCourse.title}
+                    </span>
+                  ) : completed ? (
                     <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Terminé
                     </span>

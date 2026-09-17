@@ -42,6 +42,16 @@ async function upsertCourse(slug) {
     return;
   }
   const data = JSON.parse(raw);
+  // Prerequisite : si le JSON définit `prerequisiteSlug`, on résout l'ID.
+  let prerequisiteCourseId = null;
+  if (data.prerequisiteSlug) {
+    const prereq = await prisma.course.findUnique({
+      where: { slug: data.prerequisiteSlug },
+      select: { id: true }
+    });
+    if (prereq) prerequisiteCourseId = prereq.id;
+    else console.warn(`[seed-training] prerequisiteSlug ${data.prerequisiteSlug} introuvable pour ${data.slug} — sera nul`);
+  }
   const course = await prisma.$transaction(async (tx) => {
     const c = await tx.course.upsert({
       where: { slug: data.slug },
@@ -53,7 +63,8 @@ async function upsertCourse(slug) {
         duration: data.duration ?? null,
         isCertifying: data.isCertifying ?? false,
         passThreshold: data.passThreshold ?? 70,
-        certificateWording: data.certificateWording ?? null
+        certificateWording: data.certificateWording ?? null,
+        prerequisiteCourseId
       },
       update: {
         title: data.title,
@@ -62,7 +73,8 @@ async function upsertCourse(slug) {
         duration: data.duration ?? null,
         isCertifying: data.isCertifying ?? false,
         passThreshold: data.passThreshold ?? 70,
-        certificateWording: data.certificateWording ?? null
+        certificateWording: data.certificateWording ?? null,
+        prerequisiteCourseId
       }
     });
     await tx.courseSlide.deleteMany({ where: { courseId: c.id } });

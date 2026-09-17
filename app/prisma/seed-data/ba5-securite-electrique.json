@@ -1,19 +1,20 @@
 {
   "slug": "ba5-securite-electrique",
   "title": "BA5 — Sécurité électrique (RGIE)",
-  "subtitle": "Personne qualifiée · Formation certifiante",
-  "level": "Techniciens et ingénieurs",
+  "subtitle": "Personne qualifiée · Formation certifiante — prérequis BA4",
+  "level": "Personnel technique / électricien",
   "duration": "≈ 6 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "certificateWording": "Formation relative aux risques électriques et aux principes de sécurité conformément au RGIE — niveau personne qualifiée. Cette attestation atteste de la formation et de la réussite de l'évaluation. Elle ne constitue pas à elle seule une habilitation BA5. L'attribution de la compétence BA5 relève de l'employeur pour les installations et travaux concernés.",
+  "prerequisiteSlug": "ba4-securite-electrique",
+  "certificateWording": "Formation approfondie relative aux risques électriques et aux principes de sécurité conformément au RGIE, incluant les procédures de consignation, l'analyse de risques et l'encadrement des personnes averties. Cette attestation atteste de la formation et de la réussite de l'évaluation. Elle ne constitue pas à elle seule une habilitation BA5. L'attribution de la compétence BA5 relève de l'employeur pour les installations et travaux concernés.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
-      "section": null,
-      "title": "Formation BA5 — Personne qualifiée",
-      "bodyMd": "**Sécurité électrique · RGIE Belgique · Niveau qualifié**\n\nCette formation prépare à l'habilitation **BA5** — personne qualifiée pour intervenir sur les installations électriques.\n\n**Prérequis :** avoir suivi la formation BA4 et disposer d'une expérience/qualification technique.\n\nÀ la fin : quiz certifiant. **70 % minimum** pour obtenir l'attestation.",
+      "section": "INTRODUCTION",
+      "title": "Bienvenue — Formation BA5",
+      "bodyMd": "## Personne qualifiée · niveau expert BA5\n\nCette formation prolonge la BA4 (obligatoire au préalable). Le BA5 est **le maillon opérationnel** de la sécurité électrique : c'est lui qui consigne, mesure, intervient et **encadre les BA4** sur le terrain.\n\n[ILLUSTRATION|lightning]\n\n### Ce que tu vas maîtriser\n- Le rôle et les responsabilités légales du BA5\n- La consignation complète (les 7 étapes en pratique)\n- L'analyse de risques préalable à toute intervention\n- Les régimes de neutre (TT, TN, IT) et leurs implications sécurité\n- Les EPI avancés (arc-flash suit, protection au visage)\n- La rédaction d'une **AT** (Autorisation de Travail) et le briefing d'équipe\n\n[TIP|Quiz certifiant à la fin : 10 questions, seuil 70 %. Comme pour BA4, tu peux retenter autant de fois qu'il faut.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -21,9 +22,9 @@
     {
       "position": 2,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · RÔLE DU BA5",
-      "title": "Le BA5 dans le RGIE",
-      "bodyMd": "Le BA5 est la **personne qualifiée** pour intervenir sur les installations électriques.\n\n**Ce qu'il peut faire :**\n- Réaliser des consignations\n- Ouvrir et travailler sur des armoires électriques\n- Effectuer des essais et mesures sous tension (avec équipements adaptés)\n- Encadrer des BA4 sur chantier\n\n**Ce qu'il doit être :**\n- Compétent techniquement (formation ou expérience validée)\n- Habilité par son employeur pour un périmètre précis\n- Apte médicalement (visite médicale du travail)\n- Recyclé périodiquement (typiquement tous les 3 ans)",
+      "section": "CADRE",
+      "title": "Le BA5 selon le RGIE",
+      "bodyMd": "## Personne qualifiée — définition\n\nLe RGIE (Livre 1, chapitre 4.2) définit le BA5 comme une personne **ayant les compétences techniques** nécessaires pour exécuter les tâches électriques **hors tension** et, si elle possède l'attribut **BS** (basse tension Sous tension), **sous tension** aussi.\n\n[KV|BA5:Toutes interventions hors tension (mesure, remplacement, consignation)||BA5 + BS:Interventions sous tension autorisées en BT (mesures, essais, dépannage à chaud)||BA5 + BE:Habilité à faire des essais / vérifications avant remise en service]\n\n### Compétences requises\n- Formation électrique de base (électromécanique, automatismes, ou électricien)\n- Connaissance du RGIE et des schémas de l'installation où il opère\n- Capacité à **analyser un risque avant intervention** (pas d'automatismes)\n- Aptitude à **rédiger** consignations et autorisations de travail\n\n[RULE|Le BA5 n'est **pas** un titre à vie : l'employeur peut retirer l'habilitation si le travailleur a un accident, un manquement grave, ou si sa formation n'est plus à jour. Recyclage recommandé tous les **3 ans**.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -31,9 +32,9 @@
     {
       "position": 3,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · RÔLE DU BA5",
+      "section": "CADRE",
       "title": "La chaîne des responsabilités",
-      "bodyMd": "Sur un chantier électrique, les rôles s'articulent :\n\n**Chargé d'exploitation** (souvent BA5 senior)\n- Responsable de l'installation\n- Autorise les interventions\n- Signe les consignations\n\n**Chargé de travaux** (BA5)\n- Pilote une équipe sur un chantier précis\n- Analyse les risques, coordonne les EPI\n\n**Exécutant** (BA4 ou BA5 selon tâche)\n- Réalise les travaux dans son périmètre autorisé\n- Applique les consignes\n\n**Personne autorisée** (BA5 souvent)\n- Habilitée par écrit par l'employeur pour un scope\n\n**Toi en BA5 :** tu peux occuper l'un ou l'autre selon la mission.",
+      "bodyMd": "## Qui fait quoi sur un chantier électrique\n\n[KV|Employeur:Analyse des risques du poste, attribution des habilitations écrites, fourniture des EPI, formation continue||Chargé d'Exploitation Électrique (CEE):Point unique de contact pour toute intervention sur l'installation. Autorise ou refuse les demandes de consignation.||Chargé de Consignation (BA5):Exécute les 7 étapes de la consignation. Remet l'attestation au chargé de travaux.||Chargé de Travaux (BA5):Reçoit l'attestation, dirige l'équipe, garantit le respect des règles de sécurité pendant l'intervention.||Exécutants (BA4 ou BA5):Réalisent la tâche. **Un BA4 ne peut intervenir qu'accompagné d'un BA5** qui surveille.]\n\n[USECASE|Julien, BA5 chargé de travaux — 39 ans|Julien reçoit une AT du CEE pour remplacer un contacteur en armoire 400V. Un BA4 (Léa) doit l'assister pour visser / positionner. Julien doit consigner, faire un VAT à Léa, la briefer sur les zones à ne PAS toucher, et surveiller son travail.|**Ce qui l'engage** : la sécurité de Léa. Si Léa touche une pièce sous tension mal repérée, la responsabilité pénale et civile du BA5 chargé de travaux est engagée. **Un BA5 qui accompagne n'est pas là par confort — il est légalement responsable.**]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -41,38 +42,26 @@
     {
       "position": 4,
       "kind": "QUIZ",
-      "section": "NIVEAU 1 · RÔLE DU BA5",
-      "title": "Quiz — Rôle BA5",
+      "section": "CADRE",
+      "title": "Quiz 1 — Le rôle du BA5",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Le BA5 peut réaliser une consignation ?",
-            "options": [
-              "Oui",
-              "Non",
-              "Uniquement en HT"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "L'habilitation BA5 doit être renouvelée tous les :",
-            "options": [
-              "An",
-              "3 ans typiquement",
-              "10 ans"
-            ],
+            "prompt": "Un BA5 sans l'attribut BS peut-il faire une mesure sur des barres nues sous tension en 400V ?",
+            "options": ["Oui, avec des gants isolants", "Non, il lui faut l'attribut BS", "Oui, si un BA4 l'accompagne", "Oui, en zone verte"],
             "correctIndex": 1
           },
           {
-            "prompt": "Le chargé d'exploitation est responsable :",
+            "prompt": "Un BA4 exécutant est présent sur un chantier électrique. Qui est légalement responsable de sa sécurité pendant l'intervention ?",
             "options": [
-              "De l'installation",
-              "Des salaires",
-              "De la sécurité incendie"
+              "L'employeur uniquement",
+              "Le BA4 lui-même",
+              "Le BA5 chargé de travaux qui l'accompagne",
+              "Le service prévention"
             ],
-            "correctIndex": 0
+            "correctIndex": 2
           }
         ]
       },
@@ -81,9 +70,9 @@
     {
       "position": 5,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · CONSIGNATION MAÎTRISÉE",
-      "title": "Les 5 étapes en détail",
-      "bodyMd": "**1. SÉPARER**\nOuverture de tous les sectionneurs alimentant la zone. Coupure **VISIBLE** (contacts vus ouverts).\n\n**2. CONDAMNER**\nCadenassage physique du sectionneur + panneau \"Ne pas manœuvrer — travaux en cours\". Le BA5 conserve la clé.\n\n**3. IDENTIFIER**\nVérification schéma unifilaire + repérage physique. Confirmer qu'on est bien sur la BONNE ligne.\n\n**4. VÉRIFIER L'ABSENCE DE TENSION (VAT)**\nAvec un détecteur adapté, TESTÉ AVANT/APRÈS sur une source connue (règle du \"3 tests\"). Toutes les phases + neutre + terre.\n\n**5. METTRE À LA TERRE ET EN COURT-CIRCUIT (MALT)**\nObligatoire en HT. Recommandé en BT sur certaines interventions. Protège contre :\n- Remise sous tension accidentelle\n- Retour d'énergie (condensateurs, machines tournantes)\n- Tension induite",
+      "section": "CONSIGNATION",
+      "title": "Les 7 étapes de consignation — mode opératoire",
+      "bodyMd": "## Séquence détaillée pour un BA5\n\n[ILLUSTRATION|lockout]\n\n[STEPS|**1. Séparer** — Ouvrir tous les organes de coupure en amont : disjoncteurs, sectionneurs, interrupteurs. Vérifier visuellement l'ouverture des contacts si possible.||**2. Condamner** — Cadenasser en position ouverte avec **cadenas nominatif** ET étiquette « Danger — ne pas manœuvrer / Nom / Date / Motif ». Un cadenas par personne intervenante.||**3. Identifier** — Vérifier sur le schéma unifilaire à jour + étiquetage in situ que le circuit consigné correspond bien à la zone d'intervention. Ne jamais se fier à la mémoire.||**4. VAT** — Vérifier l'absence de tension avec procédure témoin (avant / mesure / après). Sur les **3 phases + neutre**. Sur **tous les conducteurs actifs**.||**5. MALT-CC** — Mise à la terre et en court-circuit : obligatoire HT, fortement recommandé BT si conducteurs longs (câbles > 10 m peuvent se recharger par capacité).||**6. Baliser** — Rubalise + panneaux « Travaux — zone consignée ». Interdiction d'entrée sans autorisation du chargé de travaux.||**7. AT** — Rédaction d'une **Autorisation de Travail** écrite, signée entre chargé de consignation et chargé de travaux. Copie affichée sur zone.]\n\n[DANGER|**L'étape 4 (VAT) est la plus critique.** 60 % des accidents mortels de BA5 se produisent parce qu'un circuit qu'on croyait consigné est resté sous tension (mauvais schéma, condamnation contournée, retour d'énergie d'un onduleur…). **Toujours VAT, toujours procédure témoin.**]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -91,9 +80,9 @@
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · CONSIGNATION MAÎTRISÉE",
-      "title": "L'analyse de risques BA5",
-      "bodyMd": "Avant toute intervention, le BA5 rédige/valide une analyse de risques :\n\n**Contenu obligatoire :**\n- Description de la zone et des équipements\n- Tension et régime de neutre (TT, TN, IT)\n- Voisinage (autres équipements sous tension à proximité)\n- Personnel présent (BA4 encadrés ?)\n- EPI requis (classe de gants, distance de sécurité)\n- Séquence des opérations\n- Modalités de retour à la normale\n\n**Signée par :**\n- Chargé de travaux (BA5)\n- Chargé d'exploitation (validation)\n- Exécutants avant démarrage",
+      "section": "CONSIGNATION",
+      "title": "Analyse de risques préalable",
+      "bodyMd": "## Avant chaque intervention — 5 minutes qui sauvent\n\nLe BA5 ne se lance jamais dans une intervention sans **analyser les risques** à voix haute avec son équipe. Format court, systématique :\n\n[STEPS|**Nature du travail** — Que faisons-nous concrètement ? (verbe d'action précis)||**Nature du risque** — Électrique BT / HT / dynamique / thermique / mécanique ?||**Ordre d'exécution** — Quelle étape en premier ? Puis quoi ? Où sont les points de non-retour ?||**Contrôles obligatoires** — Quels tests VAT ? À quels endroits ? Qui les fait ?||**EPI requis** — Gants classe ? Écran facial ? Vêtement arc-flash ? Chaussures ?||**En cas d'imprévu** — Point d'arrêt convenu, personne à alerter, moyen d'évacuation]\n\n[USECASE|Anaïs, chargée de travaux BA5 — 33 ans|Anaïs doit remplacer un différentiel 300 mA sur un TGBT 400V. Elle démarre le briefing avec son binôme (BA4). Pendant l'analyse, elle réalise que l'onduleur du bâtiment continue à alimenter le TGBT en cas de coupure secteur.|**Sans l'analyse préalable**, elle aurait consigné le disjoncteur d'arrivée général — et la barre serait restée sous tension via l'onduleur. **Avec l'analyse**, elle ajoute l'étape de bascule manuelle de l'onduleur AVANT de consigner. Cinq minutes ont peut-être sauvé sa vie.]\n\n[RULE|Une analyse de risques bâclée = une intervention non sécurisée. Si le briefing prend 30 secondes, c'est qu'il n'y a pas eu d'analyse. **Minimum 3 minutes en équipe.**]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -101,9 +90,9 @@
     {
       "position": 7,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · CONSIGNATION MAÎTRISÉE",
-      "title": "Les régimes de neutre",
-      "bodyMd": "Le régime de neutre définit la connexion du neutre à la terre. Impact direct sur la sécurité.\n\n**TT** (Terre-Terre) — neutre du transfo relié à la terre, masses de l'installation reliées à leur propre terre\n- Le plus courant en résidentiel\n- Coupure sur premier défaut par différentiel\n\n**TN** (Terre-Neutre) — neutre + masses reliés à la terre du transfo\n- Courant en industriel\n- Coupure sur premier défaut par disjoncteur\n\n**IT** (Isolé-Terre) — neutre isolé (ou impédant), masses à la terre locale\n- Milieu hospitalier, chimie\n- Continuité de service critique — un défaut ne coupe pas\n\n**En BA5 :** identifier le régime avant intervention conditionne les protections.",
+      "section": "CONSIGNATION",
+      "title": "Régimes de neutre — implications sécurité",
+      "bodyMd": "## TT, TN, IT — ce que ça change pour un BA5\n\n[KV|**TT** (le plus courant en résidentiel/tertiaire BE):Neutre à la terre côté transfo + masses à la terre côté installation. **Défaut d'isolement → différentiel déclenche immédiatement.** Sécurité passive maximale.||**TN-S / TN-C-S** (industrie moyenne):Neutre à la terre au transfo, mais retour par conducteur PE. **Un défaut = court-circuit franc, disjoncteur déclenche par surintensité.** Attention aux hausses de potentiel PE.||**IT** (hôpitaux, cimenteries, salles de contrôle):Neutre isolé de la terre. **Premier défaut → pas de coupure, seulement alarme.** Second défaut = danger majeur (double défaut = court-circuit entre phases).]\n\n### Ce que ça implique côté BA5\n- **TT** : ne pas déconnecter le neutre en même temps qu'une phase (peut créer une tension flottante)\n- **TN** : le conducteur PE peut monter à plusieurs dizaines de V en cas de défaut sur un autre circuit\n- **IT** : **jamais** de travail sans première recherche du défaut d'isolement (contrôleur permanent d'isolement + relevé du CPI)\n\n[WARN|En régime **IT**, un contrôleur permanent d'isolement (CPI) surveille en continu. Si le voyant / alarme est actif → **stop, on ne consigne pas** avant d'avoir localisé et supprimé le premier défaut. Sinon, le second défaut peut arriver au moment le plus dangereux.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -111,37 +100,20 @@
     {
       "position": 8,
       "kind": "QUIZ",
-      "section": "NIVEAU 2 · CONSIGNATION MAÎTRISÉE",
-      "title": "Quiz — Consignation",
+      "section": "CONSIGNATION",
+      "title": "Quiz 2 — Consignation & régimes",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "La règle du 3 tests VAT vise à :",
-            "options": [
-              "Vérifier que le détecteur fonctionne",
-              "Confirmer plusieurs mesures",
-              "Contrôler les 3 phases"
-            ],
-            "correctIndex": 0
+            "prompt": "Dans la procédure de consignation, à quelle étape doit-on vérifier l'absence de tension avec la procédure « témoin » ?",
+            "options": ["Étape 1", "Étape 3", "Étape 4", "Étape 7"],
+            "correctIndex": 2
           },
           {
-            "prompt": "MALT signifie :",
-            "options": [
-              "Mesure d'Alerte Locale de Tension",
-              "Mise À La Terre (et en court-circuit)",
-              "Mise Automatique de Ligne Terminée"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Le régime IT est utilisé principalement pour :",
-            "options": [
-              "Résidentiel",
-              "Continuité de service (hôpital, chimie)",
-              "Éclairage public"
-            ],
+            "prompt": "En régime IT, quel élément signale un premier défaut d'isolement ?",
+            "options": ["Le disjoncteur général", "Le contrôleur permanent d'isolement (CPI)", "Le différentiel 30 mA", "L'onduleur"],
             "correctIndex": 1
           }
         ]
@@ -151,9 +123,9 @@
     {
       "position": 9,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · ÉQUIPEMENTS BA5",
-      "title": "Équipements de protection avancés",
-      "bodyMd": "En BA5, tu utilises régulièrement des EPI plus techniques :\n\n**Gants isolants classés** — 6 classes selon tension max\n- Classe 00 : 500 V AC\n- Classe 0 : 1 000 V AC\n- Classe 1 : 7 500 V AC\n- Classe 2 : 17 000 V AC\n- Classe 3 : 26 500 V AC\n- Classe 4 : 36 000 V AC\n\n**Vêtement anti-arc**\nVêtement retardateur de flamme (FR) classé selon la protection ATPV (cal/cm²).\n\n**Casque + visière arc-flash**\nPour interventions à risque d'arc électrique. Classe selon énergie potentielle.\n\n**Tapis isolant** — au sol devant l'armoire, isole des masses.\n\n**Perche isolante** — pour manœuvres à distance.\n\n**Chaque équipement a une date de validité — contrôle avant chaque usage.**",
+      "section": "PROTECTION",
+      "title": "EPI avancés — au-delà de la BA4",
+      "bodyMd": "## Ta panoplie BA5 complète\n\n[EPI|helmet,gloves,mat,vat,shoes,glasses,arcsuit,lockout,tester]\n\n### Nouveautés par rapport à BA4\n- **Casque avec écran facial anti-arc** (norme EN 166 + IEC 61482) — obligatoire pour toute mesure directe sur BT > 250V\n- **Vêtement de travail arc-flash** — classifié en cal/cm² (calories par cm²) selon la puissance de court-circuit du tableau\n- **Cadenas de consignation nominatifs** avec ta photo et ton nom\n- **Perche isolante** (HT) — pour tester à distance ou manœuvrer un sectionneur ouvert\n- **Tapis isolant** posé au sol devant l'armoire pendant toute la durée de l'intervention\n\n[KV|Cal/cm² sur veste arc-flash:Doit être supérieure à l'énergie incidente calculée du tableau (norme IEEE 1584)||Habituellement pour BT industrielle:8 à 25 cal/cm² selon la puissance de court-circuit||Vérification annuelle des vêtements:Fabricant / laboratoire agréé — pas seulement visuelle]\n\n[RULE|**Contrôle des EPI avant chaque intervention** — pas seulement en début de journée. Un accident peut avoir eu lieu à midi. Une inspection rapide au démarrage de chaque tâche.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -161,9 +133,9 @@
     {
       "position": 10,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · ÉQUIPEMENTS BA5",
-      "title": "Outils et testeurs",
-      "bodyMd": "**Détecteur d'absence de tension (DAT)**\n- Testé sur source connue AVANT et APRÈS chaque VAT\n- Adapté à la tension de l'installation\n\n**Multimètre catégorisé**\n- CAT II : électronique standard\n- CAT III : distribution BT bâtiment\n- CAT IV : arrivée bâtiment, réseau\n- **Choisir la catégorie ≥ à l'installation**\n\n**Pince ampèremétrique** — mesure sans contact\n\n**Outillage isolé 1000 V**\n- Tournevis, pinces, clés\n- Estampillé \"1000 V\"\n- Poignées non entamées, en bon état\n\n**Consignation kit** — cadenas + panneaux + fiches de suivi",
+      "section": "PROTECTION",
+      "title": "Outils et testeurs — les fondamentaux",
+      "bodyMd": "## Le matériel du BA5\n\n[ILLUSTRATION|tester]\n\n### Multimètre CAT III / CAT IV\n- **CAT III** : circuits fixes de distribution (armoires, TGBT) — usage classique BA5\n- **CAT IV** : arrivée réseau et compteurs — plus rare mais obligatoire là où on intervient\n- Les cordons doivent porter la même catégorie que l'appareil\n- Vérifier fusibles internes + isolement des cordons **avant chaque usage**\n\n### VAT dédié\n- **Toujours** un modèle certifié EN 61243-3 — jamais un multimètre en position V AC\n- Test « témoin » systématique (voir slide BA4 sur le VAT)\n\n### Perche de manœuvre\n- Isolée à la tension de service + marge (perche 24 kV pour installation 15 kV)\n- Contrôle annuel obligatoire (dielectric test lab)\n- Stockage vertical, à l'abri de l'humidité\n\n### Lampe frontale / éclairage sécurisé\n- Une armoire mal éclairée = un accident en préparation\n- Éclairage LED alimenté par batterie, jamais 230V\n\n[TIP|Chaque outil BA5 a un **carnet de vie** : date d'achat, date des tests électriques, incidents éventuels. Sans carnet à jour, l'outil est en principe hors service.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -171,38 +143,26 @@
     {
       "position": 11,
       "kind": "QUIZ",
-      "section": "NIVEAU 3 · ÉQUIPEMENTS BA5",
-      "title": "Quiz — Équipements",
+      "section": "PROTECTION",
+      "title": "Quiz 3 — EPI & outils",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Un gant classe 2 est isolé jusqu'à :",
+            "prompt": "Quelle catégorie de multimètre utilises-tu sur un TGBT industriel ?",
+            "options": ["CAT I", "CAT II", "CAT III", "Peu importe, l'important c'est la tension max"],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "L'unité indiquée sur un vêtement arc-flash (ex : 12 cal/cm²) représente…",
             "options": [
-              "1 000 V",
-              "17 000 V",
-              "36 000 V"
+              "La tension d'usage maximum",
+              "La quantité d'énergie thermique que le vêtement peut absorber sans brûlure de niveau 2",
+              "Le nombre d'utilisations autorisées",
+              "La classe d'isolation en kilovolts"
             ],
             "correctIndex": 1
-          },
-          {
-            "prompt": "Pour mesurer sur une installation d'arrivée bâtiment, il faut un multimètre :",
-            "options": [
-              "CAT II",
-              "CAT III",
-              "CAT IV"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Un détecteur d'absence de tension doit être testé :",
-            "options": [
-              "Jamais",
-              "Une fois par an",
-              "Avant et après chaque VAT"
-            ],
-            "correctIndex": 2
           }
         ]
       },
@@ -211,9 +171,9 @@
     {
       "position": 12,
       "kind": "CONTENT",
-      "section": "NIVEAU 4 · GESTION D'ÉQUIPE",
-      "title": "Encadrer des BA4",
-      "bodyMd": "En BA5 chargé de travaux, tu peux encadrer des BA4. Ta responsabilité :\n\n**Avant l'intervention :**\n- Briefing complet des BA4 sur les risques\n- Vérifier leurs EPI\n- Définir clairement leur périmètre autorisé\n- Rappeler la règle du STOP\n\n**Pendant :**\n- Superviser en continu\n- Réaliser toi-même les consignations\n- Intervenir sur les parties sous tension (jamais les BA4)\n- Communiquer chaque changement\n\n**En cas d'incident :**\n- Prendre le commandement\n- Sécuriser la zone\n- Assurer l'alerte\n- Documenter pour retour d'expérience\n\n**Un BA5 qui délègue trop = un BA5 qui manque à ses responsabilités.**",
+      "section": "ENCADREMENT",
+      "title": "Encadrer un BA4 — mode d'emploi",
+      "bodyMd": "## Ton rôle de superviseur\n\nQuand un BA4 t'accompagne, tu es **son garant en sécurité**. Cela impose une posture claire :\n\n### Avant l'intervention\n- **Briefing dédié** : rappel du contexte, des zones à ne PAS toucher, du geste précis attendu\n- Vérification que le BA4 porte les **bons EPI** (casque + chaussures S3 + parfois lunettes)\n- Vérification que tu es **positionné entre lui et la zone à risque** (tu vois tout)\n\n### Pendant l'intervention\n- **Communication continue** : « je vais toucher le contacteur A », « OK, tu peux visser »\n- **Aucune manipulation** hors de ta vue directe\n- Si le BA4 dévie → **stop immédiat**, on refait le point\n\n### Après l'intervention\n- Débrief court : ce qui s'est bien passé, ce qui a été surprenant, ce qu'on améliore\n- Retour d'expérience au responsable si un incident (même mineur) est survenu\n\n[USECASE|Kevin, BA5 — 45 ans, 20 ans de métier|Kevin encadre Sami (BA4 récemment habilité) sur un remplacement de bornier. Kevin, confiant, s'écarte 2 secondes pour prendre une pince à sertir. Pendant ces 2 secondes, Sami croit bien faire en tirant un câble « pour dégager ».|**Le câble concerné n'avait pas été consigné** — il alimentait un circuit voisin. Court-circuit → arc → Sami en état de choc, brûlure au bras. **La leçon** : l'encadrement, c'est **zéro seconde d'inattention**. Si tu dois t'écarter, tu arrêtes le travail. Point.]\n\n[RULE|Tu ne partages **jamais** un cadenas avec un BA4. **Chaque intervenant** cadenasse avec son propre cadenas nominatif. Retirer le cadenas d'un autre = infraction pénale grave.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -221,9 +181,9 @@
     {
       "position": 13,
       "kind": "CONTENT",
-      "section": "NIVEAU 4 · GESTION D'ÉQUIPE",
-      "title": "La rédaction d'une AT",
-      "bodyMd": "AT = **Autorisation de Travail**. Document formel qui autorise l'intervention.\n\n**Contenu :**\n1. Identification de l'installation\n2. Nature des travaux\n3. Personnes intervenantes (nom, habilitation)\n4. Consignations prévues\n5. EPI requis\n6. Périmètre autorisé\n7. Durée prévue\n8. Signature du chargé d'exploitation\n\n**Après intervention :**\n- Levée de consignation\n- Contrôle des isolements\n- Remise en service\n- Signature \"travaux terminés\"\n- Archivage de l'AT (5 ans minimum en Belgique)",
+      "section": "ENCADREMENT",
+      "title": "Rédiger une AT — Autorisation de Travail",
+      "bodyMd": "## Le document qui te couvre légalement\n\nUne AT est **écrite, signée, datée**. Elle circule entre 3 personnes minimum :\n\n[STEPS|**1.** Le **chargé d'exploitation électrique (CEE)** émet l'AT en réponse à une demande d'intervention||**2.** Le **chargé de consignation** exécute les 7 étapes, remplit son cadre, signe||**3.** Le **chargé de travaux** reçoit l'AT, signe qu'il l'a reçue et briefe son équipe||**4.** À la fin des travaux, le chargé de travaux **restitue** l'AT au chargé de consignation||**5.** Le chargé de consignation **lève la consignation** (retire cadenas, remet sous tension progressivement)||**6.** L'AT est **archivée** dans le dossier électrique de l'installation (5 à 10 ans)]\n\n### Contenu obligatoire d'une AT\n- Numéro unique + date + heure de début\n- Ouvrage concerné (repère + localisation)\n- Nature exacte des travaux\n- Nom du chargé de consignation + chargé de travaux + exécutants\n- État de l'installation (hors tension, sous tension, en essais)\n- Prescriptions particulières (EPI, distances, points de vigilance)\n- Signatures + heure de restitution\n\n[WARN|**Une intervention sans AT signée = travail au noir électrique.** Sur un chantier avec accident, le premier document que l'inspection du travail va demander, c'est l'AT. Si elle manque, l'employeur est en infraction directe — et le BA5 est co-responsable.]\n\n[TIP|La plupart des entreprises ont un modèle d'AT standardisé. Si tu débutes comme BA5, demande-le à ton service HSE — ne rédige pas ta propre version au feeling.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -231,36 +191,29 @@
     {
       "position": 14,
       "kind": "QUIZ",
-      "section": "NIVEAU 4 · GESTION D'ÉQUIPE",
-      "title": "Quiz — Encadrement",
+      "section": "ENCADREMENT",
+      "title": "Quiz 4 — Encadrement & AT",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "AT signifie :",
+            "prompt": "Un BA5 partage-t-il son cadenas de consignation avec le BA4 qui l'accompagne ?",
             "options": [
-              "Autorisation de Travail",
-              "Accès Total",
-              "Analyse Technique"
+              "Oui, pour aller plus vite",
+              "Oui, si c'est un travail rapide",
+              "Non, chaque intervenant a son propre cadenas nominatif",
+              "Oui, mais seulement pour les BT"
             ],
-            "correctIndex": 0
+            "correctIndex": 2
           },
           {
-            "prompt": "Un BA5 chargé de travaux peut laisser un BA4 seul sur une intervention sous tension ?",
+            "prompt": "Qui doit signer l'Autorisation de Travail (AT) ?",
             "options": [
-              "Oui",
-              "Non, jamais sous tension seul",
-              "Oui si l'installation est BT"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Une AT s'archive minimum :",
-            "options": [
-              "1 an",
-              "5 ans",
-              "30 ans"
+              "Uniquement l'employeur",
+              "Le chargé d'exploitation, le chargé de consignation ET le chargé de travaux",
+              "Uniquement le chargé de travaux",
+              "Le service HSE et les exécutants"
             ],
             "correctIndex": 1
           }
@@ -271,9 +224,9 @@
     {
       "position": 15,
       "kind": "CONTENT",
-      "section": "ÉVALUATION FINALE",
-      "title": "Prêt pour l'évaluation ?",
-      "bodyMd": "Évaluation certifiante **BA5**.\n\n**Règles :**\n- 10 questions couvrant tout le cursus\n- **70 %** minimum (7/10) pour l'attestation\n- Recommencement possible en cas d'échec\n- Attestation PDF générée dans **Mes documents**\n\n**Rappel légal :** attestation ≠ habilitation. L'habilitation BA5 est délivrée par l'employeur pour un périmètre précis d'installation et de travaux.",
+      "section": "CERTIFICATION",
+      "title": "Prêt pour l'évaluation certifiante ?",
+      "bodyMd": "## Quiz certifiant BA5 — 10 questions\n\nCe quiz couvre l'ensemble de la formation BA5 :\n\n- Rôle et responsabilités du BA5\n- Les 7 étapes de la consignation\n- Analyse de risques préalable\n- Régimes de neutre TT / TN / IT\n- EPI avancés (arc-flash suit, cal/cm²)\n- Encadrement d'un BA4 sur le terrain\n- Rédaction et gestion d'une Autorisation de Travail\n\n[TIP|**Seuil de certification : 70 %** (7 bonnes réponses sur 10). Retenter est toujours possible.]\n\n[RULE|Rappel : ce certificat atteste ta **formation** et ta **réussite à l'évaluation**. Il ne remplace **pas** l'habilitation formelle signée par ton employeur.]\n\nBonne chance !",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -281,101 +234,96 @@
     {
       "position": 16,
       "kind": "QUIZ",
-      "section": "ÉVALUATION FINALE",
-      "title": "Évaluation certifiante BA5",
+      "section": "CERTIFICATION",
+      "title": "🎓 Quiz certifiant final — BA5",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Un BA5 est une personne :",
+            "prompt": "Un BA5 sans l'attribut BS peut-il faire une mesure sur des barres nues sous tension en 400V ?",
+            "options": ["Oui, avec des gants classe 0", "Non, il lui faut l'attribut BS", "Oui, si un BA4 assiste", "Oui, uniquement pour de courtes durées"],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Combien d'étapes comporte la procédure officielle de consignation RGIE ?",
+            "options": ["3", "5", "7", "10"],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Dans la procédure « témoin » du VAT, la 3ᵉ étape consiste à…",
             "options": [
-              "Ordinaire",
-              "Avertie",
-              "Qualifiée à intervenir"
+              "Tester le VAT sur les conducteurs à vérifier",
+              "Tester à nouveau le VAT sur une source connue sous tension",
+              "Confirmer visuellement avec un collègue",
+              "Faire une mesure au multimètre en double"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "En régime de neutre IT, un premier défaut d'isolement…",
+            "options": [
+              "Déclenche immédiatement le différentiel",
+              "Coupe l'installation par surintensité",
+              "Génère une alarme via le contrôleur permanent d'isolement (CPI) sans couper",
+              "Fait fondre le fusible neutre"
             ],
             "correctIndex": 2
           },
           {
-            "prompt": "La 5ᵉ étape de la consignation est :",
+            "prompt": "Quelle est la conséquence potentielle d'un second défaut d'isolement en régime IT non traité ?",
             "options": [
-              "Séparer",
-              "MALT (mise à la terre)",
-              "Baliser"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Le régime de neutre TT signifie :",
-            "options": [
-              "Terre-Terre : neutre et masses reliés à des terres distinctes",
-              "Total-Total",
-              "Toutes phases sous Tension"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Pour une installation domestique 230 V, la catégorie multimètre minimale est :",
-            "options": [
-              "CAT II",
-              "CAT III",
-              "CAT IV"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "En cas d'accident sur chantier, le BA5 chargé de travaux :",
-            "options": [
-              "Attend l'employeur",
-              "Prend le commandement, sécurise, alerte",
-              "Fuit la zone"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Un gant isolant classe 4 est utilisable jusqu'à :",
-            "options": [
-              "1 000 V",
-              "17 000 V",
-              "36 000 V"
+              "Un fonctionnement normal",
+              "Une simple alarme supplémentaire",
+              "Un court-circuit entre phases via les masses",
+              "Une perte de terre uniquement"
             ],
             "correctIndex": 2
           },
           {
-            "prompt": "L'AT (Autorisation de Travail) doit être signée par :",
+            "prompt": "Un multimètre CAT II est-il adapté à la mesure sur un TGBT industriel ?",
             "options": [
-              "Le BA4 seulement",
-              "Le chargé d'exploitation",
-              "N'importe quel BA5"
+              "Oui, tant que la tension est en BT",
+              "Non, il faut un CAT III minimum",
+              "Oui, si les cordons sont en CAT IV",
+              "Cela dépend du fabricant"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Le renouvellement typique de l'habilitation BA5 est de :",
+            "prompt": "Un BA4 vous accompagne. Vous devez vous absenter 30 secondes pour aller chercher un outil. Que faites-vous ?",
             "options": [
-              "1 an",
-              "3 ans",
-              "10 ans"
+              "Vous demandez au BA4 de continuer, il connaît la manip",
+              "Vous arrêtez le travail, vous demandez au BA4 de reculer, puis vous partez",
+              "Vous filmez le BA4 avec votre téléphone à distance",
+              "Vous appelez un autre BA5 en attendant"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "MALT signifie :",
+            "prompt": "Le cadenas de consignation doit être…",
             "options": [
-              "Mise À La Terre (et en court-circuit)",
-              "Mesure d'Ampérage Local Total",
-              "Manuel d'Analyse de Ligne Technique"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "En BA5, tu peux laisser un BA4 réaliser une consignation à ta place ?",
-            "options": [
-              "Oui",
-              "Non, la consignation reste au BA5",
-              "Uniquement en BT"
+              "Universel, partagé entre tous les intervenants",
+              "Nominatif, propre à chaque intervenant",
+              "Fourni par le sous-traitant sur place",
+              "Seulement obligatoire en HT"
             ],
             "correctIndex": 1
+          },
+          {
+            "prompt": "L'énergie indiquée sur un vêtement arc-flash (ex : 12 cal/cm²) signifie…",
+            "options": [
+              "La tension d'isolement maximale",
+              "L'énergie thermique que le vêtement peut absorber sans brûlure niveau 2",
+              "Le nombre de lavages avant remplacement",
+              "La classe d'isolation en kV"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Une AT (Autorisation de Travail) doit être archivée après l'intervention pendant environ…",
+            "options": ["1 mois", "1 an", "5 à 10 ans", "Elle peut être détruite dès la fin des travaux"],
+            "correctIndex": 2
           }
         ]
       },

@@ -3199,6 +3199,12 @@ model Course {
   /// Texte légal imprimé sur le certificat. Ex : "Formation relative aux
   /// risques électriques…" — laissé libre pour supporter tous les cursus.
   certificateWording String? @db.Text
+  /// Cours prérequis : l'user doit avoir un certificat émis pour ce cours-là
+  /// (Document tagué `course:<prerequisiteCourseId>` + `certificat`) pour
+  /// pouvoir démarrer ce cours-ci. Ex : BA5 → prerequisiteCourseId = BA4.
+  prerequisiteCourseId String?
+  prerequisiteCourse   Course?  @relation("CoursePrereq", fields: [prerequisiteCourseId], references: [id], onDelete: SetNull)
+  prerequisiteFor      Course[] @relation("CoursePrereq")
   slides    CourseSlide[]
   progress  UserCourseProgress[]
   attempts  UserQuizAttempt[]

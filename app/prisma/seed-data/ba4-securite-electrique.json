@@ -11,9 +11,9 @@
     {
       "position": 1,
       "kind": "CONTENT",
-      "section": null,
-      "title": "Formation BA4 — Personne avertie",
-      "bodyMd": "**Sécurité électrique · RGIE Belgique**\n\nCette formation prépare à l'habilitation **BA4** — personne avertie sur les risques électriques.\n\nÀ la fin du cours, un quiz certifiant. **70 % minimum** pour obtenir l'attestation.",
+      "section": "INTRODUCTION",
+      "title": "Bienvenue — Formation BA4",
+      "bodyMd": "## Sécurité électrique · RGIE Belgique\n\nCette formation prépare à l'habilitation **BA4 — Personne avertie**. Elle s'adresse à toute personne susceptible d'être **exposée à un risque électrique** dans son environnement de travail sans intervenir directement sur les installations.\n\n[ILLUSTRATION|lightning]\n\n[TIP|À la fin de cette formation, un quiz certifiant t'attend. **70 % minimum** pour obtenir ton attestation. Tu peux recommencer autant de fois que nécessaire — mieux vaut prendre son temps que rater son certificat.]\n\n### Ce que tu vas apprendre\n- Le cadre légal belge (RGIE) et les niveaux d'habilitation BA1 à BA5\n- Les dangers physiques du courant électrique (électrisation, arc-flash)\n- Les équipements de protection individuelle (EPI) adaptés\n- Les bonnes pratiques et les gestes qui sauvent en cas d'accident",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -21,9 +21,9 @@
     {
       "position": 2,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · CADRE RÉGLEMENTAIRE",
-      "title": "Le RGIE en 30 secondes",
-      "bodyMd": "Le **Règlement Général sur les Installations Électriques** (RGIE) est le référentiel belge de sécurité électrique.\n\n**Ce qu'il définit :**\n- Règles de conception, exécution et exploitation des installations\n- Compétences requises pour intervenir : **BA1 à BA5**\n- Vérifications périodiques obligatoires\n- Responsabilités employeur / employé\n\n**Base légale :** Code du bien-être au travail, Livre III, Titre 2.",
+      "section": "INTRODUCTION",
+      "title": "Pourquoi cette formation est vitale",
+      "bodyMd": "## Chaque année en Belgique\n\n- Environ **1 accident électrique grave sur 10** entraîne un décès (source : FEBELIEC / SPF Emploi)\n- **80 %** des accidents électriques touchent des personnes **non électriciennes** — donc BA4 est ta première ligne de défense\n- La majorité des accidents graves impliquent un **arc électrique** (brûlures thermiques + rayonnement UV)\n\n[USECASE|Marc, technicien SCADA — 34 ans|Marc doit remplacer un capteur PT100 sur une pompe en armoire 400V. Il ouvre la porte de l'armoire sans avoir vérifié la présence de tension et effleure une barre nue avec son tournevis.|**Résultat en labo** : arc-flash de 8 kA, brûlures au 2ᵉ degré au visage et à la main. **Ce qui aurait dû être fait** : consignation par un BA5, vérification VAT, puis intervention avec EPI adapté. Un BA4 ne doit **jamais** ouvrir seul une armoire sous tension.]\n\n[RULE|Un BA4 ne travaille **jamais** sur des parties actives sous tension. Il peut approcher, observer, signaler — mais l'intervention est réservée aux BA5 et BA4-BS.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -31,9 +31,9 @@
     {
       "position": 3,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · CADRE RÉGLEMENTAIRE",
-      "title": "Les codes BA1 à BA5",
-      "bodyMd": "Le RGIE code la compétence électrique des personnes :\n\n- **BA1** — Personne ordinaire (aucune connaissance particulière)\n- **BA2** — Enfant (< 14 ans)\n- **BA3** — Handicap physique/mental\n- **BA4** — Personne AVERTIE (formation aux risques + consignes)\n- **BA5** — Personne QUALIFIÉE (peut intervenir sur les installations)\n\n**BA4** = tu as été informé et tu comprends les risques. Tu peux évoluer dans des zones électriques sans intervenir sur les équipements sous tension.",
+      "section": "CADRE RGIE",
+      "title": "Le RGIE en 90 secondes",
+      "bodyMd": "## Règlement Général sur les Installations Électriques\n\nLe **RGIE** (nouvelle version : *Code des installations électriques* — Livres 1, 2 et 3, entrés en vigueur le 1er juin 2020) est le texte belge de référence. Il transpose partiellement les normes européennes (HD, EN) et impose :\n\n- La conception sûre des installations (protections différentielles, sectionnement, IP)\n- Les **niveaux d'habilitation** BA1 à BA5\n- Les procédures de consignation (les **7 étapes**)\n- Les distances minimales d'approche des pièces nues sous tension\n\n[KV|Livre 1:Installations à basse tension et à très basse tension||Livre 2:Installations à haute tension||Livre 3:Installations pour la transmission et la distribution d'énergie électrique]\n\n[TIP|Le RGIE se lit en parallèle avec le **Code du bien-être au travail** (obligations de l'employeur) et la norme **EN 50110-1** (exploitation des installations électriques).]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -41,9 +41,9 @@
     {
       "position": 4,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · CADRE RÉGLEMENTAIRE",
-      "title": "L'habilitation n'est pas l'attestation",
-      "bodyMd": "⚠ **Distinction critique :**\n\n- **Cette attestation** = tu as suivi la formation et validé l'évaluation\n- **L'habilitation BA4** = ton EMPLOYEUR te délivre l'autorisation d'intervenir dans un contexte précis\n\nL'attestation est un **prérequis** à l'habilitation, pas l'habilitation elle-même. L'employeur reste responsable de l'attribution finale selon :\n- Les installations concernées\n- Les travaux prévus\n- L'aptitude médicale et l'expérience de la personne",
+      "section": "CADRE RGIE",
+      "title": "Les niveaux d'habilitation BA1 → BA5",
+      "bodyMd": "## Une pyramide de responsabilité\n\n[KV|BA1 — Personne ordinaire:Aucune formation électrique. Ne doit pas approcher des installations électriques ouvertes.||BA2 — Enfant:Zones inaccessibles ; concerne surtout la conception des lieux publics.||BA4 — Personne avertie:*(Cette formation)* A conscience des risques, peut circuler et observer, mais **n'intervient pas** sur les parties actives.||BA5 — Personne qualifiée:Formation technique électrique complète. Peut consigner, mesurer, intervenir sous tension dans certains cas.||BA4-BS ou BA5-BS:BA4/BA5 autorisé aux **travaux Basse tension Sous tension** (VAT + EPI complet).]\n\n[RULE|L'attribution du niveau BA4/BA5 est la responsabilité de **l'employeur** — pas de l'école. Cette formation atteste la réussite de l'évaluation ; ton employeur peut ensuite formaliser ton habilitation par écrit.]\n\n[WARN|Un certificat de formation BA4 sans lettre d'habilitation signée par l'employeur **ne suffit pas** légalement pour intervenir. Le certificat prouve la formation ; la lettre prouve l'autorisation.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -51,36 +51,29 @@
     {
       "position": 5,
       "kind": "QUIZ",
-      "section": "NIVEAU 1 · CADRE RÉGLEMENTAIRE",
-      "title": "Quiz — Cadre réglementaire",
+      "section": "CADRE RGIE",
+      "title": "Quiz 1 — Le cadre légal",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Que signifie RGIE ?",
+            "prompt": "Quel est le rôle d'un BA4 face à une armoire électrique sous tension ?",
             "options": [
-              "Règlement Général sur les Installations Électriques",
-              "Règles Générales des Ingénieurs Électriciens",
-              "Registre Général de l'Industrie Électrique"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Quel code correspond à une personne avertie ?",
-            "options": [
-              "BA1",
-              "BA4",
-              "BA5"
+              "Il peut remplacer un fusible s'il porte des gants",
+              "Il peut approcher et observer mais ne doit pas intervenir",
+              "Il peut faire tout ce qu'un BA5 peut faire à condition d'être accompagné",
+              "Il peut consigner l'armoire lui-même"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Une attestation BA4 vaut habilitation BA4 ?",
+            "prompt": "Qui attribue formellement le niveau BA4/BA5 à un travailleur ?",
             "options": [
-              "Oui, automatiquement",
-              "Non, l'employeur doit délivrer l'habilitation",
-              "Uniquement pour les électriciens"
+              "L'organisme de formation qui a délivré le certificat",
+              "L'employeur, sur base de la formation ET du poste occupé",
+              "Le SPF Emploi",
+              "Le RGIE lui-même de manière automatique"
             ],
             "correctIndex": 1
           }
@@ -91,9 +84,9 @@
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · RISQUES ÉLECTRIQUES",
-      "title": "Les 4 risques majeurs",
-      "bodyMd": "Intervenir près d'une installation électrique expose à :\n\n**1. Électrisation** — passage du courant dans le corps sans mort\n**2. Électrocution** — passage du courant dans le corps entraînant la mort\n**3. Brûlures** — thermiques (arc électrique, court-circuit) ou par effet Joule\n**4. Chutes** — secondaires à un choc, souvent le plus grave sur chantier\n\n**Effets aggravants :** humidité, sol conducteur, fatigue, mauvaise vision, précipitation.",
+      "section": "LES DANGERS",
+      "title": "Le courant qui traverse le corps",
+      "bodyMd": "## L'électrisation — un phénomène silencieux et rapide\n\nQuand un courant traverse un corps humain, ses effets dépendent de **trois paramètres** :\n\n- **L'intensité** (mA) — c'est le paramètre critique\n- **Le trajet** dans le corps (main-main, main-pied…)\n- **La durée** de contact (millisecondes vs secondes)\n\n[KV|0,5 – 1 mA:Seuil de perception (picotement)||10 mA:Contraction musculaire (**tétanisation** — la main se referme sur le conducteur)||30 mA:Seuil de déclenchement obligatoire du différentiel domestique||50 mA (100 ms):Fibrillation ventriculaire probable — **arrêt cardiaque**||100 mA + 1 s:Décès quasi certain sans défibrillation immédiate]\n\n[DANGER|La **tétanisation** est le pire piège : à partir de 10 mA, la victime **ne peut plus lâcher** le conducteur. Le temps de contact augmente, l'intensité efficace aussi (échauffement de la peau → baisse de résistance). C'est l'engrenage mortel.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -101,9 +94,9 @@
     {
       "position": 7,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · RISQUES ÉLECTRIQUES",
-      "title": "Effets du courant sur le corps",
-      "bodyMd": "Ce qui compte, ce n'est PAS la tension, c'est le COURANT qui traverse.\n\n**Seuils (courant alternatif 50 Hz) :**\n- **0,5 mA** — perception\n- **10 mA** — tétanisation musculaire (impossible de lâcher)\n- **30 mA** — paralysie respiratoire (2 minutes = mort)\n- **75 mA** — fibrillation ventriculaire\n- **> 1 A** — brûlures internes, arrêt cardiaque\n\n**Le seuil légal de sécurité en Belgique : 30 mA (disjoncteur différentiel).**\n\nC'est pour ça que les DDR sont obligatoires dans toute installation domestique et professionnelle.",
+      "section": "LES DANGERS",
+      "title": "L'arc électrique et le flash thermique",
+      "bodyMd": "## Un phénomène brutal et souvent sous-estimé\n\n[ILLUSTRATION|arc-flash]\n\nUn **arc électrique** se produit quand deux conducteurs se rapprochent au point que l'air s'ionise. Températures atteintes : **jusqu'à 19 000 °C** — 4× la surface du soleil.\n\n### Ce que produit un arc-flash\n- **Rayonnement UV et IR** intense : brûlures oculaires (photokératite) en quelques ms\n- **Onde de pression** : peut projeter une personne à plusieurs mètres, rupture tympan\n- **Projection de métal en fusion** : brûlures cutanées jusqu'au 3ᵉ degré\n- **Fumées toxiques** : oxydes métalliques, gaz nitreux\n\n[USECASE|Sophie, opératrice — 28 ans|Sophie utilise un multimètre défectueux (cordons dénudés) pour vérifier la présence de tension sur un jeu de barres 400V. Un des cordons touche un rail voisin ; court-circuit franc.|**Le multimètre explose**, produit un arc-flash de 25 kA. **Bilan** : brûlures graves aux mains et visage, tympan gauche perforé. **Bonne pratique** : utiliser un multimètre CAT III/IV certifié, contrôler l'état des cordons AVANT chaque mesure, porter écran facial arc-flash pour toute mesure > 400V.]\n\n[WARN|Un arc-flash 400V à 30 cm équivaut à une explosion de 500g de TNT. La distance et les EPI thermiques (arc-flash suit) sont les seules protections.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -111,69 +104,52 @@
     {
       "position": 8,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · RISQUES ÉLECTRIQUES",
-      "title": "Les tensions dangereuses",
-      "bodyMd": "Le RGIE définit deux classes de tension :\n\n**Basse Tension (BT)** : jusqu'à 1000 V AC / 1500 V DC\n- Tension du bâtiment (230 V / 400 V)\n- Majorité des risques quotidiens\n\n**Haute Tension (HT)** : au-dessus\n- Postes de transformation\n- Lignes aériennes\n- Arc à distance : jusqu'à 3 m à 20 kV → **ne jamais s'approcher**\n\n**Seuils de sécurité \"très basse tension\" :**\n- TBTS (Très Basse Tension de Sécurité) : ≤ 50 V AC / 120 V DC en milieu sec\n- TBTS : ≤ 25 V AC / 60 V DC en milieu humide",
+      "section": "LES DANGERS",
+      "title": "Distances minimales d'approche",
+      "bodyMd": "## Zones de sécurité (RGIE, Livre 1)\n\nAutour d'une pièce nue sous tension, trois zones sont définies. Un BA4 se limite strictement à la zone verte.\n\n[STEPS|**Zone de voisinage renforcé (rouge)** — Réservée BA5 : contact possible, EPI complet obligatoire||**Zone de voisinage (orange)** — Distance de sécurité, EPI adapté : accès BA4-BS ou BA5||**Zone hors voisinage (verte)** — Circulation libre pour un BA4 formé]\n\n[KV|BT (jusqu'à 1000V AC):Zone rouge : contact ; zone orange : 30 cm||HT 1-30 kV:Zone rouge : 30 cm ; zone orange : 60 cm à 1 m||HT 30-110 kV:Zone rouge : 1 m ; zone orange : 2 m||HT > 110 kV:Zone rouge : 2 m ; zone orange : 3-5 m selon la tension]\n\n[TIP|En **BT (basse tension)**, la zone rouge se limite au contact direct — mais l'arc-flash peut projeter une pièce en fusion sur 1-2 mètres. **Traite toujours un tableau BT ouvert comme une zone à risque étendu.**]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 9,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · RISQUES ÉLECTRIQUES",
-      "title": "Les zones de danger",
-      "bodyMd": "Autour de tout équipement sous tension, le RGIE définit des zones :\n\n**Zone d'investigation** (accès simple) — aucun risque\n**Zone de voisinage** — proximité, risque d'arc si mauvais geste\n**Zone d'investigation encadrée** — nécessite consignation ou BA5\n**Zone de travail sous tension** — RÉSERVÉE aux BT/HT habilités BA5 avec équipements spécifiques\n\n**En tant que BA4 :** tu peux entrer en zone de voisinage SI :\n- Formé aux gestes de sécurité\n- Équipé (EPI adaptés)\n- Avec un donneur d'ordre BA5 présent ou responsable",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 10,
       "kind": "QUIZ",
-      "section": "NIVEAU 2 · RISQUES ÉLECTRIQUES",
-      "title": "Quiz — Risques",
+      "section": "LES DANGERS",
+      "title": "Quiz 2 — Comprendre les risques",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Le seuil de sécurité du courant (fibrillation possible) est :",
-            "options": [
-              "10 mA",
-              "30 mA",
-              "1 A"
-            ],
+            "prompt": "À partir de quel courant environ le seuil de tétanisation musculaire est-il atteint ?",
+            "options": ["1 mA", "10 mA", "50 mA", "500 mA"],
             "correctIndex": 1
           },
           {
-            "prompt": "La tension max de la Basse Tension (BT) en AC est :",
-            "options": [
-              "230 V",
-              "400 V",
-              "1000 V"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "En zone de voisinage, un BA4 peut intervenir :",
-            "options": [
-              "Librement",
-              "Avec équipements et encadrement",
-              "Jamais"
-            ],
-            "correctIndex": 1
+            "prompt": "Un arc électrique 400V peut produire des températures allant jusqu'à…",
+            "options": ["500 °C", "2 000 °C", "5 000 °C", "19 000 °C"],
+            "correctIndex": 3
           }
         ]
       },
       "imageUrl": null
     },
     {
+      "position": 10,
+      "kind": "CONTENT",
+      "section": "PROTECTION",
+      "title": "Les EPI électriques — panorama",
+      "bodyMd": "## Ta boîte à outils de protection\n\nUn EPI (Équipement de Protection Individuelle) électrique doit être **certifié**, **daté**, **contrôlé** avant chaque usage et remplacé selon la fréquence prescrite.\n\n[EPI|helmet,gloves,mat,vat,shoes,glasses]\n\n### Règles générales\n- Chaque EPI porte une **classe d'isolation** (00, 0, 1, 2, 3, 4) qui correspond à une tension max\n- Les gants isolants ont une **date de dernier test** (test biennal) marquée dessus\n- Un EPI **endommagé, fendu, humide** = poubelle. On ne bricole pas un EPI.\n\n[RULE|Contrôle visuel avant chaque usage : gants (pas de fissure), casque (pas de choc récent), tapis (pas de coupure). Un EPI douteux est un EPI mort.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 11,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · PRÉVENTION",
-      "title": "Les EPI électriques",
-      "bodyMd": "Équipements de protection individuelle pour intervenir en environnement électrique :\n\n**Obligatoires selon la situation :**\n- **Casque isolant** (classe électrique)\n- **Lunettes de sécurité** (protection arc électrique)\n- **Gants isolants** classe 00 (500 V) à classe 4 (36 kV)\n- **Chaussures isolantes** semelles diélectriques\n- **Vêtements de travail** non synthétiques (fusion en cas d'arc)\n\n**Contrôle avant usage :**\n- Test des gants isolants avant chaque intervention (gonflage, inspection visuelle)\n- Vérification date de test périodique (marquée sur les gants)",
+      "section": "PROTECTION",
+      "title": "Gants isolants — le b.a.-ba",
+      "bodyMd": "## Classes des gants isolants (norme EN 60903)\n\n[KV|Classe 00:Usage max 500V AC / Testé à 2500V||Classe 0:Usage max 1000V AC / Testé à 5000V||Classe 1:Usage max 7500V AC / Testé à 10 000V||Classe 2:Usage max 17 000V AC / Testé à 20 000V||Classe 3:Usage max 26 500V AC / Testé à 30 000V||Classe 4:Usage max 36 000V AC / Testé à 40 000V]\n\n### Test d'étanchéité — à faire avant CHAQUE usage\n[STEPS|Roule le gant sur lui-même vers l'ouverture pour emprisonner de l'air||Presse doucement — si le gant se dégonfle par un endroit, il est **percé, jeter**||Vérifie l'intérieur : sec, sans corps étranger||Vérifie la date du dernier test électrique (max 6 mois — étiquette obligatoire)]\n\n[DANGER|Un gant classe 0 utilisé sur du 400V AC te protège. Un gant classe 00 sur du 400V AC ne suffit **pas** : sa tension d'usage max est 500V mais avec un facteur de sécurité qui peut être dépassé. En cas de doute → classe supérieure.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -181,99 +157,105 @@
     {
       "position": 12,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · PRÉVENTION",
-      "title": "Le principe de consignation",
-      "bodyMd": "Avant toute intervention sur une installation, on **CONSIGNE** — c'est la règle d'or.\n\n**La consignation en 5 étapes :**\n1. **Séparer** — coupure visible de la source (sectionneur ouvert)\n2. **Condamner** — cadenassage + panneau \"Ne pas manœuvrer\"\n3. **Identifier** — plaque d'identification de l'installation\n4. **Vérifier l'absence de tension** (VAT) — testeur de tension\n5. **Mettre à la terre et en court-circuit** (MALT) — si HT\n\n**En tant que BA4 :** tu peux vérifier qu'une consignation a été faite, mais tu ne peux **PAS** la réaliser toi-même. Cette étape relève du BA5.",
+      "section": "PROTECTION",
+      "title": "Le VAT — Vérificateur d'Absence de Tension",
+      "bodyMd": "## L'outil qui te sauve la vie\n\n[ILLUSTRATION|vat]\n\nUn **VAT** n'est **pas** un multimètre. C'est un appareil dédié à la vérification d'absence de tension, conforme à la norme **EN 61243-3**. Deux LEDs / vibrations / son : présence tension = alerte.\n\n### La procédure « témoin » — obligatoire\n[STEPS|**Test 1 :** VAT sur une source connue sous tension (ex. prise 230V témoin) → le VAT doit signaler « tension présente »||**Test 2 :** VAT sur les conducteurs à vérifier → doit signaler « pas de tension »||**Test 3 :** VAT à nouveau sur la source témoin → doit signaler « tension présente »||Les trois étapes prouvent que le VAT fonctionne toujours au moment du test critique]\n\n[TIP|Un multimètre en position V AC peut afficher **0 V** alors qu'un conducteur est sous tension via une capa parasite ou une pile faible : c'est un « pouvoir de coupure » insuffisant. **Un VAT dédié n'a pas ce problème** — c'est pour ça qu'on l'utilise pour la sécurité.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 13,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · PRÉVENTION",
-      "title": "Les 5 règles d'or",
-      "bodyMd": "Résumé synthétique des règles de sécurité incontournables :\n\n1. **Séparer** de toute source de tension\n2. **Condamner** la source en position d'ouverture\n3. **Vérifier** l'absence de tension (VAT avec équipement testé)\n4. **Mettre** à la terre et en court-circuit\n5. **Baliser** la zone de travail (rubans, panneaux)\n\n**Ces 5 règles sauvent des vies.** Elles ne se négocient pas.\n\nToute intervention qui saute une étape est un accident qui n'a pas encore eu lieu.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 14,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · PRÉVENTION",
-      "title": "Les documents obligatoires",
-      "bodyMd": "En tant que BA4 sur site, tu dois avoir accès à :\n\n**Documents chantier :**\n- **Analyse de risques** de l'intervention\n- **Autorisation de travail** signée par le chargé d'exploitation\n- **Consignes de sécurité** propres au site\n- **Schéma unifilaire** de l'installation concernée\n\n**Contrôle avant intervention :**\n- Ces documents sont-ils à jour ?\n- Sont-ils cohérents avec ce que tu vas faire ?\n- La zone concernée est-elle bien identifiée ?\n\nSi non → **STOP**, remonter au chargé d'exploitation.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 15,
       "kind": "QUIZ",
-      "section": "NIVEAU 3 · PRÉVENTION",
-      "title": "Quiz — Prévention",
+      "section": "PROTECTION",
+      "title": "Quiz 3 — Les EPI",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Combien de règles d'or pour la sécurité électrique ?",
-            "options": [
-              "3",
-              "5",
-              "7"
-            ],
+            "prompt": "Quelle est la durée maximale entre deux tests électriques de gants isolants ?",
+            "options": ["3 mois", "6 mois", "1 an", "2 ans"],
             "correctIndex": 1
           },
           {
-            "prompt": "Un BA4 peut consigner une installation ?",
+            "prompt": "La procédure « témoin » du VAT consiste à…",
             "options": [
-              "Oui",
-              "Non, c'est le BA5",
-              "Uniquement si formé spécifiquement"
+              "Utiliser un VAT que vous avez déjà utilisé la semaine précédente",
+              "Tester le VAT sur une source connue avant ET après la vérification",
+              "Demander à un collègue de confirmer visuellement",
+              "Faire deux mesures rapprochées sur les mêmes conducteurs"
             ],
             "correctIndex": 1
-          },
-          {
-            "prompt": "VAT signifie :",
-            "options": [
-              "Vérification d'Absence de Tension",
-              "Voltage Alternatif Total",
-              "Vérification d'Ampérage Thermique"
-            ],
-            "correctIndex": 0
           }
         ]
       },
       "imageUrl": null
     },
     {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "BONNES PRATIQUES",
+      "title": "Les 7 étapes de la consignation",
+      "bodyMd": "## Séquence de mise en sécurité (RGIE)\n\nUn BA4 **n'exécute pas** la consignation (c'est un BA5), mais il doit la reconnaître et savoir qu'elle a été faite avant d'approcher.\n\n[STEPS|**1. Séparer** — Ouvrir les organes de coupure (disjoncteur, sectionneur, prise) en amont||**2. Condamner** — Cadenasser en position ouverte avec badge nominatif (lock-out / tag-out)||**3. Identifier** — Vérifier sur schéma / étiquettes que c'est bien le bon circuit||**4. VAT** — Vérifier l'absence de tension avec procédure témoin sur tous les conducteurs||**5. MALT** — Mettre à la terre et en court-circuit (obligatoire HT, recommandé BT)||**6. Baliser** — Zone de travail délimitée (rubalise, panneaux)||**7. Autoriser** — Le chargé de consignation remet l'autorisation écrite au chargé de travaux]\n\n[ILLUSTRATION|lockout]\n\n[RULE|**Aucune** de ces 7 étapes n'est facultative. Sauter l'étape « VAT » a tué plus d'électriciens que tout le reste réuni. La routine est ta pire ennemie — chaque consignation se fait comme si c'était la première.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "BONNES PRATIQUES",
+      "title": "Signaler un défaut — ton rôle de BA4",
+      "bodyMd": "## Tu vois quelque chose d'anormal ? Voici quoi faire\n\n[EPI|helmet,shoes]\n\n### Signes qui doivent t'alerter immédiatement\n- **Odeur de brûlé** près d'une armoire, tableau ou prise\n- **Bruit anormal** : bourdonnement fort, crépitement, sifflement\n- **Trace de suie** ou de coulure sur / sous un tableau\n- **Câble abîmé**, gaine coupée, isolation fondue\n- **Sensation de chaleur** anormale sur une paroi métallique\n- **Différentiel qui déclenche** de manière répétée\n\n### La bonne réaction — dans l'ordre\n[STEPS|**Éloigne-toi** — au minimum 3 mètres. Ne touche à rien, n'ouvre rien.||**Sécurise la zone** — empêche d'autres personnes d'approcher||**Alerte** — préviens ton responsable + le service maintenance BA5||**Documente** — photo à distance si possible, note l'heure et le lieu exact||**Ne reviens pas sur les lieux** tant qu'un BA5 n'a pas validé la remise en état]\n\n[USECASE|Amélie, technicienne labo — 41 ans|Amélie sent une odeur de plastique brûlé près d'une armoire électrique. Elle ouvre la porte pour \"voir d'où ça vient\".|**Une étincelle jaillit** — heureusement pas d'arc, elle ferme précipitamment. **La bonne pratique** : ne **jamais** ouvrir une armoire suspecte. Reculer, alerter, faire couper le circuit en amont par un BA5.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 16,
       "kind": "CONTENT",
-      "section": "NIVEAU 4 · CONDUITE À TENIR",
-      "title": "Avant toute intervention",
-      "bodyMd": "Checklist pré-intervention pour un BA4 :\n\n☐ Je connais le périmètre de mon intervention\n☐ J'ai lu et compris l'analyse de risques\n☐ J'ai les EPI adaptés (gants, chaussures, lunettes)\n☐ Mon collègue BA5 est présent OU a validé la consignation\n☐ J'ai identifié la zone à ne PAS toucher\n☐ Je sais où sont : issue de secours, extincteur CO2, défibrillateur\n☐ J'ai un moyen de communication (radio, téléphone chargé)\n\n**Si un item manque : STOP.**",
+      "section": "BONNES PRATIQUES",
+      "title": "Les 10 règles d'or du BA4",
+      "bodyMd": "## À imprimer, plastifier, coller dans ton casier\n\n[RULE|**1.** Je considère toute installation comme sous tension jusqu'à preuve VAT du contraire.]\n\n[RULE|**2.** Je ne touche jamais à un conducteur nu, même « juste pour voir ».]\n\n[RULE|**3.** Je respecte les distances minimales d'approche selon la tension.]\n\n[RULE|**4.** Je porte casque + chaussures S3 dès que j'entre en zone technique.]\n\n[RULE|**5.** Je ne bloque jamais une porte d'armoire électrique en position ouverte.]\n\n[RULE|**6.** Je signale immédiatement tout défaut, même mineur.]\n\n[RULE|**7.** Je ne fais aucune intervention qui n'est pas dans mon habilitation écrite.]\n\n[RULE|**8.** Je n'utilise que du matériel certifié CE, en bon état, à jour de contrôle.]\n\n[RULE|**9.** Je respecte la consignation faite par un tiers — je ne retire pas un cadenas qui n'est pas le mien.]\n\n[RULE|**10.** En cas de doute, je m'arrête et je demande. La sécurité n'attend pas.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 17,
-      "kind": "CONTENT",
-      "section": "NIVEAU 4 · CONDUITE À TENIR",
-      "title": "Pendant l'intervention",
-      "bodyMd": "Règles de comportement :\n\n**À FAIRE :**\n- Rester dans son périmètre autorisé\n- Signaler tout élément inhabituel\n- Communiquer les changements de plan\n- S'arrêter si doute ou fatigue\n\n**À NE JAMAIS FAIRE :**\n- Toucher un conducteur non identifié\n- Contourner un balisage\n- Ouvrir une armoire électrique sans autorisation\n- Utiliser un outil non prévu (tournevis non isolé, etc.)\n- Improviser une réparation\n\n**Rappel :** en cas de doute, **STOP + demander**. Un chantier vaut mieux qu'un enterrement.",
+      "kind": "QUIZ",
+      "section": "BONNES PRATIQUES",
+      "title": "Quiz 4 — Bonnes pratiques",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Combien d'étapes comprend la procédure de consignation officielle ?",
+            "options": ["3", "5", "7", "10"],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Que fais-tu si tu sens une odeur de brûlé près d'une armoire électrique ?",
+            "options": [
+              "J'ouvre pour identifier la source",
+              "Je m'éloigne, sécurise la zone et j'alerte un BA5",
+              "Je coupe le disjoncteur général de l'immeuble",
+              "Je vaporise de l'eau au cas où ça brûle"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 18,
       "kind": "CONTENT",
-      "section": "NIVEAU 4 · CONDUITE À TENIR",
-      "title": "Que faire en cas d'accident",
-      "bodyMd": "Face à un accident électrique, les gestes qui sauvent :\n\n**1. NE PAS toucher la victime tant que le courant passe**\nElle est comme un aimant à courant. Si tu la touches, tu deviens toi-même la victime.\n\n**2. Couper le courant**\nDisjoncteur général, arrachage de la fiche, ou dégager la source si impossible autrement.\n\n**3. Alerter**\n- 112 (Belgique) ou 100\n- Chargé d'exploitation\n- Poste de secours du site\n\n**4. Secourir**\n- Position latérale de sécurité si inconscient qui respire\n- RCP (réanimation cardio-pulmonaire) si arrêt cardiaque\n- Refroidir les brûlures à l'eau tiède\n\nFormation secourisme obligatoire sur chantier — ne pas négliger.",
+      "section": "URGENCE",
+      "title": "Accident électrique — les 5 premières secondes",
+      "bodyMd": "## Un collègue est électrisé — ta réaction\n\n[DANGER|**Ne touche JAMAIS la victime tant qu'elle est en contact avec le courant.** Ton corps deviendrait une nouvelle voie de passage.]\n\n### Séquence PAS (Protéger – Alerter – Secourir)\n[STEPS|**1. PROTÉGER** — Coupe l'alimentation (disjoncteur, prise, sectionneur en amont). Si impossible, écarte la victime avec un objet **isolant sec** (manche à balai en bois, tapis en caoutchouc). **Jamais métallique, jamais mouillé.**||**2. ALERTER** — Appelle le **112** (numéro d'urgence européen). Fournis : lieu précis, nombre de victimes, nature (électrisation), état de conscience.||**3. SECOURIR** — Vérifier conscience et respiration. Si inconscient et ne respire pas → **massage cardiaque + défibrillateur (DEA)** immédiat.]\n\n[TIP|Un DEA (défibrillateur externe automatique) parle et guide l'utilisateur pas à pas. **N'importe qui peut l'utiliser** — ne pas hésiter. Chaque minute sans défibrillation = -10 % de survie.]\n\n[WARN|Une personne électrisée qui semble aller « bien » doit **toujours** consulter aux urgences. Les brûlures internes et troubles du rythme cardiaque peuvent apparaître **jusqu'à 24 h après** le choc.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -281,9 +263,9 @@
     {
       "position": 19,
       "kind": "CONTENT",
-      "section": "NIVEAU 4 · CONDUITE À TENIR",
-      "title": "Les erreurs fréquentes",
-      "bodyMd": "Retours d'expérience sur les accidents BA4 les plus fréquents :\n\n**Erreur 1 : \"Je vais juste jeter un œil\"**\nPasser la tête dans une armoire sous tension pour \"voir\". Un mouvement, contact avec une phase, choc.\n\n**Erreur 2 : Sous-estimer la tension**\n\"C'est du 24 V, aucun risque\". Sauf que le 24 V à côté du 400 V dans la même armoire = risque de contact.\n\n**Erreur 3 : Précipitation**\n\"On va vite ça, 5 minutes\". La précipitation est mère de tous les accidents. Prendre le temps de consigner, VAT, EPI.\n\n**Erreur 4 : Faux sens de la routine**\n\"J'ai fait ça 100 fois\". C'est la 101ᵉ qui te tue. Chaque intervention = nouvelle analyse de risques.\n\n**Erreur 5 : Ne pas oser dire STOP**\nPeur de passer pour un pleutre. Un vrai pro sait dire STOP quand il y a doute.",
+      "section": "URGENCE",
+      "title": "Brûlures électriques et arc-flash",
+      "bodyMd": "## Types de brûlures et gestes appropriés\n\n### Brûlure par contact\n- Sur le trajet du courant (entrée / sortie)\n- Souvent **plus grave à l'intérieur** qu'à l'extérieur (l'os concentre la chaleur)\n- **Ne pas** appliquer de crème, glace, farine…\n- Refroidir à l'eau tempérée (15-20 °C) pendant 15 minutes minimum\n\n### Brûlure par arc-flash\n- Rayonnement thermique + projection métal en fusion\n- Souvent au visage, mains, bras\n- **Ne pas** retirer les vêtements collés à la peau — couper autour\n- Recouvrir d'un tissu propre et sec, transport rapide\n\n### Yeux exposés à l'arc-flash (photokératite)\n- Douleurs 4-8h après exposition (« coup d'arc »)\n- Rinçage prolongé au sérum physiologique\n- Consultation ophtalmo obligatoire\n\n[RULE|Après tout accident électrique, même mineur en apparence : **documenter** (rapport interne + accident du travail auprès de la mutuelle), **surveiller** (rythme cardiaque 24h), **débriefer** (identifier la cause pour éviter la récidive).]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -291,38 +273,31 @@
     {
       "position": 20,
       "kind": "QUIZ",
-      "section": "NIVEAU 4 · CONDUITE À TENIR",
-      "title": "Quiz — Conduite",
+      "section": "URGENCE",
+      "title": "Quiz 5 — Conduite en cas d'accident",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Une victime d'électrisation est encore en contact avec le courant. Le premier réflexe est :",
+            "prompt": "Quel est le premier geste à effectuer face à une personne électrisée ?",
             "options": [
-              "La tirer immédiatement",
-              "Couper le courant",
-              "Appeler les secours"
+              "La tirer par les vêtements pour l'éloigner",
+              "Couper l'alimentation électrique en amont",
+              "Appeler le 112",
+              "Vérifier son pouls"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Numéro d'urgence en Belgique :",
+            "prompt": "Que faire d'une victime électrisée qui semble aller bien après le choc ?",
             "options": [
-              "112",
-              "911",
-              "18"
+              "La laisser reprendre son travail après quelques minutes de repos",
+              "L'envoyer chez le médecin le lendemain si les symptômes persistent",
+              "La faire consulter aux urgences dans tous les cas",
+              "Lui donner à boire pour se réhydrater et rentrer chez elle"
             ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "En cas de doute pendant une intervention :",
-            "options": [
-              "Continuer prudemment",
-              "STOP et demander",
-              "Consulter un manuel"
-            ],
-            "correctIndex": 1
+            "correctIndex": 2
           }
         ]
       },
@@ -331,9 +306,9 @@
     {
       "position": 21,
       "kind": "CONTENT",
-      "section": "ÉVALUATION FINALE",
-      "title": "Prêt pour l'évaluation ?",
-      "bodyMd": "Tu vas passer l'**évaluation certifiante BA4**.\n\n**Règles :**\n- 10 questions\n- **70 %** minimum pour obtenir l'attestation (7/10 bonnes réponses)\n- En cas d'échec, **tu peux recommencer**\n- En cas de réussite, ton attestation PDF est **générée automatiquement**\n  et disponible dans **Mes documents**\n\n**Rappel légal :** cette attestation certifie ta formation et ta réussite à l'évaluation.\nL'habilitation BA4 sera délivrée par ton employeur en fonction des installations et travaux concernés.\n\nBonne chance. 🎓",
+      "section": "CERTIFICATION",
+      "title": "Prêt pour l'évaluation finale ?",
+      "bodyMd": "## Quiz certifiant — 10 questions\n\nLe quiz suivant est **le quiz certifiant**. Il couvre l'ensemble de la formation :\n\n- Cadre RGIE et niveaux d'habilitation\n- Dangers du courant et de l'arc-flash\n- EPI et procédure VAT\n- Consignation (les 7 étapes)\n- Signalement et conduite en cas d'accident\n\n[TIP|**Score minimum pour la certification : 70 %** (7 réponses correctes sur 10). En cas d'échec, tu peux recommencer autant de fois que nécessaire — ta progression et tes tentatives précédentes sont sauvegardées.]\n\n[RULE|Prends ton temps. Une bonne réponse choisie posément vaut mieux qu'une devinette rapide. Il n'y a **pas de chrono**.]\n\nBonne chance !",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -341,99 +316,74 @@
     {
       "position": 22,
       "kind": "QUIZ",
-      "section": "ÉVALUATION FINALE",
-      "title": "Évaluation certifiante BA4",
+      "section": "CERTIFICATION",
+      "title": "🎓 Quiz certifiant final — BA4",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Le RGIE définit combien de codes BA (compétences électriques) ?",
+            "prompt": "Que signifie l'habilitation BA4 ?",
+            "options": ["Personne qualifiée", "Personne avertie", "Personne électricienne", "Personne autorisée sous tension"],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Qui a l'autorité pour attribuer formellement une habilitation BA4 ?",
+            "options": ["L'organisme de formation", "L'inspection du travail", "L'employeur", "Le SPF Économie"],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "À partir de quelle intensité (approximative) le seuil de tétanisation musculaire est-il atteint ?",
+            "options": ["1 mA", "10 mA", "100 mA", "1 A"],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un arc électrique 400V peut atteindre une température maximale de l'ordre de…",
+            "options": ["1 000 °C", "5 000 °C", "10 000 °C", "19 000 °C"],
+            "correctIndex": 3
+          },
+          {
+            "prompt": "Quelle classe de gants isolants convient pour un usage sur BT 400V AC ?",
+            "options": ["Classe 00", "Classe 0", "Classe 1", "Classe 2"],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Dans la procédure « témoin » d'utilisation d'un VAT, combien de tests fait-on au total ?",
+            "options": ["1 (sur les conducteurs)", "2 (avant et après)", "3 (témoin – vérif – témoin)", "4"],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Combien d'étapes comporte la procédure de consignation officielle RGIE ?",
+            "options": ["3", "5", "7", "9"],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Vous constatez une odeur de brûlé près d'une armoire. Quelle est la réaction correcte ?",
             "options": [
-              "3",
-              "5",
-              "7"
+              "Ouvrir l'armoire pour vérifier",
+              "Couper immédiatement le disjoncteur général du bâtiment",
+              "S'éloigner, sécuriser la zone, alerter un BA5",
+              "Attendre 10 minutes que ça passe avant d'intervenir"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Une personne est en train d'être électrisée. Quel est votre premier geste ?",
+            "options": [
+              "La tirer immédiatement par les vêtements",
+              "Couper l'alimentation électrique en amont",
+              "Verser de l'eau pour rafraîchir la zone",
+              "Appeler d'abord le 112"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Un BA4 est une personne :",
+            "prompt": "Une victime électrisée reprend connaissance et semble aller bien. Que faites-vous ?",
             "options": [
-              "Ordinaire",
-              "Avertie aux risques",
-              "Qualifiée à intervenir"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Le seuil de courant provoquant fibrillation ventriculaire (AC 50 Hz) est vers :",
-            "options": [
-              "10 mA",
-              "30-75 mA",
-              "1 A"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "La 3ᵉ règle d'or de la sécurité électrique est :",
-            "options": [
-              "Séparer",
-              "Vérifier l'absence de tension",
-              "Mettre à la terre"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "La consignation d'une installation relève :",
-            "options": [
-              "Du BA4",
-              "Du BA5",
-              "N'importe quel opérateur"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "L'équipement testé avant chaque intervention est :",
-            "options": [
-              "Les gants isolants",
-              "Le disjoncteur général",
-              "Le sectionneur"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Face à un électrisé encore en contact avec le courant :",
-            "options": [
-              "Le tirer par les vêtements",
-              "Couper le courant d'abord",
-              "Verser de l'eau"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "L'attestation obtenue à la fin de ce cours :",
-            "options": [
-              "Vaut habilitation BA4",
-              "Est un prérequis à l'habilitation, délivrée par l'employeur",
-              "N'a aucune valeur"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "En Belgique, le numéro d'urgence général est :",
-            "options": [
-              "112",
-              "911",
-              "18"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "En cas de doute pendant une intervention, la bonne attitude est :",
-            "options": [
-              "Continuer prudemment",
-              "STOP, remonter au chargé d'exploitation",
-              "Aller vite pour ne pas s'exposer"
+              "Elle peut reprendre le travail après un café",
+              "Vous la faites consulter aux urgences dans tous les cas (surveillance cardiaque)",
+              "Vous lui donnez un antidouleur et la surveillez 30 minutes",
+              "Vous la laissez rentrer seule chez elle si elle se sent bien"
             ],
             "correctIndex": 1
           }
