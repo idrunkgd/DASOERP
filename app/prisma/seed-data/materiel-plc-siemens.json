@@ -1,0 +1,1369 @@
+{
+  "slug": "materiel-plc-siemens",
+  "title": "Matériel PLC Siemens",
+  "subtitle": "Formation complète — anatomie, gamme, câblage, safety, dimensionnement",
+  "level": "Débutant à intermédiaire",
+  "duration": "≈ 6 h",
+  "isCertifying": true,
+  "passThreshold": 70,
+  "certificateWording": "Formation « Matériel PLC Siemens » — connaissances fondamentales sur la gamme SIMATIC (LOGO!, S7-1200, S7-1500, ET 200), anatomie du S7-1500, modules I/O, protocoles de communication (Profinet, Profibus, OPC UA), safety (F-CPU), sélection de matériel et bonnes pratiques de montage / câblage / maintenance. Cette attestation atteste de la formation et de la réussite de l'évaluation. Elle ne constitue pas une certification Siemens officielle.",
+  "slides": [
+    {
+      "position": 1,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Bienvenue — Matériel PLC Siemens",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ta formation Siemens en 100+ slides\n\nBienvenue dans la formation **Matériel PLC Siemens** de Dasolabs. Tu vas comprendre, brique par brique, comment est construit un automate Siemens moderne, de la CPU aux modules I/O, du câblage à la mise en service.\n\n[TIP|Cette formation est **auto-suffisante** : pas besoin d'un PLC sous la main. À la fin, tu sauras dimensionner un projet, lire une nomenclature Siemens, et diagnostiquer une panne courante.]\n\n### Ce que tu vas apprendre\n- Qu'est-ce qu'un automate programmable et comment il fonctionne\n- Toute la gamme Siemens actuelle (LOGO!, S7-1200, S7-1500, ET 200)\n- L'anatomie détaillée d'un S7-1500\n- Les modules d'entrées/sorties (DI, DO, AI, AO)\n- Les protocoles de communication (Profinet, Profibus)\n- Les CPU safety (F-CPU)\n- La sélection de matériel et le dimensionnement\n- Le montage en armoire, le câblage, la maintenance\n\n[RULE|Quiz certifiant à la fin — 10 questions, seuil 70 %. Recommence autant de fois que tu veux.]"
+    },
+    {
+      "position": 2,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Un PLC, c'est quoi exactement ?",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Définition — Programmable Logic Controller\n\nUn **PLC** (Programmable Logic Controller, en français **automate programmable industriel**) est un ordinateur spécialisé, conçu pour piloter des machines et des processus industriels de manière fiable, en temps réel, dans des environnements difficiles.\n\n### Ce qui différencie un PLC d'un PC classique\n[KV|Robustesse:Résiste à la poussière, l'humidité, les vibrations, les températures extrêmes||Cycle déterministe:Boucle de scan à intervalle fixe (1 à 100 ms typique)||Modularité:Modules I/O ajoutés au rack selon les besoins||Temps de vie:15 à 20 ans en production, pas de mises à jour intempestives||Certification:Homologué pour environnements industriels (CE, UL, ATEX si besoin)]\n\n[TIP|Un PLC n'est **pas** conçu pour naviguer sur Internet ou jouer à Fortnite. Il est conçu pour lire 500 entrées, exécuter une logique déterministe, et écrire 500 sorties — 100 fois par seconde. Sans jamais planter.]"
+    },
+    {
+      "position": 3,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Un peu d'histoire — 1968",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## L'origine des PLC\n\nLe tout premier PLC est né en **1968** chez **Bedford Associates**, à la demande de **General Motors**. GM en avait marre : chaque changement de modèle de voiture demandait de recâbler des armoires entières remplies de relais électromécaniques.\n\n### Le cahier des charges de GM (1968)\n- Résister à l'environnement industriel (chaleur, poussière, vibrations)\n- Être **reprogrammable** sans recâblage\n- Être maintenu par les techniciens du chantier (pas par des informaticiens)\n- Coûter moins cher qu'un système à relais équivalent\n- Diagnostiquer les défauts par voyants\n\n[USECASE|Richard \"Dick\" Morley, ingénieur|Il conçoit le premier PLC : le **Modicon 084** (Modular Digital Controller). Il pèse ~50 kg, coûte 30 000 $ de l'époque, tourne à une vitesse ridicule vue d'aujourd'hui.|**Impact** : Modicon devient un standard mondial. Siemens répond en 1979 avec le **SIMATIC S3**. Le S7-1500 actuel descend en droite ligne de cette lignée.]\n\n[RULE|Depuis 1968, les principes fondamentaux n'ont **pas changé** : lire des entrées, exécuter une logique, écrire des sorties, dans une boucle rapide et déterministe. La technologie a évolué, la philosophie non.]"
+    },
+    {
+      "position": 4,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Le cycle de scan — le cœur du PLC",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## La boucle infinie qui pilote tout\n\nChaque milliseconde (ou dizaine de ms), le PLC exécute **le même cycle** : c'est le **cycle de scan**.\n\n[ILLUSTRATION|scan-cycle]\n\n### Les 4 étapes du cycle\n[STEPS|**1. Lire les entrées** — Toutes les entrées physiques (interrupteurs, capteurs, mesures analogiques) sont recopiées dans une mémoire image d'entrée (**PII**).||**2. Exécuter le programme** — La CPU parcourt le code ligne par ligne, en lisant/écrivant dans la mémoire image et les mémentos. Les entrées physiques ne bougent PAS pendant cette étape.||**3. Écrire les sorties** — Les valeurs de la mémoire image de sortie (**PIQ**) sont copiées d'un coup vers les sorties physiques.||**4. Diagnostic / communication** — Le PLC gère les remontées Profinet, les erreurs, les timers OS. Puis retour à l'étape 1.]\n\n### Temps de cycle typique\n[KV|LOGO!:5 à 20 ms||S7-1200:1 à 10 ms||S7-1500 CPU 1516:100 μs à 5 ms||S7-1500 CPU 1518 (perf):50 μs par cycle possible]\n\n[TIP|**Pourquoi un cycle synchrone ?** Parce que la logique doit être **déterministe**. Un capteur activé à l'instant t est traité au cycle t+1 au plus tard, jamais à t+10. C'est la différence entre un PLC et un PC.]"
+    },
+    {
+      "position": 5,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "PLC vs microcontrôleur vs PC industriel",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Trois familles souvent confondues\n\n[KV|**PLC (Automate)**:Cycle synchrone garanti · robuste · maintenance terrain simple · langue IEC 61131-3 · durée de vie 15-20 ans||**Microcontrôleur (Arduino, PIC…)**:Cycle asynchrone · petit prix · développement C/C++ · pas de certification indus · durée de vie ~5 ans||**PC industriel (IPC + Windows/Linux)**:Cycle multi-tâches · puissance de calcul énorme · pas déterministe sans RTOS · durée de vie 5-10 ans · pour SCADA, vision, data]\n\n### Quand utiliser quoi ?\n- **PLC** : contrôle de process, sécurité, ligne de production\n- **µC** : prototypage, produit fini de bas coût, capteurs intelligents\n- **IPC** : SCADA local, MES embarqué, vision industrielle, edge AI\n\n[WARN|**Ne jamais** piloter une sécurité machine (arrêt d'urgence, presse) avec un Arduino. Les PLC safety (F-CPU Siemens) sont certifiés SIL 3 / PL e — pas Arduino.]\n\n### Chez Dasolabs, on rencontre les 3\nPharma UCB → S7-1500 (PLC) + IPC AVEVA (SCADA). Ligne agro → S7-1200. Data historisation → IPC + HighByte. Chacun sa place."
+    },
+    {
+      "position": 6,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Anatomie générale d'un système PLC",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Les briques indispensables\n\nUn système PLC complet, c'est **7 briques** qui travaillent ensemble.\n\n[STEPS|**Alimentation (PS)** — Convertit le 230 V AC en 24 V DC pour la CPU et les modules||**CPU** — Le cerveau : exécute le programme, gère la mémoire, la communication||**Rack / bus fond de panier** — Support mécanique et bus de données entre modules||**Modules d'entrées (DI, AI)** — Interface avec capteurs, boutons, mesures||**Modules de sorties (DO, AO)** — Pilotent actionneurs, contacteurs, variateurs||**Modules de communication (CM)** — Profinet, Profibus, Ethernet, série||**Carte mémoire SIMATIC MC** — Contient le programme + backup + firmware]\n\n[ILLUSTRATION|rack]\n\n[TIP|Sur un **S7-1500**, la carte mémoire SD (**SIMATIC Memory Card**) contient TOUT le projet. Si la CPU claque, tu remplaces la CPU, tu réinsères la SD, tu démarres — la machine repart en 30 secondes. C'est un des grands avantages Siemens.]"
+    },
+    {
+      "position": 7,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Où on trouve des PLC ? — 5 exemples concrets",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Le PLC est partout autour de toi\n\n[USECASE|Ascenseur d'immeuble|Chaque appui sur un bouton de cabine est traité par un petit PLC (souvent LOGO! ou S7-1200) qui gère priorité d'appels, portes, sécurités.|**Bonne pratique** : le circuit sécurité (frein, capteurs de porte) est indépendant du PLC principal — c'est un circuit de sécurité certifié qui coupe tout en dur.]\n\n[USECASE|Ligne de conditionnement pharma (UCB)|Une ligne de conditionnement de comprimés cadence 400 boîtes/minute. Un S7-1500 pilote convoyeurs, marqueurs, vision, rejet des défauts.|**Enjeu** : traçabilité GAMP 5 — chaque cycle est horodaté, archivé. Zéro downtime toléré, redondance CPU en H-mode.]\n\n[USECASE|Station de traitement d'eau (Vivaqua)|Automate S7-400 (legacy) pilote pompes, vannes motorisées, chloration, mesure de qualité. 24/7 depuis 15 ans.|**Migration** : Vivaqua migre progressivement en S7-1500 — la fin de vie du S7-400 est planifiée pour 2028.]\n\n[USECASE|Presse à injection plastique|S7-1500 F (safety) pilote la fermeture du moule (danger d'écrasement), l'injection, le refroidissement.|**Safety** : boutons d'urgence, barrière optique, portes verrouillées — tout passe par la partie safety du F-CPU.]\n\n[USECASE|Distributeur de boissons|LOGO! Micro-PLC gère la reconnaissance monnaie, sélection produit, distribution.|**Léger** : le LOGO! est parfait ici : 8 entrées, 4 sorties, 200 € matériel, programmation intuitive.]"
+    },
+    {
+      "position": 8,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Marché mondial — Siemens N°1",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Qui domine le marché mondial des PLC ?\n\nEn 2024, le marché mondial des PLC pesait **~13 milliards de dollars**. Les leaders :\n\n[KV|**Siemens (Allemagne)**:~30 % de part de marché mondiale · leader en Europe et Asie · gamme SIMATIC||**Rockwell Automation (USA)**:~20 % · leader aux USA · gamme Allen-Bradley (ControlLogix, CompactLogix)||**Mitsubishi (Japon)**:~13 % · fort en Asie · gamme MELSEC||**Schneider Electric (France)**:~10 % · Modicon (héritier historique)||**Autres**:B&R, Beckhoff, Omron, Delta, ABB…]\n\n### Pourquoi Siemens en Europe ?\n- **Écosystème** : TIA Portal unifie CPU + variateurs + IHM + Profinet\n- **Support** : réseau de distributeurs et formateurs partout\n- **Longévité** : garantie de 15 à 20 ans de fourniture pièces\n- **Compatibilité** : un projet S7-300 se porte en S7-1500 sans tout réécrire\n\n[RULE|Chez Dasolabs, **80 % de nos projets d'automatisme tournent sur Siemens**. C'est notre cœur de compétence. Cette formation te met au niveau de nos consultants seniors sur la partie matériel.]"
+    },
+    {
+      "position": 9,
+      "kind": "CONTENT",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Quelques mots de vocabulaire à connaître",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Le glossaire Siemens — à mémoriser\n\n[KV|**SIMATIC**:La marque commerciale Siemens des automates (comme \"Apple MacBook\")||**S7**:Génération d'automates depuis les années 90 (S7-200, S7-300, S7-400, S7-1200, S7-1500)||**TIA Portal**:Totally Integrated Automation — l'IDE unique pour tout programmer||**Profinet**:Protocole Ethernet industriel, standard de fait Siemens depuis 2010||**Profibus**:Protocole bus série (RS-485) — legacy mais encore massif||**ET 200**:Gamme d'I/O déportées (200MP, 200SP, 200S)||**F-CPU**:CPU avec fonctions de sécurité intégrées (Fail-safe)||**HMI (IHM)**:Interface Homme-Machine — écran opérateur||**KTP / TP / Comfort / Unified**:Familles d'écrans HMI Siemens||**PII / PIQ**:Mémoire image entrées / sorties||**OB, FB, FC, DB**:Types de blocs de programme (Organization / Function / Data)]\n\n[TIP|Le vocabulaire Siemens est **très spécifique**. Un \"OB1\" pour un débutant, c'est de l'hébreu. Pour un intégrateur senior, c'est le bloc principal cyclique. On y reviendra plus tard.]"
+    },
+    {
+      "position": 10,
+      "kind": "QUIZ",
+      "section": "1 · Qu'est-ce qu'un PLC ?",
+      "title": "Quiz 1 — Les fondamentaux",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Un PLC exécute son programme…",
+            "options": [
+              "De manière asynchrone comme un PC",
+              "Dans une boucle synchrone appelée cycle de scan",
+              "Uniquement quand une entrée change",
+              "Une fois par heure"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Qui a créé le premier PLC en 1968 et pour quel client ?",
+            "options": [
+              "Siemens pour BMW",
+              "Rockwell pour Ford",
+              "Bedford Associates (Dick Morley) pour General Motors",
+              "IBM pour Boeing"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Quelle est la principale différence entre un PLC et un microcontrôleur type Arduino ?",
+            "options": [
+              "Le PLC est plus lent",
+              "Le PLC est déterministe et certifié industriel",
+              "Le PLC coûte moins cher",
+              "Il n'y a aucune différence"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 11,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "Vue d'ensemble de la gamme SIMATIC",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Du micro-PLC au gros système redondant\n\nSiemens propose **4 familles** d'automates aujourd'hui, du plus petit au plus grand.\n\n[KV|**LOGO!**:Micro-PLC · 8-24 I/O · programmation par blocs fonction · 100 à 300 €||**S7-1200**:Compact · 14 à 284 I/O locales · gamme entrée · 500 à 1 500 €||**S7-1500**:Modulaire performance · illimité modulaire · gamme intégration · 2 000 à 15 000 €||**S7-400 (legacy)**:Gros système redondant · fin de vie 2028 · à migrer vers S7-1500]\n\n### Ancienne génération (encore en production ou service)\n[KV|**S7-200**:Fin de commercialisation 2016 · remplacé par S7-1200||**S7-300**:Fin de commercialisation 2023 · remplacé par S7-1500||**S7-400**:Encore vendu · fin annoncée 2028]\n\n[TIP|**Si tu démarres un projet neuf en 2026** : choisis LOGO! (très petit), S7-1200 (petit / moyen), ou S7-1500 (moyen / gros). N'utilise plus le S7-300 (obsolète), et le S7-400 uniquement si tu ES en H-CPU redondant avec besoin spécifique.]"
+    },
+    {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "LOGO! — Le micro-PLC",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## LOGO! 8 — pour les tout petits automatismes\n\n**LOGO!** est le **micro-PLC** de Siemens. Idéal quand tu as besoin d'un peu de logique, sans casser la banque.\n\n### Caractéristiques\n[KV|**Entrées/Sorties**:8 à 24 selon modèle · extensions max 24 DI + 20 DO||**Programmation**:Blocs fonctionnels graphiques (FBD) — pas de ladder classique||**Interface**:Écran intégré + navigation par boutons||**Communication**:Ethernet + Profinet natif depuis LOGO! 8||**Alimentation**:12/24 V DC, 24/230 V AC selon référence||**Prix**:~150 à 400 €]\n\n### Cas d'usage typiques\n- Automatisation de portails, éclairages extérieurs\n- Contrôle d'installation solaire domestique\n- Pompes de relevage, ventilation atelier\n- Distributeur automatique\n- Petits process artisanaux (brasserie, boulangerie)\n\n[USECASE|Karim, gérant de laverie industrielle|Karim veut automatiser 6 machines à laver : détection carte prépayée → démarrage cycle → fin.|**Solution** : 1 LOGO! 12/24 RCE, ~200 €. Programmation FBD en 2 h. Zéro maintenance depuis 3 ans.]\n\n[WARN|LOGO! est **limité** : pas de safety, pas d'OPC UA, mémoire minuscule. Dès que le projet devient sérieux (SCADA, traçabilité, cycles rapides), passe au S7-1200 ou S7-1500.]"
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "S7-1200 — Le compact polyvalent",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## S7-1200 — la classe d'entrée moderne\n\nLe **S7-1200** est la gamme **compacte** de Siemens : CPU + I/O intégrées dans le même boîtier, extensible par 8 modules signaux max.\n\n[ILLUSTRATION|cpu-s71200]\n\n### La gamme\n[KV|**CPU 1211C**:6 DI · 4 DO · 2 AI · 30 KB program mem · petit projet||**CPU 1212C**:8 DI · 6 DO · 2 AI · 75 KB · petit projet||**CPU 1214C**:14 DI · 10 DO · 2 AI · 100 KB · standard||**CPU 1215C**:14 DI · 10 DO · 2 AI · 125 KB · double Profinet||**CPU 1217C**:14 DI · 10 DO · 2 AI · 150 KB · high-speed differential I/O]\n\n### Variantes d'alimentation\n- **DC/DC/DC** : 24 V DC alim, entrées DC, sorties transistor DC\n- **AC/DC/RLY** : 100-240 V AC alim, entrées DC, sorties relais (charges AC/DC mixtes)\n- **DC/DC/RLY** : 24 V DC alim, sorties relais\n\n[TIP|Le **S7-1200 est le \"workhorse\" de Dasolabs** : 60 % de nos projets consultance chez Technochim, Zoetis, GROUPEMECA tournent sur S7-1200 CPU 1214/1215. Bon compromis prix / fonctionnalités.]"
+    },
+    {
+      "position": 14,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "S7-1500 — La gamme performance",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## S7-1500 — le standard industrie moderne\n\nLe **S7-1500** est le fer de lance actuel de Siemens : modulaire, extensible, ultra performant, supporte tout ce que TIA Portal sait faire.\n\n[ILLUSTRATION|cpu-s71500]\n\n### La gamme CPU\n[KV|**CPU 1511**:200 KB · 400 MB extensible · classique||**CPU 1513**:500 KB · plus rapide||**CPU 1515F**:750 KB · Safety intégrée||**CPU 1516**:1 MB · standard moyen/gros projets||**CPU 1517**:2 MB · gros projets · Motion Control avancé||**CPU 1518**:6 MB · very high performance · isochrone < 50 μs]\n\n### Suffixes courants\n- **F** : Fail-safe (safety intégrée)\n- **T** : Motion / Technology CPU (positionnement axe)\n- **H** : High availability (redondante)\n- **PN** : Profinet uniquement\n- **PN/DP** : Profinet + Profibus\n\n[TIP|**Choix courant Dasolabs** :\n- Ligne agro standard → **CPU 1516-3 PN/DP** (~4 500 €)\n- Ligne pharma safety → **CPU 1516F-3 PN/DP** (~6 000 €)\n- Skid haute performance motion → **CPU 1517T-3 PN/DP** (~9 000 €)]"
+    },
+    {
+      "position": 15,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "ET 200SP — I/O déportées modernes",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## ET 200SP — pour distribuer les I/O\n\n**ET 200SP** est la gamme moderne d'**I/O déportées** (distributed I/O). Idée : au lieu d'avoir tous les modules dans l'armoire principale, tu poses des mini-racks sur le terrain (à côté des machines) et tu les connectes en Profinet.\n\n[ILLUSTRATION|et200sp]\n\n### Composition d'une station ET 200SP\n- **1 tête IM 155-6 PN** (interface Profinet vers la CPU)\n- **N modules signaux** (jusqu'à 64) : DI, DO, AI, AO, safety, comm\n- **1 module de terminaison** (marqué \"server module\")\n- Base de montage (BaseUnit) pour chaque module\n\n### Modes de montage\n- Rail DIN standard\n- Montage IP20 (armoire) — le plus courant\n- Version IP65 sur le terrain (ET 200pro)\n\n[USECASE|Ligne d'embouteillage Zoetis|3 stations ET 200SP réparties le long de la ligne (traitement bouteilles, remplissage, étiquetage). Chaque station gère ses capteurs et actionneurs locaux.|**Bénéfice** : câblage divisé par 5 (les fils vont de la station locale au capteur, pas de la station à la CPU centrale). Diagnostic modulaire par LED locale.]\n\n[RULE|**ET 200SP ≠ CPU**. C'est une station d'I/O connectée à une CPU S7-1500 (ou S7-1200). Il existe une variante **ET 200SP CPU** (une CPU intégrée à la tête) mais on l'utilise rarement en pratique.]"
+    },
+    {
+      "position": 16,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "ET 200MP, ET 200S, ET 200pro",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Les autres gammes ET 200\n\nAu-delà de ET 200SP, Siemens propose d'autres formats selon le contexte.\n\n[KV|**ET 200MP**:I/O déportées rack-mount · même form factor que S7-1500 · pour gros besoins||**ET 200SP HA (High Availability)**:Version redondante pour pharma, énergie · doubles alims + doubles bus||**ET 200pro**:IP65 · monté directement sur la machine, sans armoire · robuste aux projections||**ET 200eco**:Version compacte tout-en-un · pour agro, logistique · Profinet direct]\n\n### Anciennes gammes (legacy, à connaître)\n- **ET 200S** : version antérieure, discontinuée en 2020\n- **ET 200iSP** : version ATEX pour zones explosives\n- **ET 200X** : très ancien, plus supporté\n\n[TIP|**Règle** : sur un projet neuf 2026, tu choisis **ET 200SP** en 95 % des cas. **ET 200pro** quand tu montes sur machine sans armoire. Tout le reste est legacy.]"
+    },
+    {
+      "position": 17,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "TIA Portal — l'IDE unifié",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Totally Integrated Automation Portal\n\n**TIA Portal** est le logiciel de développement unique pour toute la gamme SIMATIC. C'est l'équivalent Siemens de VS Code pour un développeur.\n\n[ILLUSTRATION|tia-portal]\n\n### Ce qu'on fait dans TIA Portal\n- Configuration matérielle : glisser CPU, PS, modules, régler paramètres\n- Programmation : Ladder, FBD, SCL, STL, Graph\n- Configuration Profinet : topologie, IP, cycles\n- Configuration HMI (WinCC Unified / Comfort / Basic)\n- Configuration variateurs Sinamics\n- Simulation (PLCSIM Advanced)\n- Diagnostic online\n\n### Versions\n[KV|**TIA V15.x**:Legacy, encore utilisé pour projets S7-300||**TIA V16**:Support S7-1500 R/H||**TIA V17**:Sécurité renforcée||**TIA V18**:OPC UA amélioré||**TIA V19 (actuel)**:Version recommandée pour projet neuf 2026||**TIA V20**:Roadmap 2027]\n\n[WARN|**Attention aux versions !** Un projet créé en TIA V19 ne s'ouvre pas dans TIA V16. Toujours vérifier la version du client avant de démarrer.]\n\n### Éditions\n- **Basic** : uniquement S7-1200 + HMI Basic — 300 €\n- **Professional** : tout · S7-1500 · ~4 500 € licence flottante\n- **Safety Advanced** : extension pour F-CPU · ~3 000 €"
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "Comparatif : LOGO! vs S7-1200 vs S7-1500",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Quel modèle pour quel projet ?\n\n[KV|**Critère**:LOGO! · S7-1200 · S7-1500||**Prix CPU**:150 € · 500-1500 € · 2000-15000 €||**I/O max**:44 · 284 · illimité modulaire||**Prog. mem**:400 blocs · 30-150 KB · 200 KB - 6 MB||**Cycle typique**:5-20 ms · 1-10 ms · 100 μs - 5 ms||**Profinet**:oui (LOGO! 8) · oui · oui + IRT + MRP||**OPC UA**:non · non · oui (serveur intégré)||**Safety**:non · non · oui (F-CPU)||**Motion**:non · basique · avancé (T-CPU)||**Redondance**:non · non · oui (H-CPU)||**HMI intégrée**:écran mini · non · écran diag intégré]\n\n### Règle du choix\n[STEPS|**LOGO!** — Si le projet tient sur une nappe et coûte moins de 500 € en composants totaux||**S7-1200** — Petit / moyen projet, une seule machine, budget ~2 000 € matériel||**S7-1500** — Ligne, atelier, safety, communication OPC UA, redondance : la valeur sûre]\n\n[TIP|**Chez Dasolabs**, on ne propose pas de LOGO! à un client industriel (image \"amateur\"). On démarre à S7-1200 pour du léger et on passe très vite à S7-1500 pour tout projet un peu ambitieux.]"
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "2 · La gamme Siemens",
+      "title": "Cas d'usage réel — chiffrage 3 projets",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Trois projets, trois choix de matériel\n\n[USECASE|Projet 1 · Karim, brasseur artisanal|Contrôler chauffage cuve + agitation + pompes de brassage. 6 capteurs, 4 vannes, 2 pompes. Écran opérateur simple.|**Solution matérielle** : LOGO! 12/24 RCE + KTP400 Basic HMI · ~500 € matériel · 3 jours de dev.]\n\n[USECASE|Projet 2 · Zoetis, ligne d'embouteillage|Convoyeur + remplissage 4 têtes + étiqueteuse + rejet vision + traçabilité. ~180 I/O au total. Reporting BatchReport.|**Solution matérielle** : CPU 1516-3 PN/DP + 2 ET 200SP déportées + TP1200 Comfort + Sinamics G120 · ~14 000 € matériel · 6 semaines de dev.]\n\n[USECASE|Projet 3 · Pharma UCB, réacteur GMP|Réacteur pharma classe A. Safety pour agitation, sécurité opérateur, GAMP 5 validation, redondance CPU obligatoire.|**Solution matérielle** : 2× CPU 1516F-3 PN/DP en H-mode (redondance) + ET 200SP HA + AVEVA System Platform + IPC · ~35 000 € matériel · 4 mois de dev.]\n\n[RULE|Le **matériel n'est jamais le poste principal** d'un projet automatisme. Ingénierie + programmation + tests + mise en service pèsent typiquement 5 à 10× le coût matériel.]"
+    },
+    {
+      "position": 20,
+      "kind": "QUIZ",
+      "section": "2 · La gamme Siemens",
+      "title": "Quiz 2 — La gamme Siemens",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quelle gamme choisirais-tu pour un projet avec 180 I/O, safety obligatoire, et communication OPC UA ?",
+            "options": [
+              "LOGO!",
+              "S7-1200",
+              "S7-1500 F",
+              "S7-200"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Combien de modules signaux peut-on installer sur une station ET 200SP au maximum ?",
+            "options": [
+              "8",
+              "16",
+              "32",
+              "64"
+            ],
+            "correctIndex": 3
+          },
+          {
+            "prompt": "TIA Portal V19 permet de programmer…",
+            "options": [
+              "Uniquement S7-1500",
+              "Toute la gamme SIMATIC + IHM + variateurs",
+              "Uniquement S7-1200 et LOGO!",
+              "Uniquement les CPU F"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 21,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Introduction — le S7-1500 sous le capot",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ce que tu vas apprendre dans ce chapitre\n\nLe **S7-1500** est le cœur de nos projets Dasolabs. Comprendre son anatomie, c'est le premier pas pour dimensionner, choisir, câbler, diagnostiquer.\n\n[ILLUSTRATION|rack]\n\n### Les briques d'un S7-1500\n- Le **rail DIN** (support mécanique)\n- Le **bus de fond de panier** (backplane) — mystère car intégré au rail\n- L'**alimentation PS** (source 24 V DC pour la CPU)\n- La **CPU** (le cerveau)\n- Les **modules signaux** (I/O, comm, technologie)\n- Le **module de terminaison** (pas obligatoire, différence avec ET 200SP)\n- La **carte mémoire SIMATIC MC** (SD sécurisée)\n\n[TIP|**Fait peu connu** : le \"bus fond de panier\" du S7-1500 est **intégré au rail** — pas un rack séparé comme sur le S7-300. Tu clipses les modules sur le rail, ils sont automatiquement raccordés au bus.]"
+    },
+    {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Le rail DIN et le bus de fond de panier",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Le support mécanique et électrique\n\nSur S7-1500, le **rail DIN Siemens spécifique** (référence 6ES7590-1AB60-0AA0 pour 245 mm) fait deux choses :\n1. Support mécanique des modules\n2. Bus de communication haute vitesse entre modules\n\n### Longueurs de rails standard\n[KV|160 mm:pour 3 modules max||245 mm:pour 5 modules max||482 mm:pour 10 modules max||530 mm:pour 12 modules max||830 mm:pour 20 modules max]\n\n### Configuration max\n- **32 modules** max sur un rack central (CPU + 31 modules)\n- Au-delà : passer par des ET 200 déportées via Profinet\n\n[WARN|Utiliser un **vrai rail Siemens S7-1500**, pas un rail DIN générique. Les rails S7-300 sont **incompatibles** avec S7-1500 (bus différent).]"
+    },
+    {
+      "position": 23,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "L'alimentation (PS) — 25 W, 60 W, 190 W",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Convertir 230 V AC en 24 V DC\n\nLe **module PS** (Power Supply) alimente la CPU et les modules du rack via le bus de fond de panier.\n\n### Trois niveaux de puissance\n[KV|**PS 25W 24VDC**:Entrée 24 V DC · sortie 5V bus · petites configurations||**PS 60W 24/48/60 VDC**:Entrée 24 V DC · standard S7-1500 moyen||**PS 190W 120/230 VAC/DC**:Entrée 230 V AC · gros rack chargé · haut de gamme]\n\n### Point important : la PS n'alimente PAS les capteurs terrain\n[DANGER|**Erreur classique de débutant** : croire que la PS 60W alimente les capteurs 24V du terrain. **Non**. La PS alimente la CPU + le bus interne. Pour alimenter les capteurs terrain, il te faut une **alimentation séparée** (typiquement une Siemens SITOP 24V 10A à côté).]\n\n### Redondance\nSur un projet critique, tu peux mettre **2 PS en parallèle** avec des modules DIODE-OR (SITOP Selectivity). Si une PS lâche, l'autre prend le relais sans interruption."
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "La CPU — cerveau du système",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Zoom sur la CPU 1516-3 PN/DP (l'exemple type)\n\nDécodons la référence : **CPU 1516-3 PN/DP**\n[KV|**1516**:Numéro de gamme (1511 petit, 1518 très perf)||**-3**:3 interfaces (2 Profinet + 1 Profibus)||**PN**:Profinet||**DP**:Profibus DP legacy]\n\n### Ses interfaces\n- **X1** : Profinet 100 Mbps (typiquement Profinet IO, terrain)\n- **X2** : Profinet 100 Mbps (typiquement supervision, HMI)\n- **X3** : Profibus DP (legacy, pour connecter des vieux variateurs)\n\n### Sa capacité mémoire\n- **1 MB** de mémoire de code programme\n- **5 MB** de données\n- Extensible via SIMATIC Memory Card (SD)\n\n### Ses LED de diagnostic\n[KV|**RUN/STOP**:vert (en marche) / jaune (arrêté)||**ERROR**:rouge · défaut hardware||**MAINT**:jaune · maintenance requise||**LINK X1**:vert · lien Profinet actif||**BF1**:rouge · bus fault Profinet]\n\n[TIP|La **CPU 1516F** (safety) coûte ~30 % de plus mais intègre un second processeur redondant pour la safety. Obligatoire pour SIL 3.]"
+    },
+    {
+      "position": 25,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "L'écran de diagnostic intégré",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Un écran dès la CPU 1511 — killer feature Siemens\n\nToutes les CPU S7-1500 (à partir de 1511) intègrent un **petit écran couleur** en façade. C'est unique dans l'industrie.\n\n### Ce qu'on peut faire sur l'écran\n[STEPS|**Voir l'état** : RUN/STOP, adresses IP, version firmware||**Diagnostic** : quel module est en défaut, quel bit d'entrée est à 1||**Changer l'adresse IP** sans TIA Portal (pratique en usine)||**Voir les alarmes** actives||**Verrouiller/déverrouiller** l'accès CPU]\n\n### Cas d'usage terrain\n[USECASE|Consultant en atelier|Jordan intervient sur un skid de brassage. Le client dit \"ça ne marche plus\". Jordan n'a pas son PC. Il ouvre le capot armoire, regarde l'écran CPU : « MODULE 4 : BUS FAULT ».|**Résolution** : en 30 secondes, il a identifié un câble Profinet débranché sur le module 4. Réparation en 2 min. Sans écran = 30 min à sortir le PC, connecter, télécharger TIA.]\n\n[RULE|**L'écran de diag est un vrai gain de productivité**. Chaque intervention en usine où tu n'as pas ton PC : l'écran te sauve.]"
+    },
+    {
+      "position": 26,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "La SIMATIC Memory Card — le disque dur",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## La SD Card qui contient tout\n\nLa **SIMATIC MC** (Memory Card) est une carte SD **spéciale Siemens** (pas une SD standard !) qui contient TOUT le programme + config + firmware de la CPU.\n\n### Ce qu'elle stocke\n- Programme utilisateur (OB, FB, FC, DB…)\n- Configuration matérielle (hardware config)\n- Firmware CPU\n- Recettes, journaux, traces\n- Certificats OPC UA\n\n### Tailles disponibles\n[KV|**4 MB**:Très petit projet||**12 MB**:Standard S7-1200||**32 MB**:Standard S7-1500 moyen||**256 MB**:Grande config avec recettes / logs||**2 GB / 32 GB**:Historique OPC UA, traces DataLog longues]\n\n### Cas magique : remplacement CPU sans PC\n[USECASE|Panne CPU à 3 h du matin, Pharma UCB|La CPU en production tombe en panne. Personne en astreinte n'a le PC de dev.|**Procédure** : (1) éteindre l'armoire, (2) extraire la SD, (3) remplacer la CPU physiquement (10 min), (4) réinsérer la SD dans la nouvelle CPU, (5) rallumer. La machine repart en **30 secondes**, avec exactement la même config qu'avant. Zéro besoin de TIA Portal.]\n\n[WARN|**Attention** : la SIMATIC MC est **verrouillée à la CPU** par firmware. Si tu commandes une SD \"non formatée\", elle DOIT être formatée par TIA Portal la première fois. Les SD grand public (SanDisk, Kingston) **ne fonctionnent pas**.]"
+    },
+    {
+      "position": 27,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Les modules signaux — panorama",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Les briques d'I/O\n\nLe rack S7-1500 accueille des **modules signaux** (SM) à droite de la CPU. Chacun a une fonction.\n\n[ILLUSTRATION|rack]\n\n### Types de modules signaux\n[KV|**DI**:Digital Input (entrées TOR)||**DQ**:Digital Output (sorties TOR)||**AI**:Analog Input (entrées analogiques)||**AQ**:Analog Output (sorties analogiques)||**CM**:Communication Module (Profinet, Profibus, série)||**TM**:Technology Module (comptage, positionnement, pesée)||**F-DI / F-DQ**:Safety I/O (arrêt d'urgence)]\n\n### Densités typiques\n- DI 16 · 32 · 64 points\n- DQ 8 · 16 · 32 points\n- AI 4 · 8 points (multiplexeur ADC)\n- AQ 2 · 4 points\n\n### Modes de largeur\n- **35 mm** : le format standard (majorité des modules)\n- **25 mm** : format compact (nouvelle génération HA)\n\n[TIP|**Règle** : privilégier les modules 32 points (plus dense = moins de place armoire + moins de câblage bus). Ne descends à 16 ou 8 points que si tu as des besoins précis (mixte de tension, isolation).]"
+    },
+    {
+      "position": 28,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Adressage des modules dans le rack",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Comment TIA affecte les adresses ?\n\nChaque module a une **adresse de départ** dans l'espace mémoire I/O. TIA Portal gère ça automatiquement, mais tu dois savoir lire une carte d'adresses.\n\n### Exemple concret\nRack : CPU 1516 (slot 1) + DI 32 (slot 2) + DI 32 (slot 3) + DQ 32 (slot 4) + AI 8 (slot 5)\n\n[KV|**Slot 1 CPU**:pas d'I/O directes||**Slot 2 DI 32**:%I0.0 → %I3.7 (32 bits = 4 octets, 0 à 3)||**Slot 3 DI 32**:%I4.0 → %I7.7||**Slot 4 DQ 32**:%Q0.0 → %Q3.7||**Slot 5 AI 8**:%IW100 → %IW114 (8 canaux × 2 octets = 16 octets à partir de 100)]\n\n### En SCL / Ladder\nTu écris %I2.3 pour lire la 4ᵉ entrée du 2ᵉ module DI (slot 3). Ou %Q1.0 pour piloter la 1ʳᵉ sortie du 4ᵉ module DQ.\n\n[TIP|**Bonne pratique** : dans TIA, tu ne travailles jamais avec %I2.3 en dur. Tu utilises un **PLC tag symbolique** : bp_marche_moteur1 (Bouton Poussoir Marche Moteur 1). Le tag pointe vers l'adresse. Si tu déplaces le module dans le rack, seul le tag suit — pas ton programme entier.]"
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Bus de fond de panier — vitesse et bande passante",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Communication entre modules\n\nLe **bus de fond de panier** (backplane bus) du S7-1500 fonctionne à **1 Gbps interne** (contre 12 Mbps sur S7-300). Résultat : lecture I/O ultra rapide.\n\n### Cycles I/O typiques\n[KV|**DI/DQ standard**:< 100 μs de latence entre entrée physique et mémoire CPU||**AI 4 canaux 16 bits**:0.5 ms d'acquisition||**AI 8 canaux Ex**:2 ms (isolation + filtrage)||**Isochronous mode**:jusqu'à 250 μs pour synchronisation multi-axes]\n\n### Isochronous — la magie du positionnement précis\nSur des applications multi-axes (robotique, découpe, pesée), tu peux activer le **mode isochrone** : tous les modules envoient leur data à la CPU au **même instant**. La CPU calcule, envoie les consignes, tous les axes bougent en même temps.\n\n[USECASE|Machine de découpe LFB (pharma)|Découpe de blisters à 200 unités/minute, positionnement laser + rejet. Sans isochrone : décalage de 5 ms entre axes = découpe imprécise.|**Avec isochrone activé** : synchronisation à 250 μs, précision positionnement < 0.1 mm.]"
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Redondance CPU — H-mode et R-mode",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Quand un seul CPU ne suffit pas\n\nCertains process **ne peuvent pas s'arrêter** : pharma en batch, énergie, traitement de l'eau, sidérurgie. Siemens propose deux modes de redondance sur S7-1500.\n\n[KV|**R (Redundant)**:2 CPU distinctes · commutation < 100 ms · synchronisation via fibre · SIL 2||**H (High Availability)**:2 CPU en bit-lockstep · commutation < 10 ms · calculs 100 % synchrones · SIL 3 possible avec F-H]\n\n### R-CPU (moins cher, moins strict)\n- 2 CPU 1513R ou 1515R\n- Bus de synchronisation via 2 fibres optiques\n- Si la CPU maître tombe, la second reprend en < 100 ms\n- **Perte** de quelques cycles pendant la bascule (OK pour la plupart des process)\n\n### H-CPU (haute exigence)\n- 2 CPU 1517H ou 1518H\n- Synchronisation continue \"bit-lockstep\"\n- Bascule invisible : < 10 ms sans perte de cycle\n- Coût : **2× la CPU + 2× l'ET 200SP HA + fibres = 30 000 € minimum**\n\n[USECASE|Réacteur pharma UCB — production 24/7|Un arrêt intempestif = 200 k€ de batch perdu + validation GMP à redémarrer.|**Solution** : 2× CPU 1516F-3H PN/DP + 2× ET 200SP HA + 2 SCADA redondants. Investissement 60 k€ matériel. Amorti au premier crash évité.]"
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "F-CPU — Safety intégrée",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Une seule CPU pour standard + safety\n\nLes **CPU F** (F pour Fail-safe) intègrent une **deuxième unité de calcul indépendante** dédiée à la safety. Le programme safety tourne en parallèle du programme standard, dans un espace isolé.\n\n[ILLUSTRATION|f-safety]\n\n### CPU F standard\n- CPU 1211F, 1212F, 1214F, 1215F (S7-1200 F)\n- CPU 1511F, 1513F, 1515F, 1516F, 1517F, 1518F (S7-1500 F)\n\n### Avantages du F-CPU intégré\n[STEPS|**Un seul PLC** au lieu de 2 (standard + safety séparés) — gain armoire, câblage||**Programmation unifiée** dans TIA Portal Safety Advanced||**Diagnostic centralisé** — écran + web server voient tout||**Bibliothèques certifiées** TÜV — pas besoin de recertifier ton code]\n\n### Certifications\n- **SIL 3** (IEC 61508)\n- **PL e Cat 4** (ISO 13849)\n- Certifié **TÜV Rheinland** — audit annuel Siemens\n\n[RULE|**Règle du choix** : si ton projet a un arrêt d'urgence ou une machine dangereuse (presse, robot, four), tu prends une F-CPU. Le surcoût (~30 %) est **négligeable** face au coût d'un audit safety en cas d'accident.]"
+    },
+    {
+      "position": 32,
+      "kind": "CONTENT",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Vue exploded d'un rack S7-1500 typique",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Le rack Zoetis type — décomposé\n\nRegardons un rack S7-1500 sur une vraie ligne agroalimentaire.\n\n[ILLUSTRATION|rack]\n\n### Slot par slot\n[KV|**Slot 0**:Alimentation PS 60W (à gauche du rail)||**Slot 1**:CPU 1516-3 PN/DP · programme + comm||**Slot 2**:DI 32×24VDC · lecture capteurs standards||**Slot 3**:DI 32×24VDC · deuxième banc capteurs||**Slot 4**:DQ 32×24VDC·0.5A · pilotage relais interface||**Slot 5**:AI 8×U/I/RTD/TC · 8 mesures température + pression||**Slot 6**:AQ 4×U/I · 4 consignes vers variateurs||**Slot 7**:CM 1542-1 · module Ethernet supplémentaire (IT / MES)]\n\n### Total\n- **1 CPU** + **7 modules signaux** = 8 slots occupés\n- 64 DI + 32 DQ + 8 AI + 4 AQ + 1 Ethernet supplémentaire\n\n### Puissance et taille\n- Consommation totale : ~35 W → PS 60W large\n- Largeur rack : ~50 cm (rail 530 mm + PS 25 mm)\n\n[TIP|**Marge de manœuvre** : toujours prévoir **1 slot vide** à droite pour extension future. Ajouter un module dans 3 ans en runtime est infaisable ; à l'ingénierie initiale c'est 30 min.]"
+    },
+    {
+      "position": 33,
+      "kind": "QUIZ",
+      "section": "3 · Anatomie d'un S7-1500",
+      "title": "Quiz 3 — Anatomie S7-1500",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Que contient la SIMATIC Memory Card d'un S7-1500 ?",
+            "options": [
+              "Uniquement le firmware",
+              "Uniquement le programme utilisateur",
+              "Programme + configuration matérielle + firmware + logs",
+              "Les images des HMI"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Combien de modules signaux peut-on installer au maximum sur un rack central S7-1500 ?",
+            "options": [
+              "8",
+              "16",
+              "32",
+              "64"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Que signifie le F dans CPU 1516F ?",
+            "options": [
+              "Fast (rapide)",
+              "Fibre optique intégrée",
+              "Fail-safe (safety intégrée)",
+              "Firmware"
+            ],
+            "correctIndex": 2
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 34,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Introduction aux modules I/O",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Le pont entre le PLC et le monde réel\n\nLes modules I/O sont ce qui **transforme la logique numérique** de la CPU en actions concrètes (démarrer un moteur, ouvrir une vanne) et ce qui **traduit le monde physique** (température, pression, boutons) en bits pour la CPU.\n\n[STEPS|**Entrée TOR (DI)** — Un contact fermé = 24V = bit 1||**Sortie TOR (DQ)** — Le PLC met le bit à 1 = tension de sortie 24V||**Entrée analogique (AI)** — Une mesure 4-20 mA convertie en un nombre 0-27648||**Sortie analogique (AQ)** — Le PLC envoie un nombre = tension 0-10V ou 4-20 mA]\n\nDans ce chapitre, on va décortiquer les 4 grandes familles de modules I/O Siemens."
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Entrées TOR (DI) — les bases",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## DI = Digital Input\n\nUn module DI lit des signaux **tout ou rien** : bouton pressé, capteur activé, contact fermé.\n\n[ILLUSTRATION|di-module]\n\n### Caractéristiques typiques\n[KV|**Tension**:24 V DC (99 % des cas industriels)||**Courant d'entrée**:~4 mA par point||**Densité**:8, 16, 32 points par module||**Isolation**:500 V AC entre canaux et bus||**Diagnostic**:LED verte par canal · LED rouge si court-circuit détecté||**Temps de réponse**:0.05 à 3 ms configurable]\n\n### Exemples de références Siemens\n[KV|**DI 16×24VDC HF**:6ES7521-1BH00-0AB0 · 16 pts standard||**DI 32×24VDC HF**:6ES7521-1BL00-0AB0 · 32 pts haute densité||**DI 8×230VAC**:6ES7521-7EH00-0AB0 · 8 pts 230 VAC (rare)]\n\n### HF = High Feature\nLes modules HF supportent diagnostic étendu, timestamping des entrées, mode isochrone. Les modules \"ST\" (Standard) sont moins chers mais sans ces fonctions avancées."
+    },
+    {
+      "position": 36,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Câblage DI — sink vs source, PNP vs NPN",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Câblage des entrées : subtilités importantes\n\nUn capteur industriel se câble de **2 façons** selon son type de sortie.\n\n[ILLUSTRATION|io-wiring]\n\n### Configuration Sink (M+) — la plus courante en Europe\n- Le module DI attend un signal **positif** (24V) sur son entrée\n- Capteur PNP (sortie haute) → sortie du capteur = 24V quand actif\n- Fil de retour vers 0V (M-) via le module\n\n### Configuration Source (M-) — courante aux USA\n- Le module DI attend un signal **négatif** (0V) sur son entrée\n- Capteur NPN → sortie du capteur = 0V quand actif\n- Fil d'alimentation 24V via le module\n\n[TIP|**Chez Dasolabs et en Europe** : on travaille à **99 % en PNP / Sink**. C'est le standard IEC. Aux USA, c'est souvent NPN / Source (norme UL). Un capteur PNP câblé sur un module NPN ne marche pas — attention en import.]\n\n### Le fil \"1M+\" et \"1M-\"\nChaque groupe de 8 canaux du module a une borne d'alimentation commune :\n- **1M+** = borne positive 24V du groupe 1\n- **1M-** = borne négative (0V) du groupe 1\n\nToujours câbler ces bornes ! Sinon le module ne \"voit\" rien."
+    },
+    {
+      "position": 37,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Types de capteurs TOR courants",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ce qu'on connecte à un DI\n\n[KV|**Interrupteur / bouton poussoir**:contact mécanique · le plus basique||**Détecteur inductif**:détecte le métal · sans contact · robuste||**Détecteur capacitif**:détecte tout matériau · plus sensible · plus cher||**Détecteur optique**:barrage / réflexion · pour objets non-métalliques||**Fin de course**:vérifie position mécanique (cylindre en fin)||**Interrupteur de sécurité**:câblé en série pour arrêt d'urgence||**Pressostat / thermostat**:contact TOR quand seuil dépassé]\n\n[USECASE|Ligne d'embouteillage — 12 capteurs de position|Chaque poste de la ligne a un capteur inductif qui détecte la présence d'une bouteille. Signal 24V = bouteille présente = OK pour agir.|**Câblage** : 12 capteurs × 3 fils (24V, 0V, signal) = 36 fils. Un module DI 16×24VDC couvre les 12 capteurs. Repli : les 4 canaux restants pour extension future.]\n\n[WARN|**Piège classique** : oublier l'alimentation du groupe (1M+ / 1M-). Le capteur reçoit son 24V du module (ou d'une SITOP externe), mais si le module lui-même n'a pas son alim de groupe, il ne peut RIEN lire.]"
+    },
+    {
+      "position": 38,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Sorties TOR (DQ) — relais vs transistor",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## DQ = Digital Output\n\nUn module DQ pilote des actionneurs : contacteur moteur, vanne, voyant, buzzer.\n\n### Deux technologies principales\n[KV|**Sortie transistor 24VDC (DC)**:Rapide (< 1 ms) · 0.5 à 2 A max · pas d'usure · charges DC uniquement||**Sortie relais (RLY)**:Lent (5-10 ms) · jusqu'à 10 A · usure mécanique · charges AC/DC mixtes]\n\n### Densités\n- DQ 8, 16, 32 points transistor\n- DQ 8 points relais (les relais prennent de la place, moins dense)\n\n### Protection intégrée\n[STEPS|**Court-circuit** : le module coupe et signale une erreur (LED rouge)||**Surchauffe** : protection thermique||**Diagnostic canal par canal** sur les modules HF||**Sortie de sécurité** : à 0 forcé si CPU en STOP]\n\n### Pilotage indirect\n[TIP|**Bonne pratique** : ne JAMAIS piloter un moteur directement depuis une sortie transistor DQ. La sortie DQ pilote un **relais interface** (24V bobine), qui à son tour pilote le contacteur moteur (contact 230V ou 400V 3-phases). Le module DQ est protégé, l'électronique aussi.]"
+    },
+    {
+      "position": 39,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Ce qu'on pilote avec un DQ",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Actionneurs typiques\n\n[KV|**Contacteur électromécanique**:pilote moteurs, chauffage · bobine 24V ou 230V||**Vanne électrovanne (EV)**:pilote pneumatique ou hydraulique · bobine 24V typique||**Voyant / feu tricolore**:signalisation opérateur||**Buzzer / sirène**:alarme sonore||**Relais interface**:isole le PLC de la charge · toujours recommandé pour puissance > 0.5A||**Distributeur pneumatique**:actionneur pneumatique 2/2, 3/2, 5/2 via EV]\n\n[USECASE|Machine de conditionnement — 20 actionneurs|10 EV pour distributeurs pneumatiques (mouvements pinces, éjecteurs), 5 relais pour contacteurs moteur, 3 voyants opérateur, 2 buzzers alarme.|**Câblage** : DQ 32×24VDC × 1 module = suffisant. Chaque canal pilote un relais interface Wago 24V/6A qui pilote la charge finale.]"
+    },
+    {
+      "position": 40,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Entrées analogiques (AI) — la mesure",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## AI = Analog Input\n\nUn module AI lit un signal **variable dans le temps** : température, pression, débit, niveau, position.\n\n### Signaux d'entrée standard industriels\n[KV|**4-20 mA**:Le standard mondial · immune aux perturbations · détecte fil coupé (< 4 mA)||**0-10 V**:Simple mais sensible aux perturbations · pour capteurs low-cost||**0-20 mA**:Variante de 4-20 mA · pas de détection fil coupé||**±10 V**:Signal bipolaire · rare · pour tensions ou courants signés||**Pt100 / Pt1000 (RTD)**:Sonde température par résistance · précis · 3 ou 4 fils||**Thermocouple K/J/T…**:Sonde température par tension · robuste hautes t°]\n\n### Résolution\n- Standard : **16 bits** (0 à 27648 pour 4-20 mA)\n- Haute précision : 16 bits + moyennage · **AI 8xU/I/RTD/TC HF**\n\n### Filtrage\nChaque canal a un filtre configurable dans TIA :\n- **16.6 ms** (60 Hz) — filtre secteur USA\n- **20 ms** (50 Hz) — filtre secteur Europe\n- **100 ms** — process lents (température)"
+    },
+    {
+      "position": 41,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Câblage AI et sondes de température",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Câbler une sonde 4-20 mA vs une Pt100\n\n### Câblage 4-20 mA (2 fils, boucle de courant)\n1. Alim 24V DC vers borne + du transmetteur\n2. Borne signal du transmetteur → entrée + du module AI\n3. Entrée - du module AI vers 0V\n\n### Câblage Pt100 (3 fils)\n1. Fil 1 : borne I+ du module (courant de mesure sortant)\n2. Fil 2 : borne U+ du module (mesure de tension)\n3. Fil 3 : borne U- du module (retour ; interne, court-circuité à I-)\n\nLes 3 fils compensent la résistance de câble (jusqu'à ~500 m possible).\n\n[TIP|**Toujours utiliser des câbles blindés** pour les entrées analogiques. Torons torsadés + blindage relié à la terre côté armoire (pas côté capteur !) pour éviter les boucles de masse.]\n\n### Configuration dans TIA\nPour chaque canal, tu choisis :\n1. Le type de mesure (4-20 mA, Pt100, thermocouple K…)\n2. Le filtre\n3. La détection de rupture fil (Break wire detection)\n\n[WARN|Un module AI qui affiche **\"defect\"** en rouge : 90 % du temps, c'est un fil coupé ou un capteur défectueux. Vérifie avec un multimètre au bornier avant de sortir le PC.]"
+    },
+    {
+      "position": 42,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Sorties analogiques (AQ) — la commande",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## AQ = Analog Output\n\nUn module AQ envoie un signal analogique variable pour piloter un **variateur de vitesse**, une **vanne proportionnelle**, un **régulateur**.\n\n### Signaux de sortie standard\n[KV|**4-20 mA**:standard industriel · détecte fil coupé||**0-10 V**:pour actionneurs low-cost||**±10 V**:signé · rare]\n\n### Résolution\n- 16 bits (0 à 27648 pour 4-20 mA)\n\n### Précision\nTypiquement ±0.5 % à ±0.1 % selon module.\n\n### Cas d'usage type\n[USECASE|Ligne agro — vitesse variateur Sinamics G120|La ligne doit adapter sa vitesse selon le nombre de bouteilles présentes. Le PLC calcule une consigne 4-20 mA → le variateur ajuste la fréquence moteur.|**Câblage** : borne AQ 0/M0 vers borne AI 1+ du G120. 2 fils blindés torsadés. Configuration en TIA + en Sinamics side.]\n\n[TIP|**Depuis 2020, Siemens recommande le Profinet natif** pour piloter les variateurs Sinamics au lieu de l'analogique. Plus précis, moins de câblage, diagnostic bidirectionnel. On y reviendra au chapitre Communication.]"
+    },
+    {
+      "position": 43,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Modules Technology — compter, positionner, doser",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Modules TM — au-delà de l'I/O basique\n\nLes **modules Technology (TM)** intègrent une intelligence dédiée pour des fonctions spécifiques.\n\n### Familles principales\n[KV|**TM Count**:Comptage haute vitesse (jusqu'à 1 MHz) · pour codeurs incrémentaux||**TM PosInput**:Lecture codeur absolu SSI, EnDat||**TM Pulse**:Génération d'impulsions PWM pour dosage||**TM StepDrive**:Pilotage moteur pas-à-pas||**TM ECC**:Modules pesée · précis à ±0.001 %||**TM Timer DIDQ**:Timestamping précis à 1 μs pour événements]\n\n### Cas d'usage\n[USECASE|Ligne de découpe LFB (pharma)|Découpe précise en fonction de la position d'un rouleau. Codeur SSI 25 bits sur le rouleau.|**Solution** : module TM PosInput 2 SSI · lecture position à 1 ms, 24 bits utiles · précision au 1/1000ᵉ de tour.]\n\n[USECASE|Dosage produit chimique GROUPEMECA|Doser 25 g de poudre en 2 secondes. Balance électronique sur module TM ECC.|**Solution** : lecture 100 échantillons/seconde, précision 0.01 g. Directement branché sur cellule de charge.]"
+    },
+    {
+      "position": 44,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Configuration d'un module dans TIA Portal",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Étape par étape\n\nAjouter un module dans TIA V19 se fait en 3 étapes.\n\n[ILLUSTRATION|tia-portal]\n\n[STEPS|**1. Ouvrir la vue Hardware Configuration** (Device view sur la CPU concernée)||**2. Glisser le module** depuis le catalogue (à droite) vers un slot libre du rack||**3. Configurer** : type de mesure, filtres, diagnostic, adressage — via clic-droit → Properties]\n\n### Adressage\n- **Auto** : TIA attribue automatiquement les adresses %I / %Q / %IW à la suite\n- **Manuel** : tu peux forcer une adresse (utile pour compatibilité avec ancien programme)\n\n### Diagnostic\n- Activer \"Diagnostic: enable\" pour que le module signale ses défauts à la CPU\n- Sans ce flag, le module marche mais tu ne verras pas les erreurs (piège classique !)\n\n### Téléchargement\nAprès config, tu télécharges vers la CPU (**Ctrl+L** ou bouton Load). Si le module physique manque, la CPU signale \"Configuration error\" et refuse de tourner."
+    },
+    {
+      "position": 45,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Diagnostic modulaire par LED",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ce que les LED de chaque module te disent\n\nChaque module signaux S7-1500 a des LED de status en façade.\n\n[KV|**DIAG (verte)**:Communication bus OK avec la CPU||**DIAG (rouge)**:Erreur bus, module non reconnu||**MAINT (jaune)**:Maintenance requise (durée de vie relais atteinte, etc.)||**LEDs canal (par point)**:Vert = signal actif · Rouge = court-circuit ou fil coupé]\n\n### Séquence de démarrage\n1. **Toutes les LED oranges** clignotent (initialisation, ~2 sec)\n2. **DIAG verte fixe** = bus OK, module opérationnel\n3. **DIAG rouge fixe** = problème hardware, remplacer\n\n### Cas terrain\n[USECASE|Panne suspecte sur module DI|Adrien intervient sur une machine qui ne détecte plus un capteur. Il ouvre l'armoire, regarde le module DI concerné :\n- LED canal 5 est **éteinte** alors qu'elle devrait être verte.|**Diagnostic** : soit le capteur est défectueux, soit le fil est coupé, soit la sonde n'est pas alimentée. Ordre de vérification : (1) multimètre au capteur, (2) continuité fil, (3) alim commune 1M+.]"
+    },
+    {
+      "position": 46,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Modules Ex — pour zones ATEX",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Quand l'atmosphère est explosive\n\nDans certaines industries (chimie, pétrochimie, pharma), l'atmosphère peut contenir des vapeurs inflammables. Les équipements doivent être **certifiés ATEX** (ou IECEx à l'international).\n\n### Modules Siemens Ex\n[KV|**DI 8×NAMUR EEx**:Entrées TOR intrinsèquement sûres · pour zones 1 et 2||**AI 4×0/4..20mA HART Ex**:Entrées analogiques avec protocole HART · zones Ex||**DQ 4×24VDC Ex**:Sorties intrinsèquement sûres]\n\n### Zones ATEX européennes\n[KV|**Zone 0**:Atmosphère explosive présente en permanence (rare)||**Zone 1**:Atmosphère explosive présente occasionnellement (courant en pharma)||**Zone 2**:Atmosphère explosive présente rarement||**Zone 22**:Poussière explosive]\n\n### Barrière d'isolement\nLes modules Ex passent par des **barrières Zener** qui limitent l'énergie transmise pour éviter toute étincelle en zone Ex.\n\n[WARN|**JAMAIS mixer** un module standard et un module Ex sur le même rack sans étude de séparation. Toujours prévoir une **armoire Ex séparée** ou une **isolation galvanique certifiée**.]"
+    },
+    {
+      "position": 47,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Récap I/O — cas ligne d'embouteillage",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Application complète\n\nReprenons la ligne d'embouteillage Zoetis (~180 I/O). Voici le détail du parc :\n\n[KV|**Capteurs présence bouteille**:24 points → 1× DI 32 (marge 8 pts)||**Capteurs fin de course pinces**:16 pts → réutilisation même module DI (24+16=40 → 2× DI 32)||**Boutons opérateur + interrupteurs sécurité**:12 pts → intégré à DI existants||**Contacteurs moteurs**:8 pts → 1× DQ 16 (marge 8)||**Vannes pneumatiques**:24 pts → 1× DQ 32||**Voyants tricolore**:6 pts → intégré DQ existant||**Températures process**:8 sondes Pt100 → 1× AI 8×RTD||**Pressions circuit**:4 transmetteurs 4-20 mA → 1× AI 4×U/I||**Consignes variateur**:2 sorties 4-20 mA → 1× AQ 4]\n\n### Total matériel signaux\n- 2× DI 32 · 2× DQ 32 · 1× AI 8 RTD · 1× AI 4 U/I · 1× AQ 4\n- Coût matériel signaux : ~2 500 €\n- Ajouter CPU 1516 + PS 60W + rail + SD = ~7 000 € matériel total"
+    },
+    {
+      "position": 48,
+      "kind": "CONTENT",
+      "section": "4 · Les modules I/O",
+      "title": "Astuces câblage — bonnes pratiques",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ce que tout intégrateur devrait savoir\n\n[RULE|**Toujours prévoir 20 % de réserve** en I/O. Un projet qui grossit ou qui doit évoluer sans réserve = tu ré-ouvres l'armoire pour ajouter un module = 2 jours de chantier + arrêt production.]\n\n[RULE|**Séparer physiquement** les nappes 24V DC des nappes 230V AC dans les chemins de câbles. Interférences EMC = fausses détections.]\n\n[RULE|**Utiliser des étiquettes de câble** systématiquement (Weidmüller, Phoenix) avec la référence du signal. Un an après, tu ne te souviens plus de rien sans étiquettes.]\n\n[RULE|**Blindage des analogiques** relié à la terre côté armoire uniquement. Deux mises à la terre = boucle de masse = signal bruité.]\n\n[RULE|**Reprise de blindage** sur cordon spiralé au bornier (bornes de reprise blindage). Ne jamais visser à même le carter métallique.]\n\n[TIP|Chez Dasolabs, on fournit un **template Excel de liste I/O** pour tous nos projets. 1 ligne = 1 signal, avec module, canal, fonction, capteur/actionneur, section, longueur. C'est notre référentiel unique programmation + câblage.]"
+    },
+    {
+      "position": 49,
+      "kind": "QUIZ",
+      "section": "4 · Les modules I/O",
+      "title": "Quiz 4 — Les modules I/O",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Un capteur PNP donne un signal 24V quand actif. Il se câble sur un module DI configuré en…",
+            "options": [
+              "Source (M-)",
+              "Sink (M+)",
+              "NPN",
+              "Cela n'a pas d'importance"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Quelle résolution ont typiquement les modules AI Siemens haute qualité ?",
+            "options": [
+              "8 bits",
+              "12 bits",
+              "16 bits",
+              "32 bits"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Pour piloter un moteur 400V 3-phases 5 kW, quelle sortie DQ utiliser ?",
+            "options": [
+              "Sortie transistor 24V directement au moteur",
+              "Sortie relais 10A directement au moteur",
+              "Sortie DQ pilote un relais interface qui pilote le contacteur moteur",
+              "Sortie AQ 4-20 mA"
+            ],
+            "correctIndex": 2
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 50,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Introduction aux protocoles industriels",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Comment le PLC parle à son écosystème\n\nUn PLC moderne ne fonctionne jamais seul. Il communique avec :\n- Autres PLC (peer-to-peer)\n- HMI (écrans opérateur)\n- SCADA (supervision)\n- Variateurs de vitesse\n- MES / ERP / cloud\n- Instruments de mesure évolués\n\n### Vue d'ensemble des protocoles Siemens\n[KV|**Profinet**:Standard actuel Ethernet industriel Siemens (depuis 2010)||**Profibus DP**:Bus série RS-485 legacy (encore massif)||**Ethernet TCP/IP**:Standard IT · S7 communication propriétaire||**OPC UA**:Standard universel · natif S7-1500||**Modbus RTU/TCP**:Standard multi-vendors · pour tiers||**MPI**:Ancien bus propriétaire · disparaît||**AS-Interface (AS-i)**:Bus terrain simple pour capteurs primaires||**IO-Link**:Bus point-à-point pour capteurs intelligents]\n\nDans ce chapitre, on couvre les 4 qu'un intégrateur Siemens rencontre 90 % du temps."
+    },
+    {
+      "position": 51,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Profinet — le standard moderne",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Profinet, c'est quoi exactement ?\n\n**Profinet** = **Process Field Network**. C'est le protocole **Ethernet industriel** de Siemens, développé et normalisé depuis 2003 (norme IEC 61158/61784).\n\n[ILLUSTRATION|profinet]\n\n### Ce qui différencie Profinet d'un Ethernet classique\n[STEPS|**Déterminisme** — Chaque cycle de communication a un temps garanti (< 1 ms possible)||**Diagnostic intégré** — Chaque device signale son état (LED, warnings, alarmes)||**Adressage IP + nom de device** — Chaque device a un nom (typé \"PN device\") en plus de l'IP||**Redondance possible** — MRP (Media Redundancy Protocol) pour anneau tolérant panne câble]\n\n### Débit et cycle\n[KV|**Vitesse**:100 Mbps Fast Ethernet · 1 Gbps sur derniers modules||**Cycle typique**:1 à 10 ms (IO Controller-Device)||**Cycle isochrone**:250 μs à 1 ms · pour axes synchronisés||**Nombre de devices**:jusqu'à 256 par CPU 1516]\n\n### Rôles\n- **IO Controller** = la CPU maître (S7-1500 par exemple)\n- **IO Device** = un équipement esclave (ET 200SP, variateur, HMI…)\n- **IO Supervisor** = un ordinateur qui peut mettre à jour la config (TIA Portal)"
+    },
+    {
+      "position": 52,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Profinet RT vs IRT vs non-RT",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Trois niveaux de temps réel\n\nProfinet supporte 3 modes selon les besoins temps réel.\n\n[KV|**Non-RT (standard TCP/IP)**:Latence 100 ms · pour supervision, MES, configuration||**RT (Real Time)**:Latence 1 à 10 ms · pour I/O standard 99% des cas||**IRT (Isochronous RT)**:Latence 250 μs · précision multi-axes · quantum de temps garanti]\n\n### Trames Profinet RT\nContrairement à TCP/IP, une trame Profinet RT :\n- **Ne passe pas par la stack TCP/IP** — traitement à part\n- Utilise **Ethertype 0x8892** (identifiable par sniffer réseau)\n- N'a pas de checksum lourd → traitement ultra rapide\n\n### Config IRT\nPour activer IRT, dans TIA Portal :\n1. Config Profinet → Real-time settings → Isochronous mode\n2. Assigner un **domaine sync** avec cycle et temps\n3. Tous les devices doivent supporter IRT (vérifier fiches techniques)\n\n[TIP|**En pratique** : 95 % des projets Dasolabs tournent en **RT standard** (1-10 ms). IRT est utilisé uniquement pour la robotique multi-axes ou la vision de haute cadence.]"
+    },
+    {
+      "position": 53,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Câblage Profinet — RJ45 et M12",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Deux formats de connecteurs\n\n### RJ45 pour armoire\nLe connecteur RJ45 classique, mais en version industrielle :\n- **Cat 5e** minimum, **Cat 6a** recommandé\n- **Câble blindé** (F/UTP ou S/FTP)\n- Longueur max : **100 mètres**\n- Peut être fait sur place (crimpage) ou pré-fait\n\n### M12 pour terrain\nSur les machines et en zone IP65 (eau, poussière) :\n- Connecteur circulaire **M12 codage D** (4 pôles pour Profinet)\n- Version 8 pôles pour PoE (Power over Ethernet)\n- **IP67** — étanche\n\n### Bonnes pratiques câblage\n[RULE|**Toujours passer les câbles Profinet dans un chemin métallique séparé** des câbles puissance (moteurs 400V). Interférences = paquets perdus = communication instable.]\n\n[RULE|**Longueur max 100m par segment**. Au-delà : ajouter un switch intermédiaire ou passer en fibre optique (jusqu'à 2 km).]\n\n[WARN|**Ne pas économiser sur les câbles**. Un câble Cat 5 non blindé à 0.50 €/m qui pose problème 6 mois plus tard, c'est un jour de troubleshooting à 1200 €. Prends du **Siemens SIMATIC NET Fast Connect** — spécifiquement conçu et testé pour Profinet.]"
+    },
+    {
+      "position": 54,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Topologies Profinet",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ligne, étoile, anneau\n\nProfinet supporte plusieurs topologies selon les besoins.\n\n### Topologie ligne (daisy-chain)\nDevices connectés en série via 2 ports Ethernet chacun. Simple, économique.\n- **Point faible** : panne d'un câble ou d'un device coupe tous les suivants\n\n### Topologie étoile\nTous les devices connectés à un switch central.\n- **Fiabilité** : panne d'un device n'affecte pas les autres\n- **Câblage** : plus lourd\n\n### Topologie anneau + MRP (Media Redundancy Protocol)\nDevices en anneau. Si un câble se coupe, MRP re-route en < 200 ms.\n- **Fiabilité maximale** : tolérance à une panne câble\n- **Config** : 1 device manager MRP + N devices clients\n\n[USECASE|Ligne agroalimentaire Zoetis|30 stations réparties sur 50 m. Un opérateur casse un câble avec un chariot élévateur.|**Sans MRP** : arrêt total, débuggage 30 min. **Avec MRP** : bascule en 200 ms, aucune perturbation, alarme envoyée au SCADA. Réparation planifiée en fin de shift.]\n\n### Config MRP dans TIA\n1. Config Profinet → Ring topology\n2. Marquer un device comme **MRP Manager**\n3. Marquer les autres comme **MRP Client**\n4. Câbler en anneau physiquement"
+    },
+    {
+      "position": 55,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Profibus DP — le vieux mais massif",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Profibus DP — l'héritage encore présent\n\n**Profibus DP** (Decentralized Peripherals) est le protocole série industriel de Siemens **avant** Profinet. Toujours massivement utilisé (millions de nœuds installés).\n\n### Caractéristiques\n[KV|**Support physique**:RS-485 · 1 paire torsadée blindée||**Débit**:9.6 kbps à 12 Mbps · le plus commun : 1.5 Mbps||**Longueur**:jusqu'à 1200 m à 187.5 kbps · 100 m à 12 Mbps||**Nombre de nœuds**:32 par segment · 126 avec répéteurs||**Adressage**:0 à 125]\n\n### Configuration typique\n- **1 maître** (CPU S7-1500 avec interface DP intégrée · CPU 1516-3 PN/**DP**)\n- **N esclaves** (ET 200S, variateurs Simovert, capteurs pesée)\n\n### Quand encore utiliser Profibus DP ?\n[STEPS|**Migration ou extension** d'un système existant · éviter tout remplacer||**Équipements 3ᵉ partie** qui n'ont que Profibus (rare 2026)||**Zones ATEX** où l'infra Profibus est déjà déployée]\n\n[TIP|**Sur projet neuf 2026**, on ne fait PAS de nouveau Profibus DP. **Profinet est plus performant, plus flexible, moins cher**. Profibus est en fin de vie douce.]"
+    },
+    {
+      "position": 56,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Modules CP (Communication Processor)",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ajouter de la communication à ta CPU\n\nSi les interfaces intégrées de la CPU ne suffisent pas, tu peux ajouter des **modules CP** dans le rack.\n\n### Familles principales\n[KV|**CP 1543-1**:Ethernet TCP/IP supplémentaire · pour isoler réseau IT||**CP 1542-5 DP**:Interface Profibus DP supplémentaire||**CP 1543-1 avec Firewall**:Isolation OT/IT · Firewall intégré · cybersécurité||**CP 1242-7 GPRS/LTE**:Connexion cellulaire distante (télémétrie)||**CP 341 / CP 441**:Série RS-232 / RS-485 pour équipements legacy (imprimantes, balances)]\n\n### Cas d'usage\n[USECASE|Cybersécurité pharma UCB — isolation OT/IT|Le réseau OT (PLC + ET 200) doit être isolé du réseau IT (bureaux, MES, cloud) pour raisons GAMP 5 + cyber.|**Solution** : CP 1543-1 Advanced avec Firewall dans le rack. La CPU parle au CP en interne (rack), le CP filtre les flux vers le réseau IT. Aucun accès direct CPU ↔ IT.]\n\n[USECASE|Télémétrie de station de pompage isolée|Station en zone rurale, pas de réseau, mais couverture 4G.|**Solution** : CP 1242-7 LTE. La CPU envoie des données toutes les 15 min via 4G vers un serveur centralisé.]"
+    },
+    {
+      "position": 57,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "OPC UA — le standard universel",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## OPC UA intégré nativement au S7-1500\n\n**OPC UA** (Open Platform Communications Unified Architecture) est un standard universel de communication industrielle, indépendant du constructeur.\n\n### Ce qui est génial avec OPC UA sur S7-1500\nDepuis TIA V15, **la CPU S7-1500 embarque un serveur OPC UA natif**. Aucun logiciel externe requis.\n\n### Fonctionnalités\n[KV|**Serveur intégré**:Expose les variables PLC à des clients OPC UA (SCADA, MES, cloud)||**Client OPC UA**:La CPU peut aussi consommer des données OPC UA d'autres serveurs||**Chiffrement TLS**:Cybersécurité de haut niveau · certificats X.509||**Modélisation**:Espace d'adresses type \"companion spec\" (VDMA, ISA-95)]\n\n### Cas d'usage\n[USECASE|Remontée MES chez Technochim|Un MES (Manufacturing Execution System) doit lire l'état de 20 CPU S7-1500 pour tracer la production.|**Solution** : Le MES est client OPC UA, chaque CPU expose ses variables via OPC UA. Zéro passerelle, zéro middleware. Sécurisé TLS.]\n\n### Config dans TIA\n1. Config CPU → **Runtime > OPC UA**\n2. Enable server + choix port (4840 par défaut)\n3. Certificats auto-signés ou signés par CA\n4. Publier les variables à exposer via \"OPC UA server interface\""
+    },
+    {
+      "position": 58,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Web server intégré",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Diagnostic web depuis un navigateur\n\nChaque S7-1500 a un **serveur web** intégré, accessible depuis un navigateur.\n\n### Ce qu'on peut faire depuis le navigateur\n[STEPS|**Diagnostic système** — état modules, temps de cycle, alarmes||**Journal des événements** — dernières erreurs, avec horodatage||**Modification tags PLC** — en lecture / écriture (protégé par mot de passe)||**Recettes** — export/import de recettes en CSV||**Trace / mesures** — capture de signaux en scope|**Pages web utilisateur** — HTML/JS custom hébergés dans la CPU]\n\n### Comment y accéder\n1. Ouvrir un navigateur (Chrome, Firefox)\n2. Taper l'IP de la CPU : https://192.168.1.10\n3. Login (user + mot de passe défini dans TIA)\n\n[TIP|Chez Dasolabs, on utilise le web server pour la **maintenance à distance**. Un consultant senior peut diagnostiquer depuis chez lui via VPN, sans besoin de TIA Portal. Gain de temps colossal.]\n\n[WARN|Le web server est **désactivé par défaut** sur S7-1500 (cybersécurité). Toujours l'activer et le protéger avec mot de passe fort + certificat TLS.]"
+    },
+    {
+      "position": 59,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Cybersécurité — protéger la CPU",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## L'OT devient une cible\n\nDepuis 2020, les cyberattaques sur systèmes industriels explosent (Stuxnet, Colonial Pipeline, LockerGoga). Siemens a musclé la cybersécurité S7-1500.\n\n### Mesures de sécurité natives\n[STEPS|**Password protection** de la CPU · plusieurs niveaux (HMI, engineer, maintenance)||**Access levels** paramétrables · qui peut faire quoi||**Firewall intégré** sur CPU (blacklist / whitelist IP source)||**Cryptage OPC UA** avec certificats||**Signature du programme** · empêche modification non autorisée||**Journalisation** des accès dans logs auditables]\n\n### Recommandations Dasolabs\n[RULE|**Password fort** sur toutes les CPU en production. Le password par défaut = intrusion garantie.]\n\n[RULE|**Séparation OT/IT** via firewall dédié (CP 1543-1 Firewall) OU firewall industriel externe (Palo Alto Zero Trust, Siemens Scalance SC).]\n\n[RULE|**Backup régulier** du projet TIA. En cas de ransomware, tu restores en 30 min. Sans backup : reprogrammation complète = 4 semaines.]\n\n[RULE|**Mises à jour firmware** planifiées. Un firmware avec CVE ouverte = risque énorme. Siemens publie des advisories cybersec régulièrement, à surveiller.]"
+    },
+    {
+      "position": 60,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Communication S7 (propriétaire)",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## PUT/GET, BSEND/BRCV — la comm entre CPU Siemens\n\nPour deux CPU Siemens qui échangent des données entre elles, on utilise historiquement la **communication S7 propriétaire**.\n\n### Deux modes principaux\n[KV|**PUT / GET**:Lecture / écriture directe de données · mode \"acyclique\" · un CPU accède à la mémoire de l'autre||**BSEND / BRCV**:Envoi de blocs de données jusqu'à 64 KB · mode \"événementiel\"]\n\n### Configuration\nDans TIA :\n1. Config → Connection → Add S7 connection\n2. Choisir les 2 CPU\n3. Écrire le programme d'échange (blocs PUT ou GET)\n\n[USECASE|2 lignes de production qui échangent des données|Ligne 1 (S7-1500) doit envoyer un signal \"prochain lot prêt\" à Ligne 2 (S7-1500).|**Solution rapide** : connexion S7 + un GET côté Ligne 2 lisant un bit de Ligne 1. Config : 5 minutes.]\n\n[TIP|**Alternative moderne** : depuis 2020, on préfère **OPC UA client-serveur** entre CPU au lieu de la comm S7 propriétaire. Plus standard, plus flexible, meilleur diagnostic.]"
+    },
+    {
+      "position": 61,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "MQTT — le pont vers le cloud",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## MQTT natif via bibliothèques\n\n**MQTT** (Message Queuing Telemetry Transport) est LE protocole standard IoT/cloud. Siemens ne le supporte pas **nativement** dans la CPU mais fournit des bibliothèques.\n\n### Comment implémenter MQTT sur S7-1500\n[STEPS|**Bibliothèque Siemens LMQTT** — gratuite, disponible sur Industry Online Support||**Import dans TIA Portal** en tant que bloc fonction||**Appel dans OB1** avec paramètres : broker URL, port, topic, QoS||**Publication** de tag PLC vers cloud (HiveMQ, Mosquitto, AWS IoT)||**Souscription** à des topics pour recevoir des commandes]\n\n### Cas d'usage\n[USECASE|Remontée data usine → cloud AWS pour analyse|Ligne de production Zoetis. On veut envoyer les métriques (cadence, pannes, consommations) toutes les minutes vers un cloud AWS pour dashboard temps réel.|**Solution** : LMQTT dans OB1 · publish JSON toutes les 60 sec vers HiveMQ broker · HiveMQ → AWS IoT Core → Grafana.]\n\n[RULE|Chez Dasolabs, on préfère **HighByte Intelligence Hub** comme passerelle OT/IT plutôt que MQTT direct depuis le PLC. Le PLC reste focalisé sur le contrôle, la passerelle gère la data engineering.]"
+    },
+    {
+      "position": 62,
+      "kind": "CONTENT",
+      "section": "5 · Communication",
+      "title": "Modbus TCP/RTU — multi-vendor",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Modbus, le protocole universel\n\n**Modbus** est le protocole ouvert le plus répandu pour équipements hétérogènes.\n\n### Deux variantes\n[KV|**Modbus RTU**:Sur RS-485 série · legacy · encore massif||**Modbus TCP**:Sur Ethernet TCP/IP · moderne · port 502]\n\n### Support Siemens\n- **Bibliothèque MB_MASTER / MB_SLAVE** intégrée à TIA Portal\n- Fonctionne sur la CPU S7-1500 en Modbus TCP directement (via l'interface Profinet)\n- Pour Modbus RTU : nécessite un CP 341 série\n\n### Cas d'usage\n[USECASE|Intégrer un onduleur ou une centrale de mesure d'énergie|La centrale de mesure Schneider PM8000 parle Modbus TCP mais pas Profinet.|**Solution** : Bibliothèque MB_CLIENT dans TIA · lecture cyclique de 20 registres toutes les 5 sec · variables mappées dans DB.]\n\n[TIP|**Modbus est simple** mais rustique : pas de diagnostic, pas d'événement, pas de sécurité (sauf via VPN). Pour l'intégration ponctuelle d'un instrument tiers, c'est parfait. Pour un backbone d'usine, Profinet ou OPC UA sont bien meilleurs.]"
+    },
+    {
+      "position": 63,
+      "kind": "QUIZ",
+      "section": "5 · Communication",
+      "title": "Quiz 5 — Communication",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quelle est la vitesse standard de Profinet en 2026 ?",
+            "options": [
+              "10 Mbps",
+              "100 Mbps",
+              "1 Gbps sur derniers modules",
+              "Réponses B et C sont correctes"
+            ],
+            "correctIndex": 3
+          },
+          {
+            "prompt": "Quel protocole utiliserais-tu pour connecter un S7-1500 à un cloud AWS pour analytics ?",
+            "options": [
+              "Profibus DP",
+              "MQTT via bibliothèque LMQTT",
+              "MPI legacy",
+              "Modbus RTU"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "OPC UA sur S7-1500 nécessite…",
+            "options": [
+              "Un logiciel externe payant",
+              "Un module CP supplémentaire",
+              "Rien : c'est natif dans la CPU depuis TIA V15",
+              "Une passerelle Kepware"
+            ],
+            "correctIndex": 2
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 64,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Introduction à la safety machine",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Safety : la sécurité fonctionnelle\n\n**Safety** dans le contexte automatisme = protéger les personnes et l'environnement en cas de dysfonctionnement machine. Pas la même chose que la cybersécurité (protéger les données).\n\n### Exemples de safety machine\n- Arrêt d'urgence (bouton coup-de-poing rouge)\n- Barrière optique / laser scanner autour d'un robot\n- Porte de sécurité verrouillée pendant fonctionnement\n- Détection de sur-vitesse d'un moteur (fuite)\n- Sonde de température de sur-chauffe qui coupe\n\n[RULE|La safety est une **obligation légale** (Directive Machines 2006/42/CE). Un accident sur machine sans safety = poursuite pénale du chef d'entreprise. Pas une option.]"
+    },
+    {
+      "position": 65,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Normes SIL et PL",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Deux normes principales\n\nDeux normes internationales encadrent la safety industrielle.\n\n[KV|**IEC 61508 / IEC 62061 (Process)**:Niveau **SIL** (Safety Integrity Level) 1 à 4||**ISO 13849 (Machines)**:Niveau **PL** (Performance Level) a à e]\n\n### Correspondance approximative\n[KV|**PL a**:~SIL 1 · risques faibles||**PL b**:~SIL 1||**PL c**:~SIL 2 · risques modérés||**PL d**:~SIL 2||**PL e**:~SIL 3 · risques graves]\n\n### Analyse de risque\nAvant de choisir SIL/PL, un **document d'analyse de risque** doit être produit :\n1. Identifier chaque risque (électrocution, écrasement, coupure, projection)\n2. Évaluer la gravité (mineur → mort)\n3. Évaluer la fréquence d'exposition\n4. En déduire le PL requis (via graphe ISO 13849)\n\n[TIP|Chez Dasolabs, on collabore avec un **bureau safety agréé** (INSSTC, Bureau Veritas) pour les analyses de risque de nos clients pharma et agro. On ne fait pas ça seuls — c'est une expertise à part entière.]"
+    },
+    {
+      "position": 66,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "F-CPU — Fail-safe intégré",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Une CPU, deux processeurs\n\nUne F-CPU (CPU 1516F, par exemple) contient **deux processeurs redondants** en interne :\n- Le **CPU principal** exécute le programme standard\n- Le **CPU safety** exécute le programme safety en parallèle\n\nLes deux processeurs comparent leurs résultats en continu. En cas de divergence → arrêt safety immédiat.\n\n[ILLUSTRATION|f-safety]\n\n### Certification\n- **TÜV Rheinland** certifie les F-CPU Siemens\n- **SIL 3** (IEC 61508)\n- **PL e Cat 4** (ISO 13849)\n\n### Programme safety\n- Développé dans **TIA Portal Safety Advanced** (licence séparée)\n- Utilise des blocs F-blocks **certifiés Siemens**\n- Séparé physiquement en mémoire du programme standard\n- **Signature checksum** vérifiée à chaque cycle\n\n[RULE|**Interdiction absolue** de modifier un F-block certifié Siemens. Toute modification invalide la certification TÜV → responsabilité de l'intégrateur en cas d'accident.]"
+    },
+    {
+      "position": 67,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Modules F-I/O",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## F-DI et F-DO\n\nLes modules d'I/O safety sont **différents** des modules standard.\n\n### F-DI (Fail-safe Digital Input)\n- Chaque entrée est **doublée** en interne (2 canaux physiques)\n- La CPU vérifie que les 2 lectures sont identiques\n- Divergence → défaut safety\n- Utilisé pour : arrêt d'urgence, capteurs sécurité, portes\n\n### F-DO (Fail-safe Digital Output)\n- Sortie **redondante** avec test cyclique\n- Auto-test régulier (fermeture / ouverture rapide indétectable pour l'actionneur)\n- Diagnostic actif : détection de court-circuit, fil coupé\n- Utilisé pour : coupure moteur safety, relais safety, verrouillage\n\n### Modules F ET 200SP\n- **F-DI 8×24VDC HF PROFIsafe**\n- **F-DQ 4×24VDC/2A PROFIsafe**\n- **F-DI 16 PROFIsafe** (double densité)\n\n[TIP|**PROFIsafe** = protocole safety qui garantit l'intégrité des données safety même via Profinet standard. Le paquet safety a un **CRC dédié**, un **compteur de trames**, un **timeout**. Injecter un mauvais paquet ne peut pas déclencher un mouvement dangereux.]"
+    },
+    {
+      "position": 68,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Programme safety — F-blocks",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Deux mondes séparés dans TIA\n\nSur une F-CPU, il y a deux univers de programme :\n\n### Programme standard\n- OB1, FB, FC, DB standards\n- Exécution cyclique normale\n- Peut lire les tags safety en lecture seule\n- Pas certifié\n\n### Programme safety\n- **F-OB** (Fail-safe OB) — bloc d'organisation safety\n- **F-FB** et **F-FC** — blocs de fonction safety\n- **F-DB** — data blocks safety\n- Utilise uniquement des **F-blocks certifiés** (bibliothèque Siemens Safety)\n- Communique avec les F-I/O via PROFIsafe\n\n### Blocs safety courants\n[KV|**F_ESTOP1**:Arrêt d'urgence à double canal · TÜV cert||**F_GUARD**:Porte de sécurité avec redémarrage sécurisé||**F_MUTING**:Bypass temporaire d'un capteur (pour palettes qui passent)||**F_2H_ENABLE**:Commande à 2 mains obligatoire (presse, cisaille)||**F_TIMER**:Timer safety redondant]\n\n[TIP|**Les F-blocks font PEUR** aux débutants. En réalité, ils s'utilisent comme des blocs Siemens standards — glisser depuis le catalogue, câbler les entrées, valider. La sécurité est **dedans le bloc**, pas dans ton code.]"
+    },
+    {
+      "position": 69,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Cas d'usage 1 — arrêt d'urgence machine",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Exemple : bouton d'urgence sur presse\n\nObjectif : quand l'opérateur presse le bouton rouge coup-de-poing, la presse s'arrête **immédiatement** et **de manière garantie**.\n\n### Matériel\n- 1 bouton d'urgence rouge coup-de-poing **double canal** (2 contacts NC)\n- 1 module **F-DI 8** avec 2 canaux dédiés\n- 1 module **F-DQ 4** qui coupe la bobine de contacteur principal\n- Programme safety avec bloc **F_ESTOP1**\n\n### Câblage\n- Bouton → 2 fils vers 2 canaux F-DI (canal 0 et canal 1)\n- F-DI vérifie la cohérence des 2 signaux\n- Si un canal = 1 et l'autre = 0 → défaut safety (fil coupé, bouton défectueux)\n- F-DO coupe le contacteur → machine arrêtée\n\n### Programme\n    \nF_ESTOP1(\n  ACK := start_button,  // acquittement operator\n  E_STOP := F_I0.0,     // signal bouton urgence\n  Q := safety_ok        // sortie safety\n);\n    \n\n[RULE|**Réinitialisation manuelle obligatoire** après un arrêt d'urgence. On ne peut PAS auto-redémarrer une machine juste parce que le bouton a été relâché — l'opérateur doit valider par bouton \"reset\" séparé.]"
+    },
+    {
+      "position": 70,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Cas d'usage 2 — barrière optique robot",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Exemple : cellule robotisée\n\nObjectif : quand un opérateur franchit la barrière optique protégeant un robot, le robot passe en **mode dégradé** (ralenti + éventuellement arrêté).\n\n### Matériel\n- Barrière optique **safety** (Sick, Pilz, Leuze) → sortie double canal PROFIsafe\n- Robot ABB / KUKA → interface safety (Safe Torque Off, Safe Stop)\n- F-CPU 1515F + F-I/O\n\n### Comportement\n[STEPS|**Barrière libre** → robot vitesse normale, contrôlé par programme standard||**Personne entre dans le champ** → barrière → F-DI → programme safety active un signal \"reduced speed\"||**Signal envoyé au robot** via PROFIsafe → robot passe à vitesse ≤ 250 mm/s||**Personne au contact du robot** → détection anti-collision → Safe Stop 1 (arrêt contrôlé) ou Safe Stop 0 (arrêt immédiat)]\n\n[TIP|**Muting** : sur les lignes automatisées où des palettes doivent passer par la barrière, on utilise le bloc **F_MUTING** pour bypasser temporairement la barrière quand la palette est détectée (mais pas l'opérateur !).]"
+    },
+    {
+      "position": 71,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Documentation safety obligatoire",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ce qu'il faut produire pour un projet safety\n\nUn projet safety **doit** être documenté rigoureusement, sinon en cas d'accident tu es responsable.\n\n[STEPS|**Analyse de risque** (par bureau agréé) — identifie chaque risque et le PL requis||**Cahier des charges safety** — précise fonctions safety, temps de réponse, redondance||**Programme safety** validé et testé — checksum de sécurité vérifiable||**Rapport de tests** — chaque bloc safety testé (arrêt urgence pressé/relâché, fils coupés, court-circuit)||**Manuel opérateur** — procédures d'urgence, redémarrage||**Certificat de conformité CE** — pour la machine complète, incluant volet safety||**Formation des opérateurs** — traçabilité présence en formation]\n\n[WARN|**Sans documentation** = illégal. En cas d'accident, l'inspection du travail réclame ces documents. Absence = poursuites.]\n\n### Chez Dasolabs\n- On fournit un **template safety** clef en main\n- On collabore avec **INSSTC** pour analyse de risque\n- On archive tous les rapports de test dans DasoHub → RH Documents\n\n[RULE|Un projet safety mal fait, c'est ne rien faire du tout. On préfère refuser un projet safety qu'en faire un mauvais.]"
+    },
+    {
+      "position": 72,
+      "kind": "CONTENT",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Coûts et prix — safety",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Combien ça coûte ?\n\nFaire safety ajoute **~30 à 50 %** au coût matériel PLC.\n\n### Décomposition\n[KV|**F-CPU vs CPU standard**:+~30 % (ex : CPU 1516F vs 1516 = 6 000 € vs 4 500 €)||**F-DI vs DI standard**:+~50 % (double canal + certifié)||**F-DQ vs DQ standard**:+~50 %||**Boutons d'urgence certifiés**:~80 € vs 15 € un bouton non certifié||**Barrière optique safety**:400 à 3 000 € selon portée||**Licence TIA Safety Advanced**:~3 000 € (une fois)||**Étude bureau safety**:~5 000 à 15 000 € selon complexité machine]\n\n### En pratique\nPour une machine industrielle de 50 k€ matériel automatisme :\n- Version safety : +25 k€ safety hardware + 10 k€ étude + 15 k€ programmation safety = **+100 %** environ\n\n[TIP|**Toujours quantifier le safety en avant-vente**. C'est un poste majeur qu'on ne peut pas cacher. Nos clients pharma UCB / GSK savent que safety coûte cher — c'est normal, non négociable, indispensable.]"
+    },
+    {
+      "position": 73,
+      "kind": "QUIZ",
+      "section": "6 · Safety (F-CPU)",
+      "title": "Quiz 6 — Safety",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quel niveau de sécurité une F-CPU 1516F Siemens atteint-elle ?",
+            "options": [
+              "SIL 1 / PL b",
+              "SIL 2 / PL c",
+              "SIL 3 / PL e",
+              "SIL 4"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "PROFIsafe est…",
+            "options": [
+              "Un module hardware safety",
+              "Un protocole safety qui garantit l'intégrité des données safety sur Profinet",
+              "Une norme ISO",
+              "Une marque commerciale Pilz"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Peut-on modifier un F-block certifié Siemens pour l'adapter à son projet ?",
+            "options": [
+              "Oui, c'est ouvert",
+              "Uniquement dans TIA V19",
+              "Non, cela invalide la certification TÜV",
+              "Seulement avec accord Siemens"
+            ],
+            "correctIndex": 2
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 74,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Méthode générale de dimensionnement",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Comment choisir son matériel PLC ?\n\nAvant de commander, il faut **dimensionner** correctement. Un sur-dimensionnement = argent gaspillé. Un sous-dimensionnement = projet qui rame + refonte en urgence.\n\n### Les 7 questions à poser\n[STEPS|**1. Combien d'I/O total** (DI, DQ, AI, AQ) ?||**2. Quels protocoles de comm** (Profinet, Profibus, OPC UA, MQTT) ?||**3. Combien de participants réseau** (HMI, variateurs, ET 200) ?||**4. Cycle de scan requis** (10 ms suffit ? Ou < 1 ms nécessaire ?) ?||**5. Mémoire programme + data** (taille du code, nombre DB) ?||**6. Safety requis** (SIL/PL) ?||**7. Redondance requise** (R-CPU, H-CPU) ?]\n\nEn fonction des réponses, tu peux choisir la bonne gamme."
+    },
+    {
+      "position": 75,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Dimensionner la CPU",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Charge mémoire et vitesse\n\n### Mémoire programme\nUn programme \"métier moyen\" occupe ~50 à 300 KB de mémoire code.\n- **CPU 1511** (200 KB) : projet petit\n- **CPU 1516** (1 MB) : projet moyen/gros — **le choix par défaut**\n- **CPU 1518** (6 MB) : gros projet complexe\n\n### Vitesse d'exécution\nChaque CPU a un **temps d'exécution par instruction** (bits par µs). Pour un programme \"métier moyen\" :\n[KV|**CPU 1511**:cycle typique ~5 ms||**CPU 1513**:~3 ms||**CPU 1516**:~1 ms||**CPU 1517**:~0.5 ms||**CPU 1518**:~0.2 ms]\n\n### Règle des 30 %\n[RULE|**Choisis une CPU dont la charge de scan est ≤ 30 %** en régime nominal. Marge nécessaire pour évolutions futures + gestion des exceptions.]\n\n### Exemple\nProgramme estimé 100 KB, cycle cible 5 ms.\n- CPU 1511 : 200 KB dispo (50 % chargée) + cycle 5 ms (limite) → **trop juste**\n- CPU 1516 : 1 MB dispo (10 % chargée) + cycle 1 ms (marge x5) → **excellent choix**"
+    },
+    {
+      "position": 76,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Dimensionner les modules I/O",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Combien de modules, quelle densité ?\n\n### Étape 1 : liste I/O\nÉtablir la liste complète des signaux (voir chapitre 4 · récap ligne d'embouteillage).\n\n### Étape 2 : regrouper par type\n- **DI 24V** → modules DI 32×24VDC (choisir 32 points, pas 16, plus dense)\n- **DQ transistor 24V** → modules DQ 32×24VDC/0.5A\n- **DQ relais AC** → modules DQ 8×230VAC\n- **AI 4-20 mA** → modules AI 8×U/I HF\n- **AI Pt100** → modules AI 4×RTD ou AI 8×U/I/RTD/TC HF\n- **AQ 4-20 mA** → modules AQ 4×U/I\n\n### Étape 3 : ajouter 20 % de réserve\nSur chaque type, prends 20 % de plus que le besoin actuel.\n\n### Étape 4 : calculer l'occupation rack\n- Total modules (dont la CPU)\n- Ajouter 1 slot vide pour extensions\n- Vérifier que ça tient dans un rack central ou passer en ET 200 déportées\n\n[TIP|**Astuce dimensionnement AI** : si tu as 5 sondes 4-20 mA et 3 Pt100, prends **1 module AI 8×U/I/RTD/TC HF** (multi-fonctions) plutôt que 2 modules dédiés. Coûte plus cher unitaire mais réduit le nombre de modules.]"
+    },
+    {
+      "position": 77,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Dimensionner l'alimentation",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ne pas se planter sur la PS\n\nChaque module consomme du courant sur le bus 5V interne. La PS doit fournir plus que la somme des consommations.\n\n### Consommation typique par module\n[KV|**CPU 1516**:2.5 W||**DI 32×24VDC**:0.8 W||**DQ 32×24VDC**:1.2 W||**AI 8×U/I**:1.5 W||**AQ 4×U/I**:1.0 W||**CM 1542-1**:2.0 W]\n\n### Exemple rack\nRack : CPU 1516 + 2×DI 32 + 1×DQ 32 + 1×AI 8 + 1×CM\n- Total : 2.5 + 1.6 + 1.2 + 1.5 + 2.0 = 8.8 W\n\n### Marge et choix PS\nAjouter 30 % de marge : 8.8 × 1.3 ≈ 11.5 W minimum.\n\n- PS 25W → 220 % marge → **OK largement**\n- PS 60W → largement au-dessus → **OK**\n- PS 190W → sur-dimensionné (mais utile en gros racks à 15+ modules)\n\n[TIP|**Sur projet standard, PS 60W est le sweet spot**. Coûte 200 € au lieu de 100 € pour la PS 25W mais offre marge pour extensions.]"
+    },
+    {
+      "position": 78,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Configurateur Siemens Industry Mall",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## L'outil officiel Siemens\n\nSiemens fournit **TIA Selection Tool** (téléchargeable gratuit) qui aide à configurer un projet et générer la nomenclature.\n\n### Ce que fait le TIA Selection Tool\n[STEPS|**Choisir la CPU** en fonction des besoins||**Ajouter modules signaux** au rack (glisser-déposer)||**Vérifier compatibilité** (versions firmware, encombrement)||**Exporter la nomenclature** vers Excel ou fichier TIA||**Estimer le prix** (indicatif, prix distributeur peut varier)||**Générer un rapport PDF** avec schéma rack et liste articles]\n\n### Interfaces\n- Web : https://tia-selection-tool.siemens.com (sans install)\n- Local : app Windows téléchargée\n\n### Autre outil : Industry Mall\nLe catalogue en ligne Siemens (**mall.industry.siemens.com**) donne :\n- Prix officiel indicatif\n- Fiches techniques PDF\n- Disponibilité stock\n- Documentation associée\n\n[TIP|Chez Dasolabs, on utilise TIA Selection Tool sur tous les projets neufs. C'est **gratuit**, ça évite les erreurs de compatibilité, et ça donne un support pour discuter avec le client.]"
+    },
+    {
+      "position": 79,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Cas de chiffrage 1 — atelier agro",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ligne d'embouteillage 4 000 bouteilles/heure\n\n### Cahier des charges\n- 1 ligne (30 mètres)\n- 180 I/O au total (120 DI, 32 DQ, 20 AI, 8 AQ)\n- 1 HMI KTP1200 Comfort\n- 2 variateurs Sinamics G120 pour convoyeurs\n- Aucun besoin safety avancé (arrêts d'urgence basiques suffisent)\n- Cycle : 20 ms suffisant\n\n### Matériel proposé\n[KV|**CPU 1516-3 PN/DP**:4 500 €||**PS 60W**:200 €||**Rail 830 mm**:80 €||**2× DI 32×24VDC**:2× 250 = 500 €||**1× DQ 32×24VDC**:280 €||**1× AI 8×U/I/RTD/TC**:600 €||**1× AQ 4×U/I**:350 €||**KTP1200 Comfort**:1 200 €||**Câbles Profinet Cat 5e Fast Connect (30m)**:150 €||**Divers (SD 32 MB, connectique)**:200 €]\n\n**Total matériel : ~8 060 €**\n\n### Coût projet total (avec ingénierie Dasolabs)\n- Matériel : 8 060 €\n- Ingénierie + programmation (60 j × 850 €) : 51 000 €\n- Mise en service : 8 000 €\n- **Total projet : ~67 000 €**"
+    },
+    {
+      "position": 80,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Cas de chiffrage 2 — pharma safety",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ligne pharma avec safety GAMP 5\n\n### Cahier des charges\n- Réacteur pharma classe A\n- Safety obligatoire (SIL 3)\n- Redondance CPU obligatoire (H-mode)\n- GAMP 5 validation\n- Traçabilité 21 CFR Part 11\n\n### Matériel proposé\n[KV|**2× CPU 1516F-3H PN/DP (H redundant)**:2× 8 500 = 17 000 €||**2× PS 60W**:400 €||**2× Rail 830 mm**:160 €||**Modules signaux F redondants**:~6 000 €||**Modules signaux standards**:~3 000 €||**2× IE Switch SCALANCE (redondance réseau)**:1 200 €||**Fibres optiques (sync H)**:300 €||**HMI Comfort Panel TP1200 + IPC AVEVA SCADA**:8 000 €||**Licence TIA V19 Safety Advanced**:3 000 €||**Divers**:800 €]\n\n**Total matériel : ~39 900 €**\n\n### Coût projet total\n- Matériel : 39 900 €\n- Étude safety (bureau externe) : 12 000 €\n- Ingénierie + programmation (180 j × 850 €) : 153 000 €\n- Validation GAMP 5 (URS, FS, DS, IQ, OQ, PQ) : 45 000 €\n- Mise en service : 25 000 €\n- **Total projet : ~275 000 €**\n\n[TIP|Le safety pharma **double facilement** le coût projet. Nos clients UCB/GSK budgétisent 200-300 k€ pour ce type d'installation.]"
+    },
+    {
+      "position": 81,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Erreurs de dimensionnement classiques",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Ce qu'on voit trop souvent\n\n[DANGER|**Sous-dimensionner la CPU** — Le client dit \"on a que 50 I/O\", on met un S7-1200 basique. 6 mois après, il veut ajouter du reporting BatchReport → cycle explose, latence → mécontent → refonte à 20 k€.]\n\n[DANGER|**Oublier la mémoire pour OPC UA** — S7-1500 avec OPC UA activé consomme facilement 200 KB de mémoire. Si CPU 1511 déjà chargée à 60 %, l'ajout d'OPC UA la plante.]\n\n[DANGER|**Ne pas prévoir de switch Profinet séparé** — Si 5 ET 200SP + 3 variateurs + 1 HMI sur le même switch intégré CPU (2 ports) → boucle logique, packets drops. Il FAUT un switch **industriel SCALANCE** dédié.]\n\n[DANGER|**Oublier une alimentation SITOP pour capteurs** — La PS 60W n'alimente PAS les capteurs terrain. Combien de fois on voit des capteurs branchés directement sur le module DI qui ne fonctionnent pas → il manque la SITOP 24V pour alimenter.]\n\n[DANGER|**Rack trop petit** — Le client ajoute une machine 6 mois plus tard → rack full → nouveau rack → recâblage → ~2 semaines chantier.]\n\n[RULE|**En cas de doute → sur-dimensionner**. Le surcoût matériel est marginal comparé au coût d'une refonte 6 mois plus tard.]"
+    },
+    {
+      "position": 82,
+      "kind": "CONTENT",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Fournisseurs et distributeurs",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Où acheter du matériel Siemens ?\n\n### Distributeurs officiels Siemens en Belgique\n[KV|**Siemens direct**:pour projets > 50 k€ · comptes clés||**Rexel Belgium**:distributeur large gamme · prix indicatifs||**Sonepar Belgium**:idem · stock rapide||**RS Components**:catalogue online · rapide pour petites qtés||**Farnell**:idem · variantes rares]\n\n### Timeline typique de livraison\n- **Stock**: 1-3 jours (modules courants comme DI 32, CPU 1516)\n- **Import (Allemagne)**: 2-4 semaines\n- **Sur commande (grosses CPU, safety)**: 4-8 semaines\n- **En rupture (rare)**: 3-6 mois (les modules F ont été affectés par la crise semi-conducteurs 2021-2023)\n\n[WARN|**Toujours commander à l'avance sur projets planifiés**. Un projet démarre en juin, tu commandes le matériel en mai. Éviter de commander la veille du chantier — pénurie possible.]\n\n### Avantages Dasolabs\n[TIP|En passant par nous, tu bénéficies de nos **remises volumes** négociées avec Siemens Belgium (typiquement 10 à 20 % vs prix catalogue). On facture le matériel au client au prix Siemens catalogue, on prend une marge intégration.]"
+    },
+    {
+      "position": 83,
+      "kind": "QUIZ",
+      "section": "7 · Sélection & dimensionnement",
+      "title": "Quiz 7 — Sélection & dimensionnement",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quelle CPU choisir pour un projet 50 I/O + Profinet + OPC UA + cycle 5 ms ?",
+            "options": [
+              "LOGO! 8",
+              "CPU 1211C",
+              "CPU 1516-3 PN/DP",
+              "CPU 1518"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Quelle règle de marge de charge CPU recommande-t-on ?",
+            "options": [
+              "≤ 10 %",
+              "≤ 30 %",
+              "≤ 60 %",
+              "≤ 80 %"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "L'outil officiel Siemens gratuit pour configurer un projet est…",
+            "options": [
+              "TIA Portal",
+              "TIA Selection Tool",
+              "SIMATIC Manager",
+              "STEP 7"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 84,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Conception de l'armoire électrique",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## L'armoire, le contenant du PLC\n\nUn PLC vit dans une **armoire électrique**. La conception de cette armoire est presque aussi importante que le choix du PLC lui-même.\n\n[ILLUSTRATION|cabinet]\n\n### Composants d'une armoire typique\n[STEPS|**Coffret** — dimensions 600×2000 mm typique, IP54 minimum||**Alimentation générale** — arrivée 400V 3-phases + neutre + terre||**Disjoncteurs de branche** — protection des circuits||**Transformateur 400/230V** (si besoin 230V AC pour PS ou alims)||**Alimentation 24V SITOP** — pour capteurs + relais interface||**Rail DIN PLC** — accueille CPU + PS + modules||**Relais interface** — entre DQ et charges (contacteurs, EV)||**Bornier client** — arrivée / départ terrain]\n\n### Standards à respecter\n- **IEC 61439** — armoires basse tension\n- **RGIE** (Belgique) — Règlement Général sur les Installations Électriques\n- **CE marking** — obligatoire pour vente en Europe"
+    },
+    {
+      "position": 85,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Position des composants dans l'armoire",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Règles d'organisation\n\n### De haut en bas\n[STEPS|**En haut** : disjoncteur général, arrivée puissance, contacteurs moteur (chaleur monte)||**Milieu** : PLC (CPU + modules), écran HMI si intégré||**Milieu-bas** : alimentations 24V, relais interface||**En bas** : borniers client, arrivées de câbles depuis le terrain]\n\n### Espacement obligatoire\n- **≥ 5 cm** au-dessus du PLC (ventilation)\n- **≥ 5 cm** au-dessous et sur les côtés\n- **Ne rien poser** sur le PLC (interdit, chaleur)\n\n### Éclairage armoire\nPrévoir une petite lampe LED avec interrupteur porte pour la maintenance. Économie temps considérable.\n\n[TIP|**Toujours dessiner un schéma de disposition** (implantation) avant montage. Un layout mal pensé = 30 % de temps de câblage en plus.]"
+    },
+    {
+      "position": 86,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Ventilation et température",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Températures à surveiller\n\nLes S7-1500 sont spécifiés pour fonctionner entre **0 et 60 °C ambiants**. Au-delà, dégradation rapide.\n\n### Sources de chaleur en armoire\n[KV|**Contacteurs**:5 à 20 W chacun · beaucoup si nombreux||**Transformateurs**:jusqu'à 50 W||**Alimentations 24V**:5 à 20 %  de la puissance dissipée||**PLC lui-même**:5 à 20 W · négligeable relatif]\n\n### Refroidissement\n- **Convection naturelle** : suffit pour armoire ≤ 30 W dissipés dans local à 25°C\n- **Ventilateur avec filtre** : jusqu'à ~150 W dissipés\n- **Échangeur air/air** : pour armoire en local chaud (industriel > 40°C)\n- **Groupe froid intégré** : cas extrêmes (fonderie, extérieur en soleil)\n\n### Formule simple\nDelta T = P dissipée / (facteur radiation × surface armoire)\n\n[WARN|**Piège pharma / agro** : les armoires en salle blanche / propre ne peuvent PAS avoir de ventilateur (contamination). Il faut passer par **échangeur air/air scellé** ou climatisation externe.]"
+    },
+    {
+      "position": 87,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Câblage — normes couleurs et sections",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Le RGIE en pratique\n\n### Couleurs standardisées (Belgique/Europe)\n[KV|**Rouge**:phase L1 (parfois brun)||**Marron / Noir**:phases L2, L3||**Bleu clair**:neutre N||**Vert/jaune**:terre PE · **UNIQUEMENT**||**Rouge (24V)**:+24V DC (par convention)||**Bleu foncé (24V)**:0V DC (M-)]\n\n### Sections courantes\n[KV|**Circuit contrôle 24V**:1.5 mm² (câble souple H07V-K)||**Alimentation PLC 24V**:1.5 à 2.5 mm² selon distance||**Sortie DQ vers relais**:0.75 à 1 mm²||**Alim contacteur moteur**:selon puissance moteur (2.5 à 25 mm²)||**Analogiques**:0.5 à 0.75 mm² blindé torsadé]\n\n### Serrage des bornes\n- **Bornes à ressort** (Wago, Phoenix Push-in) : rapide, pas d'outil, très fiable\n- **Bornes à vis** : couple de serrage précis (voir doc constructeur)\n- **Ferrules** obligatoires sur câbles multibrins souples\n\n[RULE|Le **RGIE (Livre 1)** en Belgique impose ces règles. Un contrôle par un organisme agréé (Vinçotte, ACEG…) est obligatoire pour toute mise en service en industrie.]"
+    },
+    {
+      "position": 88,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Câblage des entrées TOR",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Détails pratiques\n\nVoir cet exemple de câblage (source : chapitre 4).\n\n[ILLUSTRATION|io-wiring]\n\n### Étapes de câblage DI\n[STEPS|**1. Alimenter les capteurs** — +24V vers le fil marron/rouge des capteurs · 0V vers le fil bleu||**2. Signal capteur** — fil noir (PNP) vers l'entrée DI du module (bornes I0.0, I0.1…)||**3. Alimenter le groupe DI** — bornes 1M+ (+24V) et 1M- (0V) du module||**4. Étiqueter tous les fils** — étiquette au bornier ET à l'entrée module||**5. Serrer les bornes** — au couple, ni trop ni trop peu||**6. Refermer le module** — clip inférieur puis clip supérieur]\n\n### Vérifications avant mise sous tension\n[STEPS|**Continuité** — tester chaque fil au multimètre en résistance||**Isolement** — vérifier pas de court entre +24V et 0V||**Serrage** — tirer sur chaque fil (test mécanique)||**Étiquetage** — chaque fil identifié dans les 2 sens]\n\n[WARN|**Ne JAMAIS mettre sous tension** sans avoir vérifié la continuité + isolement. Un court-circuit sur module = module HS = 300 € en poubelle.]"
+    },
+    {
+      "position": 89,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Câblage des sorties TOR — via relais",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Toujours passer par un relais interface\n\nPour piloter une charge > 0.5A (contacteur moteur, EV puissance), on passe par un relais interface.\n\n### Schéma type\n    \n[Module DQ] → [Sortie 24V] → [Bobine relais interface (Phoenix, Wago)] → [Contact relais] → [Bobine contacteur moteur ou EV puissance]\n    \n\n### Choix du relais interface\n[KV|**24V DC bobine · contact 6A/230V AC**:cas standard · Phoenix PLC-RSC-24DC/21||**Slim 6 mm**:économie place · Phoenix PLC-RSC-24DC/21-1AU/RC||**LED status**:visualisation activation||**Diode roue libre**:protection du DQ transistor à la coupure||**Test manuel**:bouton mécanique de forçage · pratique pour maintenance]\n\n### Câblage\n- 24V vers bobine A1\n- 0V vers bobine A2 (ou vers 0V commun)\n- Contact 11-14 vers charge à piloter\n\n[TIP|**Ne pas économiser sur les relais** : Wago / Phoenix / Finder de qualité durent 20 ans en cyclage régulier. Les no-name chinois lâchent au bout de 2 ans → chantier de remplacement.]"
+    },
+    {
+      "position": 90,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Câblage des analogiques — blindage",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Le fil analogique, une science\n\nUn fil analogique 4-20 mA transporte un signal de faible tension (0.4 à 2 V typiquement). **Ultra sensible aux perturbations**.\n\n### Câble à utiliser\n- **Câble blindé multi-paires** : Belden 8107, Lapp UNITRONIC LiYCY\n- **Paire torsadée** : réduit induction magnétique\n- **Blindage général** : réduit couplage capacitif\n\n### Mise à la terre du blindage\n[RULE|**Le blindage se raccorde à la terre côté armoire UNIQUEMENT**. Jamais aussi côté capteur (boucle de masse = signal bruité).]\n\n### Reprise physique\n- Utiliser des **bornes de reprise blindage** au bornier armoire\n- **Ne pas dénuder** puis visser le blindage à même le carter (mauvais contact = mauvaise reprise)\n\n### Cheminement\n- **Séparer physiquement** des câbles de puissance (chemins de câble différents)\n- Si obligé de croiser : à **90°** (pas parallèle sur longueur)\n\n### Diagnostic bruit\n[USECASE|Mesure de température erratique|Le PLC lit la sonde Pt100 avec des sauts de 10-15°C aléatoires.|**Cause probable** : câble analogique passe à côté d'un câble de démarrage moteur. **Solution** : re-router le câble analogique dans un autre chemin de câble à distance des puissances.]"
+    },
+    {
+      "position": 91,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Mise à la terre",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Un pilier de la sécurité électrique\n\n### Trois types de terres à distinguer\n[KV|**PE (Protective Earth)**:terre de protection · fil vert/jaune · obligatoire||**FE (Functional Earth)**:terre fonctionnelle · pour retour EMC · blindages||**Isolation galvanique**:certains modules isolent complètement (pour Ex, mesure spéciale)]\n\n### Circuit PE d'armoire\n- **Barrette de terre** en fond d'armoire (cuivre 25 mm² minimum)\n- **Reprise sur chaque porte** (tresse cuivre souple)\n- **Chaque module PLC** a une vis PE — la connecter\n- **Terre du site** (piquet de terre ou grille) reliée à cette barrette\n\n### Contrôle\n- **Résistance de terre** < 1 Ω entre la barrette et le piquet de terre\n- Contrôlée par organisme agréé (ACEG, Vinçotte)\n- **Périodicité** : contrôle initial + contrôle périodique tous les 5 ans\n\n[DANGER|**Une mauvaise mise à la terre tue.** Perte de terre = pas de déclenchement différentiel = choc électrique 230V direct sur carter métallique = mort. Prendre ce chapitre au sérieux.]"
+    },
+    {
+      "position": 92,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Diagnostic PLC par LED",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Lire les LED de la CPU S7-1500\n\n### LEDs principales sur la CPU\n[KV|**RUN/STOP (jaune)**:allumé jaune = en STOP||**RUN/STOP (vert)**:allumé vert = en RUN||**ERROR (rouge)**:allumé = erreur système grave||**MAINT (jaune)**:allumé = maintenance requise (durée de vie module, batterie backup…)||**LINK X1 (vert)**:allumé = lien Ethernet actif sur port X1||**RX/TX X1 (jaune)**:clignote = trafic Profinet||**BF1 (rouge)**:allumé = bus fault sur X1 · device Profinet manquant]\n\n### Scénarios courants\n[USECASE|CPU en STOP au démarrage|Après power-on, la CPU reste en STOP · LED jaune fixe.|**Causes possibles** : (1) programme utilisateur en défaut (erreur compilation), (2) SD card corrompue, (3) config hardware différente du physique. **Diagnostic** : lire l'écran intégré ou connecter TIA en mode online.]\n\n[USECASE|LED BF1 rouge fixe|Un device Profinet configuré n'est pas trouvé physiquement.|**Diagnostic** : vérifier câble Profinet, LED du device (LINK vert ?), nom Profinet du device (doit correspondre à la config TIA).]"
+    },
+    {
+      "position": 93,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Diagnostic online avec TIA Portal",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## L'outil ultime — TIA online\n\n### Ouverture d'une session online\n1. Connecter le PC au réseau Profinet (via câble Ethernet vers CPU)\n2. TIA Portal → **Go Online** (raccourci Ctrl+K)\n3. Choisir l'interface réseau et l'IP de la CPU\n4. TIA compare projet local vs projet CPU → indique différences\n\n### Fonctions online\n[STEPS|**Diagnostic hardware** — voir status de chaque module en direct||**Monitor tags** — voir valeurs en temps réel des variables||**Watch table** — forcer temporairement des valeurs (attention en prod !)||**Trace** — capture haute fréquence de signaux (comme oscilloscope)||**Diagnostic buffer** — journal des événements CPU (redémarrages, erreurs)]\n\n### Cas concret\n[USECASE|Machine qui redémarre aléatoirement|Adrien intervient : le S7-1500 semble redémarrer 2 fois par jour sans raison.|**Diagnostic online** : ouvre le **diagnostic buffer** de la CPU. Voit : \"Restart due to watchdog timeout - OB1 execution too long\". **Cause** : une boucle mal écrite dans une FB. Correction en 30 min.]\n\n[TIP|**Le diagnostic buffer est ton meilleur ami**. Il enregistre les 1000 derniers événements avec horodatage. Toujours consulter en cas de problème.]"
+    },
+    {
+      "position": 94,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Firmware update",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Mettre à jour le firmware de la CPU\n\n### Pourquoi mettre à jour ?\n- **Cybersécurité** (CVE patchées)\n- **Bug fix** (Siemens publie régulièrement)\n- **Nouvelles fonctions** (OPC UA amélioré, etc.)\n\n### Procédure via SD card\n[STEPS|**1. Télécharger le firmware** depuis Industry Online Support (compte gratuit requis)||**2. Formater la SD** au format Siemens (via TIA)||**3. Copier le fichier firmware** à la racine de la SD||**4. Éteindre la CPU** · insérer la SD · rallumer||**5. La CPU flash le firmware automatiquement** (2-3 min, LED clignotent)||**6. Vérifier la version** après redémarrage (écran ou TIA online)]\n\n### Procédure via TIA Portal\n1. **Go Online** avec CPU\n2. Menu **Online → Firmware update**\n3. Sélectionner le fichier .upd téléchargé\n4. Lancer (10-15 min)\n\n[WARN|**Un firmware update rate = brick de la CPU**. TOUJOURS avoir un backup projet ET une SD de rechange avant de mettre à jour un CPU en production. Si tu peux planifier un arrêt maintenance, fais-le.]"
+    },
+    {
+      "position": 95,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Backup / Restore du projet",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Sauvegarder avant tout\n\n### Types de backup Siemens\n[KV|**Projet TIA (.ap19)**:l'archive complète · à sauvegarder après chaque modification||**Firmware CPU**:téléchargeable de nouveau à tout moment (Industry Online Support)||**Recettes / logs / DataLog CSV**:exportables depuis TIA ou web server||**SIMATIC MC**:contient copie du projet · peut servir de \"clef de restoration\"]\n\n### Politique de backup recommandée\n[STEPS|**Après chaque livraison client** : archiver le projet dans un repo Git ou Dasohub RH Documents||**Backup complet mensuel** : projet + docs + firmware, sur disque externe (règle \"3-2-1\")||**SD de secours** : chaque projet a une SD clone au coffre-fort||**Testing du backup** : restaurer sur un PLC de test chaque année pour valider]\n\n### En cas de désastre\n[USECASE|Ransomware sur le PC du chef de projet, projet TIA chiffré|Sébastien est en congé, le CD projet a disparu.|**Sans backup** : perte totale = 6 semaines de reprogrammation à 850 €/j = 25 500 € de perte + arrêt client.\n**Avec backup mensuel** : restauration en 2h à partir du dernier backup. Écart entre backup et prod à ré-appliquer (2-4h de travail).]"
+    },
+    {
+      "position": 96,
+      "kind": "CONTENT",
+      "section": "8 · Montage & maintenance",
+      "title": "Cas concret — panne intermittente",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Diagnostic en conditions réelles\n\n[USECASE|Ligne d'embouteillage Zoetis · panne aléatoire|La ligne s'arrête 2-3 fois par jour, sans qu'on comprenne pourquoi. Redémarrage manuel = ça repart pour 3-4h. Ni le client ni son intégrateur historique n'ont trouvé.|**Enquête** :\n1. Consultation **diagnostic buffer** CPU : voit \"Analog value out of range on AI1 CH2\".\n2. Regarde la variable liée : mesure de niveau de cuve.\n3. Signal AI = 24 mA (au-delà de 20 mA = capteur défaut).\n4. Câble à côté d'un variateur → **perturbation EMC**.\n\n**Solution** : câble analogique re-routé dans autre chemin. Blindage vérifié. Zéro panne depuis 6 semaines.]\n\n### Méthode générale de diagnostic\n[STEPS|**1. Lire le diagnostic buffer** — 90 % des cas résolus ici||**2. Regarder les LED** de la CPU et des modules||**3. Monitor tags online** — voir ce qui se passe en direct||**4. Trace haute fréquence** — capturer les signaux transitoires||**5. Vérifier physique** — câbles, connecteurs, alimentation||**6. Test cross-check** — remplacer temporairement pour isoler]\n\n[TIP|Chez Dasolabs, on facture **80 €/h en diagnostic** avec accès online distant (via VPN). En 2h en moyenne, on résout ce qu'un intégrateur local n'a pas trouvé en 2 jours. C'est notre valeur ajoutée.]"
+    },
+    {
+      "position": 97,
+      "kind": "QUIZ",
+      "section": "8 · Montage & maintenance",
+      "title": "Quiz 8 — Montage & maintenance",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Combien de mm minimum au-dessus d'un S7-1500 pour ventilation ?",
+            "options": [
+              "0 (touche possible)",
+              "2 cm",
+              "5 cm minimum",
+              "20 cm"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Le blindage d'un câble analogique se raccorde à la terre…",
+            "options": [
+              "Aux deux extrémités",
+              "Côté capteur uniquement",
+              "Côté armoire uniquement",
+              "Nulle part"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Quelle est la première chose à consulter face à une panne intermittente sur S7-1500 ?",
+            "options": [
+              "Le web server",
+              "Le diagnostic buffer",
+              "Le manuel Siemens",
+              "Le fournisseur"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    },
+    {
+      "position": 98,
+      "kind": "CONTENT",
+      "section": "9 · Certification",
+      "title": "Prêt pour l'évaluation certifiante ?",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null,
+      "bodyMd": "## Quiz certifiant final — 10 questions\n\nLe prochain quiz est le **quiz certifiant** de la formation Matériel PLC Siemens. Il couvre l'ensemble du contenu :\n\n- Chapitre 1 : Qu'est-ce qu'un PLC\n- Chapitre 2 : La gamme Siemens\n- Chapitre 3 : Anatomie S7-1500\n- Chapitre 4 : Modules I/O\n- Chapitre 5 : Communication\n- Chapitre 6 : Safety F-CPU\n- Chapitre 7 : Sélection & dimensionnement\n- Chapitre 8 : Montage & maintenance\n\n[TIP|**Score minimum : 70 %** (7 réponses correctes sur 10). En cas d'échec, tu peux recommencer autant de fois que nécessaire.]\n\n[RULE|Prends ton temps — pas de chrono. Une bonne réponse choisie posément vaut mieux qu'une devinette rapide.]\n\nBonne chance !"
+    },
+    {
+      "position": 99,
+      "kind": "QUIZ",
+      "section": "9 · Certification",
+      "title": "🎓 Quiz certifiant final — Matériel PLC Siemens",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Le premier PLC (Modicon 084) a été créé en quelle année et pour quel client ?",
+            "options": [
+              "1965 pour Boeing",
+              "1968 pour General Motors",
+              "1975 pour Ford",
+              "1980 pour Toyota"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Quelle gamme Siemens choisirais-tu pour un projet avec 15 I/O totales, budget serré ?",
+            "options": [
+              "S7-1500 CPU 1518",
+              "S7-1200 CPU 1214C",
+              "LOGO! 8",
+              "S7-400"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Que signifie l'abréviation TIA dans TIA Portal ?",
+            "options": [
+              "Total Industrial Access",
+              "Totally Integrated Automation",
+              "Time Interval Automation",
+              "Transaction In Automation"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Combien de modules signaux peut-on installer au maximum sur un rack central S7-1500 ?",
+            "options": [
+              "8",
+              "16",
+              "32",
+              "128"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Un capteur PNP à sortie 24V se câble sur un module DI configuré en…",
+            "options": [
+              "Source (retour 0V par module)",
+              "Sink (retour 24V par module)",
+              "NPN",
+              "AS-Interface"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Quel niveau de sécurité une F-CPU 1516F atteint-elle avec TÜV ?",
+            "options": [
+              "SIL 1 / PL b",
+              "SIL 2 / PL c",
+              "SIL 3 / PL e",
+              "SIL 4"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "OPC UA sur S7-1500…",
+            "options": [
+              "Nécessite un module CP supplémentaire",
+              "Est natif dans la CPU depuis TIA V15",
+              "Nécessite un logiciel Kepware",
+              "N'est pas supporté"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Le blindage d'un câble analogique 4-20 mA se raccorde à la terre…",
+            "options": [
+              "Aux deux extrémités",
+              "Côté armoire uniquement",
+              "Côté capteur uniquement",
+              "Nulle part"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Face à une panne intermittente sur S7-1500, quelle est la première étape de diagnostic ?",
+            "options": [
+              "Remplacer la CPU",
+              "Reformater la carte SD",
+              "Consulter le diagnostic buffer via TIA online",
+              "Redémarrer l'armoire"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Pour une ligne avec 180 I/O, safety GAMP 5, redondance CPU, OPC UA — matériel adapté ?",
+            "options": [
+              "LOGO! 12/24 RCE",
+              "2× CPU 1516F-3H PN/DP en H-mode + F-I/O + ET 200SP HA",
+              "S7-1200 CPU 1214C avec DI/DQ intégrées",
+              "Une seule CPU 1511 standard suffit"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null,
+      "bodyMd": ""
+    }
+  ]
+}
