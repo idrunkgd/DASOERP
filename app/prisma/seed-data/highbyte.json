@@ -1,19 +1,19 @@
 {
   "slug": "highbyte",
   "title": "HighByte Intelligence Hub",
-  "subtitle": "Formation UNS complète — data engineering industriel moderne",
+  "subtitle": "DataOps industriel · UNS · intégration OT/IT moderne",
   "level": "Intermédiaire à avancé",
-  "duration": "≈ 8 h",
+  "duration": "≈ 7 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "certificateWording": "Formation « HighByte Intelligence Hub » — connaissances fondamentales sur le concept UNS (Unified Namespace), l'architecture HighByte, la connexion aux sources OT/IT, la modélisation d'objets métier, les flows de transformation, le publishing MQTT/OPC UA (dont Sparkplug B), la sécurité et le déploiement production.",
+  "certificateWording": "Formation « HighByte Intelligence Hub » — maîtrise de la plate-forme DataOps industriel HighByte : Unified Namespace (UNS), architecture (Sources, Templates, Instances, Pipelines, Sinks), modélisation ISA-95, transformations et enrichissement, publication vers MQTT Sparkplug B, Kafka, cloud (Azure/AWS), intégration avec PLC/SCADA/Historian/MES existants, cas pratiques Dasolabs.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
+      "section": "1 · Introduction HighByte",
       "title": "Bienvenue — HighByte Intelligence Hub",
-      "bodyMd": "## Formation complète HighByte\n\nBienvenue ! Formation à **HighByte Intelligence Hub**, la solution UNS (Unified Namespace) de référence en 2026.\n\n### Ce que tu vas apprendre\n- Le concept UNS et pourquoi c'est révolutionnaire\n- Installation et architecture\n- Connexion à toutes les sources OT et IT\n- Modélisation objets métier\n- Publishing MQTT et OPC UA\n- Sécurité et déploiement\n- Cas pratiques industriels\n\n[RULE|Quiz certifiant : 70 %. Recommence si besoin.]",
+      "bodyMd": "## Pourquoi cette formation\n\nHighByte Intelligence Hub est un **DataOps industriel** relativement récent (fondée en 2018) mais qui a rapidement pris la place dominante dans le domaine du Unified Namespace (UNS) et de l'intégration OT/IT moderne. Chez Dasolabs, on l'a déployé chez plusieurs clients pharma et industriels pour remplacer les ETL legacy et construire des architectures UNS conformes.\n\n### Pourquoi c'est important\nLe paysage industriel change : les usines veulent leurs données en temps réel pour AI, dashboards, jumeaux numériques, MES modernes. Les vieilles architectures (Historian isolé, MES fermé, données silotées) ne suffisent plus. HighByte permet de fluidifier tout ça sans re-coder les vieux systèmes.\n\n### Ce que tu vas apprendre\n- Qu'est-ce que le DataOps industriel\n- Le concept d'Unified Namespace (UNS)\n- Architecture HighByte (Sources, Pipelines, Sinks)\n- Configuration de sources (OPC UA, MQTT, SQL, REST)\n- Modélisation des objets métier (ISA-95 aligned)\n- Transformations et enrichissement\n- Publication vers cibles (MQTT Sparkplug, Kafka, SQL, cloud)\n- Cas pratiques Dasolabs\n\n[RULE|Quiz certifiant final · 70 % · refaisable]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -21,9 +21,9 @@
     {
       "position": 2,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "Qu'est-ce qu'un UNS ?",
-      "bodyMd": "## Unified Namespace expliqué\n\nUn **UNS (Unified Namespace)** est une **architecture data** où toutes les données industrielles convergent dans un **espace unique**, structuré hiérarchiquement, accessible en temps réel par tous les systèmes.\n\n### Analogie\nUn UNS c'est un **arbre commun** où :\n- Les PLC publient leurs mesures\n- Les SCADA lisent en temps réel\n- Le MES écrit des ordres\n- L'ERP lit des résultats\n- Le cloud archive tout\n\nUn seul point de vérité.\n\n[TIP|**Concept clé** : au lieu de N×M connexions point-à-point entre systèmes, on a N connexions vers le UNS. Explosion combinatoire évitée.]",
+      "section": "1 · Introduction HighByte",
+      "title": "Le DataOps industriel — contexte",
+      "bodyMd": "## Pourquoi HighByte existe\n\nPour comprendre HighByte, il faut comprendre le problème qu'il résout.\n\n### La problématique historique\nDepuis 30 ans, les usines accumulent des systèmes :\n- **Automates** (PLCs) parlant Modbus, Profinet, OPC DA\n- **Historians** (Wonderware, PI) archivant en propriétaire\n- **MES** (Werum, POMSnet) avec leurs propres DB\n- **ERP** (SAP) au-dessus\n- **LIMS**, **GMAO**, **Data marts**...\n\nChaque système parle son propre langage. Les échanger nécessite des **intégrations point-à-point** codées à la main. Sur une usine mature, on peut avoir 50-100 intégrations bilatérales — un plat de spaghettis ingérable.\n\n### Le DataOps industriel\nLe concept **DataOps industriel** vise à structurer et fluidifier ces échanges de données :\n- **Centralisation** logique via un UNS (Unified Namespace)\n- **Modélisation** cohérente (souvent ISA-95)\n- **Contextualisation** : enrichir les data brutes avec contexte métier\n- **Publication** vers multiples cibles simultanément\n- **Gouvernance** : documenter, versionner, auditer\n\nC'est l'équivalent industriel du **DataOps IT** (chef, ansible, kubernetes for data).\n\n### Positionnement HighByte\nHighByte se positionne comme la **plate-forme DataOps de référence** pour l'industrie. Concurrents :\n[KV|**HighByte Intelligence Hub**:leader UNS · natif industriel · fondé 2018||**Cognite Data Fusion**:orienté data science · plus lourd||**Element Unify**:orientation contextuel||**AVEVA Data Hub**:cloud-first · lié à l'écosystème AVEVA||**Custom (Kafka + code)**:flexible mais dev-heavy]\n\n### Modèle économique\nHighByte est un logiciel payant, licence annuelle par nœud :\n- Small : ~10-20 k€/an · petit projet\n- Medium : ~30-50 k€/an · usine moyenne\n- Large : ~50-100 k€/an · usine large ou multi-sites\n\nC'est un investissement significatif mais qui remplace parfois 500 k€ de dev custom.\n\n[TIP|**Chez Dasolabs**, on positionne HighByte pour les clients qui veulent **moderniser leur data architecture** sans réécrire leurs MES/SCADA existants. C'est notre outil #1 pour projets UNS.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -31,9 +31,9 @@
     {
       "position": 3,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "L'ancien monde vs UNS",
-      "bodyMd": "## Comparaison\n\n### Ancien monde (point-to-point)\n- MES parle à 5 SCADA (5 intégrations)\n- SCADA parle à 20 PLC (100 intégrations)\n- ERP parle à MES + SCADA + Historian (3 intégrations)\n- Total : ~100+ intégrations, cauchemar de maintenance\n\n### Monde UNS\n- Chaque système publie dans le UNS (1 intégration par système)\n- Chaque système consomme depuis le UNS (1 intégration par système)\n- Total : ~30 intégrations, découplage total\n\n[TIP|Le UNS **découple** les producteurs et consommateurs de data. Modifier un système ne casse plus les autres.]",
+      "section": "1 · Introduction HighByte",
+      "title": "L'Unified Namespace (UNS) — concept fondateur",
+      "bodyMd": "## Le pivot conceptuel\n\nL'**Unified Namespace** (UNS) est le concept central autour duquel HighByte est bâti. Il faut le comprendre à fond.\n\n### Définition\nUn **UNS** est un **espace de nommage unifié** qui organise toutes les données industrielles selon une hiérarchie claire (souvent ISA-95). Chaque data point a un chemin unique, sémantiquement clair, accessible par n'importe quel système autorisé.\n\n### Exemple\nSans UNS, on a :\n- Le SCADA parle de « Reactor_1_Temp »\n- Le MES parle de « R1_Temperature »\n- Le PLC parle de « DB100.DBD4 »\n- L'Historian stocke « SITE01/AREA02/TAG_00456 »\n\nC'est la même donnée, mais 4 noms différents. Impossible de corréler proprement.\n\nAvec UNS ISA-95 :\n\n    /Dasolabs/Brussels/Suspension/Reactor_Cell/Reactor_R1/temperature\n\nUn seul nom, clair, hiérarchique. Tous les systèmes s'accordent.\n\n### Principes UNS\n[STEPS|**Un seul namespace** pour toute l'usine · pas de silos||**Hiérarchique** : Enterprise → Site → Area → Line → Unit → Tag||**ISA-95 aligned** : reflète l'organisation physique||**Publish/Subscribe** : producteurs publient, consommateurs souscrivent||**Découvrable** : un consommateur peut lister ce qui est disponible||**Contextualisé** : chaque valeur est enrichie de metadata (unité, timestamp, qualité)]\n\n### UNS ≠ MQTT\nAttention : UNS est un **concept**, pas un protocole. On peut l'implémenter via :\n- MQTT + Sparkplug B (le plus courant)\n- Kafka (moins fréquent en industriel)\n- Custom (déconseillé)\n\nHighByte utilise typiquement **MQTT Sparkplug B** comme transport, mais peut aussi publier vers Kafka, WebSockets, REST APIs.\n\n### Pattern architectural\n[STEPS|**Producers** : PLC, SCADA, Historian · publient leurs data au UNS||**UNS Broker** : MQTT broker (HiveMQ, EMQX) · reçoit tout||**Consumers** : Dashboards, MES, IA, cloud · s'abonnent à ce qui les intéresse||**HighByte** au milieu · route, transforme, enrichit, standardise]\n\n### Bénéfices\n1. **Découplage** : ajouter un consommateur ne demande rien aux producteurs\n2. **Simplicité** : 1 broker vs 50 intégrations point-à-point\n3. **Évolutivité** : ajouter des sources/consommateurs = ajout dans le broker\n4. **Standard** : ISA-95 = langage commun\n5. **Résilience** : broker persiste les data, consommateurs peuvent rejoindre à leur rythme\n\n[TIP|**Anti-pattern à éviter** : croire qu'installer un broker MQTT = avoir un UNS. Non — un UNS demande une modélisation ISA-95 rigoureuse. Sans modélisation, MQTT = juste un pub-sub bordel.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -41,29 +41,62 @@
     {
       "position": 4,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "Origines du concept UNS",
-      "bodyMd": "## L'histoire\n\n### Walker Reynolds — le prophète\n**Walker Reynolds** (Intellic Integration, USA) popularise le concept UNS depuis 2019 via ses conférences et YouTube.\n\n### Motivation\nAgacé par la complexité point-to-point des projets industriels. Constate que les architectes IT (avec Kafka, MQTT, event-driven) sont 20 ans en avance sur l'OT.\n\n### Adoption\n- 2020 : concept isolé chez des early adopters\n- 2022 : ISA (International Society of Automation) reconnaît\n- 2024 : standard de fait dans l'industrie moderne\n- 2026 : incontournable en projet de transformation numérique",
+      "section": "1 · Introduction HighByte",
+      "title": "Positionnement HighByte dans l'architecture",
+      "bodyMd": "## Où intervient l'outil\n\nHighByte n'est pas partout. Comprendre où il se place aide à bien l'utiliser.\n\n### Position architecture typique\n[STEPS|**Niveau 1-2 (PLC/SCADA)** : les producteurs de data · Siemens, Rockwell, AVEVA · pas touchés||**HighByte** : au niveau 2.5-3 · lit les producteurs, publie au UNS||**UNS Broker** (HiveMQ, EMQX) : niveau 3 · point central||**Consumers niveau 3-4-5** : MES, cloud, IA, dashboards]\n\n### Rôle exact\nHighByte fait 3 choses principales :\n[KV|**Read** : lit les sources industrielles (OPC UA, Modbus, MQTT existant, SQL, REST)||**Transform** : structure, enrichit, calcule, filtre · applique le modèle ISA-95||**Publish** : envoie vers cibles (UNS MQTT, Kafka, SQL, cloud)]\n\nC'est du **DataOps** : orchestration de flux de données, pas de stockage à long terme.\n\n### Ce qu'HighByte n'est PAS\n[KV|**Pas un historian**:ne stocke pas long terme (utiliser AVEVA Historian, Timescale, InfluxDB)||**Pas un SCADA**:ne visualise pas le process (utiliser WinCC, InTouch, Ignition)||**Pas un MES**:ne gère pas les recettes ni la traçabilité batch (utiliser Werum, POMSnet)||**Pas un ETL classique**:ne fait pas de batch nocturne (préférer SSIS ou Airflow)]\n\n### Cas d'usage typiques\n1. **Créer un UNS** à partir de PLCs + historians existants\n2. **Alimenter le cloud** (AWS IoT, Azure IoT) depuis l'usine\n3. **Nourrir un MES moderne** en data contextualisées\n4. **Publier vers un data lake** pour IA/ML\n5. **Interfacer un système legacy** avec des consommateurs modernes\n\n### Un exemple concret\nClient Dasolabs (industriel non-pharma) :\n- 8 PLC Siemens S7-1500\n- 1 SCADA WinCC\n- 1 Historian PI\n- Voulait alimenter un data lake Azure pour IA prédictive\n\nAvant HighByte : projet dev estimé 300 k€, 12 mois.\nAvec HighByte : 60 k€ setup, 3 mois. Économie : 240 k€ + 9 mois.\n\n[TIP|HighByte brille quand la **modernisation** est le mot d'ordre. Il ne remplace pas l'archi existante, il l'**ouvre**.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 5,
-      "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "UNS ≠ SCADA ≠ MES",
-      "bodyMd": "## Positionnement dans le stack\n\n[KV|**PLC**:contrôle temps réel · logique||**SCADA**:supervision opérateur · UI||**Historian**:archives time-series||**UNS**:pont data entre TOUS les systèmes||**MES**:gestion production||**ERP**:gestion entreprise]\n\n### UNS ne remplace pas\n- Pas un SCADA (pas d'UI)\n- Pas un Historian (pas d'archive long terme)\n- Pas un MES (pas de workflow)\n- Pas un ERP\n\n### UNS complète\nIl est LE bus data qui relie tout ça.",
+      "kind": "QUIZ",
+      "section": "1 · Introduction HighByte",
+      "title": "Quiz 1 — Introduction",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "L'Unified Namespace (UNS) est…",
+            "options": [
+              "Un logiciel",
+              "Un concept d'organisation hiérarchique unifiée des data industrielles · souvent ISA-95 · implémenté via MQTT/Kafka",
+              "Un PLC",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "HighByte est principalement…",
+            "options": [
+              "Un SCADA",
+              "Une plate-forme DataOps industriel · lit sources, transforme, publie vers UNS et autres cibles",
+              "Un historian",
+              "Un MES"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "HighByte ne remplace PAS…",
+            "options": [
+              "Rien",
+              "Le SCADA, l'Historian, le MES · il les complète et les connecte",
+              "Uniquement le PLC",
+              "Tout"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "MQTT — le protocole du UNS",
-      "bodyMd": "## Le protocole roi\n\n**MQTT** (Message Queuing Telemetry Transport) est le protocole standard pour un UNS.\n\n### Caractéristiques\n[KV|**Publish/Subscribe**:découplé · pas de point-à-point||**Léger**:message < 1 KB · pour IoT||**Bidirectionnel**:client peut publier ET s'abonner||**QoS 3 niveaux**:0 (best effort), 1 (at least once), 2 (exactly once)||**Retained messages**:dernier message conservé pour nouveau subscriber||**Will messages**:message si client se déconnecte brutalement]\n\n[TIP|MQTT couplé avec un broker (HiveMQ, Mosquitto) = colonne vertébrale de tout UNS moderne.]",
+      "section": "2 · Architecture HighByte",
+      "title": "Composants principaux",
+      "bodyMd": "## Les briques de la plateforme\n\nHighByte est architecturé autour de plusieurs concepts que tu dois maîtriser.\n\n### Les concepts clés\n[KV|**Sources** : les producteurs de data · OPC UA server, MQTT topic, SQL DB, REST endpoint||**Connections** : configuration technique d'une source (URL, credentials, port)||**Instances** : les objets métier structurés · un Reactor, un Filler, une Line||**Templates** : modèles réutilisables d'instances · définit attributs communs||**Pipelines** : les flux de transformation entre sources et cibles||**Sinks** : les cibles où publier · MQTT broker, Kafka, SQL DB, cloud||**Flows** : orchestration de pipelines · séquences et conditions]\n\n### Analogie\nPense à HighByte comme un **studio d'orchestration** :\n- Sources = musiciens (producteurs de son)\n- Templates/Instances = les partitions structurées\n- Pipelines = les arrangements musicaux\n- Sinks = les publics/salles\n\nLe chef d'orchestre (HighByte) prend le son brut, le structure, le joue vers plusieurs salles simultanément.\n\n### Interfaces\nHighByte offre plusieurs façons de l'utiliser :\n[KV|**Web UI** : interface graphique · pour configuration visuelle||**REST API** : programmatique · pour automation, CI/CD||**Configuration files** : YAML/JSON exportables · pour versionning Git||**Command line** : pour opérations en batch]\n\n### Déploiement\nHighByte tourne comme :\n- **Windows service** ou **Linux daemon**\n- **Docker container** (recommandé)\n- **Kubernetes** (déploiements avancés)\n- **Edge device** (compact, pour usines isolées)\n\n### Sizing indicatif\n[KV|**Small**:PoC ou petite usine · 2 vCPU, 4 GB RAM · 100-1000 tags/sec||**Medium**:usine moyenne · 4 vCPU, 8 GB RAM · 5000-10000 tags/sec||**Large**:multi-sites · 8+ vCPU, 16-32 GB RAM · 20000+ tags/sec]\n\nEn pratique, HighByte n'est pas gourmand — sa perf est souvent limitée par les I/O réseau, pas par le CPU.\n\n[TIP|**Bonnes pratiques Dasolabs** : HighByte en Docker sur un serveur dédié Linux Ubuntu 22. Configuration YAML dans Git. Backup quotidien des configs.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -71,9 +104,9 @@
     {
       "position": 7,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "OPC UA vs MQTT dans un UNS",
-      "bodyMd": "## Deux protocoles complémentaires\n\n### MQTT\n- Événementiel (change of value)\n- Publish/subscribe pur\n- Excellent pour IoT/cloud\n- Un broker central\n\n### OPC UA\n- Client/serveur (aussi pub/sub depuis 1.04)\n- Modélisation d'objets riche\n- Standards industriels (companion specs)\n- Sécurité native (certificats)\n\n### Dans un UNS moderne\n- **MQTT** : transport principal, bus event-driven\n- **OPC UA** : modélisation objets, sources OT anciennes\n\n[RULE|Un UNS mature utilise **les 2 protocoles** : OPC UA pour lire l'OT, MQTT pour distribuer partout.]",
+      "section": "2 · Architecture HighByte",
+      "title": "Configuration des Sources",
+      "bodyMd": "## Se connecter aux systèmes existants\n\nLa première étape est de **connecter HighByte aux sources** de données existantes.\n\n### Sources supportées natively\n[KV|**OPC UA**:le classique industriel · connect à Siemens, Rockwell, Kepware||**OPC DA/HDA**:legacy · via COM · Windows only||**MQTT**:pour brokers existants ou Sparkplug B||**Modbus TCP/RTU**:pour PLC anciens||**SQL Server / Oracle / PostgreSQL / MySQL**:DBs relationnelles||**Rest APIs**:custom HTTP endpoints · pour cloud ou services externes||**File-based**:CSV, JSON, XML watchers||**AVEVA System Platform**:objets ArchestrA · natif||**PI System (OSIsoft)**:historian OSIsoft/AVEVA||**Snowflake / BigQuery**:data warehouses cloud||**Ignition Gateway**:autre SCADA populaire]\n\n### Exemple — connexion OPC UA\nSetup type pour lire un S7-1500 :\n\n1. **Connection** :\n   - Endpoint : opc.tcp://192.168.1.100:4840\n   - Security : Basic256Sha256, SignAndEncrypt (obligatoire prod)\n   - Authentication : username/password ou certificat\n   - Application URI : dasolabs.highbyte.opcua\n\n2. **Browsing** : HighByte navigue automatiquement dans l'arbre OPC UA du PLC\n\n3. **Selection** : tu choisis les nodes à lire (par ex, tous ceux sous \"Reactor_R1\")\n\n4. **Sampling interval** : à quelle fréquence lire (100 ms, 1 sec, etc.)\n\n5. **Test** : HighByte affiche les valeurs live dans l'UI\n\n### Bonnes pratiques Sources\n[STEPS|**Utiliser toujours TLS/encryption** en prod · jamais Basic128Rsa15 ou None||**Authentification forte** · username/password ou certificat||**Compte de service dédié** côté PLC · pas le compte admin||**Sampling interval adapté** : trop rapide = surcharge · trop lent = perte données||**Deadband** activé : ne remonter que si valeur change significativement · gain bande passante||**Historian buffering** : HighByte peut buffer si le broker cible est down · évite perte data]\n\n### Gestion des erreurs\nQuand une source tombe (PLC déconnecté), HighByte :\n- Marque les data comme \"bad quality\"\n- Alerte via journaux\n- Retry automatiquement à intervalles configurables\n- Ne bloque pas les autres sources\n\nC'est crucial en production : une source défaillante ne doit pas casser tout le UNS.\n\n[TIP|Sur projet réel, prévoir un **dashboard de monitoring** HighByte : nb sources connectées, latences, taux d'erreurs. C'est ce qui différencie un déploiement pro d'un bricolage.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -81,9 +114,9 @@
     {
       "position": 8,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "Sparkplug B — le dialecte MQTT industriel",
-      "bodyMd": "## MQTT n'est pas suffisant seul\n\n**Sparkplug B** est une **spec de messages MQTT** dédiée à l'industriel :\n- Format de payload structuré (Protobuf)\n- Types de données industriels (Int, Float, Bool, DateTime, Template)\n- État connexion (DBIRTH, NBIRTH, DDEATH, NDEATH)\n- Séquençage des messages\n- Store & forward en cas de perte\n\n### Bénéfice\nStandardisation entre systèmes. Un SCADA Ignition et un HighByte parlent le même dialecte MQTT.\n\n[TIP|En 2026, Sparkplug B est **le standard MQTT industriel**. HighByte le supporte nativement.]",
+      "section": "2 · Architecture HighByte",
+      "title": "Templates et Instances — modélisation",
+      "bodyMd": "## La modélisation métier\n\nUne des puissance de HighByte : la capacité à **modéliser** les data brutes en objets métier.\n\n### Le problème résolu\nLes data brutes des PLCs sont techniques : \"DB100.DBD4\", \"M1_R1_T1\", \"%I2.4\". Aucun sens métier. Ce qu'on veut : \"Reactor_R1.temperature.value\", avec contexte, unité, timestamp, qualité.\n\nHighByte résout ça via **Templates + Instances**.\n\n### Template — le modèle\nUn **Template** définit un type d'objet métier :\n\n    Template : Reactor\n    Attributes:\n      - temperature (Number, unit: °C)\n      - pressure (Number, unit: bar)\n      - level (Number, unit: %)\n      - state (String, values: [Idle, Running, Held, Complete])\n      - agitator_speed (Number, unit: rpm)\n      - last_batch_id (String)\n\nCe template est réutilisable pour tous les réacteurs.\n\n### Instance — l'objet concret\nChaque réacteur physique est une **Instance** du template :\n\n    Instance : Reactor_R1 (Type: Reactor)\n    Bindings:\n      - temperature → OPC UA node \"Reactor_R1.TT01\"\n      - pressure → OPC UA node \"Reactor_R1.PT01\"\n      - level → OPC UA node \"Reactor_R1.LT01\"\n      - state → SQL query : SELECT state FROM Batches WHERE reactor = 'R1' AND active = 1\n      - agitator_speed → OPC UA node \"Reactor_R1.AGIT_RPM\"\n      - last_batch_id → SQL query : ...\n\nAinsi, la donnée technique \"Reactor_R1.TT01\" devient sémantiquement \"Reactor_R1.temperature\". La modélisation transforme du technique en métier.\n\n### Hiérarchie ISA-95\nLes instances s'organisent naturellement en hiérarchie ISA-95 :\n\n    /Dasolabs (Enterprise)\n      /Brussels (Site)\n        /Suspension_Area (Area)\n          /Reactor_Cell (Work Center)\n            /Reactor_R1 (Work Unit)\n            /Reactor_R2 (Work Unit)\n          /Filling_Line (Work Center)\n            /Filler_M1 (Work Unit)\n            /Capper_M2 (Work Unit)\n\nChaque instance a son chemin unique dans l'UNS.\n\n### Bénéfices\n1. **Réutilisabilité** : 20 réacteurs = 1 template + 20 instances\n2. **Cohérence** : tous les réacteurs ont les mêmes attributs\n3. **Évolutivité** : ajouter un attribut au template = ajouter à tous les instances\n4. **Documentation** : le modèle est auto-documenté\n\n### Change management\nModifier un template affecte toutes les instances. En production, on utilise :\n- **Versioning** des templates (Template_Reactor_v1, v2)\n- **Migration progressive** : test sur R1, puis extension\n- **Rollback plan** si problème\n\n[TIP|**Investir dans la modélisation** au démarrage · c'est ce qui fait la différence entre un UNS pro et un UNS bricolé. 2-4 semaines de modélisation en début de projet économise 6-12 mois de refactor.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -91,9 +124,9 @@
     {
       "position": 9,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "Ce qu'est HighByte",
-      "bodyMd": "## HighByte Intelligence Hub\n\n**HighByte** est un logiciel de **data engineering industriel** (DataOps pour l'OT).\n\n### Fonctions\n[STEPS|**Connecter** aux sources OT (PLC, SCADA, Historian)||**Connecter** aux sources IT (SQL, REST, MQTT)||**Transformer** les data (normalisation, calculs, enrichissement)||**Modéliser** en objets métier (Machine, Batch, Line…)||**Publier** vers destinations (MQTT UNS, cloud, MES)||**Gouverner** : sécurité, versioning, audit]\n\n### Positionnement marché\n- Fondée 2018 par ex-Kepware (Torey Penrod-Cambra + team)\n- Racheté par PTC / Kepware pas encore mais partenariat\n- Standard émergent pour UNS professional",
+      "section": "2 · Architecture HighByte",
+      "title": "Pipelines — le cœur des transformations",
+      "bodyMd": "## Où se passent les traitements\n\nUne fois les sources connectées et les instances définies, on utilise des **pipelines** pour orchestrer les transformations.\n\n### Structure d'un pipeline\nUn pipeline est une séquence d'étapes :\n[STEPS|**Input** : d'où viennent les data (une source ou une instance)||**Transformations** : filtrage, mapping, agrégation, calcul||**Enrichment** : ajout de metadata (contexte, unité, source)||**Routing** : conditions pour envoyer vers différentes cibles||**Output** : vers un sink (broker, DB, cloud)]\n\n### Transformations disponibles\n[KV|**Filter**:garder seulement les data qui match un critère · ex \"valeur > 50\"||**Map**:renommer, restructurer les champs||**Calculate**:formules arithmétiques ou logiques · ex \"value * 1.8 + 32\" pour C→F||**Aggregate**:moyennes, min/max, sums sur fenêtres temporelles||**Enrich**:ajouter des champs (batch_id courant, opérateur, recette)||**Format**:convertir formats (JSON, XML, CSV, Parquet)||**Batch**:regrouper N messages avant publication · gain performance||**Split**:éclater un message en plusieurs||**Deduplicate**:éviter doubles publications]\n\n### Exemple complet — pipeline batch pharma\nSur un projet Zoetis :\n\n**Input** : OPC UA nodes des 5 réacteurs (T°, P°, agitation, débit)\n\n**Étape 1 — Filter** :\n- Garder seulement les valeurs si batch_id != null (donc en production)\n\n**Étape 2 — Enrich** :\n- Ajouter batch_id, product_id, operator (depuis SQL query sur MES)\n- Ajouter timestamp UTC\n- Ajouter site=\"LouvainLaNeuve\"\n\n**Étape 3 — Map** :\n- Renommer selon convention ISA-95\n- Reactor_R1.TT01 → /Zoetis/LouvainLaNeuve/Suspension/ReactorCell/R1/temperature\n\n**Étape 4 — Deduplicate** :\n- Ne publier que si valeur change > 0.1 °C (deadband)\n\n**Étape 5 — Route** :\n- Si status = \"Running\" → publier sur UNS MQTT\n- Toutes les valeurs → également stocker dans data lake Snowflake\n\n**Output** :\n- Sink 1 : MQTT broker HiveMQ (Sparkplug B format)\n- Sink 2 : Snowflake data warehouse (Parquet format)\n\n### Debugging\nHighByte offre des outils de debug :\n- **Message inspector** : voir le contenu d'un message à chaque étape\n- **Metrics** : latence, throughput par étape\n- **Error queue** : messages qui ont échoué, avec raison\n- **Replay** : rejouer des messages archivés (dev/test)\n\n[TIP|Les pipelines sont où les problèmes de perf apparaissent. **Monitoring** en prod est crucial · alertes sur throughput anormal, queues qui grossissent.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -101,69 +134,49 @@
     {
       "position": 10,
       "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "HighByte vs alternatives",
-      "bodyMd": "## Les concurrents\n\n[KV|**HighByte**:UNS-centric · No-code · Enterprise pharma/manuf||**Ignition (Inductive Automation)**:SCADA + UNS · plus large scope||**Kepware KEPServerEX**:driver bridge · pas UNS-first · legacy||**Node-RED**:open-source · pas industriel · script-based||**Aveva Insight Edge**:IIoT gateway · lié écosystème AVEVA||**Litmus Edge**:IIoT platform · plus edge computing]\n\n### Quand choisir HighByte ?\n- Focus UNS clean\n- Multi-vendor (Siemens + Rockwell + SQL + cloud)\n- No-code (accessible aux ingénieurs process)\n- Enterprise features (audit, RBAC, HA)",
+      "section": "2 · Architecture HighByte",
+      "title": "Sinks — publier vers les cibles",
+      "bodyMd": "## Où va la data enrichie\n\nLes **Sinks** sont les destinations où HighByte publie les data transformées.\n\n### Sinks supportés\n[KV|**MQTT broker**:le classique pour UNS · souvent avec Sparkplug B||**Kafka**:pour data lakes cloud · haute cadence · plus IT que OT||**AWS IoT Core**:cloud AWS · pour intégration ML/analytics||**Azure IoT Hub**:cloud Microsoft · similaire||**Google Cloud Pub/Sub**:cloud Google||**SQL Server / Oracle / PostgreSQL / MySQL**:DBs traditionnelles||**Snowflake / BigQuery**:data warehouses cloud||**REST APIs**:pour custom endpoints||**File output**:CSV, JSON, Parquet · pour ETL batch||**AVEVA Data Hub**:cloud AVEVA · intégration native||**Ignition Gateway**:si Ignition est déjà en place]\n\n### Publier vers un UNS MQTT\nLe cas d'usage principal : publier vers un broker MQTT avec **Sparkplug B**.\n\nConfiguration :\n- Broker URL : ssl://hivemq.dasolabs.be:8883\n- Auth : username/password ou client cert\n- Sparkplug B enabled : oui\n- Group ID : Dasolabs\n- Edge Node ID : Highbyte_LouvainLaNeuve\n- QoS : 1 (at-least-once delivery)\n- Retain : selon topic\n- Will message : configuré pour disconnect graceful\n\n### Publier plusieurs sinks en parallèle\nUn même pipeline peut avoir plusieurs sinks. Cas typique :\n- Sink 1 (temps réel) : MQTT broker UNS\n- Sink 2 (historique) : Snowflake data lake\n- Sink 3 (backup) : File CSV local (au cas où)\n\nLes 3 se font en parallèle, chacune à sa cadence.\n\n### Gestion des back-pressures\nQue se passe-t-il si un sink est plus lent que le producer ? HighByte :\n- **Buffer** en mémoire jusqu'à limite configurée\n- **Persist** sur disque si buffer plein (option)\n- **Drop** les messages plus anciens si tout est plein (dernier recours)\n- **Alerte** dans les logs\n\nEn config prod, on active le persist sur disque pour éviter la perte de data en cas de sink lent.\n\n### Failover et haute dispo\nPour un déploiement critique, HighByte peut être :\n- **Actif/Passif** : 2 nœuds · si le primary tombe, le secondary prend\n- **Actif/Actif** : plusieurs nœuds répartissent la charge\n- **Edge + central** : nœud edge dans chaque usine + nœud central au corporate\n\n### Testing avant prod\nAvant de mettre un sink en prod :\n1. Tester avec un topic \"test\" séparé\n2. Vérifier format des messages\n3. Vérifier performance (latence, throughput)\n4. Simuler des pannes (network, broker restart)\n5. Vérifier le comportement de reconnexion\n\n[TIP|Un sink mal configuré peut **noyer** les consommateurs de messages inutiles. Toujours tester en dev avant prod, avec limits de rate.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 11,
-      "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "Cas d'usage typique",
-      "bodyMd": "## Ligne d'embouteillage Zoetis\n\n### Objectif\nUnifier les data de 5 lignes pour un dashboard unique + MES central + cloud.\n\n### Setup HighByte\n[STEPS|**Sources OT** : 5 S7-1500 en Profinet (via OPC UA)||**Sources IT** : SQL Server MES · REST API ERP||**Modèles** : Ligne, Batch, Recette, Défaut||**Transformations** : normalisation unités, calcul OEE||**Publications** : MQTT broker HiveMQ · Grafana dashboard · MES batch events]\n\n### Bénéfices\n- 1 seule intégration par système\n- Modifier PLC ne casse plus le MES\n- Dashboard temps réel en direct",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 12,
-      "kind": "CONTENT",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "Éditions et pricing",
-      "bodyMd": "## Choisir la bonne édition\n\n[KV|**HighByte Intelligence Hub**:le produit principal · SaaS ou on-prem · ~15-30 k€/an||**Trial 30j**:gratuit pour test||**Standalone**:machine unique · pas de HA · petit projet||**Cluster**:HA · gros déploiements pharma · plus cher||**Extensions**:connecteurs additionnels (SAP, custom REST) · en supplément]\n\n### Sizing\n- Petit projet (< 1000 tags) : Standalone standard suffit\n- Moyen (1k-10k tags) : Cluster 2 nodes\n- Grand (> 10k tags) : Cluster 3+ nodes + broker HA",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 13,
       "kind": "QUIZ",
-      "section": "1 · Introduction UNS & HighByte",
-      "title": "Quiz 1 — Intro UNS",
+      "section": "2 · Architecture HighByte",
+      "title": "Quiz 2 — Architecture",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Un UNS est…",
+            "prompt": "Un Template HighByte définit…",
             "options": [
-              "Un SCADA",
-              "Un espace de données industriel unifié pour tous les systèmes",
-              "Un PLC",
-              "Un MES"
+              "Une source unique",
+              "Un type d'objet métier réutilisable (ex Reactor) avec attributs standardisés · chaque réacteur physique = Instance",
+              "Rien",
+              "Un sink"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Le protocole roi pour le transport dans un UNS moderne est…",
+            "prompt": "Un pipeline HighByte fait…",
             "options": [
-              "OPC UA seul",
-              "MQTT (souvent Sparkplug B)",
-              "Modbus",
-              "Ethernet raw"
+              "Rien",
+              "Lecture source → transformations (filter, map, calc, enrich, aggregate) → publication vers sinks",
+              "Uniquement lire",
+              "Uniquement publier"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "HighByte est positionné comme…",
+            "prompt": "Sources supportées par HighByte incluent…",
             "options": [
-              "Un SCADA",
-              "Un logiciel de data engineering industriel pour construire un UNS",
-              "Un PLC",
-              "Un ERP"
+              "Uniquement OPC UA",
+              "OPC UA/DA/HDA, MQTT, Modbus, SQL, REST, Files, AVEVA, PI, Snowflake, Ignition, etc.",
+              "Rien",
+              "Uniquement Excel"
             ],
             "correctIndex": 1
           }
@@ -172,11 +185,31 @@
       "imageUrl": null
     },
     {
+      "position": 12,
+      "kind": "CONTENT",
+      "section": "3 · Cas pratiques Dasolabs",
+      "title": "Cas 1 — Zoetis UNS complet",
+      "bodyMd": "## Setup UNS pharma vétérinaire\n\nSur un projet Zoetis Louvain-la-Neuve, on a mis en place un UNS complet pour connecter les data OT à leur data lake Azure pour IA prédictive.\n\n### Le contexte\nZoetis produit des vaccins vétérinaires. Ils voulaient :\n1. Prédire les rendements batchs (IA)\n2. Détecter les anomalies de process en avance\n3. Optimiser la consommation énergétique\n4. Sans casser leur architecture existante\n\n### L'architecture avant\n- 5 PLC Siemens S7-1500 (par ligne production)\n- 1 SCADA AVEVA InTouch\n- 1 Historian AVEVA (7 ans de data)\n- 1 MES Werum PAS-X (source de vérité batchs)\n- 1 LIMS Labware (QA)\n\nPas de data lake. Pas d'IA. Silos.\n\n### L'architecture après (HighByte)\n[STEPS|**HighByte** installé sur VM Ubuntu · connecté aux 5 PLC via OPC UA · lit Historian et MES via SQL||**Modélisation ISA-95** complète : Enterprise/Site/Area/Line/Unit||**Pipelines** enrichissent chaque valeur process avec batch_id, product, operator||**UNS MQTT** publié via HiveMQ · Sparkplug B format||**Data lake Azure** alimenté en parallèle · Parquet format · pour IA]\n\n### Volume\n- 8 000 tags lus toutes les secondes\n- 500 batchs/an\n- ~50 GB de data/an dans Azure\n\n### Bénéfices mesurés (12 mois post-go-live)\n1. **Modèle IA prédiction rendement** : précision 87 % · déployé\n2. **Détection anomalies process** : 12 anomalies détectées avant qu'elles causent NC\n3. **Optimisation énergie** : -8 % consommation vapeur (dashboard Power BI)\n4. **Time to insight** : de 3 jours (extractions Excel manuelles) à 30 sec (dashboard live)\n\n### Investissement\n- Setup : 120 k€ (HighByte licence + intégration Dasolabs)\n- Formation : 15 k€\n- Azure infra : 20 k€/an\n- Total 1ère année : ~155 k€\n\n### ROI\nGain net annuel Zoetis : ~400 k€ (batchs mieux rendus + moins de NC + énergie). Amortissement 5 mois.\n\n### Ce qui a fait le succès\n1. **Modélisation ISA-95 rigoureuse** avant de coder quoi que ce soit\n2. **Ne pas toucher aux systèmes existants** · HighByte est transparent\n3. **Formation utilisateurs early** · MES/QA team impliqués dès le départ\n4. **Monitoring solide** dès la mise en service\n\n[TIP|Ce cas Zoetis est devenu notre **référence** pour prospecter d'autres pharma vétérinaires. Chaque nouveau prospect visite Zoetis et voit le résultat.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "3 · Cas pratiques Dasolabs",
+      "title": "Cas 2 — Industriel non-pharma",
+      "bodyMd": "## UNS pour l'IA prédictive\n\nSur un projet industriel (client anonyme) non-pharma, HighByte pour alimenter un modèle IA de maintenance prédictive.\n\n### Le contexte\nIndustriel qui produit des composants automobiles :\n- 30 machines-outils CNC\n- Production 3x8, 6 jours/7\n- Pannes coûteuses (arrêt de ligne, ~5 k€/heure)\n- Objectif : prédire pannes 24-72h à l'avance\n\n### L'architecture\n1. **Sources** : 30 CNC via OPC UA · vibrations, températures moteurs, couples, courants\n2. **HighByte** : lit 200 tags/machine à 100 ms · 6 000 tags/sec total\n3. **Modélisation** : template \"CNC_Machine\" avec 200 attributs\n4. **Enrichment** : ajout de metadata (OF, opérateur, programme CN, matière)\n5. **Publish** : Snowflake data lake · Parquet format · partitionné par jour\n\n### Volume important\n- 6 000 tags/sec × 86400 sec/jour = 500 M events/jour\n- 15 TB de data/an compressée\n\n### Défis rencontrés\n1. **Throughput** : au démarrage, HighByte ne tenait pas les 6000 tags/sec · résolu en scaling (2 nœuds actifs/actifs)\n2. **Latence Snowflake** : les inserts ligne à ligne étaient trop lents · résolu par batching (bulk load toutes les 30 sec)\n3. **Downtime réseau** : le WAN vers Snowflake tombait 1x/semaine · résolu par persist local pendant downtime, replay ensuite\n\n### Bénéfices\n- Modèle IA détecte 78 % des pannes 48h à l'avance\n- Gain : 200 k€/an évités\n- Investissement : 90 k€\n- ROI : 6 mois\n\n### Ce qui n'a pas marché\n- Modèle IA initial trop simple · fallu 6 mois pour affiner\n- Résistance des mainteneurs (peur de \"l'IA qui remplace\") · fallu 3 mois de change management\n\n[TIP|Le **change management** est souvent sous-estimé. Sur ce projet, on a passé 20 % du budget en formation et sessions de rassurance. Bien investi.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 14,
       "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Architecture HighByte",
-      "bodyMd": "## Les composants\n\n[KV|**Instance Hub**:le serveur principal · installé sur Windows ou Linux||**Web UI**:interface d'admin/design · navigateur||**Adapters**:connecteurs vers sources (OPC UA, SQL, MQTT…)||**Models**:objets métier définis par l'utilisateur||**Flows**:pipelines de transformation||**Publications**:destinations (MQTT, REST, DB)||**Runtime**:moteur d'exécution 24/7]",
+      "section": "3 · Cas pratiques Dasolabs",
+      "title": "Cas 3 — Migration ETL legacy",
+      "bodyMd": "## Remplacer 20 ans d'intégrations point-à-point\n\nUn client Dasolabs (industriel, anonymisé) avait accumulé 80 intégrations point-à-point sur 20 ans. Ingérable. On a migré vers HighByte + UNS.\n\n### L'existant\n- 15 PLC de générations différentes (S5, S7-300, S7-1500)\n- 3 SCADA (InTouch, WinCC, Citect selon époque)\n- 2 Historians (PI et Wonderware)\n- 1 MES custom .NET\n- 1 ERP SAP\n- 80 intégrations point-à-point codées à la main sur 20 ans\n- Personne ne comprend l'ensemble\n\n### Le plan\n[STEPS|**Phase 1 (3 mois)** : cartographier l'existant · lister toutes les intégrations · documenter||**Phase 2 (4 mois)** : modéliser en ISA-95 · définir templates HighByte||**Phase 3 (6 mois)** : reconstruire les flux dans HighByte · en parallèle des anciens||**Phase 4 (3 mois)** : cutover progressif · un flux à la fois · monitoring intensif||**Phase 5 (2 mois)** : décommissionnement ancien · nettoyage code legacy]\n\n### Le résultat\n- **80 intégrations point-à-point** → **1 UNS + 15 producers + 20 consumers**\n- Documentation : 300 pages → 50 pages (le modèle est auto-doc)\n- Temps d'ajout d'une nouvelle source : semaines → heures\n- Temps d'ajout d'un consommateur : jours → minutes\n\n### Coût\n- Projet : 400 k€ · 18 mois\n- Économies récurrentes : 150 k€/an (temps dev intégrations + maintenance)\n- Amortissement : 32 mois\n\n### Leçons apprises\n1. **Ne pas migrer d'un seul coup** : approche progressive, un flux à la fois\n2. **Documenter d'abord** : sans compréhension de l'existant, migration impossible\n3. **Modélisation ISA-95 en amont** : essentiel\n4. **Formation** : les devs qui maintenaient l'ancien code deviennent operateurs UNS · reconversion nécessaire\n\n### Anti-pattern évité\nUn consultant concurrent avait proposé une refonte \"big bang\" : tout couper, tout refaire. On aurait crashé la production. Notre approche progressive = 0 interruption production.\n\n[RULE|Migration UNS n'est **jamais** un big bang. Toujours progressif. Toujours avec double-run pendant la transition.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -184,909 +217,174 @@
     {
       "position": 15,
       "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Prérequis système",
-      "bodyMd": "## Configuration recommandée\n\n### OS supporté\n- **Windows Server 2019/2022**\n- **Linux Ubuntu 22.04, RHEL 8/9**\n- **Docker** (recommandé)\n\n### Ressources\n[KV|**CPU**:4 cores minimum · 8 confortable||**RAM**:8 GB minimum · 16 GB confortable||**Disque**:100 GB SSD||**Réseau**:1 Gbps · accès aux sources OT et IT]\n\n### Docker\n    docker pull highbyte/intelligencehub:latest\n    docker run -d -p 4949:4949 highbyte/intelligencehub",
+      "section": "3 · Cas pratiques Dasolabs",
+      "title": "Erreurs à éviter",
+      "bodyMd": "## Ce qu'on a vu foirer\n\nRetours d'expérience Dasolabs sur les erreurs classiques HighByte.\n\n### Erreur 1 — Skip la modélisation\nClient presse le budget · on saute la modélisation ISA-95 · résultat : namespace bordel, refactor 6 mois plus tard.\n[DANGER|Modélisation ISA-95 = **investissement de départ non-négociable**]\n\n### Erreur 2 — Trop de tags publiés\nPublier 20 000 tags à 100 ms parce que \"on ne sait jamais\" · broker MQTT surchargé · consommateurs se noient.\n[DANGER|**Publier ce qui est utile**, pas tout ce qui existe · deadband, filtering]\n\n### Erreur 3 — Pas de monitoring\nMise en prod sans dashboard monitoring · quand ça casse, on ne sait pas où ni pourquoi.\n[DANGER|**Monitoring HighByte + broker** = obligatoire · Grafana/Prometheus recommandés]\n\n### Erreur 4 — Sécurité négligée\nMQTT sans TLS, credentials en clair, pas d'ACL · risque cyber majeur.\n[DANGER|**TLS + auth + ACL par topic** = non-négociable en prod]\n\n### Erreur 5 — Sink unique\nPublier UNIQUEMENT vers le broker MQTT · si broker tombe, tout perdu.\n[DANGER|**Toujours** un fallback file/DB · évite perte data en cas d'incident]\n\n### Erreur 6 — Pas de versioning des configs\nConfigs HighByte non versionnées · un dev modifie, ça casse, impossible de rollback.\n[DANGER|**Configs YAML/JSON dans Git** · Terraform-like approach · CI/CD]\n\n### Erreur 7 — Formation insuffisante\nClient hérite de HighByte sans savoir l'utiliser · dépendance totale à Dasolabs.\n[DANGER|**Formation clients** dans le budget projet · autonomie]\n\n### Erreur 8 — Vouloir remplacer le SCADA\n\"HighByte peut afficher les data, pourquoi encore un SCADA ?\" · non, HighByte n'est pas fait pour ça · latence, résilience, HMI operator specific.\n[DANGER|**HighByte ≠ SCADA** · complémentaires, pas substituts]\n\n### Le pattern d'échec type\n1. Client veut aller vite\n2. Skip modélisation, skip monitoring, skip sécurité\n3. Mise en prod\n4. Incidents dans les 3-6 mois\n5. Perte de confiance\n6. Projet abandonné ou refactor majeur\n\n[RULE|On refuse les projets HighByte avec délais < 4 mois modélisation incluse. C'est notre garde-fou.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 16,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Installation Windows",
-      "bodyMd": "## Setup traditionnel\n\n[STEPS|**Télécharger** l'installer depuis compte HighByte||**Executer** SETUP.EXE en admin||**Choisir dossier** install : C:\\Program Files\\HighByte||**Choisir port** : 4949 par défaut||**Service Windows** : démarrage auto||**Firewall** : ouvrir 4949 (UI) + 8883 MQTT etc.||**Reboot** puis test UI]\n\n### Post-install\n- URL admin : `http://localhost:4949`\n- Login initial : admin / changeme\n- **Changer le password immédiatement**",
+      "kind": "QUIZ",
+      "section": "3 · Cas pratiques Dasolabs",
+      "title": "Quiz 3 — Cas pratiques",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Sur projet Zoetis, HighByte a permis…",
+            "options": [
+              "Rien",
+              "IA prédiction rendements (87 % précision) · détection anomalies · optimisation énergie · time-to-insight 3j → 30sec",
+              "Uniquement remplacer SCADA",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Migration ETL legacy vers HighByte doit être…",
+            "options": [
+              "Big bang",
+              "Progressive, un flux à la fois · double-run pendant transition · modélisation d'abord",
+              "Rapide",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Erreur classique à éviter…",
+            "options": [
+              "Modéliser",
+              "Skip modélisation ISA-95 · publier trop · pas de monitoring · pas de sécurité · configs non versionnées",
+              "Utiliser Git",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 17,
       "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Installation Docker",
-      "bodyMd": "## Le moderne\n\n### Docker Compose\n    version: '3.8'\n    services:\n      highbyte:\n        image: highbyte/intelligencehub:latest\n        ports:\n          - '4949:4949'\n        volumes:\n          - highbyte_data:/data\n        environment:\n          - HB_LICENSE_KEY=xxx\n        restart: unless-stopped\n    volumes:\n      highbyte_data:\n\n### Bénéfice\n- Portable\n- Upgrade facile (nouveau tag)\n- Backup volume simple\n- Multi-instance possible",
+      "section": "4 · Certification",
+      "title": "Prêt pour l'évaluation ?",
+      "bodyMd": "## Quiz certifiant HighByte\n\nRécap :\n- DataOps industriel + Unified Namespace\n- Architecture HighByte (Sources, Templates, Instances, Pipelines, Sinks)\n- Modélisation ISA-95\n- Transformations et enrichissement\n- Publication vers UNS MQTT / Kafka / cloud\n- Cas Dasolabs Zoetis + industriel + migration legacy\n- Erreurs à éviter\n\n[TIP|Seuil 70 % · refaisable]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 18,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Premier login et setup",
-      "bodyMd": "## Configuration initiale\n\n[STEPS|**Login** admin / changeme||**Changer mot de passe** immédiatement||**Créer users additionnels** pour l'équipe||**Configurer NTP** pour horodatage précis||**Configurer certificat TLS** pour HTTPS||**License key** validation||**Backup config** initial]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 19,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Web UI — navigation",
-      "bodyMd": "## L'interface\n\n[KV|**Home**:dashboard santé Hub||**Adapters**:sources de data configurées||**Models**:objets métier créés||**Flows**:pipelines transformation||**Publications**:destinations||**System**:users, license, backup, logs||**Monitoring**:performance, throughput, erreurs]\n\n### Design pattern\nHighByte se veut **no-code**. Tout se configure via l'UI avec drag-drop, config panels, previews.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 20,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Configuration adapters — OPC UA",
-      "bodyMd": "## Connecter à un PLC S7-1500\n\n[STEPS|**Adapters → Add new → OPC UA**||**Endpoint**: opc.tcp://192.168.1.10:4840||**Security**: Sign & Encrypt (recommandé)||**Certificate**: auto-généré ou CA||**User credentials**: si activé||**Test connection**: OPC UA browse||**Node discovery**: naviguer dans l'espace d'adresses||**Add tags**: sélectionner tags à récupérer]\n\n### Fréquence de sampling\n- Change of value (COV) : recommandé\n- Cyclic 1 sec : pour data lente\n- Cyclic 100 ms : pour data rapide (attention perf)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 21,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Configuration adapters — MQTT",
-      "bodyMd": "## Connecter à un broker MQTT\n\n[STEPS|**Adapters → Add new → MQTT**||**Broker URL**: mqtt://broker.dasolabs.be:1883 ou mqtts://:8883||**Auth**: username/password ou certificat client||**QoS**: 1 par défaut||**Topics à souscrire**: `dasolabs/factory/+/status`||**Retain flag**: pour état persistant]\n\n### Wildcards MQTT\n[KV|**+**:un niveau (dasolabs/+/status = dasolabs/lineA/status, dasolabs/lineB/status)||**#**:tous les niveaux (dasolabs/# = tous les topics dasolabs)]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 22,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Configuration adapters — SQL Server",
-      "bodyMd": "## Connecter à une DB\n\n[STEPS|**Adapters → Add new → SQL Server**||**Server**: SQLPROD\\INSTANCE01||**Database**: Dasolabs_MES||**Auth**: Windows ou SQL account||**Test connection**||**Query defaults**: config du polling (SELECT xxx)||**Polling frequency**: 30 sec par défaut]\n\n### Queries typiques\n- Ordres de production actifs\n- Recettes à charger\n- Statuts batchs",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 23,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Configuration adapters — REST API",
-      "bodyMd": "## APIs modernes\n\n[STEPS|**Adapters → Add new → REST**||**Base URL**: https://api.dasolabs.be||**Auth**: Basic, Bearer token, OAuth 2.0||**Endpoints à polling**: /production/orders, /users/list||**Frequency**: chaque 5 min||**Parsing**: JSON path pour extraire champs]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 24,
-      "kind": "CONTENT",
-      "section": "2 · Architecture et installation",
-      "title": "Autres adapters supportés",
-      "bodyMd": "## Écosystème complet\n\n[KV|**Kepware KEPServerEX**:accès à toutes les sources KEP||**Rockwell/AB**:direct via OPC UA (RSLinx) ou EtherNet/IP||**Siemens S7**:OPC UA ou S7comm (via drivers)||**Modbus TCP/RTU**:multi-vendor||**AVEVA Historian**:query directe||**PI System**:si présent||**Ignition**:web services||**Files**:CSV, JSON, XML watch folders||**Cloud**:AWS IoT, Azure IoT, GCP IoT]\n\n[TIP|HighByte supporte **60+ adapters** en 2026. Multiplication continue.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 25,
       "kind": "QUIZ",
-      "section": "2 · Architecture et installation",
-      "title": "Quiz 2 — Architecture",
+      "section": "4 · Certification",
+      "title": "🎓 Quiz certifiant HighByte",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "L'URL par défaut de l'admin HighByte est…",
+            "prompt": "L'Unified Namespace (UNS) est…",
             "options": [
-              "http://localhost:80",
-              "http://localhost:4949",
-              "https://:8080",
-              "http://:1883"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Le déploiement Docker est…",
-            "options": [
-              "Impossible",
-              "Recommandé pour production moderne",
-              "Legacy uniquement",
-              "Trop lent"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour connecter HighByte à un S7-1500…",
-            "options": [
-              "Modbus obligatoire",
-              "Adapter OPC UA (endpoint opc.tcp://…)",
-              "Bluetooth",
-              "Rien de possible"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 26,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Concept de Model",
-      "bodyMd": "## L'objet métier\n\nUn **Model** dans HighByte est une **définition d'objet métier**. Ex : Machine, Batch, Order, Sensor.\n\n### Structure\n- Nom (`Machine`)\n- Attributs (`temperature`, `pressure`, `state`, `product`)\n- Types (Real, Bool, String)\n- Mappings vers adapters sources\n- Transformations éventuelles\n\n### Instances\nUn Model peut avoir **N instances**. Ex : Model `Machine` avec instances `Line1_M1`, `Line1_M2`, `Line2_M1`.\n\n[TIP|Le modeling est le cœur de HighByte. Bien penser les modèles = UNS propre.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 27,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Créer un Model",
-      "bodyMd": "## Étape par étape\n\n[STEPS|**Models → Add new model**||**Nom**: `Machine`||**Attributs**: définir champs typés||**Source binding**: chaque attribut lié à une source (adapter)||**Transformations**: filtres, calculs si besoin||**Sample data**: preview avec data réelle||**Deploy**]\n\n### Exemple attribut\n- Name: `temperature`\n- Type: Real\n- Source: OPC UA adapter S7 · Node `ns=3;s=LineA.M1.TempPV`\n- Unit: °C\n- Deadband: 0.1 (ignore changements < 0.1)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 28,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Namespace hiérarchique",
-      "bodyMd": "## L'arborescence UNS\n\n### Structure Purdue-oriented\n    dasolabs/\n    ├── site_brussels/\n    │   ├── area_production/\n    │   │   ├── line_1/\n    │   │   │   ├── cell_1/\n    │   │   │   │   ├── machine_M1/\n    │   │   │   │   │   ├── temperature\n    │   │   │   │   │   ├── pressure\n    │   │   │   │   │   ├── state\n\n### Bénéfice\nHiérarchie claire, extensible, standardisée. Un consommateur peut naviguer par site → ligne → machine.\n\n[TIP|Standard **ISA-95 physical hierarchy** : Enterprise → Site → Area → Line → Cell → Machine.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 29,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Types de données",
-      "bodyMd": "## Attributs typés\n\n[KV|**Bool**:état marche/arrêt||**Int, Long**:compteurs, IDs||**Real, Double**:mesures||**String**:noms, statuts||**DateTime**:horodatages||**Object**:sous-objet complexe (record)||**Array**:tableau (recettes)]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 30,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Transformations",
-      "bodyMd": "## Modifier les data\n\n### Types de transformations\n[KV|**Calcul**:formule (OEE = availability × performance × quality)||**Filter**:éliminer valeurs aberrantes||**Aggregate**:moyenne, somme sur période||**Deduplicate**:éliminer répétitions||**Enrichment**:joindre avec data d'un autre adapter||**Type conversion**:Int → Real, String → DateTime]\n\n### Exemple OEE\n    OEE = ((runtime / planned_time) * (actual_qty / target_qty) * (good_qty / actual_qty)) * 100",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 31,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Enrichment cross-source",
-      "bodyMd": "## Joindre OT et IT\n\n### Cas d'usage\nUn PLC publie `batch_id`. On veut enrichir avec les infos du batch venant du MES SQL.\n\n### Setup\n- **Source primary**: OPC UA S7 · publie `batch_id`\n- **Lookup source**: SQL adapter · table `batches`\n- **Join key**: `batch_id`\n- **Attributes to enrich**: `product`, `recipe`, `operator`\n\n### Résultat\nLe modèle final contient batch_id + product + recipe + operator + temperature + …\n\n[TIP|**Enrichment est le killer feature** d'un UNS. Croiser data OT temps réel avec métadonnées MES → dashboards complets.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 32,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Instances multiples",
-      "bodyMd": "## Un modèle, N machines\n\n### Setup\n- Model `Machine` : template générique\n- Instances : `Line1_M1`, `Line1_M2`, `Line1_M3`, `Line2_M1`...\n\n### Configuration instance\nChaque instance a **son mapping source** :\n- `Line1_M1.temperature` ← OPC UA node `LineA.M1.TempPV`\n- `Line2_M1.temperature` ← OPC UA node `LineB.M1.TempPV`\n\nMême modèle, sources différentes.\n\n### Bénéfice\nRefactor le modèle → toutes les instances mises à jour.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 33,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Companion Specifications",
-      "bodyMd": "## Standards du secteur\n\n### OPC UA Companion Specs\nStandards par industrie qui définissent des modèles d'objets :\n[KV|**VDMA 40001-1**:packaging||**Weihenstephan Standards**:agroalimentaire||**Umati**:machine tools||**SEMI SECS/GEM**:semiconducteur||**Auto-ISA**:automotive]\n\n### Support HighByte\nImport de ces specs → modèles pré-fabriqués. Utile pour standardiser vite.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 34,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Version control des modèles",
-      "bodyMd": "## Historique et rollback\n\n### Versioning natif\n- Chaque modif de modèle crée une version\n- Historique consultable\n- Rollback en 1 clic\n\n### Bonnes pratiques\n[STEPS|**Commit message** systématique||**Testing en staging** avant prod||**Backup pre-changement**||**Documentation** des changements majeurs]\n\n[TIP|Sans versioning, un mauvais changement modèle peut casser TOUS les downstream. À prendre au sérieux.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 35,
-      "kind": "CONTENT",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Environnements dev/staging/prod",
-      "bodyMd": "## CI/CD pour UNS\n\n### 3 environnements\n[KV|**Dev**:local sur laptop dev · test rapide||**Staging**:mirror prod · validation||**Prod**:production 24/7 · aucun test]\n\n### Promotion\nExport config dev → import staging → test → import prod.\n\nAutomation via API HighByte possible.\n\n[TIP|Chez Dasolabs, on maintient 3 environnements pour tout projet HighByte de + de 30 modèles. Investissement initial = maintenance facilitée.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 36,
-      "kind": "QUIZ",
-      "section": "3 · Data modeling — objets métier",
-      "title": "Quiz 3 — Modeling",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Un Model dans HighByte est…",
-            "options": [
-              "Un fichier XML",
-              "Une définition d'objet métier avec attributs typés et sources",
-              "Un adapter",
-              "Un broker MQTT"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "L'enrichment cross-source permet…",
-            "options": [
-              "Rien",
-              "Joindre data OT temps réel + métadonnées IT (SQL) pour créer un objet complet",
-              "Uniquement des calculs",
-              "Rien d'utile"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Le namespace hiérarchique standard ISA-95 est…",
-            "options": [
-              "Plat",
-              "Enterprise → Site → Area → Line → Cell → Machine",
-              "Random",
-              "Numérique seul"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 37,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Flows — les pipelines",
-      "bodyMd": "## Vue d'ensemble\n\nUn **Flow** est un **pipeline** qui transforme et route des messages :\n- Une source d'entrée (adapter)\n- N transformations\n- Une ou N destinations (publications)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 38,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Créer un Flow",
-      "bodyMd": "## Étape par étape\n\n[STEPS|**Flows → Add new flow**||**Source**: adapter d'entrée · ex OPC UA S7||**Transformations**: filter, calculate, enrich||**Destination**: publication MQTT ou autre||**Test avec data**||**Deploy]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 39,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Transformation Filter",
-      "bodyMd": "## Éliminer messages\n\n### Cas d'usage\n- Ne publier que si valeur > seuil\n- Ne publier que si changement > deadband\n- Ne publier que sur heures ouvrées\n\n### Config\n    Filter: temperature > 25.0 AND state == 'RUNNING'",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 40,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Transformation Calculate",
-      "bodyMd": "## Ajouter des champs calculés\n\n### Exemples\n- `deviation = temperature - setpoint`\n- `efficiency = actual / target * 100`\n- `alarm_high = temperature > 80`\n\n### Formule\nExpression style JavaScript/Python simple : `deviation = temperature - setpoint`",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 41,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Transformation Aggregate",
-      "bodyMd": "## Résumer sur période\n\n### Types\n[KV|**Sum**:somme sur fenêtre||**Average**:moyenne||**Min/Max**:extremes||**Count**:nb événements||**Std deviation**:écart type]\n\n### Fenêtres\n- Fixed : tous les X sec/min\n- Sliding : window glissant\n- Session : basé sur inactivité",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 42,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Transformation Deduplicate",
-      "bodyMd": "## Éliminer les doublons\n\n### Cas\nUn PLC publie même valeur 100 fois par seconde. Ne publier que si changement.\n\n### Config\n- Deadband absolu (`abs(new - old) > 0.5`)\n- Deadband relatif (`abs(new - old) / old > 5%`)\n- Time-based (`interval > 5 sec`)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 43,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Transformation Type conversion",
-      "bodyMd": "## Adapter les types\n\n### Cas courants\n- PLC envoie Int 0/1 → convertir en Bool\n- Temperature en Kelvin → Celsius\n- Timestamp Unix → ISO 8601\n- String number → Real",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 44,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Chaînage de transformations",
-      "bodyMd": "## Multiple étapes\n\nUn flow peut avoir **N transformations** chaînées :\n\n1. Filter (state == 'RUNNING')\n2. Deduplicate (deadband 0.1)\n3. Calculate (efficiency)\n4. Aggregate (moyenne 1 min)\n5. Publish MQTT\n\nLe résultat de N est l'input de N+1.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 45,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Flow templates",
-      "bodyMd": "## Réutiliser des patterns\n\n### Templates courants\n[KV|**OPC UA → MQTT**:direct sans transformation||**OPC UA + SQL enrich → MQTT**:enrichissement typique||**Multiple sources → Aggregate → REST**:reporting||**MQTT → Alarm rules → Email**:alerting]\n\n[TIP|Créer une bibliothèque de flow templates réutilisables réduit le temps de nouveau projet de 50%.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 46,
-      "kind": "CONTENT",
-      "section": "4 · Flows et transformations",
-      "title": "Testing des flows",
-      "bodyMd": "## Avant déploiement\n\n### Modes de test\n[KV|**Preview**:simulateur avec data synthétique||**Live test**:connecté aux vraies sources · dry-run (pas de publish réel)||**Full deploy**:en prod]\n\n### Validation\n- Comparer input/output attendu\n- Vérifier volume messages\n- Latence acceptable\n\n[WARN|Toujours **live test** avant deploy prod. Les cas edge cases (NULL, valeurs extrêmes) apparaissent en réel.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 47,
-      "kind": "QUIZ",
-      "section": "4 · Flows et transformations",
-      "title": "Quiz 4 — Flows",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Un Flow HighByte est…",
-            "options": [
-              "Un adapter",
-              "Un pipeline source → transformations → destination",
-              "Un modèle",
-              "Un MQTT broker"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour ne publier que si un tag change > 0.5, on utilise…",
-            "options": [
-              "Aggregate",
-              "Deduplicate avec deadband",
-              "Calculate",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 48,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Publications — les destinations",
-      "bodyMd": "## Où envoyer les data\n\nUne **Publication** est un target où les Flows envoient leurs data.\n\n### Types de publications\n[KV|**MQTT**:vers un broker · le plus courant||**REST**:POST vers une URL · pour cloud, MES||**SQL**:INSERT dans une table · pour data warehouse||**Kafka**:vers cluster Kafka · pour data lake||**File**:CSV, JSON écrits sur disque · legacy||**OPC UA server**:HighByte publie en OPC UA · pour compat legacy]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 49,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Publish MQTT — le workhorse",
-      "bodyMd": "## Setup MQTT publication\n\n[STEPS|**Publications → Add → MQTT**||**Broker URL**: mqtts://broker.dasolabs.be:8883||**Auth**: certificate client ou user/password||**Topic pattern**: dasolabs/{site}/{line}/{machine}/state||**QoS**: 1 par défaut||**Retain flag**: activé pour état persistant||**Message format**: JSON, Sparkplug B, custom]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 50,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Format Sparkplug B",
-      "bodyMd": "## Le standard industriel\n\n### Payload structure\nProtobuf binaire :\n    {\n      timestamp: 1695029400000,\n      metrics: [\n        { name: 'temperature', value: 23.5, dataType: Float },\n        { name: 'pressure', value: 1.02, dataType: Float },\n        { name: 'state', value: 'RUNNING', dataType: String }\n      ],\n      seq: 42\n    }\n\n### Types de messages Sparkplug B\n- **NBIRTH**: connexion node · tags avec valeurs initiales\n- **NDATA**: changement · seuls les changements sont envoyés\n- **NDEATH**: déconnexion node · alarme\n- **DBIRTH/DDATA/DDEATH**: idem pour devices",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 51,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Topic design",
-      "bodyMd": "## L'arborescence MQTT\n\n### Convention recommandée\n    dasolabs/site/area/line/machine/attribute\n\n### Exemples\n- `dasolabs/brussels/production/line1/M1/temperature`\n- `dasolabs/brussels/production/line1/M1/state`\n\n### Sparkplug B convention\n- `spBv1.0/{group_id}/{message_type}/{edge_node_id}/{device_id}`\n\n[RULE|**Cohérence namespace = clé** d'un UNS réussi. Documenter et respecter la convention.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 52,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Publish OPC UA",
-      "bodyMd": "## HighByte comme serveur OPC UA\n\nHighByte peut aussi **exposer les data en OPC UA server** pour des clients legacy qui ne parlent pas MQTT.\n\n### Configuration\n- Enable OPC UA server\n- Port : 4840\n- Certificate config\n- Publier les modèles comme espaces d'adresses OPC UA\n\n### Cas d'usage\nUn vieux SCADA qui parle uniquement OPC UA peut lire un UNS moderne via HighByte comme passerelle.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 53,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Publish REST",
-      "bodyMd": "## Vers cloud ou MES\n\n### Config\n- URL : https://api.dasolabs.be/data/ingest\n- Method : POST\n- Auth : Bearer token\n- Body : JSON template\n- Retry policy si erreur",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 54,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Publish Kafka",
-      "bodyMd": "## Data lake moderne\n\n### Config\n- Bootstrap brokers : kafka1:9092,kafka2:9092\n- Topic : `industrial-events`\n- Auth : SASL/PLAIN ou mTLS\n- Compression : gzip\n\n[TIP|Kafka pour **data warehouse** et **stream processing**. MQTT pour **temps réel opérationnel**. Différents cas d'usage.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 55,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Multiple publications parallel",
-      "bodyMd": "## Un Flow → N destinations\n\nUn même Flow peut publier vers :\n- MQTT broker (temps réel opérateurs)\n- SQL Server (historique 5 ans)\n- Kafka (data lake analytics)\n- REST vers cloud (backup)\n\nMême data, N consommateurs, découplés.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 56,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Store & forward",
-      "bodyMd": "## Ne rien perdre en cas de perte comm\n\n### Cas\nBroker MQTT tombe → HighByte stocke localement les messages → replay quand broker revient.\n\n### Configuration\n- Local buffer size (10 000 messages typique)\n- TTL (48h avant expiration)\n- Delivery order (FIFO)\n\n[RULE|Store & forward = essentiel pour production critique. Pas de perte de data.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 57,
-      "kind": "CONTENT",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "QoS et delivery guarantees",
-      "bodyMd": "## Fiabilité\n\n### QoS MQTT\n[KV|**0 (at most once)**:fire and forget · peut être perdu||**1 (at least once)**:ACK requis · peut être dupliqué||**2 (exactly once)**:4-way handshake · lent · pour data critique]\n\n### En pratique\n- QoS 0 : monitoring casual (dashboard)\n- QoS 1 : la plupart des cas · bon compromis\n- QoS 2 : batch pharma · transactions financières",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 58,
-      "kind": "QUIZ",
-      "section": "5 · Publishing MQTT et OPC UA",
-      "title": "Quiz 5 — Publishing",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Sparkplug B est…",
-            "options": [
-              "Un broker MQTT",
-              "Une spec de format de messages MQTT industriel (Protobuf)",
-              "Un langage",
-              "Un SCADA"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Store & forward garantit…",
-            "options": [
-              "Pas de perte de messages en cas de perte comm",
-              "La rapidité",
-              "Rien d'utile",
-              "Un log"
-            ],
-            "correctIndex": 0
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 59,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Sécurité — modèle",
-      "bodyMd": "## Défense en profondeur\n\n### Couches\n[STEPS|**Réseau** : VLAN OT/IT séparé, firewall||**Transport** : TLS obligatoire (MQTT sur 8883)||**Authentification** : users + certificats||**Autorisation** : RBAC, permissions granulaires||**Audit** : logs immutables||**Chiffrement au repos** : disque encrypté]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 60,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Authentication et RBAC",
-      "bodyMd": "## Users et rôles\n\n### Rôles standards HighByte\n[KV|**Admin**:tout||**Designer**:crée models, flows||**Operator**:lecture seule||**Viewer**:dashboard uniquement]\n\n### AD/LDAP integration\nSSO via Active Directory · configuration simple",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 61,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "TLS et certificats",
-      "bodyMd": "## Sécuriser les connexions\n\n### MQTT sur TLS (8883)\n- Certificate serveur validé\n- Certificate client (optionnel mais recommandé)\n- Ciphers modernes obligatoires\n\n### OPC UA security\n- Sign & Encrypt policy\n- Certificat X.509\n- User authentication",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 62,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Audit trail",
-      "bodyMd": "## Traçabilité complète\n\n### Ce qui est logué\n- Login/logout users\n- Modifications models, flows, publications\n- Deployments\n- Erreurs runtime\n- Rejets messages (par transformation)\n\n### Rétention\n- 90 jours par défaut\n- Configurable jusqu'à 10 ans pour pharma",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 63,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Haute disponibilité (HA)",
-      "bodyMd": "## Cluster HighByte\n\n### Config HA\n- 2 ou 3 instances HighByte en cluster\n- Base de config partagée (PostgreSQL ou etcd)\n- Load balancing (HAProxy, nginx)\n- Failover automatique\n\n### RTO/RPO\n- **RTO** : < 30 sec\n- **RPO** : < 1 message perdu",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 64,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Backup et restore",
-      "bodyMd": "## Politique\n\n### Backup\n- Config exportée en JSON quotidien\n- Base de données snapshot hebdo\n- Certificats séparés\n\n### Restore\n- Import config JSON\n- Restore DB\n- Restart services\n\n[RULE|Tester le restore chaque trimestre. Un backup non testé = pas de backup.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 65,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Monitoring",
-      "bodyMd": "## Superviser HighByte lui-même\n\n### Métriques à surveiller\n- CPU usage\n- RAM usage\n- Nombre de messages/sec\n- Latence transformations\n- Erreurs adapters\n- Queue depths\n\n### Intégration\n- Prometheus/Grafana pour métrics\n- Elasticsearch pour logs\n- PagerDuty pour alertes\n\n[TIP|**Health endpoint** REST natif HighByte : `GET /api/health` retourne état système.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 66,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Déploiement production",
-      "bodyMd": "## Checklist go-live\n\n[STEPS|**Environnements** dev/staging/prod configurés||**Backup automatique** activé||**Monitoring** actif avec alertes||**HA configuré** si nécessaire||**Documentation** users à jour||**Formation** utilisateurs faite||**Support** 24/7 défini||**Rollback plan** documenté]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 67,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Migration et upgrade",
-      "bodyMd": "## Passer à une nouvelle version\n\n### Procédure\n[STEPS|**Backup complet** avant||**Test upgrade** en staging||**Fenêtre maintenance** planifiée||**Upgrade** en prod||**Validation** post-upgrade||**Monitoring renforcé** 24h après]\n\n### Rétrocompatibilité\nHighByte garantit rétrocompat sur 2 versions majeures. Config V22 fonctionne en V24.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 68,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Documentation",
-      "bodyMd": "## Ce qu'il faut documenter\n\n### Docs projet\n[STEPS|**Architecture** : diagramme haut niveau · sources · flows · destinations||**Modèles** : structure, mapping, unités||**Flows** : logique métier||**Users** : rôles, permissions||**Procedures** : ajout adapter, création flow, rollback||**Contacts** : équipe, support HighByte]\n\n[RULE|Documentation = seule chose qui reste quand les gens changent. À jour toujours.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 69,
-      "kind": "QUIZ",
-      "section": "6 · Sécurité et déploiement",
-      "title": "Quiz 6 — Sécurité et déploiement",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "MQTT sécurisé utilise le port…",
-            "options": [
-              "1883 (clear)",
-              "8883 (TLS)",
-              "443",
-              "22"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Un cluster HighByte HA offre RTO de…",
-            "options": [
-              "1 heure",
-              "< 30 sec",
-              "1 semaine",
-              "Jamais"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 70,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Cas 1 — Zoetis 5 lignes UNS complet",
-      "bodyMd": "## Contexte\n\n5 lignes d'embouteillage · 5× S7-1500 · 5× WinCC Comfort · Historian AVEVA · MES custom · besoin dashboard unifié.\n\n### Solution HighByte\n[STEPS|**Adapters** : 5× OPC UA (PLC) + 1 SQL (MES) + 1 REST (ERP)||**Models** : Machine, Batch, Recipe, Alarm||**Flows** : normalisation unités, calcul OEE, enrichissement batch||**Publications** : 1 MQTT HiveMQ + 1 SQL Historian + 1 Kafka data lake]\n\n### Résultat\n- Dashboard Grafana unifié temps réel\n- MES lit UNS pour tracer batchs\n- Cloud analytics via Kafka\n- **Zéro couplage** entre systèmes source\n\n### Investissement\n- Licences HighByte : ~25 k€/an\n- Setup Dasolabs : 60 jours (~50 k€)\n- Retour : réduction 40 % coûts intégration futurs",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 71,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Cas 2 — UCB pharma safety",
-      "bodyMd": "## Migration progressive vers UNS\n\n### Contexte\nUCB pharma · 20 réacteurs · legacy 20 ans · besoin modernisation sans big-bang.\n\n### Approche progressive\n[STEPS|**Phase 1** : HighByte lit historian AVEVA (aucun changement PLC)||**Phase 2** : Ajout SCADA moderne WinCC Unified · lit HighByte via OPC UA||**Phase 3** : Nouveaux PLC S7-1500 publient direct HighByte via OPC UA||**Phase 4** : MES batch relit HighByte au lieu de Historian direct||**Phase 5** : Cloud analytics ajouté sans casser rien]\n\n### Bénéfice\n- Modernisation étalée sur 2 ans\n- Aucun arrêt production\n- ROI progressif",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 72,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Cas 3 — GROUPEMECA skid",
-      "bodyMd": "## HighByte pour skids modulaires\n\n### Contexte\n30 skids identiques livrés à des clients différents.\n\n### Standardisation\n- **Template HighByte** avec models pré-fabriqués\n- Chaque skid a un instance manager\n- Config paramétrable (IP PLC, credentials, publication cible)\n\n### Livraison client\n- 1 jour de setup HighByte par skid\n- Le client reçoit tout intégré\n- Dashboard cloud possible sans effort\n\n[TIP|Templatiser un déploiement HighByte = multiplicateur de business pour Dasolabs.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 73,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Cas 4 — Vivaqua eau",
-      "bodyMd": "## SCADA + telemetry cellulaire\n\n### Contexte\nStation de pompage isolée avec 4G comme seul lien.\n\n### Solution\n- HighByte edge à la station\n- Buffer local 48h\n- Publish MQTT vers HiveMQ central quand connexion OK\n- Store & forward si perte\n\n### Bénéfice\n- Robustesse aux coupures réseau\n- Pas de perte data\n- Coût comm minimisé",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 74,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Cas 5 — Migration vers cloud",
-      "bodyMd": "## Zoetis vers AWS\n\n### Objectif\nAvoir dashboard temps réel accessible depuis n'importe où.\n\n### Setup\n- HighByte on-prem (usine)\n- Publish MQTT vers HiveMQ Cloud managed\n- AWS IoT Core subscribe\n- Lambda → DynamoDB → QuickSight dashboards\n\n### Timeline\n- 3 mois de setup\n- Dashboard live 24/7\n- Coût cloud : ~2 k€/mois",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 75,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Erreurs classiques",
-      "bodyMd": "## À éviter\n\n[DANGER|Pas de convention namespace claire → chaos]\n[DANGER|Pas de version control models → régressions]\n[DANGER|Pas de store & forward → data perdue en cas de coupure]\n[DANGER|Pas de monitoring HighByte → crash silencieux]\n[DANGER|Skip staging → break prod]\n[DANGER|Migrer big-bang → catastrophe]\n[DANGER|Sous-estimer volume messages → HighByte saturé]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 76,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Bonnes pratiques Dasolabs",
-      "bodyMd": "## Notre méthodologie\n\n[RULE|Namespace ISA-95 physical hierarchy respecté partout]\n[RULE|3 environnements dev/staging/prod obligatoires]\n[RULE|Version control models via export JSON dans Git]\n[RULE|Backup automatique quotidien]\n[RULE|Monitoring HighByte avec Prometheus + Grafana]\n[RULE|Store & forward activé par défaut]\n[RULE|Documentation à jour · architecture · models · flows]\n[RULE|Migration progressive vs big-bang · toujours]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 77,
-      "kind": "QUIZ",
-      "section": "7 · Cas pratiques Dasolabs",
-      "title": "Quiz 7 — Cas pratiques",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Un déploiement HighByte pharma UCB migration progressive prend typiquement…",
-            "options": [
-              "1 semaine",
-              "1 mois",
-              "~2 ans par phases",
-              "1 jour"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Pour une station isolée avec 4G, HighByte doit avoir…",
-            "options": [
-              "Aucun setup particulier",
-              "Store & forward activé avec buffer local 48h",
-              "Uniquement une VM",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 78,
-      "kind": "CONTENT",
-      "section": "8 · Certification",
-      "title": "Prêt pour l'évaluation ?",
-      "bodyMd": "## Quiz certifiant final\n\n10 questions, seuil 70 %. Bonne chance !",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 79,
-      "kind": "QUIZ",
-      "section": "8 · Certification",
-      "title": "🎓 Quiz certifiant final — HighByte",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Un UNS (Unified Namespace) est…",
-            "options": [
-              "Un SCADA",
-              "Un espace de données industriel unifié",
+              "Un logiciel",
+              "Concept d'organisation hiérarchique unifiée des data industrielles · souvent ISA-95 · via MQTT/Kafka",
               "Un PLC",
-              "Un ERP"
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Le protocole roi du UNS moderne est…",
+            "prompt": "HighByte est…",
             "options": [
-              "Modbus",
-              "MQTT (souvent Sparkplug B)",
-              "OPC UA seul",
-              "S7comm"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "HighByte est positionné comme…",
-            "options": [
-              "SCADA",
-              "Logiciel de data engineering pour UNS",
-              "PLC",
-              "ERP"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "L'URL admin HighByte par défaut est…",
-            "options": [
-              "localhost:80",
-              "localhost:4949",
-              "localhost:8080",
-              "localhost:1883"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Un Model HighByte représente…",
-            "options": [
-              "Un adapter",
-              "Un objet métier avec attributs typés",
-              "Un flow",
-              "Un broker"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Enrichment cross-source permet…",
-            "options": [
-              "Rien",
-              "Joindre data OT temps réel + IT métadonnées",
-              "Uniquement filter",
-              "Un calcul"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Sparkplug B est…",
-            "options": [
-              "Un broker",
-              "Format de messages MQTT industriel structuré Protobuf",
               "Un SCADA",
-              "Un langage"
+              "Plate-forme DataOps industriel · Sources → Transform → Sinks · complémentaire au SCADA/Historian/MES",
+              "Historian",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "MQTT sécurisé utilise le port…",
+            "prompt": "Template HighByte définit…",
             "options": [
-              "1883",
-              "8883 (TLS)",
-              "443",
-              "22"
+              "Une source",
+              "Un type d'objet métier réutilisable (ex Reactor) avec attributs · les réacteurs physiques sont Instances",
+              "Rien",
+              "Un sink"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Store & forward sert à…",
+            "prompt": "Sources HighByte supporte…",
+            "options": [
+              "Uniquement OPC UA",
+              "OPC UA/DA/HDA, MQTT, Modbus, SQL, REST, Files, AVEVA, PI, Snowflake, etc.",
+              "Uniquement Excel",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un pipeline fait…",
             "options": [
               "Rien",
-              "Ne pas perdre messages en cas de coupure réseau",
-              "Accélérer",
-              "Décorer"
+              "Lecture source → transformations (filter, map, calc, enrich, aggregate) → publication vers sinks",
+              "Uniquement lecture",
+              "Uniquement publication"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Un déploiement HighByte pharma progressif prend…",
+            "prompt": "Sink typique UNS…",
             "options": [
-              "1 jour",
-              "1 semaine",
-              "1 mois",
-              "~2 ans par phases pour minimiser risques"
+              "Uniquement fichier",
+              "MQTT broker (HiveMQ, EMQX) avec Sparkplug B · souvent en parallèle avec data lake cloud (Snowflake, Azure IoT)",
+              "Rien",
+              "Uniquement SQL"
             ],
-            "correctIndex": 3
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Modélisation ISA-95 en HighByte…",
+            "options": [
+              "Optionnelle",
+              "Essentielle · Enterprise/Site/Area/Work Center/Work Unit · sans ça, l'UNS est bordélique",
+              "Facultative",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Sur projet Zoetis, HighByte a permis…",
+            "options": [
+              "Rien",
+              "IA prédiction rendements + détection anomalies + optimisation énergie · ROI 5 mois",
+              "Remplacer SCADA",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Migration ETL legacy vers HighByte…",
+            "options": [
+              "Big bang",
+              "Progressive, un flux à la fois · double-run pendant transition · modélisation d'abord",
+              "Rapide en 1 semaine",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Erreurs classiques à éviter…",
+            "options": [
+              "Modéliser",
+              "Skip modélisation · trop de tags · pas de monitoring · pas de TLS · configs non versionnées · pas de formation",
+              "Utiliser Git",
+              "Rien"
+            ],
+            "correctIndex": 1
           }
         ]
       },
