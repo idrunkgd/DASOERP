@@ -40,6 +40,15 @@ const COURSES = [
 const prisma = new PrismaClient();
 
 async function upsertCourse(slug) {
+  // ⚡ Cimetière : si le slug a été supprimé volontairement depuis l'UI HUB,
+  // on ne le ressuscite JAMAIS au reboot Docker. Pour le restaurer, retirer
+  // manuellement l'entrée de la table DeletedCourseSlug.
+  const buried = await prisma.deletedCourseSlug.findUnique({ where: { slug } });
+  if (buried) {
+    console.log(`[seed-training] ${slug} dans le cimetière (supprimé le ${buried.deletedAt.toISOString()}) — skip`);
+    return;
+  }
+
   const jsonPath = path.join(process.cwd(), "prisma", "seed-data", `${slug}.json`);
   let raw;
   try {

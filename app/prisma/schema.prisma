@@ -3181,6 +3181,18 @@ enum CourseSlideKind {
   QUIZ
 }
 
+/// Cimetière des slugs de cours supprimés.
+/// Le seed-training.mjs check cette table AVANT tout upsert : si le slug est
+/// dedans, le cours n'est pas recréé. Ça empêche la résurrection au reboot
+/// Docker d'un cours volontairement supprimé depuis l'UI.
+/// Pour "ressusciter" un cours, retirer manuellement l'entrée de cette table.
+model DeletedCourseSlug {
+  slug      String   @id
+  deletedAt DateTime @default(now())
+  deletedBy String?  // user.id qui a supprimé
+  reason    String?  // optionnel
+}
+
 model Course {
   id        String        @id @default(cuid())
   slug      String        @unique

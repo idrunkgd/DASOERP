@@ -354,7 +354,17 @@ export async function deleteCourse(courseId: string) {
   //                       → UserCourseProgress (onDelete Cascade)
   //                       → UserQuizAttempt (via CourseSlide onDelete Cascade)
   // Les Documents (certificats) NE sont PAS cascadés → archives préservées.
-  await prisma.course.delete({ where: { id: courseId } });
+  //
+  // ⚡ On enregistre AUSSI le slug dans le cimetière DeletedCourseSlug pour
+  // que le seed Docker ne le ressuscite pas au prochain reboot.
+  await prisma.$transaction([
+    prisma.course.delete({ where: { id: courseId } }),
+    prisma.deletedCourseSlug.upsert({
+      where: { slug: course.slug },
+      create: { slug: course.slug, deletedBy: session.user.id, reason: "Deleted from HUB catalog" },
+      update: { deletedAt: new Date(), deletedBy: session.user.id }
+    })
+  ]);
 
   await logActivity({
     actorId: session.user.id,
