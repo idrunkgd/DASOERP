@@ -32,7 +32,9 @@ const COURSES = [
   "programmation-tia-portal",
   "wincc-scada",
   "aveva-report",
-  "sql-server"
+  "sql-server",
+  "highbyte",
+  "hivemq"
 ];
 
 const prisma = new PrismaClient();

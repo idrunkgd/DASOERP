@@ -324,6 +324,24 @@ export async function setCoursePrerequisite(courseId: string, prerequisiteCourse
   return { ok: true };
 }
 
+/**
+ * Change la couche IT/OT/UNS d'un cours (drag-drop).
+ * layerKey null → cours placé automatiquement selon le mapping par défaut.
+ */
+export async function setCourseLayer(courseId: string, layerKey: string | null) {
+  await requirePermission("training.manage");
+  const validLayers = ["cloud", "mes", "uns", "scada", "control", "field"];
+  if (layerKey && !validLayers.includes(layerKey)) {
+    throw new Error(`Couche invalide : ${layerKey}`);
+  }
+  await prisma.course.update({
+    where: { id: courseId },
+    data: { layerKey }
+  });
+  revalidatePath("/training");
+  return { ok: true };
+}
+
 export async function deleteCourse(courseId: string) {
   const session = await requirePermission("training.manage");
   const course = await prisma.course.findUnique({

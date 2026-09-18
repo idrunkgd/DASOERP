@@ -35,7 +35,6 @@ export default async function TrainingPage() {
 
   const cards = courses.map((c) => {
     const prog = progressByCourse.get(c.id);
-    // Admin bypasse le lock des prérequis.
     const locked = !canManage && !!c.prerequisiteCourse && !certifiedCourseIds.has(c.prerequisiteCourse.id);
     return {
       id: c.id,
@@ -44,6 +43,7 @@ export default async function TrainingPage() {
       subtitle: c.subtitle,
       active: c.active,
       slideCount: c._count.slides,
+      layerKey: (c as any).layerKey as string | null,
       prerequisiteCourse: c.prerequisiteCourse,
       progressPct: prog ? Math.round((prog.lastSlide / Math.max(c._count.slides, 1)) * 100) : 0,
       completed: !!prog?.completedAt,

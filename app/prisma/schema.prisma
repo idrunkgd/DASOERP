@@ -3205,6 +3205,10 @@ model Course {
   prerequisiteCourseId String?
   prerequisiteCourse   Course?  @relation("CoursePrereq", fields: [prerequisiteCourseId], references: [id], onDelete: SetNull)
   prerequisiteFor      Course[] @relation("CoursePrereq")
+  /// Couche du stack industriel (Purdue/ISA-95) où le cours est positionné.
+  /// Valeurs : "cloud", "mes", "uns", "scada", "control", "field", null.
+  /// Modifiable par l'admin via drag-drop sur la vue architecture.
+  layerKey String?
   slides    CourseSlide[]
   progress  UserCourseProgress[]
   attempts  UserQuizAttempt[]
