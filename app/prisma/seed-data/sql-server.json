@@ -1,19 +1,19 @@
 {
   "slug": "sql-server",
-  "title": "SQL Server",
-  "subtitle": "Formation complète — SQL, admin, optimisation, sécurité, intégration industrielle",
-  "level": "Débutant à intermédiaire",
-  "duration": "≈ 7 h",
+  "title": "SQL Server pour l'industrie",
+  "subtitle": "Base transactionnelle pharma · MES, historian, reporting",
+  "level": "Intermédiaire à avancé",
+  "duration": "≈ 8 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "certificateWording": "Formation « SQL Server » — connaissances fondamentales sur Microsoft SQL Server pour l'industrie, incluant SQL (SELECT/INSERT/UPDATE/DELETE/JOIN/subqueries/window functions), administration, index et optimisation, procédures stockées, sécurité, backup/restore, et intégration avec WinCC / AVEVA / MES. Cette attestation atteste de la formation et de la réussite de l'évaluation.",
+  "certificateWording": "Formation « SQL Server pour l'industrie » — maîtrise de SQL Server en contexte industriel pharma : architecture, T-SQL avancé (CTE, window functions, MERGE), indexation et plans d'exécution, backup/restore/DR (FULL recovery, PITR, Always On), sécurité (auth, roles, audit, TDE), intégration avec AVEVA System Platform, Historian, Werum PAS-X, data marts pharma.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "Bienvenue — SQL Server",
-      "bodyMd": "## La formation SQL Server pour l'industrie\n\nFormation complète à Microsoft **SQL Server**, la base de données transactionnelle dominante en industrie (WinCC, AVEVA, MES).\n\n### Ce que tu apprends\n- Concepts SQL et bases relationnelles\n- Installation et administration\n- SELECT / INSERT / UPDATE / DELETE\n- JOIN, GROUP BY, subqueries\n- Optimisation (index, plans)\n- Procédures stockées\n- Sécurité et backup\n- Intégration OT (WinCC, AVEVA)\n\n[RULE|Quiz certifiant : 70 %.]",
+      "section": "1 · Introduction SQL Server pour l'industrie",
+      "title": "Bienvenue — SQL Server en contexte industriel",
+      "bodyMd": "## Pourquoi cette formation\n\nSQL Server n'est pas juste « une base de données de plus ». Dans l'écosystème industriel moderne, c'est **la base transactionnelle** derrière la plupart des MES, historians, et applications métier (Werum PAS-X, AVEVA MES, POMSnet, custom apps sur .NET). Un consultant automation qui ne maîtrise pas SQL Server se ferme la porte à 60 % des projets pharma en Europe.\n\nCette formation te donne le socle nécessaire : administration, requêtage T-SQL, performance, backup/restore, intégration avec les stacks industrielles Dasolabs (AVEVA System Platform, Historian, Report).\n\n### Ce que tu vas apprendre\n- Architecture SQL Server (Engine, TempDB, transaction log, tempdb)\n- Installation et configuration pour usage industriel\n- T-SQL avancé (CTE, window functions, MERGE)\n- Indexation et plans d'exécution\n- Backup/restore/disaster recovery\n- Haute disponibilité (Always On, mirroring, log shipping)\n- Sécurité (comptes, rôles, audit)\n- Intégration AVEVA/Werum/custom\n- Monitoring et troubleshooting\n\n[RULE|Quiz certifiant à la fin — 10 questions, seuil 70 %. Refaisable.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -21,9 +21,9 @@
     {
       "position": 2,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "SQL vs NoSQL",
-      "bodyMd": "## Quelle base pour quoi ?\n\n[KV|**SQL relationnel (SQL Server, PostgreSQL)**:transactionnel · ACID · schémas stricts · pour data structurée · WinCC / AVEVA||**NoSQL document (MongoDB)**:flexible · JSON · pour data variable · WinCC Unified||**NoSQL time-series (InfluxDB, Timescale)**:optimisé pour points temporels · SCADA historian||**NoSQL clé-valeur (Redis)**:cache ultra rapide · pas persistant]\n\n### En industrie\n- SQL Server = 90 % des cas industriels\n- Historian = time-series dédiés (AVEVA Historian)\n- MongoDB = WinCC Unified moderne",
+      "section": "1 · Introduction SQL Server pour l'industrie",
+      "title": "Histoire et versions",
+      "bodyMd": "## D'où vient SQL Server\n\nSQL Server est un SGBD relationnel développé par Microsoft, initialement en partenariat avec Sybase dans les années 80. Depuis SQL Server 7.0 (1998), Microsoft a réécrit le moteur en interne et l'a fait évoluer vers un des SGBD les plus déployés en entreprise, aux côtés d'Oracle et PostgreSQL.\n\n### Versions marquantes\n[KV|**SQL Server 2000**:première version « moderne » · encore vue en legacy pharma||**SQL Server 2005**:refonte moteur · introduction de SSIS/SSRS/SSAS · standard historique MES||**SQL Server 2008 R2**:stabilité · encore courant dans usines||**SQL Server 2012**:AlwaysOn Availability Groups · haute dispo native||**SQL Server 2016**:Query Store · Always Encrypted · JSON natif||**SQL Server 2019**:Big Data Clusters (déprécié depuis) · intelligent query processing||**SQL Server 2022**:Azure Synapse Link · Ledger · Parameter Sensitive Plan · sortie fin 2022]\n\n### Éditions\nToutes les versions ont plusieurs éditions selon les fonctionnalités et le prix :\n- **Express** : gratuit, limité (10 GB par DB, 1 socket, 1.4 GB RAM) · usage dev ou petites apps\n- **Standard** : ~2 000 €/core · usage production classique · manque quelques features avancées\n- **Enterprise** : ~7 000 €/core · toutes les features · haute dispo, partitionnement avancé, compression avancée\n- **Developer** : gratuit mais **dev uniquement** (illégal en prod) · même features qu'Enterprise\n- **Web** : pour hébergeurs uniquement\n\n### Ce qu'on utilise en pratique chez Dasolabs\nPour un client pharma sérieux (UCB, Zoetis) : **Enterprise** obligatoire pour la haute dispo Always On. Pour des petits projets ou dev : **Standard** ou **Developer**. Express seulement pour PoC.\n\n[TIP|**Piège coûteux** : ne jamais utiliser Developer Edition en production. C'est illégal, et un audit Microsoft peut coûter très cher (parfois plusieurs 100 k€). On voit encore ça chez des clients qui n'ont pas fait attention.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -31,9 +31,9 @@
     {
       "position": 3,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "SQL Server éditions",
-      "bodyMd": "## Choisir la bonne édition\n\n[KV|**Express**:gratuit · 10 GB DB max · pour dev / test / très petits projets||**Web**:hébergement web · limité||**Standard**:production standard · features complètes · ~1 500 €/socket||**Enterprise**:features avancées (cluster, partitioning, encryption transparente) · ~7 000 €/socket||**Developer**:gratuit · features Enterprise · usage dev uniquement]\n\n### Chez Dasolabs\n- **Express** pour projets petits (WinCC Comfort local)\n- **Standard** pour SCADA production (WinCC Pro / Unified)\n- **Enterprise** pour pharma multi-sites, backup avancé",
+      "section": "1 · Introduction SQL Server pour l'industrie",
+      "title": "Architecture globale",
+      "bodyMd": "## Comment SQL Server est organisé\n\nComprendre l'architecture est essentiel pour diagnostiquer les problèmes de performance et faire de l'admin sérieuse. SQL Server est composé de plusieurs sous-systèmes qui interagissent.\n\n### Les composants majeurs\n[KV|**Database Engine (SQL OS)**:le cœur · exécute les requêtes · gère mémoire, threads, IO||**Storage Engine**:accès disque · buffer pool · lecture/écriture des pages||**Query Processor**:parse, optimise, exécute le T-SQL||**Buffer Pool**:cache en RAM des pages · souvent 70-80 % de la mémoire du serveur||**Transaction Log**:journal WAL · toutes les modifs y passent AVANT d'aller sur disque||**TempDB**:base système temporaire · sort operations, table variables, snapshots]\n\n### Les bases système\nToute instance SQL Server a 4 bases système par défaut :\n- **master** : configuration globale (login, linked servers, endpoints)\n- **model** : template pour toute nouvelle DB créée\n- **msdb** : job SQL Agent, mail, backup history\n- **tempdb** : temporaire · reset à chaque restart\n\n**Attention à TempDB** : c'est un point critique de performance. En industrie, on la place sur un SSD dédié.\n\n### Comment une requête est exécutée\n[STEPS|**Parsing** : validation syntaxique · construction de l'arbre logique||**Binding** : validation des noms d'objets · vérifications de sécurité||**Optimization** : le Query Optimizer choisit le meilleur plan (indexes, joins)||**Compilation** : plan mis en cache pour réutilisation||**Execution** : le Storage Engine lit/écrit les pages · Result Set renvoyé au client]\n\n### La page — l'unité de stockage\nToute donnée SQL Server est stockée en **pages de 8 KB**. Une table est un ensemble de pages organisées par un index cluster (souvent la clé primaire). Les 8 pages consécutives forment un « extent » (64 KB). Cette granularité influence toutes les optimisations.\n\n[TIP|**Réalité industrielle** : sur un projet UCB, on avait des perfs SCADA dégradées. Diagnostic : buffer pool trop petit (8 GB au lieu de 32 GB config recommandée pour la charge). Un simple config change a réglé le problème.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -41,29 +41,62 @@
     {
       "position": 4,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "Architecture SQL Server",
-      "bodyMd": "## Composants d'une instance\n\n[KV|**Database Engine**:le cœur SQL||**SQL Server Agent**:planificateur de jobs||**SSMS**:Management Studio · IDE d'administration||**SSRS**:Reporting Services · SQL Server report engine||**SSIS**:Integration Services · ETL||**SSAS**:Analysis Services · OLAP data warehousing]\n\n### Instances\nUn serveur physique peut avoir plusieurs instances (`SERVER\\INSTANCE1`, `SERVER\\INSTANCE2`) — isolation.",
+      "section": "1 · Introduction SQL Server pour l'industrie",
+      "title": "Installation typique pharma",
+      "bodyMd": "## Configuration recommandée pour projet Dasolabs\n\nUne installation SQL Server pour usage industriel n'est pas triviale. Voici ce qu'on fait sur nos projets.\n\n### Sizing serveur\n[KV|**CPU**:8-16 cores minimum · pharma production||**RAM**:32-128 GB · dépend de la taille des DBs et de la charge||**Storage OS**:2 x SSD 240 GB en RAID 1 · pour l'OS||**Storage Data**:SAN ou SSD NVMe · IOPS élevés critiques||**Storage Log**:SSD dédié · séquentiel · JAMAIS partagé avec data||**Storage TempDB**:SSD ultra-rapide · dédié · souvent NVMe local||**Storage Backup**:HDD à part · gros volumes]\n\n### Bonnes pratiques d'install\n[STEPS|**Windows Server 2019 ou 2022** en OS · patché à jour||**Compte de service SQL Server** dédié, pas Administrator · Managed Service Account idéalement||**TempDB configurée** : 1 fichier par core CPU (jusqu'à 8) · taille identique · sur SSD dédié||**Model DB configurée** : recovery FULL par défaut pour toutes nouvelles DBs||**Max Server Memory** : laisser 4-8 GB au système · reste pour SQL||**Cost Threshold for Parallelism** : passer de 5 à 50 · évite parallélisme sur petites requêtes||**MAXDOP** : configurer selon nb de cores · pas plus de 8||**Encryption at rest** : TDE (Transparent Data Encryption) obligatoire pharma]\n\n### Configuration réseau\n- Port TCP **1433** ouvert uniquement depuis serveurs autorisés (MES, SCADA)\n- **Named pipes désactivé** en prod (sécurité)\n- **SQL Browser désactivé** (attack surface)\n- Certificat SSL pour TLS obligatoire\n\n### Comptes et sécurité initial\n[KV|**sa désactivé**:mot de passe fort mais compte désactivé · attack surface||**Windows Auth** privilégié:comptes AD nommés · pas d'auth SQL sauf besoin||**Login SQL app** avec permissions minimales · principle of least privilege||**Audit activé**:capture des logins, DDL changes, sensitive queries]\n\n[RULE|Chez Dasolabs, on n'installe JAMAIS SQL Server sans revue architecture par un senior. Une install bâclée à J1 coûte 10x plus cher à réparer 2 ans après.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 5,
-      "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "Installation Windows",
-      "bodyMd": "## Setup pas à pas\n[STEPS|**Téléchargement** installer Microsoft Learn||**Setup.exe** en admin||**Choix édition** : Standard/Express selon licence||**Choix features** : Database Engine + SSMS obligatoires||**Instance name** : default ou nommée||**Service accounts** : compte de service dédié||**Authentication mode** : Mixed (Windows + SQL)||**SA password** : fort||**Firewall** : port 1433 (par défaut)||**Reboot** puis test SSMS]",
+      "kind": "QUIZ",
+      "section": "1 · Introduction SQL Server pour l'industrie",
+      "title": "Quiz 1 — Introduction",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "L'unité de stockage de base dans SQL Server est…",
+            "options": [
+              "1 KB",
+              "8 KB (la page)",
+              "64 KB",
+              "1 MB"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "TempDB sert à…",
+            "options": [
+              "Rien de spécifique",
+              "Stocker les données temporaires : sort, table variables, snapshots · reset à chaque restart",
+              "Backup",
+              "Config globale"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "En pharma production, quelle édition SQL Server est recommandée pour la haute dispo Always On ?",
+            "options": [
+              "Express",
+              "Standard",
+              "Enterprise",
+              "Developer"
+            ],
+            "correctIndex": 2
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "SSMS — Management Studio",
-      "bodyMd": "## L'IDE pour SQL Server\n\n**SSMS** (SQL Server Management Studio) est l'outil admin/dev principal.\n\n### Fonctions clés\n- Query editor avec IntelliSense\n- Object Explorer (naviguer tables, procs, vues)\n- Database diagrams\n- Backup/Restore GUI\n- Performance monitoring\n- Import/export\n\n### Alternatives\n- **Azure Data Studio** (moderne, cross-platform)\n- **DBeaver** (open-source, multi-DB)\n- **HeidiSQL** (léger)",
+      "section": "2 · T-SQL essentiel",
+      "title": "T-SQL vs SQL standard",
+      "bodyMd": "## Le dialecte Microsoft\n\n**T-SQL** (Transact-SQL) est le dialecte SQL de Microsoft. Il étend le SQL ANSI standard avec des fonctionnalités procédurales (variables, conditions, boucles), des fonctions Microsoft-spécifiques, et une syntaxe légèrement différente sur certains points.\n\n### Différences majeures vs SQL standard\n[KV|**GETDATE()**:vs CURRENT_TIMESTAMP · les 2 marchent mais GETDATE() est traditionnel||**TOP N**:vs LIMIT (MySQL/Postgres) · SELECT TOP 10 * FROM table||**IDENTITY**:vs SERIAL/AUTO_INCREMENT · pour colonnes auto-incrémentées||**+= pour string concat**:vs || (Postgres) ou CONCAT()||**PRINT vs SELECT**:PRINT affiche dans le Messages tab, pas dans les résultats||**MERGE**:UPSERT natif · plus complet que ON CONFLICT (Postgres)||**Batches séparés par GO**:GO n'est pas SQL, c'est un séparateur d'outil (SSMS, sqlcmd)]\n\n### Constructions procédurales\nT-SQL supporte le procédural, ce qui permet des scripts complexes :\n\n    DECLARE @count INT = 0;\n    WHILE @count < 10\n    BEGIN\n        INSERT INTO Log (message) VALUES ('iteration ' + CAST(@count AS VARCHAR(10)));\n        SET @count = @count + 1;\n    END\n\nUtile pour scripts de migration, seed data, ETL simples.\n\n### Ce qu'il faut vraiment maîtriser\n1. **SELECT avec JOIN complexes** (INNER, LEFT, RIGHT, FULL, CROSS APPLY)\n2. **CTE** (Common Table Expressions) — WITH clause\n3. **Window functions** (ROW_NUMBER, RANK, LAG, LEAD)\n4. **Subqueries corrélées**\n5. **MERGE** pour upsert\n6. **Stored procedures** avec paramètres et TRY/CATCH\n7. **User-defined functions** (mais attention aux perfs)\n8. **PIVOT/UNPIVOT** pour tableaux croisés\n\n[TIP|**Ressource** : le livre « T-SQL Fundamentals » d'Itzik Ben-Gan est LA référence. Compter 40h pour le lire, mais après tu écris du T-SQL professionnel.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -71,9 +104,9 @@
     {
       "position": 7,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "Bases de données système",
-      "bodyMd": "## Les DBs par défaut\n\n[KV|**master**:configuration serveur, logins || Ne pas toucher||**model**:template pour nouvelles DBs||**msdb**:jobs, backup history · utilisé par SQL Agent||**tempdb**:données temporaires · vidé à chaque restart||**resource**:objets système · caché]\n\n[WARN|**Ne jamais dropper ou modifier** ces DBs système. SQL Server casse.]",
+      "section": "2 · T-SQL essentiel",
+      "title": "CTE — Common Table Expressions",
+      "bodyMd": "## L'outil qui change tout\n\nLes **CTE** sont probablement la fonctionnalité T-SQL qui améliore le plus la lisibilité du code. Elles remplacent avantageusement les subqueries imbriquées et permettent des requêtes récursives.\n\n### Syntaxe basique\nUne CTE est déclarée avec **WITH** avant le SELECT principal :\n\n    WITH SalesData AS (\n        SELECT Region, SUM(Amount) AS Total\n        FROM Sales\n        WHERE Year = 2026\n        GROUP BY Region\n    )\n    SELECT * FROM SalesData WHERE Total > 100000;\n\nC'est équivalent à une subquery, mais nommée et lisible. Une CTE est **jetable** — elle existe uniquement le temps de la requête.\n\n### Plusieurs CTE chaînées\nOn peut chaîner plusieurs CTE :\n\n    WITH\n    OrdersPerCustomer AS (\n        SELECT CustomerId, COUNT(*) AS OrderCount\n        FROM Orders GROUP BY CustomerId\n    ),\n    TopCustomers AS (\n        SELECT CustomerId FROM OrdersPerCustomer WHERE OrderCount > 10\n    )\n    SELECT c.Name, o.OrderCount\n    FROM Customers c\n    JOIN OrdersPerCustomer o ON o.CustomerId = c.Id\n    WHERE c.Id IN (SELECT CustomerId FROM TopCustomers);\n\nBeaucoup plus lisible qu'avec des subqueries imbriquées.\n\n### CTE récursives — la killer feature\nLes CTE peuvent s'appeler elles-mêmes, permettant de traiter des hiérarchies (organigrammes, arbres BOM, graph traversal) :\n\n    WITH BOM AS (\n        SELECT ProductId, ComponentId, 1 AS Level FROM BillOfMaterials WHERE ProductId = 'FinalProduct'\n        UNION ALL\n        SELECT b.ProductId, b.ComponentId, bom.Level + 1\n        FROM BillOfMaterials b JOIN BOM bom ON b.ProductId = bom.ComponentId\n    )\n    SELECT * FROM BOM;\n\nCette requête traverse récursivement une nomenclature multi-niveaux. En moins de 10 lignes.\n\n### Cas d'usage industriel\nSur un projet UCB, on avait besoin de calculer les temps cumulés d'un batch en cascade sur 40 phases. Sans CTE = code procédural en curseur (100 lignes). Avec CTE récursive = 15 lignes, 100x plus rapide.\n\n[TIP|Les CTE ne sont PAS des tables temporaires. Elles ne matérialisent rien. Si tu utilises une CTE 5 fois dans la requête suivante, elle est ré-exécutée 5 fois. Pour matérialiser, utilise une table temporaire (#temp) ou variable de table.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -81,9 +114,9 @@
     {
       "position": 8,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "Créer une base de données",
-      "bodyMd": "## Nouvelle DB\n\n### Via SSMS\nRight-click Databases → New Database → nom + settings.\n\n### Via SQL\n    CREATE DATABASE Dasolabs_MES\n    ON PRIMARY (\n      NAME = 'Dasolabs_MES_data',\n      FILENAME = 'D:\\SQL\\Data\\MES.mdf',\n      SIZE = 100 MB,\n      MAXSIZE = 10 GB,\n      FILEGROWTH = 10 MB\n    )\n    LOG ON (\n      NAME = 'Dasolabs_MES_log',\n      FILENAME = 'D:\\SQL\\Log\\MES.ldf',\n      SIZE = 20 MB\n    );\n\n### Configuration recovery model\n- **Full** : full transaction log · restore point-in-time\n- **Simple** : log recycled auto · perte possible transactions\n- **Bulk-logged** : intermédiaire",
+      "section": "2 · T-SQL essentiel",
+      "title": "Window functions",
+      "bodyMd": "## Analyse par fenêtre\n\nLes **window functions** transforment SQL Server en outil analytique puissant. Elles permettent des calculs par groupe SANS grouper (donc en gardant toutes les lignes).\n\n### La différence avec GROUP BY\nUn GROUP BY réduit N lignes à 1 par groupe. Une window function calcule PAR groupe mais renvoie les N lignes.\n\n### Les principales\n[KV|**ROW_NUMBER() OVER (ORDER BY x)**:numérote les lignes||**RANK() OVER (ORDER BY x)**:comme ROW_NUMBER mais avec ex-æquo||**DENSE_RANK()**:comme RANK mais sans trous||**LAG(col, 1) OVER (ORDER BY x)**:valeur de la ligne précédente||**LEAD(col, 1) OVER (ORDER BY x)**:valeur de la ligne suivante||**SUM() OVER (PARTITION BY x)**:somme par groupe · gardée sur toutes les lignes||**AVG(col) OVER (ORDER BY x ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)**:moyenne mobile 7 jours]\n\n### Exemple concret — moyenne mobile\nOn veut la moyenne mobile 24h de température sur les 30 derniers jours d'un batch :\n\n    SELECT Timestamp, Temperature,\n        AVG(Temperature) OVER (\n            ORDER BY Timestamp\n            ROWS BETWEEN 143 PRECEDING AND CURRENT ROW\n        ) AS MovingAvg24h\n    FROM Historian\n    WHERE Timestamp >= DATEADD(day, -30, GETDATE())\n    ORDER BY Timestamp;\n\n(143 = 24h × 6 échantillons par heure - 1)\n\nEn une seule requête, sans besoin de code procédural. Puissant.\n\n### Exemple — comparer avec ligne précédente\n« Combien de temps s'est écoulé entre chaque alarme ? » :\n\n    SELECT AlarmTime,\n        LAG(AlarmTime, 1) OVER (ORDER BY AlarmTime) AS PreviousAlarm,\n        DATEDIFF(second, LAG(AlarmTime, 1) OVER (ORDER BY AlarmTime), AlarmTime) AS SecondsSincePrevious\n    FROM Alarms\n    ORDER BY AlarmTime;\n\n### Cas d'usage industriel\nSur un rapport batch pharma UCB, on utilisait 8 window functions pour calculer : classement des batchs par rendement, écart type mobile de la T°, temps entre alarmes consécutives, comparaison avec la moyenne site. Une seule requête, ~100 lignes, exécution 3 sec. Sans window functions ce serait des heures de dev et minutes d'exécution.\n\n[TIP|Les window functions sont **la** différence entre un dev SQL junior et senior. Investis 4-6 heures pour les maîtriser vraiment.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -91,49 +124,59 @@
     {
       "position": 9,
       "kind": "CONTENT",
-      "section": "1 · Introduction SQL Server",
-      "title": "Tables et schémas",
-      "bodyMd": "## Structure d'une DB\n\n### Schémas\nRegroupent les tables :\n    CREATE SCHEMA production;\n    CREATE TABLE production.batches (...)\n\n### Tables\n    CREATE TABLE production.batches (\n      batch_id INT IDENTITY(1,1) PRIMARY KEY,\n      product NVARCHAR(50) NOT NULL,\n      start_time DATETIME2 DEFAULT GETDATE(),\n      end_time DATETIME2 NULL,\n      status NVARCHAR(20) CHECK (status IN ('running','ok','ko'))\n    );\n\n### Types de données\n[KV|**INT, BIGINT, SMALLINT**:entiers||**DECIMAL, NUMERIC**:précision fixe · pharma||**FLOAT**:approximatif||**NVARCHAR(n)**:Unicode texte||**DATETIME2**:date + time · plus précis que DATETIME||**BIT**:booléen 0/1||**UNIQUEIDENTIFIER**:GUID]",
+      "section": "2 · T-SQL essentiel",
+      "title": "MERGE — upsert transactionnel",
+      "bodyMd": "## Insérer ou mettre à jour en une opération\n\nL'instruction **MERGE** combine INSERT, UPDATE et DELETE en une seule opération atomique. Très utile pour synchroniser des données depuis un système source vers une table cible.\n\n### Cas typique — sync depuis Historian\nToutes les 5 min, on synchronise les données Historian vers un data mart :\n\n    MERGE INTO DataMart.HourlyValues AS target\n    USING (\n        SELECT TagName, DATEADD(hour, DATEDIFF(hour, 0, Timestamp), 0) AS HourStart,\n               AVG(Value) AS AvgValue, MIN(Value) AS MinValue, MAX(Value) AS MaxValue\n        FROM Historian.RawValues\n        WHERE Timestamp >= DATEADD(hour, -1, GETDATE())\n        GROUP BY TagName, DATEADD(hour, DATEDIFF(hour, 0, Timestamp), 0)\n    ) AS source\n    ON target.TagName = source.TagName AND target.HourStart = source.HourStart\n    WHEN MATCHED THEN\n        UPDATE SET AvgValue = source.AvgValue,\n                   MinValue = source.MinValue,\n                   MaxValue = source.MaxValue\n    WHEN NOT MATCHED THEN\n        INSERT (TagName, HourStart, AvgValue, MinValue, MaxValue)\n        VALUES (source.TagName, source.HourStart, source.AvgValue, source.MinValue, source.MaxValue);\n\nTrois cas gérés :\n- Si la ligne existe déjà (MATCHED) → UPDATE\n- Si nouvelle (NOT MATCHED) → INSERT\n- Optionnellement WHEN NOT MATCHED BY SOURCE → DELETE (lignes cible absentes de source)\n\n### Avantages vs script procédural\n1. **Atomique** : tout dans une transaction\n2. **Performance** : un seul passage sur la table cible\n3. **Lisible** : la logique métier est claire\n\n### Piège classique\n[DANGER|MERGE avec sources non-uniques peut donner des résultats erronés · toujours faire un GROUP BY ou DISTINCT sur la source]\n\n### Cas d'usage industriel Dasolabs\nSur un projet Zoetis, on utilise MERGE quotidiennement pour synchroniser depuis Werum PAS-X vers un data mart de reporting. 500 batchs synchronisés en 30 sec via un seul MERGE.\n\n[TIP|MERGE existe aussi en Oracle et PostgreSQL 15+. C'est une syntaxe portable, pas Microsoft-only.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 10,
+      "kind": "CONTENT",
+      "section": "2 · T-SQL essentiel",
+      "title": "Stored procedures et error handling",
+      "bodyMd": "## Encapsuler la logique métier\n\nLes **stored procedures** (procédures stockées, sprocs) permettent d'encapsuler du T-SQL réutilisable côté serveur. C'est la façon standard d'exposer de la logique métier depuis une DB.\n\n### Syntaxe basique\n\n    CREATE PROCEDURE dbo.GetBatchYield\n        @BatchId INT,\n        @Yield DECIMAL(5,2) OUTPUT\n    AS\n    BEGIN\n        SET NOCOUNT ON;\n        BEGIN TRY\n            SELECT @Yield =\n                CAST(SUM(ActualQuantity) AS DECIMAL(10,2)) /\n                NULLIF(SUM(TargetQuantity), 0) * 100\n            FROM BatchPhases\n            WHERE BatchId = @BatchId;\n        END TRY\n        BEGIN CATCH\n            THROW;\n        END CATCH\n    END\n\n### Bonnes pratiques\n[STEPS|**SET NOCOUNT ON** en début · évite envoi de \"rows affected\" · gain perf||**BEGIN TRY / BEGIN CATCH** pour gérer les erreurs||**Paramètres explicitement typés** · pas de \"varchar\" sans taille||**OUTPUT parameters** pour renvoyer des valeurs uniques||**Return SELECT** pour renvoyer des tables||**Return code** pour statut (0=OK, autres=erreur)||**Naming convention** : préfixe usp_ ou schéma dédié (proc.)]\n\n### TRY/CATCH — error handling\nComme dans les langages objet, T-SQL supporte try/catch :\n\n    BEGIN TRY\n        BEGIN TRANSACTION;\n        UPDATE Inventory SET Qty = Qty - @Amount WHERE ItemId = @Id;\n        INSERT INTO Consumption (ItemId, Amount, Time) VALUES (@Id, @Amount, GETDATE());\n        COMMIT;\n    END TRY\n    BEGIN CATCH\n        ROLLBACK;\n        DECLARE @ErrMsg NVARCHAR(4000) = ERROR_MESSAGE();\n        INSERT INTO ErrorLog (Msg, Time) VALUES (@ErrMsg, GETDATE());\n        THROW;\n    END CATCH\n\nCette structure garantit la cohérence transactionnelle : soit tout se fait, soit rien.\n\n### Sprocs vs code applicatif\nDébat classique : mettre la logique dans le SQL ou dans l'app ?\n- **Sprocs pro** : perf (compilation cached), sécurité (permissions granulaires), abstraction\n- **Sprocs contre** : moins de portabilité, moins testable, versioning plus difficile\n- **Compromis Dasolabs** : logique CRUD et perfs critiques → sprocs · logique métier complexe → app\n\n[RULE|Chez Dasolabs, on utilise les sprocs pour les opérations transactionnelles critiques (batch commit, inventory update). Le reste (queries analytiques) va dans le code applicatif.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 11,
       "kind": "QUIZ",
-      "section": "1 · Introduction SQL Server",
-      "title": "Quiz 1 — Intro SQL Server",
+      "section": "2 · T-SQL essentiel",
+      "title": "Quiz 2 — T-SQL",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Quelle édition SQL Server est gratuite pour production petits projets ?",
+            "prompt": "Une CTE (Common Table Expression) est…",
             "options": [
-              "Enterprise",
-              "Standard",
-              "Express",
-              "Developer"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "L'IDE principal pour SQL Server est…",
-            "options": [
-              "Visual Studio",
-              "SSMS (SQL Server Management Studio)",
-              "Notepad",
-              "IntelliJ"
+              "Une table temporaire matérialisée",
+              "Un alias de subquery, non-matérialisée, valable le temps de la requête, permettant récursion",
+              "Un index",
+              "Une trigger"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Pour data time-series industrielle, mieux vaut…",
+            "prompt": "Une window function comme SUM() OVER (PARTITION BY x)…",
             "options": [
-              "SQL Server",
-              "AVEVA Historian ou InfluxDB (time-series dédié)",
-              "MongoDB",
-              "Redis"
+              "Réduit les lignes comme GROUP BY",
+              "Calcule par groupe MAIS garde toutes les lignes de départ",
+              "Ne fonctionne pas",
+              "Remplace WHERE"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "MERGE permet de…",
+            "options": [
+              "Rien",
+              "Combiner INSERT/UPDATE/DELETE en une seule opération atomique · idéal pour synchronisation",
+              "Fusionner 2 DBs",
+              "Backup"
             ],
             "correctIndex": 1
           }
@@ -142,21 +185,11 @@
       "imageUrl": null
     },
     {
-      "position": 11,
-      "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "SELECT de base",
-      "bodyMd": "## Le fondamental\n\n    SELECT column1, column2 FROM table_name;\n\n### Wildcard\n    SELECT * FROM production.batches;  -- tout\n\n### Alias\n    SELECT batch_id AS id, product AS 'Nom produit' FROM batches;\n\n### DISTINCT\n    SELECT DISTINCT product FROM batches;  -- produits uniques",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
       "position": 12,
       "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "WHERE — filtrer",
-      "bodyMd": "## Conditions\n\n    SELECT * FROM batches WHERE status = 'ok';\n\n### Opérateurs\n[KV|**=, <>, !=**:égalité / différent||**<, <=, >, >=**:comparaison||**BETWEEN a AND b**:plage||**IN (a,b,c)**:parmi liste||**LIKE 'foo%'**:pattern matching||**IS NULL / IS NOT NULL**:test nullité||**AND, OR, NOT**:combiner]\n\n### Exemple\n    SELECT * FROM batches\n    WHERE product IN ('ProductA', 'ProductB')\n      AND start_time BETWEEN '2026-01-01' AND '2026-01-31'\n      AND end_time IS NOT NULL;",
+      "section": "3 · Indexation et performance",
+      "title": "Pourquoi les index sont critiques",
+      "bodyMd": "## Le sujet #1 de la performance SQL\n\n**80 % des problèmes de perf en SQL Server viennent d'un problème d'index** : soit absents, soit mal choisis, soit trop nombreux. Maîtriser l'indexation, c'est régler l'essentiel des problèmes.\n\n### Sans index — le table scan\nSans index sur une table de 1 M lignes, une requête « WHERE UserId = 12345 » **lit toute la table**. À 8 KB par page, ça peut être 10 000 pages = 80 MB de disque scanné, pour trouver quelques dizaines de lignes.\n\nC'est ce qu'on appelle un **table scan** ou **clustered index scan** (sur la table entière). Rapide sur petites tables, catastrophique sur grandes.\n\n### Avec un index — le seek\nAvec un index sur UserId, SQL Server fait un **index seek** : navigation dans un B-tree (structure arborescente) qui trouve les lignes en 3-4 « niveaux ». Pour 1 M lignes, un seek lit typiquement **10-20 pages**, pas 10 000. Gain 500x.\n\n### Structure d'un index B-tree\n[STEPS|**Racine** : 1 page avec pointeurs vers pages intermédiaires||**Niveaux intermédiaires** : quelques pages · index sur ranges||**Feuilles** : les vraies données (index cluster) ou pointeurs vers données (nonclustered)]\n\nLe nombre de niveaux dépend de la taille : sur 1 M lignes, typiquement 3-4 niveaux. Sur 100 M lignes, 4-5. C'est logarithmique, pas linéaire — c'est ça qui rend les seeks rapides.\n\n### Clustered vs Nonclustered\n[KV|**Clustered index**:organise physiquement la table · UNE seule par table · souvent PK||**Nonclustered index**:structure séparée qui pointe vers la table · plusieurs par table · pour queries alternatives]\n\n### Le compromis clé\nChaque index ajouté :\n- **Accélère** les SELECT qui l'utilisent\n- **Ralentit** les INSERT/UPDATE/DELETE (l'index doit être maintenu)\n- **Consomme** de l'espace disque\n\nDonc pas d'index à outrance. **On indexe ce qui apparaît souvent dans les WHERE, JOIN, ORDER BY**.\n\n[TIP|**Règle empirique Dasolabs** : sur une table transactionnelle, 3-6 index nonclustered en plus du cluster. Au-delà, les INSERT deviennent lents.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -164,9 +197,9 @@
     {
       "position": 13,
       "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "ORDER BY — trier",
-      "bodyMd": "## Ordonner les résultats\n\n    SELECT * FROM batches ORDER BY start_time DESC;  -- récents en premier\n\n### Multi-colonnes\n    ORDER BY product ASC, start_time DESC;\n\n### TOP / LIMIT\n    SELECT TOP 10 * FROM batches ORDER BY yield DESC;  -- top 10 rendement",
+      "section": "3 · Indexation et performance",
+      "title": "Concevoir un bon index",
+      "bodyMd": "## Comment choisir les colonnes\n\nCréer un index sans réfléchir est aussi mauvais que ne pas en avoir. Quelques principes pour concevoir des index utiles.\n\n### Analyser la charge\nAvant de créer un index, on regarde **quelles requêtes tournent souvent**. SQL Server fournit la DMV **sys.dm_db_missing_index_details** qui suggère des index manquants basés sur les requêtes réelles.\n\n    SELECT * FROM sys.dm_db_missing_index_details\n    WHERE database_id = DB_ID();\n\nCette DMV est votre point de départ. **MAIS attention** : elle suggère à outrance. Il faut évaluer avant de créer.\n\n### Ordre des colonnes dans un index composite\nUn index sur (A, B, C) est efficace pour :\n- WHERE A = ?\n- WHERE A = ? AND B = ?\n- WHERE A = ? AND B = ? AND C = ?\n\nMais **PAS pour** :\n- WHERE B = ? (sans A)\n- WHERE C = ? (sans A ni B)\n\nRègle : **la colonne la plus sélective en premier**.\n\n### INCLUDE — covering indexes\nUn index nonclustered peut INCLURE des colonnes non-clés :\n\n    CREATE NONCLUSTERED INDEX IX_Orders_Date\n    ON Orders (OrderDate)\n    INCLUDE (CustomerId, Amount, Status);\n\nRésultat : quand une requête filtre sur OrderDate et select CustomerId+Amount+Status, l'index couvre entièrement — pas besoin d'aller à la table. Gain énorme.\n\n### Éviter les erreurs classiques\n[DANGER|**Index sur colonne nullable** : SQL Server gère les NULL, mais index inutile si 90 % de la table est NULL sur cette col]\n[DANGER|**Index sur colonne peu sélective** : Genre M/F sur une colonne — l'index est aussi coûteux que le scan]\n[DANGER|**Index avec ORDER BY DESC quand la plupart des queries font ASC** : forcer bon ordre]\n[DANGER|**Doublons entre indexes** : IX1 sur (A, B) et IX2 sur (A) · le premier couvre déjà le second]\n\n### Query Store — pour la vraie mesure\nDepuis SQL 2016, **Query Store** enregistre toutes les requêtes exécutées avec leurs plans et perfs. C'est LA source de vérité pour savoir ce qui coûte cher et ce qui bénéficierait d'un nouvel index.\n\n    ALTER DATABASE YourDB SET QUERY_STORE = ON;\n\nÀ activer **impérativement** sur tout DB de production.\n\n[TIP|Sur un projet UCB, l'activation Query Store et l'ajout de 3 indexes suggérés ont réduit le temps de chargement d'un dashboard MES de 45 sec à 2 sec. Investissement : 4h.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -174,9 +207,9 @@
     {
       "position": 14,
       "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "GROUP BY et aggregates",
-      "bodyMd": "## Résumer les données\n\n    SELECT product, COUNT(*) AS n_batches, AVG(yield) AS avg_yield\n    FROM batches\n    WHERE end_time > '2026-01-01'\n    GROUP BY product\n    ORDER BY avg_yield DESC;\n\n### Aggregates courants\n[KV|**COUNT(*)**:nb lignes||**SUM(col)**:somme||**AVG(col)**:moyenne||**MIN(col), MAX(col)**:extremes||**STDEV(col)**:écart type]\n\n### HAVING vs WHERE\n- WHERE filtre AVANT groupement\n- HAVING filtre APRÈS groupement\n\n    GROUP BY product HAVING COUNT(*) > 10  -- produits avec >10 batchs",
+      "section": "3 · Indexation et performance",
+      "title": "Plans d'exécution",
+      "bodyMd": "## Comprendre ce que fait SQL Server\n\nLe **plan d'exécution** est la représentation graphique de comment SQL Server exécute une requête. Le lire est la compétence #1 en tuning.\n\n### Voir un plan\nDans SSMS : **Ctrl+M** puis exécuter la requête. Le plan apparaît dans un onglet.\n\nOu en T-SQL :\n\n    SET SHOWPLAN_ALL ON;\n    -- votre query\n    SET SHOWPLAN_ALL OFF;\n\n### Les opérateurs importants à connaître\n[KV|**Clustered Index Seek**:navigation dans l'index cluster · rapide||**Clustered Index Scan**:parcours de toute la table via cluster · lent sur grosses tables||**Index Seek**:navigation dans nonclustered index · rapide||**Index Scan**:parcours nonclustered · pas idéal||**Key Lookup**:après index seek, remonter à la table pour col manquantes · évitable avec INCLUDE||**Nested Loop Join**:pour petites tables ou avec seek · rapide||**Hash Match Join**:pour grandes tables · consomme mémoire||**Merge Join**:pour tables triées · rare mais efficace||**Sort**:tri explicite · souvent évitable avec bon index]\n\n### Ce qu'on cherche à éviter\n[DANGER|**Table Scan sur grande table** : plus d'un million de lignes = red flag]\n[DANGER|**Key Lookup en masse** : signe qu'il faut INCLUDE de colonnes dans l'index]\n[DANGER|**Hash Match sur petites tables** : Nested Loop serait plus rapide]\n[DANGER|**Sort après WHERE** : ajouter un index qui ordonne naturellement]\n\n### Estimated vs Actual\nSSMS montre 2 types de plans :\n- **Estimated** : ce que le Query Optimizer PENSE faire · basé sur statistiques\n- **Actual** : ce qu'il a VRAIMENT fait · nécessite exécution réelle\n\n**Différence importante** entre les 2 = stats obsolètes. Faire :\n\n    UPDATE STATISTICS TableName WITH FULLSCAN;\n\n### Cost — l'unité de mesure\nChaque opérateur a un « cost » (en unités abstraites). Le total du plan doit être minimisé. Un plan « cost 10.5 » est meilleur qu'un « cost 45.8 ».\n\n**Attention** : le cost n'est pas en secondes. C'est une estimation basée sur des unités relatives IO/CPU.\n\n### Lire un plan — de la droite vers la gauche\nLes données coulent de la droite (feuilles = accès aux tables) vers la gauche (opération finale). Cette convention nord-américaine surprend au début.\n\n[TIP|**Ressource formatrice** : le blog Erik Darling (erikdarling.com) explique les plans d'exécution avec humour. À dévorer.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -184,29 +217,62 @@
     {
       "position": 15,
       "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "JOIN — croiser plusieurs tables",
-      "bodyMd": "## Combiner tables\n\n### INNER JOIN\n    SELECT b.batch_id, b.product, e.step_name\n    FROM batches b\n    INNER JOIN batch_events e ON b.batch_id = e.batch_id;\n\n### LEFT JOIN\n    -- Batchs même sans événements\n    SELECT b.batch_id, e.step_name\n    FROM batches b\n    LEFT JOIN batch_events e ON b.batch_id = e.batch_id;\n\n### Types de JOIN\n[KV|**INNER JOIN**:seulement lignes qui matchent des 2 côtés||**LEFT JOIN**:toutes lignes gauche + matches droites (NULL si aucun)||**RIGHT JOIN**:l'inverse||**FULL OUTER JOIN**:tout des 2 côtés||**CROSS JOIN**:produit cartésien · rare]",
+      "section": "3 · Indexation et performance",
+      "title": "Statistiques et maintenance",
+      "bodyMd": "## Le carburant de l'Optimizer\n\nLes **statistiques** sont ce qui permet au Query Optimizer de choisir un bon plan. Sans stats à jour, il devine mal. C'est un aspect souvent négligé.\n\n### Qu'est-ce que les statistiques ?\nPour chaque index et chaque colonne indexée, SQL Server maintient une distribution des valeurs (histogramme). Exemple : « 30 % des lignes ont Status=Active, 50 % ont Status=Completed, 20 % ont Status=Cancelled ».\n\nL'Optimizer utilise ces stats pour estimer combien de lignes une clause WHERE va renvoyer, et donc choisir le meilleur plan.\n\n### Le problème des stats obsolètes\nSi tu insères 500 000 lignes dans une table de 100 000 sans mettre à jour les stats, l'Optimizer croit toujours qu'il y a 100 000 lignes. Il choisit un plan basé sur cette mauvaise info. Résultat : perf catastrophique.\n\n### Auto Update\nPar défaut, SQL Server met à jour les stats **automatiquement** dès que ~20 % des lignes ont changé. Mais c'est asynchrone et parfois trop tard.\n\n### Maintenance manuelle\nSur tables très volatiles, on programme des maintenances régulières :\n\n    UPDATE STATISTICS Sales WITH FULLSCAN;\n\nOu pour toute la base :\n\n    EXEC sp_updatestats;\n\n### Fragmentation des index\nAprès beaucoup d'INSERT/DELETE, les index se fragmentent (pages désordonnées, half-empty). Sur >30 % de fragmentation, la perf souffre.\n\nDiagnostic :\n\n    SELECT * FROM sys.dm_db_index_physical_stats(DB_ID(), OBJECT_ID('YourTable'), NULL, NULL, 'LIMITED');\n\nCorrection :\n- **< 10 % fragmentation** : ne rien faire\n- **10-30 %** : REORGANIZE (online, léger)\n- **> 30 %** : REBUILD (peut être lourd)\n\n### Maintenance plan hebdomadaire\nChez Dasolabs, on met un job SQL Agent qui tourne le weekend :\n1. UPDATE STATISTICS sur toutes les tables\n2. REBUILD ou REORGANIZE index selon fragmentation\n3. Backup complet\n4. Vérifier intégrité (DBCC CHECKDB)\n\n[TIP|Ola Hallengren propose un ensemble de scripts SQL Server maintenance gratuits, ultra-populaires (ola.hallengren.com). À utiliser au lieu de réinventer la roue.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 16,
-      "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "Subqueries",
-      "bodyMd": "## Requêtes imbriquées\n\n### Dans WHERE\n    SELECT * FROM batches\n    WHERE product IN (SELECT product FROM products WHERE type = 'critical');\n\n### Dans FROM (derived table)\n    SELECT product, avg_yield FROM (\n      SELECT product, AVG(yield) AS avg_yield FROM batches GROUP BY product\n    ) t\n    WHERE avg_yield > 90;\n\n### CTE (Common Table Expression)\n    WITH top_products AS (\n      SELECT product, AVG(yield) AS avg_yield FROM batches GROUP BY product\n    )\n    SELECT * FROM top_products WHERE avg_yield > 90;\n\n[TIP|**CTE > subqueries** en lisibilité. Toujours préférer.]",
+      "kind": "QUIZ",
+      "section": "3 · Indexation et performance",
+      "title": "Quiz 3 — Indexation",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Sur une table de 10M lignes, un WHERE sans index fait…",
+            "options": [
+              "Un index seek rapide",
+              "Un table scan qui lit toutes les pages · catastrophique",
+              "Rien",
+              "Une erreur"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un index avec INCLUDE (col1, col2) permet…",
+            "options": [
+              "Rien",
+              "De couvrir des colonnes non-clés · évite le Key Lookup vers la table",
+              "De supprimer",
+              "De backuper"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Fragmentation d'index à 45 % — que faire ?",
+            "options": [
+              "Rien",
+              "REBUILD (ALTER INDEX ... REBUILD)",
+              "Supprimer la table",
+              "Attendre"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 17,
       "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "Window functions",
-      "bodyMd": "## Ranking et running totals\n\n### ROW_NUMBER, RANK, DENSE_RANK\n    SELECT batch_id, product, yield,\n           RANK() OVER (PARTITION BY product ORDER BY yield DESC) as rank_in_product\n    FROM batches;\n\n### LAG / LEAD (accès aux lignes précédentes/suivantes)\n    SELECT batch_id, yield,\n           LAG(yield) OVER (ORDER BY start_time) as prev_yield\n    FROM batches;\n\n### Running sum\n    SELECT batch_id, yield,\n           SUM(yield) OVER (ORDER BY start_time ROWS UNBOUNDED PRECEDING) as running_total\n    FROM batches;\n\n[TIP|Window functions = ultra puissant pour analytics. Un must à maîtriser.]",
+      "section": "4 · Backup / Restore / DR",
+      "title": "Recovery models",
+      "bodyMd": "## Le choix qui conditionne tout\n\nChaque base SQL Server a un **recovery model** qui détermine comment le transaction log fonctionne et quels types de backups sont possibles.\n\n### Les 3 modèles\n[KV|**FULL**:log garde toutes les transactions · backups full + differential + log · restore point-in-time · **pharma production**||**BULK_LOGGED**:comme FULL mais moins de log pour bulk ops · usage transitoire||**SIMPLE**:log auto-truncated après checkpoint · pas de backup log · restore = jusqu'au dernier full ou differential]\n\n### Quand utiliser lequel ?\n- **FULL** : quasi tout en production sérieuse. Point-in-time recovery = pouvoir restaurer à 14h37 exact = sauve-vie en cas de bug ou corruption.\n- **SIMPLE** : dev, DBs jetables, DBs qui ne changent que par ETL nocturne (on refait l'ETL en cas de crash).\n- **BULK_LOGGED** : rare, temporaire, pour opérations d'import massives.\n\n### Le piège FULL\nUne DB en FULL sans backup log régulier voit son transaction log **grossir indéfiniment** jusqu'à saturer le disque. C'est un problème classique : équipe met la DB en FULL, oublie de configurer les backups log, ~1 mois après le log fait 500 GB.\n\n### Configuration recommandée pharma\n[STEPS|**Toutes DBs prod en FULL recovery**||**Backup full quotidien** (nuit)||**Backup differential** toutes les 4-6h||**Backup log** toutes les 15 min||**Stockage backup séparé** du serveur SQL||**Tests de restore mensuels** · un backup non-testé = pas un backup]\n\n### Point-in-time recovery en action\nCas UCB (fictif) : à 14h30, un dev exécute par erreur \"DELETE FROM Batches\" sans WHERE. Catastrophe. Sans PIT recovery = perte de la journée. Avec PIT :\n\n1. Restore le backup full de la nuit\n2. Apply differential jusqu'à 14h00\n3. Apply logs jusqu'à 14h29 (juste avant le DELETE)\n4. La DB est restaurée exactement 1 minute avant le drame\n\nPerte : 1 minute. Sans PIT : 12h. Différence : compliance sauvée.\n\n[RULE|**En pharma, FULL recovery + point-in-time = obligatoire.** SIMPLE recovery est acceptable pour dev/staging, JAMAIS pour prod.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -214,9 +280,9 @@
     {
       "position": 18,
       "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "UNION et INTERSECT",
-      "bodyMd": "## Combiner résultats\n\n### UNION\n    SELECT batch_id FROM ok_batches\n    UNION\n    SELECT batch_id FROM ko_batches;  -- déduplique\n\n### UNION ALL\n    UNION ALL  -- garde doublons · plus rapide\n\n### INTERSECT\nLignes présentes dans les 2 queries.\n\n### EXCEPT\nLignes présentes dans la 1re mais pas la 2e.",
+      "section": "4 · Backup / Restore / DR",
+      "title": "Types de backups",
+      "bodyMd": "## Full, Differential, Log — la trilogie\n\nSQL Server propose 3 types de backup complémentaires. Comprendre leur interaction est essentiel.\n\n### Full Backup\nBackup complet de la DB. Peut prendre longtemps sur grosses DBs (heures). Point de départ de tout scénario de restore.\n\n    BACKUP DATABASE MyDB TO DISK = 'D:\\Backup\\MyDB_full.bak' WITH INIT, CHECKSUM, COMPRESSION;\n\n- **INIT** : écrase les backups précédents dans le fichier\n- **CHECKSUM** : ajoute checksums, détecte corruption\n- **COMPRESSION** : compresse le backup (Enterprise ou 2016+ Standard)\n\n### Differential Backup\nBackup des pages modifiées depuis le dernier full. Plus rapide qu'un full, mais grandit au fur et à mesure.\n\n    BACKUP DATABASE MyDB TO DISK = 'D:\\Backup\\MyDB_diff.bak' WITH DIFFERENTIAL, INIT;\n\n### Log Backup\nBackup du transaction log depuis le dernier log backup. Petit et rapide. Permet le point-in-time.\n\n    BACKUP LOG MyDB TO DISK = 'D:\\Backup\\MyDB_log.bak' WITH INIT;\n\n### Scénario de restore complet\nPerte de la DB à 14h37. Backups disponibles :\n- Full nuit à 02h00\n- Diff à 12h00\n- Logs toutes les 15 min (14h30 est le dernier)\n\nSéquence de restore :\n\n    -- Restaurer le full (WITH NORECOVERY = reste en attente)\n    RESTORE DATABASE MyDB FROM DISK = '...\\full.bak' WITH NORECOVERY;\n\n    -- Appliquer le differential\n    RESTORE DATABASE MyDB FROM DISK = '...\\diff.bak' WITH NORECOVERY;\n\n    -- Appliquer les logs jusqu'à 14h35 (juste avant la panne)\n    RESTORE LOG MyDB FROM DISK = '...\\log_14h15.bak' WITH NORECOVERY;\n    RESTORE LOG MyDB FROM DISK = '...\\log_14h30.bak' WITH NORECOVERY;\n\n    -- Finaliser\n    RESTORE DATABASE MyDB WITH RECOVERY;\n\n### Verification obligatoire\nUn backup **n'est pas fiable** tant qu'il n'a pas été restauré et testé. Chez Dasolabs, on programme un restore mensuel sur un serveur de test :\n\n1. Prendre le dernier backup prod\n2. Restaurer sur serveur test\n3. Vérifier que la DB est cohérente (DBCC CHECKDB)\n4. Documenter le temps de restore\n\nCette pratique révèle typiquement 20 % des backups non-fiables.\n\n[DANGER|**Backup non-testé = illusion de sécurité**. J'ai vu 3 clients qui découvraient le jour du désastre que leurs backups étaient corrompus depuis des mois. Pas de restore, pas de conformité, coûts énormes.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -224,9 +290,9 @@
     {
       "position": 19,
       "kind": "CONTENT",
-      "section": "2 · SELECT — extraire des données",
-      "title": "Fonctions SQL utiles",
-      "bodyMd": "## Manipulation courante\n\n### String\n[KV|**LEN(s)**:longueur||**LOWER, UPPER**:casse||**LEFT(s,n), RIGHT(s,n)**:extraire début/fin||**SUBSTRING(s, start, len)**:extraire||**REPLACE(s, old, new)**:remplacer||**TRIM(s)**:supprimer espaces||**CONCAT(a, b, c)**:concaténer||**FORMAT(x, 'format')**:formater nombres/dates]\n\n### Date\n[KV|**GETDATE()**:date/heure actuelle||**YEAR(date), MONTH(date), DAY(date)**:extraire parties||**DATEADD(day, 7, date)**:ajouter||**DATEDIFF(day, d1, d2)**:différence||**FORMAT(date, 'yyyy-MM-dd')**:formater]\n\n### Numeric\n[KV|**ROUND(x, n)**:arrondir||**FLOOR, CEILING**:arrondi inf/sup||**ABS(x)**:absolu||**POWER(x, n)**:puissance||**SQRT(x)**:racine]",
+      "section": "4 · Backup / Restore / DR",
+      "title": "Always On Availability Groups",
+      "bodyMd": "## Haute dispo pharma\n\n**Always On Availability Groups** (AG) est la solution HA/DR moderne de SQL Server, depuis 2012. Elle remplace le vieux Database Mirroring et le vieux Log Shipping.\n\n### Le principe\nUne DB est **répliquée en temps réel** sur 1-8 serveurs. Un serveur est **primary** (accepte les writes), les autres sont **secondaries** (read-only optionnellement). En cas de panne du primary, un secondary prend le relais automatiquement (**failover**).\n\n### Composants\n[KV|**Windows Server Failover Cluster (WSFC)**:socle Windows · nécessaire||**Availability Group**:l'unité logique · contient 1-N DBs répliquées||**Availability Replica**:un serveur SQL du groupe (primary ou secondary)||**Availability Listener**:VIP réseau · les apps se connectent à ce nom · redirige vers primary]\n\n### Modes de sync\n- **Synchronous commit** : le primary attend l'ACK du secondary avant de committer · zéro perte de data · latence légère\n- **Asynchronous commit** : le primary ne wait pas · perf max mais possibilité de perte de quelques transactions\n\n### Configuration typique pharma\nPour UCB :\n- **3 serveurs Always On** (Primary + Sync Secondary + Async Secondary)\n- **Sync** dans le même datacenter (backup local instantané)\n- **Async** dans un autre datacenter (DR géographique)\n- **Failover automatique** entre primary et sync secondary\n- **Failover manuel** vers async secondary si les 2 premiers tombent\n\n### Bénéfices business\n- **Zéro downtime** planifié : patcher les serveurs 1 par 1 en faisant tourner sur les autres\n- **Zéro data loss** : sync commit garantit\n- **Disaster recovery** : perte d'un datacenter = failover vers l'autre\n- **Load balancing** : queries de reporting sur les secondaries read-only\n\n### Coûts\nAlways On demande **Enterprise Edition** sur tous les nœuds. C'est cher. Pour un client pharma type UCB : ~30-50 k€/an de licences juste pour HA. Mais l'assurance vaut le coût.\n\n### Alternatives\n- **Basic Availability Groups** : sur Standard Edition, mais limité (1 DB, 2 replicas)\n- **Log Shipping** : vieux, mais simple et pas cher · pour DR asynchrone budget-friendly\n- **SQL Server on Azure/AWS Managed Instance** : HA géré par le cloud provider\n\n[TIP|Setup d'un Always On est complexe. Chez Dasolabs, on a un consultant expert (Sophie) qui prend 2-4 semaines pour un setup 3 nœuds propre.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -234,39 +300,39 @@
     {
       "position": 20,
       "kind": "QUIZ",
-      "section": "2 · SELECT — extraire des données",
-      "title": "Quiz 2 — SELECT",
+      "section": "4 · Backup / Restore / DR",
+      "title": "Quiz 4 — Backup/DR",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Pour compter les batchs par produit, on utilise…",
+            "prompt": "Point-in-time recovery nécessite quel recovery model ?",
             "options": [
-              "COUNT(*) avec GROUP BY product",
-              "SUM(product)",
-              "ORDER BY",
-              "Rien"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Pour joindre 2 tables et garder seulement les lignes qui matchent des 2 côtés…",
-            "options": [
-              "LEFT JOIN",
-              "INNER JOIN",
-              "CROSS JOIN",
-              "FULL OUTER"
+              "SIMPLE",
+              "FULL (avec backup log régulier)",
+              "BULK_LOGGED uniquement",
+              "Aucun"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Pour ranker les batchs par rendement par produit, on utilise…",
+            "prompt": "Always On Availability Groups permet…",
             "options": [
-              "ORDER BY simple",
-              "Window function RANK() OVER (PARTITION BY…)",
-              "Une subquery à la main",
-              "Rien c'est impossible"
+              "Rien de spécial",
+              "Réplication temps réel sur 1-8 serveurs · failover auto · read-only secondaries · nécessite Enterprise",
+              "Backup uniquement",
+              "Compression"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un backup non-testé…",
+            "options": [
+              "Est parfaitement sûr",
+              "Est un risque · on n'a AUCUNE garantie qu'il restaurera en cas de besoin · à tester mensuellement",
+              "Sert à rien",
+              "Rien"
             ],
             "correctIndex": 1
           }
@@ -277,9 +343,9 @@
     {
       "position": 21,
       "kind": "CONTENT",
-      "section": "3 · INSERT, UPDATE, DELETE",
-      "title": "INSERT — ajouter des données",
-      "bodyMd": "## Insertion de base\n\n    INSERT INTO batches (product, start_time)\n    VALUES ('ProductA', GETDATE());\n\n### Insert multi-lignes\n    INSERT INTO batches (product, start_time)\n    VALUES ('ProductA', GETDATE()), ('ProductB', GETDATE());\n\n### Insert from SELECT\n    INSERT INTO batches_archive\n    SELECT * FROM batches WHERE end_time < DATEADD(year, -1, GETDATE());\n\n### IDENTITY (auto-increment)\nColonnes IDENTITY(1,1) auto-incrementent. Ne pas les fournir à l'INSERT.",
+      "section": "5 · Sécurité et compliance",
+      "title": "Modèle de sécurité SQL Server",
+      "bodyMd": "## Authentification et autorisation\n\nSQL Server a un modèle de sécurité en **plusieurs couches** : authentification (qui es-tu ?) et autorisation (que peux-tu faire ?).\n\n### Authentification — 2 modes\n[KV|**Windows Authentication**:comptes AD · single sign-on · **recommandé**||**SQL Authentication**:login/password gérés par SQL · pour apps sans intégration AD ou services externes]\n\nEn pharma, **Windows Auth privilégié** — un utilisateur Active Directory se connecte avec son compte, pas de mot de passe SQL à gérer.\n\n### Hiérarchie des principals\n[STEPS|**Login** : identité au niveau instance · sa, DOMAIN\\user||**Database User** : mapping du login dans une DB spécifique||**Role** : groupe de permissions · role membership pour un user||**Schema** : namespace des objets (tables, vues) · permissions au niveau schéma]\n\n### Rôles serveur prédéfinis\n- **sysadmin** : full control · à réserver aux 2-3 admins DB\n- **securityadmin** : gérer logins et permissions\n- **dbcreator** : créer/altérer DBs\n- **bulkadmin** : opérations BULK INSERT\n- **public** : rôle par défaut\n\n### Rôles database prédéfinis\n- **db_owner** : full control sur la DB\n- **db_datareader** : lecture toutes les tables\n- **db_datawriter** : écriture toutes les tables\n- **db_ddladmin** : opérations DDL (CREATE, ALTER)\n- **db_denydatareader/writer** : refus explicite\n\n### Principle of Least Privilege\nUn compte d'app **NE DOIT PAS** être db_owner. Il doit avoir uniquement les permissions strictement nécessaires. Exemple typique pour app MES :\n\n    CREATE ROLE app_mes_role;\n    GRANT SELECT ON SCHEMA::mes TO app_mes_role;\n    GRANT INSERT, UPDATE ON SCHEMA::mes TO app_mes_role;\n    GRANT EXECUTE ON SCHEMA::mes TO app_mes_role;\n\n    CREATE USER app_mes FROM LOGIN app_mes;\n    EXEC sp_addrolemember 'app_mes_role', 'app_mes';\n\nLe compte peut lire/écrire dans le schéma mes, exécuter les sprocs, mais **rien d'autre**. Il ne peut pas créer de tables, altérer, drop, backup.\n\n[RULE|**Aucun compte applicatif en db_owner ou sysadmin en pharma production.** Non-négociable · principle of least privilege est un axiome sécurité.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -287,9 +353,9 @@
     {
       "position": 22,
       "kind": "CONTENT",
-      "section": "3 · INSERT, UPDATE, DELETE",
-      "title": "UPDATE — modifier",
-      "bodyMd": "## Modifier données existantes\n\n    UPDATE batches\n    SET status = 'ok', end_time = GETDATE()\n    WHERE batch_id = 123;\n\n### UPDATE avec JOIN\n    UPDATE b\n    SET b.product_name = p.name\n    FROM batches b\n    INNER JOIN products p ON b.product_id = p.id;\n\n[WARN|**Toujours** un WHERE clair. Un UPDATE sans WHERE modifie TOUTES les lignes → catastrophe.]",
+      "section": "5 · Sécurité et compliance",
+      "title": "Audit et compliance",
+      "bodyMd": "## Traçabilité des accès\n\nEn pharma, la **traçabilité des accès DB** est obligatoire pour la compliance 21 CFR Part 11. Toute lecture/modification de données sensibles doit être tracée.\n\n### SQL Server Audit\nDepuis SQL 2008, un système d'audit natif :\n\n    CREATE SERVER AUDIT PharmaAudit\n    TO FILE (FILEPATH = 'D:\\Audit\\', MAX_SIZE = 100MB, MAX_FILES = 100)\n    WITH (ON_FAILURE = SHUTDOWN);\n\n    CREATE SERVER AUDIT SPECIFICATION LoginAudit\n    FOR SERVER AUDIT PharmaAudit\n    ADD (FAILED_LOGIN_GROUP), ADD (SUCCESSFUL_LOGIN_GROUP);\n\n    CREATE DATABASE AUDIT SPECIFICATION BatchAudit\n    FOR SERVER AUDIT PharmaAudit\n    ADD (SELECT, UPDATE, DELETE ON dbo.Batches BY public);\n\n    ALTER SERVER AUDIT PharmaAudit WITH (STATE = ON);\n\nChaque event est écrit dans un fichier binaire, lisible via **sys.fn_get_audit_file**.\n\n### ON_FAILURE = SHUTDOWN\nOption critique en pharma : si le système d'audit ne peut plus écrire (disque plein, corruption), **SQL Server s'arrête**. C'est brutal, mais conforme : plutôt s'arrêter que travailler sans audit.\n\n### Sensitive Data Discovery\nDepuis SQL 2019, une feature qui identifie automatiquement les colonnes sensibles (nom, email, SSN, etc.) et suggère les classifications :\n\n    SELECT * FROM sys.sensitivity_classifications;\n\nUtile pour cartographier ce qui doit être audité/chiffré.\n\n### Row-Level Security\nDepuis SQL 2016, on peut restreindre les lignes visibles par utilisateur :\n\n    CREATE FUNCTION Security.RestrictBySite(@Site NVARCHAR(50))\n    RETURNS TABLE WITH SCHEMABINDING\n    AS RETURN\n        SELECT 1 AS AccessGranted\n        WHERE @Site = USER_NAME() OR IS_MEMBER('db_owner') = 1;\n\n    CREATE SECURITY POLICY SitePolicy\n    ADD FILTER PREDICATE Security.RestrictBySite(Site) ON dbo.Batches;\n\nRésultat : un opérateur site A ne voit QUE les batchs site A. Pratique pour multi-tenant.\n\n### Always Encrypted\nLes colonnes marquées Always Encrypted sont chiffrées **côté client** (l'app détient les clés). SQL Server ne voit que du chiffré. Utile pour données ultra-sensibles (SSN, données santé patient).\n\n[TIP|Sur projet pharma, on active systématiquement SQL Server Audit avec log dédié + rétention 10 ans. Coût disque : ~50 GB/an sur DBs de taille moyenne. Compliance : totale.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -297,546 +363,244 @@
     {
       "position": 23,
       "kind": "CONTENT",
-      "section": "3 · INSERT, UPDATE, DELETE",
-      "title": "DELETE — supprimer",
-      "bodyMd": "## Suppression\n\n    DELETE FROM batches WHERE end_time < DATEADD(year, -5, GETDATE());\n\n### TRUNCATE — plus rapide\n    TRUNCATE TABLE temp_data;  -- vide toute la table\n\n### DELETE vs TRUNCATE\n[KV|**DELETE**:logé transaction · WHERE possible · déclenche triggers||**TRUNCATE**:reset auto-increment · rapide · pas de WHERE · minimal logging]\n\n[DANGER|Toujours BEGIN TRANSACTION avant un UPDATE/DELETE risqué → ROLLBACK possible si erreur.]",
+      "section": "5 · Sécurité et compliance",
+      "title": "TDE — Transparent Data Encryption",
+      "bodyMd": "## Chiffrement au repos\n\n**TDE** chiffre les fichiers DB (.mdf, .ndf, .ldf) au repos. Si un serveur ou disque est volé, les données restent illisibles sans les clés.\n\n### Comment ça marche\n[STEPS|**Database Master Key** : clé racine · dans la DB master||**Certificate** : signé par DMK · protège la Database Encryption Key||**Database Encryption Key (DEK)** : clé qui chiffre effectivement la DB · une par DB||**Chiffrement au write, déchiffrement au read** : transparent pour l'application]\n\n### Setup basique\n\n    USE master;\n    CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'StrongPassword123!';\n\n    CREATE CERTIFICATE TDECert\n    WITH SUBJECT = 'TDE Certificate';\n\n    USE PharmaDB;\n    CREATE DATABASE ENCRYPTION KEY\n    WITH ALGORITHM = AES_256\n    ENCRYPTION BY SERVER CERTIFICATE TDECert;\n\n    ALTER DATABASE PharmaDB SET ENCRYPTION ON;\n\nAprès quelques minutes/heures (selon taille), la DB est chiffrée.\n\n### Backup du certificat — CRITIQUE\nSans le certificat, **impossible de restaurer les backups**. Il faut absolument le sauvegarder :\n\n    BACKUP CERTIFICATE TDECert\n    TO FILE = 'D:\\Certs\\TDECert.cer'\n    WITH PRIVATE KEY (\n        FILE = 'D:\\Certs\\TDECert.pvk',\n        ENCRYPTION BY PASSWORD = 'BackupPassword456!'\n    );\n\nCe backup certificate va dans un **coffre-fort**, à part des serveurs SQL. Sans lui = perte data définitive.\n\n### Impact perf\nTDE ajoute typiquement **3-10 % de CPU**. Négligeable sur la plupart des workloads. Non applicable sur backups compressés (le chiffrement empêche la compression).\n\n### Conformité\nTDE est **exigé** par :\n- GAMP 5 (pharma)\n- GDPR (données personnelles)\n- HIPAA (santé USA)\n- PCI-DSS (cartes bancaires)\n\nSur un projet pharma sans TDE = risque d'audit majeur.\n\n[DANGER|**Ne jamais perdre le certificate TDE**. Un vol de disque avec backup mais sans certificate = données perdues. Un serveur qui meurt avec DB TDE sans backup certificate = data perdue.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 24,
-      "kind": "CONTENT",
-      "section": "3 · INSERT, UPDATE, DELETE",
-      "title": "MERGE — upsert",
-      "bodyMd": "## Insert-or-update en une commande\n\n    MERGE INTO target_table AS t\n    USING source_table AS s ON t.id = s.id\n    WHEN MATCHED THEN\n      UPDATE SET t.value = s.value\n    WHEN NOT MATCHED THEN\n      INSERT (id, value) VALUES (s.id, s.value);\n\n### Cas d'usage\n- Sync entre 2 tables\n- Data ETL (Extract Transform Load)\n- Import batch de fichier CSV",
+      "kind": "QUIZ",
+      "section": "5 · Sécurité et compliance",
+      "title": "Quiz 5 — Sécurité",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Principle of Least Privilege signifie…",
+            "options": [
+              "Rien",
+              "Chaque compte a UNIQUEMENT les permissions strictement nécessaires · pas db_owner pour un compte d'app",
+              "Tout le monde admin",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "SQL Server Audit avec ON_FAILURE = SHUTDOWN…",
+            "options": [
+              "Optionnel",
+              "Arrête SQL Server si l'audit ne peut plus écrire · conforme pharma · plutôt s'arrêter que travailler sans traçabilité",
+              "Fait crash",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "TDE (Transparent Data Encryption) chiffre…",
+            "options": [
+              "Rien",
+              "Les fichiers DB au repos · protège contre vol de disque · nécessaire pharma GAMP 5",
+              "Le réseau",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 25,
       "kind": "CONTENT",
-      "section": "3 · INSERT, UPDATE, DELETE",
-      "title": "Transactions",
-      "bodyMd": "## Atomicité des opérations\n\n### Structure\n    BEGIN TRANSACTION;\n\n    UPDATE inventory SET qty = qty - 10 WHERE product = 'A';\n    INSERT INTO orders (product, qty) VALUES ('A', 10);\n\n    -- Si tout OK :\n    COMMIT;\n\n    -- Si erreur :\n    ROLLBACK;\n\n### Isolation levels\n[KV|**READ UNCOMMITTED**:dirty reads possibles||**READ COMMITTED**:default · pas de dirty reads||**REPEATABLE READ**:même valeur si relu||**SERIALIZABLE**:isolation max · verrous stricts]\n\n[TIP|En pharma, transactions **obligatoires** pour cohérence GAMP 5.]",
+      "section": "6 · Intégration industrielle",
+      "title": "SQL Server dans un stack MES/SCADA",
+      "bodyMd": "## Où SQL Server s'intègre\n\nDans un projet automation moderne, SQL Server intervient à plusieurs endroits.\n\n### Les usages typiques\n[KV|**MES database**:Werum PAS-X, POMSnet, AVEVA MES · stockent recettes, batchs, EBRs en SQL Server||**Historian metadata**:AVEVA Historian et PI System stockent tags, users, config en SQL Server||**SCADA config**:WinCC RT, InTouch stockent HMI config en SQL Server||**Reporting**:AVEVA Report, SSRS · queries SQL pour générer PDFs||**Custom apps**:apps métier .NET connectées à SQL Server||**Data mart**:consolidation cross-sites en SQL Server]\n\n### Pattern architectural\n[STEPS|**PLC** produit les données brutes (temp, pression, débit)||**SCADA** archive dans Historian (time-series optimisé)||**MES** orchestre production · stocke ordres et résultats en SQL||**Data intégration** : ETL nocturne agrège Historian + MES en Data Mart SQL||**BI/Reporting** : Power BI, SSRS, AVEVA Report lisent le Data Mart]\n\n### Comment MES et Historian se parlent\nLe MES ne stocke pas les valeurs process haute fréquence (5 sec, 1 sec) — c'est le job de l'Historian. Il stocke uniquement :\n- Métadonnées de batch (ID, produit, dates, opérateur)\n- Milestones (start, end de phase)\n- Résultats consolidés (rendement, T° moyenne)\n- Événements notables (alarmes, déviations)\n\nQuand un rapport EBR veut afficher la courbe de T° du batch, il **interroge l'Historian**, pas le MES. C'est une séparation architecturale importante.\n\n### Communication cross-systems\nPlusieurs façons de faire parler ces systèmes :\n1. **Linked Servers** : SQL Server voit un autre SGBD comme s'il était local · lourd, à éviter\n2. **SSIS ETL** : intégrations batch nocturnes robustes\n3. **Service Broker** : queue de messages asynchrone dans SQL Server · natif\n4. **API REST** : moderne, mais nécessite dev\n5. **OPC UA** : pour Historian et systèmes OT\n\nChez Dasolabs, on privilégie **SSIS ETL nocturnes** pour la synchronisation Historian → MES → Data Mart. Robuste et audit-friendly.\n\n[TIP|**Anti-pattern à éviter** : ne JAMAIS faire des requêtes cross-systems en temps réel (« SELECT ... FROM MES JOIN Historian JOIN SCADA »). Les linked servers créent des dépendances catastrophiques. Toujours passer par ETL.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 26,
-      "kind": "QUIZ",
-      "section": "3 · INSERT, UPDATE, DELETE",
-      "title": "Quiz 3 — INSERT/UPDATE/DELETE",
-      "bodyMd": "",
+      "kind": "CONTENT",
+      "section": "6 · Intégration industrielle",
+      "title": "AVEVA System Platform et SQL Server",
+      "bodyMd": "## L'intégration prima donna\n\n**AVEVA System Platform** (ex Wonderware) utilise SQL Server comme **backing store** pour son Galaxy Repository (référentiel objets).\n\n### Ce qui va dans SQL Server côté AVEVA\n[KV|**Galaxy DB**:tous les objets (Areas, Tags, HMI screens, scripts) sont stockés en SQL||**Alarm DB**:archives des alarmes||**Historian metadata**:configuration Historian (tags, retention, users)||**Batch DB**:si AVEVA Batch Management, stocke recettes et batchs||**MES DB**:si AVEVA MES est utilisé]\n\n### Sizing typique AVEVA\nPour un client pharma type UCB avec System Platform, Historian et Batch :\n- Galaxy DB : 5-20 GB\n- Alarm DB : 20-50 GB (rétention 2 ans)\n- Historian archives : plusieurs TB (pas dans SQL Server directement, mais métadonnées oui)\n- Backup complet : ~200 GB\n\n### Le SMC — System Management Console\nL'outil AVEVA pour gérer la Galaxy fait tout via SQL Server. Sauvegarde de Galaxy = export XML + backup de la DB SQL. Restore = import XML + restore DB.\n\n### Bonnes pratiques Dasolabs\n[STEPS|**SQL Server dédié** pour la Galaxy · pas mutualisé avec MES ou autre app||**FULL recovery** avec backups logs 15 min · point-in-time obligatoire||**TempDB sur SSD** dédié · System Platform génère beaucoup de temp||**Firewall strict** : accès SQL uniquement depuis les nœuds AVEVA||**Backup DB + export Galaxy** quotidiens · les 2 sont nécessaires||**Version SQL Server** : celle certifiée par AVEVA · pas la dernière au hasard]\n\n### Corruption Galaxy — le cauchemar\nJ'ai vu 2 fois en 10 ans : Galaxy corrompue → System Platform ne démarre plus → production arrêtée. Diagnostic complexe.\n\n**Cause fréquente** : SQL Server tué proprement (électricité coupée sans onduleur), et corruption des pages.\n\n**Prévention** :\n- Onduleur (UPS)\n- Backups fiables testés\n- DBCC CHECKDB weekly\n- Alertes disque plein\n\n### Support AVEVA / SQL Server\nAVEVA certifie certaines versions SQL Server. Il faut vérifier la compatibilité avant d'installer/mettre à jour. Un mismatch = pas de support.\n\n[RULE|Un SQL Server sous AVEVA System Platform est un composant critique. **Onduleur + backups testés + monitoring = non-négociable.**]",
       "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Pour supprimer toute une table rapidement…",
-            "options": [
-              "DELETE FROM t",
-              "TRUNCATE TABLE t",
-              "DROP TABLE t",
-              "Redémarrer SQL Server"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour insert-or-update en une commande…",
-            "options": [
-              "IF/ELSE en boucle",
-              "MERGE INTO",
-              "Impossible",
-              "TRUNCATE + INSERT"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
+      "quiz": null,
       "imageUrl": null
     },
     {
       "position": 27,
       "kind": "CONTENT",
-      "section": "4 · Optimisation performance",
-      "title": "Les index",
-      "bodyMd": "## Accélérer les recherches\n\n### Types d'index\n[KV|**Clustered index**:1 par table · organise physiquement les données · souvent PRIMARY KEY||**Non-clustered index**:N par table · pointeurs vers lignes · pour colonnes dans WHERE/JOIN||**Filtered index**:index partiel sur sous-ensemble · rare||**Unique index**:équivalent à UNIQUE constraint||**Full-text index**:recherche texte avancée]\n\n### Créer un index\n    CREATE NONCLUSTERED INDEX IX_batches_product\n    ON batches(product) INCLUDE (yield);\n\n### Coût\nLes index accélèrent SELECT mais ralentissent INSERT/UPDATE. Balance à trouver.",
+      "section": "6 · Intégration industrielle",
+      "title": "Data mart pharma — cas UCB",
+      "bodyMd": "## Reporting cross-batchs\n\nSur un projet UCB, on a construit un **data mart SQL Server** qui consolide les données de tous les batchs produits pour le reporting management.\n\n### L'architecture\n[STEPS|**Sources** : MES Werum · Historian AVEVA · LIMS Labware · SAP · GMAO||**ETL SSIS nocturne** : 2h-6h · consolide toutes les données de la journée||**Data Mart** SQL Server : ~500 GB · rétention 10 ans||**Cubes SSAS** (Analysis Services) : pour Power BI en libre-service||**Rapports SSRS** : rapports mensuels management · KPIs pharma]\n\n### Schéma du data mart\nModèle en étoile classique BI :\n- Table de faits **Batch** : 1 ligne par batch · ~100 colonnes\n- Dimensions : Produit, Site, Ligne, Opérateur, Recette, Date\n\n### Volume de data\n- 500 batchs/an\n- 40 phases par batch\n- 20 000 valeurs process par batch\n- 30 tests QA par batch\n\nTotal : ~100 M enregistrements dans la table de faits Phase, ~10 M en tests QA, ~10 M en événements.\n\n### Perf challenges\nUn data mart pharma pose 3 défis :\n1. **ETL nocturne rapide** : tout doit tenir en 4h (2h-6h)\n2. **Requêtes reporting rapides** : dashboards doivent charger en <5 sec\n3. **Historique long** : 10 ans obligatoire, mais requêtes recentes doivent rester rapides\n\nSolutions :\n- **Partitionnement** de la table de faits par année\n- **Columnstore indexes** sur les colonnes numériques (compression 10x)\n- **Materialized views** (indexed views) pour agrégats fréquents\n- **SSAS cubes** pour pré-calculs\n\n### KPIs typiques calculés\n[KV|**OEE** (Overall Equipment Effectiveness)||**Rendement moyen** par produit||**Nb de NC** (Non-Conformités) par batch||**Temps de cycle** moyen||**Uptime** équipement||**Consommation matières** vs prévisionnel]\n\n### ROI\nSetup data mart : 6 mois, ~400 k€. Bénéfices :\n- Reporting management automatisé (avant : 5 jours-hommes/mois)\n- Traçabilité audit facilitée\n- Identification tendances qualité\n- Facilité de rappel produit\n\nAmortissement : 2 ans.\n\n[TIP|Un data mart pharma bien conçu devient un **actif stratégique** de l'entreprise. Vaut chaque euro investi.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 28,
-      "kind": "CONTENT",
-      "section": "4 · Optimisation performance",
-      "title": "Plan d'exécution",
-      "bodyMd": "## Comprendre comment SQL exécute\n\n### Analyzer le plan\nSSMS → **Include Actual Execution Plan** (Ctrl+M) → exécuter query.\n\n### Ce qu'on regarde\n- Sequential scan vs Index seek\n- Coût de chaque étape (%)\n- Estimations vs réel (divergence = stats obsolètes)\n\n### Corrections courantes\n- Ajouter un index\n- Réécrire une subquery en JOIN\n- Ajouter un TOP\n- Refactoriser la logique",
+      "kind": "QUIZ",
+      "section": "6 · Intégration industrielle",
+      "title": "Quiz 6 — Intégration",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Un MES stocke typiquement dans SQL Server…",
+            "options": [
+              "Les valeurs 1 sec Historian",
+              "Métadonnées batchs, milestones, résultats consolidés, événements · PAS les valeurs process haute fréquence",
+              "Rien",
+              "Uniquement backups"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un data mart pharma consolide typiquement…",
+            "options": [
+              "Rien",
+              "MES + Historian + LIMS + SAP + GMAO via ETL nocturne · pour reporting management et audit",
+              "Uniquement des logs",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "AVEVA System Platform stocke sa Galaxy dans…",
+            "options": [
+              "MySQL",
+              "SQL Server (backing store obligatoire)",
+              "Oracle",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 29,
       "kind": "CONTENT",
-      "section": "4 · Optimisation performance",
-      "title": "Statistiques",
-      "bodyMd": "## Optimizer se base sur stats\n\n### Auto-update stats\n    ALTER DATABASE Dasolabs_MES SET AUTO_UPDATE_STATISTICS ON;\n\n### Update manuel\n    UPDATE STATISTICS batches;\n\n### Quand ?\n- Après gros INSERT/DELETE\n- Après création index\n- Si query plan divergent des réels",
+      "section": "7 · Certification",
+      "title": "Prêt pour l'évaluation ?",
+      "bodyMd": "## Quiz certifiant final\n\nCette formation SQL Server industriel couvre :\n\n- Architecture SQL Server (Engine, Buffer Pool, TempDB)\n- Installation pharma (sizing, config)\n- T-SQL avancé (CTE, window functions, MERGE, sprocs)\n- Indexation et plans d'exécution\n- Backup/Restore/DR (recovery models, PITR, Always On)\n- Sécurité (auth, roles, audit, TDE)\n- Intégration industrielle (AVEVA, MES, data mart)\n\n[TIP|Seuil : 70 %. Refaisable autant que nécessaire.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 30,
-      "kind": "CONTENT",
-      "section": "4 · Optimisation performance",
-      "title": "Partitioning (Enterprise)",
-      "bodyMd": "## Grosses tables\n\n### Cas d'usage\nTable de 100M+ lignes → partitionner par mois pour requêtes rapides.\n\n### Configuration\n    CREATE PARTITION FUNCTION pf_monthly (DATETIME2)\n    AS RANGE RIGHT FOR VALUES ('2026-02-01', '2026-03-01', …);\n\n### Bénéfice\nQueries avec WHERE date = ... : SQL ne lit que la partition concernée.\n\n[TIP|Partitioning = Enterprise edition. Pour Standard, splits manuels par table (batches_2024, batches_2025…).]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 31,
       "kind": "QUIZ",
-      "section": "4 · Optimisation performance",
-      "title": "Quiz 4 — Optim",
+      "section": "7 · Certification",
+      "title": "🎓 Quiz certifiant SQL Server",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Pour accélérer un SELECT avec WHERE product = X…",
+            "prompt": "L'unité de stockage SQL Server est…",
             "options": [
-              "Créer un index sur product",
+              "1 KB",
+              "8 KB (la page) · 8 pages = 1 extent (64 KB)",
+              "1 MB",
+              "16 KB"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "TempDB…",
+            "options": [
+              "Config globale",
+              "Base système temporaire · reset à chaque restart · à placer sur SSD dédié · 1 fichier par core CPU",
+              "Backup uniquement",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Point-in-time recovery nécessite…",
+            "options": [
+              "SIMPLE recovery",
+              "FULL recovery + backup log régulier · permet restore à la seconde près",
+              "BULK_LOGGED uniquement",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "CTE (Common Table Expression) est…",
+            "options": [
+              "Une table temporaire matérialisée",
+              "Un alias de subquery non-matérialisé, valable le temps de la requête · supporte récursion",
+              "Un index",
+              "Une trigger"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Window function comme SUM() OVER (PARTITION BY x)…",
+            "options": [
+              "Réduit les lignes comme GROUP BY",
+              "Calcule par groupe MAIS garde toutes les lignes de départ",
+              "Ne fonctionne pas",
+              "Remplace WHERE"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Index seek vs table scan…",
+            "options": [
+              "Identiques",
+              "Seek = navigation dans B-tree, très rapide · Scan = parcours toute la table, catastrophique sur grandes tables",
               "Rien",
-              "Ajouter des colonnes",
-              "Réduire les données"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Un plan d'exécution qui montre 'Table Scan' au lieu de 'Index Seek' indique…",
-            "options": [
-              "Performance optimale",
-              "Un index manquant probablement",
-              "SQL Server est cassé",
-              "Tout va bien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 32,
-      "kind": "CONTENT",
-      "section": "5 · Procédures stockées et fonctions",
-      "title": "Stored procedures",
-      "bodyMd": "## Code SQL réutilisable\n\n### Structure\n    CREATE PROCEDURE GetBatchesByProduct\n      @product NVARCHAR(50),\n      @minYield DECIMAL(5,2) = 0\n    AS\n    BEGIN\n      SET NOCOUNT ON;\n      SELECT batch_id, yield\n      FROM batches\n      WHERE product = @product AND yield >= @minYield\n      ORDER BY start_time DESC;\n    END;\n\n### Appel\n    EXEC GetBatchesByProduct @product = 'ProductA', @minYield = 90.0;\n\n### Bénéfices\n- **Sécurité** : accorder droits sur proc, pas sur tables\n- **Performance** : plan mis en cache\n- **Maintenance** : logique centralisée",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 33,
-      "kind": "CONTENT",
-      "section": "5 · Procédures stockées et fonctions",
-      "title": "Functions",
-      "bodyMd": "## Fonctions retournant valeur\n\n### Scalar function\n    CREATE FUNCTION dbo.CalculateYield(@ok INT, @total INT)\n    RETURNS DECIMAL(5,2)\n    AS BEGIN\n      RETURN CAST(@ok AS DECIMAL) / @total * 100.0;\n    END;\n\n### Utilisation\n    SELECT batch_id, dbo.CalculateYield(qty_ok, qty_total) as yield\n    FROM batches;\n\n### Table-valued function\nRetourne une table (comme une vue paramétrable).",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 34,
-      "kind": "CONTENT",
-      "section": "5 · Procédures stockées et fonctions",
-      "title": "Triggers",
-      "bodyMd": "## Actions automatiques sur modif\n\n### AFTER trigger\n    CREATE TRIGGER trg_audit_batches\n    ON batches\n    AFTER UPDATE\n    AS BEGIN\n      INSERT INTO audit_log (table_name, action, changed_at)\n      VALUES ('batches', 'UPDATE', GETDATE());\n    END;\n\n### Cas d'usage\n- Audit trail auto\n- Validation cohérence data\n- Cascade personnalisée\n\n[WARN|Trigger cachés = source de bugs difficiles à débug. Utiliser avec parcimonie.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 35,
-      "kind": "CONTENT",
-      "section": "5 · Procédures stockées et fonctions",
-      "title": "Vues",
-      "bodyMd": "## Requête réutilisable en objet DB\n\n    CREATE VIEW v_recent_batches AS\n    SELECT batch_id, product, yield, DATEDIFF(minute, start_time, end_time) as duration_min\n    FROM batches\n    WHERE end_time > DATEADD(day, -30, GETDATE());\n\n### Utilisation\n    SELECT * FROM v_recent_batches WHERE yield > 95;\n\n### Bénéfices\n- Simplifier queries complexes\n- Sécurité : masquer colonnes sensibles\n- Réutilisation",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 36,
-      "kind": "QUIZ",
-      "section": "5 · Procédures stockées et fonctions",
-      "title": "Quiz 5 — Procédures",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Une stored procedure est…",
-            "options": [
-              "Une variable SQL",
-              "Un bloc de code SQL nommé et réutilisable",
-              "Un index",
-              "Une vue"
+              "Impossible"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Une vue (VIEW) est…",
+            "prompt": "Always On Availability Groups…",
             "options": [
-              "Une copie physique des données",
-              "Un query nommé qui se recalcule à chaque appel",
-              "Un index",
-              "Une DB"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 37,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité",
-      "title": "Utilisateurs et logins",
-      "bodyMd": "## Authentification SQL Server\n\n### Windows authentication\nUser Windows AD → login SQL auto. Recommandé.\n\n### SQL authentication\nCréer user SQL local :\n    CREATE LOGIN dasolabs_app WITH PASSWORD = 'StrongP@ss123!';\n    CREATE USER dasolabs_app FOR LOGIN dasolabs_app;\n\n### SA account\nSA = Super Admin. Password fort obligatoire.\n\n[DANGER|SA avec password vide ou faible = compromission garantie. Toujours password ≥ 12 chars complexe.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 38,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité",
-      "title": "Roles et permissions",
-      "bodyMd": "## Regrouper permissions\n\n### Server roles\n[KV|**sysadmin**:tout · attention||**dbcreator**:créer/dropper DB||**securityadmin**:gérer logins||**bulkadmin**:BULK INSERT]\n\n### Database roles\n[KV|**db_owner**:tout dans la DB||**db_datareader**:lecture seule||**db_datawriter**:écriture||**db_ddladmin**:DDL (CREATE, ALTER, DROP)]\n\n### GRANT\n    GRANT SELECT ON batches TO dasolabs_readonly;\n    GRANT EXECUTE ON GetBatchesByProduct TO dasolabs_app;",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 39,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité",
-      "title": "Encryption",
-      "bodyMd": "## Chiffrer les données\n\n### TDE (Transparent Data Encryption)\nEnterprise uniquement. Chiffre entière DB au repos.\n\n### Column-level encryption\n    ENCRYPTBYKEY / DECRYPTBYKEY  -- pour colonnes sensibles\n\n### TLS pour connexions\nActiver TLS obligatoire pour connexions clients → serveur.\n\n[RULE|Pharma / RGPD : chiffrement au repos + en transit obligatoire.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 40,
-      "kind": "CONTENT",
-      "section": "6 · Sécurité",
-      "title": "SQL Injection — prévention",
-      "bodyMd": "## L'attaque la plus courante\n\n### Vulnérabilité\n    -- Bad code (jamais faire ça)\n    query = \"SELECT * FROM users WHERE name = '\" + userInput + \"'\"\n\nUn user malin tape : `admin' OR 1=1 --` → toutes les lignes retournées.\n\n### Prévention\n**Paramètres bindés** :\n    // C#\n    cmd.CommandText = \"SELECT * FROM users WHERE name = @name\";\n    cmd.Parameters.AddWithValue(\"@name\", userInput);\n\n[DANGER|SQL Injection = risque #1 des applis DB. Jamais concaténer input utilisateur dans query.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 41,
-      "kind": "QUIZ",
-      "section": "6 · Sécurité",
-      "title": "Quiz 6 — Sécurité",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Pour prévenir SQL Injection, on utilise…",
-            "options": [
-              "Un firewall",
-              "Des paramètres bindés (parameterized queries)",
-              "SSL uniquement",
+              "Backup manuel",
+              "Réplication temps réel sur 1-8 serveurs · failover auto · nécessite Enterprise",
+              "Compression",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Le rôle 'db_datareader' permet…",
+            "prompt": "Principle of Least Privilege signifie…",
             "options": [
-              "Lecture seule dans la DB",
-              "DDL",
-              "Tout",
-              "Rien"
-            ],
-            "correctIndex": 0
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 42,
-      "kind": "CONTENT",
-      "section": "7 · Backup et haute disponibilité",
-      "title": "Types de backup",
-      "bodyMd": "## Stratégies de sauvegarde\n\n[KV|**Full**:copie complète · plus long · restore le plus simple||**Differential**:changements depuis dernier full · rapide · quotidien||**Log**:transaction log · toutes les 15 min · restore point-in-time possible||**Filegroup**:backup partiel · pour très grosses DBs]\n\n### Planning typique\n- Full hebdo (dimanche 2h)\n- Differential quotidien (2h)\n- Log toutes les 15 min\n- Rétention : 4 semaines locale + 5 ans off-site",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 43,
-      "kind": "CONTENT",
-      "section": "7 · Backup et haute disponibilité",
-      "title": "Restore",
-      "bodyMd": "## Récupérer une DB\n\n### Restore basique\n    RESTORE DATABASE Dasolabs_MES\n    FROM DISK = 'D:\\Backup\\MES_full.bak'\n    WITH REPLACE, NORECOVERY;\n\n    RESTORE LOG Dasolabs_MES\n    FROM DISK = 'D:\\Backup\\MES_log_20260918.trn'\n    WITH STOPAT = '2026-09-18 14:30', RECOVERY;\n\n### Point-in-time restore\nRestaure à un instant précis (ex: juste avant erreur utilisateur).\n\n[TIP|**Toujours tester les restores** régulièrement. Un backup non testé = pas de backup.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 44,
-      "kind": "CONTENT",
-      "section": "7 · Backup et haute disponibilité",
-      "title": "Always On Availability Groups",
-      "bodyMd": "## Haute disponibilité Enterprise\n\n### AlwaysOn AG\nRéplique DB entre serveurs · bascule automatique en cas de panne.\n\n### Configuration\n- Windows Failover Cluster requis\n- 2+ serveurs (primary + secondaries)\n- Synchronisation sync ou async\n- Bascule automatique si primary tombe\n\n### Cas d'usage pharma\nSCADA critique 24/7 → 2 SQL Server en AG · downtime < 30 sec en cas de crash.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 45,
-      "kind": "QUIZ",
-      "section": "7 · Backup et haute disponibilité",
-      "title": "Quiz 7 — Backup",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Pour restore à un instant précis, il faut…",
-            "options": [
-              "Un full backup seul",
-              "Full + differential + log backups",
-              "Pas possible",
-              "Un snapshot Windows"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "AlwaysOn Availability Groups sert à…",
-            "options": [
-              "Backup",
-              "Haute disponibilité avec bascule automatique",
-              "Optimisation",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 46,
-      "kind": "CONTENT",
-      "section": "8 · Intégration avec l'industrie",
-      "title": "SQL Server + WinCC",
-      "bodyMd": "## WinCC utilise SQL Server\n\n### Ce qui est stocké\n- **Historical data logs** (tag archives)\n- **Alarm archives**\n- **Recipes**\n- **Audit trail**\n- **User administration**\n\n### Sizing\nUne HMI Comfort produit ~1 GB de data par mois. Un SCADA gros peut aller à 100 GB/mois.\n\n### Accès\nQuery directe possible (avec doc structure Siemens) pour reporting custom.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 47,
-      "kind": "CONTENT",
-      "section": "8 · Intégration avec l'industrie",
-      "title": "SQL Server + AVEVA",
-      "bodyMd": "## AVEVA utilise SQL Server\n\n### AVEVA Historian\n- Stockage compressé propriétaire ET SQL Server pour métadonnées\n- Query via SQL avec functions Historian (History table)\n\n### AVEVA Report\n- Report Database sur SQL Server\n- Templates, users, permissions, schedules\n\n### System Platform (Galaxy Repository)\n- SQL Server backend\n- Peut être migré sur cluster",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 48,
-      "kind": "CONTENT",
-      "section": "8 · Intégration avec l'industrie",
-      "title": "MES et ERP",
-      "bodyMd": "## Intégration verticale\n\n### MES\nManufacturing Execution System stocke souvent en SQL Server :\n- Ordres de fabrication\n- Recettes maître\n- Résultats de batchs\n- Traçabilité matières premières\n\n### ERP (SAP, Oracle)\n- SAP a son propre RDBMS (peut être SQL Server)\n- Intégration via connectors ou middleware (BizTalk, MuleSoft)\n\n[TIP|Interface MES ↔ SCADA se fait souvent via **tables SQL partagées** (staging) ou services web.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 49,
-      "kind": "CONTENT",
-      "section": "8 · Intégration avec l'industrie",
-      "title": "Cas pratique — reporting KPI",
-      "bodyMd": "## SQL alimente le SCADA\n\n### Setup\n- SQL Server centralise data des 5 lignes\n- Vue matérialisée `v_daily_kpi` pré-calcule OEE, rendement, taux rebut\n- WinCC lit cette vue toutes les 5 min pour afficher dashboard temps réel\n\n### Bénéfices\n- Calculs faits une fois côté SQL, plusieurs SCADA les affichent\n- Modif KPI → 1 endroit à changer\n- Historisation KPI dans SQL",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 50,
-      "kind": "CONTENT",
-      "section": "8 · Intégration avec l'industrie",
-      "title": "SQL depuis un PLC ?",
-      "bodyMd": "## Peut-on écrire dans SQL depuis un PLC ?\n\n### Directement — non\nUn PLC S7-1500 ne parle pas SQL natif.\n\n### Passerelle\n- **AVEVA Historian** entre PLC et SQL\n- **WinCC** stocke les data en SQL\n- **HighByte / Node-RED** passerelle custom\n- **OPC UA HDA** pour historique\n\n[RULE|PLC = temps réel, cycle court. SQL = transactionnel, latence. Ne pas mélanger.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 51,
-      "kind": "QUIZ",
-      "section": "8 · Intégration avec l'industrie",
-      "title": "Quiz 8 — Intégration",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "WinCC stocke ses archives dans…",
-            "options": [
-              "Un fichier CSV",
-              "SQL Server par défaut",
-              "MongoDB",
-              "Rien"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Un PLC S7-1500 peut-il écrire directement dans SQL Server ?",
-            "options": [
-              "Oui, natif",
-              "Non, il faut passerelle (Historian, WinCC…)",
-              "Uniquement en modbus",
-              "Toujours"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 52,
-      "kind": "CONTENT",
-      "section": "9 · Certification",
-      "title": "Prêt pour l'évaluation ?",
-      "bodyMd": "## Quiz final — 10 questions\n\n[TIP|Seuil 70 %. Bonne chance !]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 53,
-      "kind": "QUIZ",
-      "section": "9 · Certification",
-      "title": "🎓 Quiz certifiant final — SQL Server",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "L'IDE principal pour SQL Server est…",
-            "options": [
-              "Notepad",
-              "SSMS",
-              "Visual Studio Code",
-              "IntelliJ"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour compter les batchs par produit…",
-            "options": [
-              "COUNT(*) avec GROUP BY",
-              "SUM(*)",
-              "TOP 10",
-              "ORDER BY"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Un INNER JOIN garde…",
-            "options": [
-              "Toutes les lignes",
-              "Uniquement lignes qui matchent des 2 côtés",
-              "Lignes gauche seulement",
-              "Aucune ligne"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour accélérer WHERE product = X…",
-            "options": [
-              "Index sur product",
+              "Tout le monde admin",
+              "Chaque compte a UNIQUEMENT les permissions nécessaires · PAS db_owner pour compte d'app",
               "Rien",
-              "Réduire data",
-              "Refactor code"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Une stored procedure…",
-            "options": [
-              "Une variable",
-              "Bloc SQL nommé réutilisable",
-              "Un index",
-              "Une vue"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour prévenir SQL Injection…",
-            "options": [
-              "Firewall",
-              "Paramètres bindés (parameterized queries)",
-              "SSL",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Pour restore point-in-time…",
+            "prompt": "TDE (Transparent Data Encryption) chiffre…",
             "options": [
-              "Full seul",
-              "Full + Differential + Log",
-              "Impossible",
-              "Snapshot"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "WinCC stocke ses archives dans…",
-            "options": [
-              "Fichier CSV",
-              "SQL Server par défaut",
-              "MongoDB",
-              "Redis"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Un plan d'exécution 'Table Scan' indique…",
-            "options": [
-              "Performance optimale",
-              "Index manquant potentiellement",
-              "SQL cassé",
+              "Les logs uniquement",
+              "Les fichiers DB au repos · protège contre vol · backup certificate CRITIQUE à sauvegarder",
+              "Le réseau",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Pour data time-series industrielle massive, mieux vaut…",
+            "prompt": "Data mart pharma consolide…",
             "options": [
-              "SQL Server pur",
-              "Historian dédié (AVEVA, InfluxDB)",
-              "Excel",
+              "Rien",
+              "MES + Historian + LIMS + SAP + GMAO via ETL nocturne · reporting cross-batchs · rétention 10 ans",
+              "Backup uniquement",
               "Rien"
             ],
             "correctIndex": 1
