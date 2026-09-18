@@ -1,520 +1,614 @@
 {
   "slug": "wincc-scada",
-  "title": "WinCC SCADA (Siemens)",
-  "subtitle": "Formation self-service — Débutant · Intermédiaire · Expert",
-  "level": "Débutant à Expert",
-  "duration": "3 jours (≈ 24 h)",
+  "title": "WinCC SCADA",
+  "subtitle": "Formation complète — HMI, SCADA, tags, animations, alarmes, recettes, sécurité",
+  "level": "Intermédiaire",
+  "duration": "≈ 6 h",
+  "isCertifying": true,
+  "passThreshold": 70,
+  "prerequisiteSlug": "programmation-tia-portal",
+  "certificateWording": "Formation « WinCC SCADA » — connaissances fondamentales sur la gamme WinCC (Basic, Comfort, Unified), l'architecture HMI/SCADA, la programmation d'écrans, les tags et connexions PLC, les animations et objets graphiques, le système d'alarmes, les recettes et l'archivage, et la sécurité (utilisateurs, audit trail, GAMP 5). Cette attestation atteste de la formation et de la réussite de l'évaluation. Elle ne constitue pas une certification Siemens officielle.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
-      "section": null,
-      "title": "WinCC SCADA (Siemens)",
-      "bodyMd": "",
+      "section": "1 · Introduction SCADA & WinCC",
+      "title": "Bienvenue — WinCC SCADA",
+      "bodyMd": "## La formation WinCC de A à Z\n\nBienvenue ! Cette formation te forme à **WinCC**, la solution HMI/SCADA de Siemens, du panel opérateur au SCADA d'usine.\n\n[TIP|Prérequis : maîtrise TIA Portal recommandée. WinCC est intégré à TIA depuis 2010.]\n\n### Ce que tu vas maîtriser\n- Les 4 familles WinCC (Basic, Comfort, Advanced, Unified)\n- L'architecture SCADA vs HMI vs MES\n- La programmation d'écrans, animations, alarmes\n- Les tags, les recettes, l'archivage\n- La sécurité et la gestion multi-utilisateurs\n\n[RULE|Quiz certifiant : 10 questions, seuil 70 %.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-01.jpg"
+      "imageUrl": null
     },
     {
       "position": 2,
       "kind": "CONTENT",
-      "section": "INTRODUCTION",
-      "title": "Objectifs de la formation",
-      "bodyMd": "WinCC est la famille SCADA Siemens. Elle couvre du panel HMI 4 pouces (Comfort) au SCADA distribué multi-serveur (WinCC OA). Cette formation vous fait naviguer entre les 4 produits, comprendre lequel choisir et devenir productif sur les plus courants (Comfort et Unified).\n\n**Distinguer les 4 produits** — Comfort, Advanced, Unified, OA — chacun un usage précis.\n\n**Concevoir une IHM opérationnelle** — Screens, faceplates, animations, alarmes hiérarchisées.\n\n**Historisation et reporting** — Historian SQL, tendances multi-tags, exports Excel.\n\n**Multi-langue et gestion utilisateurs** — Traductions industrielles, RBAC, audit trail GxP.\n\n**Architectures redondées et industrialisation** — Serveur redondant, WinCC OA, Openness scripting.\n\n**À retenir :** Comfort pour un panel, Advanced pour poste PC, Unified pour supervision moderne HTML5, OA pour gros multi-serveur. Il n'y a pas UN WinCC — il y en a quatre.",
+      "section": "1 · Introduction SCADA & WinCC",
+      "title": "SCADA vs HMI — clarifier les termes",
+      "bodyMd": "## Deux mondes proches mais distincts\n\n[KV|**HMI (Human-Machine Interface)**:écran local à côté d'une machine · petit format · opérateur direct||**SCADA (Supervisory Control and Data Acquisition)**:supervision globale · plusieurs machines/lignes · panneau de contrôle centralisé · souvent PC/serveur]\n\n### Cas d'usage typiques\n- **HMI** : écran KTP700 (7\") à côté d'une machine · start/stop, réglages basiques, alarmes locales\n- **SCADA** : PC dans salle contrôle · vue synoptique de toute l'usine · alarmes centralisées · reporting\n\n### Le SCADA moderne peut aussi être un HMI géant\nUn écran tactile 24\" avec WinCC Comfort peut faire office de SCADA local pour 1 ligne. Frontière floue.\n\n[TIP|Chez Dasolabs, on parle de \"HMI\" pour tout écran ≤ 15\" et \"SCADA\" pour tout ce qui tourne sur PC/serveur. C'est arbitraire mais pratique.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-02.jpg"
+      "imageUrl": null
     },
     {
       "position": 3,
       "kind": "CONTENT",
-      "section": "INTRODUCTION",
-      "title": "Le parcours en trois niveaux",
-      "bodyMd": "",
+      "section": "1 · Introduction SCADA & WinCC",
+      "title": "La gamme WinCC — 4 familles",
+      "bodyMd": "## Choisir la bonne édition WinCC\n\n[KV|**WinCC Basic**:petits panels KTP · gratuit inclus avec TIA Basic · S7-1200 uniquement||**WinCC Comfort**:panels Comfort · KTP400 Comfort à TP2200 Comfort · fonctions avancées · **le plus utilisé**||**WinCC Advanced**:PC-based SCADA · monoposte · pour PC unique||**WinCC Professional**:SCADA client-serveur · multi-poste · redondance · legacy vers WinCC Unified||**WinCC Unified**:nouvelle génération SCADA (2020+) · web natif · HTML5 · remplace WinCC Professional]\n\n### Roadmap 2026\n- **WinCC Comfort** : maintenu pour les Comfort Panels\n- **WinCC Advanced** : encore vendu mais en fin de vie douce\n- **WinCC Professional** : en fin de vie · migration vers Unified\n- **WinCC Unified** : le futur · investissement Siemens majeur\n\n[TIP|Sur projet neuf 2026 : **WinCC Unified** pour SCADA · **WinCC Comfort** pour panels tactiles machine.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-03.jpg"
+      "imageUrl": null
     },
     {
       "position": 4,
       "kind": "CONTENT",
-      "section": "INTRODUCTION",
-      "title": "Prérequis et environnement de lab",
-      "bodyMd": "- TIA Portal V17+ Professional avec WinCC Comfort + Advanced + Unified installés\n- Cours 'TIA Portal' recommandé — sinon comprendre PLC tags + connexion PLC-HMI\n- SQL Server Express (pour Runtime Historian) — inclus dans le pack Siemens\n- PLC virtuel (PLCSIM Advanced) ou CPU S7-1500 réelle\n- Optionnel : panel Comfort KTP700 pour TP hardware\n\n💡 Un poste WinCC Runtime en prod tourne 24/7 : SSD, RAM 16 Go, onduleur obligatoire, monitoring OS.",
+      "section": "1 · Introduction SCADA & WinCC",
+      "title": "WinCC Comfort — le workhorse",
+      "bodyMd": "## L'HMI le plus courant\n\n**WinCC Comfort** cible les **Comfort Panels** :\n\n### La gamme Comfort Panels\n[KV|**KTP400 Comfort**:4.3\" écran tactile · petit format · IP65 · ~800 €||**KTP700 Comfort**:7\" · standard machine · ~1 200 €||**KTP900 Comfort**:9\" · plus de place graphique · ~1 500 €||**KTP1200 Comfort**:12.1\" · grand format machine · ~2 000 €||**TP1500 Comfort**:15\" · ligne complète · ~2 500 €||**TP1900 Comfort**:19\" · grand HMI industriel · ~3 500 €||**TP2200 Comfort**:22\" · vraiment grand · ~4 500 €]\n\n### Fonctionnalités WinCC Comfort\n- Écrans graphiques (screens)\n- Tags (variables)\n- Alarmes\n- Recettes (jusqu'à 50 recettes typiques)\n- Archivage (jusqu'à quelques semaines)\n- Multi-utilisateurs\n- Web server intégré (accès distant)\n\n[TIP|Un KTP1200 Comfort couvre 80 % des besoins HMI machine. C'est le sweet spot.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-04.jpg"
+      "imageUrl": null
     },
     {
       "position": 5,
       "kind": "CONTENT",
-      "section": "NIVEAU 1",
-      "title": "Débutant",
-      "bodyMd": "",
+      "section": "1 · Introduction SCADA & WinCC",
+      "title": "WinCC Unified — le futur",
+      "bodyMd": "## Nouveau SCADA web natif\n\n**WinCC Unified** est la révolution 2020 de Siemens : SCADA nativement web, HTML5, responsive.\n\n### Différences vs WinCC Professional\n[KV|**Interface**:HTML5 · s'ouvre dans un navigateur · pas d'app native||**Client**:aucune install cliente · navigateur Chrome/Edge||**OS serveur**:Windows Server ou Linux (en cours)||**Base de données**:MongoDB (embarquée) · vs SQL Server dans Professional||**Scripting**:JavaScript · vs VB legacy||**Design**:responsive · adapté mobile/tablette]\n\n### Éditions Unified\n- **WinCC Unified Comfort Panels** : sur nouveaux panels Unified (2021+)\n- **WinCC Unified PC** : sur PC serveur\n- **WinCC Unified Runtime** : le runtime déployé sur serveur\n\n[RULE|**Sur projet neuf SCADA à partir de 2024, choisir WinCC Unified**. Pro est en fin de vie douce, migration futur inévitable.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-05.jpg"
+      "imageUrl": null
     },
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Les 4 produits WinCC",
-      "bodyMd": "**WinCC COMFORT / ADVANCED**\n- Comfort : sur panels HMI (KTP, TP700, Comfort Panels 22'')\n- Advanced : sur PC Windows en mode Runtime\n- Intégré à TIA Portal — projet unifié PLC+HMI\n- Jusqu'à 8192 tags (Advanced), 4096 (Comfort)\n- Cible : poste opérateur unique, machine isolée\n- Écrans : approche graphique classique\n\n**WinCC UNIFIED / OA**\n- Unified : web natif HTML5, remplace Comfort/Advanced\n- OA : SCADA distribué historique, gros projets\n- Unified intégré TIA, OA outil séparé\n- Unified : illimité tags, Runtime = navigateur, mobile natif\n- OA : multi-serveur, objets métier, ~150 protocoles\n- Cibles : Unified = greenfield 2024+, OA = gros SCADA 24/7\n\n**À retenir :** En 2026, nouveau projet WinCC greenfield choisit Unified. Comfort et Advanced restent pour l'existant. OA se justifie sur gros process continus (chimie, énergie, pharma).",
+      "section": "1 · Introduction SCADA & WinCC",
+      "title": "Créer un HMI dans TIA Portal",
+      "bodyMd": "## Le wizard HMI\n\nAjouter une HMI dans un projet TIA existant :\n\n[STEPS|**Add new device** → HMI → Comfort Panels → KTP1200 Comfort → V17+||**Wizard** propose : nom, IP, langue par défaut||**Connexions PLC** : sélectionner la CPU du projet||**Choix template** : screens vide ou template prédéfini||**Import tags** : depuis PLC → HMI automatique]\n\n### Interface WinCC dans TIA\nUne fois créé, tu vois le HMI dans Project tree :\n- **Screens** : les écrans à dessiner\n- **Screen management** : modèles, permanents (menus)\n- **HMI tags** : variables locales HMI\n- **Connections** : liens avec PLC\n- **HMI alarms** : catégories d'alarmes\n- **Recipes** : recettes\n- **Historical data** : archivage\n- **Scheduled tasks** : tâches planifiées\n- **Text and graphic lists** : textes multi-langue\n- **User administration** : utilisateurs et rôles\n\n[TIP|**Toujours commencer par les Connections** puis les tags. Le graphisme peut attendre.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-06.jpg"
+      "imageUrl": null
     },
     {
       "position": 7,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Screens et navigation",
-      "bodyMd": "Un projet WinCC = arborescence de Screens (écrans). Chaque écran est une page graphique liée à des tags. On navigue via boutons ou navigation par sélection. Architecture bien pensée = 5 à 10 écrans principaux + faceplates réutilisables.\n\n**Root Screen** — Page d'accueil au démarrage. Synoptique global du procédé.\n\n**Screen templates** — Modèles réutilisables : bandeau haut alarmes, bandeau bas menu, zone centrale variable.\n\n**Faceplates** — Symboles paramétrables. Ex : faceplate 'Pompe' instanciée 15 fois pour 15 pompes.\n\n**Change Screen** — Fonction native. Peut être conditionnelle (droits user, mode équipement).\n\n**Popup et modals** — Écrans overlay pour détails, réglages, acquittements. Ne pas abuser.\n\n**À retenir :** IHM efficace se navigue en 2 clics : synoptique → équipement → détail. Au-delà, l'opérateur se perd et rate les alarmes.",
+      "kind": "QUIZ",
+      "section": "1 · Introduction SCADA & WinCC",
+      "title": "Quiz 1 — Introduction WinCC",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-07.jpg"
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Quelle édition WinCC choisir pour un projet neuf SCADA 2026 ?",
+            "options": [
+              "WinCC Basic",
+              "WinCC Comfort",
+              "WinCC Professional (legacy)",
+              "WinCC Unified"
+            ],
+            "correctIndex": 3
+          },
+          {
+            "prompt": "Un KTP1200 Comfort est…",
+            "options": [
+              "Un PLC",
+              "Un panel HMI 12.1\" tactile",
+              "Un SCADA serveur",
+              "Un variateur"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un HMI se différencie d'un SCADA principalement par…",
+            "options": [
+              "Sa taille et sa localisation (local machine vs supervision globale)",
+              "Son prix uniquement",
+              "Aucune différence",
+              "Le protocole utilisé"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "imageUrl": null
     },
     {
       "position": 8,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Tags — le pont PLC-HMI",
-      "bodyMd": "- Tag HMI = variable liée à un PLC tag ou DB global via connexion PLC-HMI\n- Types : BOOL, INT, DINT, REAL, STRING, DateTime — miroir types PLC\n- Cycle d'acquisition : 100 ms à 60 s selon criticité. 500 ms typique\n- Trigger : cyclique (polling) ou event-based (changement, plus efficace)\n- Scaling : conversion valeur brute PLC → valeur affichée (0-27648 → 0-100%)\n- External tags (liés PLC) vs Internal tags (calculés HMI uniquement)\n\n💡 Éviter les cycles trop rapides — 100 ms sur 500 tags = ~5000 req/s sur le PLC. Ajuster selon la criticité.",
+      "section": "2 · Tags et connexions",
+      "title": "HMI Tags — les variables côté HMI",
+      "bodyMd": "## Les tags dans WinCC\n\nLes tags HMI sont les variables affichées/modifiables à l'écran.\n\n### Deux types\n[KV|**Internal tags**:variables locales HMI · pas liées à un PLC · pour affichage temporaire, calculs||**External tags**:liées à une variable PLC · via connexion · c'est 95 % des cas]\n\n### Créer un external tag\n1. HMI tags → Add new tag\n2. Nom : 'TP_temperature_actuelle'\n3. Type : Real, Int, Bool, String…\n4. Connection : sélectionner la connexion PLC\n5. PLC tag : glisser depuis le PLC ou saisir manuellement\n\n### Import auto depuis PLC\n- Sélectionner plusieurs tags PLC\n- Glisser vers HMI tags\n- Auto-création avec bon type et bonne adresse\n\n[TIP|Convention nommage Dasolabs : préfixer les tags HMI avec 'HMI_' pour les distinguer visuellement dans les scripts.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-08.jpg"
+      "imageUrl": null
     },
     {
       "position": 9,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Faceplate — le composant réutilisable",
-      "bodyMd": "**Pourquoi :** Sur un synoptique avec 20 pompes, dessiner 20 objets identiques = 20× le travail + 20× le risque d'erreur + 20× la douleur pour évoluer. Un faceplate = 1 seul objet, 20 instances qui se mettent à jour ensemble.\n\n**Comment :** 1) Créer un faceplate 'FP_Pump' avec les objets graphiques (cercle, texte, tooltip). 2) Définir les Interface Tags (les tags qu'on paramètre : ex 'Motor'). 3) Utiliser ces tags dans les propriétés dynamiques. 4) Instancier le faceplate sur le synoptique et passer le vrai tag PLC (Pump_A_UDT).\n\n**Pièges :** 1) Modifier un faceplate déjà instancié 20 fois = toutes les instances se mettent à jour → parfois casse. 2) Interface Tags mal choisis = faceplate rigide. 3) Trop d'animations coûtent en RT perf.\n\n**Bonnes pratiques :** Toujours bien concevoir l'interface AVANT d'instancier. Versionner les faceplates. Documenter les Interface Tags. Un faceplate = un contrat, comme un FB PLC.",
+      "section": "2 · Tags et connexions",
+      "title": "Connections — le lien PLC ↔ HMI",
+      "bodyMd": "## Configurer la connexion\n\n### Auto-création\nQuand tu ajoutes une HMI dans un projet TIA existant et que tu draggue un fil dans Network View entre CPU et HMI → connexion auto-créée.\n\n### Manuel\nConnections → Add new connection :\n- Nom : 'Connection_Ligne1'\n- Communication driver : SIMATIC S7 1500\n- Interface : Ethernet\n- IP du partenaire (la CPU)\n\n### Vérification\nLe tag HMI référence maintenant un tag PLC via la connexion. Compilation → OK. Runtime → valeurs lisibles/écritables.\n\n[WARN|**Si l'HMI ne montre pas les valeurs** : 99 % du temps c'est un problème de connexion (IP mauvaise, mot de passe CPU, firewall). Vérifier dans Diagnostics → Communication.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-09.jpg"
+      "imageUrl": null
     },
     {
       "position": 10,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Animation moteur — propriétés dynamiques",
-      "bodyMd": "Un objet Motor typique change d'apparence selon 3 tags PLC : Run (marche), Trip (défaut), Ready (prêt). Configuration via propriétés dynamiques — préférable à VBScript.\n\n```\n(* Configuration via propriétés dynamiques (pas de script) *)\n\nMotor_Symbol (Group)\n├── Body_Circle (Ellipse)\n│   Property 'Fill Color' → Dynamic\n│   Formula : IF Motor.Fb.Tripped THEN Red\n│            ELSIF Motor.Fb.Running THEN Green\n│            ELSIF Motor.Fb.Ready THEN Yellow\n│            ELSE Gray\n│\n├── State_Text (IO Field)\n│   Property 'Text' → Dynamic\n│   Tag : Motor.Fb.State_Text (String écrit par le PLC)\n│\n├── Speed_Bar (Bar)\n│   Property 'Value' → Motor.Fb.Speed_Actual\n│   Property 'Fill Color' → Green si Value > 10 else Gray\n│\n└── Tooltip\n    'État : {Motor.Fb.State_Text}\n     Vitesse : {Motor.Fb.Speed_Actual} Hz\n     Cumul : {Motor.Fb.Runtime_H} h\n     Dernier défaut : {Motor.Fb.Last_Trip_Time}'\n```\n\n**À retenir :** Toujours préférer les propriétés dynamiques natives WinCC à VBScript quand possible : plus rapide en Runtime, moins de bugs, portable Unified/OA.",
+      "section": "2 · Tags et connexions",
+      "title": "Import de tags — bulk import",
+      "bodyMd": "## Rapidité pour gros projets\n\nPour un projet avec 200+ tags HMI, faire du 1-par-1 est mortel.\n\n### Import Excel\n1. Exporter les tags PLC en Excel (bouton Export dans PLC tags)\n2. Copier la sélection dans les HMI tags\n3. TIA gère la correspondance automatique\n\n### Import depuis PLC via glisser-déposer\n- Dans PLC tags, sélectionner un groupe\n- Glisser vers HMI tags\n- Auto-nommage possible avec préfixe/suffixe\n\n[TIP|Astuce : nommer les tags PLC **avec suffixes clairs** dès le début ('temp_cuve1_R' pour Real, 'bp_start_B' pour Bool). Le tri devient trivial.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-10.jpg"
+      "imageUrl": null
     },
     {
       "position": 11,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Runtime Comfort/Advanced — mise en service",
-      "bodyMd": "1. Compile HMI (F7) : vérifier 0 erreurs dans Inspector\n2. Simulation Runtime en dev (menu Online → Start simulation)\n3. Tester tous les screens + navigation + alarmes\n4. Backup du projet TIA (fichier .ap) avant déploiement\n5. Comfort : Download vers le panel via Ethernet ou USB\n6. Advanced : générer Runtime installable (menu Options → Generate Runtime)\n7. Sur poste cible : installer Runtime + coller le pack projet\n8. Config auto-start Windows : Runtime lancé au boot avec le projet\n9. Configurer l'auto-recovery en cas de crash Runtime\n10. Vérifier connexion PLC : Watch table + ping + logs Runtime\n\n⚠ Toujours backup Runtime AVANT toute intervention. Restauration = 30s, refaire un projet = journée.",
+      "kind": "QUIZ",
+      "section": "2 · Tags et connexions",
+      "title": "Quiz 2 — Tags",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-11.jpg"
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Un tag HMI 'external' est…",
+            "options": [
+              "Local à l'HMI",
+              "Lié à un tag PLC via une connexion",
+              "Sur internet",
+              "Sur cloud"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Combien de connexions minimum entre 1 HMI et 1 CPU ?",
+            "options": [
+              "0",
+              "1",
+              "10",
+              "Autant qu'on veut"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
     },
     {
       "position": 12,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "TP N1-1 : Synoptique MIX-01 avec faceplate",
-      "bodyMd": "**Contexte :** TIA V17 + WinCC Advanced + PLCSIM Advanced. Le projet MIX-01 tourne avec 3 UDT_Pump instances (A, B, C). Créer un HMI Advanced Runtime PC.\n\n**Consigne :** 1) Créer un faceplate 'FP_Pump' avec Interface Tag 'Motor : UDT_Pump'. 2) Ajouter : Body_Circle avec Fill Color dynamique selon Motor.Fb.Running/Tripped. 3) State_Text avec Tag Motor.Fb.State_Text. 4) Boutons Start/Stop qui écrivent Motor.Cmd.Start/Stop. 5) Sur Root Screen : instancier 3 fois FP_Pump avec Pump_A_UDT, Pump_B_UDT, Pump_C_UDT. 6) Lancer Runtime simulation, cliquer Start Pump_A → seul A démarre.\n\n**Attendu :** 3 faceplates identiques sur le synoptique, chacun contrôlant sa pompe. Un click sur Start_A démarre uniquement A (visible dans PLCSIM watch table + couleur passe verte). Modif du faceplate = les 3 instances se mettent à jour d'un coup.\n\n💡 Le faceplate se crée dans Project Tree → Faceplate → Add new. Interface Tag = UDT_Pump. Dans les propriétés du faceplate, utiliser 'Interface Tags → Motor' comme référence tag.",
+      "section": "3 · Screens et animations",
+      "title": "Screens — organiser les écrans",
+      "bodyMd": "## Structure typique d'une IHM\n\nUne HMI a **plusieurs écrans** organisés par fonction.\n\n### Types d'écrans typiques\n[KV|**Écran d'accueil (home)**:vue synoptique · résumé de la machine||**Écran par équipement**:un écran par sous-machine (moteur, cuve, ligne)||**Écran alarmes**:liste des alarmes actives + historique||**Écran recettes**:sélection et édition des recettes||**Écran configuration**:paramètres, seuils, calibrations||**Écran maintenance**:runtime, cycles, diagnostic||**Écran login**:authentification utilisateur||**Écran production**:cadence, comptages, rendement]\n\n### Création\nScreens → Add new screen. Nom clair : 'SCREEN_HOME', 'SCREEN_ALARMS'.\n\n### Templates\nPour éviter de répéter (bandeau haut, menu bas) sur chaque écran, utiliser des **templates** (Screen management → Templates).\n\n[TIP|Un template avec logo Dasolabs, horloge, nom utilisateur connecté, bouton alarmes clignotant = base de 20 écrans en 30 secondes chacun ensuite.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-12.jpg"
+      "imageUrl": null
     },
     {
       "position": 13,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "TP N1-2 : Trend view multi-tags",
-      "bodyMd": "**Contexte :** Suite TP N1-1. Le PLC MIX-01 expose : Tank.Level_Actual (0-100 %), Tank.Temperature (0-120 °C), Agitator.Speed_Actual (0-60 Hz). Créer un écran 'Trends' avec un Trend View.\n\n**Consigne :** 1) Créer un nouvel écran 'Trends'. 2) Ajouter un Trend View. 3) Ajouter 3 courbes (Level bleu, Temperature rouge, Speed vert). 4) Configurer axe X = 30 min glissantes, axe Y = auto-scale par courbe. 5) Ajouter des seuils visuels : Level_Low = 20, Level_High = 80 (lignes horizontales). 6) Bouton 'Export CSV' qui sauvegarde les données affichées. 7) Vérifier : forcer variation dans PLCSIM → les courbes bougent en temps réel.\n\n**Attendu :** Trend view en direct affiche 3 courbes qui se mettent à jour toutes les secondes. Zoom + scroll fonctionnels. Export CSV crée un fichier avec 30 min de données horodatées.\n\n💡 Le Trend View est dans Toolbox → Advanced Controls. Config → Data → Add tag pour chaque courbe. Rafraîchissement 1 s typique. Export CSV : propriété 'ExportButton' à activer.",
+      "section": "3 · Screens et animations",
+      "title": "Objets graphiques — la palette",
+      "bodyMd": "## La bibliothèque WinCC\n\nPalette d'objets à droite dans WinCC :\n\n### Basic objects\n- Rectangle, ellipse, ligne\n- Texte, image\n- Connecteurs\n- Boîte de dialogue\n\n### Elements\n[KV|**IO Field**:champ d'affichage / saisie de valeur||**Button**:bouton cliquable · trigger d'action||**Symbolic IO Field**:liste déroulante (dropdown)||**Graphic IO Field**:image change selon valeur (ex : voyant vert/rouge)||**Date/Time Field**:affichage horodaté||**Bar**:barre proportionnelle||**Gauge**:cadran type compteur voiture||**Trend view**:courbe temporelle||**Alarm view**:liste d'alarmes||**Recipe view**:édition recettes||**User view**:gestion utilisateurs]\n\n### Controls (Unified spécifique)\n- Charts moderne\n- Gauges avancées\n- Web view (embed page web)\n\n[TIP|**Ne surchargez pas les écrans**. Max 15-20 objets par écran. Au-delà, opérateur perdu, IHM confuse.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-13.jpg"
+      "imageUrl": null
     },
     {
       "position": 14,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Récapitulatif du niveau 1",
-      "bodyMd": "",
+      "section": "3 · Screens et animations",
+      "title": "Animations — donner vie à l'IHM",
+      "bodyMd": "## Faire réagir un objet à un tag\n\nChaque objet peut être **animé** selon des tags.\n\n### Types d'animations\n[KV|**Display (visibility)**:objet visible / invisible selon tag||**Color change (bg/fg)**:couleur change selon valeur (vert = OK, rouge = alarm)||**Movement (position)**:objet se déplace (rare, pour animation simulée)||**Rotation**:image tourne||**Value display**:le texte / valeur affichée est mis à jour]\n\n### Configuration\nSélectionner objet → Animations tab (bas droite) → Add new animation.\n\n### Exemple : voyant rouge si alarme\n1. Rectangle vert par défaut\n2. Animation \"Appearance\" → source = tag 'alarme_pression'\n3. Si tag = TRUE → couleur rouge\n4. Si tag = FALSE → couleur verte\n\n[TIP|**Attention aux clignotements**. Utiliser modérément : max 1 objet clignotant à l'écran, sinon migraine opérateur.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-14.jpg"
+      "imageUrl": null
     },
     {
       "position": 15,
-      "kind": "QUIZ",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Quiz de fin de niveau 1",
-      "bodyMd": "",
+      "kind": "CONTENT",
+      "section": "3 · Screens et animations",
+      "title": "IO Field — l'objet le plus utilisé",
+      "bodyMd": "## Afficher et modifier une valeur\n\n**IO Field** = Input/Output Field = la brique de base.\n\n### Configuration\n[KV|**Process tag**:le tag PLC/HMI affiché||**Type**:Output (lecture seule) · Input (saisie) · Input/output (les deux)||**Format**:nombre décimal, entier, format 3.2 (3 chiffres avant, 2 après)||**Limites min/max**:pour saisie · empêche entrée hors bornes||**Read cycle**:fréquence de rafraîchissement (0.5 s, 1 s…)]\n\n### Runtime\n- Output : affiche la valeur en temps réel\n- Input : opérateur touche le champ → clavier virtuel → saisit → validation → écrit dans PLC tag\n\n### Sécurité saisie\n[STEPS|Toujours activer **limites min/max** pour éviter valeurs aberrantes||Configurer **permissions utilisateur** pour saisie (interdire aux opérateurs, réserver aux maintenanciers)||**Confirmation** avant écriture (pop-up \"êtes-vous sûr ?\") pour valeurs critiques]",
       "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "WinCC est édité par :",
-            "options": [
-              "Rockwell",
-              "Siemens",
-              "AVEVA"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Comfort cible :",
-            "options": [
-              "Panels HMI + PC RT",
-              "SCADA distribué",
-              "Cloud"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Tag WinCC =",
-            "options": [
-              "Objet graphique",
-              "Variable liée au PLC",
-              "Alarme"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Runtime Advanced :",
-            "options": [
-              "4096 tags",
-              "8192 tags",
-              "Illimité"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Screens =",
-            "options": [
-              "Fenêtres graphiques HMI",
-              "Alarmes",
-              "Recettes"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Faceplate =",
-            "options": [
-              "Symbole paramétrable réutilisable",
-              "Écran d'accueil",
-              "Log alarme"
-            ],
-            "correctIndex": 0
-          }
-        ]
-      },
-      "imageUrl": "/training/wincc-scada/slide-15.jpg"
+      "quiz": null,
+      "imageUrl": null
     },
     {
       "position": 16,
       "kind": "CONTENT",
-      "section": "NIVEAU 2",
-      "title": "Intermédiaire",
-      "bodyMd": "",
+      "section": "3 · Screens et animations",
+      "title": "Boutons — actions opérateur",
+      "bodyMd": "## Faire cliquer sur un bouton\n\n### Configuration bouton\n- **Texte** : \"Marche\", \"Reset\", \"Recette 1\"\n- **Événement** : Click, Press, Release\n- **Action** : Set tag, Toggle tag, Screen change, Script…\n\n### Actions courantes\n[KV|**SetBit**:passer un tag Bool à TRUE (marche moteur)||**ResetBit**:passer un tag à FALSE (arrêt)||**InvertBit**:toggle||**SetValue**:écrire une valeur numérique||**ActivateScreen**:changer d'écran||**ActivatePreviousScreen**:retour||**RunScript**:exécuter un script custom]\n\n### Cas d'usage\n[USECASE|Bouton \"Démarrer cycle\"|Opérateur appuie → écrit TRUE dans 'HMI_bp_start_cycle' (tag lié à 'PLC_bp_start_cycle'). Le PLC voit ça, lance le cycle.]\n\n[TIP|**Ne jamais lier un bouton HMI directement à un actionneur** (moteur). Toujours en passer par une variable \"commande\" que le PLC traite avec conditions. L'opérateur ne pilote pas la vanne, il demande au PLC de le faire.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-16.jpg"
+      "imageUrl": null
     },
     {
       "position": 17,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Alarmes ISA-18.2 sur WinCC",
-      "bodyMd": "WinCC distingue alarmes discrètes (BOOL) et analogiques (seuils sur mesures REAL). Chaque alarme a une classe (gravité), un texte multilingue, éventuellement des variables associées. Bonne pratique = aligner sur ISA-18.2 : rationalisation, priorisation, hystérésis.\n\n**Classes d'alarmes** — Errors, Warnings, System, Custom. Chaque classe = couleur, son, obligation d'ack, priorité.\n\n**Alarmes discrètes** — Déclenchées par bit PLC. Ex : Motor.Trip → alarme 'Défaut thermique pompe 1'.\n\n**Alarmes analogiques** — Seuils Bas/Haut/BasBas/HautHaut avec hystérésis 2-5 %.\n\n**Alarm buffer** — 1024-10000 événements FIFO. Temps réel + historique SQL.\n\n**Acquittement** — Simple ou avec commentaire (obligatoire GxP).\n\n**À retenir :** Système d'alarme sain a <150 alarmes/jour/opérateur. Au-delà, vigilance décroche. Rationaliser trimestriellement.",
+      "section": "3 · Screens et animations",
+      "title": "Trend view — courbes historiques",
+      "bodyMd": "## Visualiser l'évolution d'un tag\n\nLe **Trend view** trace un tag dans le temps.\n\n### Configuration\n- Nom du trend\n- Axe X : temps (ex : dernières 60 min)\n- Axe Y : valeur (min/max ou auto)\n- Sources : jusqu'à 8 tags simultanément\n- Couleur de chaque courbe\n\n### Modes de collecte\n[KV|**Cyclique**:échantillonnage à intervalle fixe (1 s, 10 s…)||**Sur événement**:échantillon quand un trigger se déclenche||**Depuis archive**:relit les données archivées]\n\n### Cas d'usage\nSuivi de température de cuve pharma : trend view sur 24h + seuils min/max en pointillé.\n\n[TIP|**Toujours logger les tags critiques** dans une archive (voir chapitre suivant). Sinon le trend view ne montre que du \"temps réel\" et pas d'historique.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-17.jpg"
+      "imageUrl": null
     },
     {
       "position": 18,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Recettes — gestion des paramètres produit",
-      "bodyMd": "Les recettes stockent des jeux de paramètres associés à un produit. Éditables via l'IHM et téléchargées vers le PLC au démarrage d'un batch. Fonctionnalité clé pour agroalimentaire, pharma, tout procédé multi-produit.\n\n**Structure recette** — Template = liste de paramètres. Chaque recette = 1 jeu de valeurs.\n\n**Recipe views** — Écran dédié listant recettes, sélection, édition, ajout, suppression.\n\n**Transfer PLC ↔ HMI** — Fonctions natives ReadDataSetFromPlc, WriteDataSetToPlc.\n\n**Recettes sur SD card** — Backup + import/export CSV pour transfert entre panels ou ERP.\n\n**Sécurité et audit** — Modification recette = action journalisée avec user + timestamp + old/new (obligatoire GxP).\n\n**À retenir :** Recette bien conçue = opérateur non-technique change de produit sans intervention automaticien. Usage n°1 des IHM en agro/pharma.",
+      "kind": "QUIZ",
+      "section": "3 · Screens et animations",
+      "title": "Quiz 3 — Screens et animations",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-18.jpg"
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "L'objet HMI 'IO Field' sert à…",
+            "options": [
+              "Naviguer entre écrans",
+              "Afficher et/ou saisir une valeur",
+              "Afficher une image",
+              "Exécuter un script"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour changer la couleur d'un rectangle selon un tag booléen, on utilise…",
+            "options": [
+              "Un script",
+              "Une animation Appearance",
+              "Un template",
+              "Un event Click"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un bouton HMI qui doit démarrer un moteur…",
+            "options": [
+              "Écrit directement dans la sortie moteur",
+              "Écrit dans un tag commande PLC qui gère la logique",
+              "Redémarre l'HMI",
+              "Ouvre l'écran alarme"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
     },
     {
       "position": 19,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "VBScript — événement custom",
-      "bodyMd": "VBScript est intégré à Comfort/Advanced pour la logique que les propriétés dynamiques ne couvrent pas : calculs complexes, écriture massive PLC, appel externe. Attention : VBScript exécuté à chaque changement de tag peut ralentir Runtime.\n\n```\n' Bouton 'Démarrer batch' — vérifie préréquis puis lance\nSub StartBatch_OnClick()\n    Dim recipe, level, temp\n    recipe = SmartTags(\"HMI.Selected_Recipe_ID\")\n    level  = SmartTags(\"PLC.Tank.Level_Actual\")\n    temp   = SmartTags(\"PLC.Tank.Temperature\")\n\n    ' Vérifications\n    If recipe = 0 Then\n        ShowSystemAlarm \"Aucune recette sélectionnée\"\n        Exit Sub\n    End If\n\n    If level > 5 Then\n        Dim response\n        response = MsgBox(\"Cuve non vide (\" & level & \"%). Continuer ?\", _\n                        vbYesNo + vbQuestion, \"Confirmation batch\")\n        If response = vbNo Then Exit Sub\n    End If\n\n    If temp > 80 Then\n        ShowSystemAlarm \"Température trop élevée (\" & temp & \"°C)\"\n        Exit Sub\n    End If\n\n    ' Tout OK — écrire commande démarrage vers PLC\n    SmartTags(\"PLC.Batch.Start_Cmd\") = True\n    SmartTags(\"HMI.Log_Message\") = \"Batch démarré à \" & Now\nEnd Sub\n```\n\n**À retenir :** VBScript = flexibilité mais coût. Toujours mesurer l'impact Runtime et préférer les propriétés dynamiques pour les usages simples.",
+      "section": "4 · Alarmes et événements",
+      "title": "Système d'alarmes WinCC",
+      "bodyMd": "## Signaler les événements anormaux\n\n### Types d'alarmes\n[KV|**Alarm bit**:déclenchée par un bit (tag Bool) · le plus courant||**Alarm analog**:déclenchée par franchissement de seuil (haut/bas) sur analog||**System alarm**:erreurs système (perte comm, erreur runtime)||**ProDiag alarm**:auto-générée par le PLC (S7-1500 uniquement)]\n\n### Priorités / catégories\n[KV|**Errors**:alarme critique · nécessite acquittement || **Warnings**:alerte importante · acquittement possible||**System**:info système]\n\n### Configuration\nHMI alarms → **Discrete alarms** ou **Analog alarms**.\n- Numéro d'alarme unique\n- Trigger tag\n- Message texte (multi-langue possible)\n- Priorité, catégorie\n- Groupe d'alarmes",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-19.jpg"
+      "imageUrl": null
     },
     {
       "position": 20,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Historian — tendances et alarmes",
-      "bodyMd": "WinCC embarque un historian basé sur SQL Server Express : les valeurs de tags sélectionnés sont échantillonnées et stockées, les alarmes journalisées. Affichage tendances, export Excel, transfert vers SCADA supérieur.\n\n**Data logs (tendances)** — Sélection tags à historiser, cycle échantillonnage (1s à 1h), rétention (jours/mois).\n\n**Alarm logs** — Toutes alarmes journalisées avec timestamp, ack, durée, contexte. Base analyses SIL.\n\n**Trend view** — Objet natif : sélection tags, plage temporelle, zoom, export CSV.\n\n**Circular vs linear log** — Circular : FIFO, écrase l'ancien. Linear : accumule sans limite (archiver manuellement).\n\n**Access ODBC/SQL** — Base SQL directement interrogeable depuis Excel, Power BI, SSRS, WinCC OA.\n\n**À retenir :** Historian intégré suffit pour poste standalone. Reporting industriel + accès distant + longs archivages : ajouter AVEVA Historian ou WinCC Information Server.",
+      "section": "4 · Alarmes et événements",
+      "title": "Alarm view — l'affichage",
+      "bodyMd": "## Voir les alarmes actives et historiques\n\n**Alarm view** = objet WinCC pour afficher les alarmes.\n\n### Modes d'affichage\n- **Alarmes actives** : celles en cours (non retombées)\n- **Alarmes historiques** : archivées (avec horodatage)\n- **Buffer** : les 100/1000 dernières alarmes en mémoire\n\n### Actions opérateur\n- **Acknowledge (ACK)** : acquitter · marque l'alarme \"vue\"\n- **ACK all** : tout acquitter d'un coup\n- **Filter** : filtrer par priorité, groupe, mot-clé\n\n### Cas d'usage\nUn opérateur voit \"Alarme haute température cuve 3\" en rouge clignotant. Il touche l'alarme → détail : date, horodatage, valeur au moment de l'alarme. Il acquitte, ça passe à orange (acquittée mais toujours active) puis vert (retombée) puis disparaît.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-20.jpg"
+      "imageUrl": null
     },
     {
       "position": 21,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "TP N2-1 : Alarmes ISA-18.2 sur MIX-01",
-      "bodyMd": "**Contexte :** MIX-01 en Runtime Advanced. Objectifs : détecter niveau cuve trop haut (>90%), température trop haute (>110°C), un défaut pompe individuel.\n\n**Consigne :** 1) Créer 3 classes d'alarmes : 'Critical' (rouge, ack obligatoire), 'Warning' (orange), 'Info' (bleu, no ack). 2) Créer 5 alarmes discrètes/analogiques : Tank_Level_High (analog >90 %, hystérésis 5 %, delay 3 s, class Warning), Tank_Level_HighHigh (>95 %, delay 1 s, class Critical), Tank_Temp_High (>110 °C, class Critical), Pump_A_Trip, Pump_B_Trip (discrètes, class Warning). 3) Ajouter Alarm view sur un écran dédié. 4) Simuler la remontée de chaque alarme et vérifier ack.\n\n**Attendu :** Chaque alarme apparaît avec sa couleur, son texte, son horodatage. Level à 91 % → alarme Warning après 3 s. Level à 96 % → alarme Critical immédiate. Ack via bouton, alarme grisée mais reste dans historique.\n\n💡 Alarmes analogiques : HMI tags → Discrete Alarms / Analog Alarms. Hystérésis = 'Deadband'. Delay = 'Delay Time'. Ne pas oublier : le PLC doit exposer Level et Temp dans un DB avec 'HMI accessible'.",
+      "section": "4 · Alarmes et événements",
+      "title": "Archivage des alarmes",
+      "bodyMd": "## Garder l'historique\n\n### Configuration archive\nHistorical data → Alarms archive :\n- Nom : 'AlarmArchive_Ligne1'\n- Capacité : 10 000 entrées typique\n- Mode : circulaire (écrase les vieux) ou stop plein\n- Storage location : local HMI ou serveur distant\n\n### Cas d'usage GAMP 5\nPharma UCB : archivage 10 ans obligatoire (21 CFR Part 11).\n- Archive locale HMI insuffisante\n- Archive serveur SQL Server ou Historian\n- Récupération pour audit possible\n\n### Filtres et recherche\n- Filtre par date/heure\n- Filtre par priorité\n- Filtre par groupe\n- Export CSV pour analyse Excel/Power BI",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-21.jpg"
+      "imageUrl": null
     },
     {
       "position": 22,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "TP N2-2 : Recettes 3 produits MIX-01",
-      "bodyMd": "**Contexte :** Suite TP N2-1. MIX-01 doit produire 3 recettes différentes : YoGourt (25% A + 60% B + 3 min mélange), FromageBlanc (30% A + 55% B + 5 min), Lait_Aromatise (10% A + 80% B + 2 min).\n\n**Consigne :** 1) Créer un Recipe (Template) : nom, 3 paramètres Q_A, Q_B, MixTime. 2) Créer 3 Data Records : YoGourt, FromageBlanc, Lait_Aromatise avec les valeurs. 3) Ajouter Recipe View sur un écran + boutons Select/Load/Save. 4) Modifier le FB_Mix_Sequence pour lire les valeurs depuis le PLC (DB Current_Recipe). 5) Sélection recette → click Load → transfer PLC → lancement batch utilise les nouvelles valeurs.\n\n**Attendu :** Sélectionner YoGourt + Load → DB Current_Recipe reçoit Q_A=25, Q_B=60, MixTime=3min. Lancer batch → cycle utilise ces valeurs. Sélectionner FromageBlanc + Load → nouvelles valeurs, nouveau cycle correspondant.\n\n💡 Recipe → Add new. Type de transfer : 'PLC access via tag connection'. Le DB PLC doit être créé avec la même structure que la recette (3 champs).",
+      "section": "4 · Alarmes et événements",
+      "title": "Alertes email/SMS",
+      "bodyMd": "## Escalade des alarmes\n\n**Sur les grosses installations**, on veut recevoir les alarmes critiques par email/SMS quand personne n'est en salle contrôle.\n\n### Options WinCC\n[KV|**WinCC Unified WebNav**:notifs push navigateur (light)||**WinCC RT Advanced Email option**:email direct||**Passerelle externe**:MQTT / OPC UA + service tiers (PagerDuty, Twilio SMS)||**SCADA custom**:script Python qui lit les archives WinCC et envoie]\n\n### Recommandation Dasolabs\n[TIP|On préfère une **passerelle externe** : le SCADA WinCC publie en OPC UA → passerelle HighByte lit → route selon priorité vers Slack, email, SMS. Découplage propre.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-22.jpg"
+      "imageUrl": null
     },
     {
       "position": 23,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Récapitulatif du niveau 2",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-23.jpg"
-    },
-    {
-      "position": 24,
       "kind": "QUIZ",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Quiz de fin de niveau 2",
+      "section": "4 · Alarmes et événements",
+      "title": "Quiz 4 — Alarmes",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Alarmes discrètes vs analogiques :",
+            "prompt": "Un 'discrete alarm' est déclenchée par…",
             "options": [
-              "Discrètes bit, analogiques seuils",
-              "Identiques",
-              "Analog impossible"
+              "Un franchissement de seuil",
+              "Un bit à TRUE",
+              "Un timeout",
+              "Une action opérateur"
             ],
-            "correctIndex": 0
+            "correctIndex": 1
           },
           {
-            "prompt": "Recettes servent à :",
+            "prompt": "En pharma GAMP 5, la durée d'archivage typique des alarmes est de…",
             "options": [
-              "Jeux de paramètres produit",
-              "Compter alarmes",
-              "Router tags"
+              "1 semaine",
+              "1 mois",
+              "1 an",
+              "10 ans"
             ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "VBScript WinCC :",
-            "options": [
-              "Actions custom côté HMI",
-              "Programmation PLC",
-              "Compilation"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Multi-langue WinCC :",
-            "options": [
-              "Colonnes traduction natives",
-              "Impossible",
-              "XML externe"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Historian intégré :",
-            "options": [
-              "Base SQL Server tendances + alarmes",
-              "CSV",
-              "Cloud only"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Audit Trail WinCC :",
-            "options": [
-              "Journal actions opérateurs pour GxP",
-              "Log tags forcés",
-              "Tendances"
-            ],
-            "correctIndex": 0
+            "correctIndex": 3
           }
         ]
       },
-      "imageUrl": "/training/wincc-scada/slide-24.jpg"
+      "imageUrl": null
+    },
+    {
+      "position": 24,
+      "kind": "CONTENT",
+      "section": "5 · Recettes et archivage",
+      "title": "Système de recettes",
+      "bodyMd": "## Gérer des configurations produit\n\nSur une ligne qui produit **plusieurs produits différents**, chaque produit a sa recette : température, dosage, timings, etc.\n\n### Composition d'une recette\n[KV|**Nom** de la recette||**Numéro / ID** unique||**Set de paramètres** : dosages, températures, temps de cycle · dépend du produit||**Métadonnées** : version, date création, opérateur créateur]\n\n### Structure typique\n- **Recipe** : entité regroupant des paramètres\n- **Data record** : une valeur particulière de recette (produit A, produit B…)\n- **Element** : un paramètre individuel dans une recette",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
     },
     {
       "position": 25,
       "kind": "CONTENT",
-      "section": "NIVEAU 3",
-      "title": "Expert",
-      "bodyMd": "",
+      "section": "5 · Recettes et archivage",
+      "title": "Recipe view — l'objet WinCC",
+      "bodyMd": "## L'écran de gestion recettes\n\n**Recipe view** = objet WinCC pour afficher/éditer/charger les recettes.\n\n### Actions opérateur\n- **Load recipe** : charger une recette dans le PLC (Runtime → PLC)\n- **Save recipe** : lire les valeurs actuelles du PLC et sauvegarder comme recette\n- **Create new** : créer une nouvelle recette\n- **Delete** : supprimer une recette\n- **Export/Import CSV** : échange avec Excel\n\n### Sécurité\nRéserver \"Load recipe\" à un utilisateur \"process engineer\", pas à l'opérateur de base.\n\n### Cas d'usage pharma\n5 recettes pour 5 produits différents. L'opérateur sélectionne la recette du jour → charge → confirme → cycle démarre.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-25.jpg"
+      "imageUrl": null
     },
     {
       "position": 26,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "WinCC Unified — la nouvelle génération",
-      "bodyMd": "Unified est la refonte moderne : Runtime navigateur (Chrome/Edge/mobile), déploiement web, langage graphique JavaScript, moteur scripts modernisé. Intégré à TIA Portal.\n\n**Runtime navigateur** — IHM tourne dans Chrome/Edge sans installation locale. Multi-écrans, mobile, remote support natif.\n\n**Rendu vectoriel** — Écrans en SVG — zoom infini sans pixellisation. Adaptation auto résolution.\n\n**JavaScript à la place de VBScript** — Scripts modernes, async/await, débogage F12 Chrome. Migration douloureuse depuis VBScript.\n\n**Sécurité intégrée** — HTTPS obligatoire, certificats, auth OAuth possible, session tokens.\n\n**Companion apps** — WinCC Unified App sur Android/iOS pour supervision terrain avec push notifications.\n\n**À retenir :** Unified n'est pas 'Comfort en web' — c'est un produit NOUVEAU. Migration Comfort → Unified = refonte scripts + reprise graphique. Prévoir 30-50 % du temps du projet initial.",
+      "section": "5 · Recettes et archivage",
+      "title": "Archivage données process",
+      "bodyMd": "## Historian embarqué\n\nWinCC peut **archiver des données process** en continu.\n\n### Types d'archivage\n[KV|**Tag archive**:sauvegarde cyclique de valeurs (température, débit…) · pour trend historique||**Alarm archive**:sauvegarde des alarmes||**Audit trail**:qui a fait quoi et quand (obligatoire pharma)]\n\n### Configuration tag archive\nHistorical data → Data logs :\n- Nom\n- Tags à archiver (jusqu'à 250 par log)\n- Sample rate (1 sec, 10 sec, 1 min…)\n- Storage : local HMI, ou serveur distant, ou SQL Server externe\n\n### Récupération\n- Trend view liée à l'archive → graphique historique\n- Export CSV pour analyse externe\n- API OPC HDA pour clients spécialisés\n\n[TIP|Sur gros projets, on stocke les archives dans un **Historian tiers** (AVEVA Historian, InfluxDB, TimescaleDB) plutôt que dans WinCC. Meilleure performance long terme.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-26.jpg"
+      "imageUrl": null
     },
     {
       "position": 27,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "WinCC OA — le SCADA industriel objet",
-      "bodyMd": "WinCC OA (ex-PVSS d'ETM avant rachat Siemens) est un SCADA orienté objet, multi-serveur, ultra-évolutif. Utilisé au CERN, métros, usines chimiques 24/7, nucléaire. Approche radicalement différente : modèle objet + drivers 150+ + langage CTRL.\n\n**Modèle objet (Data Point Types)** — Modéliser un équipement (Pompe, Vanne) une fois, puis instancier. Comme AVEVA System Platform.\n\n**Multi-serveur natif** — Projet OA = 1 à 10 serveurs redondants dialoguant en cluster.\n\n**150+ drivers** — Modbus, OPC UA, DNP3, IEC 61850 (énergie), IEC 60870-5, BACnet...\n\n**Langage CTRL** — Langage propriétaire type C. Puissant, courbe d'apprentissage raide.\n\n**Cible** — Projets > 100k datapoints, 24/7 critique, multi-site (énergie, transport, pharma).\n\n**À retenir :** OA ≠ Unified. OA cible gros process 24/7 critiques (>100k datapoints). Unified cible postes opérateur classiques. Ne pas se tromper de choix.",
+      "section": "5 · Recettes et archivage",
+      "title": "Reporting — BatchReport",
+      "bodyMd": "## Produire des rapports automatiques\n\n**AVEVA BatchReport** (ex-Wonderware) est un outil de reporting couplé à WinCC.\n\n### Cas d'usage pharma\nChaque batch de production doit générer un **rapport de batch** avec :\n- Identifiant batch\n- Recette utilisée\n- Horodatage début/fin\n- Valeurs process aux étapes clés\n- Alarmes survenues\n- Signature opérateur\n\n### Intégration\nWinCC → archives → BatchReport → PDF signé électroniquement → SGD (Système de Gestion Documentaire).\n\n### Alternative\n- **SQL Server + custom** : requêtes SQL directes, génération PDF Python/Node\n- **Power BI + connecteur** : dashboards dynamiques\n- **Grafana + Loki + Historian** : moderne, open-source\n\n[TIP|Chez Dasolabs, on maîtrise **AVEVA Report** couplé à WinCC + AVEVA Historian. C'est le combo pharma standard.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-27.jpg"
+      "imageUrl": null
     },
     {
       "position": 28,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Redondance serveur WinCC",
-      "bodyMd": "Serveur unique = SPOF. Pour 24/7, deux serveurs synchronisés + bascule automatique. Config différente selon produit (Advanced, Unified, OA).\n\n**Advanced redondance** — 2 postes RT synchronisés via réseau dédié. Bascule 5-10 s. Base historian répliquée.\n\n**Unified redondance** — 2 pods Unified (Windows Server ou Linux container) load-balancés. Session utilisateur peut migrer.\n\n**OA redondance native** — Multi-serveur intégré au design. Manager events répliqué, historian sur serveur dédié.\n\n**Sync base historian** — Base SQL avec réplication master/replica ou synchro applicative.\n\n**Tests bascule périodiques** — Simuler crash serveur 1×/an minimum. Documenter procédure reprise.\n\n**À retenir :** Redondance non testée = illusion de sécurité. Simuler la bascule au moins une fois par an et documenter dans le PCA.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-28.jpg"
-    },
-    {
-      "position": 29,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Openness WinCC — automatisation",
-      "bodyMd": "- Bibliothèque Siemens.Engineering.Hmi.* dans TIA Openness\n- Cas d'usage : générer 50 faceplates identiques depuis un CSV équipements\n- Cas d'usage : importer 500 tags depuis un fichier Excel\n- Cas d'usage : exporter tous les écrans en XML pour Git\n- Cas d'usage : audit auto — vérifier qu'aucun tag n'est orphelin\n- Compilation headless d'un projet WinCC pour CI/CD\n\n💡 Openness pour HMI plus jeune que côté PLC. Documentation Siemens complète, exemples clairsemés — la communauté Automation Techies est une bonne source.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-29.jpg"
-    },
-    {
-      "position": 30,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Migration Comfort → Unified — chiffres réels",
-      "bodyMd": "Projet HMI Advanced 400 tags, 25 screens, 40 VBScripts, historian actif depuis 4 ans. Client demande migration vers Unified pour accès mobile et modernisation.\n\n```\nPLAN DE MIGRATION — analyse détaillée\n\nPhase 1 : Cartographie (5 jours)\n  ✓ Inventaire des 25 screens + captures\n  ✓ Liste des 400 tags avec sources PLC\n  ✓ Audit des 40 VBScripts (complexité)\n  ✓ Historian : quels tags conserver, sur combien de temps\n\nPhase 2 : Migration outillée (10 jours)\n  ✓ Import du projet Advanced dans Unified via TIA\n  ✓ HW config + tags : passe automatiquement (95 %)\n  ✓ Écrans : passent en Unified mais rendu approximatif\n  ✓ VBScripts : NE PASSENT PAS (langage différent)\n\nPhase 3 : Refonte manuelle (25 jours)\n  ✓ Retravailler chaque écran pour rendu Unified propre\n  ✓ Réécrire les 40 scripts en JavaScript\n  ✓ Refaire les alarms (structure légèrement différente)\n  ✓ Recréer les faceplates (compatibilité partielle)\n\nPhase 4 : Tests + intégration (10 jours)\n  ✓ Tests fonctionnels : chaque écran vs Advanced original\n  ✓ Tests perf : latence, refresh, mobile\n  ✓ Formation opérateurs sur nouvelle IHM\n  ✓ Bascule progressive (dual run 2 sem)\n\nTotal : 50 jours homme\nCoût estimé : 40 000 € en régie interne\nCoût terrain client : ~30 % du projet initial\n\nRetour d'expérience : la sous-estimation classique\nest de compter Phase 2 (auto) sans compter Phase 3 (refonte\nmanuelle qui est le vrai gros du travail).\n```\n\n50 jours pour un projet de taille moyenne. Sous-estimer = catastrophe : client déçu du rendu automatique, refonte non budgétée, dépassement de 200 % courant.\n\n**À retenir :** Ne jamais promettre 'migration transparente'. Un projet Unified est un NOUVEAU projet qui réutilise 60 % de l'ancien. Communiquer honnêtement l'effort.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-30.jpg"
-    },
-    {
-      "position": 31,
-      "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Récapitulatif du niveau 3",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-31.jpg"
-    },
-    {
-      "position": 32,
       "kind": "QUIZ",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Quiz de fin de niveau 3",
+      "section": "5 · Recettes et archivage",
+      "title": "Quiz 5 — Recettes & archivage",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "WinCC Unified :",
+            "prompt": "Une 'data record' dans une recette WinCC est…",
             "options": [
-              "Web natif HTML5, successeur Comfort/Advanced",
-              "Cloud only",
-              "Simulateur"
+              "Une valeur particulière de la recette (produit A)",
+              "Le nom de la recette",
+              "Le PLC associé",
+              "Le nom du fichier"
             ],
             "correctIndex": 0
           },
           {
-            "prompt": "WinCC OA :",
+            "prompt": "Pour un batch pharma UCB, l'outil de reporting couramment associé à WinCC est…",
             "options": [
-              "Object-oriented, gros projets, redondant",
-              "Comfort embarqué",
-              "Basic HMI"
+              "Word",
+              "AVEVA BatchReport",
+              "Excel manuel",
+              "Notepad"
             ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Redondance serveur :",
-            "options": [
-              "2 serveurs actif/passif sync base",
-              "Auto sans config",
-              "Impossible"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Openness WinCC :",
-            "options": [
-              "API .NET pour manipuler projet HMI",
-              "Format export",
-              "Framework OSS"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Migration Comfort → Unified :",
-            "options": [
-              "Manuelle en grande partie",
-              "Auto 100 %",
-              "Impossible"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Best practice 24/7 :",
-            "options": [
-              "Redondance + monitoring + backup off-site",
-              "Backup local",
-              "Onduleur seul"
-            ],
-            "correctIndex": 0
+            "correctIndex": 1
           }
         ]
       },
-      "imageUrl": "/training/wincc-scada/slide-32.jpg"
+      "imageUrl": null
+    },
+    {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité et utilisateurs",
+      "title": "Gestion utilisateurs — User administration",
+      "bodyMd": "## Qui peut faire quoi\n\nWinCC gère les utilisateurs et leurs droits.\n\n### Objets\n- **Users** : les utilisateurs avec login/mdp\n- **User groups** : groupes de droits (Operator, Engineer, Admin)\n- **Authorizations** : permissions granulaires (afficher écran X, éditer recette, acquitter alarme)\n\n### Configuration\nUser administration → Users / Groups :\n- Créer les groupes (Opérateur, Supervisor, Admin)\n- Créer les utilisateurs, les affecter à un groupe\n- Attribuer les autorisations aux groupes\n\n### Runtime login\nUser view (objet WinCC) affiche login. Sur clic → clavier virtuel → login.\n\nAprès login, seuls les écrans/objets auxquels l'utilisateur a droit sont accessibles.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité et utilisateurs",
+      "title": "Audit trail — pharma GAMP 5",
+      "bodyMd": "## Traçabilité des actions opérateur\n\nEn pharma (**FDA 21 CFR Part 11**), chaque action opérateur doit être **tracée** :\n- Qui (utilisateur)\n- Quoi (action)\n- Quand (horodatage précis)\n- Sur quoi (tag, recette, alarme)\n\n### Configuration WinCC\n- Audit trail activation dans User administration\n- Sélectionner les actions à tracer (login, écriture tag, chargement recette, acquittement alarme)\n- Stockage : archive dédiée\n\n### Contenu type d'un enregistrement\n    2026-09-18 14:32:15 · user:marie_martin · action:LOAD_RECIPE · target:Recipe_ProductA · previous:none\n\n### Consultation\nDepuis WinCC → Audit trail view. Filtrable par utilisateur, date, action.\n\n[RULE|Audit trail = **OBLIGATOIRE en pharma**. Sans audit trail, l'installation ne passe pas la validation GMP.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité et utilisateurs",
+      "title": "Sécurité runtime",
+      "bodyMd": "## Protéger le poste WinCC\n\nUn poste PC qui héberge WinCC Runtime est une cible cyber.\n\n### Bonnes pratiques\n[STEPS|**Windows durci** : disable USB, disable ports non nécessaires, patches à jour||**Firewall** : whitelist des IP autorisées uniquement||**Password fort** BIOS + Windows + WinCC||**Séparation OT/IT** : PC WinCC sur VLAN OT, pas exposé Internet||**Backup complet du projet** régulier · en cas de crash ou ransomware||**Certificats TLS** pour OPC UA et web server]\n\n### WinCC Unified spécificités\n- Auto-signed cert par défaut → à remplacer par cert CA officielle\n- HTTPS obligatoire pour connexions clientes\n- Password minimum 12 chars\n\n[WARN|**Un poste WinCC en production ne doit pas naviguer sur Internet**. Périphérique uniquement pour supervision — pas de navigateur ouvert sur des sites tiers.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 32,
+      "kind": "QUIZ",
+      "section": "6 · Sécurité et utilisateurs",
+      "title": "Quiz 6 — Sécurité",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "L'audit trail dans WinCC est obligatoire en…",
+            "options": [
+              "Automobile",
+              "Pharma / GAMP 5",
+              "Agroalimentaire uniquement",
+              "Nulle part"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un utilisateur WinCC est typiquement affecté à…",
+            "options": [
+              "Un utilisateur Windows",
+              "Un groupe avec autorisations",
+              "Un tag PLC",
+              "Un écran unique"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
     },
     {
       "position": 33,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "En résumé",
-      "bodyMd": "",
+      "section": "7 · Certification",
+      "title": "Prêt pour l'évaluation certifiante ?",
+      "bodyMd": "## Quiz certifiant final — 10 questions\n\nLe prochain quiz certifie ta maîtrise de WinCC SCADA. Couvre :\n\n- Introduction SCADA et gamme WinCC\n- Tags et connexions\n- Screens et animations\n- Alarmes et événements\n- Recettes et archivage\n- Sécurité et utilisateurs\n\n[TIP|Seuil : 70 %. Recommence si besoin.]\n\nBonne chance !",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-33.jpg"
+      "imageUrl": null
     },
     {
       "position": 34,
-      "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "Passer à l'action — 30 jours",
-      "bodyMd": "- Rejouer les 3 quiz sur DasoHub — objectif 80 %+\n- Refaire les 4 TPs dans votre TIA + WinCC + PLCSIM\n- Installer WinCC Unified Trial et refaire le TP faceplate en Unified\n- Lire le Siemens 'Style Guide for WinCC Unified'\n- Pour projet greenfield 2026 : partir directement en Unified\n- Anticiper migrations Comfort → Unified — planifier 2026-2028\n\n💡 Passage à Unified = investissement — mais Siemens ne reviendra pas en arrière. Autant s'y mettre tôt.",
+      "kind": "QUIZ",
+      "section": "7 · Certification",
+      "title": "🎓 Quiz certifiant final — WinCC SCADA",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/wincc-scada/slide-34.jpg"
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Sur projet SCADA neuf en 2026, quelle édition WinCC choisir ?",
+            "options": [
+              "WinCC Basic",
+              "WinCC Comfort",
+              "WinCC Professional (legacy)",
+              "WinCC Unified"
+            ],
+            "correctIndex": 3
+          },
+          {
+            "prompt": "Un HMI se différencie d'un SCADA par…",
+            "options": [
+              "Sa localisation (local machine vs supervision globale)",
+              "Son prix uniquement",
+              "Son OS",
+              "Rien"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "prompt": "Un tag HMI 'external' est lié à…",
+            "options": [
+              "Une variable Windows",
+              "Un tag PLC via une connexion",
+              "Un fichier CSV",
+              "Internet"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour animer la couleur d'un rectangle selon un tag, on utilise…",
+            "options": [
+              "Un script Python",
+              "Une animation Appearance",
+              "Un template externe",
+              "Un event JavaScript"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un bouton HMI qui doit démarrer un moteur…",
+            "options": [
+              "Écrit directement dans la sortie PLC moteur",
+              "Écrit dans un tag commande PLC qui décide",
+              "Redémarre l'HMI",
+              "Ne fait rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un 'discrete alarm' est déclenché par…",
+            "options": [
+              "Un franchissement de seuil analog",
+              "Un bit à TRUE",
+              "Un événement Windows",
+              "Une déconnexion"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "L'archivage GAMP 5 pharma exige typiquement combien d'années ?",
+            "options": [
+              "1",
+              "5",
+              "10",
+              "50"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "L'audit trail dans WinCC est obligatoire pour…",
+            "options": [
+              "Toutes les industries",
+              "Pharma / GMP",
+              "Aucune",
+              "Automobile"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un poste WinCC Runtime en production doit…",
+            "options": [
+              "Naviguer sur Internet",
+              "Rester sur VLAN OT, sans navigation Internet, avec MDP fort",
+              "N'avoir aucun firewall",
+              "Utiliser des comptes admin par défaut"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Sur une ligne pharma qui produit 5 produits, on utilise…",
+            "options": [
+              "Un HMI par produit",
+              "Un système de recettes avec 5 data records",
+              "Rien, on code en dur",
+              "Un SCADA différent par produit"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
     }
   ]
 }

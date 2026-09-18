@@ -28,7 +28,9 @@ const COURSES = [
   "csv-validation",
   "ba4-securite-electrique",
   "ba5-securite-electrique",
-  "materiel-plc-siemens"
+  "materiel-plc-siemens",
+  "programmation-tia-portal",
+  "wincc-scada"
 ];
 
 const prisma = new PrismaClient();
