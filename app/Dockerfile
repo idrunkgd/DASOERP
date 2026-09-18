@@ -18,7 +18,10 @@ COPY prisma ./prisma
 # désynchronisé après ajout de deps (nodemailer, web-push, @types/*). Le lock
 # sera régénéré dans l'image ; côté hôte on peut le committer plus tard via
 # `npm install --package-lock-only` si l'on veut refigure `npm ci`.
-RUN npm install --no-audit --no-fund --include=dev
+# BuildKit cache mount : évite de retélécharger tous les packages à chaque build.
+# Gain typique : 2-4 min → 20-40 sec sur builds successifs (cache Coolify).
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm install --no-audit --no-fund --include=dev
 
 # ─── Stage 2 : build ───
 FROM node:20-alpine AS builder
@@ -30,7 +33,10 @@ COPY . .
 
 RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+# BuildKit cache mount pour le cache webpack/turbopack de Next.js.
+# Sur des builds incrémentaux, gain 1-2 min car seul le code modifié recompile.
+RUN --mount=type=cache,target=/app/.next/cache,sharing=locked \
+    npm run build
 
 # ─── Stage 3 : runtime minimal ───
 FROM node:20-alpine AS runner
@@ -70,12 +76,16 @@ EXPOSE 3000
 
 # Healthcheck pour Coolify
 # - 127.0.0.1 (pas localhost) pour éviter résolution IPv6 (::1) où Next n'écoute pas.
-# - start-period 60s : maintenant que le CLI Prisma est bundled, le démarrage
-#   prend ~20-30s au lieu de 110s. On garde une marge de sécurité.
-HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=5 \
+# - start-period 30s : le seed tourne en background (non-bloquant), donc l'app
+#   répond dès que Next.js écoute (~10-15s). Marge x2 pour sécurité.
+HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
   CMD wget --quiet --tries=1 -O /dev/null http://127.0.0.1:3000/api/health || exit 1
 
-# Appliquer migrations Prisma au démarrage puis lancer Next standalone.
-# On utilise le CLI bundled dans l'image (pas `npx`) → pas de download au boot,
-# et garantie que la version utilisée est exactement celle de package.json (5.22).
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node prisma/seed-training.mjs && node server.js"]
+# Séquence de démarrage :
+# 1. migrate deploy — SYNCHRONE : les nouvelles pages peuvent dépendre du schema
+# 2. seed-training  — ASYNCHRONE en arrière-plan : ~30-60s d'upserts qui ne
+#    doivent PAS bloquer le healthcheck /api/health (le healthcheck teste juste
+#    la DB, pas la présence des cours). Coolify voit l'app "healthy" dès que
+#    Next.js écoute, sans attendre la fin du seed.
+# 3. server.js      — SYNCHRONE : c'est le processus principal (PID 1)
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && (node prisma/seed-training.mjs > /tmp/seed.log 2>&1 &) && node server.js"]
