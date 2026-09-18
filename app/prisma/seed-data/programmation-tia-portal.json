@@ -1,19 +1,19 @@
 {
   "slug": "programmation-tia-portal",
-  "title": "Programmation TIA Portal",
-  "subtitle": "Formation complète — projet, langages, blocs, debug, cybersécurité",
-  "level": "Intermédiaire",
-  "duration": "≈ 7 h",
+  "title": "Programmation TIA Portal V19",
+  "subtitle": "Développement PLC + HMI Siemens · standards industriels",
+  "level": "Débutant à intermédiaire",
+  "duration": "≈ 10 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "certificateWording": "Formation « Programmation TIA Portal » — connaissances fondamentales sur l'IDE TIA Portal V19, la configuration matérielle, les langages IEC 61131-3 (LAD, FBD, SCL, GRAPH), l'organisation en blocs (OB/FB/FC/DB), le debug online (PLCSIM, trace, cross-references), et les fonctions avancées (PID, OPC UA, MQTT, cybersécurité). Cette attestation atteste de la formation et de la réussite de l'évaluation. Elle ne constitue pas une certification Siemens officielle.",
+  "certificateWording": "Formation « Programmation TIA Portal V19 » — maîtrise de l'environnement de développement Siemens TIA Portal : interface, hardware configuration (PLC S7-1200/1500, ET 200SP, Profinet), langages IEC 61131-3 (LAD, FBD, STL, SCL, GRAPH), structuration programme (OB, FB, FC, DB, UDT), variables et tags, simulation PLCSIM, développement HMI Comfort avec WinCC, safety F-PLC (SIL 3 pharma), bonnes pratiques Dasolabs.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
       "section": "1 · Introduction TIA Portal",
-      "title": "Bienvenue — Programmation TIA Portal",
-      "bodyMd": "## La formation TIA de A à Z\n\nBienvenue ! Cette formation te forme à la **programmation TIA Portal** de Siemens, l'IDE unifié pour toute la gamme SIMATIC.\n\n[TIP|Prérequis conseillé : avoir suivi ou maîtriser le contenu de la formation **Matériel PLC Siemens**. On saute ici la partie matériel pour se concentrer sur le développement.]\n\n### Ce que tu vas maîtriser\n- L'organisation d'un projet TIA\n- Les 5 langages IEC 61131-3 (LAD, FBD, SCL, STL, GRAPH)\n- L'architecture blocs (OB, FB, FC, DB)\n- Le debug online, simulation PLCSIM\n- Les bibliothèques et la réutilisation\n- La cybersécurité + versioning\n\n[RULE|Quiz certifiant final : 10 questions, seuil 70 %. Recommence autant que tu veux.]",
+      "title": "Bienvenue — TIA Portal V19",
+      "bodyMd": "## Pourquoi cette formation\n\n**TIA Portal** (Totally Integrated Automation Portal) est **l'environnement de développement** intégré Siemens qui remplace les vieux outils STEP 7, WinCC, Simatic Manager depuis 2010. Aujourd'hui en version 19+, c'est l'outil incontournable pour tout ce qui touche à l'automation Siemens : PLC S7-1200, S7-1500, ET 200SP, HMI Comfort/Basic, drives SINAMICS, safety F-PLC, etc.\n\nChez Dasolabs, on l'utilise quotidiennement chez UCB, Zoetis, GROUPEMECA, Technochim. C'est une compétence **fondamentale** pour tout consultant automation Siemens.\n\n### Ce que tu vas apprendre\n- Interface TIA Portal (Project View, Portal View)\n- Hardware configuration (PLC, IO, drives)\n- Programmation LAD, FBD, STL, SCL, GRAPH\n- Structuration en blocs (OB, FB, FC, DB)\n- Variables (Tags, PLC data types, DBs)\n- Simulation avec PLCSIM\n- HMI Comfort avec WinCC\n- Safety F-PLC\n- Diagnostic et troubleshooting\n- Cas pratiques Dasolabs\n\n[RULE|Quiz certifiant · 70 % · refaisable]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -22,8 +22,8 @@
       "position": 2,
       "kind": "CONTENT",
       "section": "1 · Introduction TIA Portal",
-      "title": "Historique — de STEP 7 à TIA Portal",
-      "bodyMd": "## L'IDE Siemens à travers les décennies\n\nAvant TIA Portal, Siemens avait **plusieurs logiciels distincts** :\n- STEP 7 (SIMATIC Manager) pour les PLC S7-300/400\n- STEP 7 Micro/WIN pour les S7-200\n- WinCC flexible pour les HMI\n- Sinamics Starter pour les variateurs\n\nChaque outil avec sa propre interface, ses licences, ses fichiers.\n\n### La révolution TIA (2010)\nSiemens sort **TIA Portal V10** : un IDE unique pour tout. Configuration hardware + programmation + HMI + variateurs, tout dans une seule interface.\n\n[KV|**TIA V10-V13 (2010-2014)**:premières versions · encore instables||**TIA V14-V15 (2015-2018)**:maturité · support S7-1500||**TIA V16-V17 (2019-2021)**:sécurité renforcée · OpenSSL · signature||**TIA V18-V19 (2022-2025)**:OPC UA amélioré · version actuelle recommandée||**TIA V20 (2027 prévu)**:cloud engineering annoncé]\n\n[TIP|Chez Dasolabs on utilise **TIA V19** en standard. On tolère V17-V18 pour compatibilité client. En dessous de V16, on refuse — trop de failles de sécurité.]",
+      "title": "Historique TIA Portal",
+      "bodyMd": "## D'où vient l'outil\n\nComprendre l'histoire aide à comprendre pourquoi TIA Portal est structuré comme ça.\n\n### Chronologie\n[KV|**1994**:STEP 7 v3 sort · l'outil DOS/Windows pour PLC S5/S7-300/400||**2004**:WinCC flexible pour HMI · outil SÉPARÉ de STEP 7||**2010**:TIA Portal V10 · première version · révolution : PLC + HMI dans le même outil||**2013**:TIA Portal V13 · adoption massive · standard émergent||**2016**:TIA Portal V14 · introduction OPC UA server dans le PLC||**2019**:TIA Portal V16 · Cloud Connector · lien avec MindSphere||**2022**:TIA Portal V18 · nouveaux F-CPUs · améliorations sécurité||**2024-25**:TIA Portal V19 · dernière stable · support S7-1500 R/H pour redondance||**2026**:TIA Portal V20 émerge · features cloud renforcées]\n\n### Le changement paradigmatique\nAvant TIA Portal, un projet Siemens = 3-4 outils différents :\n- STEP 7 pour la programmation PLC\n- WinCC flexible pour les HMI\n- STARTER pour les drives\n- Chacun avec son projet séparé, ses variables séparées, sa cohérence à maintenir à la main\n\nTIA Portal a **tout unifié** :\n- 1 projet unique\n- Variables partagées entre PLC et HMI\n- Cohérence automatique\n- Simulation intégrée\n\nC'est cette intégration qui a fait le succès. Aujourd'hui, aucun retour en arrière possible.\n\n### Positionnement Siemens\nTIA Portal fait partie du **Totally Integrated Automation** (TIA), la vision Siemens d'une plateforme unifiée automation :\n- Hardware (S7-1200/1500, ET 200, HMI Comfort, SINAMICS)\n- Software (TIA Portal)\n- Communication (Profinet, Profisafe, OPC UA)\n- Services cloud (MindSphere)\n\nLe tout pensé pour fonctionner ensemble sans intégration custom.\n\n### Version choix\nChez Dasolabs, notre standard :\n- **Projets neufs** : TIA Portal V19 · dernière stable\n- **Legacy** : ne pas mixer avec versions antérieures · en projet dédié\n- **F-PLC** : V19 requis pour dernières features safety\n\n### Licencing\nTIA Portal est payant :\n- **Basic** : PLC S7-1200 uniquement · ~500 €\n- **Professional** : tous PLC S7-1200/1500 · ~4 000 €\n- **STEP 7 Professional** : S7-300/400 legacy · ~3 000 €\n- **WinCC Comfort** : HMI Comfort · ~2 000 €\n- **WinCC Unified** : nouveau HMI web-based · ~4 000 €\n\nTotal pour poste consultant complet : ~10-15 k€ setup.\n\n[TIP|Un consultant Dasolabs a **son propre poste TIA Portal** avec toutes les licences. Investissement fait par Dasolabs, indispensable pour productivité.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -32,28 +32,61 @@
       "position": 3,
       "kind": "CONTENT",
       "section": "1 · Introduction TIA Portal",
-      "title": "Installation et licences",
-      "bodyMd": "## Ce qu'il faut pour installer TIA\n\n### Configuration PC recommandée\n- **Windows 10/11 Pro 64 bits** (Home refuse certaines fonctions)\n- **32 GB RAM minimum** (16 GB = souffrance, 64 GB = confort)\n- **500 GB SSD** minimum (TIA installe ~40 GB par version)\n- Écran **1920×1080 minimum**, 2 écrans confort\n\n[WARN|**JAMAIS** installer TIA sur une VM standard. La virtualisation graphique = crash quotidiens. Les VMs supportées : VMware Workstation Pro avec 3D acceleration.]\n\n### Licences\n[KV|**TIA V19 Basic**:S7-1200 + HMI Basic uniquement · ~300 €||**TIA V19 Professional**:tout · gestion S7-1500 · ~5 500 € licence flottante||**TIA V19 Safety Advanced**:extension F-CPU · ~3 500 €||**TIA V19 OpenService**:client web + API · ~2 000 €]\n\n### Types de licences\n- **Floating (recommandé)** : partagée via serveur licence, N utilisateurs\n- **Single License** : liée à un PC spécifique\n- **Trial 21 jours** : gratuit, sans limitation\n\n[TIP|Chez Dasolabs, un dongle USB Automation License Manager centralise les licences pour toute l'équipe. Louise commande, tout le monde profite.]",
+      "title": "Interface TIA Portal",
+      "bodyMd": "## Se repérer dans l'outil\n\nTIA Portal a une interface qui semble complexe au début. Voici les repères essentiels.\n\n### Portal View vs Project View\nTIA Portal offre 2 vues principales :\n[KV|**Portal View**:vue guidée · pour débutants · \"que voulez-vous faire ?\"||**Project View**:vue complète · pour expérimentés · tout accessible]\n\nEn pratique, un consultant travaille **99 % en Project View**. Le Portal View est utile juste au premier démarrage d'un projet.\n\n### Les zones clés de Project View\n[STEPS|**Project tree (gauche)** : arborescence du projet · devices, blocs, HMI screens||**Working area (centre)** : là où on édite blocs, HMI, config||**Inspector window (bas)** : propriétés de l'objet sélectionné||**Task cards (droite)** : bibliothèques, drag-and-drop||**Menu bar (haut)** : commandes globales · compile, download, online]\n\n### Le project tree — la structure\nUn projet TIA typique contient :\n- **Devices** : la liste des équipements (PLC, HMI, IO, drives)\n- Pour chaque device :\n  - **Program blocks** : les blocs de code (OB, FB, FC, DB)\n  - **Technology objects** : axes, régulations\n  - **PLC tags** : variables I/O globales\n  - **Watch tables** : pour debug\n- **Common data** : partagé entre devices\n- **Documentation settings**\n- **Languages & resources** : traductions\n- **Online access** : pour connexion à un vrai PLC\n\n### Compile & Download\nDeux opérations centrales :\n- **Compile** : vérification syntaxique + génération binaire · offline\n- **Download** : envoi vers PLC · nécessite connexion online\n\nChez Dasolabs, on compile souvent (avant chaque save important), on télécharge après avoir compilé sans erreur.\n\n### Shortcuts clés\n[KV|**Ctrl+S**:save||**Ctrl+K**:compile all||**Ctrl+D**:download to device||**Ctrl+O**:go online||**Ctrl+Alt+O**:go offline||**F1**:aide contextuelle||**F5**:refresh||**F7**:trouver dans blocs||**Ctrl+H**:search & replace]\n\n### Bibliothèques\nTIA Portal propose des bibliothèques :\n- **Corporate library** : bibliothèque interne au projet · réutilisation\n- **Global libraries** : bibliothèques réutilisables entre projets · ex \"Motor Standard Dasolabs\"\n- **Siemens libraries** : fournies par Siemens (LGF, etc.)\n\nChez Dasolabs, on maintient une **Corporate Library Dasolabs** avec nos blocs standards (moteurs, vannes, régulateurs). Gain énorme en productivité.\n\n[TIP|**Investissement recommandé** : 20-30h pour maîtriser vraiment l'interface. Après, on gagne 3h par jour de productivité pendant toute sa carrière.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 4,
-      "kind": "CONTENT",
+      "kind": "QUIZ",
       "section": "1 · Introduction TIA Portal",
-      "title": "Structure d'un projet TIA",
-      "bodyMd": "## L'arborescence côté fichiers et côté logiciel\n\nUn projet TIA est un dossier « .ap19 » (extension liée à la version).\n\n### Arborescence côté disque\n[STEPS|**MonProjet.ap19** — fichier principal||**Additional files/** — captures, docs, logs||**System/** — configuration système||**UserFiles/** — pièces jointes utilisateur||**AR_SYSTEM_1/** — sauvegardes automatiques]\n\n### Arborescence côté logiciel (Project Tree)\nUne fois le projet ouvert dans TIA :\n[STEPS|**Devices & Networks** — la vue matériel globale (rack, réseau)||**Sous chaque device (PLC, HMI, Drive)**:\n  - Program blocks (OB, FB, FC, DB)\n  - Technology objects\n  - External source files\n  - PLC tags\n  - PLC data types\n  - Watch and force tables\n  - Online & diagnostics||**Common data** — partagé entre plusieurs devices||**Documentation settings** — templates de doc||**Languages & resources** — multi-langue HMI]\n\n### Sauvegarde et Git\n[TIP|Un projet TIA est un dossier binaire. **Il ne se versionne PAS bien en Git** directement. Deux options :\n1. **TIA Multiuser Server** (payant, Siemens officiel) — le vrai versioning\n2. **Sauvegarder l'archive .zap19** dans un dossier partagé/OneDrive/Git LFS — solution du pauvre]",
+      "title": "Quiz 1 — Introduction",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "TIA Portal est…",
+            "options": [
+              "Un PLC",
+              "L'environnement de développement intégré Siemens · unifie PLC + HMI + drives + safety dans 1 projet",
+              "Un SCADA",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "TIA Portal a remplacé…",
+            "options": [
+              "Rien",
+              "STEP 7 + WinCC flexible + STARTER · outils séparés avant 2010 · projet unique désormais",
+              "Uniquement STEP 7",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Consultant Dasolabs utilise en pratique…",
+            "options": [
+              "Portal View",
+              "Project View à 99 % · vue complète pour expérimentés",
+              "Rien",
+              "Portal View + Project View 50/50"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 5,
       "kind": "CONTENT",
-      "section": "1 · Introduction TIA Portal",
-      "title": "Premier projet — création",
-      "bodyMd": "## Créer un nouveau projet vide\n\n### Wizard TIA\n[STEPS|**File → New** → nom du projet + emplacement||**Add new device** → Controllers → SIMATIC S7-1500 → CPU 1516-3 PN/DP → choisir version firmware||**Add HMI (optionnel)** → SIMATIC HMI → Comfort Panels → TP1200||**Add IE Communication** entre PLC et HMI dans Devices & Networks]\n\n### Version firmware\n[WARN|La version firmware de la CPU dans TIA **doit correspondre** au firmware réel de la CPU physique. Firmware 3.0 dans TIA vs 2.9 sur la CPU réelle = erreur au téléchargement.]\n\n### Nom du device\nNommer intelligemment : 'PLC_Ligne1_Zoetis', pas 'PLC_1'. Le nom apparaît partout — dans les logs, HMI, docs.\n\n[TIP|Toujours commencer par la **configuration matérielle**. Ne jamais coder avant que le rack soit configuré, sinon les adresses I/O bougent et casse tout ton code.]",
+      "section": "2 · Hardware configuration",
+      "title": "Configurer un PLC",
+      "bodyMd": "## Du hardware au projet\n\nLa première étape d'un nouveau projet TIA : configurer le hardware. C'est le point de départ obligatoire.\n\n### Créer un nouveau projet\n1. **Portal View** → \"Create new project\"\n2. Nommer le projet (ex \"UCB_Reactor_2026\")\n3. Choisir le chemin de stockage · Git recommandé pour versioning\n4. Auteur\n5. Le projet est créé\n\n### Ajouter un PLC\n1. Dans Project View → double-click \"Add new device\"\n2. Choisir la catégorie : PLC → SIMATIC S7-1500\n3. Modèle exact (ex : CPU 1516-3 PN/DP · Firmware V3.1)\n4. Numéro d'article Siemens (ex : 6ES7 516-3AN02-0AB0)\n5. Confirmer\n\nLe PLC apparaît dans le project tree avec sa configuration hardware par défaut (une CPU, quelques slots pour cartes IO).\n\n### La Device View — configurer les modules\nDouble-clic sur le PLC → **Device View**. On voit :\n- Le rail (rack) avec les slots\n- Slot 1 : CPU (déjà là)\n- Slots vides pour cartes IO\n\nPour ajouter des cartes IO :\n1. Drag-drop depuis Hardware catalog (à droite)\n2. Types disponibles :\n   - **DI** (Digital Input) : boutons, capteurs TOR\n   - **DO** (Digital Output) : vannes, contacteurs\n   - **AI** (Analog Input) : capteurs 4-20 mA, PT100\n   - **AO** (Analog Output) : sondes, régulateurs\n   - **F-DI/DO** : safety inputs/outputs\n\n### Adressage automatique\nTIA Portal alloue automatiquement les adresses :\n- DI : %I0.0, %I0.1, ... (bit-adressage)\n- DO : %Q0.0, %Q0.1, ...\n- AI : %IW0, %IW2, ... (2 bytes)\n- AO : %QW0, %QW2, ...\n\nOn peut réassigner manuellement si besoin (rare).\n\n### Network view — communications\nDeuxième vue essentielle : **Network View**. Là on connecte les devices entre eux :\n- PLC ↔ HMI : réseau Profinet ou Ethernet\n- PLC ↔ Drives : Profinet\n- PLC ↔ Autre PLC : Ethernet ou Profinet\n- HMI ↔ HMI : Ethernet\n\nSimple drag-drop pour connecter. TIA Portal génère la config réseau automatiquement.\n\n### IP addressing\nChaque device a son IP :\n- PLC principal : 192.168.1.10\n- HMI : 192.168.1.20\n- Drives : 192.168.1.30+\n- IO distribuées : 192.168.1.100+\n\nOn configure dans les propriétés device. **Attention aux collisions** — utiliser plan d'adressage IP documenté.\n\n### Compile et téléchargement hardware\nAprès config hardware :\n1. Compile (Ctrl+K)\n2. Fix errors si y en a\n3. Download to device (Ctrl+D)\n4. Le PLC reçoit sa nouvelle config\n5. Redémarrage automatique · quelques secondes\n\nAprès ça, le PLC est prêt à recevoir le programme applicatif.\n\n[TIP|**Bonne pratique** : documenter la config hardware dans un doc Excel séparé (numéros de série, MAC, IPs). C'est plus rapide à consulter que d'aller dans TIA. Utile en support terrain.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -61,29 +94,62 @@
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "1 · Introduction TIA Portal",
-      "title": "Configuration matérielle — Device View",
-      "bodyMd": "## Le rack graphique\n\nDans Devices → Device Configuration → Device View, tu vois le rack graphique.\n\n### Ce qu'on y fait\n- Glisser des modules du catalogue (à droite) vers un slot libre\n- Cliquer sur un module pour voir ses propriétés (adressage, diagnostic, options)\n- Changer les adresses I/O si besoin (par défaut auto)\n\n### Propriétés module — panneau bas\nOnglets à connaître :\n[KV|**General**:nom, commentaire||**Ethernet addresses**:IP, subnet mask, nom PN||**Time synchronization**:NTP, master/slave||**Web server**:activer, port, HTTPS||**Display**:langue, verrouillage écran||**Access level**:mots de passe accès CPU]\n\n[TIP|**Toujours configurer un mot de passe** en accès Full sur la CPU en production. Le CPU sans mot de passe = compromise garantie.]",
+      "section": "2 · Hardware configuration",
+      "title": "IO distribuées ET 200SP",
+      "bodyMd": "## Extension des IO en modulaire\n\nEn pratique, un projet dépasse vite les slots physiques d'un rack CPU. On utilise des **IO distribuées** — modules déportés connectés via Profinet.\n\n### Le concept\nUne ET 200SP est une **station IO déportée** :\n- Interface Profinet (côté réseau)\n- Un rail avec des modules\n- Plus proche des équipements terrain (~50-100 m du CPU)\n\nAvantages :\n- **Câblage plus court** entre capteurs/actionneurs et modules\n- **Modularité** : ajouter des modules sans toucher au CPU\n- **Diagnostic** avancé (LED par slot)\n- **Hot swap** : changement de module sans arrêt\n\n### Configuration dans TIA\n1. Network View → drag \"IM 155-6 PN HF\" (interface ET 200SP)\n2. Connecter au PLC via ligne Profinet\n3. Configurer IP de la station\n4. Device View de la station → ajouter modules DI/DO/AI/AO\n5. Compile + Download\n\nL'ET 200SP apparaît côté PLC comme une extension des IO — les adresses s'enchaînent naturellement.\n\n### Types de modules ET 200SP\n[KV|**Digital Input**:8, 16 canaux · 24 VDC · avec ou sans diagnostic||**Digital Output**:8, 16 canaux · 24 VDC · courant variable||**Analog Input**:4, 8 canaux · 4-20 mA, 0-10 V, PT100, thermocouples||**Analog Output**:2, 4 canaux · 4-20 mA, 0-10 V||**F-modules**:safety · F-DI, F-DO · pour circuits sécurité||**IO-Link master**:pour capteurs IO-Link modernes||**Motor starter**:pour petits moteurs · commande + protection intégrée]\n\n### Cas d'usage typique pharma UCB\nSur une ligne d'embouteillage :\n- **1 PLC S7-1500** dans armoire principale\n- **3 stations ET 200SP** dispatched :\n  - Station 1 : entrée ligne (dépalettiseur, débobineur)\n  - Station 2 : remplissage (fillers, capping)\n  - Station 3 : sortie (étiquetage, palettiseur)\n- **Câbles Profinet** entre stations (câble bus + alimentation)\n- **~200 IO** répartis\n\nÇa permet d'avoir un câblage propre, court, maintenable.\n\n### Diagnostic ET 200SP\nChaque station et chaque module a :\n- **LED status** : vert = OK, rouge = erreur, orange = warning\n- **LED par canal** : voit immédiatement quel capteur est actif\n- **Diagnostic bus** : le PLC voit l'état de chaque module\n\nEn cas de problème, l'électricien terrain regarde d'abord les LEDs. En 30 sec, il identifie 80 % des problèmes sans même ouvrir TIA Portal.\n\n[TIP|Sur projets Dasolabs, on standardise sur ET 200SP pour toutes les stations déportées. Cohérence, formation team, stock spare parts unique.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 7,
-      "kind": "CONTENT",
-      "section": "1 · Introduction TIA Portal",
-      "title": "Compilation et téléchargement",
-      "bodyMd": "## Du code au PLC — le workflow\n\n### Compilation\n- **Ctrl+B** ou clic droit → Compile → Hardware and software\n- TIA vérifie syntaxe, cohérence, utilisation mémoire\n- Résultats dans l'onglet **Info** en bas\n\n### Téléchargement (Download)\n- **Ctrl+L** ou clic droit → Download to device\n- Choisir Hardware only, Software only, ou All\n- TIA se connecte au PLC via Ethernet\n- **Warning** si CPU en RUN — proposer STOP puis RUN\n\n### Modes de téléchargement\n[KV|**Hardware download**:configuration rack + réseau · nécessite STOP CPU||**Software download**:programme utilisateur · possible en RUN pour blocs déjà existants||**Consistent download**:tout d'un coup · plus sûr]\n\n### Upload (télécharger DU PLC vers le PC)\nCas typique : tu récupères un projet dont tu n'as pas la source.\n[STEPS|**Online & diagnostics → Backup from PLC** → sauvegarde de sécurité||**Upload devices to PG/PC** → reconstitue un projet TIA depuis la CPU||**Attention** — commentaires et noms symboliques peuvent être perdus si projet compilé sans \"Extended download\"]\n\n[TIP|**Toujours faire un backup AVANT téléchargement**. Un mauvais téléchargement peut planter la machine — le backup te sauve la mise en 30 secondes.]",
+      "kind": "QUIZ",
+      "section": "2 · Hardware configuration",
+      "title": "Quiz 2 — Hardware",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Configurer le hardware TIA se fait dans…",
+            "options": [
+              "Rien",
+              "Device View pour le rail et modules · Network View pour connexions entre devices",
+              "Uniquement Portal View",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "ET 200SP est…",
+            "options": [
+              "Un PLC",
+              "Station IO déportée connectée via Profinet · pour rapprocher IO du terrain · modulaire",
+              "Un SCADA",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Adressage automatique TIA Portal…",
+            "options": [
+              "Rien",
+              "Alloue automatiquement %I, %Q, %IW, %QW selon slots · overridable manuellement",
+              "Aléatoire",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 8,
       "kind": "CONTENT",
-      "section": "1 · Introduction TIA Portal",
-      "title": "Simulation avec PLCSIM Advanced",
-      "bodyMd": "## Tester sans PLC physique\n\n**PLCSIM** simule une CPU S7-1500 sur ton PC. Idéal pour développer sans matériel.\n\n### Deux versions\n[KV|**PLCSIM (classique)**:simulation basique · pas de Profinet · pour test rapide||**PLCSIM Advanced**:simulation complète · Profinet · comm entre CPU · pour dev sérieux]\n\n### Utilisation basique\n1. Sélectionner CPU dans Project tree\n2. **Start simulation** (icône moniteur bleu)\n3. TIA lance PLCSIM en tant que CPU virtuelle\n4. Download → ta CPU virtuelle reçoit le code\n5. Aller online → tu vois les I/O, tu peux forcer des valeurs\n\n### Avec PLCSIM Advanced\n- Créer plusieurs CPU virtuelles simultanément\n- Créer un **réseau Profinet virtuel**\n- Faire communiquer plusieurs PLC entre eux, ou avec un WinCC\n- **API Python/C#** pour orchestration de tests automatiques\n\n[USECASE|Développement projet Zoetis|Adrien développe la logique de ligne d'embouteillage. Il n'a pas encore le matériel commandé.|**PLCSIM Advanced** simule 1× S7-1500 + 3× ET 200SP virtuelles. Il code, teste, valide toute la logique **avant** livraison matériel. Gain : 3 semaines sur planning.]",
+      "section": "3 · Programmation",
+      "title": "Les langages de programmation",
+      "bodyMd": "## LAD, FBD, STL, SCL, GRAPH\n\nTIA Portal supporte 5 langages standards IEC 61131-3, chacun avec ses forces.\n\n### Vue d'ensemble\n[KV|**LAD (Ladder Diagram)**:schémas contact-bobine · le plus visuel · pour logique combinatoire · standard historique||**FBD (Function Block Diagram)**:blocs fonctionnels · pour logique complexe · plus lisible que LAD||**STL (Statement List)**:assembleur PLC · puissant mais illisible · legacy · à éviter||**SCL (Structured Control Language)**:Pascal-like · pour algorithmes complexes · standard moderne · **recommandé**||**GRAPH (Sequential Function Chart)**:machine d'états · pour séquences batch · idéal recettes]\n\n### Le choix Dasolabs\nChez Dasolabs, on privilégie :\n- **SCL** pour la logique complexe (algorithmes, calculs, traitement string)\n- **LAD** pour la logique combinatoire simple (verrouillages, gestion moteurs)\n- **GRAPH** pour les séquences (recettes batch, procédures)\n- **FBD** occasionnellement pour visualisation\n- **STL** : évité — seulement pour maintenance de legacy\n\nCette combinaison couvre 100 % des cas industriels.\n\n### LAD — le classique\nPour un verrouillage simple :\n\n    Bouton_Start ────┤├────Bouton_Stop───┤/├────┤ Motor\n                                        (Motor)\n\nSe lit : « Si Bouton_Start = 1 ET Bouton_Stop = 0, alors Motor = 1 ». Très visuel, très rapide pour combinatoire.\n\n### SCL — le moderne\nLe même verrouillage en SCL :\n\n    IF Bouton_Start AND NOT Bouton_Stop THEN\n        Motor := TRUE;\n    ELSE\n        Motor := FALSE;\n    END_IF;\n\nPlus verbeux mais plus explicite pour algorithmes. SCL est **le futur** — Siemens pousse SCL de plus en plus.\n\n### GRAPH — les séquences\nPour une recette de batch :\n\n    Étape 1 : Ouvrir V1\n    Transition : Niveau > 50 %\n    Étape 2 : Chauffage à 60°C\n    Transition : Température atteinte\n    Étape 3 : Agitation 30 min\n    Transition : Timer écoulé\n    Étape 4 : Vidange\n    Transition : Cuve vide\n\nGRAPH transforme naturellement une séquence en logique PLC exécutable. Idéal pour ISA-88.\n\n### Passage d'un langage à l'autre\nDans un même projet, on peut mixer :\n- Un FB en SCL avec du code procédural\n- Un FB en LAD avec des sous-appels vers FB SCL\n- Un OB principal en LAD qui appelle des FB en GRAPH\n\nCette flexibilité permet d'utiliser le meilleur outil pour chaque cas.\n\n[TIP|**Convention Dasolabs** : chaque bloc a un commentaire indiquant pourquoi tel langage a été choisi. Ex : « Bloc SCL car algorithme complexe · maintenance = SCL exclusivement ».]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -91,49 +157,59 @@
     {
       "position": 9,
       "kind": "CONTENT",
-      "section": "1 · Introduction TIA Portal",
-      "title": "Interface TIA — barre d'outils essentielle",
-      "bodyMd": "## Ce que tu utilises 100 fois par jour\n\n### Barre haut-gauche\n[KV|**Save (Ctrl+S)**:sauvegarder projet · **impératif** avant toute manip risquée||**Compile (Ctrl+B)**:compiler le device sélectionné||**Download (Ctrl+L)**:télécharger||**Upload from device**:récupérer depuis PLC||**Go online (Ctrl+K)**:connexion online||**Go offline (Ctrl+M)**:déconnexion online||**Monitor on/off (F7)**:activer visu variables temps réel||**Simulation start**:lancer PLCSIM]\n\n### Onglet Info (en bas)\n- **General** : messages de compilation\n- **Cross-references** : où une variable est utilisée\n- **Compile** : résultats détaillés\n- **Diagnostic** : erreurs online\n\n### Recherches (Ctrl+F)\n- Chercher un tag, un bloc, une adresse\n- **Ctrl+Shift+F** : chercher DANS les blocs\n\n[TIP|**Ctrl+Shift+F sur un tag** = \"où est-il utilisé dans le programme ?\" = fonctionnalité vitale pour comprendre un code hérité.]",
+      "section": "3 · Programmation",
+      "title": "Structure d'un programme S7",
+      "bodyMd": "## OB, FB, FC, DB — les briques\n\nUn programme S7 est structuré en **blocs** de différents types. Comprendre cette organisation est fondamental.\n\n### Types de blocs\n[KV|**OB (Organization Block)**:le point d'entrée · appelé automatiquement par l'OS du PLC · ex OB1 = cycle main||**FB (Function Block)**:fonction avec mémoire (DB associé) · pour objets avec état · ex un moteur||**FC (Function)**:fonction sans mémoire · pour calculs stateless · ex CONVERTIR_MA_EN_TEMP()||**DB (Data Block)**:bloc de données · pour stocker · global ou associé à un FB||**PLC data types**:types complexes réutilisables · struct-like]\n\n### L'OB1 — le programme principal\nOB1 est appelé **cycliquement** par l'OS du PLC (typiquement toutes les 1-10 ms selon complexité). C'est le point d'entrée du programme applicatif.\n\nOB1 typique :\n\n    // OB1 - Programme principal\n    // Appelé cycliquement par le PLC\n\n    \"Init_Signals\"();           // Init des signaux d'entrée\n    \"Interlocks_Global\"();      // Verrouillages globaux\n    \"Reactor_R1\"(\"R1\", ...);    // FB Reactor instancié pour R1\n    \"Reactor_R2\"(\"R2\", ...);    // FB Reactor instancié pour R2\n    \"Alarms_Manager\"();         // Gestion des alarmes\n    \"HMI_Interface\"();          // Update variables pour HMI\n\nChaque fonction a son rôle clair. OB1 reste **court et lisible**.\n\n### Autres OB importants\n[KV|**OB100**:Startup · appelé au démarrage du PLC · pour init||**OB35**:Cyclic interrupt · appelé à intervalles précis (ex 100 ms) · pour régulation||**OB40**:Hardware interrupt · sur événement matériel · rare||**OB82**:Diagnostic interrupt · en cas d'erreur module||**OB80**:Time error · si un OB déborde||**OB121/122**:Programming/access errors]\n\n### FB vs FC — quand choisir quoi ?\n[STEPS|**FB pour objets avec état** : un moteur avec last_speed, run_time, alarm_count||**FC pour fonctions pures** : convertir 4-20mA en °C · même input → même output||**FB si tu réutilises le même code plusieurs fois** : Reactor R1, R2, R3 = FB \"Reactor\" instancié 3x||**FC si code utilitaire** : ROUND(), CLAMP(), SCALE()]\n\n### DB — les données\nLes blocs DB stockent les data :\n- **Instance DB** : mémoire d'un FB spécifique · créé auto quand on appelle un FB\n- **Global DB** : accessible depuis tout le programme · pour config, recettes, tampons\n\nConvention Dasolabs :\n- DB1 : Configuration globale\n- DB10-99 : Recettes\n- DB100+ : Instance DBs des FBs\n\n### PLC data types (UDT)\nLes UDT (User-Defined Types) sont des structures :\n\n    UDT \"Motor_State\":\n      speed : Real\n      running : Bool\n      alarm_count : Int\n      last_maintenance : DateTime\n\nOn peut utiliser Motor_State partout — cohérence garantie. Modifier l'UDT = update partout auto.\n\n[TIP|**Convention nommage Dasolabs** :\n- OB : \"OB_XX_Description\" (OB_1_Main, OB_35_100ms)\n- FB : \"FB_Domain_Function\" (FB_Motor_Start, FB_Reactor_Sequence)\n- FC : \"FC_Function\" (FC_Convert_4-20mA)\n- DB : \"DB_Function\" (DB_Recipes, DB_Config)\n- UDT : \"UDT_Domain_Type\" (UDT_Motor_State, UDT_Batch_Info)\n\nStandardisation = maintenabilité.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 10,
+      "kind": "CONTENT",
+      "section": "3 · Programmation",
+      "title": "Variables et tags",
+      "bodyMd": "## Nommage et organisation\n\nLes **variables** (tags) sont ce qui rend un programme lisible ou illisible. Investissement clé.\n\n### Les 3 domaines de variables\n[KV|**PLC tags**:variables globales I/O · liées aux modules physiques · %I0.0 = Bouton_Start||**Program tags**:variables du programme applicatif · dans les FB et DB||**HMI tags**:variables partagées avec HMI · souvent aliases des PLC tags]\n\n### PLC tags — la table\nDans TIA Portal → Devices → PLC → PLC tags → Default tag table. On y liste toutes les variables I/O :\n\n    Name                Address     Data Type   Comment\n    Bouton_Start        %I0.0       Bool        Bouton marche console operateur\n    Bouton_Stop         %I0.1       Bool        Bouton arret console operateur\n    Reactor_R1_Temp     %IW10       Int         Temperature R1 (4-20 mA)\n    Reactor_R1_Motor    %Q0.0       Bool        Commande moteur R1\n\nCette table est **la référence unique** pour les I/O. Bien la maintenir = base d'un projet propre.\n\n### Conventions de nommage\n[STEPS|**Descriptifs** : Bouton_Start_R1 · pas B_S_R1||**Underscore separator** : Reactor_R1_Temp · pas ReactorR1Temp||**Snake_case** cohérent · pas mixed camel/snake||**Pas de caractères spéciaux** : accents, apostrophes||**Anglais** dans les projets multi-sites · français en projets locaux||**Suffixes standardisés** : _M pour moteur, _V pour vanne, _T pour capteur température]\n\n### Structuration en groupes\nPour un projet de 500 tags, la table devient ingérable. On organise en **groupes** :\n- Group \"Reactor R1\" : tags R1\n- Group \"Reactor R2\" : tags R2\n- Group \"HMI\" : tags spécifiques HMI\n- Group \"Diagnostics\" : tags de diag\n- Group \"Safety\" : tags safety\n\nChaque group = une table séparée dans TIA. Plus lisible.\n\n### Tags dans les blocs\nDans un FB, on a :\n- **Input** : paramètres entrants\n- **Output** : paramètres sortants\n- **InOut** : entrée-sortie (pointeur)\n- **Static** : mémoire persistente du FB\n- **Temp** : temporaire, reset à chaque appel\n\nExemple pour FB_Reactor :\n\n    Input:\n      TargetTemp : Real\n      RecipeId : Int\n    Output:\n      ActualTemp : Real\n      Alarm : Bool\n    Static:\n      InternalState : Int\n      Timer_Chauffe : Timer\n\n### Cross-reference — la killer feature\nTIA Portal permet de **naviguer** les usages d'une variable :\n- Click droit sur \"Reactor_R1_Temp\" → \"Cross-references\"\n- Liste : dans FB_R1, dans HMI screen \"Overview\", dans DB_Historian\n\nUtile pour :\n- Comprendre l'impact d'une modification\n- Chercher où une variable est écrite/lue\n- Audit code\n\n[TIP|**Bonne pratique** : audit annuel de la table de tags. Chaque année, on parcourt et on nettoie (vieux tags plus utilisés, renommer les mal-nommés). Investissement 1 jour, gain énorme pour maintenance.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 11,
       "kind": "QUIZ",
-      "section": "1 · Introduction TIA Portal",
-      "title": "Quiz 1 — Introduction TIA Portal",
+      "section": "3 · Programmation",
+      "title": "Quiz 3 — Programmation",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "TIA Portal est apparu en quelle année ?",
+            "prompt": "TIA Portal supporte quels langages IEC 61131-3 ?",
             "options": [
-              "2000",
-              "2005",
-              "2010",
-              "2015"
+              "Uniquement LAD",
+              "LAD, FBD, STL, SCL, GRAPH · choix selon cas d'usage · SCL et GRAPH recommandés modernes",
+              "Uniquement SCL",
+              "Rien"
             ],
-            "correctIndex": 2
+            "correctIndex": 1
           },
           {
-            "prompt": "Quelle est la RAM minimum recommandée pour TIA V19 ?",
+            "prompt": "Différence FB vs FC ?",
             "options": [
-              "4 GB",
-              "8 GB",
-              "32 GB",
-              "128 GB"
+              "Aucune",
+              "FB = fonction avec mémoire (Instance DB) pour objets avec état · FC = fonction pure sans mémoire pour utilitaires",
+              "FB = HMI",
+              "Rien"
             ],
-            "correctIndex": 2
+            "correctIndex": 1
           },
           {
-            "prompt": "PLCSIM Advanced permet de…",
+            "prompt": "OB1 est…",
             "options": [
-              "Simuler seulement 1 CPU",
-              "Simuler plusieurs CPU + réseau Profinet virtuel",
-              "Uniquement de la simulation LAD",
-              "Rien, c'est un logiciel séparé"
+              "Un DB",
+              "Le programme principal · appelé cycliquement par le PLC OS · point d'entrée du programme applicatif",
+              "Un HMI",
+              "Rien"
             ],
             "correctIndex": 1
           }
@@ -142,21 +218,11 @@
       "imageUrl": null
     },
     {
-      "position": 11,
-      "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Devices & Networks — vue d'ensemble",
-      "bodyMd": "## Le hub de la config\n\n**Devices & Networks** (Device View + Network View) est le point de départ de tout projet TIA.\n\n### Device View\n- Vue physique du rack de chaque device (PLC, HMI, Drive)\n- Slots de modules, adressage local\n\n### Network View\n- Vue graphique **réseau** : PLC + HMI + Drives connectés\n- Liaisons Profinet, Profibus, S7 connections\n- Topologie physique (qui est câblé à qui)\n\n[TIP|Toujours démarrer un projet par la Network View : dessine tes devices, connecte-les logiquement, ADRESSE-LES avant de coder quoi que ce soit.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
       "position": 12,
       "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Adressage IP et nom Profinet",
-      "bodyMd": "## Deux identifiants coexistent\n\nChaque device Profinet a **deux identifiants** :\n1. **Adresse IP** (192.168.1.10 par ex.)\n2. **Nom Profinet** (device name — 'plc_ligne1')\n\nLes deux sont configurés côté TIA, puis appliqués au device.\n\n### Politique d'adressage Dasolabs\n[KV|**192.168.1.x**:VLAN OT · PLC + ET 200 + HMI local||**192.168.100.x**:VLAN engineering · PC dev + serveur licence||**10.0.x.x**:VLAN IT/MES · SCADA · MES]\n\n### Assignation du nom Profinet\n1. Dans TIA → Device View → clic droit sur le port PN → Assign name\n2. TIA broadcast, tous les devices non nommés répondent\n3. Sélectionner physique + assigner le nom voulu\n4. Le device retient le nom même après power-cycle\n\n[WARN|**Ne jamais avoir deux devices avec le même nom PN** dans un même réseau. Conflit garanti, comm cassée aléatoirement.]",
+      "section": "4 · Simulation et HMI",
+      "title": "PLCSIM — simulation sans PLC",
+      "bodyMd": "## Développer sans matériel\n\n**PLCSIM** est le simulateur intégré TIA Portal. Il permet de tester un programme **sans PLC physique**. Fondamental pour dev efficace.\n\n### Deux versions\n[KV|**PLCSIM Classic**:pour S7-1200/1500 · simule un CPU + IO virtuels · gratuit inclus TIA||**PLCSIM Advanced**:payant · simule cluster de PLC · communication réseau réelle · pour cas complexes]\n\nEn pratique, PLCSIM Classic couvre 90 % des besoins.\n\n### Utilisation typique\n1. Développer le programme dans TIA Portal\n2. Compile\n3. Ouvrir PLCSIM\n4. Load le programme dans PLCSIM (comme un download vers PLC physique)\n5. Go Online avec le PLC virtuel\n6. Tester les fonctions comme sur un vrai PLC\n\nRésultat : on peut développer 100 % chez soi ou au bureau, valider fonctionnellement, avant d'aller sur site.\n\n### Forcer les IO\nDans PLCSIM, on peut **forcer** les valeurs des IO :\n- Set %I0.0 = TRUE (comme si le bouton était appuyé)\n- Set %IW10 = 500 (comme si la sonde lisait 500)\n- Observer la réaction du programme\n- Set %Q0.0 = FALSE (débug de la sortie)\n\nCombiné avec les watch tables TIA, c'est un environnement de test complet.\n\n### Watch tables\nPendant PLCSIM ou en online réel, on utilise les **Watch Tables** pour observer/modifier des variables :\n\n    Name                Value       Modify Value\n    Reactor_R1_Temp     45.2        [set 60]\n    Motor_State         RUNNING     [set STOPPED]\n    Alarm_Active        FALSE       -\n\nRapide, efficace pour debug.\n\n### Simulation HMI en parallèle\nOn peut également simuler le HMI en parallèle avec le PLC :\n- **WinCC Runtime Advanced** (pour HMI Comfort)\n- **HMI Simulator** intégré TIA\n\nRésultat : on teste PLC + HMI ensemble sans hardware. Test end-to-end fonctionnel.\n\n### Limitations\nPLCSIM ne simule PAS :\n- Temps réel exact (les cycles peuvent être un peu différents)\n- Certains modules F-CPU safety (nécessite hardware)\n- OPC UA server dans certaines configurations\n\nPour ces cas, on valide sur hardware réel avant mise en prod.\n\n### Impact sur productivité\nChez Dasolabs, l'utilisation systématique de PLCSIM :\n- Réduit de 40-60 % le temps de dev\n- Détecte 80 % des bugs avant hardware\n- Permet de démarrer un projet sans attendre livraison PLC (6-12 semaines de delay)\n\nC'est **majeur** pour productivité consultant.\n\n[TIP|**Conseil formation** : maîtriser PLCSIM en premier · avant d'apprendre les subtilités du langage. Sans PLCSIM, chaque test = 5 min de download. Avec, 5 sec.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -164,29 +230,62 @@
     {
       "position": 13,
       "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Topologie Profinet — définir les câbles",
-      "bodyMd": "## Documenter le câblage physique\n\nTIA supporte la **définition de topologie** : indiquer qui est câblé sur quel port de quel device.\n\n### Bénéfices\n- **Diagnostic** : \"tel câble entre tel port et tel port a chuté\"\n- **MRP** (Media Redundancy Protocol) : nécessite topologie fixe en anneau\n- **IRT** (Isochronous Real Time) : nécessite topologie déterministe\n\n### Comment définir\nDevice Configuration → Onglet Topology View → clic droit sur port CPU X1 P1 → Connect to → choisir device destinataire + port.\n\n[TIP|Sur projet moyen (5+ devices Profinet), toujours configurer la topologie. Ça prend 15 min, ça économise des heures de diagnostic.]",
+      "section": "4 · Simulation et HMI",
+      "title": "HMI Comfort avec WinCC",
+      "bodyMd": "## Interface opérateur intégrée\n\nTIA Portal permet de développer les **HMI Comfort** (les IHM Siemens tactiles) dans le même projet que le PLC. WinCC est le nom du framework HMI.\n\n### Types de HMI Siemens\n[KV|**Basic**:tactile · 3-7 pouces · fonctions limitées · low-cost||**Comfort**:tactile · 4-22 pouces · fonctions étendues · standard industriel||**Comfort Pro**:comme Comfort + fonctions avancées||**Unified**:nouveau · web-based · responsive · pour tablettes]\n\nLe plus courant : **Comfort**. On développe dans TIA Portal via WinCC engineering.\n\n### Ajout d'un HMI au projet\n1. Add new device → HMI → SIMATIC Comfort Panel\n2. Choisir modèle (ex TP1200 Comfort)\n3. Network view → connecter HMI au PLC via Ethernet\n4. Compile → l'HMI est ajouté au projet\n\n### Développement HMI\nDans le project tree, sous le HMI :\n- **Screens** : les écrans opérateur\n- **Screen management** : navigation, écrans templates\n- **HMI tags** : variables · souvent aliases des PLC tags\n- **Connections** : au PLC\n- **Alarms** : gestion des alarmes\n- **Historical data** : archivage local\n- **Recipes** : si HMI gère recettes\n- **User administration** : gestion utilisateurs\n- **Scripts** : VBS ou C# pour logique custom\n\n### Types d'objets HMI\n[STEPS|**Text field** : texte statique · titres, labels||**IO field** : lecture/écriture variable · le plus utilisé||**Button** : action au clic||**Graphic view** : SVG ou images||**Trend view** : courbes temps réel||**Table** : listes de données||**Alarm view** : liste des alarmes||**Recipe view** : gestion des recettes]\n\n### Un exemple typique — écran Reactor\nSur l'HMI d'un client UCB, écran \"Reactor R1\" :\n- **Header** : logo UCB, titre \"Reactor R1\", horloge, utilisateur connecté\n- **Central** : synoptique du réacteur avec valeurs live (T°, P°, agitation)\n- **Boutons** : Start, Stop, Emergency Stop, Manual mode\n- **Trend** : T° et pression des 2 dernières heures\n- **Alarm view** : bandeau d'alarmes actives\n- **Footer** : navigation vers autres écrans (R2, Overview, Alarms History)\n\n### Cohérence PLC ↔ HMI\nLe gros avantage TIA Portal : les tags PLC sont directement utilisables côté HMI. Modifier une variable côté PLC = HMI automatiquement synchronisé. Zéro double-saisie.\n\n### Compile HMI et test\nAvant download :\n1. Compile HMI (Ctrl+K sur HMI)\n2. Fix errors\n3. Simulate HMI (Runtime Simulator) : test sans hardware\n4. Une fois OK, download vers HMI physique\n\n### Alarms — le point critique\nLes alarmes HMI sont **critiques** en pharma. Elles doivent :\n- Être classifiées (Critical, High, Warning, Info)\n- Etre archivées avec timestamps\n- Requérir acquittement opérateur\n- Être exportables\n\nTIA Portal + WinCC gèrent tout ça · à configurer proprement dès le début.\n\n[TIP|**Convention Dasolabs** : templates HMI standardisés pour tous nos projets. Charter graphique, navigation, gestion alarmes · uniforme. Formation opérateurs plus rapide, projet plus maintenable.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 14,
-      "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Configurer les HMI — WinCC",
-      "bodyMd": "## HMI dans TIA Portal\n\nAjouter une HMI (KTP Basic, Comfort, Unified) se fait comme pour un PLC :\n1. **Add new device** → HMI → Family → Model → Version WinCC\n2. Wizard : IP, langue, thème\n3. Auto-création d'un template de HMI Screens\n\n### Connexion PLC ↔ HMI\n- Dans Network View, **glisser un fil** entre le port PN de la CPU et celui de la HMI\n- TIA crée automatiquement une \"HMI connection\"\n- Les tags PLC deviennent accessibles côté HMI (via drag-drop)\n\n[TIP|La configuration WinCC est un module à part entière. On la couvre dans la **formation WinCC SCADA** dédiée. Ici on reste focalisé PLC.]",
+      "kind": "QUIZ",
+      "section": "4 · Simulation et HMI",
+      "title": "Quiz 4 — Simulation et HMI",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "PLCSIM est…",
+            "options": [
+              "Un PLC physique",
+              "Simulateur intégré TIA Portal · teste un programme sans hardware · gratuit avec TIA · dev 40-60 % plus rapide",
+              "Un HMI",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "HMI Comfort se développe…",
+            "options": [
+              "Séparé",
+              "Dans TIA Portal (WinCC engineering) · même projet que le PLC · tags partagés · zéro double-saisie",
+              "Sur papier",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Alarmes HMI pharma doivent…",
+            "options": [
+              "Être ignorées",
+              "Être classifiées (Critical/High/Warning), archivées avec timestamps, acquittées opérateur, exportables",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 15,
       "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Configurer les variateurs Sinamics",
-      "bodyMd": "## Piloter un G120, S120 depuis TIA\n\nSiemens intègre les variateurs **Sinamics** directement dans TIA.\n\n### Ajouter un variateur\n1. Network View → catalog → Sinamics → G120 → Control Unit CU250S-2 PN\n2. Glisser à côté de la CPU\n3. Connecter le port PN vers le PN de la CPU\n4. Dans Device Configuration → onglet Telegrams → choisir le télégramme (message profile)\n\n### Télégramme standard 105\nLe télégramme 105 est le plus courant : 6 mots I/O bidirectionnels.\n\n### Bibliothèque SINA_SPEED\nBloc fonctionnel prêt à l'emploi pour piloter un G120 en vitesse. Fourni gratuitement par Siemens (Industry Online Support).\n\n[TIP|Une fois configuré, tu pilotes le variateur depuis ton code SCL en 3 lignes. Bien plus propre que le vieux câblage analogique 4-20 mA.]",
+      "section": "5 · Safety et bonnes pratiques",
+      "title": "F-PLC — safety intégrée",
+      "bodyMd": "## La sécurité fonctionnelle\n\nEn industrie pharma/chimie/nucléaire, la **safety fonctionnelle** est critique. Siemens propose des CPUs Failsafe (F-CPUs) pour ça.\n\n### Le concept SIL\nLe standard **IEC 61508 / IEC 61511** définit les niveaux de sécurité :\n[KV|**SIL 1**:PFD 10-1 à 10-2 · risque modéré||**SIL 2**:PFD 10-2 à 10-3 · risque élevé||**SIL 3**:PFD 10-3 à 10-4 · risque critique · **le plus courant en pharma**||**SIL 4**:PFD 10-4 à 10-5 · risque catastrophique · rare · nucléaire]\n\nUn projet doit calculer son SIL requis (via HAZOP) et concevoir les fonctions safety pour l'atteindre.\n\n### F-CPU Siemens\nUne F-CPU (ex CPU 1516F-3 PN/DP) est un PLC classique + **canal safety redondant** :\n- **Standard CPU** : partie normale · non-safety\n- **F-CPU logic** : partie safety · avec vérification redondante · certifiée TÜV pour SIL 3\n\nUn même hardware, mais avec une logique dupliquée en interne pour la partie safety.\n\n### F-modules\nLes modules I/O safety :\n- **F-DI** : Failsafe Digital Input · lit boutons d'arrêt d'urgence · redondance interne\n- **F-DO** : Failsafe Digital Output · commande sécurisée d'un contacteur d'arrêt · double-canal\n- **F-Analog** : rare · pour capteurs safety\n\n### Développement safety\nDans TIA Portal, on développe la partie safety :\n- **F-blocs** : FB spécifiques safety · certifiés\n- **F-langages** : uniquement LAD safety et FBD safety · pas STL ni SCL\n- **F-tags** : variables safety · préfixées et signées\n- **Signature** : chaque F-bloc a une signature · vérifiée au download\n\n### Un exemple concret — Emergency Stop\nSur un réacteur pharma :\n- Bouton **E-Stop** rouge en façade + porte réacteur ouverte\n- 2 F-DI redondants (chaque signal lu 2x)\n- F-FB \"Emergency\" : si un des signaux = 0, alors :\n  - Coupe alimentation moteur agitateur (F-DO)\n  - Ferme vanne d'entrée matière (F-DO)\n  - Active alarme visuelle (F-DO)\n- Requiert un ré-armement manuel (bouton Reset)\n\nCette logique est **certifiée SIL 3** — validée par un organisme externe (TÜV).\n\n### Validation safety\nUn projet safety en pharma nécessite :\n1. **Analyse HAZOP** : lister les risques et SIL requis\n2. **SRS** (Safety Requirements Specification) : specs formelles\n3. **Design** : F-blocs conçus selon SIL\n4. **Validation** : tests exhaustifs · signature TÜV\n5. **Documentation** : traçabilité complète\n6. **Maintenance safety** : tests périodiques\n\nC'est **lourd** mais obligatoire.\n\n### Coûts\nUn projet safety :\n- Hardware F : +30-40 % vs non-safety\n- Ingénierie : +50-100 % de temps\n- Validation TÜV : 20-50 k€\n- Documentation : 100-200 pages\n\nMais c'est le prix pour éviter accidents graves. Non-négociable.\n\n[RULE|Un consultant automation en pharma **doit** maîtriser les bases F-PLC. Pas d'excuse.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -194,754 +293,172 @@
     {
       "position": 16,
       "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Configurer les I/O déportées ET 200SP",
-      "bodyMd": "## Ajouter une station déportée\n\n### Étapes\n[STEPS|**Add new device** → I/O device → SIMATIC ET 200SP → Interface Module IM 155-6 PN||**Placer en Network View** à côté de la CPU||**Glisser un fil Profinet** entre les ports||**Dans Device View de l'ET 200SP**, ajouter les modules signaux (DI, DO, AI, AO, …)||**Configurer chaque module** (adressage, diagnostic, filtres)]\n\n### Assignation du nom PN\nComme pour les autres devices : Online & diagnostics → Assign device name.\n\n### Diagnostic\nUne fois configuré, dans l'écran online tu vois chaque module ET 200SP avec son état LED.\n\n[USECASE|3 stations ET 200SP configurées en 1h|Setup type ligne d'embouteillage : 3 stations, chacune 4 modules. Configuration TIA + assignation noms + topology + test comm.|**Résultat** : le projet a démarré en 1 h de config. La programmation applicative peut commencer.]",
+      "section": "5 · Safety et bonnes pratiques",
+      "title": "Bonnes pratiques Dasolabs",
+      "bodyMd": "## Notre méthodologie codifiée\n\nAprès dizaines de projets Siemens, voici nos règles.\n\n### Règles absolues\n[RULE|**Templates réutilisables** : bibliothèque interne Dasolabs · pas de code from scratch]\n[RULE|**Nommage variables** : convention standardisée · tous les projets identiques]\n[RULE|**Structure blocs** : OB1 court · logique dans FB/FC · pas de spaghetti dans OB1]\n[RULE|**PLCSIM** utilisé en dev · avant hardware · gain 40-60 % productivité]\n[RULE|**Versioning Git** du projet TIA · commit régulier · code review]\n[RULE|**Documentation intégrée** : chaque bloc a header commenté · pourquoi/qui/quand]\n[RULE|**Safety proper** : F-PLC si SIL 2+ · pas de bricolage safety]\n[RULE|**HMI charte graphique** cohérente client · pas d'écran random]\n[RULE|**Formation utilisateurs** avant mise en service · pas d'exception]\n[RULE|**Support terrain** post-cutover · présence 1-2 semaines]\n\n### Framework projet\n[STEPS|**Phase 1 - Analyse (2-4 semaines)** : besoins, hardware sizing, safety analysis||**Phase 2 - Design (3-4 semaines)** : architecture, spec fonctionnelle, layouts||**Phase 3 - Développement (2-6 mois)** : PLC + HMI · itératif · reviews||**Phase 4 - Tests (2-4 semaines)** : PLCSIM · sur banc · sur hardware réel||**Phase 5 - FAT** (Factory Acceptance Test) : dans nos locaux · client valide||**Phase 6 - SAT** (Site Acceptance Test) : sur site client · commissioning||**Phase 7 - Formation** (1-2 semaines) : opérateurs, maintenance||**Phase 8 - Support** (3 mois) : post-go-live · résolution rapide]\n\n### Équipe typique projet\n- 1 chef de projet (Dasolabs)\n- 1-2 automaticiens seniors (PLC + HMI)\n- 1 spécialiste safety si applicable\n- Côté client : 1 champion, 1 mainteneur, 1 opérateur\n\n### Livrables projet\n- Programme TIA Portal validé et documenté\n- Manuel utilisateur (30-50 pages)\n- Manuel maintenance (50-100 pages)\n- Documentation hardware (schémas armoires, câblage)\n- Documentation safety (si applicable)\n- Formation slides\n- Support runbook\n\n### Investissement en R&D interne\nDasolabs investit annuellement en :\n- Bibliothèque de blocs standards (motor, valve, PID, etc.)\n- Templates HMI par industrie (pharma, chimie, agroalimentaire)\n- Documentation processes internes\n- Formation continue équipe (nouvelles versions TIA, cybersec, etc.)\n\nCet investissement se traduit par : projets plus rapides, plus fiables, plus rentables. C'est notre différenciation vs concurrents low-cost.\n\n[TIP|Chaque projet nourrit la bibliothèque interne. Un nouveau bloc développé chez UCB devient réutilisable pour Zoetis. C'est un actif qui se capitalise.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 17,
-      "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "PLC tags — l'usage des symboliques",
-      "bodyMd": "## Ne jamais utiliser %I0.0 dans le code\n\nUn **PLC tag** est un nom symbolique associé à une adresse.\n\n### Créer un tag\n- **Dans PLC tags → Default tag table** → nouveau tag\n- Colonnes : Name / Data type / Address / Retain / Comment\n\n### Exemples\n[KV|**Name**:bp_marche_pompe1||**Data type**:Bool||**Address**:%I0.0||**Comment**:Bouton poussoir marche pompe 1 - armoire A]\n\n### Table de tags multiples\n- **Default tag table** : tags globaux du projet\n- **Personnalisées** : 'TAG_HMI', 'TAG_SAFETY', etc. — pour organiser\n\n### PLC data types (UDT)\nPour des structures complexes (recette, alarme…), créer un **User-defined Data Type** :\n- **Data type → new UDT**\n- Champs typés (Bool, Int, Real, String…)\n\n[TIP|Convention Dasolabs :\n- **bp_** = bouton poussoir\n- **cap_** = capteur\n- **v_** = vanne\n- **m_** = moteur\n- **al_** = alarme\n- **cn_** = consigne]",
+      "kind": "QUIZ",
+      "section": "5 · Safety et bonnes pratiques",
+      "title": "Quiz 5 — Safety et pratiques",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "F-PLC est…",
+            "options": [
+              "Un PLC lent",
+              "PLC failsafe · canal safety redondant certifié TÜV · pour SIL 2/3 · obligatoire en pharma safety critique",
+              "Un SCADA",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "SIL 3 en pharma est…",
+            "options": [
+              "Rare",
+              "Le plus courant · PFD 10-3 à 10-4 · pour risques critiques (arrêt urgence, verrouillages procédé)",
+              "Interdit",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Bonnes pratiques Dasolabs TIA…",
+            "options": [
+              "Coder from scratch",
+              "Templates réutilisables · nommage standardisé · PLCSIM · versioning Git · docs intégrées · safety proper",
+              "Pas de docs",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 18,
       "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Structure de données — DB, Global DB",
-      "bodyMd": "## Data Blocks — la mémoire longue\n\nUn **DB (Data Block)** stocke des données globales accessibles à tout le programme.\n\n### Global DB vs Instance DB\n[KV|**Global DB**:mémoire globale, accès direct ('DB1.PRESSION_MAX')||**Instance DB**:mémoire d'un FB spécifique, attachée à cette instance]\n\n### Créer un Global DB\nProgram blocks → Add new block → Data Block → Global.\n\n### Exemples de contenu\n- Recettes : 20 recettes × 30 paramètres\n- Config machine : consignes, seuils, calibrations\n- Compteurs de production\n- États historiques\n\n### Retain memory\nCocher **Retain** sur les tags qui doivent persister après power-cycle (compteurs de prod, calibrations utilisateur).\n\n[WARN|Sans Retain, le tag est ré-initialisé à sa valeur par défaut au démarrage. Piège classique sur compteur de production (\"il redémarre à 0 chaque nuit après reset\").]",
+      "section": "6 · Certification",
+      "title": "Prêt pour l'évaluation ?",
+      "bodyMd": "## Quiz certifiant TIA Portal\n\nRécap :\n- TIA Portal (historique, interface, project tree)\n- Hardware configuration (PLC, ET 200SP, network)\n- Langages IEC 61131-3 (LAD, FBD, STL, SCL, GRAPH)\n- Structure programme (OB, FB, FC, DB, UDT)\n- Variables et tags (conventions, cross-references)\n- Simulation PLCSIM\n- HMI Comfort avec WinCC\n- Safety F-PLC\n- Bonnes pratiques Dasolabs\n\n[TIP|Seuil 70 % · refaisable]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 19,
-      "kind": "CONTENT",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Data types — le typage strict",
-      "bodyMd": "## Bool, Int, Real, String, Struct…\n\n### Types simples\n[KV|**Bool**:1 bit (true/false)||**Byte**:8 bits (0-255)||**Word**:16 bits||**DWord**:32 bits||**Int**:16 bits signé (-32k à +32k)||**DInt**:32 bits signé (~±2e9)||**Real**:32 bits float (≈ 7 chiffres significatifs)||**LReal**:64 bits float (double précision, S7-1500)||**Time**:32 bits (représente une durée)||**Date**:type calendaire||**String**:chaîne de caractères (jusqu'à 254)||**Char**:1 caractère]\n\n### Conversions\n[WARN|TIA est **strict sur le typage**. 'Int + Real' → erreur compile. Utilisation de fonctions de conversion :\n- 'INT_TO_REAL(x)' : convertir Int en Real\n- 'REAL_TO_INT(x)' : convertir Real en Int (troncature)]\n\n### Arrays\nArray[0..99] of Real → tableau de 100 réels indexés 0 à 99.\n\n### Struct et UDT\nStructuré via **UDT** (voir slide précédente).",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 20,
       "kind": "QUIZ",
-      "section": "2 · Configuration matérielle & réseau",
-      "title": "Quiz 2 — Config matérielle & tags",
+      "section": "6 · Certification",
+      "title": "🎓 Quiz certifiant TIA Portal",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Qu'est-ce qu'un PLC tag ?",
+            "prompt": "TIA Portal a remplacé…",
             "options": [
-              "Une variable Windows du PC",
-              "Un nom symbolique associé à une adresse mémoire PLC",
-              "Un mot de passe",
-              "Un fichier de projet"
+              "Rien",
+              "STEP 7 + WinCC flexible + STARTER · outils séparés avant · unification en 2010",
+              "Uniquement STEP 7",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Un tag configuré en Retain…",
+            "prompt": "TIA Portal supporte quels langages IEC 61131-3 ?",
             "options": [
-              "Perd sa valeur au reboot",
-              "Garde sa valeur après power-cycle",
-              "N'existe qu'en online",
-              "Est stocké sur la SD"
+              "Uniquement LAD",
+              "LAD, FBD, STL, SCL, GRAPH · SCL et GRAPH modernes recommandés",
+              "Uniquement SCL",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Un type Real prend combien de bits ?",
+            "prompt": "FB (Function Block) vs FC (Function)…",
             "options": [
-              "16",
-              "32",
-              "64",
-              "128"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 21,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "Les 5 langages standardisés",
-      "bodyMd": "## La norme IEC 61131-3\n\nLa norme **IEC 61131-3** (1993, révisée 2013) définit **5 langages** standards de programmation PLC.\n\n[KV|**LAD (Ladder)**:diagramme à contact · évoque un schéma électrique · le plus utilisé||**FBD (Function Block)**:blocs graphiques reliés · comme un schéma électronique||**SCL (Structured Control Language)**:texte type Pascal · pour algo complexes||**STL (Statement List)**:assembleur PLC · legacy, encore utilisé||**GRAPH (SFC)**:diagramme séquentiel · pour machines à états et batch]\n\n### Quand utiliser quoi ?\n[KV|**LAD**:Combinatoire simple, boutons/relais/moteurs · 60% du code Dasolabs||**FBD**:Régulation, blocs pré-fabriqués · 20 %||**SCL**:Algos, calculs, boucles, structures · 15 %||**STL**:Legacy S7-300 · éviter en nouveau||**GRAPH**:Batch pharma, machines séquentielles · 5 %]\n\n[TIP|Chez Dasolabs, la règle : LAD pour la combinatoire (opérateurs sauront relire), SCL pour les algos, GRAPH pour les séquences batch. On ne mélange pas au hasard.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 22,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "LAD — Ladder — le fondamental",
-      "bodyMd": "## Le langage historique — dessin électrique\n\nLe **LAD (Ladder)** ressemble à un schéma électrique de contacts et bobines.\n\n### Éléments\n[KV|**Contact normal ouvert (NO)** '| |':conducteur si tag = TRUE||**Contact normal fermé (NC)** '|/|':conducteur si tag = FALSE||**Bobine** '( )':écrit TRUE si branche active||**Bobine négative** '(/)':écrit FALSE si branche active||**Set (S)**:met à TRUE et maintient||**Reset (R)**:met à FALSE et maintient]\n\n### Exemple simple\nRéseau LAD pour \"démarrer moteur si bouton pressé, arrêter si stop pressé\" :\n\nLigne 1 :  '| bp_marche | + | bp_stop_NC | + ( m_moteur_state )'\n\nAuto-maintien : ajouter un contact du moteur en parallèle du bp_marche.\n\n[TIP|LAD est **lu de haut en bas, gauche à droite**. Chaque \"réseau\" (rung) est indépendant. On lit comme un schéma électrique.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 23,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "LAD — Timers et Compteurs",
-      "bodyMd": "## Les blocs classiques\n\n### Timers IEC (recommandés)\n[KV|**TP** (Pulse):sortie active pendant durée T à partir de front montant||**TON** (On-delay):sortie devient TRUE après T secondes de IN=TRUE||**TOF** (Off-delay):sortie retombe T secondes après IN=FALSE]\n\n### Timers S5 (legacy — éviter)\n'S_ODT', 'S_OFFDT', 'S_PULSE' — utilisés en S7-300, à éviter en S7-1500.\n\n### Compteurs IEC\n[KV|**CTU** (Count up):compte les fronts montants sur CU||**CTD** (Count down):décompte||**CTUD** (Count up/down):les deux]\n\n### Utilisation\nUn timer/compteur est **instancié** dans un instance DB. Chaque instance = un compteur indépendant.\n\n### Exemple TON\nRéseau LAD :\n- Contact 'bp_start'\n- Bloc 'TON' avec input IN, PT = T#5s, output Q\n- Bobine 'voyant_pret' sur Q\n\nRésultat : voyant s'allume 5 sec après appui bouton start.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 24,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "LAD — Comparaisons et calculs",
-      "bodyMd": "## Au-delà du booléen\n\nLAD supporte des blocs de comparaison et calcul.\n\n### Comparaisons\n[KV|**==** 'EQ':égalité||**<>** 'NE':différent||**<, <=, >, >=**:comparaisons numériques||Utilisable sur Int, DInt, Real, Time…]\n\n### Exemple\nRéseau LAD :\n- Bloc '>=' avec IN1 = temperature_actuelle, IN2 = 80.0\n- Bobine 'alarm_temp_haute'\n\n### Calculs\n[KV|**MOVE**:copie une valeur d'un tag à un autre||**ADD, SUB, MUL, DIV**:arithmétique||**ABS, NEG**:absolu, opposé||**SQR, SQRT, EXP, LN**:carré, racine, exp, log]\n\n[TIP|Pour les calculs complexes (formules physiques, régulation avancée), passer en **SCL**. LAD devient illisible avec 10 blocs de calcul.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 25,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "FBD — Function Block Diagram",
-      "bodyMd": "## L'alternative graphique à LAD\n\n**FBD** ressemble à un schéma électronique numérique : portes logiques (AND, OR, NOT) et blocs fonctionnels.\n\n### Différence LAD vs FBD\nLAD lit \"en série\" (comme un chemin de conduction). FBD lit \"en flux\" (comme un signal électronique).\n\n### Exemple\nLe même réseau « bp_marche AND NOT bp_stop → m_moteur » en FBD :\n- Bloc AND avec entrées 'bp_marche' et 'NOT bp_stop'\n- Sortie vers 'm_moteur'\n\n### Quand utiliser FBD ?\n- Programmation de **régulation** (PID, filtres)\n- Programmation de **fonctions arithmétiques** enchaînées\n- Cultures allemande / suisse — plus populaire qu'en France\n\n[TIP|**LAD et FBD sont interchangeables** dans le même bloc. Tu peux basculer via clic droit → Switch programming language.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 26,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "SCL — Structured Control Language",
-      "bodyMd": "## Le Pascal du PLC\n\n**SCL** est un langage textuel à syntaxe Pascal, standardisé IEC.\n\n### Structure d'un bloc SCL\n    FUNCTION_BLOCK \"MonFB\"\n    VAR_INPUT\n        temperature : Real;\n        setpoint : Real;\n    END_VAR\n    VAR_OUTPUT\n        chauffage : Bool;\n    END_VAR\n    VAR\n        erreur : Real;\n    END_VAR\n\n    BEGIN\n        erreur := setpoint - temperature;\n        IF erreur > 0.5 THEN\n            chauffage := TRUE;\n        ELSE\n            chauffage := FALSE;\n        END_IF;\n    END_FUNCTION_BLOCK\n\n### Avantages SCL\n- Boucles 'FOR', 'WHILE', 'REPEAT' faciles\n- Structures conditionnelles 'IF..ELSIF..ELSE', 'CASE'\n- Fonctions et sous-routines proprement typées\n- Calculs mathématiques lisibles\n- Portabilité vers autres marques (via IEC standard)\n\n[TIP|**SCL est OBLIGATOIRE** pour tout algorithme non-trivial. Faire de la régulation ou du calcul en LAD est du bricolage.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 27,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "SCL — Structures de contrôle",
-      "bodyMd": "## IF, CASE, FOR, WHILE\n\n### IF..ELSIF..ELSE\n    IF #niveau < 20.0 THEN\n        #pompe := TRUE;\n    ELSIF #niveau > 80.0 THEN\n        #pompe := FALSE;\n    ELSE\n        // zone morte, ne rien faire\n    END_IF;\n\n### CASE\n    CASE #etat OF\n        0: #consigne := 0.0;\n        1: #consigne := 50.0;\n        2: #consigne := 100.0;\n        ELSE: #consigne := 0.0;\n    END_CASE;\n\n### FOR\n    FOR #i := 0 TO 99 DO\n        #somme := #somme + #tableau[#i];\n    END_FOR;\n\n### WHILE\n    WHILE #compteur < 100 AND #etat = 1 DO\n        #compteur := #compteur + 1;\n    END_WHILE;\n\n[WARN|**Attention aux boucles infinies** en PLC. Un WHILE mal écrit peut bloquer la CPU au cycle. Prévoir toujours une condition de sortie garantie.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 28,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "SCL — Fonctions et procédures",
-      "bodyMd": "## Fonctions utilitaires\n\nSCL supporte les fonctions à valeur de retour (comme en C/Pascal).\n\n### Appel de fonction\n    #resultat := TO_INT(#valeur_reelle);\n    #max := MAX(IN1 := #a, IN2 := #b);\n    #cos_theta := COS(#theta);\n\n### Fonctions natives Siemens\n[KV|**Math**:ABS, SQR, SQRT, POW, EXP, LN, LOG||**Trigo**:SIN, COS, TAN, ASIN, ACOS, ATAN||**Conversion**:TO_INT, TO_REAL, TO_BOOL, INT_TO_REAL||**Bit**:SHL, SHR, ROL, ROR||**String**:LEN, LEFT, RIGHT, MID, CONCAT]\n\n### Appel d'un FB depuis SCL\n    \"MonFB_Instance\"(temperature := #t_actuelle, setpoint := #consigne);\n    IF \"MonFB_Instance\".chauffage THEN\n        // ...\n    END_IF;",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 29,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "GRAPH — SFC — pour les séquences",
-      "bodyMd": "## Le graphe de fonctions séquentielles\n\n**GRAPH** (SFC = Sequential Function Chart) modélise des **machines à états** — parfait pour du batch pharma, cycles de machine, séquences.\n\n### Éléments\n[KV|**Étape**:un état dans lequel des actions sont exécutées||**Transition**:condition pour passer à l'étape suivante||**Actions**:code SCL/LAD exécuté pendant l'étape||**Divergences / convergences**:parallèle, alternatif]\n\n### Exemple simple — vidange cuve\nÉtape 1 : Attente → Transition : bp_start pressé → Étape 2 : Ouvrir vanne → Transition : niveau = 0 → Étape 3 : Fermer vanne → Étape 1\n\n### Cas d'usage typique\nBatch pharma UCB : cycle de préparation de solution.\n- Étape 1 : Dosage matière première 1\n- Étape 2 : Dosage matière première 2 (en parallèle : agitation)\n- Étape 3 : Chauffage\n- Étape 4 : Maintien\n- Étape 5 : Refroidissement\n- Étape 6 : Vidange\n\n[TIP|GRAPH est le seul langage qui permet de **modéliser** proprement une séquence. En LAD, ça devient rapidement illisible. GRAPH auto-génère les OB et FB correspondants.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 30,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "STL — l'assembleur PLC (legacy)",
-      "bodyMd": "## À connaître, à éviter\n\n**STL** (Statement List) est le langage historique Siemens, très bas niveau (mnémoniques type assembleur).\n\n### Exemple\n    A \"bp_marche\"\n    AN \"bp_stop\"\n    = \"m_moteur\"\n\nTraduit : \"AND bp_marche AND NOT bp_stop → set moteur\".\n\n### Quand tu vas rencontrer STL\n- Vieux projets S7-300 non convertis\n- Blocs système Siemens internes\n- Programmateurs de plus de 45 ans\n\n### Pourquoi éviter\n- Illisible pour tout non-Siemens\n- Non porté sur S7-1500 (converti auto en LAD)\n- Aucun avantage sur SCL\n\n[RULE|Sur projet neuf : **jamais de STL**. Sur reprise projet S7-300 : convertir en LAD ou SCL au fur et à mesure.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 31,
-      "kind": "CONTENT",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "Quel langage pour quel besoin ?",
-      "bodyMd": "## Récap décisionnel\n\n[KV|**Combinatoire de boutons/relais**:LAD||**Séquence machine à états**:GRAPH ou SCL avec CASE||**Régulation PID**:FBD ou SCL avec blocs Siemens||**Calcul mathématique**:SCL uniquement||**Bibliothèque réutilisable**:SCL (portable, testable)||**Debug rapide devant client**:LAD (l'opérateur peut suivre)||**Batch pharma**:GRAPH obligatoire (GAMP 5 friendly)]\n\n### Règle Dasolabs\n[RULE|60 % LAD (combinatoire), 15 % SCL (algos), 5 % FBD (régul PID), 15 % GRAPH (batch), 5 % divers. STL = 0 %.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 32,
-      "kind": "QUIZ",
-      "section": "3 · Langages IEC 61131-3",
-      "title": "Quiz 3 — Langages IEC",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Combien de langages standards l'IEC 61131-3 définit-il ?",
-            "options": [
-              "3",
-              "4",
-              "5",
-              "7"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Quel langage utiliser pour une régulation PID complexe ?",
-            "options": [
-              "LAD",
-              "STL",
-              "SCL ou FBD",
-              "GRAPH"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Pour un batch pharma avec traçabilité GAMP 5, quel langage recommande-t-on ?",
-            "options": [
-              "LAD uniquement",
-              "GRAPH (SFC)",
-              "STL",
-              "AWL"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 33,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "Les 4 types de blocs",
-      "bodyMd": "## OB, FB, FC, DB — le fondement\n\nUn programme TIA est structuré en **blocs**. 4 types.\n\n[KV|**OB (Organization Block)**:point d'entrée du système · appelé par le firmware CPU||**FB (Function Block)**:fonction avec mémoire persistante · nécessite un instance DB||**FC (Function)**:fonction sans mémoire · comme une fonction pure en programmation||**DB (Data Block)**:bloc de données · mémoire globale ou instance]\n\n### Nomenclature Siemens\n- Numérotage : OB1, OB35, FB10, FC20, DB1, DB100\n- Renommage possible et recommandé : 'MotorControl_FB' au lieu de 'FB10'\n\n[TIP|**Convention Dasolabs** : noms symboliques partout. Les numéros sont abandonnés. 'FB_LineControl', 'DB_Recipes'.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 34,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "OB — Organization Blocks",
-      "bodyMd": "## Point d'entrée du système\n\nLe firmware CPU appelle les OB selon des événements.\n\n### OB principaux\n[KV|**OB1**:main cyclique · appelé chaque cycle · 90 % du code Dasolabs vit ici||**OB100**:startup · appelé une fois au démarrage · init variables||**OB35**:timer interrupt · appelé toutes les N ms (config)||**OB40**:hardware interrupt · appelé sur événement I/O rapide||**OB80-88**:error handling · appelés sur erreurs système||**OB121, OB122**:programming errors, I/O access errors]\n\n### Priorité\nLes OB ont des priorités : un OB de priorité haute (interrupt) peut interrompre l'OB1. Prio typiques :\n- OB1 : 1 (basse)\n- OB35 : 8-24 selon config\n- OB80-88 : 26-28\n- OB121, OB122 : 25\n\n[WARN|**Toujours créer OB80, OB121, OB122** dans un projet sérieux. Sinon la CPU passe en STOP au premier défaut mineur.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 35,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "FB — Function Block",
-      "bodyMd": "## Le bloc avec mémoire\n\nUn **FB** est comme une classe en programmation objet : il a des paramètres d'entrée, sortie, et une **mémoire persistante** (dans son instance DB).\n\n### Structure\n    VAR_INPUT     // entrées (lues)\n    VAR_OUTPUT    // sorties (écrites)\n    VAR_IN_OUT    // bidirectionnelles\n    VAR           // mémoire persistante (STATIC)\n    VAR_TEMP      // temporaires (perdues entre cycles)\n\n### Instance\nChaque appel d'un FB nécessite une **instance DB** unique. Elle contient toutes les VARS de l'instance.\n\n### Exemple\n'FB_MotorControl' avec input 'bp_marche', 'bp_stop', output 'moteur_run', memory 'runtime_seconds'.\n- Instance 1 : 'DB_Motor1' → moteur pompe 1\n- Instance 2 : 'DB_Motor2' → moteur pompe 2\n\nDeux moteurs pilotés par la MÊME logique, chaque instance mémorise son état.\n\n[TIP|Les FB sont la brique **réutilisable** par excellence. 1 FB bien codé + N instances = code propre.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 36,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "FC — Function",
-      "bodyMd": "## Le bloc sans mémoire\n\nUn **FC** est une fonction pure : mêmes entrées → mêmes sorties, pas de mémoire persistante.\n\n### Structure\n    VAR_INPUT\n    VAR_OUTPUT\n    VAR_IN_OUT\n    VAR_TEMP  // pas de VAR STATIC — pas de mémoire\n\n### Exemple\nFC_CalculMoyenne(IN1, IN2, IN3, IN4) → OUT = (IN1+IN2+IN3+IN4)/4\n\nAppel 'FC_CalculMoyenne(a, b, c, d)' — pas d'instance DB nécessaire.\n\n### FC vs FB — quand utiliser ?\n[KV|**FC**:fonction pure, calculs, conversions · pas de mémoire||**FB**:machine à états, temporisations, compteurs · mémoire nécessaire]\n\n[TIP|Règle simple : si ton bloc a besoin de \"se souvenir\" entre deux cycles (compteur, timer, variable d'état) → **FB**. Si c'est pur calcul → **FC**.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 37,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "DB — Data Block",
-      "bodyMd": "## La mémoire globale\n\nDeux types :\n[KV|**Global DB**:accessible depuis tout le code · exemple : recettes, config machine||**Instance DB**:attaché à un FB · une instance par appel FB]\n\n### Créer un Global DB\nAdd new block → Data Block → **Global**.\n- Ajouter des variables typées\n- Optimized access (S7-1500) : accès plus rapide\n- Non-optimized : compatible S7-300 legacy\n\n### Accès\n- **Symbolique** : '\"DB_Recipes\".recipe_1.dosage_qty'\n- **Absolu** (déconseillé) : 'DB10.DBD0'\n\n[RULE|**Toujours utiliser accès symbolique**. L'accès absolu casse dès qu'on ajoute une variable — les offsets changent.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 38,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "IN, OUT, IN_OUT, TEMP, STAT",
-      "bodyMd": "## Les 5 zones d'un bloc\n\n### Sections\n[KV|**VAR_INPUT**:paramètres lus seulement · valeur passée à l'appel||**VAR_OUTPUT**:paramètres écrits · valeur ramenée à l'appelant||**VAR_IN_OUT**:bidirectionnels · pointeur vers la mémoire de l'appelant||**VAR_TEMP**:temporaires · vie = un cycle · non initialisées||**VAR (STATIC dans FB)**:persistants · vie = plusieurs cycles · stockés dans instance DB]\n\n### Passage par valeur vs référence\n[KV|**IN, OUT**:par valeur (copie)||**IN_OUT**:par référence (pointeur) · utilisé pour STRUCT / STRING (évite copie coûteuse)]\n\n### Piège classique\n[WARN|**TEMP n'est PAS initialisée**. À chaque cycle, la valeur est ce qu'il y avait en mémoire (garbage). Toujours initialiser avant utilisation :\n    VAR_TEMP\n        somme : Real;\n    END_VAR\n    BEGIN\n        somme := 0.0;  // OBLIGATOIRE\n        // ...]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 39,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "Appel de blocs",
-      "bodyMd": "## Comment un OB appelle un FB ?\n\n### En LAD\nGlisser le FB depuis Program blocks vers un réseau LAD :\n- TIA propose de créer une instance DB → OK\n- Câbler les inputs/outputs\n\n### En SCL\n    \"MonFB_Instance\"(\n        bp_marche := \"bp_start\",\n        bp_stop := \"bp_stop\",\n        moteur_run => \"m_moteur1\"\n    );\n\n### Instance multi-instance\nUn FB peut appeler un autre FB. L'instance du FB appelé peut être :\n- **Single instance** : DB séparé\n- **Multi-instance** : intégrée à l'instance parent (recommandé)\n\n[TIP|**Multi-instance = propreté maximale**. Si tu instancies 'FB_Motor' DANS 'FB_Line', l'instance du moteur vit dans l'instance de la ligne. Pas de DB séparé à créer.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 40,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "Structure typique d'un projet",
-      "bodyMd": "## Organisation Dasolabs\n\n### Arborescence type\n    Program blocks/\n    ├── OB1 (Main)                    // appelle les autres\n    ├── OB100 (Startup)               // init\n    ├── OB80, OB121, OB122            // error handling\n    ├── OB35 (100 ms tick)            // régulation cyclique\n    ├── FB_LineControl                // logique globale ligne\n    │   └── DB_LineControl_Instance\n    ├── FB_MotorControl               // logique moteur générique\n    │   ├── DB_Motor1_Instance\n    │   ├── DB_Motor2_Instance\n    │   └── DB_Motor3_Instance\n    ├── FC_ConvertPressure            // conversion analogique\n    ├── DB_Recipes                    // recettes globales\n    ├── DB_AlarmsCurrent              // alarmes en cours\n    └── DB_ProdCounters (Retain)      // compteurs prod\n\n### Principe\n[STEPS|**OB1** = orchestrateur — appelle les FB principaux avec un ordre logique||**FB spécialisés** — un par équipement (moteur, vanne, régulation…)||**FC utilitaires** — conversions, calculs, formatages||**DB globaux** — recettes, config, historique]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 41,
-      "kind": "CONTENT",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "Bibliothèques et réutilisation",
-      "bodyMd": "## Ne pas ré-écrire ce qu'on a déjà écrit\n\nTIA supporte des **bibliothèques** : blocs réutilisables entre projets.\n\n### Types\n[KV|**Global libraries**:partagée entre projets · fichier .al19||**Corporate library**:centralisée · versionnée · Dasolabs propre à chaque client||**Project library**:embarquée dans le projet]\n\n### Blocs standards Siemens\nSiemens fournit des bibliothèques gratuites via Industry Online Support :\n- **LSCM** : gestion sécurité\n- **LGF** : bibliothèque General\n- **LMQTT** : MQTT client\n- **LWEB** : web pages\n- **LADP** : ADP (Advanced Data Processing)\n\n### Bibliothèque Dasolabs\nOn maintient une **bibliothèque interne** avec nos FB standards :\n- FB_MotorControl_v3\n- FB_ValveControl_v2\n- FB_AnalogInput_Filtered_v1\n- FB_BatchStep_v1\n\n[TIP|**Réutiliser un FB testé et validé** = risque zéro. Ré-écrire = re-tester = 3x plus de temps.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 42,
-      "kind": "QUIZ",
-      "section": "4 · Organisation des blocs (OB, FB, FC, DB)",
-      "title": "Quiz 4 — Organisation des blocs",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Quelle est la différence entre un FB et une FC ?",
-            "options": [
-              "FB a une mémoire persistante, FC non",
-              "FC a une mémoire persistante, FB non",
-              "Aucune différence",
-              "FB est en LAD, FC en SCL"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Où sont stockées les variables STATIC (STAT) d'un FB ?",
-            "options": [
-              "Dans la CPU RAM temporaire",
-              "Dans l'instance DB associée au FB",
-              "Dans le programme",
-              "Nulle part, elles sont perdues"
+              "Identiques",
+              "FB = avec mémoire (Instance DB) pour objets stateful · FC = pure sans mémoire pour utilitaires",
+              "Rien",
+              "Aléatoire"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Que faut-il obligatoirement faire pour un VAR_TEMP avant utilisation ?",
+            "prompt": "OB1 est…",
             "options": [
-              "Rien, il est auto-initialisé à 0",
-              "L'initialiser explicitement dans le code",
-              "Le déclarer en STAT",
-              "Le mettre en Retain"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 43,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Go Online — connexion au PLC",
-      "bodyMd": "## Le monde online\n\nUne fois connecté online (**Ctrl+K**), TIA offre plein de fonctions vitales.\n\n### Ce qu'on peut faire\n- Voir les variables en temps réel\n- Modifier des valeurs\n- Ouvrir le diagnostic buffer\n- Lancer une trace haute fréquence\n- Comparer projet local vs projet CPU\n\n### Différences online vs offline\n[KV|**Offline**:édition du projet · pas d'exécution · pas de valeur temps réel||**Online**:connecté à un PLC réel · vue en temps réel · attention aux modifications directes]\n\n[WARN|**Ne pas modifier du code en online sans stop CPU**. Les modifications directes en RUN sont risquées (glitch, sur-cycle). Toujours : Stop → Modifier → Compile → Download → Run.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 44,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Monitor tags — la fenêtre live",
-      "bodyMd": "## Voir les variables en temps réel\n\nEn **online**, chaque bloc affiche les valeurs actuelles.\n\n### Comment activer\n- **F7** ou icône lunettes → Monitor on\n- Les contacts LAD affichent vert (TRUE) / bleu (FALSE)\n- Les valeurs numériques s'affichent à côté des tags\n\n### Watch tables\nCréer une **watch table** pour surveiller un groupe de tags précis :\n- Program blocks → Watch and force tables → Add new watch table\n- Ajouter les tags à surveiller\n- Modifier valeurs en direct (attention en prod !)\n\n### Force\nDifférent de Modify :\n- **Modify** : écrit UNE fois la valeur, le programme peut la changer\n- **Force** : bloque la valeur, le programme ne peut pas la modifier\n\n[DANGER|**Ne jamais Force en production**. Un force oublié = comportement imprévu quand tu débranches le PC. Utiliser Force uniquement en dev/test.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 45,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Diagnostic buffer",
-      "bodyMd": "## Le journal des événements CPU\n\nLe **diagnostic buffer** enregistre les 1000 derniers événements CPU avec horodatage précis.\n\n### Accès\nOnline & diagnostics → Diagnostic buffer.\n\n### Événements typiques\n[KV|**Démarrage CPU**:power-on ou remise en RUN||**Passage STOP → RUN**:manuel ou après téléchargement||**Erreur d'accès I/O**:module manquant, court-circuit||**Erreur programme**:division par zéro, index hors bornes||**Perte de comm Profinet**:device Profinet manquant||**Firmware update**:changement de version]\n\n### Utilisation forensic\n[USECASE|Machine arrêtée en pleine nuit|Le client dit \"la machine s'est arrêtée à 3h du matin\". Personne ne sait pourquoi.|**Diagnostic buffer** : entrée à 3:02:15 \"OB121 activated - programming error, division by zero in FB_Regulation, network 5\". **Diagnostic** : la mesure de débit est passée à zéro à cause d'un capteur défectueux, provoquant une division par zéro dans le calcul PID. Correction : ajout d'un test dans le FB.]\n\n[TIP|**Toujours consulter le diagnostic buffer AVANT de sortir le PC-scope**. 80 % des problèmes sont expliqués ici.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 46,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Cross-references — où utilise-t-on ce tag ?",
-      "bodyMd": "## Comprendre un code hérité\n\n### Cas d'usage\nTu récupères un projet TIA de 5 ans, plein de tags cryptiques. Tu vois '%M100.3' — qu'est-ce que ça pilote ?\n\n### Cross-references (Ctrl+Shift+F)\n1. Sélectionner le tag\n2. **Ctrl+Shift+F** ou clic droit → Cross-references\n3. TIA liste **tous les endroits** où ce tag est utilisé (read / write)\n\n### Résultats\nPanneau bas → liste avec :\n- Bloc utilisant le tag\n- Réseau (network)\n- Type d'utilisation (read, write, read+write)\n\n[TIP|**Cross-references est ton outil forensic préféré**. En 30 secondes, tu comprends l'utilité d'un tag sans lire tout le code.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 47,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Modifier code en online (edit online)",
-      "bodyMd": "## Le mode compatibilité\n\nTIA permet la modification \"à chaud\" d'un FB déjà téléchargé, **si le bloc est compatible**.\n\n### Conditions pour édit online\n- Pas de changement de structure (ajout/suppression VAR)\n- Pas de changement de type\n- Uniquement modification de logique\n\n### Procédure\n1. Modifier le bloc en offline\n2. **Download** → TIA détecte que le bloc est déjà là, propose \"modify in RUN\"\n3. Confirmer\n\n[WARN|**Le download in RUN glitche parfois** — surtout sur FB avec beaucoup de mémoire. **En prod**, toujours planifier un arrêt maintenance pour download propre.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 48,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Trace — l'oscilloscope PLC",
-      "bodyMd": "## Capturer des signaux haute fréquence\n\n**Trace** permet de capturer des variables à chaque cycle CPU — comme un oscilloscope numérique.\n\n### Configuration\nProgram blocks → Traces → Add new trace.\n- Sélectionner variables à capturer (jusqu'à 16)\n- Trigger : condition de déclenchement (front, seuil…)\n- Sample rate : chaque cycle, ou tous les N cycles\n\n### Utilisation typique\n[USECASE|Régulation instable — dépassement|Une régulation de pression oscille. Le client dit \"la vanne bat comme un métronome\".|**Trace** : capture de la mesure, consigne, sortie vanne à chaque cycle sur 10 secondes. Analyse : le PID est mal réglé, gain trop élevé. Correction : Ki divisé par 2. Stable.]\n\n### Export\nLa trace peut être exportée en CSV pour analyse Excel/Grafana.\n\n[TIP|**Trace = essentiel pour régulation et cycles rapides**. Sans trace, tu diagnostiques à l'aveugle.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 49,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Comparaison projet vs CPU",
-      "bodyMd": "## Détecter les modifications sauvages\n\nIl arrive qu'un intégrateur tiers modifie du code online sans mettre à jour le projet local. Comment détecter ?\n\n### Compare\nOnline & diagnostics → Compare offline/online.\n\n### Résultat\nTIA liste :\n- Blocs identiques\n- Blocs différents (modifiés)\n- Blocs présents online mais pas offline (ajoutés online)\n- Blocs présents offline mais pas online (supprimés online)\n\n### Actions possibles\n- **Upload** du bloc modifié vers le projet local\n- **Download** du bloc local vers la CPU\n- **Diff** : visualiser les différences ligne à ligne\n\n[TIP|**Toujours faire un compare** en début d'intervention chez un nouveau client. Souvent, le projet fourni ne correspond pas à ce qui tourne — ça évite les surprises.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 50,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "PLCSIM Advanced — simuler",
-      "bodyMd": "## Développer sans PLC\n\n**PLCSIM Advanced** simule une CPU S7-1500 sur le PC.\n\n### Créer une instance\n1. Lancer PLCSIM Advanced\n2. New Instance → choix CPU (1516, 1518…) + PLCSIM IP\n3. Instance démarre — c'est une \"CPU virtuelle\" sur le PC\n\n### Connexion depuis TIA\n1. Dans TIA, ouvrir le projet\n2. Go Online → interface = PLCSIM Advanced\n3. Choisir l'instance\n4. Download vers l'instance virtuelle\n\n### Simuler les I/O\n- Interface graphique PLCSIM Advanced\n- Forcer manuellement les entrées\n- Voir les sorties\n- Simuler des devices Profinet\n\n[USECASE|Test complet avant livraison chez Zoetis|Avant transport du matériel, Adrien simule la ligne complète en PLCSIM Advanced : CPU + 3 ET 200SP + HMI virtuel + variateur virtuel.|**Résultat** : 90 % des bugs détectés au bureau. Mise en service sur site : 3 jours au lieu de 3 semaines.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 51,
-      "kind": "CONTENT",
-      "section": "5 · Debug & diagnostic",
-      "title": "Erreurs classiques et solutions",
-      "bodyMd": "## Le catalogue des galères\n\n[KV|**\"Connect timeout\"**:PC pas sur le bon réseau · vérifier IP PC/PLC dans même sous-réseau||**\"Access denied\"**:mot de passe CPU mauvais · vérifier config online sécurité||**\"Wrong firmware version\"**:CPU réelle a un firmware différent de celui config dans TIA · updater l'un ou l'autre||**\"Program CPU inconsistent\"**:projet local ≠ projet CPU · Compare + choisir action||**\"OB121 - programming error\"**:erreur runtime dans le code (division par zéro, index hors bornes) · débugger via diagnostic buffer||**\"Cycle time exceeded\"**:OB1 met plus longtemps que watchdog · optimiser code ou augmenter watchdog||**\"Rack error\"**:module physique manquant ou différent de config · réparer + reload]\n\n[TIP|**80 % des erreurs TIA** sont des erreurs de config réseau, firmware, ou mot de passe — pas du code. Toujours vérifier ces bases en premier.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 52,
-      "kind": "QUIZ",
-      "section": "5 · Debug & diagnostic",
-      "title": "Quiz 5 — Debug & diagnostic",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Quelle fonction TIA permet de voir tous les endroits où un tag est utilisé ?",
-            "options": [
-              "Monitor",
-              "Cross-references (Ctrl+Shift+F)",
-              "Trace",
-              "PLCSIM"
+              "Un DB",
+              "Le programme principal · appelé cycliquement par le PLC OS · point d'entrée applicatif",
+              "Un HMI",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "En cas d'arrêt inexpliqué de la machine, quelle est la première chose à consulter ?",
+            "prompt": "ET 200SP est…",
             "options": [
-              "Le web server",
-              "Le diagnostic buffer",
-              "Reboot la CPU",
-              "Le manuel Siemens"
+              "Un PLC",
+              "Station IO déportée Profinet · modulaire · rapproche IO du terrain · standard Dasolabs",
+              "Un HMI",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Quelle est la différence entre Modify et Force ?",
+            "prompt": "PLCSIM est…",
             "options": [
-              "Aucune",
-              "Modify écrit une fois, Force bloque la valeur",
-              "Force est plus rapide",
-              "Modify est plus dangereux"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 53,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "Régulation PID intégrée",
-      "bodyMd": "## Le bloc PID standard Siemens\n\nSiemens fournit un bloc PID prêt à l'emploi : **PID_Compact** (petits systèmes) ou **PID_3Step** (avec anti-emballement).\n\n### Utilisation typique\n1. Ajouter Technology Object → PID Compact\n2. Configurer : setpoint, mesure, actuator\n3. Auto-tuning : la CPU calcule automatiquement Kp, Ki, Kd\n4. Appel dans OB35 (100 ms cyclic)\n\n### Auto-tuning\n[STEPS|**Pre-tuning** : premier calcul en step → estime paramètres initiaux||**Fine-tuning** : oscillation contrôlée pour affiner les paramètres]\n\n[TIP|L'auto-tuning marche **bien pour la température, la pression, le niveau**. Pour la vitesse ou le débit rapide, mieux régler manuellement.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 54,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "Machine à états avec CASE",
-      "bodyMd": "## Modéliser une séquence en SCL\n\nAlternative à GRAPH : utiliser une variable d'état + CASE en SCL.\n\n    CASE #etat OF\n        0: // Idle\n            IF #bp_start THEN #etat := 1; END_IF;\n        1: // Dosage\n            #v_dosage := TRUE;\n            IF #niveau >= #consigne_dose THEN\n                #v_dosage := FALSE;\n                #etat := 2;\n            END_IF;\n        2: // Chauffage\n            #chauffage := TRUE;\n            IF #temp >= 80.0 THEN\n                #chauffage := FALSE;\n                #etat := 3;\n            END_IF;\n        3: // Fin\n            #cycle_termine := TRUE;\n            IF #bp_reset THEN #etat := 0; END_IF;\n    END_CASE;\n\n### Avantages vs GRAPH\n- Plus compact\n- Testable unitairement\n- Portable\n\n[TIP|Pour des batches complexes pharma (>15 étapes, parallélisme), utiliser **GRAPH**. Pour du simple séquencement (< 10 étapes), CASE en SCL suffit.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 55,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "Communication S7 entre CPU",
-      "bodyMd": "## PUT / GET pour échanger\n\nPour deux CPU S7-1500 qui échangent des données, on utilise **PUT / GET**.\n\n### Configuration\n1. Network View → **Add new connection** → S7 connection\n2. Choisir les 2 CPU + config partenaire\n3. Dans le programme, appeler **PUT** ou **GET**\n\n### Exemple GET (lire depuis l'autre CPU)\n    \"GET_DB\"(REQ := \"bp_read\",\n             ID := 16#0100,\n             ADDR_1 := P#DB10.DBX0.0 BYTE 100,\n             RD_1 := \"DB_Local\".donnees_recues);\n\n### Alternative moderne\nDepuis TIA V17, **OPC UA client-serveur** entre CPU est plus flexible. Recommandé sur projet neuf.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 56,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "OPC UA server — publier des variables",
-      "bodyMd": "## Exposer les tags PLC au monde\n\nLe serveur OPC UA natif du S7-1500 permet à des clients externes (SCADA, MES, cloud) de lire/écrire les variables du PLC.\n\n### Étapes de config\n[STEPS|**Device configuration** → CPU → Runtime → OPC UA server → **Enable**||**Choisir le port** (défaut 4840) et l'URL||**Sécurité** : certificats auto-signés ou signés||**Publier les variables** : OPC UA server interfaces → glisser les tags à exposer]\n\n### Test client\nUtiliser **UaExpert** (gratuit) comme client :\n1. Connexion sur 'opc.tcp://192.168.1.10:4840'\n2. Naviguer dans l'espace d'adresses\n3. Lire/écrire les tags publiés\n\n[TIP|Les grands SCADA (AVEVA, Ignition, WinCC Unified) sont **clients OPC UA natifs**. Aucune passerelle nécessaire.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 57,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "MQTT via bibliothèque LMQTT",
-      "bodyMd": "## Publier vers le cloud\n\n**LMQTT** est la bibliothèque Siemens gratuite pour publier des messages MQTT depuis un S7-1500.\n\n### Import\n1. Télécharger LMQTT depuis Industry Online Support\n2. Global libraries → Open library → charger le fichier LMQTT\n3. Copier les blocs dans le projet\n\n### Appel typique\n    \"LMQTT_Client_Instance\"(\n        i_Enable := TRUE,\n        i_BrokerURL := 'mqtt.dasolabs.be',\n        i_Port := 1883,\n        i_ClientID := 'PLC_LigneZoetis',\n        i_Publish := \"trigger_publish\",\n        i_Topic := 'zoetis/line1/status',\n        i_Payload := \"message_json\"\n    );\n\n### Cas d'usage\n[USECASE|Remontée cadence vers cloud|Chaque minute, publier cadence + T° + pression → HiveMQ → Grafana Cloud.|**Config** : 1 FB LMQTT en OB35, 1 message toutes les 60 sec. Consommation programme : ~5 KB. Latence : < 100 ms.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 58,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "Recettes — DB structurés",
-      "bodyMd": "## Gérer des recettes de production\n\nSur une ligne pharma qui produit 5 médicaments différents, chaque médicament a sa recette (température, dosage, timings).\n\n### Structure typique\n    // UDT_Recipe\n    STRUCT\n        nom : String[32];\n        dosage_kg : Real;\n        temp_consigne : Real;\n        temps_maintien_sec : DInt;\n        vitesse_agitation_rpm : Int;\n    END_STRUCT\n\n    // DB_Recipes\n    recipes : Array[0..49] of \"UDT_Recipe\";  // 50 recettes\n\n### Chargement d'une recette active\n    \"DB_Active\".recipe := \"DB_Recipes\".recipes[#recipe_id];\n\n### Import/export HMI\nRecettes exportables/importables en CSV depuis le HMI ou web server. Pratique pour maintenance.\n\n[TIP|Toujours **prévoir 50-100 slots recette** initialement. Ajouter des slots après = migration DB fastidieuse.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 59,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "Gestion des alarmes — ProDiag",
-      "bodyMd": "## Système d'alarmes standard\n\nLe S7-1500 intègre un système d'alarmes puissant : **ProDiag** (Program Diagnostics).\n\n### Types d'alarmes\n[KV|**Program alarm**:déclenchée par condition (temp > seuil, etc.)||**Supervision alarm**:déclenchée par surveillance système||**Diagnosis alarm**:déclenchée par module hardware]\n\n### Configuration\n1. Program blocks → **Supervisions** → Add\n2. Choix du tag à surveiller\n3. Condition, message, catégorie\n\n### Affichage HMI\nLes alarmes ProDiag s'affichent **automatiquement** sur le HMI (Comfort ou Unified) via wizard.\n\n### Archive\nToutes les alarmes archivées avec horodatage précis dans la CPU. Consultables via web server ou HMI.\n\n[TIP|**Utiliser ProDiag plutôt qu'un système custom**. Compatible GAMP 5 pharma, journalisable, standard.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 60,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "Cybersécurité — access levels & password",
-      "bodyMd": "## Sécuriser une CPU en production\n\n### Access levels S7-1500\n[KV|**Complete access (no protection)**:tout ouvert · **jamais en prod**||**Read access**:lecture seule · pour maintenance||**HMI access**:HMI seulement · pas d'engineering||**No access (complete protection)**:accès total refusé sauf avec mot de passe]\n\n### Configuration\nDevice configuration → CPU → Protection → Access level → choisir + configurer mot de passe.\n\n### Cybersécurité renforcée\n[STEPS|**Firewall CPU** : whitelist des IP autorisées||**Certificats** pour OPC UA, web server||**Signature du programme** : empêche modification non autorisée||**Audit log** : trace des accès dans logs auditables]\n\n[RULE|**Toute CPU en production doit avoir un mot de passe**. Password par défaut = piratage garanti dans les 6 mois.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 61,
-      "kind": "CONTENT",
-      "section": "6 · Programmation avancée",
-      "title": "Versioning et Multiuser",
-      "bodyMd": "## Travailler à plusieurs sur un projet\n\n### Multiuser Server (payant)\nServeur Siemens qui héberge le projet TIA :\n- **Check-out** d'un bloc → verrouillé pour toi\n- Modifications → **Check-in** → visible aux autres\n- Historique de versions\n\n### Alternative gratuite : archive + Git\n- **Save as archive .zap19** régulièrement\n- Commit dans Git (avec Git LFS car binaire volumineux)\n- **Pas de merge possible** entre versions binaires — un seul développeur à la fois\n\n### Chez Dasolabs\n- Petits projets : archive .zap19 + Git LFS\n- Gros projets (UCB, Zoetis) : Multiuser Server dédié client (~5 000 €/an licence)\n\n[TIP|**Un projet TIA sans versioning = perte garantie**. Un jour ou l'autre, quelqu'un écrase le projet. Sans historique, mois de travail perdu.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 62,
-      "kind": "QUIZ",
-      "section": "6 · Programmation avancée",
-      "title": "Quiz 6 — Programmation avancée",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Le bloc PID_Compact de Siemens fait…",
-            "options": [
-              "Que du proportionnel",
-              "PID complet avec auto-tuning",
-              "Uniquement de la mesure",
-              "Que du filtrage"
+              "Un vrai PLC",
+              "Simulateur intégré TIA Portal · teste sans hardware · gain productivité 40-60 %",
+              "Un HMI",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Pour publier des variables PLC vers un SCADA moderne, on utilise…",
+            "prompt": "HMI Comfort se développe…",
             "options": [
-              "MPI legacy",
-              "OPC UA server intégré",
-              "Modbus RTU obligatoire",
-              "Rien, ce n'est pas possible"
+              "Séparément",
+              "Dans TIA Portal (WinCC engineering) · même projet que PLC · tags partagés",
+              "Sur papier",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Une CPU S7-1500 en production sans mot de passe est…",
+            "prompt": "F-PLC est…",
             "options": [
-              "Sécurisée par défaut",
-              "Une catastrophe cyber",
-              "Impossible techniquement",
-              "Recommandé pour le debug"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 63,
-      "kind": "CONTENT",
-      "section": "7 · Certification",
-      "title": "Prêt pour l'évaluation certifiante ?",
-      "bodyMd": "## Quiz certifiant final — 10 questions\n\nLe prochain quiz certifie ta maîtrise de la formation Programmation TIA Portal. Couvre :\n\n- Introduction TIA\n- Configuration matérielle & tags\n- Langages IEC 61131-3\n- Organisation blocs (OB, FB, FC, DB)\n- Debug & diagnostic\n- Programmation avancée\n\n[TIP|Seuil : 70 % (7 réponses correctes / 10). Recommence autant que nécessaire.]\n\nBonne chance !",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 64,
-      "kind": "QUIZ",
-      "section": "7 · Certification",
-      "title": "🎓 Quiz certifiant final — Programmation TIA Portal",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Quel langage IEC 61131-3 est textuel type Pascal ?",
-            "options": [
-              "LAD",
-              "FBD",
-              "SCL",
-              "STL"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Où est stockée la mémoire persistante d'un FB ?",
-            "options": [
-              "En VAR_TEMP",
-              "Dans l'instance DB associée",
-              "Dans OB1",
-              "En VAR_INPUT"
+              "Un PLC lent",
+              "PLC failsafe · canal safety redondant certifié TÜV · pour SIL 2/3",
+              "Un SCADA",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Un OB1 est appelé…",
+            "prompt": "Convention nommage Dasolabs pour blocs…",
             "options": [
-              "Une fois au démarrage",
-              "Chaque cycle CPU",
-              "Sur événement I/O",
-              "Toutes les 100 ms"
+              "Random",
+              "FB_Domain_Function (FB_Motor_Start), FC_Function, DB_Function, UDT_Domain_Type · standardisé",
+              "Anglais uniquement",
+              "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Pour un batch pharma GAMP 5, quel langage recommande-t-on ?",
+            "prompt": "Framework projet Dasolabs TIA inclut…",
             "options": [
-              "LAD uniquement",
-              "GRAPH (SFC)",
-              "STL",
-              "AWL"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "En cas d'arrêt inexpliqué de la CPU, quelle est la première étape ?",
-            "options": [
-              "Redémarrer",
-              "Consulter le diagnostic buffer",
-              "Réinstaller TIA",
-              "Contacter Siemens"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Une variable en VAR_TEMP…",
-            "options": [
-              "Persiste entre cycles",
-              "Est auto-initialisée à 0",
-              "N'est PAS auto-initialisée, à initialiser explicitement",
-              "Est stockée dans un DB"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Quelle fonction utilise-t-on pour comprendre où un tag est utilisé ?",
-            "options": [
-              "Trace",
-              "Cross-references (Ctrl+Shift+F)",
-              "Force",
-              "Compile"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour piloter un G120 depuis TIA, on utilise typiquement…",
-            "options": [
-              "Câblage analogique 4-20 mA uniquement",
-              "Profinet + télégramme 105 + bibliothèque SINA_SPEED",
-              "Le protocole MPI legacy",
-              "Rien, il faut un logiciel séparé"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour publier des tags PLC vers un SCADA moderne (AVEVA, Ignition)…",
-            "options": [
-              "Modbus RTU",
-              "OPC UA server natif S7-1500",
-              "MPI",
-              "Aucun protocole"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Une CPU en production doit avoir…",
-            "options": [
-              "Pas de mot de passe",
-              "Un mot de passe fort",
-              "Complete access",
-              "Web server désactivé et pas de sécurité"
+              "Une seule phase",
+              "Analyse → Design → Dev → Tests → FAT → SAT → Formation → Support (3 mois)",
+              "Rien",
+              "Uniquement dev"
             ],
             "correctIndex": 1
           }
