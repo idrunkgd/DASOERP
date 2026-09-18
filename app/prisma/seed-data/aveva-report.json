@@ -1,470 +1,963 @@
 {
   "slug": "aveva-report",
-  "title": "AVEVA Report (ex-Dream Report)",
-  "subtitle": "Rapports opérationnels industriels",
-  "level": "Débutant à Expert",
-  "duration": "3 jours (≈ 24 h)",
+  "title": "AVEVA Report",
+  "subtitle": "Formation complète — reporting industriel pharma & process",
+  "level": "Intermédiaire à avancé",
+  "duration": "≈ 8 h",
+  "isCertifying": true,
+  "passThreshold": 70,
+  "certificateWording": "Formation « AVEVA Report » — connaissances fondamentales sur l'outil de reporting industriel AVEVA (ex-Wonderware Report), incluant architecture, design de templates, sources de données (Historian, SQL Server), distribution automatique, sécurité et validation GAMP 5 / 21 CFR Part 11. Cette attestation atteste de la formation et de la réussite de l'évaluation.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
-      "section": null,
-      "title": "AVEVA Report (ex-Dream Report)",
-      "bodyMd": "",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Bienvenue — AVEVA Report",
+      "bodyMd": "## La formation reporting industriel\n\nBienvenue ! Formation complète à **AVEVA Report** (ex-Wonderware Report), l'outil de reporting industriel de référence en pharma et process.\n\n[TIP|Prérequis conseillé : notions SCADA / WinCC.]\n\n### Ce que tu vas apprendre\n- L'écosystème AVEVA et positionnement Report\n- Installation et architecture\n- Design de templates de rapport\n- Sources de données (SQL, Historian, tags)\n- Distribution automatique (PDF, email)\n- Sécurité et validation GAMP 5\n\n[RULE|Quiz certifiant final : 70 %.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-01.jpg"
+      "imageUrl": null
     },
     {
       "position": 2,
       "kind": "CONTENT",
-      "section": "INTRODUCTION",
-      "title": "Objectifs",
-      "bodyMd": "AVEVA Report (né Dream Report, racheté 2019) = solution reporting spécialisée industrie process. Contrairement à Power BI (analytique) ou SSRS (opérationnel MS), AVEVA Report est optimisé pour sources data industrielles (historian, OPC UA, PI System) et calculs métier (OEE, MTBF, batch reports).\n\n**Sources industrielles** — Historian AVEVA (ex Wonderware), OPC UA, PI System, SQL, CSV.\n\n**Calculs métier prêts** — OEE, MTBF, MTTR, batch yields, energy KPIs — pas besoin formules custom.\n\n**Templates industry** — Batch, shift, environmental, energy, quality — 20+ prêts.\n\n**Triggers multiples** — Planning, événement historian, alarme, réception mail, REST.\n\n**Distribution large** — Mail, portail web, FTP, SharePoint, cloud.\n\n**À retenir :** AVEVA Report excelle où SSRS/Power BI font mal : rapports batch industriels avec sources historian. Complémentaire.",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Qu'est-ce qu'AVEVA Report ?",
+      "bodyMd": "## Reporting industriel automatisé\n\n**AVEVA Report** est un outil qui **génère automatiquement des rapports** industriels : batch reports pharma, shift reports, rapports de production, dashboards périodiques.\n\n### Cas d'usage typiques\n[KV|**Batch report pharma**:rapport de fin de batch avec toutes les données process · signé électroniquement||**Shift report**:résumé de fin de poste 8h · cadence, qualité, alarmes||**Compliance report**:rapport 21 CFR Part 11 pour la FDA||**KPI dashboard**:OEE, rendement, taux de rebut||**Consumption report**:consommation énergie, MP · reporting environnement]\n\n[TIP|AVEVA Report est **la solution de référence** en pharma pour le batch reporting GAMP 5.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-02.jpg"
+      "imageUrl": null
     },
     {
       "position": 3,
       "kind": "CONTENT",
-      "section": "INTRODUCTION",
-      "title": "Le parcours en trois niveaux",
-      "bodyMd": "",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Historique — Wonderware → AVEVA",
+      "bodyMd": "## L'évolution du produit\n\n**AVEVA** est né en 2018 de la fusion Schneider Electric Software (dont Wonderware) et AVEVA (chantier naval / oil & gas).\n\n### Timeline\n[KV|**1987**:naissance Wonderware · InTouch HMI · pionnier SCADA moderne||**2010s**:Wonderware Report ajouté à la suite||**2018**:fusion → AVEVA · rebranding graduel||**2020+**:AVEVA Report (nouveau nom) · roadmap AVEVA System Platform||**2023**:AVEVA racheté par Schneider Electric à 100 %]\n\n### Renommage produits\n[KV|**Wonderware InTouch**:→ AVEVA InTouch HMI||**Wonderware Historian**:→ AVEVA Historian||**Wonderware Report**:→ AVEVA Report||**System Platform**:→ AVEVA System Platform (SP)]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-03.jpg"
+      "imageUrl": null
     },
     {
       "position": 4,
       "kind": "CONTENT",
-      "section": "NIVEAU 1",
-      "title": "Débutant",
-      "bodyMd": "",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Positionnement dans l'écosystème AVEVA",
+      "bodyMd": "## Où se place Report ?\n\nAVEVA propose une suite intégrée :\n[KV|**AVEVA System Platform (SP)**:l'infrastructure (Galaxy, objets, apps déployées)||**AVEVA InTouch HMI**:les HMI/SCADA||**AVEVA Historian**:le time-series database||**AVEVA Report**:le reporting sur ces données||**AVEVA MES**:le manufacturing execution system||**AVEVA Batch Management**:orchestration batch pharma]\n\n### Report utilise typiquement\n- **Historian** comme source de données time-series\n- **SQL Server** comme source de données transactionnelles\n- **System Platform** pour l'orchestration",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-04.jpg"
+      "imageUrl": null
     },
     {
       "position": 5,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "AVEVA Report vs SSRS vs Power BI",
-      "bodyMd": "**AVEVA REPORT**\n- Sources historian natives\n- Calculs métier prêts (OEE, MTBF, batch)\n- Templates industry\n- Coût élevé — entreprise\n- Rapports batch industriels\n- GxP intégré\n\n**SSRS + POWER BI**\n- SSRS : reporting MS opérationnel\n- Power BI : analytique + dashboards\n- Sources : SQL, Excel, cloud, APIs\n- Coûts modérés\n- Rapports business + KPIs\n- Compliance à ajouter\n\n**À retenir :** Usine industrielle AVEVA-first : AVEVA Report. IT enterprise multi-source : SSRS + Power BI. Souvent les 2 coexistent.",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "AVEVA Report vs alternatives",
+      "bodyMd": "## Comparatif marché\n\n[KV|**AVEVA Report**:leader pharma · GAMP 5 native · cher · rigide||**SSRS (Microsoft)**:gratuit avec SQL Server · plus flexible · moins pharma||**Crystal Reports**:legacy · encore utilisé industriellement · déclin||**Power BI**:moderne · dashboards interactifs · faible sur batch reports||**Grafana**:open-source · temps réel · pas de PDF signé||**Report Portal (custom)**:code Python/Node · flexible max · demande dev]\n\n### Quand choisir AVEVA Report ?\n[STEPS|**Pharma/biotech** avec exigences GAMP 5 || GMP → obligatoire||**Client historique Wonderware** → cohérence écosystème||**Reporting batch complexe** avec signatures électroniques||**Budget important** disponible (licences chères)]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-05.jpg"
+      "imageUrl": null
     },
     {
       "position": 6,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "TP N1-1 : Installer + premier rapport",
-      "bodyMd": "**Contexte :** Trial AVEVA Report 30 jours téléchargé. Un simulateur OPC UA (Prosys) ou fichier CSV avec des données industrielles simulées.\n\n**Consigne :** 1) Installer AVEVA Report + Studio Designer. 2) Connecter à Prosys OPC UA (ou importer un CSV). 3) Créer 3 Data Objects : Tank_Temperature, Pump_Speed, Batch_Yield (chacun sur 8h). 4) Ajouter des Statistics : Min/Max/Avg pour chaque. 5) Layout : bandeau haut avec logo, tableau des stats au centre, chart température en bas. 6) Publish + tester.\n\n**Attendu :** Rapport batch simple généré. Affiche les 3 mesures avec stats et chart. Export PDF proper.\n\n💡 Studio Designer : IDE Windows. Data Object : source + interval + calcul. Chart : glisser depuis toolbox + lier Data Object.",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Éditions et licences",
+      "bodyMd": "## Prix et versions\n\n### Éditions\n[KV|**AVEVA Report Runtime**:runtime seul, pour exécuter les rapports · ~5 000 € licence||**AVEVA Report Designer**:designer + runtime · pour créer les templates · ~15 000 €||**Cluster / Enterprise**:usage multi-server, sites || Contact commercial]\n\n### Modes de licence\n- **Perpétuelle** : achat unique + maintenance 20 %/an\n- **Abonnement** : mensuel (SaaS)\n- **Bundle** : inclus dans AVEVA Manufacturing Suite\n\n[TIP|**Économie** : négocier bundle AVEVA Historian + Report + SP pour projet pharma → -30 % vs prix cataloque.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-06.jpg"
+      "imageUrl": null
     },
     {
       "position": 7,
       "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "TP N1-2 : Template shift report",
-      "bodyMd": "**Contexte :** AVEVA Report + templates natifs.\n\n**Consigne :** 1) Ouvrir le template 'Shift Report' fourni. 2) Personnaliser : logo entreprise, couleurs, colonnes pertinentes pour votre usine. 3) Adapter les Data Objects aux tags de votre historian. 4) Publier. 5) Comparer temps de dev : template = 1h vs from-scratch = 8h.\n\n**Attendu :** Shift report opérationnel en <2h. Personnalisé aux couleurs entreprise. Utilise 60-80% du template + 20-40% custom.\n\n💡 20+ templates dans le dossier Samples. Structure typique : header logo + summary KPIs + tables production + charts trend + footer signature.",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Architecture Report",
+      "bodyMd": "## Composants clés\n\n[KV|**Report Designer**:éditeur pour créer templates · install PC dev||**Report Runtime**:moteur d'exécution · install serveur || génère les PDF||**Report Portal**:web app pour utilisateurs · voir/télécharger rapports||**Report Database**:SQL Server où sont stockés templates + métadonnées||**Datasources**:AVEVA Historian, SQL Server, OPC UA, fichiers CSV]\n\n### Flux typique\n[STEPS|**Designer** crée un template graphique (bars, tables, charts)||**Template déployé** vers Runtime · publié dans le Portal||**Trigger** : planifié (chaque nuit), sur événement (fin batch), à la demande||**Runtime exécute** : récupère data · injecte dans template · génère PDF||**PDF distribué** : email, portal, SharePoint, dossier réseau]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-07.jpg"
+      "imageUrl": null
     },
     {
       "position": 8,
-      "kind": "QUIZ",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Quiz N1",
-      "bodyMd": "",
+      "kind": "CONTENT",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Configuration matérielle recommandée",
+      "bodyMd": "## Serveur AVEVA Report\n\n### Recommandation Siemens\n[KV|**CPU**:8 cores minimum · 16 cores confort||**RAM**:32 GB minimum||**Disque**:SSD 500 GB (avec SQL Server) · plus si historique long||**OS**:Windows Server 2019 ou 2022||**Réseau**:1 Gbps · idéal 10 Gbps si Historian gros]\n\n### Deployment options\n- **Single server** (petit projet, < 100 users)\n- **Multi-server** (server data + server renderer séparés)\n- **Cluster** (haute disponibilité, redondance)\n\n[TIP|Sur pharma UCB, on déploie **2 serveurs** : 1 SQL Server dédié (avec Historian) + 1 AVEVA Report + Runtime. Isolation propre.]",
       "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "AVEVA Report =",
-            "options": [
-              "Outil reporting AVEVA (ex-Dream Report)",
-              "PLC",
-              "SCADA"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Cible :",
-            "options": [
-              "Rapports opérationnels manufacturing",
-              "Finance",
-              "Bureautique"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Source :",
-            "options": [
-              "Historian AVEVA, OPC UA, SQL",
-              "Excel seul",
-              "Fichiers plats"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Sortie :",
-            "options": [
-              "PDF, Excel, HTML, email",
-              "Papier",
-              "3D"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "vs SSRS :",
-            "options": [
-              "AVEVA adapté data historian",
-              "SSRS mieux",
-              "Identiques"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Nom historique :",
-            "options": [
-              "Dream Report",
-              "SAP Report",
-              "Report Manager"
-            ],
-            "correctIndex": 0
-          }
-        ]
-      },
-      "imageUrl": "/training/aveva-report/slide-08.jpg"
+      "quiz": null,
+      "imageUrl": null
     },
     {
       "position": 9,
       "kind": "CONTENT",
-      "section": "NIVEAU 2",
-      "title": "Intermédiaire",
-      "bodyMd": "",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Concepts de base — Report, Template, Instance",
+      "bodyMd": "## Vocabulaire\n\n[KV|**Report Template**:le design (structure, styles, sources) · réutilisable||**Report Instance**:une exécution particulière d'un template (avec paramètres) → 1 PDF||**Report Definition**:la description du template (XML/DB)||**Data Source**:une connexion (Historian, SQL, tag)||**Query**:une requête SELECT dans une source||**Report Object**:un widget dans le template (chart, table, text)]\n\n### Cycle de vie\nUn **template** est créé une fois. Il est **exécuté** N fois → N **instances** (chaque batch, chaque shift…).",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-09.jpg"
+      "imageUrl": null
     },
     {
       "position": 10,
-      "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "OEE — le KPI industriel n°1",
-      "bodyMd": "OEE (Overall Equipment Effectiveness) mesure l'efficacité en combinant 3 facteurs : Availability × Performance × Quality. Objectif world-class : 85%+. Moyenne industrie : 60%.\n\n**Availability** — = Temps de marche / Temps planifié. Impact : pannes, changements de série.\n\n**Performance** — = (Production × Cycle idéal) / Temps de marche. Impact : ralentissements, micro-arrêts.\n\n**Quality** — = Bons / Total. Impact : rebuts, retouches, non-conformités.\n\n**Pièges** — Bien définir 'temps planifié' (avec ou sans pauses), 'cycle idéal' (nominal ou best case).\n\n**AVEVA Report** — Statistical Object 'OEE' pré-configuré. Configurer 3 tags source + formule auto.\n\n**À retenir :** OEE puissant mais fragile en définition. Documenter EXACTEMENT quels tags nourrissent chaque facteur — sinon 2 rapports OEE incohérents.",
+      "kind": "QUIZ",
+      "section": "1 · Introduction AVEVA Report",
+      "title": "Quiz 1 — Introduction AVEVA Report",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-10.jpg"
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "AVEVA Report est né de la fusion de…",
+            "options": [
+              "Rockwell + Siemens",
+              "Schneider Electric Software (Wonderware) + AVEVA",
+              "IBM + Microsoft",
+              "Oracle + SAP"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour un batch report pharma GAMP 5, l'outil de référence est…",
+            "options": [
+              "Power BI",
+              "AVEVA Report",
+              "Excel manuel",
+              "Grafana"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un 'template' AVEVA Report est…",
+            "options": [
+              "Une exécution unique",
+              "Le design réutilisable qui peut générer N instances",
+              "Un fichier temporaire",
+              "Une base de données"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
     },
     {
       "position": 11,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "TP N2-1 : Calculer OEE",
-      "bodyMd": "**Contexte :** Historian avec les 3 tags nécessaires : Machine_RunTime_Min, Machine_Production_Units, Machine_Good_Units.\n\n**Consigne :** 1) Créer Data Objects pour les 3 tags sur 8h de shift. 2) Créer 3 Statistical Objects : Availability (RunTime / 480), Performance (Production × Cycle idéal / RunTime), Quality (Good / Production). 3) Combiner en OEE = A × P × Q. 4) Layout : 3 gauges pour A, P, Q + gros chiffre OEE au centre. 5) Exécuter → vérifier valeurs cohérentes (60-85%).\n\n**Attendu :** Rapport OEE quotidien avec 3 facteurs + composite. Visuellement clair. Valeurs cohérentes avec la production simulée.\n\n💡 Statistical Object formule : Value_1 / Value_2. Gauge : object → linked to Statistical Object. Choose color scale : red 0-40, yellow 40-70, green 70-100.",
+      "section": "2 · Installation et architecture",
+      "title": "Prérequis installation",
+      "bodyMd": "## Ce qu'il faut avant de démarrer\n\n### Prérequis logiciels\n[STEPS|**Windows Server 2019/2022** ou Windows 10/11 Pro (dev)||**.NET Framework 4.8** minimum||**SQL Server 2019+** (Express OK en dev, Standard en prod)||**IIS** (pour le Portal web)||**AVEVA System Platform** installé si intégration]\n\n### Comptes de service\n- **AVEVA Service Account** (account Windows dédié)\n- **SQL Service Account**\n- Droits DBA sur la Report Database\n\n[WARN|Toujours utiliser des **comptes de service** dédiés, pas des comptes utilisateur. Comptes utilisateur → problèmes quand la personne quitte l'entreprise.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-11.jpg"
+      "imageUrl": null
     },
     {
       "position": 12,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "TP N2-2 : Parameter shift + email",
-      "bodyMd": "**Contexte :** Suite TP N2-1.\n\n**Consigne :** 1) Ajouter parameter @Shift (dropdown : Morning/Afternoon/Night). 2) Adapter Data Objects pour utiliser le range de temps selon @Shift. 3) Configurer un scheduled trigger : chaque jour à 6am envoyer le OEE du shift précédent au manager production. 4) Format PDF, destinataire = email manager.\n\n**Attendu :** Manager reçoit chaque matin le OEE du shift de nuit. Cliquer sur le rapport ouvre les détails par facteur.\n\n💡 Parameter → default value expression. Schedule → configuration → SMTP. Test manual : Run With Parameters.",
+      "section": "2 · Installation et architecture",
+      "title": "Installation pas à pas",
+      "bodyMd": "## Workflow d'install\n\n[STEPS|**Télécharger** l'installer AVEVA depuis le portail client||**Serial number** validé auprès d'AVEVA||**Executer SETUP.EXE** en mode admin||**Choix composants** : Designer, Runtime, Portal||**Config database** : nouvelle DB ou existante · SQL Server address||**Config service accounts**||**Firewall rules** ouvertes (ports 80, 443, 1433 SQL, 4022 Historian…)||**Reboot serveur**||**Test** : ouvrir Report Designer, créer un template vide → vérifier connexion Report Database]\n\n### Durée typique\nInstall complète : 2-4 heures selon complexité.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-12.jpg"
+      "imageUrl": null
     },
     {
       "position": 13,
-      "kind": "QUIZ",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Quiz N2",
-      "bodyMd": "",
+      "kind": "CONTENT",
+      "section": "2 · Installation et architecture",
+      "title": "Configuration initiale",
+      "bodyMd": "## Premier lancement\n\n### Étapes post-install\n[STEPS|**Créer un utilisateur admin** dans Report Portal||**Configurer les data sources** (Historian, SQL, System Platform)||**Test connexion** vers chaque source||**Créer un groupe de rapports** (Batch, Shift, KPI…)||**Import** de templates existants (si migration)||**Configurer les scheduled jobs**||**Activer les notifications email**]\n\n### Configuration email\n- Serveur SMTP (souvent Exchange interne)\n- Compte email émetteur (report@dasolabs.be par ex.)\n- Test envoi\n\n[TIP|Toujours **tester l'envoi email** avec un rapport factice avant mise en production. Sinon les rapports générés s'accumulent sans notification.]",
       "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Connectors :",
-            "options": [
-              "Historian/OPC UA/SQL/CSV/Excel/REST",
-              "SQL only",
-              "Aucun"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Stats :",
-            "options": [
-              "Moyennes, MTBF, OEE, percentiles",
-              "Manuel",
-              "Impossible"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Trigger :",
-            "options": [
-              "Cron, événement, alarme, mail, REST",
-              "Manuel",
-              "Impossible"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "OEE =",
-            "options": [
-              "Availability × Performance × Quality",
-              "Somme",
-              "Impossible"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Templates :",
-            "options": [
-              "Batch, shift, OEE, energy pré-configurés",
-              "Aucun",
-              "Custom only"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Multi-langue :",
-            "options": [
-              "Rapports N langues + formats locaux",
-              "Anglais only",
-              "Impossible"
-            ],
-            "correctIndex": 0
-          }
-        ]
-      },
-      "imageUrl": "/training/aveva-report/slide-13.jpg"
+      "quiz": null,
+      "imageUrl": null
     },
     {
       "position": 14,
       "kind": "CONTENT",
-      "section": "NIVEAU 3",
-      "title": "Expert",
-      "bodyMd": "",
+      "section": "2 · Installation et architecture",
+      "title": "Data Sources — Historian",
+      "bodyMd": "## Connecter à AVEVA Historian\n\n### Configuration Historian\n[STEPS|**Report → Data Sources → Add**||**Type**: AVEVA Historian||**Server**: nom du serveur Historian||**Authentification**: Windows integrated ou SQL||**Test connection**: vérifier ping et query test]\n\n### Historian expose\n- Tags time-series (température, débit, pression)\n- Alarmes historisées\n- Événements process\n\n### Retention\n- Par défaut : 1 an rolling\n- Configurable jusqu'à 20 ans (avec compression)",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-14.jpg"
+      "imageUrl": null
     },
     {
       "position": 15,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Triggers événement",
-      "bodyMd": "AVEVA Report peut se déclencher sur événements réels — pas seulement toutes les 6h. Fin de batch, alarme critique, réception mail, appel REST. Transforme le reporting en workflow opérationnel intégré.\n\n**Scheduled** — Cron-like : daily 6am, weekly Monday, monthly 1st.\n\n**Event-triggered** — Tag historian change → rapport se génère. Ex : Batch.Status = 'Completed' → batch report.\n\n**Alarm-triggered** — Alarme critique déclenche rapport d'incident. Envoi immédiat.\n\n**Email inbound** — Mail avec sujet 'Report last shift' → généré et retourné. Self-service par mail.\n\n**REST API** — Appli tierce POST /reports/execute → génération à la demande.\n\n**À retenir :** Event-triggered transforme le reporting de 'lit après-coup' à 'agit en temps réel'.",
+      "section": "2 · Installation et architecture",
+      "title": "Data Sources — SQL Server",
+      "bodyMd": "## Sources SQL transactionnelles\n\n### Configuration SQL Server\n[STEPS|**Data Sources → Add → SQL Server**||**Server** : nom instance SQL · ex `SQLPROD\\INSTANCE01`||**Database** : la DB spécifique||**Authentification** : Windows ou SQL account||**Timeout query** : 30 sec par défaut · à augmenter pour requêtes lourdes]\n\n### Cas d'usage\n- Data ordres de production (venue du MES)\n- Recettes stockées en SQL\n- Utilisateurs et signatures électroniques\n- Journaux d'événements custom",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-15.jpg"
+      "imageUrl": null
     },
     {
       "position": 16,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "TP N3-1 : Batch report event-triggered",
-      "bodyMd": "**Contexte :** Historian + AVEVA Report avec batch report existant.\n\n**Consigne :** 1) Configurer un trigger : Batch.Status_Text = 'Completed' → génération auto. 2) Rapport détaillé du batch : recette utilisée, durée, alarmes, courbes température/pression/débit. 3) Signature électronique de l'opérateur (via prompt). 4) Envoi PDF automatique au responsable qualité. 5) Test : simuler un batch complet, vérifier réception PDF <2 min après fin.\n\n**Attendu :** Fin de batch = PDF dans la boîte mail du responsable qualité en <2 min. Signé électroniquement.\n\n💡 Trigger : Data Object → Event → Value equals 'Completed'. Signature : Interactive prompt → user + password + timestamp. GxP compliance activated.",
+      "section": "2 · Installation et architecture",
+      "title": "Data Sources — System Platform",
+      "bodyMd": "## Intégration avec Galaxy\n\n### AVEVA System Platform (Galaxy)\nSi tu utilises System Platform :\n- Chaque objet (Motor, Valve…) est modélisé dans le Galaxy\n- Ses attributs sont accessibles via Data Sources System Platform\n\n### Configuration\n[STEPS|**Data Sources → Add → System Platform**||**Galaxy** : nom du galaxy||**Namespace** : namespace des objets||**Login credentials** intégrés SP]\n\n### Query typique\nRécupérer tous les batchs terminés depuis 24h avec leurs paramètres.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-16.jpg"
+      "imageUrl": null
     },
     {
       "position": 17,
+      "kind": "CONTENT",
+      "section": "2 · Installation et architecture",
+      "title": "Report Database",
+      "bodyMd": "## Où sont stockés les templates ?\n\n### Structure\nLa **Report Database** (SQL Server) contient :\n- Les **templates** (design XML sérialisé)\n- Les **métadonnées** (nom, version, auteur)\n- Les **paramètres par défaut**\n- Les **schedules** (planification)\n- Les **historique d'exécutions**\n- Les **archives PDF** (optionnel, souvent externe)\n\n### Tables principales\n- `Templates`\n- `ScheduledJobs`\n- `ExecutionHistory`\n- `Datasources`\n- `Users` / `Roles`\n\n[TIP|La Report DB grossit avec le temps (historique). Prévoir **archivage périodique** des vieilles exécutions (> 5 ans) pour maintenir perf.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 18,
+      "kind": "CONTENT",
+      "section": "2 · Installation et architecture",
+      "title": "Report Portal — accès utilisateurs",
+      "bodyMd": "## L'interface web\n\n**Report Portal** est une web app IIS accessible depuis un navigateur.\n\n### Fonctionnalités\n[STEPS|**Login** utilisateur||**Liste des rapports** disponibles selon les droits||**Exécution à la demande** avec choix paramètres||**Consulter historique** des exécutions passées||**Télécharger PDF** ou XLSX||**Configurer préférences** (langue, notifications)||**Admin** : gérer users, groups, permissions]\n\n### URL typique\n`http://reportserver.dasolabs.be/AVEVA_Report_Portal`\n\n### Compatibilité navigateur\n- Chrome / Edge (recommandé)\n- Firefox\n- IE 11 (legacy)",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 19,
+      "kind": "CONTENT",
+      "section": "2 · Installation et architecture",
+      "title": "Deployment production",
+      "bodyMd": "## Passer en production\n\n### Étapes de mise en prod\n[STEPS|**Environnement de test** identique à prod (test in staging)||**Validation IQ** (Installation Qualification) — pharma||**Validation OQ** (Operational Qualification)||**Validation PQ** (Performance Qualification)||**Backup complet** avant go-live||**Cutover** planifié en fenêtre maintenance||**Rollback plan** documenté||**Support post-go-live** 1 semaine minimum]\n\n### Pharma GAMP 5\nEn pharma, chaque étape doit être documentée pour audit FDA / EMA.\n\n[TIP|La mise en prod pharma d'AVEVA Report se planifie sur **3-6 mois**. Pas de shortcut.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 20,
       "kind": "QUIZ",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Quiz N3",
+      "section": "2 · Installation et architecture",
+      "title": "Quiz 2 — Installation & architecture",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Distribution :",
+            "prompt": "Quel OS supporte AVEVA Report Runtime en production ?",
             "options": [
-              "Mail, share, FTP, cloud, REST push",
-              "Papier only",
-              "Impossible"
+              "Linux Ubuntu",
+              "Windows Server 2019/2022",
+              "macOS",
+              "Android"
             ],
-            "correctIndex": 0
+            "correctIndex": 1
           },
           {
-            "prompt": "Web viewer :",
+            "prompt": "La Report Database est stockée dans…",
             "options": [
-              "Portail HTML5",
-              "Client lourd",
-              "Impossible"
+              "Un fichier XML local",
+              "SQL Server",
+              "MongoDB",
+              "Excel"
             ],
-            "correctIndex": 0
+            "correctIndex": 1
           },
           {
-            "prompt": "Historian AVEVA :",
+            "prompt": "Pour la mise en prod pharma AVEVA Report, la durée typique est…",
             "options": [
-              "Time-series milliards de tags",
-              "CSV",
-              "Cloud only"
+              "1 semaine",
+              "1 mois",
+              "3-6 mois avec validation IQ/OQ/PQ",
+              "1 jour"
             ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Ignition + Sparkplug B :",
-            "options": [
-              "Historian → AVEVA Report standard",
-              "Impossible",
-              "Manuel"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Compliance GxP :",
-            "options": [
-              "Audit trail, signatures, 21 CFR Part 11",
-              "Impossible",
-              "Non concerné"
-            ],
-            "correctIndex": 0
-          },
-          {
-            "prompt": "Alternatives :",
-            "options": [
-              "Power BI, SSRS, Grafana, Ignition",
-              "Unique",
-              "Aucun"
-            ],
-            "correctIndex": 0
+            "correctIndex": 2
           }
         ]
       },
-      "imageUrl": "/training/aveva-report/slide-17.jpg"
-    },
-    {
-      "position": 18,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Architecture AVEVA Report",
-      "bodyMd": "AVEVA Report (ex-Dream Report) = 3 briques : Studio (designer), Runtime (exécution + planif), Web Portal (consultation). Comprendre les 3 = savoir où déployer et où débugger.\n\n**Studio** — Éditeur graphique où tu conçois le rapport. Poste ingénieur, licence désignée.\n\n**Runtime** — Service Windows qui exécute les rapports selon triggers (temps, événements, batch). Serveur dédié.\n\n**Web Portal** — Portail HTML accessible en réseau où les users consultent, filtrent, téléchargent.\n\n**Sources de données** — OSIsoft PI, AVEVA Historian, InfluxDB, SQL Server, ODBC, OPC UA, MQTT — 30+ connecteurs.\n\n**Formats de sortie** — PDF, Excel, HTML, Word, CSV. Auto-envoi par mail/SharePoint/FTP.\n\n**À retenir :** Runtime licence par CAL (Concurrent Access Licence) — dimensionner selon nombre de rapports simultanés max, pas nombre total.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-18.jpg"
-    },
-    {
-      "position": 19,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "Les objets clés du designer",
-      "bodyMd": "Tout rapport se construit avec quelques objets clés bien maîtrisés. Les connaître = savoir traduire un besoin métier en rapport.\n\n**Statistical Objects** — Sum, Avg, Min, Max, Count, StdDev sur une période — la base des KPI.\n\n**Historical Data Table** — Table de valeurs horodatées d'un tag. Idéal pour trends et audit trail.\n\n**Batch List / Batch Detail** — Interroge le module Batch (S88). Rapports lots parfaits pour pharma.\n\n**Alarm List** — Sortie ISA-18.2 des alarmes sur période, par acquittement, par priorité.\n\n**SQL Object** — Résultat d'une requête SQL libre. Puissant pour joindre historian + BDD métier.\n\n**À retenir :** 90% des rapports usine se font avec Statistical + Historical + Alarm + Batch. Les autres objets sont niche.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-19.jpg"
-    },
-    {
-      "position": 20,
-      "kind": "CONTENT",
-      "section": "NIVEAU 1 · DÉBUTANT",
-      "title": "TP N1-3 : Multi-source (historian + SQL)",
-      "bodyMd": "**Contexte :** Vous devez faire un rapport 'Production quotidienne' qui affiche : production réelle (historian tag), production planifiée (base ERP SQL), écart calculé.\n\n**Consigne :** 1) Créer Data Source #1 : historian AVEVA. 2) Créer Data Source #2 : SQL Server BDD ERP. 3) Statistical Object avec Sum tag 'Production_Compteur' pour la période. 4) SQL Object : SELECT PlannedQty FROM ProductionPlan WHERE Day = @date. 5) Textbox Écart : =[Sum_Production] - [Planned]. 6) Coloration : rouge si Écart < -5%, vert sinon.\n\n**Attendu :** Rapport avec 3 valeurs : réel, planifié, écart coloré. Data provient de 2 sources hétérogènes fusionnées.\n\n💡 Timezone à surveiller : historian souvent UTC, SQL souvent local. Aligner avant de comparer, sinon écart fantôme d'1h à minuit.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-20.jpg"
+      "imageUrl": null
     },
     {
       "position": 21,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "Templates et paramètres",
-      "bodyMd": "Templates = même mise en page, données différentes selon params. Économie de temps massive : au lieu de 30 rapports par site, 1 template + 1 param Site.\n\n**Parameters** — @Date, @Shift, @Site, @Batch. Bindés aux objets pour filtrer dynamiquement.\n\n**Time period params** — @StartTime, @EndTime. Peuvent être relatifs : 'Last 24h', 'This shift', 'MTD'.\n\n**Cascading** — Sélection @Site filtre la liste des @Line disponibles. Améliore l'UX.\n\n**Default values** — Toujours définir des valeurs par défaut sensées. Sinon rapport plante ou vide.\n\n**Validation** — Contrôler cohérence (Start < End, période raisonnable). Éviter query de 10 ans qui plombe le serveur.\n\n**À retenir :** 1 template bien fait = économie de 10-20 rapports. Investir 2 jours dans le template = gagner 20 jours de maintenance.",
+      "section": "3 · Design de templates",
+      "title": "Report Designer — l'IDE",
+      "bodyMd": "## L'interface de design\n\n**Report Designer** est l'IDE pour créer les templates de rapport.\n\n### Composants de l'interface\n[KV|**Toolbox**:palette d'objets (charts, tables, images…)||**Design surface**:la page de rapport (souvent A4 portrait)||**Property panel**:propriétés de l'objet sélectionné||**Data panel**:sources et queries||**Layout tree**:hiérarchie des objets||**Preview**:aperçu du rapport avec data test]\n\n### Workflow typique\n[STEPS|**Créer un template** vierge||**Ajouter data sources** (Historian, SQL)||**Design layout** : header, body, footer||**Glisser objets** (chart, table) depuis toolbox||**Bind les objets** à des queries data||**Preview** avec data test||**Deploy** vers Runtime]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-21.jpg"
+      "imageUrl": null
     },
     {
       "position": 22,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "TP N2-3 : OEE par équipe/shift",
-      "bodyMd": "**Contexte :** Machine ligne 3 : tag 'Etat' (0=arrêt, 1=marche), tag 'Compteur_Prod', tag 'Compteur_Rebut'. OEE = Availability × Performance × Quality.\n\n**Consigne :** 1) Availability = temps marche / temps planifié. Statistical Object sur 'Etat' avec filtre =1. 2) Performance = production réelle / cadence théorique * temps marche. 3) Quality = (production - rebut) / production. 4) OEE = A × P × Q en %. 5) Comparaison 3 shifts sur graphique bar. 6) Param @Shift : Matin/Après-midi/Nuit + Tous.\n\n**Attendu :** Rapport OEE tri-shift comparatif. Chaque KPI décliné. Cible OEE affichée en ligne. Alarme visuelle si < 65%.\n\n💡 OEE < 40% = alerte : soit calcul faux, soit machine vraiment en catastrophe. Vérifier les temps planifiés (pauses ? maintenance ?).",
+      "section": "3 · Design de templates",
+      "title": "Structure d'un template",
+      "bodyMd": "## Layout standard\n\n### Sections d'un rapport\n[KV|**Report header**:apparaît une fois en tête (logo, titre, batch #)||**Page header**:en haut de chaque page||**Report body**:le contenu principal (répété selon data)||**Group header/footer**:pour grouper des sections||**Page footer**:en bas de chaque page (page N/M)||**Report footer**:apparaît une fois à la fin (signatures, résumé)]\n\n### Orientation & format\n- **A4 portrait** (standard européen)\n- **A4 paysage** (pour tables larges)\n- **Letter** (US)\n- **Custom** (poster grand format)\n\n[TIP|Pharma : toujours utiliser A4 portrait avec en-tête standard incluant N° batch + Product + Date + Version template.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-22.jpg"
+      "imageUrl": null
     },
     {
       "position": 23,
       "kind": "CONTENT",
-      "section": "NIVEAU 2 · INTERMÉDIAIRE",
-      "title": "TP N2-4 : Batch report GxP pharma",
-      "bodyMd": "**Contexte :** Batch de comprimés dans un MES pharma. À la fin, générer un Batch Report signé pour libération QA.\n\n**Consigne :** 1) Trigger : événement 'BatchEnd' du module Batch. 2) Header : BatchID, produit, quantité, dates start/end, opérateur. 3) Body : trend température/pression/pH pendant tout le lot + statistiques Min/Max/Avg avec alarmes de dépassement. 4) Section 'Deviations' listant toutes les alarmes du lot. 5) Signature électronique 21 CFR Part 11 embarquée. 6) Livraison : PDF + archive GxP + notif QA par mail.\n\n**Attendu :** Batch Report auto-généré à fin lot. QA reçoit + signe électroniquement. Archivage lifetime + 30 ans. Zéro intervention manuelle.\n\n💡 E-signature 21 CFR : auth 2 composants + non-répudiable. AVEVA Report v6+ supporte natif. Vérifier version + licence e-signature.",
+      "section": "3 · Design de templates",
+      "title": "Objets — Text, Image, Rectangle",
+      "bodyMd": "## Objets statiques\n\n### Text object\n- **Static text** : libellé fixe\n- **Bound text** : lié à un tag ou une query\n- **Expression** : calcul dynamique\n- Formatage : police, taille, alignement, couleur\n\n### Image object\n- Image statique (logo)\n- Image dynamique (depuis DB, URL)\n\n### Rectangle / Line\n- Décoration : bordures, séparations\n- Cadrage de sections\n\n### Signature line\n- Zone pour signature manuscrite (à la place)\n- Ou champ électronique signé si intégré e-signature",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-23.jpg"
+      "imageUrl": null
     },
     {
       "position": 24,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "Portal web + mobile",
-      "bodyMd": "Le Web Portal AVEVA Report offre : consultation, filtrage, téléchargement, souscription — depuis un browser. Extension mobile pour terrain. Auth AD/SSO/SAML.\n\n**Rôles + sécurité** — Groupes AD → permissions folder → visibilité rapports. Séparation prod / dev.\n\n**Filtres + params dynamiques** — Users appliquent params sans intervention IT. Autonomie métier.\n\n**Souscriptions self-service** — User s'abonne à un rapport → mail automatique selon fréquence.\n\n**Widgets embed** — Extraire un objet du rapport dans un dashboard tiers (iframe / API).\n\n**REST API** — Trigger rapport programmatique, récup PDF, alimenter d'autres systèmes.\n\n**À retenir :** Portal = adoption. Sans portal, tu génères de beaux PDF que personne ne lit. Avec portal + notif, l'info arrive à ceux qui décident.",
+      "section": "3 · Design de templates",
+      "title": "Charts — courbes et bar charts",
+      "bodyMd": "## Visualiser des données\n\n### Types de charts\n[KV|**Line chart**:courbe temporelle (T° en fonction du temps)||**Bar chart**:comparaison entre catégories||**Pie chart**:proportion (rebut par cause)||**Scatter plot**:corrélation entre 2 variables||**Gauge**:cadran type compteur||**Stacked bar**:composition superposée]\n\n### Configuration typique line chart\n[STEPS|**Add chart object** vers le layout||**Data source**: Historian||**Query**: SELECT temperature FROM history WHERE tag='TC_R1' AND time BETWEEN @start AND @end||**X axis**: time (auto)||**Y axis**: temperature (range 0-100 °C)||**Series color**: bleu||**Legend**: activer si multi-séries]\n\n### Styling\n- Grille de fond activable\n- Zones colorées (zone verte OK, rouge alarme)\n- Points d'alarme superposés",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-24.jpg"
+      "imageUrl": null
     },
     {
       "position": 25,
       "kind": "CONTENT",
-      "section": "NIVEAU 3 · EXPERT",
-      "title": "TP N3-2 : Portal + SSO Azure AD",
-      "bodyMd": "**Contexte :** Portal AVEVA Report accessible à 200 users. Login local casse-pieds. Objectif : SSO Azure AD.\n\n**Consigne :** 1) Créer une App Registration Azure AD 'AVEVA Report Portal'. 2) Configurer SAML avec URL de redirection portal. 3) Mapper claims : email, groups. 4) Côté portal : activer SSO SAML, upload metadata Azure. 5) Créer mapping groups AD → rôles portal. 6) Tester avec 3 comptes différents (admin, user, viewer). 7) Documenter procédure onboarding new user.\n\n**Attendu :** Users se connectent avec compte Azure AD. Rôles portal auto-affectés selon groupes AD. Aucun login local à gérer.\n\n💡 SSO échec fréquent : mismatch claim 'email' vs 'upn'. Utiliser Fiddler ou dev tools pour capturer SAML response et voir les claims réels.",
+      "section": "3 · Design de templates",
+      "title": "Tables — grilles de données",
+      "bodyMd": "## Afficher un tableau\n\n### Table object\nAffiche une query en tableau à N lignes M colonnes.\n\n### Configuration\n[STEPS|**Add table** vers le layout||**Data source**: SQL Server||**Query**: SELECT * FROM batch_events WHERE batch_id = @batch||**Columns** définis : nom, type, formatage||**Header row**: avec styles||**Alternating rows**: gris/blanc pour lisibilité||**Sorting**: option de tri par colonne (interactif si HTML)]\n\n### Formatting cellules\n- Nombre : 2 décimales, séparateur milliers\n- Date : format ISO ou local\n- Booléen : true/false, oui/non, icône\n- Conditional formatting : colorer selon valeur",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-25.jpg"
+      "imageUrl": null
     },
     {
       "position": 26,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "AVEVA Report vs SSRS vs PowerBI",
-      "bodyMd": "**AVEVA Report**\n- Historian-native (PI, AVEVA)\n- Batch reports GxP top niveau\n- Alarmes ISA-18.2 gérées\n- Trigger événement usine\n- Licence Runtime + CAL\n\n**SSRS + PowerBI**\n- SQL-first\n- Rapports business + finance\n- Interactivité forte (PowerBI)\n- Trigger temps/manuel\n- Licences SQL Server / Pro\n\n**À retenir :** Reporting usine + réglementaire → AVEVA Report. Business + finance → SSRS/PowerBI. Rare que ce soit un ou l'autre : coexistence fréquente.",
+      "section": "3 · Design de templates",
+      "title": "Groupes — regrouper données",
+      "bodyMd": "## Grouper par catégorie\n\nExemple : rapport de fin de batch avec sections \"Étape 1\", \"Étape 2\"...\n\n### Configuration groupe\n[STEPS|**Query returne data** avec champ 'step_name'||**Add group** dans la structure||**Group by**: field = step_name||**Group header** : titre de section (\"Étape : {step_name}\")||**Group body** : les données de l'étape||**Group footer** : totaux, résumé]\n\n### Groupes multi-niveaux\nGrouper par produit puis par équipe → sous-groupes emboîtés.",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-26.jpg"
+      "imageUrl": null
     },
     {
       "position": 27,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "Check-list rapport prod",
-      "bodyMd": "",
+      "section": "3 · Design de templates",
+      "title": "Expressions et calculs",
+      "bodyMd": "## Formules dans le rapport\n\n### Expressions AVEVA Report\nSyntaxe proche VBScript / SQL :\n\n[KV|**Aggregate**:AVG, SUM, MIN, MAX, COUNT sur une query||**Math**:+ - * / ^ % · MOD, ABS, ROUND||**String**:CONCATENATE, LEFT, RIGHT, TRIM, REPLACE||**Date**:NOW, DATEDIFF, DATEADD, FORMAT_DATE||**Condition**:IIF(condition, true_val, false_val)||**Reference tag**:GetTagValue(\"TC_R1.CV\")]\n\n### Exemples\n- `Rendement = SUM(qty_ok) / SUM(qty_total) * 100`\n- `Duree = DATEDIFF('minute', batch_start, batch_end)`\n- `Statut = IIF(rendement > 95, 'OK', 'A revoir')`",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-27.jpg"
+      "imageUrl": null
     },
     {
       "position": 28,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "En résumé",
-      "bodyMd": "",
+      "section": "3 · Design de templates",
+      "title": "Parameters — rapports paramétrables",
+      "bodyMd": "## Rendre le rapport dynamique\n\n### Ajouter un parameter\n[STEPS|**Report → Parameters → Add**||**Name**: batch_id||**Type**: String||**Default value**: dernière valeur ou vide||**Required**: oui/non||**Multi-select**: pour listes]\n\n### Utilisation dans query\n    SELECT * FROM batch_events WHERE batch_id = @batch_id\n\n### Interface utilisateur\nAu lancement du rapport dans le Portal, on demande les paramètres :\n- Date début / fin (pour shift report)\n- Batch # (pour batch report)\n- Ligne / usine (pour multi-sites)\n- Recette (pour filter par recette)\n\n[TIP|Toujours proposer des **valeurs par défaut sensées** (ex: date début = début de semaine). Économise clics à l'utilisateur.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-28.jpg"
+      "imageUrl": null
     },
     {
       "position": 29,
       "kind": "CONTENT",
-      "section": "CONCLUSION",
-      "title": "Passer à l'action — 30 jours",
-      "bodyMd": "- Rejouer les 3 quiz\n- Trial AVEVA Report + refaire les 5 TPs\n- Explorer les 20+ templates fournis\n- Comparer AVEVA Report vs Grafana + Ignition\n- Se former GxP si secteur pharma/agro\n\n💡 Skill niche recherché pour l'industrie AVEVA-first.",
+      "section": "3 · Design de templates",
+      "title": "Styles et thèmes",
+      "bodyMd": "## Uniformité visuelle\n\n### Créer un thème Dasolabs\n[STEPS|**Report → Themes → New**||**Palette**: couleurs corporate (indigoaccent, midnight)||**Fonts**: DM Sans + DM Mono si disponible sinon Arial||**Header style**: bold 14 pt centered||**Body text**: 10 pt regular||**Table header**: white on midnight||**Table alt row**: light gray]\n\n### Réutiliser dans templates\nUn thème appliqué globalement met tous les objets aux styles définis. Modif du thème → tous les rapports mis à jour.\n\n[TIP|**Investir 2h dans un thème** en début de projet = économiser 20h de formatage sur 10 templates.]",
       "notes": null,
       "quiz": null,
-      "imageUrl": "/training/aveva-report/slide-29.jpg"
+      "imageUrl": null
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "3 · Design de templates",
+      "title": "Sub-reports — templates dans templates",
+      "bodyMd": "## Composition avancée\n\nUn **sub-report** est un template inséré dans un autre template.\n\n### Cas d'usage\n- Rapport de production quotidien avec, en pièce jointe, le batch report détaillé de chaque batch de la journée\n- Réutilisation d'un layout \"page signature\" identique dans 20 rapports\n\n### Configuration\n[STEPS|**Add subreport** dans le layout||**Reference** vers un template existant||**Pass parameters** au sub-report||**Le sub-report** s'exécute à la génération et son output est intégré]\n\n[TIP|Décomposer les gros rapports en sub-reports = maintenance facilitée + réutilisation.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "3 · Design de templates",
+      "title": "Preview et test",
+      "bodyMd": "## Avant de déployer\n\n### Preview dans Designer\n- Bouton **Preview** avec data test (mock ou live)\n- Vérifie le layout (débordements, sauts de page)\n- Teste les paramètres\n\n### Test avec data réelle\n- Se connecter à Historian et SQL en mode test\n- Vérifier volumes (10 000 lignes → OK ? 100 000 → perf ?)\n- Vérifier calculs (aggregates corrects)\n\n### Deploy en staging\nAvant prod : déploiement dans un environnement de test identique à prod (mêmes users, mêmes data sources).\n\n[TIP|**Ne déployez jamais directement en prod**. Toujours staging → validation utilisateurs → prod.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 32,
+      "kind": "CONTENT",
+      "section": "3 · Design de templates",
+      "title": "Versioning des templates",
+      "bodyMd": "## Gérer les versions\n\n### Bonnes pratiques\n[STEPS|**Nomenclature** : `BatchReport_v1.2.3.rdlx` (semver)||**Historique** : chaque version majeure archivée séparément||**Change log** : documenter changements par version||**Signature de l'auteur** : audit pharma||**Approbations** : plusieurs signatures avant déploiement prod]\n\n### Rollback\nSi la nouvelle version fait n'importe quoi → rollback = redéploiement de la version précédente.\n\n### Stockage\n- Templates archivés dans DB Report ET dans Git (avec backup)\n- Chaque déploiement génère un tag Git avec version\n\n[TIP|Pharma : versioning strict + change control = OBLIGATOIRE en GAMP 5.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 33,
+      "kind": "QUIZ",
+      "section": "3 · Design de templates",
+      "title": "Quiz 3 — Design de templates",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Un template AVEVA Report peut inclure…",
+            "options": [
+              "Un seul type d'objet",
+              "Chart + table + text + subreport + images",
+              "Uniquement des tableaux",
+              "Uniquement du HTML"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour rendre un rapport paramétrable, on utilise…",
+            "options": [
+              "Un script Python",
+              "Report Parameters (batch_id, dates…)",
+              "Un fichier config externe",
+              "Rien, c'est en dur"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour uniformiser le style de 10 rapports, on utilise…",
+            "options": [
+              "Copier-coller la mise en forme",
+              "Créer un Thème (Theme)",
+              "Refaire tout à zéro",
+              "Éditer chaque rapport un par un"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 34,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "SQL de base pour AVEVA Report",
+      "bodyMd": "## Ce qu'il faut connaître en SQL\n\nSi tu ne maîtrises pas déjà SQL, la formation **SQL Server** de Dasolabs te donne toutes les bases.\n\n### Instructions essentielles\n[KV|**SELECT**:extraire des données||**FROM**:table source||**WHERE**:filtrer||**ORDER BY**:trier||**GROUP BY**:regrouper||**JOIN**:combiner tables||**Aggregates**:SUM, AVG, MIN, MAX, COUNT]\n\n### Exemple query batch\n    SELECT batch_id, product, COUNT(*) as steps, AVG(temp) as avg_temp\n    FROM batch_events\n    WHERE batch_id = @batch_id\n    GROUP BY batch_id, product",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "Requêtes Historian",
+      "bodyMd": "## Interroger l'historian\n\nAVEVA Historian a son propre langage similaire à SQL.\n\n### Exemple : température moyenne toutes les 15 min\n    SELECT DateTime, Value, MIN, MAX\n    FROM Runtime.dbo.History\n    WHERE TagName = 'TC_Reactor1_PV'\n      AND DateTime BETWEEN @start AND @end\n    AND wwRetrievalMode = 'Cyclic'\n    AND wwCycleCount = @intervals\n\n### Modes de récupération\n[KV|**Cyclic**:échantillonnage à intervalle fixe · le plus courant||**Full**:tous les points enregistrés||**Delta**:uniquement les changements||**BestFit**:optimisé pour la visualisation]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 36,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "Filtres et paramètres",
+      "bodyMd": "## Rendre les queries flexibles\n\n### Filtres statiques\n    WHERE product = 'ProductA' AND batch_start > '2026-01-01'\n\n### Filtres avec paramètres\n    WHERE product = @product_name AND batch_start > @date_start\n\n### Paramètres avancés\n[KV|**Multi-select**:WHERE product IN (@product_list)||**Optional**:WHERE (@product_name IS NULL OR product = @product_name)||**Date range**:WHERE date BETWEEN @start AND @end]\n\n[TIP|Toujours **paramétrer** les queries. Zéro hardcoded value. Ça permet de réutiliser la même query pour plusieurs contextes.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 37,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "JOIN entre sources",
+      "bodyMd": "## Croiser plusieurs tables\n\n### Batch info + événements + alarmes\n    SELECT b.batch_id, b.product, e.step_name, e.step_start, e.step_end,\n           COUNT(a.alarm_id) as alarms_count\n    FROM batches b\n    JOIN batch_events e ON b.batch_id = e.batch_id\n    LEFT JOIN batch_alarms a ON e.event_id = a.event_id\n    WHERE b.batch_id = @batch\n    GROUP BY b.batch_id, b.product, e.step_name, e.step_start, e.step_end\n\n### JOIN cross-sources ?\n**Impossible** de faire un JOIN direct entre Historian et SQL Server (DBs distincts). Solutions :\n- Sub-queries dans des Report Objects distincts\n- Vues consolidées côté SQL Server (importées Historian via linked servers)",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 38,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "Aggregates et calculs",
+      "bodyMd": "## Agrégations complexes\n\n### Aggregates de base\n    SUM, AVG, MIN, MAX, COUNT, STDEV, VAR\n\n### Aggregates conditionnels\n    -- Nombre de batchs OK vs NOK\n    COUNT(CASE WHEN status = 'OK' THEN 1 END) as ok_batches\n\n### GROUP BY multi-critères\n    GROUP BY product, DATEPART(month, batch_end)\n\n### Window functions (SQL Server 2012+)\n    -- Ranking\n    RANK() OVER (PARTITION BY product ORDER BY yield DESC)\n\n[TIP|Les **window functions** sont ultra puissantes pour analyses complexes. À maîtriser absolument.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 39,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "Query performance",
+      "bodyMd": "## Éviter les rapports lents\n\n### Bonnes pratiques\n[STEPS|**INDEX** sur les colonnes filtrées (WHERE) et jointes (JOIN)||**LIMIT/TOP** pour préviews : SELECT TOP 100||**EVITER SELECT *** — nommer les colonnes explicitement||**Pré-agréger** dans des vues matérialisées pour requêtes lentes||**Cache** des résultats pour rapports statiques]\n\n### Diagnostic\n- **Query Analyzer** de SQL Server pour voir le plan d'exécution\n- Report Runtime log pour identifier requêtes lentes\n\n[WARN|Un rapport qui prend > 30 sec à générer = utilisateur mécontent. Toujours optimiser en dessous de 10 sec.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 40,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "Data validation",
+      "bodyMd": "## Vérifier la data avant reporting\n\n### Cas courants d'erreurs data\n[KV|**NULL non attendu**:vérifier avec IS NULL / IS NOT NULL||**Doublons**:SELECT DISTINCT ou GROUP BY||**Trous temporels**:pas de data dans une plage · alarmer||**Incohérence Historian ↔ SQL**:mesures qui divergent · investigation]\n\n### Techniques\n- **Queries de validation** avant queries principales\n- **Alertes** email si data manquante\n- **Fallback values** (moyennes historiques)\n- **Report note** signalant data suspecte",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 41,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "Écrire dans les data sources",
+      "bodyMd": "## Report peut écrire ?\n\n**Officiellement non** : AVEVA Report est lecture-seule. Pas d'INSERT/UPDATE via templates.\n\n### Contournements\n- **Post-generation script** : appelle un stored procedure pour flag un batch comme \"reported\"\n- **Custom action** dans le rapport : bouton \"Approve\" qui écrit dans DB (via API custom)\n\n[TIP|**Report est fait pour lire**. Pour écrire dans une DB, utiliser plutôt un workflow séparé (BatchReport Manager, MES).]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 42,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "External data - CSV, JSON, XML",
+      "bodyMd": "## Data non SQL\n\n### CSV file\nCharger un fichier CSV comme data source :\n- Path : dossier réseau accessible\n- Sample data pour deviner le schéma\n- Refresh automatique ou manuel\n\n### JSON / XML\n- Support natif en V22+\n- Query via XPath (XML) ou JSONPath (JSON)\n\n### REST API\n- Configuration via connecteur générique\n- Auth : basic, OAuth, API key\n- Cache configurable pour éviter surcharge API",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 43,
+      "kind": "CONTENT",
+      "section": "4 · Requêtes et data sources",
+      "title": "Cache et performance",
+      "bodyMd": "## Optimiser les récupérations\n\n### Cache Report\n- **Cache résultats de query** pendant N minutes\n- Bien pour rapports périodiques avec data qui bouge peu\n\n### Materialized views SQL\n- Précalcul de queries lourdes\n- Rafraîchi périodiquement (nightly)\n- Report lit la vue → instantané\n\n### Historian pre-aggregation\n- Historian peut pré-calculer moyennes horaires\n- Report lit les moyennes horaires (au lieu de recalculer sur points bruts) = 10-100x plus rapide\n\n[TIP|Sur gros historique (millions de points), **toujours pré-agréger**. Sinon rapports lents et Historian saturé.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 44,
+      "kind": "QUIZ",
+      "section": "4 · Requêtes et data sources",
+      "title": "Quiz 4 — Requêtes et sources",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Pour extraire des données d'AVEVA Historian, on utilise…",
+            "options": [
+              "Un langage propriétaire",
+              "Un SQL adapté avec syntaxe similaire à SQL Server",
+              "REST API uniquement",
+              "Rien, c'est manuel"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour améliorer les performances d'un rapport lent, une bonne pratique est…",
+            "options": [
+              "Ajouter plus de colonnes SELECT *",
+              "Créer des vues matérialisées pré-calculées",
+              "Réduire les index",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un JOIN direct entre Historian et SQL Server est…",
+            "options": [
+              "Toujours possible",
+              "Impossible directement · nécessite passerelles",
+              "Recommandé",
+              "Automatique"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 45,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Scheduled jobs — rapports automatiques",
+      "bodyMd": "## Planifier l'exécution\n\n**Scheduled Jobs** = tâches planifiées qui exécutent les rapports automatiquement.\n\n### Configuration\n[STEPS|**Jobs → Add scheduled job**||**Report** : template à exécuter||**Schedule** : cron-like (chaque nuit 2h, chaque lundi, chaque 30 min)||**Parameters** : valeurs par défaut ou calculées (date début = début semaine)||**Distribution** : email, dossier réseau, FTP, SharePoint||**Notification** : email OK / KO à l'admin]\n\n### Exemples\n- **Batch report** : à la fin de chaque batch (trigger event)\n- **Shift report** : tous les jours à 6h, 14h, 22h\n- **Weekly production** : chaque lundi à 8h\n- **Monthly compliance** : le 1er du mois",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 46,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Trigger sur événement",
+      "bodyMd": "## Rapport déclenché par un événement\n\nAu lieu d'un schedule fixe, un rapport peut être **déclenché par un événement** :\n\n[KV|**Fin de batch**:AVEVA Batch Management envoie signal → report généré||**Alarme critique**:déclenchement immédiat → email direct maintenance||**Fin de shift**:opérateur clique un bouton HMI → report shift généré||**Anomalie détectée**:rapport de diagnostic auto]\n\n### Configuration\n- **Trigger** : reçoit signal SOAP/REST/SQL\n- **Report** à exécuter\n- **Delay** : optionnel (attente stabilisation data)\n\n[TIP|Les triggers sont **puissants** en pharma : chaque batch génère automatiquement son BatchReport signé, sans intervention humaine.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 47,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Distribution email",
+      "bodyMd": "## Envoyer par email\n\n### Configuration\n[STEPS|**Job → Distribution → Email**||**To** : liste destinataires (fixe ou dynamique via query)||**CC / BCC**||**Subject** : template avec paramètres (\"Batch #{batch_id} - Product #{product}\")||**Body** : template HTML avec résumé||**Attachment** : le PDF généré||**Priority** : normal / high]\n\n### Distribution lists\n- Groupes AD (Active Directory) supportés\n- Liste dynamique via query : `SELECT email FROM users WHERE role='QA'`\n\n[TIP|**Sujet clair et paramétré** aide énormément au tri email : `[BATCH REPORT] Batch #12345 - ProductA - 2026-09-18`]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 48,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Distribution vers SharePoint",
+      "bodyMd": "## Archivage centralisé\n\n### Intégration SharePoint\n- Config : URL SharePoint site + credentials\n- **Path** : dossier de destination (paramétré)\n- **Nom fichier** : template (BatchReport_{batch_id}_{date}.pdf)\n- **Métadonnées** : injection auto (batch_id, product, date)\n\n### Search et navigation\nSharePoint indexe le contenu → recherche full-text possible.\nColumns Sharepoint → filter par produit, date.\n\n[TIP|Pharma UCB stocke tous les BatchReports dans SharePoint → conformité GDPR + audit trail natif SharePoint.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 49,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Distribution dossier réseau",
+      "bodyMd": "## Vers un share Windows\n\n### Configuration\n- **UNC path** : \\\\\\\\SERVER\\share\\reports\\\n- **Credentials** : compte de service avec droits écriture\n- **Naming pattern** : {report_name}_{date}_{batch_id}.pdf\n- **Sous-dossiers** : par année/mois pour organisation\n\n### Politique de rétention\n- 5 ans en actif\n- Archive glacier après\n- Purge auto > 20 ans si RGPD applicable",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 50,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Distribution FTP / SFTP",
+      "bodyMd": "## Vers un serveur FTP externe\n\n### Cas d'usage\n- Envoyer rapports vers portail client (auditeur externe)\n- Push vers cloud tiers\n- Backup off-site\n\n### Config sécurisée\n- **SFTP** (SSH FTP) obligatoire · jamais FTP en clair\n- **Clé SSH** ou credentials cryptés\n- **Post-upload verification** : vérifier hash pour détecter corruption\n\n[WARN|Ne jamais envoyer des rapports pharma sur FTP non chiffré. GDPR + confidentialité industrielle.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 51,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Génération à la demande",
+      "bodyMd": "## Rapport ad-hoc via Portal\n\nUn utilisateur peut lancer un rapport à la demande depuis le Portal :\n\n[STEPS|**Login** au Portal||**Sélectionner** un rapport||**Saisir paramètres** (batch, dates, filters)||**Click \"Generate\"**||**Attente** (10 sec à 5 min selon complexité)||**Download** PDF ou preview inline]\n\n### Cas d'usage\n- QA demande le batch report d'un batch passé\n- Manager veut le shift report d'hier\n- Auditeur veut un compliance report sur période\n\n[TIP|Générer un rapport à la demande **doit être rapide** (< 30 sec typique). Sinon frustration utilisateur.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 52,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Notifications d'échec",
+      "bodyMd": "## Alerter si un rapport ne se génère pas\n\n### Types d'échec\n- Data source indisponible (Historian down)\n- Query timeout (> 60 sec)\n- Erreur template (bug design)\n- Distribution échouée (email server down, SharePoint auth expiré)\n\n### Notifications\n[STEPS|**Job KO** → email admin (report@dasolabs.be)||**Message clair** : nom job, timestamp, error message||**Log détaillé** dans Report Portal||**Auto-retry** : 3 tentatives avec backoff 5min/15min/30min||**Escalade** vers on-call si toujours KO]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 53,
+      "kind": "CONTENT",
+      "section": "5 · Distribution et automatisation",
+      "title": "Chaînage de jobs",
+      "bodyMd": "## Report qui déclenche autre report\n\n### Workflow\n1. Job A génère un rapport batch\n2. Si succès, il déclenche job B qui archive\n3. Job C vérifie l'archive et notifie QA\n\n### Configuration\n- **Post-success trigger** : lancer un autre job\n- **Post-failure trigger** : lancer un job de recovery\n- **Conditional** : basé sur contenu du rapport\n\n[TIP|Chaînage utile pour workflow pharma : GenerateBatchReport → SignElectronic → ArchiveSharePoint → NotifyQA.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 54,
+      "kind": "QUIZ",
+      "section": "5 · Distribution et automatisation",
+      "title": "Quiz 5 — Distribution",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Un 'trigger sur événement' déclenche un rapport…",
+            "options": [
+              "À une heure fixe",
+              "Sur un signal (fin de batch, alarme…)",
+              "Jamais",
+              "Une fois par an"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour distribuer un rapport pharma confidentiel via FTP, utiliser…",
+            "options": [
+              "FTP standard port 21",
+              "SFTP chiffré SSH port 22",
+              "Rien c'est déconseillé",
+              "HTTP"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 55,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Utilisateurs et rôles",
+      "bodyMd": "## Gestion des permissions\n\n### Modèle RBAC\n[KV|**Roles**:Administrator, Designer, User, Viewer||**Permissions**:Create/Edit templates, Execute reports, View reports, Admin config||**Groups**:groupes AD ou groupes custom]\n\n### Exemples de rôles Dasolabs\n- **Designer** : crée templates (rare, ~2-3 personnes)\n- **QA Manager** : voit tous les rapports, approuve\n- **Operator** : voit uniquement rapports de sa ligne\n- **Auditor** (externe) : accès lecture seule à archives\n\n### AD integration\nSSO via Active Directory → l'utilisateur log une fois Windows, plus besoin de re-taper password.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 56,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Signature électronique — 21 CFR Part 11",
+      "bodyMd": "## E-signature conforme FDA\n\n### Requirements 21 CFR Part 11\n- **Unique authentication** : chaque signature liée à un user unique\n- **Time-stamped** : horodatage précis\n- **Non-repudiable** : preuve que l'utilisateur a signé\n- **Meaningful** : signature indique une action précise (approve, reject, review)\n\n### AVEVA Report e-signature\n[STEPS|**Trigger** : rapport généré, en attente d'approbation||**QA Manager** ouvre le rapport dans Portal||**Click \"Sign & Approve\"** → login modal||**Password + reason** obligatoires||**Signature capturée** : nom, timestamp, hash du rapport||**Rapport final** avec bloc signature ajouté]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 57,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Validation GAMP 5",
+      "bodyMd": "## Cycle IQ/OQ/PQ\n\n### 3 étapes\n[KV|**IQ (Installation Qualification)**:vérifier que l'install est conforme à la spec (versions, configs)||**OQ (Operational Qualification)**:tester les fonctions clés (générer un rapport, distribuer)||**PQ (Performance Qualification)**:tester en conditions réelles avec vrais utilisateurs et vraie data]\n\n### Documentation\nChaque étape produit un **rapport formel** signé par :\n- Responsable projet (Dasolabs)\n- QA client\n- Responsable IT client\n\n[RULE|**Sans documentation IQ/OQ/PQ**, une installation pharma est **non-conforme** en audit. Retrait autorité possible.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 58,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Audit trail",
+      "bodyMd": "## Traçabilité des actions\n\n### Ce qui doit être tracé\n- **Login/logout** utilisateurs\n- **Génération** de rapports (qui, quand, quel template, quels params)\n- **Modification** de templates\n- **Approbation** (e-signatures)\n- **Distribution** (à qui, quand, statut)\n- **Configuration changes** (data sources, users, permissions)\n\n### Stockage\nAudit trail dans SQL Server, immutable (INSERT-only), rétention 10 ans.\n\n### Consultation\n- Dashboard admin\n- Export CSV pour audit\n- Search avec filtres (user, date, action)",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 59,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Backup et disaster recovery",
+      "bodyMd": "## Ne jamais perdre les rapports\n\n### Backup strategy\n[STEPS|**SQL Server** : full backup hebdo · differential quotidien · log toutes les 15 min||**Templates** : archivés dans Git + backup DB||**Fichiers générés** : SharePoint + backup Azure Blob (cold storage)||**Config** : export XML mensuel||**Test restore** : chaque trimestre]\n\n### Disaster recovery\n- **RPO** (Recovery Point Objective) : max 15 min de data perdue\n- **RTO** (Recovery Time Objective) : max 4 heures d'indisponibilité\n\n### Redondance active\nEn pharma critique, 2 serveurs Report en hot standby, bascule < 5 min.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 60,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Cas pratique Dasolabs — UCB batch report",
+      "bodyMd": "## Setup pharma exemplaire\n\n### Contexte\nUCB pharma · production de vaccin · 5 réacteurs · batchs de 8-16h.\n\n### Setup Report\n- **AVEVA System Platform** orchestre les batchs\n- **AVEVA Historian** archive T°, pH, agitation à 1 sec\n- **SQL Server** stocke ordres de fabrication, opérateurs, alarmes\n- **AVEVA Report** génère 1 BatchReport par batch, ~30 pages\n\n### Contenu du BatchReport\n[STEPS|**Header** : batch #, product, dates, opérateur, superviseur||**Recipe used** : dosages, températures, temps de maintien||**Timeline** : chart avec T°, pH, agitation sur toute la durée||**Alarmes** : liste + acquittements||**Événements** : intervention opérateur (ajout MP, retard)||**Analyses labo** : résultats (import auto depuis LIMS)||**Signatures** : opérateur (au moment production), QA (approve), Batch record officer]\n\n### Distribution\n- Généré auto en fin de batch (trigger AVEVA BatchMgmt)\n- E-signature QA dans les 24h\n- Archive SharePoint pour 10 ans",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 61,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Cas pratique — GSK compliance report",
+      "bodyMd": "## Rapport mensuel réglementaire\n\n### Contexte\nGSK · rapport mensuel de conformité pour autorités FDA.\n\n### Contenu\n- Nombre de batchs produits\n- Taux de conformité (batchs rejetés / total)\n- Root cause analysis de chaque batch rejeté\n- Alarmes critiques par catégorie\n- Interventions maintenance\n- Formation opérateurs (heures / thème)\n- Actions correctives suivies\n\n### Distribution\n- Généré le 1er de chaque mois\n- Email au VP Quality + upload SharePoint QMS\n- Auditeur externe reçoit accès lecture",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 62,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Cas pratique — Zoetis KPI ligne",
+      "bodyMd": "## KPI temps réel\n\n### Contexte\nZoetis pharma vétérinaire · ligne d'embouteillage · besoin dashboard temps quasi-réel.\n\n### Approche\n- **AVEVA Report** génère un rapport toutes les 15 minutes\n- Contenu : cadence dernière heure, taux de rebut, T°, alarmes\n- Publié en PDF dans SharePoint et **dashboard écran** en salle contrôle\n\n### Complémentaire\n- **Power BI** dashboard temps réel (< 1 sec latence)\n- AVEVA Report pour rapports **formels signés** (fin de shift)",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 63,
+      "kind": "CONTENT",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Erreurs et bonnes pratiques finales",
+      "bodyMd": "## À faire et à éviter\n\n### Bonnes pratiques\n[RULE|**Toujours paramétrer** les rapports · zéro hardcoded value]\n[RULE|**Thème global** avant de designer 10 rapports · gain 20h]\n[RULE|**Sous-reports** pour composition · pas de duplication]\n[RULE|**Version control** obligatoire · Git + tags]\n[RULE|**Test staging** avant prod · toujours]\n[RULE|**Backup 3-2-1** · pas de compromis]\n\n### À éviter\n[DANGER|Modifier un template en prod directement · rollback impossible]\n[DANGER|Créer un template unique de 40 pages · impossible à maintenir]\n[DANGER|Ignorer les erreurs de génération · dette technique explose]\n[DANGER|Pas de rétention definie · disque plein en 2 ans]\n[DANGER|Oublier signature électronique en pharma · non-conforme FDA]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 64,
+      "kind": "QUIZ",
+      "section": "6 · Sécurité, validation GAMP 5, cas pratiques",
+      "title": "Quiz 6 — Sécurité et cas pratiques",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "En pharma, la validation d'AVEVA Report suit le cycle…",
+            "options": [
+              "Nothing",
+              "IQ/OQ/PQ (Installation/Operational/Performance Qualification)",
+              "Uniquement OQ",
+              "Ce que le client demande"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Une signature électronique 21 CFR Part 11 doit être…",
+            "options": [
+              "Faite à la main",
+              "Unique, horodatée, non-répudiable, meaningful",
+              "Optionnelle en pharma",
+              "Générée automatiquement sans authentification"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour un rapport batch pharma, le workflow typique est…",
+            "options": [
+              "Manuel Excel",
+              "Generate auto → E-sign QA → Archive SharePoint 10 ans",
+              "Rien",
+              "Pas de rapport"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 65,
+      "kind": "CONTENT",
+      "section": "7 · Certification",
+      "title": "Prêt pour l'évaluation certifiante ?",
+      "bodyMd": "## Quiz certifiant final\n\n10 questions, seuil 70 %. Couvre l'ensemble de la formation.\n\n[TIP|Bonne chance ! Recommence si nécessaire.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 66,
+      "kind": "QUIZ",
+      "section": "7 · Certification",
+      "title": "🎓 Quiz certifiant final — AVEVA Report",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "AVEVA Report est né de la fusion de…",
+            "options": [
+              "Rockwell + Siemens",
+              "Schneider Electric Software (Wonderware) + AVEVA",
+              "IBM + Microsoft",
+              "Oracle + SAP"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour batch report pharma GAMP 5, l'outil de référence est…",
+            "options": [
+              "Power BI",
+              "AVEVA Report",
+              "Excel",
+              "Grafana"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un template AVEVA Report est stocké dans…",
+            "options": [
+              "Un fichier XML seul",
+              "SQL Server (Report Database)",
+              "MongoDB",
+              "S3"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour uniformiser 10 rapports, on utilise…",
+            "options": [
+              "Copier-coller",
+              "Un Thème (Theme) global",
+              "Refaire à zéro",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour rendre un rapport paramétrable, on utilise…",
+            "options": [
+              "Script Python",
+              "Report Parameters (batch_id, dates…)",
+              "Config externe",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Pour améliorer les performances d'un rapport lent…",
+            "options": [
+              "Ajouter SELECT *",
+              "Pré-agréger via vues matérialisées",
+              "Réduire les index",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un trigger 'sur événement' déclenche un rapport…",
+            "options": [
+              "À heure fixe",
+              "Sur signal externe (fin batch, alarme)",
+              "Jamais",
+              "Une fois par an"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Distribution pharma d'un rapport confidentiel…",
+            "options": [
+              "FTP standard",
+              "SFTP chiffré ou SharePoint sécurisé",
+              "Email en clair",
+              "Post-it"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "La validation pharma d'AVEVA Report suit…",
+            "options": [
+              "Nothing",
+              "IQ/OQ/PQ",
+              "Uniquement OQ",
+              "Ce que le client veut"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Une signature électronique 21 CFR Part 11 doit être…",
+            "options": [
+              "Sur papier",
+              "Unique, horodatée, non-répudiable, meaningful",
+              "Optionnelle",
+              "Auto sans auth"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
     }
   ]
 }

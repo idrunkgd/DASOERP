@@ -272,6 +272,58 @@ export async function toggleCourseVisibility(courseId: string) {
  * historique des consultants qui ont réussi.
  * Réservé aux admins avec training.manage.
  */
+/**
+ * Définit (ou supprime) le cours prérequis d'un autre cours.
+ * Passe null pour supprimer la dépendance.
+ * Réservé aux admins.
+ */
+export async function setCoursePrerequisite(courseId: string, prerequisiteCourseId: string | null) {
+  const session = await requirePermission("training.manage");
+  if (prerequisiteCourseId === courseId) throw new Error("Un cours ne peut pas être son propre prérequis.");
+
+  const [course, prereq] = await Promise.all([
+    prisma.course.findUnique({ where: { id: courseId }, select: { id: true, title: true } }),
+    prerequisiteCourseId
+      ? prisma.course.findUnique({ where: { id: prerequisiteCourseId }, select: { id: true, title: true, prerequisiteCourseId: true } })
+      : Promise.resolve(null)
+  ]);
+  if (!course) throw new Error("Cours introuvable");
+  if (prerequisiteCourseId && !prereq) throw new Error("Cours prérequis introuvable");
+
+  // Anti-cycle : parcourir la chaîne des prérequis du prereq pour vérifier
+  // qu'on ne rencontre pas courseId (sinon on créerait une boucle).
+  if (prereq) {
+    let cursor: { id: string; prerequisiteCourseId: string | null } | null = { id: prereq.id, prerequisiteCourseId: prereq.prerequisiteCourseId };
+    const seen = new Set<string>();
+    while (cursor) {
+      if (cursor.id === courseId) throw new Error("Cycle détecté : cette dépendance créerait une boucle.");
+      if (seen.has(cursor.id)) break;
+      seen.add(cursor.id);
+      if (!cursor.prerequisiteCourseId) break;
+      cursor = await prisma.course.findUnique({
+        where: { id: cursor.prerequisiteCourseId },
+        select: { id: true, prerequisiteCourseId: true }
+      });
+    }
+  }
+
+  await prisma.course.update({
+    where: { id: courseId },
+    data: { prerequisiteCourseId }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Course",
+    entityId: course.id,
+    message: prerequisiteCourseId
+      ? `Prérequis défini pour "${course.title}" → "${prereq!.title}"`
+      : `Prérequis retiré pour "${course.title}"`
+  });
+  revalidatePath("/training");
+  return { ok: true };
+}
+
 export async function deleteCourse(courseId: string) {
   const session = await requirePermission("training.manage");
   const course = await prisma.course.findUnique({

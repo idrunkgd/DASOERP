@@ -6,7 +6,6 @@
   "duration": "≈ 6 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "prerequisiteSlug": "programmation-tia-portal",
   "certificateWording": "Formation « WinCC SCADA » — connaissances fondamentales sur la gamme WinCC (Basic, Comfort, Unified), l'architecture HMI/SCADA, la programmation d'écrans, les tags et connexions PLC, les animations et objets graphiques, le système d'alarmes, les recettes et l'archivage, et la sécurité (utilisateurs, audit trail, GAMP 5). Cette attestation atteste de la formation et de la réussite de l'évaluation. Elle ne constitue pas une certification Siemens officielle.",
   "slides": [
     {

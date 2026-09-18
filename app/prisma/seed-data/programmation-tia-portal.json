@@ -6,7 +6,6 @@
   "duration": "≈ 7 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "prerequisiteSlug": "materiel-plc-siemens",
   "certificateWording": "Formation « Programmation TIA Portal » — connaissances fondamentales sur l'IDE TIA Portal V19, la configuration matérielle, les langages IEC 61131-3 (LAD, FBD, SCL, GRAPH), l'organisation en blocs (OB/FB/FC/DB), le debug online (PLCSIM, trace, cross-references), et les fonctions avancées (PID, OPC UA, MQTT, cybersécurité). Cette attestation atteste de la formation et de la réussite de l'évaluation. Elle ne constitue pas une certification Siemens officielle.",
   "slides": [
     {

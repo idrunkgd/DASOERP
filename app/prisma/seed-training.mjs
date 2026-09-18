@@ -30,7 +30,9 @@ const COURSES = [
   "ba5-securite-electrique",
   "materiel-plc-siemens",
   "programmation-tia-portal",
-  "wincc-scada"
+  "wincc-scada",
+  "aveva-report",
+  "sql-server"
 ];
 
 const prisma = new PrismaClient();
@@ -45,15 +47,19 @@ async function upsertCourse(slug) {
     return;
   }
   const data = JSON.parse(raw);
-  // Prerequisite : si le JSON définit `prerequisiteSlug`, on résout l'ID.
-  let prerequisiteCourseId = null;
+  // Prerequisite : le JSON peut suggérer une valeur initiale via
+  // `prerequisiteSlug`, MAIS ce champ n'est utilisé qu'à la CRÉATION du cours.
+  // À l'UPDATE (re-seed), on NE touche PAS à prerequisiteCourseId — c'est
+  // Louise/Gérald qui gèrent les dépendances depuis l'UI HUB. Ça évite qu'un
+  // reboot Docker écrase leurs choix.
+  let initialPrerequisiteCourseId = null;
   if (data.prerequisiteSlug) {
     const prereq = await prisma.course.findUnique({
       where: { slug: data.prerequisiteSlug },
       select: { id: true }
     });
-    if (prereq) prerequisiteCourseId = prereq.id;
-    else console.warn(`[seed-training] prerequisiteSlug ${data.prerequisiteSlug} introuvable pour ${data.slug} — sera nul`);
+    if (prereq) initialPrerequisiteCourseId = prereq.id;
+    else console.warn(`[seed-training] prerequisiteSlug ${data.prerequisiteSlug} introuvable pour ${data.slug} — sera nul à la création`);
   }
   const course = await prisma.$transaction(async (tx) => {
     const c = await tx.course.upsert({
@@ -67,17 +73,17 @@ async function upsertCourse(slug) {
         isCertifying: data.isCertifying ?? false,
         passThreshold: data.passThreshold ?? 70,
         certificateWording: data.certificateWording ?? null,
-        prerequisiteCourseId
+        prerequisiteCourseId: initialPrerequisiteCourseId
       },
       update: {
+        // ⚠ prerequisiteCourseId volontairement OMIS → géré depuis l'UI
         title: data.title,
         subtitle: data.subtitle ?? null,
         level: data.level ?? null,
         duration: data.duration ?? null,
         isCertifying: data.isCertifying ?? false,
         passThreshold: data.passThreshold ?? 70,
-        certificateWording: data.certificateWording ?? null,
-        prerequisiteCourseId
+        certificateWording: data.certificateWording ?? null
       }
     });
     await tx.courseSlide.deleteMany({ where: { courseId: c.id } });

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requirePermissionOrRedirect } from "@/lib/rbac";
+import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { ChevronLeft, ChevronRight, List } from "lucide-react";
 import { QuizRunner, type QuizQuestion } from "./quiz-runner";
@@ -32,15 +32,20 @@ export default async function SlideViewer({
 
   // Gate prérequis : sans le certificat du cours prérequis, on redirige
   // vers la page cours (qui affiche le blocage clairement).
+  // ⚡ Admins training.manage bypassent.
   if (course.prerequisiteCourseId) {
-    const cert = await prisma.document.findFirst({
-      where: {
-        consultantId: session.user.id,
-        tags: { hasEvery: ["certificat", `course:${course.prerequisiteCourseId}`] }
-      },
-      select: { id: true }
-    });
-    if (!cert) redirect(`/training/${course.slug}`);
+    const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+    const isAdmin = perms.includes("training.manage");
+    if (!isAdmin) {
+      const cert = await prisma.document.findFirst({
+        where: {
+          consultantId: session.user.id,
+          tags: { hasEvery: ["certificat", `course:${course.prerequisiteCourseId}`] }
+        },
+        select: { id: true }
+      });
+      if (!cert) redirect(`/training/${course.slug}`);
+    }
   }
 
   const sorted = [...course.slides].sort((a, b) => a.position - b.position);

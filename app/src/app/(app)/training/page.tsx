@@ -1,12 +1,7 @@
-import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
-import { GraduationCap, CheckCircle2, Clock, PlayCircle, EyeOff, Lock } from "lucide-react";
-import { ToggleCourseVisibility } from "./toggle-visibility";
-import { DeleteCourse } from "./delete-course";
-// Le cours AVEVA est semé automatiquement au démarrage du conteneur
-// (voir prisma/seed-training.mjs + Dockerfile CMD). Plus de bouton d'import.
+import { ArchitectureView } from "./architecture-view";
 
 export const dynamic = "force-dynamic";
 
@@ -15,114 +10,62 @@ export default async function TrainingPage() {
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canManage = perms.includes("training.manage");
 
-  // Admin (training.manage) : voit TOUS les cours, actifs et masqués, avec un
-  // œil pour basculer. Consultant : ne voit que les actifs (comportement historique).
+  // Admin (training.manage) : voit TOUS les cours, actifs et masqués.
+  // Consultant : uniquement les actifs.
   const [courses, myProgress, myCerts] = await Promise.all([
     prisma.course.findMany({
       where: canManage ? {} : { active: true },
-      orderBy: [{ active: "desc" }, { title: "asc" }],
+      orderBy: [{ title: "asc" }],
       include: {
         _count: { select: { slides: true } },
         prerequisiteCourse: { select: { id: true, title: true } }
       }
     }),
-    prisma.userCourseProgress.findMany({
-      where: { userId: session.user.id }
-    }),
+    prisma.userCourseProgress.findMany({ where: { userId: session.user.id } }),
     prisma.document.findMany({
       where: { consultantId: session.user.id, tags: { has: "certificat" } },
       select: { tags: true }
     })
   ]);
+
   const progressByCourse = new Map(myProgress.map((p) => [p.courseId, p]));
-  // Set des courseIds pour lesquels l'user a un certificat émis
   const certifiedCourseIds = new Set(
     myCerts.flatMap((d) => d.tags.filter((t) => t.startsWith("course:")).map((t) => t.slice("course:".length)))
   );
+
+  const cards = courses.map((c) => {
+    const prog = progressByCourse.get(c.id);
+    // Admin bypasse le lock des prérequis.
+    const locked = !canManage && !!c.prerequisiteCourse && !certifiedCourseIds.has(c.prerequisiteCourse.id);
+    return {
+      id: c.id,
+      slug: c.slug,
+      title: c.title,
+      subtitle: c.subtitle,
+      active: c.active,
+      slideCount: c._count.slides,
+      prerequisiteCourse: c.prerequisiteCourse,
+      progressPct: prog ? Math.round((prog.lastSlide / Math.max(c._count.slides, 1)) * 100) : 0,
+      completed: !!prog?.completedAt,
+      locked
+    };
+  });
+
+  const allCoursesLight = courses.map((c) => ({ id: c.id, title: c.title }));
 
   return (
     <div>
       <PageHeader
         title="Formations techniques"
-        subtitle="Cours slide-by-slide avec quiz interactifs — ta progression est sauvegardée"
+        subtitle="Un catalogue organisé en couches IT / OT / UNS — chaque formation se positionne dans le stack industriel"
       />
 
-      {courses.length === 0 ? (
+      {cards.length === 0 ? (
         <div className="card p-10 text-center text-sm text-midnight-500 italic">
           Aucun cours publié pour l'instant.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((c) => {
-            const prog = progressByCourse.get(c.id);
-            const pct = prog ? Math.round((prog.lastSlide / c._count.slides) * 100) : 0;
-            const completed = !!prog?.completedAt;
-            const locked = !!c.prerequisiteCourse && !certifiedCourseIds.has(c.prerequisiteCourse.id);
-            return (
-              <div key={c.id} className={"relative " + (!c.active ? "opacity-60" : locked ? "opacity-75" : "")}>
-                {canManage && (
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1">
-                    <ToggleCourseVisibility courseId={c.id} active={c.active} />
-                    <DeleteCourse
-                      courseId={c.id}
-                      courseTitle={c.title}
-                      courseSlug={c.slug}
-                      slideCount={c._count.slides}
-                    />
-                  </div>
-                )}
-                <Link
-                  href={`/training/${c.slug}`}
-                  className="card p-5 hover:shadow-md transition-shadow group block"
-                >
-                <div className="flex items-start gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-indigoaccent/10 text-indigoaccent flex items-center justify-center flex-shrink-0">
-                    <GraduationCap className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0 flex-1 pr-8">
-                    <h3 className="font-semibold text-midnight-900 group-hover:text-indigoaccent transition-colors flex items-center gap-2">
-                      {c.title}
-                      {!c.active && <EyeOff className="w-3.5 h-3.5 text-midnight-400" />}
-                      {locked && <Lock className="w-3.5 h-3.5 text-amber-600" />}
-                    </h3>
-                    {c.subtitle && <p className="text-xs text-midnight-500 mt-0.5 line-clamp-2">{c.subtitle}</p>}
-                  </div>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2 text-[10px]">
-                  {c.level    && <span className="badge-neutral">{c.level}</span>}
-                  {c.duration && <span className="badge-neutral inline-flex items-center gap-1"><Clock className="w-3 h-3" />{c.duration}</span>}
-                  <span className="badge-neutral">{c._count.slides} slides</span>
-                </div>
-                <div className="mt-4">
-                  {locked && c.prerequisiteCourse ? (
-                    <span className="inline-flex items-center gap-1 text-xs text-amber-700 font-medium">
-                      <Lock className="w-3.5 h-3.5" /> Requiert : {c.prerequisiteCourse.title}
-                    </span>
-                  ) : completed ? (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Terminé
-                    </span>
-                  ) : prog ? (
-                    <>
-                      <div className="flex items-center justify-between text-[10px] text-midnight-500 mb-1">
-                        <span>En cours — slide {prog.lastSlide}/{c._count.slides}</span>
-                        <span>{pct}%</span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-midnight-100 overflow-hidden">
-                        <div className="h-full bg-indigoaccent" style={{ width: `${pct}%` }} />
-                      </div>
-                    </>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-xs text-indigoaccent font-medium">
-                      <PlayCircle className="w-3.5 h-3.5" /> Commencer
-                    </span>
-                  )}
-                </div>
-              </Link>
-              </div>
-            );
-          })}
-        </div>
+        <ArchitectureView courses={cards} canManage={canManage} allCourses={allCoursesLight} />
       )}
     </div>
   );

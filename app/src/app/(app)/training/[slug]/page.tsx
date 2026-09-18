@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { requirePermissionOrRedirect, requireSession } from "@/lib/rbac";
+import { requirePermissionOrRedirect, requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { ArrowLeft, PlayCircle, RotateCw, CheckCircle2, FileQuestion, FileText, Lock } from "lucide-react";
 
@@ -28,8 +28,12 @@ export default async function CoursePage({ params }: { params: { slug: string } 
 
   // Vérification du prérequis : présence d'un Document taggé
   // `certificat` + `course:<prerequisiteCourseId>` pour l'utilisateur.
+  // ⚡ Les admins training.manage bypassent le check (accès total sans
+  // avoir à passer les prérequis).
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const isAdmin = perms.includes("training.manage");
   let prereqPassed = true;
-  if (course.prerequisiteCourse) {
+  if (course.prerequisiteCourse && !isAdmin) {
     const cert = await prisma.document.findFirst({
       where: {
         consultantId: session.user.id,
