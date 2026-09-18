@@ -4,6 +4,7 @@ import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/
 import { PageHeader } from "@/components/ui/page-header";
 import { GraduationCap, CheckCircle2, Clock, PlayCircle, EyeOff, Lock } from "lucide-react";
 import { ToggleCourseVisibility } from "./toggle-visibility";
+import { DeleteCourse } from "./delete-course";
 // Le cours AVEVA est semé automatiquement au démarrage du conteneur
 // (voir prisma/seed-training.mjs + Dockerfile CMD). Plus de bouton d'import.
 
@@ -60,8 +61,14 @@ export default async function TrainingPage() {
             return (
               <div key={c.id} className={"relative " + (!c.active ? "opacity-60" : locked ? "opacity-75" : "")}>
                 {canManage && (
-                  <div className="absolute top-3 right-3 z-10">
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1">
                     <ToggleCourseVisibility courseId={c.id} active={c.active} />
+                    <DeleteCourse
+                      courseId={c.id}
+                      courseTitle={c.title}
+                      courseSlug={c.slug}
+                      slideCount={c._count.slides}
+                    />
                   </div>
                 )}
                 <Link

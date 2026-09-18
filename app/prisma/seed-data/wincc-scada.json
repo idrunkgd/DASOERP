@@ -490,7 +490,562 @@
     {
       "position": 33,
       "kind": "CONTENT",
-      "section": "7 · Certification",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Architecture WinCC Unified",
+      "bodyMd": "## Le SCADA new-gen expliqué\n\nWinCC Unified révolutionne l'architecture WinCC classique.\n\n### Composants\n[KV|**Runtime**:le serveur SCADA · tourne sur Windows Server ou IPC Unified||**Web-based clients**:navigateur Chrome/Edge · aucun install||**Database**:MongoDB embarquée (données runtime + config)||**Web server**:accès depuis n'importe où sur le réseau||**Companion app**:mobile iOS/Android pour supervision]\n\n### Différences majeures\n- Pas de Runtime binaire à installer côté client\n- Multi-device (PC, tablette, mobile) par défaut\n- Docker-compatible en cours (roadmap 2026-2027)\n\n[TIP|Unified = un investissement Siemens majeur. Chaque version TIA sortie ajoute des fonctionnalités Unified. C'est là qu'il faut aller.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 34,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Créer un projet Unified",
+      "bodyMd": "## Wizard Unified\n\n### Ajout dans TIA\n[STEPS|**Add new device** → HMI → Unified Comfort Panels ou PC Unified||**Wizard** : nom, IP, résolution écran||**Version WinCC Unified** : V17+ recommandé||**Import template** : Unified Basic Template Siemens]\n\n### Structure du projet\nSimilaire au Comfort mais avec :\n- **Screens** au format Unified (SVG-based)\n- **User Interface** : layout responsive multi-résolution\n- **Reports** : reporting intégré\n- **Documents** : gestion pièces jointes\n- **Web app** : accès web natif\n\n### Runtime deployment\n1. Compilation projet → génère un package\n2. Déploiement vers **Unified Runtime Server**\n3. Runtime actif → clients navigateur peuvent se connecter\n\n[TIP|Le déploiement Unified est **beaucoup plus simple** que Comfort/Pro : plus besoin d'installer un client sur chaque poste.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Screens Unified — le SVG natif",
+      "bodyMd": "## Design vectoriel responsive\n\nLes screens Unified sont en **SVG** (vector), pas en bitmap. Avantages :\n\n### Bénéfices\n[KV|**Zoom sans perte**:on peut zoomer sur un objet sans pixellisation||**Responsive**:le screen s'adapte automatiquement à la résolution client||**Léger**:un SVG pèse ~5 KB vs 500 KB bitmap||**Éditable**:on peut modifier les vecteurs, styles, couleurs facilement||**Style CSS**:on applique des thèmes globaux]\n\n### Nouveaux objets\n- **Combo box** moderne\n- **Charts high-density** (jusqu'à 100k points)\n- **Camera view** intégré\n- **Web browser embed** (afficher une page web dans un screen)\n- **Extended tables** avec tri, filtre\n\n### Édition dans TIA\nInterface similaire à un design tool moderne (Figma-like). Snap, alignement auto, guides.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 36,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Faceplates — composants réutilisables",
+      "bodyMd": "## L'équivalent WinCC des FB\n\nUn **faceplate** est un composant réutilisable : contient graphisme + logique.\n\n### Cas d'usage\nFaceplate \"Pump\" : représentation graphique d'une pompe (icône, voyants, boutons), avec ses paramètres.\n- Utiliser 20 fois dans le projet pour 20 pompes différentes\n- Chaque instance a ses propres tags\n\n### Bénéfices\n[STEPS|**Standardisation** : toutes les pompes ont la même apparence||**Maintenance** : modifier UNE fois le faceplate → 20 pompes mises à jour||**Vitesse** : projet de 100 objets → 5 faceplates réutilisés = 30 min de design||**Tests** : tester UN faceplate suffit]\n\n### Création\nScreens → Faceplates → Add new faceplate.\nParamètres d'entrée (comme un FB PLC) : Tags à afficher, textes, couleurs.\n\n[TIP|Un projet SCADA sérieux **doit** avoir sa bibliothèque de faceplates : Motor, Valve, Sensor, Regulator, etc. Coder les mêmes graphismes 100 fois = amateur.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 37,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Templates et layout responsive",
+      "bodyMd": "## Structure globale de l'IHM\n\n### Templates\nComme dans Comfort, mais plus puissants dans Unified.\n- **Header** : logo, titre, horloge, alarmes actives\n- **Footer** : utilisateur connecté, mode (RUN/STOP), version\n- **Sidebar** : menu de navigation\n- Content zone dynamique\n\n### Layout responsive\nUnified adapte automatiquement selon la résolution :\n- 1920×1080 (PC) : layout desktop\n- 1280×800 (tablet) : layout compact\n- 375×667 (mobile) : layout mobile verticalisé\n\n### Media queries CSS\n    @media (max-width: 768px) {\n        .header { display: none; }\n        .menu { position: fixed; }\n    }",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 38,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Runtime en Docker (roadmap)",
+      "bodyMd": "## Le SCADA cloud-native\n\nSiemens a annoncé (roadmap 2026-2027) le **runtime WinCC Unified en Docker**.\n\n### Avantages attendus\n[KV|**Portabilité** : le runtime tourne sur Windows, Linux, cloud||**Scalabilité** : plusieurs instances Docker orchestrées||**CI/CD** : déploiement continu depuis Git||**Isolation** : chaque SCADA a son conteneur|| **DevOps friendly** : intégration Kubernetes possible]\n\n### Cas d'usage\n- Cloud SCADA privé\n- Micro-services SCADA (un container par ligne)\n- Redéploiement rapide en cas de crash\n\n[TIP|Roadmap officielle Siemens : Docker Unified attendu en 2027. À suivre.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 39,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Reports natifs Unified",
+      "bodyMd": "## Le reporting intégré\n\nUnified inclut un module **Reports** pour générer des rapports PDF automatiques.\n\n### Types de rapports\n[KV|**Batch report**:rapport de fin de batch avec tags process||**Shift report**:rapport de fin de poste 8h||**Alarm report**:liste des alarmes de la période||**KPI report**:cadence, rendement, OEE]\n\n### Éditeur graphique\n- Drag-drop de widgets (charts, tables, texts)\n- Sources de données : tags actuels ou archives\n- Génération : à la demande, planifiée, sur événement\n\n### Sortie\n- PDF téléchargeable\n- Email envoi automatique\n- Archivage local ou serveur\n\n[TIP|Reports Unified est **beaucoup plus simple** que BatchReport externe. Pour du reporting basique, c'est parfait.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 40,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Compatibilité et migration",
+      "bodyMd": "## Migrer de Pro/Advanced vers Unified\n\n### Outil de migration Siemens\nDepuis TIA V17, un **wizard de migration** convertit un projet WinCC Professional en Unified.\n\n### Éléments migrables\n[KV|**Screens**:convertis partiellement (nouvelle grammaire graphique)||**Tags**:migrent facilement||**Alarms**:migration directe||**Scripts VB → JS**:conversion partielle, à retravailler||**Recipes**:migrent||**User admin**:migrent]\n\n### Éléments PROBLÉMATIQUES\n- Scripts VB avancés → à réécrire en JavaScript\n- Contrôles ActiveX legacy → non supportés Unified\n- Certaines animations complexes → à recréer\n\n### Estimation coût migration\nPharma UCB, WinCC Pro V15 → Unified V19 : ~40 % du temps du projet original.\n\n[RULE|Migrer un vieux projet vers Unified prend du temps. Prévoir un vrai chantier planifié, pas \"à côté\".]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 41,
+      "kind": "CONTENT",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Écarts Unified vs Comfort/Pro",
+      "bodyMd": "## Ce qui n'existe PAS encore dans Unified (2026)\n\n### Fonctionnalités manquantes ou en évolution\n[KV|**Diagnostics View (ProDiag)**:supporté V18+||**Sm@rtServer**:pas d'équivalent direct||**Global Actions**:remplacé par autre mécanisme||**Certaines connexions bus terrain**:S7-300 en particulier support limité||**Historian avancé**:délégué à AVEVA Historian ou InfluxDB]\n\n### Alternatives Unified\n- Sm@rtServer → Web client Unified natif (mieux)\n- ActiveX legacy → Web components HTML5\n\n### Statut de maturité\n- V17 (2020) : beta amélioré\n- V19 (2024) : stable pour la plupart des cas\n- V20 (2027) : maturity complète attendue\n\n[TIP|**Ne pas commencer un projet Unified V17**. Attendre V19 minimum pour projet client sérieux.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 42,
+      "kind": "QUIZ",
+      "section": "7 · WinCC Unified spécifique",
+      "title": "Quiz 7 — WinCC Unified",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Les screens Unified sont en…",
+            "options": [
+              "Bitmap PNG",
+              "SVG vectoriel",
+              "Flash",
+              "PDF"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un faceplate WinCC est…",
+            "options": [
+              "Un fond d'écran",
+              "Un composant graphique réutilisable avec paramètres",
+              "Un mot de passe",
+              "Un rapport"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Sur quel navigateur Unified est-il utilisable ?",
+            "options": [
+              "IE uniquement",
+              "Chrome/Edge modernes",
+              "Netscape",
+              "Safari uniquement"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 43,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "VB Script (Comfort/Pro) vs JavaScript (Unified)",
+      "bodyMd": "## Deux langages selon l'édition\n\nWinCC supporte des **scripts** pour logique custom qui va au-delà du click.\n\n[KV|**WinCC Comfort/Pro**:VBScript (VBS) · syntaxe Microsoft classique||**WinCC Unified**:JavaScript · syntaxe moderne · async/await]\n\n### Cas d'usage\n- Calculs complexes non gérables en tag\n- Boucles d'automatisation SCADA\n- Intégration avec API externes (REST, database)\n- Génération de rapports custom\n\n### Où écrire un script\n- Sur événement objet (clic bouton, changement de valeur)\n- Sur événement global (login, changement d'écran)\n- Sur planificateur (toutes les 5 min, à minuit…)",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 44,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "Exemple VB Script Comfort",
+      "bodyMd": "## Bouton avec logique custom\n\nBouton \"Reset compteurs\" en VBS :\n\n    Sub OnClick()\n        SmartTags(\"comp_bouteilles\") = 0\n        SmartTags(\"comp_defauts\") = 0\n        SmartTags(\"last_reset_time\") = Now\n        ShowSystemAlarm \"Compteurs remis à zéro par \" & SmartTags(\"current_user\")\n    End Sub\n\n### Objets VBScript disponibles\n- **SmartTags** : accès aux tags HMI\n- **HMIRuntime** : contrôle général (screen, alarms, users)\n- **HmiTag** : manipulation avancée\n- **Alarms** : gérer alarmes programmatiquement",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 45,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "Exemple JavaScript Unified",
+      "bodyMd": "## Le moderne — événements et async\n\nBouton en JS Unified :\n\n    export async function onClick() {\n        try {\n            const currentUser = await UserManagement.getCurrentUser();\n\n            await Tags.setValue('comp_bouteilles', 0);\n            await Tags.setValue('comp_defauts', 0);\n            await Tags.setValue('last_reset_time', new Date().toISOString());\n\n            Alarms.trigger('sys.reset_by_user', currentUser.name);\n        } catch (err) {\n            console.error('Reset failed:', err);\n        }\n    }\n\n### API disponibles\n- **Tags** : lecture/écriture async\n- **UserManagement** : utilisateurs, permissions\n- **Alarms** : trigger, ack\n- **HMIRuntime** : navigation\n- **fetch()** : API HTTP standard",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 46,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "Cas d'usage — intégration REST API",
+      "bodyMd": "## Consommer une API externe\n\nCas : SCADA doit consulter météo pour ajuster consigne HVAC.\n\n### JS Unified\n    export async function updateWeather() {\n        const response = await fetch('https://api.weather.com/temperature?city=Brussels');\n        const data = await response.json();\n        await Tags.setValue('external_temp', data.temperature);\n    }\n\nCe script tourne toutes les 15 min via scheduled task.\n\n### Bénéfice\n- Pas besoin de connexion PLC vers Internet\n- Le SCADA joue passerelle\n- Sécurité : trafic REST via HTTPS\n\n[WARN|Attention aux **timeouts** et gestion d'erreurs. Un fetch qui plante ne doit pas figer l'IHM.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 47,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "Bibliothèques et modules",
+      "bodyMd": "## Réutiliser du code\n\n### Unified — modules JS\nCréer un module JS partagé :\n- **Global scripts** → Add module → 'weather_api.js'\n- Import dans les scripts d'objet\n\n    // Dans le bouton\n    import { getWeather } from '/scripts/weather_api.js';\n    export async function onClick() {\n        const w = await getWeather();\n        // …\n    }\n\n### Comfort — includes\nSimilar concept mais moins moderne :\n- Ajouter fichier .vbs global\n- Include dans script objet\n- Fonctions partagées\n\n[TIP|**Structurer les scripts** en modules réutilisables plutôt que dupliquer partout. Comme du bon code partout ailleurs.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 48,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "Debug de scripts",
+      "bodyMd": "## Voir ce que fait le script\n\n### Comfort — Debug output\n- 'HMIRuntime.Trace \"message\"' → affiche dans le trace\n- Alarm system → trigger custom alarms\n- Fichier log manuel\n\n### Unified — Console browser\nLes scripts JS s'exécutent côté client (navigateur) → accessible via **F12 → Console** du navigateur.\n\n    console.log('Debug value:', myVar);\n    console.error('Something wrong', err);\n\nAussi possible :\n    console.time('operation');\n    // ...code...\n    console.timeEnd('operation');\n\n[TIP|Debugger avec browser DevTools (F12) est un game-changer. Breakpoints, watch expressions, step-through — comme un vrai IDE moderne.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 49,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "Sécurité des scripts",
+      "bodyMd": "## Éviter les catastrophes\n\nUn script peut potentiellement :\n- Écraser tous les tags\n- Bloquer le SCADA (boucle infinie)\n- Exfiltrer des données via fetch\n\n### Bonnes pratiques\n[STEPS|**Timeout obligatoire** sur fetch et opérations lourdes||**try/catch systématique** → l'IHM ne doit jamais crasher||**Whitelist des tags** modifiables par script (permissions)||**Logs des actions script** pour audit trail||**Revue de code** obligatoire avant déploiement prod]\n\n[DANGER|**Un script buggé peut planter tout le SCADA**. Toujours tester en staging avant production.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 50,
+      "kind": "CONTENT",
+      "section": "8 · Scripting",
+      "title": "Quand NE PAS utiliser un script",
+      "bodyMd": "## La règle des 80/20\n\n**80 % des besoins IHM sont réalisables sans scripts**. Utiliser des scripts quand :\n\n[STEPS|**Nécessaire** : calcul complexe qui ne tient pas en animation||**Efficace** : boucle sur 100 tags plus rapide que 100 animations||**Communication** : API REST, DB, fichier||**Reporting** : génération PDF custom]\n\n### À éviter\n[DANGER|Piloter un moteur via script (mettre la logique dans le PLC !)||Faire un timer 100 ms dans un script (le PLC est meilleur pour ça)||Traiter des alarmes safety dans un script (jamais)|Faire un cycle rapide dans un script (le PLC est fait pour ça)]\n\n[RULE|La règle Dasolabs : **le PLC pilote, le SCADA supervise**. Les scripts SCADA sont pour ce qui ne rentre pas dans un tag animation.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 51,
+      "kind": "QUIZ",
+      "section": "8 · Scripting",
+      "title": "Quiz 8 — Scripting",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "WinCC Comfort utilise quel langage de scripting ?",
+            "options": [
+              "JavaScript",
+              "Python",
+              "VBScript",
+              "Lua"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "WinCC Unified utilise quel langage ?",
+            "options": [
+              "VBScript",
+              "JavaScript",
+              "C#",
+              "Java"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un script SCADA doit être…",
+            "options": [
+              "Utilisé partout pour tout",
+              "Utilisé avec parcimonie, réservé aux besoins non gérables en animation",
+              "Interdit",
+              "Dupliqué dans chaque écran"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 52,
+      "kind": "CONTENT",
+      "section": "9 · Communication OPC UA & MQTT",
+      "title": "OPC UA dans WinCC",
+      "bodyMd": "## Publier et consommer OPC UA\n\nWinCC intègre **serveur et client OPC UA**.\n\n### OPC UA server\nRendre les tags WinCC accessibles à des clients OPC UA (MES, Historian, cloud).\n\n### Config\n- HMI configuration → OPC UA server → Enable\n- Port 4840 par défaut\n- Certificats auto-signés ou CA\n- Choix des tags à exposer\n\n### OPC UA client\nWinCC peut aussi être client d'un autre serveur OPC UA (ex : lire depuis un PLC S7-1500 via OPC UA au lieu de S7 communication).\n\n[TIP|Utiliser OPC UA plutôt que S7 communication pour connecter WinCC à des PLC tiers (non-Siemens). Standard, sécurisé, portable.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 53,
+      "kind": "CONTENT",
+      "section": "9 · Communication OPC UA & MQTT",
+      "title": "MQTT bridge — SCADA vers cloud",
+      "bodyMd": "## Publier des données vers le cloud\n\nWinCC Unified supporte MQTT nativement (via extension) pour publier des tags vers un broker.\n\n### Config\n- HMI configuration → MQTT publisher\n- Broker URL, port, credentials\n- Topic mapping : tag WinCC → topic\n- QoS 0 / 1 / 2\n\n### Cas d'usage\nPublier cadence, T°, pression vers HiveMQ → AWS IoT Core → Grafana Cloud.\n\n### Bénéfice\n- Découplage OT/IT\n- Scalable\n- Standard IoT\n\n[TIP|MQTT depuis WinCC est parfait pour de la remontée data cloud. Pour du edge computing avancé, préférer une passerelle HighByte dédiée.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 54,
+      "kind": "CONTENT",
+      "section": "9 · Communication OPC UA & MQTT",
+      "title": "Communication avec Historian",
+      "bodyMd": "## Archives long terme\n\nUn **Historian** est un stockage optimisé time-series (millions de points).\n\n### Historians courants\n[KV|**AVEVA Historian**:standard pharma / large industrie||**OSIsoft PI**:leader industriel||**InfluxDB**:open-source, moderne||**TimescaleDB**:PostgreSQL time-series||**Aveva PI Server**:legacy renommé]\n\n### Connexion WinCC → Historian\n[STEPS|**WinCC publie via OPC UA HA** (Historical Access) → Historian consomme||**Historian écrit dans sa propre DB** (compression, indexation)||**Requêtes** possibles depuis SCADA, dashboards, MES]\n\n### Volume\nUn Historian moderne stocke facilement **100 million de points par jour** compressés.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 55,
+      "kind": "CONTENT",
+      "section": "9 · Communication OPC UA & MQTT",
+      "title": "Interconnexion avec MES",
+      "bodyMd": "## SCADA ↔ MES\n\nUn **MES** (Manufacturing Execution System) supervise la production au niveau usine.\n\n### Flux typiques\n- **SCADA → MES** : cadence, alarmes, tags process\n- **MES → SCADA** : ordres de production, recettes à charger\n\n### Protocoles\n- **OPC UA** : le plus courant\n- **Custom SQL** : DB partagée\n- **REST API** : moderne\n- **MQTT** : événementiel\n\n### ISA-95 standard\nLe standard ISA-95 définit les 4 niveaux (0 process, 1 sensors/actuators, 2 SCADA, 3 MES, 4 ERP). WinCC est niveau 2, remonte vers niveau 3.\n\n[TIP|Chez Dasolabs, on intègre WinCC avec **AVEVA Batch Management** en pharma. C'est le combo standard SCADA + MES léger.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 56,
+      "kind": "CONTENT",
+      "section": "9 · Communication OPC UA & MQTT",
+      "title": "Bus terrain — Modbus, Profibus, EtherNet/IP",
+      "bodyMd": "## Connecter à des équipements tiers\n\nWinCC supporte plusieurs drivers de communication :\n\n[KV|**SIMATIC S7 (natif)**:Siemens S7-1200, S7-1500||**Modbus TCP/RTU**:équipements tiers · centrales mesure, onduleurs||**EtherNet/IP**:Rockwell Allen-Bradley||**Profibus DP**:legacy||**OPC UA**:tout || **BACnet**:HVAC bâtiment]\n\n### Multi-driver\nUn projet WinCC peut avoir plusieurs connexions → parle S7-1500 + Modbus + OPC UA simultanément.\n\n### Cas d'usage\n[USECASE|Ligne mixte Siemens + Rockwell|Ligne agro avec S7-1500 principal + robot Rockwell PLC. WinCC parle aux deux.|**Config** : S7 driver pour Siemens · EtherNet/IP driver pour Rockwell · unifié dans le SCADA.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 57,
+      "kind": "CONTENT",
+      "section": "9 · Communication OPC UA & MQTT",
+      "title": "Sécurité communication",
+      "bodyMd": "## Chiffrer les échanges\n\n### OPC UA\n- **Certificats X.509** obligatoires en prod\n- **TLS** chiffre les échanges\n- **Authentification** utilisateur + certificat\n\n### MQTT\n- **TLS** sur port 8883 (au lieu de 1883)\n- **Username/password** basique\n- **Client certificate** pour production\n\n### S7 communication\n- **Password CPU** obligatoire\n- **Filter IP** sur la CPU\n- **VPN** si accès distant\n\n[RULE|**Aucune communication en clair** en production. TLS, certificats, VPN — tout sécurisé.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 58,
+      "kind": "QUIZ",
+      "section": "9 · Communication OPC UA & MQTT",
+      "title": "Quiz 9 — Communication",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "WinCC Unified peut publier vers un broker MQTT via…",
+            "options": [
+              "Rien, pas supporté",
+              "Extension MQTT publisher native",
+              "Uniquement un script Python",
+              "Un logiciel tiers"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un Historian time-series moderne peut stocker environ…",
+            "options": [
+              "1 000 points/jour",
+              "100 millions de points/jour compressés",
+              "10 000 points/jour",
+              "Illimité sans compression"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 59,
+      "kind": "CONTENT",
+      "section": "10 · Déploiement runtime",
+      "title": "Comfort Panel — déploiement",
+      "bodyMd": "## Charger le projet sur un panel\n\n### Étapes typiques\n[STEPS|**Compiler** le projet HMI dans TIA (Ctrl+B)||**Assurer la connectivité** : PC en même réseau que le panel (192.168.1.x)||**Assigner IP du panel** si première fois via Sm@rtServer or Wizard||**Download** vers le panel (Ctrl+L)||**Panel redémarre** → projet actif en runtime]\n\n### Temps typique\n- Petit projet (5-10 écrans) : 2-3 min\n- Gros projet (50+ écrans avec archives) : 15-30 min\n\n### Vérifications post-déploiement\n- Connexion PLC OK\n- Écrans s'affichent correctement\n- Tags valeurs cohérentes\n- Alarmes fonctionnent",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 60,
+      "kind": "CONTENT",
+      "section": "10 · Déploiement runtime",
+      "title": "PC-based Runtime — installation",
+      "bodyMd": "## Serveur WinCC sur PC industriel\n\n### PC recommandé\n- IPC Siemens SIMATIC IPC847 ou équivalent\n- Windows 10/11 Pro ou Windows Server 2019/2022\n- 16 GB RAM minimum, 32 GB confort\n- SSD 500 GB\n- 2 cartes réseau (1 OT, 1 IT)\n\n### Installation\n1. Installer TIA + WinCC Advanced/Pro/Unified\n2. Configurer la licence (Automation License Manager)\n3. Ouvrir le projet TIA\n4. Compiler\n5. Déployer vers le runtime\n\n### Runtime autostart\nConfigurer WinCC Runtime pour démarrer automatiquement au boot Windows.",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 61,
+      "kind": "CONTENT",
+      "section": "10 · Déploiement runtime",
+      "title": "Redondance SCADA",
+      "bodyMd": "## Ne jamais perdre le SCADA\n\nSur des installations critiques, on veut **redondance** SCADA.\n\n### Modes redondance\n[KV|**Hot standby**:2 serveurs · un actif, un en veille · bascule < 5 sec||**Warm standby**:2 serveurs · veille pas synchronisée · bascule 30-60 sec||**Load balancing**:les 2 serveurs partagent la charge]\n\n### WinCC Unified redondance (roadmap)\n- Cluster Docker (roadmap 2027)\n- Sync temps réel via MongoDB replica\n\n### Coût\nRedondance = double licence WinCC = ~10 000 € supplémentaires.\n\n[TIP|Redondance = pour installations critiques (pharma, énergie, chimie). Pour ligne agro standard, pas nécessaire.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 62,
+      "kind": "CONTENT",
+      "section": "10 · Déploiement runtime",
+      "title": "Runtime monitoring",
+      "bodyMd": "## Surveiller le SCADA lui-même\n\nLe SCADA doit être **monitoré** :\n\n### Métriques à suivre\n- **CPU usage** du serveur SCADA\n- **RAM usage**\n- **Disk I/O** (archives peuvent devenir énormes)\n- **Network throughput** (charge OPC UA)\n- **Runtime uptime**\n\n### Outils\n- **Windows Performance Monitor** (natif)\n- **Zabbix / Prometheus** (open-source)\n- **Solarwinds** (payant)\n- Intégration avec l'IT du client\n\n### Alertes\nDéfinir des seuils : CPU > 80 % pendant 5 min → alerte à l'équipe IT.\n\n[RULE|Un SCADA non monitoré = SCADA qui plante à 3 h du matin sans prévenir.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 63,
+      "kind": "CONTENT",
+      "section": "10 · Déploiement runtime",
+      "title": "Backup et restauration",
+      "bodyMd": "## Ne jamais perdre le projet\n\n### Backup runtime\n- Projet TIA : archive .zap19 régulière\n- Base de données MongoDB : dump quotidien\n- Config Runtime : export config\n- Certificats : sauvegarde séparée sécurisée\n\n### Politique 3-2-1\n- **3** copies des données\n- **2** supports différents (disque, cloud)\n- **1** copie hors site\n\n### Restore procedure\nDocumenter la procédure pour restore en < 4 h. La tester tous les 6 mois.\n\n[USECASE|Ransomware sur poste WinCC|Cryptolocker chiffre le serveur SCADA.|**Sans backup** : perte totale, arrêt production critique. **Avec backup** : restore en 4 h · perte de max 24 h de data.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 64,
+      "kind": "CONTENT",
+      "section": "10 · Déploiement runtime",
+      "title": "Mise à jour SCADA en production",
+      "bodyMd": "## Changer sans casser\n\n### Politique de fenêtres\n- Fenêtre maintenance planifiée (ex : nuit dimanche)\n- Notification opérateurs 1 semaine avant\n- Backup complet AVANT\n- Test en staging\n\n### Types de mises à jour\n[KV|**Correctif mineur**:< 5 min · impact réduit||**Ajout écran**:5-10 min · impact acceptable||**Refonte majeure**:1-2 h · nécessite fenêtre planifiée||**Migration WinCC version**:4-8 h · vrai chantier]\n\n[RULE|**Ne JAMAIS mettre à jour un SCADA à 15h en pleine prod**. Toujours planifier, toujours backup, toujours tester.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 65,
+      "kind": "CONTENT",
+      "section": "10 · Déploiement runtime",
+      "title": "Formation opérateurs",
+      "bodyMd": "## L'opérateur, utilisateur final\n\nUn SCADA magnifique techniquement mais **mal appris** par l'opérateur = échec.\n\n### Livrables formation\n[STEPS|**Manuel utilisateur** avec captures écrans||**Vidéo tutorielle** par écran||**Sessions formation** en présentiel (1 j min)||**Cheat sheet** plastifié à côté du poste||**Contact hotline** pour questions post-formation]\n\n### Retour d'expérience\nAprès 2 semaines d'utilisation, réunion feedback :\n- Écrans mal placés ?\n- Boutons manquants ?\n- Alarmes trop fréquentes ?\n\nAjustements post-livraison.\n\n[TIP|Chez Dasolabs, on inclut **une semaine de support post-mise en service** dans tous les devis SCADA. Résout 90 % des ajustements finaux.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 66,
+      "kind": "QUIZ",
+      "section": "10 · Déploiement runtime",
+      "title": "Quiz 10 — Déploiement",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "La politique de backup recommandée est…",
+            "options": [
+              "1 copie sur disque local",
+              "3-2-1 (3 copies, 2 supports, 1 hors site)",
+              "Rien, WinCC est auto-sauvegardé",
+              "Copier sur clé USB"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Une mise à jour SCADA en production devrait…",
+            "options": [
+              "Se faire en plein jour",
+              "Se planifier en fenêtre maintenance avec backup préalable",
+              "Se faire sans notification",
+              "Ne jamais être faite"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 67,
+      "kind": "CONTENT",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Cas 1 — Ligne d'embouteillage Zoetis",
+      "bodyMd": "## Setup SCADA pharma vétérinaire\n\n### Contexte\nLigne d'embouteillage vaccins vétérinaires · S7-1500 + 3 ET 200SP · KTP1200 Comfort + IPC WinCC Unified.\n\n### Architecture\n- **KTP1200 Comfort** local sur la ligne (opérateur)\n- **IPC WinCC Unified** en salle contrôle (supervisor)\n- **AVEVA Historian** central\n- **AVEVA BatchReport** pour reporting GAMP 5\n\n### Points clés\n[STEPS|**Recipes 20 slots** pour 20 vaccins différents||**Alarmes 5 catégories** (critique, alerte, info, maintenance, système)||**Audit trail complet** GMP-compatible||**Comm OPC UA** vers Historian||**Redondance IPC** en hot standby]\n\n### Coût\n- Matériel HMI + IPC : ~8 k€\n- Licences WinCC Comfort + Unified + Historian : ~15 k€\n- Ingénierie SCADA (25 j × 850 €) : 21 k€\n- **Total : ~44 k€ SCADA**",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 68,
+      "kind": "CONTENT",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Cas 2 — Distribution eau Vivaqua",
+      "bodyMd": "## Traitement d'eau — SCADA large\n\n### Contexte\nStation de traitement d'eau · 30 pompes · 15 vannes · 8 mesures · besoin 24/7.\n\n### Architecture\n- **S7-1500 F** redondant (H-CPU)\n- **WinCC Unified** en hot standby sur 2 IPC\n- **Alarmes SMS** pour urgences hors heures\n- **Reporting hebdo** consommations\n\n### Sécurité\n- Firewall dédié OT\n- VPN pour accès distant\n- Audit trail permanent\n\n### Coût\n- Matériel : ~25 k€\n- Licences (Runtime + redondance + drivers) : ~20 k€\n- Ingénierie : ~50 k€ (45 j)\n- **Total : ~95 k€**",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 69,
+      "kind": "CONTENT",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Cas 3 — Ligne Technochim (pharma classe A)",
+      "bodyMd": "## SCADA le plus exigeant\n\n### Contexte\nRéacteur pharma classe A · production batch · validation GAMP 5 complète.\n\n### Architecture\n- **S7-1500 F-H** (safety redondant)\n- **WinCC Unified** avec licences GMP\n- **AVEVA BatchReport** pour rapports 21 CFR Part 11\n- **SGD** (Sharepoint) pour archivage rapports\n\n### Points spécifiques GAMP 5\n[STEPS|**URS + FS + DS** documentés||**IQ, OQ, PQ** exécutés||**Audit trail 21 CFR Part 11 compliant**||**Electronic signature** sur validation batch||**10 ans d'archivage** garanti]\n\n### Coût\n- **~250 k€ total SCADA + validation**\n\n[TIP|La validation GAMP 5 = 40 % du coût projet. C'est pour ça que le pharma est très bien payé.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 70,
+      "kind": "CONTENT",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Cas 4 — Skid modulaire GROUPEMECA",
+      "bodyMd": "## SCADA compact standardisé\n\n### Contexte\nSkid de traitement chimique livré à des clients variés · WinCC standard réutilisable.\n\n### Standardisation\n- **Template WinCC** avec 10 écrans standards\n- **Faceplates réutilisables** (pompe, vanne, régulation, capteur)\n- **Recettes 50 slots** paramétrables\n- Chaque livraison : 2 j de personnalisation SCADA\n\n### Bénéfice\n- Design coût unique amorti sur ~30 skids/an\n- Qualité constante\n- Formation opérateurs simplifiée (même IHM partout)\n\n### Coût par skid\n- Adaptation SCADA : ~2 000 €\n- Ingénierie faible car réutilisation forte",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 71,
+      "kind": "CONTENT",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Cas 5 — Migration UCB (Pro → Unified)",
+      "bodyMd": "## Chantier de refonte\n\n### Contexte\nUCB pharma · WinCC Professional V15 en production depuis 2018 · migration vers Unified V19.\n\n### Approche\n[STEPS|**Audit projet existant** : 40 écrans, 800 tags, 50 alarmes||**Estimation** : 3 mois de refonte||**Plan de migration** : par ligne, arrêt planifié||**Formation** opérateurs avec les 2 systèmes en parallèle||**Bascule** un weekend prolongé||**Support post-mise en service** 1 mois]\n\n### Chiffres\n- Coût migration : ~180 k€\n- Durée : 4 mois\n- Bénéfice : plateforme moderne pour 10 ans\n\n[TIP|Une migration WinCC est **coûteuse mais nécessaire**. Un legacy WinCC Pro 2010 = risque cyber majeur en 2026.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 72,
+      "kind": "CONTENT",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Erreurs classiques à éviter",
+      "bodyMd": "## Ce qu'on voit trop\n\n[DANGER|**Faire un SCADA sans template** — 50 écrans différents à maintenir → cauchemar de maintenance]\n\n[DANGER|**Coder toute la logique en scripts** — Le PLC doit piloter, le SCADA superviser. Scripts SCADA = pour l'affichage/UX]\n\n[DANGER|**Alarmes non catégorisées** — 500 alarmes toutes de niveau \"erreur\" → opérateur ne sait plus quelles sont critiques]\n\n[DANGER|**Pas de backup** — Cryptolocker sur poste WinCC = perte des mois de travail]\n\n[DANGER|**Passer sur Unified V17 en production critique** — Trop jeune. Attendre V19 minimum.]\n\n[DANGER|**Ne pas former les opérateurs** — La plus belle IHM du monde ne sert à rien si pas apprise]\n\n[DANGER|**Oublier l'audit trail en pharma** — Non-conformité GMP = arrêt production par autorités]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 73,
+      "kind": "CONTENT",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Bonnes pratiques Dasolabs SCADA",
+      "bodyMd": "## Notre méthodologie\n\n[RULE|**Template + faceplates** — Toujours démarrer par ces fondations. Zéro écran développé sans template.]\n\n[RULE|**Naming convention stricte** — Tags, écrans, recettes, alarmes : convention documentée et respectée.]\n\n[RULE|**Séparation logique PLC / affichage SCADA** — Le PLC pilote, le SCADA affiche. Toujours.]\n\n[RULE|**Alarmes en 5 catégories max** — Critical / Warning / Info / Maintenance / System. Pas plus.]\n\n[RULE|**Audit trail systématique** — Même hors pharma. On veut savoir qui a fait quoi.]\n\n[RULE|**Backup automatique quotidien** — 3-2-1 politique.]\n\n[RULE|**Formation opérateurs comprise dans le devis** — 1 j minimum, plus si complexe.]\n\n[RULE|**Support post-mise en service** — 1 semaine incluse gratuite.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 74,
+      "kind": "QUIZ",
+      "section": "11 · Cas pratiques Dasolabs",
+      "title": "Quiz 11 — Cas pratiques",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "En pharma classe A, la validation GAMP 5 représente environ…",
+            "options": [
+              "10 % du coût projet",
+              "25 % du coût projet",
+              "40 % du coût projet",
+              "5 %"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "prompt": "Sur des skids modulaires livrés à plusieurs clients, on utilise…",
+            "options": [
+              "Un SCADA totalement custom à chaque fois",
+              "Un template SCADA standardisé + adaptation légère par livraison",
+              "Pas de SCADA",
+              "Un SCADA différent par client"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 75,
+      "kind": "CONTENT",
+      "section": "12 · Certification",
       "title": "Prêt pour l'évaluation certifiante ?",
       "bodyMd": "## Quiz certifiant final — 10 questions\n\nLe prochain quiz certifie ta maîtrise de WinCC SCADA. Couvre :\n\n- Introduction SCADA et gamme WinCC\n- Tags et connexions\n- Screens et animations\n- Alarmes et événements\n- Recettes et archivage\n- Sécurité et utilisateurs\n\n[TIP|Seuil : 70 %. Recommence si besoin.]\n\nBonne chance !",
       "notes": null,
@@ -498,9 +1053,9 @@
       "imageUrl": null
     },
     {
-      "position": 34,
+      "position": 76,
       "kind": "QUIZ",
-      "section": "7 · Certification",
+      "section": "12 · Certification",
       "title": "🎓 Quiz certifiant final — WinCC SCADA",
       "bodyMd": "",
       "notes": null,

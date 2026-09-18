@@ -264,3 +264,35 @@ export async function toggleCourseVisibility(courseId: string) {
   revalidatePath("/training");
   return { ok: true, active: updated.active };
 }
+
+/**
+ * Supprime définitivement un cours du catalogue.
+ * Cascade : supprime les slides, la progression, les tentatives.
+ * NE supprime PAS les certificats émis (Documents) — ils restent l'archive
+ * historique des consultants qui ont réussi.
+ * Réservé aux admins avec training.manage.
+ */
+export async function deleteCourse(courseId: string) {
+  const session = await requirePermission("training.manage");
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { id: true, title: true, slug: true, _count: { select: { slides: true } } }
+  });
+  if (!course) throw new Error("Cours introuvable");
+
+  // Prisma cascade delete : Course → CourseSlide (onDelete Cascade)
+  //                       → UserCourseProgress (onDelete Cascade)
+  //                       → UserQuizAttempt (via CourseSlide onDelete Cascade)
+  // Les Documents (certificats) NE sont PAS cascadés → archives préservées.
+  await prisma.course.delete({ where: { id: courseId } });
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "Course",
+    entityId: course.id,
+    message: `Cours "${course.title}" (${course.slug}) supprimé — ${course._count.slides} slides + progression + tentatives effacées. Certificats préservés.`
+  });
+  revalidatePath("/training");
+  return { ok: true, deletedCourse: course.title, slidesDeleted: course._count.slides };
+}
