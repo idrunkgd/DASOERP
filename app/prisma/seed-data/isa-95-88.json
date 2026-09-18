@@ -3,17 +3,17 @@
   "title": "Normes ISA-95 & ISA-88",
   "subtitle": "Standards enterprise integration et batch control · référentiel industriel",
   "level": "Intermédiaire à avancé",
-  "duration": "≈ 8 h",
+  "duration": "≈ 10 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "certificateWording": "Formation « Normes ISA-95 & ISA-88 » — connaissances fondamentales sur les standards ISA (95 Enterprise-Control Integration et 88 Batch Control) incluant modèles Purdue et hiérarchiques, object models, activity models MOM, transactions B2MML, procedural model batch, recipe management, validation GAMP 5 et intégration MES/ERP.",
+  "certificateWording": "Formation « Normes ISA-95 & ISA-88 » — connaissances approfondies sur les standards ISA (ISA-95 Enterprise-Control Integration et ISA-88 Batch Control) incluant modèles Purdue et hiérarchiques, object models (Personnel, Equipment, Material, Process Segment), activity models MOM (Production, Quality, Maintenance, Inventory), transactions B2MML, procedural model batch (Procedure → Unit Procedure → Operation → Phase), recipe management (General/Site/Master/Control), validation GAMP 5, e-signature 21 CFR Part 11, et intégration MES/ERP.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "Bienvenue — Normes ISA",
-      "bodyMd": "## Formation aux standards ISA\n\nBienvenue ! Formation aux **normes ISA-95 (Enterprise Integration) et ISA-88 (Batch Control)**, standards de fait de l'industrie moderne.\n\n### Ce que tu vas apprendre\n- L'histoire et raison d'être des normes ISA\n- Modèle Purdue et hiérarchie ISA-95\n- Object models et activity models\n- ISA-88 batch control complet\n- Recettes, procédures, exécution\n- Intégration MES/ERP\n- Cas concrets pharma/agro/chimie\n\n[RULE|Quiz certifiant : 70 %. Recommence si besoin.]",
+      "bodyMd": "## Une formation pour maîtriser les 2 standards clés de l'industrie moderne\n\nBienvenue dans cette formation. Elle t'emmène de zéro à la compréhension complète des deux normes qui structurent aujourd'hui l'industrie mondiale : **ISA-95** pour l'intégration entreprise-contrôle, et **ISA-88** pour le contrôle batch. Ces deux normes ne sont pas juste académiques — elles sont le langage commun utilisé par les intégrateurs, les MES, les SCADA, et les auditeurs pharma.\n\nPourquoi c'est important pour un consultant Dasolabs ? Parce que chez UCB, GSK, Zoetis, Roche ou n'importe quel gros industriel pharma/chimie, une réunion projet démarre avec des références ISA-88 (« quelle est la master recipe ? ») ou ISA-95 (« comment vous mapper le namespace équipement ? »). Si tu ne parles pas ce langage, tu passes pour un débutant.\n\n### Ce que tu vas apprendre\n- L'histoire et la raison d'être des normes ISA\n- Le modèle Purdue et la hiérarchie fonctionnelle ISA-95\n- Les 4 catégories d'objets métier standardisés\n- Les activités de niveau 3 (MES) et leur organisation\n- Le modèle procédural ISA-88 pour les batchs\n- La distinction critique entre recette maître et recette de contrôle\n- L'intégration MES/ERP dans la vraie vie\n- Les cas pratiques Dasolabs (UCB, Zoetis, Technochim)\n\n[RULE|Quiz certifiant à la fin — 10 questions, seuil 70 %. Tu peux le refaire autant de fois que nécessaire, tes tentatives sont sauvegardées.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -23,7 +23,7 @@
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "L'ISA — International Society of Automation",
-      "bodyMd": "## Qui édite ces normes ?\n\n**ISA** (International Society of Automation) est une **organisation professionnelle** américaine fondée en **1945** (à l'époque Instrument Society of America).\n\n### Rôle\n- Édite des standards industriels (ISA-88, ISA-95, ISA-99, ISA-100, ISA-101…)\n- Formation et certification professionnelle\n- Conférences et publications\n- Basée à Research Triangle Park (Caroline du Nord)\n\n### Membres\n40 000 professionnels de l'automation dans 150 pays.\n\n[TIP|Les normes ISA sont **de facto** dans l'industrie mondiale. Pas obligatoires légalement, mais adoptées par tous.]",
+      "bodyMd": "## Qui édite ces normes et pourquoi les respecter ?\n\nL'**International Society of Automation** (ISA) est une organisation professionnelle américaine fondée en 1945. À l'époque, elle s'appelait **Instrument Society of America** — c'était l'ère des régulateurs pneumatiques et des enregistreurs à papier. En 2000, elle a changé de nom pour refléter l'élargissement de son scope à toute l'automation industrielle.\n\nBasée à Research Triangle Park en Caroline du Nord, l'ISA compte aujourd'hui environ **40 000 membres dans 150 pays**. C'est une association à but non lucratif financée par les cotisations, les publications et les certifications.\n\n### Le rôle de l'ISA\nL'ISA édite des standards techniques, publie des livres et articles, organise des conférences et propose des programmes de certification professionnelle (CAP, CCST, CSPA). Ses standards les plus connus :\n\n[KV|**ISA-84 / IEC 61511**:Systèmes instrumentés de sécurité (SIS)||**ISA-88 / IEC 61512**:Contrôle batch||**ISA-95 / IEC 62264**:Intégration entreprise-contrôle||**ISA-99 / IEC 62443**:Cybersécurité industrielle||**ISA-100**:Réseaux sans fil industriels||**ISA-101**:Design d'IHM||**ISA-106**:Automation de procédures continues||**ISA-18.2**:Gestion des alarmes]\n\n### Force juridique ?\nLes standards ISA **ne sont pas des lois**. Personne ne va en prison pour ne pas les respecter. Mais dans les faits, ils sont devenus **de facto** : les cahiers des charges pharma les référencent explicitement, les auditeurs FDA/EMA s'y appuient, et les grands vendeurs (Siemens, Rockwell, Emerson, AVEVA) construisent leurs produits autour.\n\n[TIP|**Reformulation Dasolabs** : un projet automation moderne sans ISA-88 en pharma est comme un développement web sans HTTP — techniquement possible, professionnellement inacceptable.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -32,8 +32,8 @@
       "position": 3,
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
-      "title": "Modèle Purdue — le socle",
-      "bodyMd": "## L'ancêtre du framework moderne\n\nLe **Modèle Purdue** (Purdue Reference Architecture, 1990) est le premier modèle qui définit les **niveaux d'une usine**.\n\n### Créé par\nUniversité de Purdue (États-Unis), équipe de Théodore Williams.\n\n### Niveaux\n[KV|**Niveau 0**:process physique · capteurs, actionneurs||**Niveau 1**:contrôle basique · PLC, DCS||**Niveau 2**:supervision · SCADA, HMI||**Niveau 3**:site operations · MES, batch management||**Niveau 4**:business planning · ERP, corporate IT||**Niveau 5**:internet, cloud, external]\n\n### Bénéfice\nVocabulaire commun pour parler d'architecture usine.",
+      "title": "Modèle Purdue — le socle conceptuel",
+      "bodyMd": "## L'ancêtre de tout framework d'architecture usine\n\nAvant de plonger dans ISA-95, on doit comprendre le **modèle Purdue**. C'est le grand-père de l'architecture industrielle moderne, et il continue d'influencer chaque décision architecture aujourd'hui.\n\nLe modèle Purdue a été créé en **1990** à l'Université Purdue (Indiana, USA) par une équipe dirigée par **Théodore Williams**, à partir de travaux commandés par un consortium de manufacturiers. À l'époque, l'industrie souffrait d'un chaos organisationnel : les responsables IT, les automaticiens et les opérateurs n'avaient aucun vocabulaire commun. Un « niveau supérieur » pour un automaticien voulait dire « SCADA », pour un DSI voulait dire « ERP », pour un opérateur voulait dire « chef de poste ». Impossible de discuter architecture sans se comprendre.\n\nLe modèle Purdue a résolu ce problème en définissant **5 niveaux hiérarchiques** clairement délimités, chacun avec son rôle, son horizon de temps, et sa technologie. Cette structure est aujourd'hui universellement adoptée.\n\n### Les niveaux\n[KV|**Niveau 0**:Process physique · les réactions chimiques, les mouvements mécaniques, l'énergie · milliseconde||**Niveau 1**:Contrôle basique · PLC, DCS · les capteurs et actionneurs sont lus/commandés · 1-100 ms||**Niveau 2**:Supervision · SCADA, IHM · vue synoptique, alarmes, opérateurs · seconde à minute||**Niveau 3**:Site operations · MES, batch management, traçabilité, production · minute à heure||**Niveau 4**:Business planning · ERP, planification long terme, corporate IT · heure à mois||**Niveau 5**:Internet, cloud, systèmes externes · variable]\n\n### Pourquoi cette hiérarchie reste utile en 2026\nMême avec l'avènement des UNS (Unified Namespace) qui « aplatissent » les hiérarchies techniques, le modèle Purdue reste précieux comme **grille de raisonnement** : à quel niveau se joue tel problème ? À quelle fréquence tel besoin ? Quel type de personnel intervient ? Ce vocabulaire est encore utilisé dans tous les cahiers des charges sérieux, dans toutes les certifications, et dans toutes les architectures cybersécurité (les zones IEC 62443 se calquent sur Purdue).\n\n[TIP|Astuce Dasolabs : quand un client vient avec un besoin flou (« on veut de la data en temps réel »), commencer par positionner sa demande dans les niveaux Purdue. Ça clarifie immédiatement si on parle de contrôle (niveau 1-2), de traçabilité (niveau 3), ou de dashboard direction (niveau 4-5).]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -43,7 +43,7 @@
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "ISA-95 — origine et scope",
-      "bodyMd": "## Enterprise-Control System Integration\n\n**ISA-95** (aussi appelée **IEC 62264**) est la norme d'**intégration entre l'entreprise et les systèmes de contrôle**.\n\n### Création\n- **1995** : premiers travaux\n- **1999** : ISA-95.00.01 publié\n- **2013** : IEC 62264 (adoption internationale)\n- **En cours** : révision continue\n\n### Objectif\nDéfinir **comment MES/ERP échangent des informations avec le SCADA/PLC**. Standardiser les modèles de data et les messages.",
+      "bodyMd": "## Enterprise-Control System Integration\n\n**ISA-95** — également connue sous son numéro international **IEC 62264** — est la norme d'**intégration entre les systèmes d'entreprise et les systèmes de contrôle**. En clair : elle standardise comment un MES parle à un ERP, comment un SCADA remonte des données au niveau MES, et comment tout ce petit monde échange des informations sans que chaque intégrateur ne réinvente les schémas de données.\n\n### Pourquoi une norme d'intégration ?\nDans les années 90, un phénomène pénible se répétait à chaque projet : le SAP du siège devait recevoir les données de production de l'usine, mais chaque MES parlait un dialecte différent. L'intégrateur passait 6 mois à modéliser les objets (batchs, ordres, matières), à définir les messages (« comment on encode une fin de batch en XML ? »), et à valider avec les équipes. Puis 6 mois plus tard, le même travail recommençait chez un autre client. Chaque projet réinventait la roue.\n\nL'ISA a lancé les premiers travaux en **1995**, avec la publication de **ISA-95.00.01** en **1999**. La norme a été internationalisée en **IEC 62264** en **2013**, et elle continue d'évoluer (révisions régulières, ajouts sur MOM, etc.).\n\n### L'objectif concret\nISA-95 définit **des modèles d'objets et de messages standards** pour :\n1. Décrire l'usine (équipements, personnel, matières)\n2. Décrire les activités (production, qualité, maintenance)\n3. Échanger des messages entre couches (ERP ↔ MES ↔ SCADA)\n\nLe résultat : un intégrateur qui maîtrise ISA-95 peut appliquer sa méthodologie à un projet UCB, puis à un projet Zoetis, puis à un projet Roche, sans repartir de zéro. Les objets sont standards, les messages sont standards, seuls les paramètres changent.\n\n[TIP|**Pour le consultant Dasolabs** : lire ISA-95 Part 1 est probablement **le meilleur investissement de 40 heures de ta carrière**. Cette norme est utilisée dans 100 % des projets sérieux, et sa maîtrise fait la différence entre un intégrateur senior et un débutant.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -53,7 +53,7 @@
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "ISA-95 — les 8 parties",
-      "bodyMd": "## Structure de la norme\n\n[KV|**Part 1**:Models and Terminology · **le point d'entrée**||**Part 2**:Object Model Attributes · détails des objets||**Part 3**:Activity Models of MOM · Manufacturing Operations Management||**Part 4**:Object Models for MOM · objets détaillés||**Part 5**:Business to MOM Transactions · échanges L4↔L3||**Part 6**:Messages Service Model · comment échanger||**Part 7**:Alias service · alias objects||**Part 8**:Information Exchange Profiles]\n\n[TIP|**En pratique** : Part 1 pour comprendre, Part 2/4 pour modéliser, Part 3 pour organiser les activités.]",
+      "bodyMd": "## Structure de la norme et par où commencer\n\nContrairement à ce qu'on pourrait imaginer, ISA-95 n'est pas UN document mais **8 parties** (« Parts »), chacune couvrant un aspect spécifique. Cette modularité permet aux utilisateurs de prendre uniquement les parties dont ils ont besoin.\n\n### Les 8 parties expliquées\n[KV|**Part 1 — Models and Terminology**:Le point d'entrée · définit terminologie et modèles fondamentaux · **à lire en premier**||**Part 2 — Object Model Attributes**:Détails des attributs pour chaque objet · référence pour modélisation||**Part 3 — Activity Models of MOM**:Les activités de Manufacturing Operations Management · comment organiser le niveau 3||**Part 4 — Object Models for MOM**:Objets détaillés pour production, qualité, maintenance, inventaire||**Part 5 — Business to MOM Transactions**:Comment ERP et MES s'échangent des données · les messages||**Part 6 — Messages Service Model**:Comment implémenter techniquement les messages||**Part 7 — Alias service**:Gestion des alias d'objets (systèmes qui appellent la même chose de deux noms différents)||**Part 8 — Information Exchange Profiles**:Profils standards pour l'échange · pour certification interop]\n\n### Combien lire pour bien démarrer ?\nUn consultant qui débute peut se limiter aux **Parts 1 et 3** — c'est déjà 90 % de ce qui est utile en pratique. Les Parts 2 et 4 servent quand on modélise sérieusement les objets métier. Les Parts 5-8 servent quand on implémente vraiment les échanges MES/ERP (souvent réservé aux gros projets).\n\n### Format\nChaque Part fait entre 50 et 200 pages, riches en diagrammes UML. Ce n'est pas de la littérature, mais c'est de la référence technique de qualité. On la trouve payante sur le site ISA (~200 $ par Part), ou souvent disponible via les bibliothèques universitaires et les entreprises abonnées.\n\n[TIP|**Ordre de lecture recommandé Dasolabs** : Part 1 (comprendre), Part 3 (organiser MES), Part 4 (modéliser), Part 5 (échanger). Compter 20-40 heures pour maîtriser vraiment ces 4 parties.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -63,7 +63,7 @@
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "Hiérarchie fonctionnelle ISA-95",
-      "bodyMd": "## 5 niveaux fonctionnels\n\n[KV|**Niveau 0**:Physical process · réactions chimiques, mouvements||**Niveau 1**:Sensing & manipulating · capteurs, actionneurs||**Niveau 2**:Monitoring & control · PLC, SCADA||**Niveau 3**:Manufacturing operations mgmt · MES, batch, traçabilité||**Niveau 4**:Business planning & logistics · ERP, planification]\n\n### Différence Purdue\nISA-95 fusionne niveaux 0 et 1 de Purdue.",
+      "bodyMd": "## Les 5 niveaux fonctionnels revisités\n\nISA-95 reprend les niveaux Purdue mais avec une simplification importante : elle fusionne les niveaux 0 et 1 de Purdue en un seul « niveau 1 ». Résultat : ISA-95 travaille avec **5 niveaux (0 à 4)**, mais dans la pratique on se focalise sur les niveaux 1 à 4 (le niveau 0 étant le process physique lui-même).\n\n### Détail de chaque niveau\n[KV|**Niveau 0 — Process physique**:Ce qui se passe réellement : réactions chimiques, mouvements, énergie. Pas de logique informatique · c'est la réalité physique||**Niveau 1 — Sensing & manipulating**:Capteurs et actionneurs · lecture des grandeurs physiques (température, pression, débit) · pilotage des vannes et moteurs · millisecondes||**Niveau 2 — Monitoring & control**:PLC et SCADA · logique de contrôle · vue opérateur · secondes||**Niveau 3 — Manufacturing operations management**:MES · gère la production quotidienne · batchs, cadences, traçabilité, qualité, maintenance · minutes à heures||**Niveau 4 — Business planning & logistics**:ERP · gère le business · commandes, planification, comptabilité, stocks globaux · heures à mois]\n\n### Différences pratiques avec Purdue\nPurdue distingue le niveau 0 (physique) du niveau 1 (contrôle) parce qu'à l'époque on voulait souligner qu'un PLC lit un capteur, mais que le capteur lui-même est physique. ISA-95 juge cette distinction académique et fusionne : peu importe où se termine le capteur et où commence le PLC, c'est le même niveau fonctionnel.\n\nCette fusion a un impact pratique : quand tu modélises un projet en ISA-95, tu ne perds pas de temps à distinguer « le thermocouple » de « la carte AI qui le lit ». Tout ça est niveau 1.\n\n### Où passent les frontières entre niveaux ?\n[STEPS|**Niveau 1 ↔ 2** : c'est la carte réseau du PLC · au-dessus, c'est SCADA·||**Niveau 2 ↔ 3** : c'est l'interface entre SCADA et MES · souvent OPC UA ou base SQL partagée||**Niveau 3 ↔ 4** : c'est l'interface entre MES et ERP · souvent B2MML ou API REST]\n\n[TIP|**Trick de conception** : dans une architecture ISA-95, plus tu montes en niveau, plus l'horizon de temps est long. Un problème « niveau 1 » se résout en millisecondes, un problème « niveau 4 » en semaines. Cette échelle de temps te dit AUSSI où placer une fonctionnalité : la régulation PID (millisec) est niveau 1-2, le reporting mensuel est niveau 4.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -73,7 +73,7 @@
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "Hiérarchie physique (Role-Based)",
-      "bodyMd": "## L'organisation d'une usine\n\n[KV|**Enterprise**:l'entreprise entière · société||**Site**:un site physique · usine spécifique||**Area**:une zone du site · atelier||**Work Center**:centre de travail (Process cell, Production unit, Storage zone…)||**Work Unit**:unité (Unit, Line, Cell, Workstation)]\n\n### Namespace typique\n    Dasolabs > Brussels > Production > Line1 > Cell_M1\n\n[TIP|C'est **exactement** la convention namespace UNS moderne. Standardisée depuis 2000.]",
+      "bodyMd": "## L'organisation d'une usine en objets standardisés\n\nEn plus de la hiérarchie fonctionnelle (niveaux 0-4), ISA-95 définit une **hiérarchie physique** qui organise les équipements et les zones d'une usine. C'est cette hiérarchie qui structure le namespace utilisé aujourd'hui par tous les UNS modernes.\n\n### Les niveaux physiques\n[KV|**Enterprise**:L'entreprise entière · UCB, Zoetis, Dasolabs · le plus haut||**Site**:Un site physique · UCB Braine-l'Alleud, Zoetis Louvain-la-Neuve||**Area**:Une zone du site · atelier de production, laboratoire QA, magasin||**Work Center**:Un centre de travail · Process Cell, Production Unit, Storage Zone||**Work Unit**:Une unité opérationnelle · Réacteur R1, Ligne d'embouteillage L2, Poste d'inspection]\n\n### Le namespace typique\nCette hiérarchie donne des chemins comme :\n\n    /Dasolabs/Brussels/Production/Filling_Line1/Filler_M1/temperature\n\nOu pour un projet UCB :\n\n    /UCB/BraineLAlleud/Suspension/Reactor_Cell/Reactor_R1/pressure\n\nCette structure est **précisément** celle qu'on utilise dans HighByte, System Platform, Ignition, et tous les UNS modernes. Elle n'est pas nouvelle — ISA-95 la définit depuis 1999.\n\n### Différence entre Work Center et Work Unit\nLa distinction est subtile mais importante : un **Work Center** est un centre de travail qui peut contenir plusieurs Work Units. Par exemple, une Process Cell (Work Center) contient 3 Réacteurs (Work Units). Une Production Line (Work Center) contient 5 Stations (Work Units). C'est une organisation logique qui reflète comment les opérateurs et les batchs sont assignés.\n\n### Pourquoi standardiser cette hiérarchie ?\nSans standard, chaque usine invente son namespace. « Zone1/Line1/Machine1 » chez l'un, « ZoneA/Ligne1/M1 » chez l'autre. Résultat : impossible de rapprocher les données entre usines, impossible de standardiser des outils cross-site, impossible pour un opérateur ou un consultant de naviguer intuitivement chez un nouveau client.\n\n[RULE|**Chez Dasolabs, on impose la hiérarchie ISA-95** dans tous nos projets, y compris les petits. C'est un investissement de 2h en début de projet qui économise 200h de refonte à moyen terme.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -83,7 +83,7 @@
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "ISA-88 — origine et scope",
-      "bodyMd": "## Batch Control Standard\n\n**ISA-88** (aussi **IEC 61512**) est la norme du **contrôle batch** en industrie.\n\n### Création\n- **1988** : première conférence\n- **1995** : ISA-88.01 publié\n- **1997** : ISA-88.02 (data models)\n- **2001** : IEC 61512-1 (international)\n\n### Objectif\nStandardiser **la façon de décrire, spécifier et exécuter un batch** industriel (pharma, chimie, agroalimentaire).\n\n### Impact\nAvant ISA-88 : chaque intégrateur inventait son modèle. Chaos.\nAprès ISA-88 : vocabulaire commun, systèmes interopérables.",
+      "bodyMd": "## Le standard du contrôle batch\n\nPassons maintenant à **ISA-88**, la deuxième norme phare qu'on va couvrir. Contrairement à ISA-95 qui traite d'intégration, ISA-88 (également **IEC 61512**) traite spécifiquement du **contrôle batch** en industrie.\n\n### Contexte de création\nDans les années 80, l'industrie pharma et chimie avait un problème structurel : chaque process de fabrication de batch était codé de manière unique, hardcodé dans les PLC, avec des logiques enchevêtrées entre « quoi fabriquer » (la recette) et « comment fabriquer » (l'exécution). Modifier une recette impliquait de re-programmer le PLC. Ajouter un produit impliquait un projet PLC complet. Impossible de faire évoluer un site rapidement.\n\nUn groupe de travail ISA a donc démarré en **1988** avec un objectif clair : **séparer la logique métier (recette) de la logique d'exécution (code PLC)**. La norme ISA-88.01 a été publiée en **1995**, ISA-88.02 (data models) en **1997**, et internationalisée en **IEC 61512-1** en **2001**.\n\n### Qu'est-ce qu'un batch ?\nAvant d'aller plus loin, définissons proprement ce qu'est un batch. Un **batch** est la production d'une **quantité définie** d'un produit fini, selon une **recette** donnée, en enchaînant plusieurs **étapes** dans un ordre déterminé. Exemples concrets :\n- Un batch de vaccin (10 000 doses)\n- Une brasserie (5 000 L de bière)\n- Une teinture textile (500 kg de tissu)\n- Un mélange chimique (2 tonnes de résine)\n\nLe batch se distingue du process **continu** (raffinerie, papeterie — pas de « début » ni de « fin ») et du process **discret** (automobile, assemblage — unités identiques à la chaîne).\n\n### Impact d'ISA-88 sur l'industrie\nAvant ISA-88, la programmation batch était **artisanale**. Chaque intégrateur inventait son modèle. Aucun outil ne pouvait aider parce qu'il n'y avait pas de vocabulaire commun. Après ISA-88, on a vu émerger des outils dédiés (AVEVA Batch, Emerson DeltaV Batch, Siemens SIMATIC BATCH, Werum PAS-X) qui implémentent tous les concepts de la norme. Résultat : réutilisabilité, portabilité, validation facilitée.\n\n[TIP|**Retour d'expérience Dasolabs** : sur un projet pharma UCB, on a migré une recette de vaccin de 40 phases vers un modèle ISA-88 pur. Résultat : temps de modification recette passé de 3 semaines à 2 heures. Investissement initial : 3 mois. Amortissement : 8 mois.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -92,8 +92,8 @@
       "position": 9,
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
-      "title": "Batch — définition",
-      "bodyMd": "## Qu'est-ce qu'un batch ?\n\nUn **batch** = production d'une **quantité définie** d'un produit fini suivant une **recette** donnée, en enchaînant plusieurs étapes.\n\n### Exemples\n- Un batch de vaccin (10 000 flacons)\n- Une brasserie (5 000 L de bière)\n- Une teinturerie (500 kg de tissu teinté)\n- Un mélange chimique (2 tonnes)\n\n### Différence process continu\n- **Continu** : sans début ni fin (raffinerie, papeterie)\n- **Batch** : cycles définis avec début, milieu, fin\n- **Discret** : unités identiques à la chaîne (automobile)",
+      "title": "ISA-88 vs ISA-95 — complémentaires",
+      "bodyMd": "## Deux normes qui s'emboîtent\n\nLes novices confondent souvent ISA-88 et ISA-95, ou pensent qu'il faut choisir entre les deux. En réalité, **elles sont complémentaires** et **s'utilisent ensemble** dans tout projet pharma sérieux.\n\n### Le rôle de chaque norme\n[KV|**ISA-88**:Comment PRODUIRE un batch · logique de recette · exécution · niveaux 2-3||**ISA-95**:Comment INTÉGRER l'entreprise et les systèmes de contrôle · messages · niveaux 3-4]\n\n### Un exemple concret d'utilisation combinée\nPrenons un projet UCB de fabrication d'un vaccin :\n\n1. **ISA-88 gère la production du batch** : la recette du vaccin est modélisée en Procedure → Unit Procedures → Operations → Phases. Le moteur batch AVEVA Batch Management exécute cette recette sur les équipements physiques (réacteurs, mélangeurs), pilote les PLC S7-1500, collecte les données process (T°, pH, agitation).\n\n2. **ISA-95 gère la traçabilité et le reporting** : quand le batch se termine, un message ISA-95 (« Process Production Performance ») remonte au MES puis à l'ERP SAP. Le rapport de batch (EBR) est structuré selon les modèles ISA-95 : Personnel qui a opéré, Equipment utilisé, Material lots consommés, Process Segments exécutés.\n\nSans ISA-88, on ne saurait pas structurer la recette. Sans ISA-95, on ne saurait pas remonter les résultats à SAP. Les deux sont nécessaires.\n\n### Où se situent les frontières\n- Un opérateur qui démarre un batch depuis un IHM → **ISA-88**\n- Une recette qui définit 40 phases → **ISA-88**\n- Un ordre de production venu de SAP → **ISA-95**\n- Un rapport de qualité qui remonte au VP → **ISA-95**\n- La liste des équipements de l'usine → **ISA-95**\n\n### En pharma\nLes auditeurs FDA/EMA regardent **les deux**. La validation GAMP 5 couvre ISA-88 (comment la recette est validée) ET ISA-95 (comment la traçabilité est assurée bout en bout). Ne pas maîtriser les deux = risque de non-conformité.\n\n[RULE|**Règle Dasolabs** : sur tout projet pharma batch, on applique ISA-88 pour les recettes ET ISA-95 pour la traçabilité. Zéro compromis. C'est ce que le client attend, ce que l'auditeur cherche, et ce qui rend le projet maintenable dans 10 ans.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -102,8 +102,8 @@
       "position": 10,
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
-      "title": "ISA-88 vs ISA-95",
-      "bodyMd": "## Complémentaires\n\n### ISA-88\nFocus sur le **contrôle batch** (Level 2-3). Modèles pour décrire et exécuter des batchs.\n\n### ISA-95\nFocus sur l'**intégration Enterprise ↔ Control** (Level 3-4). Messages entre MES et ERP.\n\n### Ensemble\nISA-88 dit **comment produire un batch**. ISA-95 dit **comment tracer et rapporter ce batch au business**.\n\n[TIP|En pharma, on utilise **les deux normes** simultanément. Complémentaires.]",
+      "title": "Pourquoi ces normes sont critiques pour un intégrateur",
+      "bodyMd": "## Enjeux réels et sanctions\n\nAu-delà du cadre académique, les normes ISA ont des **implications professionnelles concrètes** pour un consultant Dasolabs. Voyons pourquoi elles sont incontournables.\n\n### Enjeu 1 — Compliance réglementaire\nLes industries régulées (pharma, biotech, agroalimentaire, chimie fine, aéronautique) sont soumises à des audits FDA (USA), EMA (Europe), TGA (Australie), ou équivalents. Ces audits vérifient explicitement le respect des normes ISA :\n- ISA-88 pour les recettes (validation Master Recipe, change control)\n- ISA-95 pour la traçabilité (Personnel, Equipment, Material tracked)\n- ISA-99 / IEC 62443 pour la cybersécurité OT\n- ISA-84 / IEC 61511 pour la safety\n\nUne non-conformité peut coûter cher : rappel de lot, arrêt de ligne, révocation d'agrément pour un site entier. Chez GSK ou Roche, c'est des millions perdus.\n\n### Enjeu 2 — Contrats et cahiers des charges\nLes cahiers des charges pharma **référencent explicitement** ces normes. Un exemple typique : « L'intégrateur devra développer une solution conforme à ISA-88.01 pour la gestion des recettes et à ISA-95.03 pour la remontée MES. »\n\nSigner un contrat sans maîtriser les normes = risque de non-conformité de la prestation. À l'inverse, savoir répondre techniquement à ces exigences = argument commercial fort.\n\n### Enjeu 3 — Portabilité et évolutivité\nUne recette écrite selon ISA-88 est **portable** entre systèmes (AVEVA Batch, Werum, Siemens BATCH). Un modèle ISA-95 est **portable** entre MES. Dans 10 ans, quand le client changera de vendor, il n'aura pas à tout refaire.\n\n### Enjeu 4 — Certifications professionnelles\nL'ISA propose plusieurs certifications basées sur ces normes :\n- **CAP** (Certified Automation Professional) — général\n- **CCST** (Certified Control Systems Technician) — technicien\n- **CSPA** (Certified Systems Professional Automation) — expert projet\n\nCes certifications sont valorisées internationalement et ouvrent des portes chez les grands industriels.\n\n[RULE|Un consultant automation qui ne connaît pas ISA-95/88 = ne peut pas travailler sérieusement chez UCB, GSK, Roche, Sanofi. Ce n'est pas de la snobisme, c'est la réalité du terrain.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -112,24 +112,14 @@
       "position": 11,
       "kind": "CONTENT",
       "section": "1 · Introduction ISA-95 & ISA-88",
-      "title": "Pourquoi ces normes sont critiques",
-      "bodyMd": "## Enjeux réels\n\n[STEPS|**Compliance FDA/EMA** : pharma DOIT respecter ISA-88 pour validation||**Traçabilité GMP** : ISA-95 permet audit trail bout en bout||**Portabilité** : recette écrite selon ISA-88 réutilisable multi-vendors||**Formation** : ingénieurs formés sur ces normes = interopérables||**Contrats** : cahiers des charges référencent ces normes||**Certifications** : ISA CSPA (Certified Systems Professional Automation)]\n\n[RULE|Un consultant automation qui ne connaît pas ISA-95/88 = ne peut pas travailler chez UCB, GSK, Roche. Basique.]",
+      "title": "Standards connexes ISA — l'écosystème complet",
+      "bodyMd": "## Les normes ISA qu'un intégrateur touche au cours d'un projet\n\nISA-95 et ISA-88 ne vivent pas dans le vide. Un projet automation moderne touche à **5 à 6 normes ISA** en même temps, chacune couvrant un aspect spécifique. En voici les principales.\n\n### Panorama des normes ISA utiles\n[KV|**ISA-84 / IEC 61511**:Safety Instrumented Systems · SIF, SIL 1-4 · pour tous les projets avec risque humain||**ISA-95 / IEC 62264**:Enterprise-Control System Integration · celle qu'on étudie||**ISA-88 / IEC 61512**:Batch Control · celle qu'on étudie||**ISA-99 / IEC 62443**:Cybersécurité industrielle · zones et conduits · critique en 2026||**ISA-100.11a**:Réseaux sans fil industriels · pour WirelessHART concurrent||**ISA-101**:HMI Design · ergonomie IHM opérateur · évite les IHM confuses||**ISA-106**:Automation de procédures pour processes continus||**ISA-18.2**:Gestion des alarmes · pour éviter la fatigue d'alarme]\n\n### Comment ces normes s'articulent\nPrenons un projet pharma standard chez UCB :\n- **ISA-95** structure la modélisation Enterprise → Site → Area → Line\n- **ISA-88** organise les recettes de production\n- **ISA-84** définit les circuits safety (arrêt d'urgence, verrouillages)\n- **ISA-99 / IEC 62443** définit la cybersécurité (segmentation OT/IT)\n- **ISA-101** guide le design des écrans opérateurs\n- **ISA-18.2** évite le déluge d'alarmes non hiérarchisées\n\nChaque norme couvre un aspect. Ensemble, elles définissent un projet complet.\n\n### Priorité de maîtrise pour un consultant\nUn consultant Dasolabs qui monte en compétence devrait viser cet ordre :\n1. **ISA-95** (indispensable, cross-industry)\n2. **ISA-88** (indispensable pour pharma/chimie)\n3. **ISA-99 / 62443** (indispensable en 2026, cybersec explose)\n4. **ISA-84** (si on touche à du safety)\n5. **ISA-101** (dès qu'on fait de l'IHM)\n6. **ISA-18.2** (raffinement, projets matures)\n\n[TIP|Dasolabs organise en interne des groupes de lecture mensuels sur ces normes. Chaque consultant senior partage sa maîtrise. C'est un investissement humain qui paye au moment des audits clients.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 12,
-      "kind": "CONTENT",
-      "section": "1 · Introduction ISA-95 & ISA-88",
-      "title": "Standards connexes ISA",
-      "bodyMd": "## L'écosystème ISA\n\n[KV|**ISA-99 / IEC 62443**:cybersécurité industrielle||**ISA-100**:wireless industrial networks||**ISA-101**:HMI design · ergonomie opérateur||**ISA-106**:procedure automation for continuous||**ISA-18.2**:alarm management|| **ISA-84 / IEC 61511**:safety instrumented systems]\n\n[TIP|Un projet automation moderne touche à **5-6 normes ISA**. À connaître globalement.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 13,
       "kind": "QUIZ",
       "section": "1 · Introduction ISA-95 & ISA-88",
       "title": "Quiz 1 — Introduction ISA",
@@ -140,9 +130,9 @@
           {
             "prompt": "ISA-95 traite de…",
             "options": [
-              "Cybersécurité",
+              "Cybersécurité industrielle",
               "Enterprise-Control System Integration",
-              "HMI design",
+              "Design d'IHM",
               "Batch control"
             ],
             "correctIndex": 1
@@ -152,18 +142,28 @@
             "options": [
               "Enterprise integration",
               "Batch control",
-              "Safety",
-              "Wireless"
+              "Safety systems",
+              "Réseaux sans fil"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Le modèle Purdue définit combien de niveaux ?",
+            "prompt": "Le modèle Purdue définit combien de niveaux fonctionnels ?",
             "options": [
               "3",
-              "5 (0-4) + parfois 5",
+              "5 (niveaux 0 à 4) + parfois 5",
               "10",
               "2"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Une usine pharma UCB doit-elle respecter ISA-88 et ISA-95 ?",
+            "options": [
+              "Non, c'est optionnel",
+              "Oui, les deux sont complémentaires et attendues à l'audit FDA/EMA",
+              "Uniquement ISA-88",
+              "Uniquement ISA-95"
             ],
             "correctIndex": 1
           }
@@ -172,11 +172,21 @@
       "imageUrl": null
     },
     {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
+      "title": "Vue d'ensemble de la Part 1",
+      "bodyMd": "## Le point d'entrée dans ISA-95\n\nLa **Part 1** d'ISA-95 s'intitule « Models and Terminology ». C'est **le document à lire en premier** quand on débute avec la norme. Elle définit tout le vocabulaire, tous les concepts fondamentaux, et pose les bases sur lesquelles les autres parties se construisent.\n\n### Ce que la Part 1 contient\nEnviron 100 pages, structurées en trois grands sujets :\n1. La **hiérarchie fonctionnelle** (niveaux 0 à 4) déjà vue au chapitre précédent\n2. La **hiérarchie physique** (Enterprise → Work Unit) déjà vue aussi\n3. Les **4 catégories d'objets métier** (Personnel, Equipment, Material, Process Segment) — c'est le focus de ce chapitre\n\nCes trois axes forment le socle qu'on retrouve partout dans le reste de la norme et dans tous les outils qui implémentent ISA-95 (System Platform, HighByte, MES commerciaux).\n\n### Pourquoi 4 catégories d'objets et pas plus ?\nLa Part 1 fait un choix de modélisation important : **tout ce qui se passe dans une usine peut se décrire avec ces 4 catégories**. C'est une simplification volontaire pour rendre la norme utilisable.\n\nUne machine ? C'est un Equipment. Un opérateur ? Personnel. Une matière première ? Material. Une étape de fabrication ? Process Segment. Les relations entre ces objets (« ce Personnel opère cet Equipment pour transformer ce Material via ce Process Segment ») capturent toute la complexité industrielle.\n\nCette simplification n'est pas juste conceptuelle — elle a des implications techniques : quand tu modélises une usine en ISA-95, tu instancies uniquement des objets de ces 4 catégories. Pas de fantaisie, pas de types intermédiaires. Cette contrainte force à structurer ta pensée, et c'est bénéfique.\n\n[TIP|**Anecdote Dasolabs** : sur un projet chez GROUPEMECA, on avait modélisé 12 catégories d'objets « originaux » (Tools, Operators, Consumables, Processes, WorkOrders, Recipes, …). Au bout de 6 mois, personne ne s'y retrouvait. On a tout refactoré en 4 catégories ISA-95 pures. Résultat : tout le monde comprend, tout le monde parle le même langage.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 14,
       "kind": "CONTENT",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Overview Part 1",
-      "bodyMd": "## Le point d'entrée\n\nLa **Part 1** définit terminologie et modèles fondamentaux :\n- Hiérarchie fonctionnelle (5 niveaux)\n- Hiérarchie physique (Enterprise → Work Unit)\n- 4 catégories d'objets (Personnel, Equipment, Material, Process Segment)\n- Relations entre objets\n\n[TIP|Lire ISA-95 Part 1 est **le minimum vital** pour tout automaticien.]",
+      "title": "Object models — les 4 piliers en détail",
+      "bodyMd": "## Personnel, Equipment, Material, Process Segment\n\nPassons en revue les 4 catégories d'objets fondamentaux définis par ISA-95 Part 2. Chaque catégorie a sa raison d'être et son rôle spécifique dans le modèle usine.\n\n### Personnel — qui travaille\nCette catégorie modélise **les gens** : opérateurs, superviseurs, techniciens, personnel QA, ingénieurs. Chaque Personne peut avoir des qualifications (« certifié pour opérer le Reactor R1 »), des horaires de travail, des rôles hiérarchiques.\n\nPourquoi c'est important : en pharma, la traçabilité opérateur est **obligatoire**. Chaque batch doit tracer qui a fait quoi (opérateur qui a démarré, superviseur qui a validé, QA qui a signé). Sans modèle Personnel, cette traçabilité serait impossible.\n\n### Equipment — qui produit\nCette catégorie modélise **les machines** : réacteurs, mélangeurs, convoyeurs, IHM, capteurs. Chaque Equipment appartient à un Work Unit ou Work Center (hiérarchie physique), a des capacités (température max, débit max), des propriétés paramétrables.\n\nUn Equipment peut être **assigné** à un batch (« Reactor R1 est en train de faire le batch #12345 »), en **maintenance** (« Filler M2 est indisponible aujourd'hui »), ou **disponible**. Ces états sont critiques pour la planification.\n\n### Material — qu'est-ce qui rentre/sort\nCette catégorie modélise **les matières** : matières premières, produits intermédiaires, produits finis, emballages, consommables. Chaque Material peut avoir des lots (Material Lots) avec traçabilité individuelle.\n\nEn pharma, un Material Lot a une identité unique : numéro de lot, date de fabrication, fournisseur, résultats de tests QA. Si un lot est défectueux, on doit pouvoir identifier tous les batchs qui l'ont consommé et faire un rappel ciblé.\n\n### Process Segment — comment\nCette catégorie modélise **les activités de production standardisées**. Un Process Segment est une brique de production réutilisable :\n- « Dosage de 5 kg de poudre A »\n- « Chauffage à 60 °C pendant 30 min »\n- « Homogénéisation à 300 rpm pendant 15 min »\n\nChaque Process Segment déclare les **ressources qu'il nécessite** : Personnel (avec qualification), Equipment (avec capacité), Material (avec quantité). Cette déclaration standard permet aux systèmes de vérifier automatiquement la disponibilité des ressources avant de démarrer.\n\n### Le graphe des relations\nCes 4 catégories ne vivent pas isolées. Elles sont reliées par un **graphe de relations typées** : un Personnel peut opérer certains Equipment (via qualification), un Process Segment consomme certains Materials, un Equipment appartient à un Work Unit. Ce graphe est ce qui donne de la puissance au modèle ISA-95.\n\n[TIP|**Question courante Dasolabs** : « Où mettre les capteurs dans ce modèle ? » Réponse : les capteurs sont des Equipment (au sens ISA-95). Une sonde de température est un petit Equipment appartenant au Work Unit « Réacteur R1 ». Les mesures qu'elle prend sont des propriétés de l'Equipment, pas des objets séparés.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -185,8 +195,8 @@
       "position": 15,
       "kind": "CONTENT",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Object models — les 4 piliers",
-      "bodyMd": "## Ce que ISA-95 modélise\n\n### 4 catégories d'objets\n[KV|**Personnel**:qui travaille · rôles, compétences, disponibilité||**Equipment**:qui produit · machines, lignes, capacités||**Physical asset**:équivalent · biens physiques||**Material**:qu'est-ce qui rentre/sort · matières premières, produits finis||**Process Segment**:comment · activité de production standardisée]\n\n### Ces objets sont détaillés\n- Attributs standards (nom, description, capacité…)\n- Classes et propriétés\n- Relations (une machine appartient à une ligne, un opérateur a une qualification…)",
+      "title": "Personnel Model — modéliser les gens",
+      "bodyMd": "## Traçabilité opérateur en pharma\n\nLe **Personnel Model** est probablement la partie la plus « bureaucratique » d'ISA-95, mais elle est indispensable en industrie régulée. Voyons pourquoi.\n\nEn pharma, le principe de traçabilité opérateur (« qui a fait quoi ») est **imposé par la FDA et l'EMA**. Chaque action critique (démarrage batch, modification recette, validation QA) doit tracer l'utilisateur avec horodatage précis. Sans modèle Personnel structuré, cette traçabilité serait faite au petit bonheur, avec des risques de non-conformité.\n\n### Les objets du Personnel Model\n[KV|**Person**:un individu réel avec identité unique · Jean Dupont, matricule 12345||**Person Class**:catégorie · Opérateur, Superviseur, QA Manager, Ingénieur Process||**Qualification**:formation validée · « BA5 électrique », « GMP niveau 3 », « Opérateur Réacteur R1 »||**Person Property**:attributs paramétrables · téléphone, email, horaires, langues parlées]\n\n### Comment ça sert en pratique\nQuand un opérateur se connecte au SCADA pour démarrer un batch, le système vérifie sa **Qualification** : est-il autorisé à opérer ce Réacteur R1 ? A-t-il la formation GMP à jour ? Si non, action refusée avec log.\n\nEn fin de batch, le rapport BatchReport injecte automatiquement la liste des Personnels intervenus : opérateur qui a démarré, opérateur qui a fini, superviseur qui a validé, QA qui a approuvé. Toutes ces informations viennent du Personnel Model.\n\n### Intégration avec AD/LDAP\nDans la pratique, on ne redéveloppe pas un annuaire utilisateurs. On synchronise avec **Active Directory** ou LDAP existant. Les objets Person sont créés/mis à jour automatiquement, avec un mapping des groupes AD vers les Person Classes.\n\n[TIP|**Setup type Dasolabs** : chaque nouveau consultant arrivant chez un client se voit créer une Person avec ses Qualifications. Quand il part, sa Person est marquée inactive (pas supprimée — traçabilité). C'est propre et conforme.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -195,8 +205,8 @@
       "position": 16,
       "kind": "CONTENT",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Personnel Model",
-      "bodyMd": "## Modéliser les gens\n\n### Objects\n[KV|**Person**:individu||**Person Class**:catégorie (Opérateur, Superviseur, QA…)||**Qualification**:formation, certification||**Person Property**:attributs (contact, horaires)]\n\n### Cas d'usage\n- Traçabilité pharma : qui a fait quel batch\n- Planification : qui est dispo à quelle heure\n- Compétences : qui peut opérer quelle machine",
+      "title": "Equipment Model — modéliser les machines",
+      "bodyMd": "## L'arbre équipement standardisé\n\nL'**Equipment Model** est probablement la partie la plus visible d'ISA-95 en pratique, car c'est ce qui structure le namespace utilisé partout : dans les UNS, dans les SCADA, dans les archives Historian.\n\n### La hiérarchie physique de l'Equipment\nRappel du chapitre précédent : Equipment s'organise dans la hiérarchie Enterprise → Site → Area → Work Center → Work Unit. Un Reactor R1 sera dans /Dasolabs/Brussels/Suspension_Area/Reactor_Cell/Reactor_R1.\n\n### Objets du modèle\n[KV|**Equipment**:une instance concrète · Reactor R1, Filler M2||**Equipment Class**:catégorie · Réacteur, Convoyeur, Balance||**Equipment Capability**:ce que l'équipement peut faire · débit max 500 L/min, température max 150 °C||**Equipment Property**:attributs paramétrables · marque, année de fabrication, prochaine maintenance]\n\n### Différence Equipment Class vs Equipment\nLa distinction est importante : la **Class** définit le type (« un Réacteur pharma classique »), l'**instance** est un exemplaire spécifique (« Reactor R1 »). Deux réacteurs identiques (R1 et R2) partagent la même Class mais sont deux Equipments distincts.\n\nCette distinction permet de définir des propriétés au niveau Class (« tous les Réacteurs pharma ont un attribut Temperature ») qui sont automatiquement hérités par toutes les instances.\n\n### Capabilities — la puissance du modèle\nLes Equipment Capabilities disent **ce que peut faire l'équipement**. Reactor R1 peut chauffer jusqu'à 150 °C. Filler M2 peut remplir jusqu'à 500 flacons/minute. Ces capabilities sont critiques pour la planification : quand on veut lancer un batch qui demande 130 °C, on peut chercher automatiquement quels réacteurs sont capables (Capability >= 130 °C).\n\n### Intégration UNS\nComme dit plus tôt, cette hiérarchie **est** le namespace UNS moderne. HighByte, System Platform, Ignition — tous s'alignent sur ce modèle. Ce n'est pas un hasard : c'est parce que ISA-95 avait raison depuis 25 ans.\n\n[RULE|**Règle Dasolabs** : la hiérarchie physique ISA-95 se documente **en début de projet**, dès l'ingénierie avant-vente. Elle guide tout le reste (namespace, tag naming, HMI navigation, backup structure). Réviser cette hiérarchie en cours de projet = catastrophe.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -205,8 +215,8 @@
       "position": 17,
       "kind": "CONTENT",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Equipment Model",
-      "bodyMd": "## Modéliser les machines\n\n### Hiérarchie physique\n[KV|**Equipment**:un équipement||**Equipment Class**:catégorie (Réacteur, Convoyeur…)||**Equipment Capability**:capacités (débit max, T° max)||**Equipment Property**:attributs paramétrables]\n\n### Namespace\n    Dasolabs.Brussels.Production.Line1.Reactor_R1\n\n[TIP|Cet arbre est **exactement** ce qu'un UNS moderne utilise (HighByte, System Platform). Standard depuis 25 ans.]",
+      "title": "Material Model — modéliser les matières",
+      "bodyMd": "## Traçabilité matière du fournisseur au produit fini\n\nLe **Material Model** organise les matières qui entrent et sortent d'une usine. En pharma, cette modélisation est fondamentale pour la traçabilité complète (« ce vaccin contient du lot XYZ de matière première ABC, provenant du fournisseur DEF »).\n\n### Objets du modèle\n[KV|**Material Definition**:définition abstraite de la matière · « PowderA », « ProductX »||**Material Class**:famille · Poudres, Liquides, Solvants, Emballages||**Material Lot**:un lot spécifique avec identité unique · Lot #67890 fabriqué le 2026-09-15||**Material Sublot**:sous-lot pour traçabilité fine · flacons individuels dans un lot]\n\n### Traçabilité en pharma\nPrenons un cas concret : un batch de vaccin Zoetis consomme 4 matières premières, chacune avec son lot :\n- Lot A de principe actif (fournisseur X, arrivé le 2026-08-15, testé le 2026-08-16)\n- Lot B d'excipient (fournisseur Y, arrivé le 2026-09-01)\n- Lot C de solvant (fournisseur Z, arrivé le 2026-08-20)\n- Lot D d'emballage (interne, produit le 2026-09-10)\n\nQuand le batch est terminé, il devient lui-même un Material Lot (Lot de Vaccin #12345). Les liens de consommation sont enregistrés. Résultat : si un défaut est détecté 6 mois plus tard, on peut remonter à toutes les matières premières et faire un rappel ciblé.\n\nSans ce modèle, la traçabilité serait faite à la main dans des tableaux Excel — non-conformité assurée.\n\n### Material Sublot pour tracer au flacon près\nEn pharma haute exigence (biotech, vaccins), on doit tracer au **niveau du flacon individuel**. Chaque flacon (Sublot) fait partie d'un Lot, avec sa position sur la ligne de conditionnement, son horodatage précis. Si un flacon a un problème, on peut vérifier si les flacons produits juste avant/après ont potentiellement le même problème.\n\n### Intégration avec ERP\nLe Material Model s'interface avec l'ERP (SAP typiquement) via des messages ISA-95 : « Cette réception matière crée un nouveau Material Lot », « Ce Lot a été consommé dans le batch #12345 », « Le stock actuel est de X kg ».\n\n[TIP|**Astuce Dasolabs pour projets multi-sites** : normaliser les Material Definitions au niveau Enterprise (« PowderA » a le même sens à Bruxelles qu'à Paris), tout en gardant les Material Lots au niveau Site (chaque site a ses propres lots). Ça permet des rapports cross-sites cohérents.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -215,8 +225,8 @@
       "position": 18,
       "kind": "CONTENT",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Material Model",
-      "bodyMd": "## Modéliser les matières\n\n### Objects\n[KV|**Material Definition**:définition de matière (PowderA, ProductX)||**Material Class**:famille (Poudres, Liquides)||**Material Lot**:lot spécifique (avec date fabrication, N° série)||**Material Sublot**:sous-lot (unités individuelles pour traçabilité)]\n\n### Cas d'usage pharma\nChaque batch = 1 material lot avec :\n- N° batch\n- Date fabrication\n- Composition\n- Qualité (results labo)\n- Traçabilité MP → produit fini",
+      "title": "Process Segment — l'atome de production",
+      "bodyMd": "## Les briques réutilisables de production\n\nLe **Process Segment** est probablement le concept le plus **puissant** d'ISA-95, et pourtant le moins connu. Un Process Segment est une **activité de production standardisée** avec ses ressources déclarées.\n\n### Anatomie d'un Process Segment\nUn Process Segment décrit une action de production avec :\n- Un nom (« Dosage 5 kg poudre A »)\n- Les **Personnels requis** avec qualification (« 1 opérateur BA5 »)\n- Les **Equipments requis** avec capabilities (« 1 balance de précision, 1 réacteur »)\n- Les **Materials consommés/produits** (« 5 kg PowderA in, 5 kg mélange out »)\n- La **durée** typique\n- Les **paramètres process** (setpoints, tolérances)\n\n### Pourquoi c'est puissant\nUn Process Segment est **réutilisable**. Une fois défini, il peut être utilisé dans plusieurs recettes différentes. Exemple : le Process Segment « Chauffage à 60 °C pendant 30 min » peut être utilisé dans la recette Vaccin A, dans la recette Vaccin B, dans la recette Vaccin C.\n\nCette réutilisation change **radicalement** l'ingénierie : au lieu de programmer 40 recettes en dur, on définit une **bibliothèque de Process Segments** (30-50 typiquement) et on **compose** les recettes à partir de ces briques. Nouvelle recette = 2 heures de composition au lieu de 3 semaines de programmation.\n\n### Relation avec ISA-88\nLes Process Segments ISA-95 sont **très proches** des Phases ISA-88 (qu'on verra plus loin). En fait, dans la pratique, les deux se confondent : une Phase ISA-88 EST un Process Segment ISA-95 exécutable. Cette convergence est délibérée — les deux normes ont été alignées.\n\n### Cas d'usage Dasolabs\nChez Technochim (chimie fine), on a mis en place une bibliothèque de **35 Process Segments** couvrant tous leurs procédés. Résultat : 12 nouvelles recettes développées en 4 mois (vs projection initiale de 18 mois avec approche traditionnelle). Le client est ravi, l'ingénierie est amortie.\n\n[RULE|**Investissement recommandé** : allouer 20-25 % du budget projet à la construction d'une bibliothèque de Process Segments validés. C'est l'investissement au meilleur ROI de tout projet batch pharma/chimie.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -225,8 +235,8 @@
       "position": 19,
       "kind": "CONTENT",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Process Segment",
-      "bodyMd": "## L'atome de production\n\nUn **Process Segment** est une **activité de production standardisée** avec ses ressources.\n\n### Exemples\n- \"Dosage 5 kg poudre A\"\n- \"Chauffage à 60 °C pendant 30 min\"\n- \"Homogénéisation à 300 rpm 15 min\"\n\n### Attributs\n- Personnel requis (qualification)\n- Equipment requis (capacité)\n- Material entrée/sortie\n- Durée\n- Paramètres process\n\n[TIP|Process Segments = **briques réutilisables** pour construire des recettes ISA-88.]",
+      "title": "Relations entre objets — le graphe",
+      "bodyMd": "## Les liens qui donnent du sens aux objets\n\nLes 4 catégories d'objets (Personnel, Equipment, Material, Process Segment) prises isolément ne suffisent pas. Ce qui donne de la puissance au modèle ISA-95, ce sont les **relations typées** qui les relient.\n\n### Les principales relations\n[KV|**Personnel ↔ Qualification**:qui est certifié pour quoi||**Personnel ↔ Equipment**:qui peut opérer quoi (via qualifications)||**Personnel ↔ Person Class**:groupe d'appartenance||**Equipment ↔ Work Unit**:localisation dans la hiérarchie physique||**Equipment ↔ Equipment Capability**:ce qu'il sait faire||**Material ↔ Material Class**:famille||**Material Lot ↔ Material Definition**:instanciation||**Process Segment ↔ Personnel spec**:qui est requis||**Process Segment ↔ Equipment spec**:quel équipement||**Process Segment ↔ Material spec**:quelles matières]\n\n### À quoi ça sert concrètement\nCes relations permettent des **requêtes puissantes** sur le modèle. Exemples réels :\n\n1. « Quels équipements peuvent produire ProduitX ? » → parcours des Process Segments qui produisent ProduitX + des Equipments requis par ces Segments\n2. « Qui est qualifié pour opérer Reactor R1 aujourd'hui ? » → parcours des Personnels dont les Qualifications incluent Reactor R1 + disponibilité\n3. « Quels batchs ont consommé Lot #67890 ? » → parcours inverse des relations Material Lot consommé\n4. « Que peut-on produire avec les ressources actuellement disponibles ? » → intersection des capacités Equipment × Personnels dispo × Materials en stock\n\nSans ces relations formalisées, on ferait tout ça à la main. Avec, on a des systèmes de planification et de traçabilité performants.\n\n### Implémentation\nTechniquement, les relations sont implémentées en base de données relationnelle (SQL Server, PostgreSQL) via des tables de jointure, ou en base graphe (Neo4j) pour les cas les plus complexes. Les MES commerciaux (Werum PAS-X, Emerson Syncade) implémentent tout ça nativement.\n\n[TIP|**Piège classique** à éviter : sur-modéliser. Un projet qui définit 50 catégories de relations custom devient vite ingérable. Rester dans les relations standards ISA-95, quitte à avoir un modèle moins « riche » sémantiquement mais beaucoup plus maintenable.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -235,33 +245,23 @@
       "position": 20,
       "kind": "CONTENT",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Relations entre objets",
-      "bodyMd": "## Le graphe des dépendances\n\n### Types de relations\n- Personnel → Equipment (qui peut opérer quoi)\n- Personnel → Qualification (qui est certifié)\n- Equipment → Material (quelle machine transforme quoi)\n- Process Segment → Personnel, Equipment, Material (ressources nécessaires)\n\n### Modélisation\nRelations = **liens typés** dans le modèle. Permettent requêtes complexes :\n- \"Quelles machines peuvent produire ProduitX ?\"\n- \"Qui est qualifié pour opérer Reactor_R1 ?\"",
+      "title": "Namespace ISA-95 en pratique",
+      "bodyMd": "## Convention concrète pour un projet Dasolabs\n\nRécapitulons ce que la Part 1 nous a appris, et voyons comment l'appliquer en pratique dans un projet Dasolabs typique. On va se concentrer sur la convention namespace qui sera le fil rouge de tous les projets.\n\n### La convention recommandée\nLa hiérarchie physique ISA-95 donne le schéma :\n\n    /Enterprise/Site/Area/Work Center/Work Unit/attribute\n\nCe schéma est **strict** et à respecter partout. Il devient le namespace utilisé dans le UNS, dans les tags SCADA, dans les archives Historian, dans les rapports.\n\n### Exemple appliqué à Zoetis\nPrenons Zoetis, avec une usine à Louvain-la-Neuve :\n\n    /Zoetis/LouvainLaNeuve/Filling_Area/Filling_Line1/Filler_M1/temperature\n    /Zoetis/LouvainLaNeuve/Filling_Area/Filling_Line1/Filler_M1/pressure\n    /Zoetis/LouvainLaNeuve/Filling_Area/Filling_Line1/Capper_M2/state\n    /Zoetis/LouvainLaNeuve/QA_Area/Lab_Station1/pH_meter/value\n\nCette structure est **immédiatement lisible** pour n'importe quel intégrateur qui débarque sur le projet. Pas besoin de documentation externe.\n\n### Bénéfices concrets\n1. **Onboarding rapide** : un nouveau consultant comprend l'organisation en 5 minutes\n2. **Requêtes intuitives** : « tous les capteurs de la Filling_Area » = wildcard /Zoetis/LouvainLaNeuve/Filling_Area/#\n3. **Extensibilité** : ajouter une nouvelle ligne = ajouter un nouveau Work Center dans le namespace, sans rien casser\n4. **Portabilité multi-sites** : la structure identique s'applique à Bruxelles, Paris, Milan\n5. **Documentation implicite** : le namespace est la carte de l'usine\n\n### Erreurs à éviter\n[DANGER|**Namespace incohérent** : « /Zoetis/Line1 » et « /Zoetis/LineA/ » dans le même projet · chaos]\n[DANGER|**Trop plat** : « /tag_1234 », « /tag_1235 » · impossible à naviguer]\n[DANGER|**Trop profond** : 10 niveaux hiérarchiques · illisible]\n[DANGER|**Nommer par technologie** : « /PLC1/CPU/DB10.DBX0.0 » · lie namespace à implémentation · casse au refactor]\n\n### Recommandation Dasolabs\nDans nos projets, on documente la convention namespace **avant de coder quoi que ce soit**. C'est un livrable d'ingénierie qui prend 4h et évite des semaines de refactor.\n\n[RULE|**Convention namespace = premier livrable d'un projet automation moderne**. Non-négociable.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 21,
-      "kind": "CONTENT",
-      "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Namespace ISA-95",
-      "bodyMd": "## L'arborescence standard\n\n### Structure recommandée\n    /Enterprise/Site/Area/Work Center/Work Unit/attribute\n\n### Exemple concret\n    /Dasolabs/Brussels/Filling_Area/Line1/Filler_M1/temperature\n\n### Bénéfices\n- Cohérent partout\n- Extensible\n- Mappable vers UNS MQTT\n\n[RULE|Cette convention est **le standard de facto** de tous les UNS modernes. À adopter dès jour 1.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 22,
       "kind": "QUIZ",
       "section": "2 · ISA-95 Part 1 — Terminologie et modèles",
-      "title": "Quiz 2 — Object models",
+      "title": "Quiz 2 — Object Models",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "ISA-95 définit combien de catégories d'objets principaux ?",
+            "prompt": "ISA-95 définit combien de catégories d'objets métier principaux ?",
             "options": [
               "2",
               "4 (Personnel, Equipment, Material, Process Segment)",
@@ -273,20 +273,30 @@
           {
             "prompt": "Un Process Segment est…",
             "options": [
-              "Un capteur",
-              "Une activité de production standardisée avec ressources",
+              "Un capteur physique",
+              "Une activité de production standardisée avec ressources déclarées, réutilisable dans plusieurs recettes",
               "Un ERP",
-              "Un DB"
+              "Une base de données"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Namespace ISA-95 standard hiérarchique…",
+            "prompt": "Le namespace ISA-95 recommandé est de la forme…",
             "options": [
-              "Plat",
-              "Enterprise → Site → Area → Work Center → Work Unit",
-              "Random",
-              "Numérique"
+              "/tag_1234",
+              "/Enterprise/Site/Area/Work Center/Work Unit/attribute",
+              "Aléatoire",
+              "Numéroté séquentiellement"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un Material Sublot sert à…",
+            "options": [
+              "Rien de spécial",
+              "Traçabilité fine · au niveau du flacon individuel en pharma",
+              "Réduire les coûts",
+              "Optimiser le stockage"
             ],
             "correctIndex": 1
           }
@@ -295,11 +305,21 @@
       "imageUrl": null
     },
     {
+      "position": 22,
+      "kind": "CONTENT",
+      "section": "3 · ISA-95 Part 3 — MOM Activities",
+      "title": "Manufacturing Operations Management — vue d'ensemble",
+      "bodyMd": "## Comment structurer le niveau 3 d'une usine ?\n\nLa **Part 3** d'ISA-95 est probablement la plus utile en pratique pour un intégrateur. Elle décrit **les activités du niveau 3** (MES) et fournit une organisation standardisée pour tout MES moderne.\n\n### Le contexte\nAvant ISA-95 Part 3, chaque intégrateur qui déployait un MES organisait les fonctionnalités à sa sauce. Certains regroupaient tout dans « Production Manager », d'autres séparaient en dizaines de modules. Résultat : impossible de comparer deux MES, impossible de former du personnel qui pourrait travailler sur plusieurs systèmes.\n\nLa Part 3 propose une **taxonomie standardisée** en **4 grandes catégories** d'activités :\n\n[KV|**Production Operations Management**:tout ce qui concerne la production directe · cadences, batchs, traçabilité||**Maintenance Operations Management**:tout ce qui concerne la maintenance · pannes, interventions, TPM||**Quality Operations Management**:tout ce qui concerne la qualité · tests, résultats, non-conformités||**Inventory Operations Management**:tout ce qui concerne les stocks · matières premières, produits finis, WIP]\n\n### Pourquoi cette organisation ?\nCes 4 catégories reflètent les **4 grandes préoccupations d'un directeur d'usine** :\n1. Produit-on bien ? (Production)\n2. Les machines tiennent-elles ? (Maintenance)\n3. La qualité est-elle au rendez-vous ? (Quality)\n4. Où sont les matières et produits ? (Inventory)\n\nUn MES qui couvre ces 4 domaines couvre 100 % du niveau 3. Un MES qui en couvre 1 ou 2 est incomplet — souvent par choix commercial (les MES pharma se concentrent sur Production + Quality par exemple).\n\n### Convergence avec les 4 catégories d'objets\nLes 4 catégories d'activités **s'articulent** avec les 4 catégories d'objets vues précédemment. Chaque activité utilise et modifie des objets Personnel, Equipment, Material, Process Segment. Par exemple, l'activité « Production Execution » implique un Personnel qui opère un Equipment pour transformer un Material selon un Process Segment. Tout est cohérent.\n\n[TIP|**Astuce d'analyse Dasolabs** : quand on évalue un MES chez un client, on liste les activités qu'il couvre selon ces 4 catégories. Cette grille de lecture révèle immédiatement les manques (« Ce MES ne fait pas Quality, donc il faut un système QA séparé »).]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 23,
       "kind": "CONTENT",
       "section": "3 · ISA-95 Part 3 — MOM Activities",
-      "title": "Manufacturing Operations Management",
-      "bodyMd": "## Level 3 activities\n\nLa **Part 3** décrit les **activités du niveau 3** (MES) organisées en 4 sous-catégories.\n\n### Les 4 activities catégories\n[KV|**Production operations mgmt**:cadences, batches, traçabilité||**Maintenance operations mgmt**:pannes, interventions, TPM||**Quality operations mgmt**:tests, résultats, non-conformités||**Inventory operations mgmt**:stocks matières, produits finis]",
+      "title": "Production Operations Management",
+      "bodyMd": "## Le cœur de la production\n\n**Production Operations Management** (POM) est la catégorie principale d'activités MOM. Elle couvre tout ce qui concerne la production directe : planifier, dispatcher, exécuter, collecter des données, suivre, analyser la performance.\n\n### Les activités POM détaillées\n[KV|**Detailed Scheduling**:Planifier les ordres au niveau machine · qui produit quoi quand||**Production Dispatching**:Assigner les ordres aux ressources · démarrer les batchs||**Production Execution Management**:Piloter l'exécution en temps réel · orchestrer les phases||**Production Data Collection**:Collecter les données process pendant la production||**Production Tracking**:Tracer chaque batch de A à Z · qui, quoi, quand, avec quoi||**Production Performance Analysis**:Analyser les indicateurs · cadence, OEE, taux de rebut]\n\n### Un exemple concret — batch pharma UCB\nSuivons un batch depuis sa planification jusqu'à son analyse :\n\n1. **Detailed Scheduling** : Le planificateur charge la commande SAP « Produire 10 000 doses de vaccin XYZ ». Le MES calcule qu'il faut 3 batchs de 3400 doses, planifiés sur 3 jours consécutifs sur Reactor R1.\n\n2. **Production Dispatching** : À J-1, le MES envoie l'ordre au moteur batch (AVEVA Batch Management) : « Batch #12345 à démarrer demain 6h sur R1 avec recette Vaccin_XYZ_v2.3 ».\n\n3. **Production Execution Management** : Le moteur batch exécute les 40 phases de la recette. Le PLC S7-1500 pilote les vannes et régulations. L'opérateur suit sur le SCADA.\n\n4. **Production Data Collection** : Toutes les 100 ms, Historian archive les valeurs T°, pH, agitation. Toutes les alarmes sont archivées avec horodatage précis.\n\n5. **Production Tracking** : Le batch record électronique (EBR) accumule toutes les données au fil de l'exécution. À la fin, il contient l'histoire complète du batch.\n\n6. **Production Performance Analysis** : Fin de mois, le MES compare les 30 batchs produits : cadence moyenne, rendement, batchs rejetés. Reporting envoyé au directeur d'usine.\n\n### Cohérence avec les autres activités\nLe POM n'agit pas isolément. Pendant Production Execution, il déclenche des activités Quality (tests QA en cours de batch), Inventory (consommation matières premières), Maintenance (si détection anomalie équipement).\n\n### En termes MES commerciaux\nWerum PAS-X, POMSnet, Emerson Syncade, Rockwell FactoryTalk Production — tous implémentent ces 6 activités POM. Elles constituent le cœur fonctionnel de tout MES.\n\n[TIP|**Retour d'expérience** : sur un projet UCB, la mise en place structurée du POM (avec cette taxonomie) a réduit les KPIs de rejets batch de 12 % à 3 % en 18 mois. Pas de magie — juste que la structuration force à identifier les causes racines.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -308,8 +328,8 @@
       "position": 24,
       "kind": "CONTENT",
       "section": "3 · ISA-95 Part 3 — MOM Activities",
-      "title": "Production Operations",
-      "bodyMd": "## Détail\n\n### Activities\n[KV|**Detailed scheduling**:planifier les ordres au niveau machine||**Production dispatching**:assigner ordres aux ressources||**Production execution mgmt**:exécuter la production||**Production data collection**:collecter données process||**Production tracking**:tracer chaque batch||**Production performance analysis**:analyser KPI]",
+      "title": "Quality Operations Management",
+      "bodyMd": "## QA/QC en pharma — le domaine critique\n\n**Quality Operations Management** (QOM) est probablement la catégorie la plus critique en pharma et agroalimentaire. Elle organise tous les tests, résultats, non-conformités, et libérations qualité.\n\n### Contexte pharma\nEn pharma, chaque batch produit doit passer par un cycle de tests QA obligatoires **avant libération** pour vente. Un batch de vaccin qui n'est pas libéré ne peut pas quitter l'usine, même s'il est physiquement produit. Le QOM gère ce cycle critique.\n\nSans QOM structuré, la gestion qualité se fait à coups d'Excel et de mails — inconforme à GAMP 5, risque énorme en audit FDA.\n\n### Les activités QOM détaillées\n[KV|**Quality Test Definition**:Définir les tests à faire · T° cible, viscosité min, contamination microbienne max||**Quality Test Execution**:Exécuter les tests · prise d'échantillons, analyses labo||**Quality Data Collection**:Collecter les résultats des tests||**Quality Tracking**:Tracer les non-conformités (NC) · investigation, cause racine||**Quality Performance Analysis**:Analyser tendances qualité · évolution des NC, statistiques]\n\n### Un exemple pharma UCB\nPour chaque batch de vaccin UCB :\n\n1. **Test Definition** : La master recipe définit 15 tests obligatoires : pH, viscosité, apparence visuelle, contamination microbienne, stérilité, potency assay, etc. Chaque test a des critères d'acceptation.\n\n2. **Test Execution** : Aux étapes définies du batch, des échantillons sont prélevés automatiquement (via ligne d'échantillonnage) ou manuellement par l'opérateur. Ils sont envoyés au labo.\n\n3. **Data Collection** : Le labo effectue les tests et enregistre les résultats dans le LIMS (Laboratory Information Management System). Ces résultats sont automatiquement remontés vers le MES via ISA-95 message.\n\n4. **Tracking** : Si un test échoue, une NC est créée avec workflow d'investigation. QA doit décider : libérer le batch quand même (déviation acceptable), refuser (batch perdu), ou retraiter (rework).\n\n5. **Performance Analysis** : Rapport mensuel des NC par catégorie · identification tendances (« depuis 3 mois, la contamination microbienne augmente sur R1, à investiguer »).\n\n### Signature électronique 21 CFR Part 11\nToutes les décisions QA critiques (libération batch, acceptation déviation) sont **signées électroniquement** conformément au 21 CFR Part 11. Le QOM enregistre : qui, quand, quelle décision, pourquoi.\n\n[RULE|**Sans QOM structuré, une usine pharma est en risque de non-conformité permanent**. C'est un investissement obligatoire, pas optionnel.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -318,8 +338,8 @@
       "position": 25,
       "kind": "CONTENT",
       "section": "3 · ISA-95 Part 3 — MOM Activities",
-      "title": "Quality Operations",
-      "bodyMd": "## QA/QC en pharma\n\n### Activities\n[KV|**Quality test definition**:définir tests (T°, pH, viscosité…)||**Quality test execution**:exécuter tests||**Quality data collection**:collecter résultats||**Quality tracking**:tracer NC (non-conformités)||**Quality performance analysis**:analyser tendances]\n\n### Cas pharma\nChaque batch produit → tests QA obligatoires avant libération. ISA-95 définit comment tout ça est structuré.",
+      "title": "Maintenance Operations Management",
+      "bodyMd": "## TPM et interventions structurées\n\n**Maintenance Operations Management** (MOM_Maint) organise tout ce qui concerne la maintenance : préventif, curatif, GMAO, indicateurs. C'est souvent moins visible qu'un MES, mais critique pour la disponibilité des équipements.\n\n### Contexte\nUne usine qui ne gère pas la maintenance de manière structurée voit ses temps d'arrêt exploser progressivement. Une usine qui applique la **TPM** (Total Productive Maintenance) avec des activités structurées voit son OEE (Overall Equipment Effectiveness) monter et rester haut.\n\n### Les activités\n[KV|**Maintenance Definition**:Définir le programme préventif · révision R1 tous les 3 mois, filtres changés tous les 500h||**Maintenance Dispatching**:Planifier les interventions · assigner techniciens, réserver machines||**Maintenance Execution**:Effectuer l'intervention · check-list, pièces utilisées||**Maintenance Data Collection**:Relever temps, pièces consommées, observations||**Maintenance Analysis**:Calculer indicateurs · MTBF (Mean Time Between Failures), MTTR (Mean Time To Repair)]\n\n### Intégration avec GMAO\nCes activités s'implémentent souvent dans une **GMAO** (Gestion de Maintenance Assistée par Ordinateur) : SAP PM, IBM Maximo, Infor EAM, etc. Ces outils communiquent avec le MES via ISA-95 pour se synchroniser (disponibilité machines, alarmes qui déclenchent interventions).\n\n### Un exemple concret\nSur une ligne Zoetis :\n1. **Definition** : Filler M1 doit être révisé toutes les 500h (pièces d'usure, calibration balance)\n2. **Dispatching** : Le compteur d'heures atteint 495h → GMAO génère automatiquement OT (Ordre de Travail) planifié à J+5, assigné à Adrien (technicien qualifié)\n3. **Execution** : Adrien fait l'intervention, coche les check-lists, note les pièces changées\n4. **Data Collection** : Temps réel : 4h30. Pièces : 2 joints, 1 balance. Observations : « usure joint 3 plus forte que prévue, à surveiller »\n5. **Analysis** : Fin d'année, calcul MTBF = 480h (proche des 500h prévus, RAS)\n\n### Bénéfice pour Dasolabs\nChez GROUPEMECA, on a implémenté un MOM_Maint structuré avec IBM Maximo. Résultat en 2 ans : temps d'arrêt réduit de 18 % → 9 %. Économie : ~150 k€/an. Amortissement du projet : 8 mois.\n\n[TIP|Une maintenance structurée profite AUSSI aux équipes. Un technicien qui a un plan d'intervention clair, des pièces réservées, un historique — c'est un technicien efficace et non-stressé.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -328,8 +348,8 @@
       "position": 26,
       "kind": "CONTENT",
       "section": "3 · ISA-95 Part 3 — MOM Activities",
-      "title": "Maintenance Operations",
-      "bodyMd": "## TPM et interventions\n\n### Activities\n[KV|**Maintenance definition**:programme préventif||**Maintenance dispatching**:planifier interventions||**Maintenance execution**:effectuer intervention||**Maintenance data collection**:relever temps, pièces||**Maintenance analysis**:MTBF, MTTR]",
+      "title": "Inventory Operations Management",
+      "bodyMd": "## Gestion des stocks intégrée\n\n**Inventory Operations Management** (IOM) organise les mouvements de matières : réceptions fournisseurs, consommation en production, produits finis, expéditions.\n\n### Contexte pharma\nEn pharma, la gestion des stocks est doublement critique :\n1. **Traçabilité obligatoire** : chaque lot de matière première doit être suivi jusqu'au produit fini\n2. **Péremption** : les matières et produits ont des dates d'expiration à respecter\n\nSans IOM structuré, on ne peut pas répondre à « quel batch a consommé ce lot défectueux ? » en cas de rappel — non-conformité.\n\n### Les activités IOM\n[KV|**Inventory Definition**:Catalogue des matières · références, unités, spécifications||**Inventory Tracking**:Mouvements en temps réel · réceptions, consommations, expéditions||**Inventory Dispatching**:Allocation aux batchs · réserver Lot A pour batch #12345||**Inventory Analysis**:Rotation, seuils, alertes péremption]\n\n### Un exemple\nRéception matière première chez Zoetis :\n\n1. **Definition** : PowderA (référence SKU-4567) · unité kg · fournisseur X pré-qualifié\n2. **Tracking** : Livraison de 200 kg le 2026-09-15 · Lot #67890 · testé QA le 2026-09-16\n3. **Dispatching** : Production planning réserve 20 kg pour batch #12345 (2026-09-20)\n4. **Analysis** : Rotation FIFO respectée, expiration Lot #67890 à 6 mois (2027-03-15), alerte 30 jours avant\n\n### Intégration ERP\nL'IOM communique très fort avec l'ERP (SAP MM par exemple). Les réceptions créent des mouvements SAP, les consommations déduisent les stocks SAP, les expéditions génèrent des factures. Ces échanges se font via des messages ISA-95 Part 5 (voir chapitre suivant).\n\n[RULE|En pharma, l'IOM doit être **automatique**. Toute saisie manuelle = risque d'erreur = risque de non-conformité. Investir dans l'automatisation IOM est rentable dès la première année.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -338,24 +358,14 @@
       "position": 27,
       "kind": "CONTENT",
       "section": "3 · ISA-95 Part 3 — MOM Activities",
-      "title": "Inventory Operations",
-      "bodyMd": "## Gestion des stocks\n\n### Activities\n[KV|**Inventory definition**:catalogue matières||**Inventory tracking**:mouvements||**Inventory dispatching**:allocation aux batches||**Inventory analysis**:rotation, seuils]",
+      "title": "Vue globale MOM et intégration",
+      "bodyMd": "## Les 4 piliers ensemble\n\nRécapitulons ce qu'on a vu : le MOM (Manufacturing Operations Management) au niveau 3 est structuré en **4 catégories d'activités** (Production, Quality, Maintenance, Inventory), chacune avec ses sous-activités standardisées.\n\n### Comment ces catégories interagissent\nElles ne sont pas isolées. Un batch typique en pharma implique les 4 :\n\n1. **Production** exécute le batch\n2. **Quality** prélève des échantillons et teste\n3. **Maintenance** s'assure que les équipements sont dispos\n4. **Inventory** trace les matières consommées et le produit fini créé\n\n### Vue architecture d'un MES ISA-95\nUn MES conforme à ISA-95 a typiquement :\n- 1 **module Production** central\n- 1 **module Quality** connecté au LIMS\n- 1 **module Maintenance** connecté à la GMAO\n- 1 **module Inventory** connecté à l'ERP\n- 1 **backbone** commun avec les 4 catégories d'objets (Personnel, Equipment, Material, Process Segment)\n\n### Choix MES pour Dasolabs\nQuand on évalue un MES pour un client, on regarde comment il couvre les 4 activités :\n- **Werum PAS-X** : couvre les 4, focus pharma pur, très cher\n- **POMSnet** : couvre les 4, moderne, prix moyen\n- **Rockwell FactoryTalk Production** : focus Production/Quality, moins Maintenance\n- **Emerson Syncade** : couvre les 4, focus batch pharma/chimie\n- **AVEVA MES (ex Wonderware)** : couvre partiellement, souvent complété par autre outil\n\nPas de meilleur MES universel — dépend du contexte client.\n\n[TIP|Dasolabs recommande souvent de **démarrer avec une seule catégorie** (souvent Production) et d'étendre progressivement. Un MES full-scope déployé en big bang = échec quasi certain. Une approche incrémentale = succès.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 28,
-      "kind": "CONTENT",
-      "section": "3 · ISA-95 Part 3 — MOM Activities",
-      "title": "Vue globale MOM",
-      "bodyMd": "## Les 4 pilliers ensemble\n\nUn MES ISA-95 orchestre :\n- **Production** (cadence, batches)\n- **Quality** (tests, NC)\n- **Maintenance** (interventions)\n- **Inventory** (stocks)\n\nAvec les mêmes objets (Personnel, Equipment, Material, Process Segment).\n\n[TIP|Un vrai MES pharma (Werum PAS-X, POMSnet, Emerson Syncade) implémente les 4 pilliers ISA-95.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 29,
       "kind": "QUIZ",
       "section": "3 · ISA-95 Part 3 — MOM Activities",
       "title": "Quiz 3 — MOM Activities",
@@ -364,7 +374,7 @@
       "quiz": {
         "questions": [
           {
-            "prompt": "ISA-95 définit combien de catégories d'activités MOM ?",
+            "prompt": "ISA-95 Part 3 définit combien de catégories d'activités MOM ?",
             "options": [
               "2",
               "4 (Production, Quality, Maintenance, Inventory)",
@@ -374,94 +384,21 @@
             "correctIndex": 1
           },
           {
-            "prompt": "En pharma, l'activité Quality Operations tracks…",
+            "prompt": "En pharma UCB, l'activité Quality Operations trace…",
             "options": [
               "Rien",
-              "Tests QA/QC + non-conformités + libérations batch",
+              "Tests QA/QC + non-conformités + libérations batch avec e-signature",
               "Uniquement les alarmes",
-              "Le café"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 30,
-      "kind": "CONTENT",
-      "section": "4 · ISA-95 Part 5 — B2M Transactions",
-      "title": "Business to MOM Transactions",
-      "bodyMd": "## Messages entre L3 et L4\n\nLa **Part 5** définit **comment ERP et MES échangent des informations**.\n\n### Concept\nMessages standardisés (schémas XML/JSON) pour :\n- ERP envoie ordres de production au MES\n- MES rapporte résultats au ERP\n- Données synchronisées (recettes, matières, personnel)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 31,
-      "kind": "CONTENT",
-      "section": "4 · ISA-95 Part 5 — B2M Transactions",
-      "title": "Types de messages",
-      "bodyMd": "## 4 verbes principaux\n\n[KV|**Get**:demander information||**Show**:répondre avec info||**Change**:modifier||**Process**:effectuer transaction]\n\n### Exemples concrets\n- Get Production Order → MES demande à ERP les ordres du jour\n- Show Production Order → ERP renvoie la liste\n- Change Production Schedule → MES informe ERP d'un décalage\n- Process Production Performance → MES rapporte résultats batch",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 32,
-      "kind": "CONTENT",
-      "section": "4 · ISA-95 Part 5 — B2M Transactions",
-      "title": "Publication et subscription",
-      "bodyMd": "## Modes de communication\n\n### Publish\nUn système publie un message qui peut être consommé par plusieurs.\n\n### Subscribe\nUn système s'abonne à un type de messages.\n\n### Cas d'usage\nMES publie \"Batch complete\" → ERP s'abonne pour clôturer commande + Historian s'abonne pour archiver + Analytics s'abonne pour KPI.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 33,
-      "kind": "CONTENT",
-      "section": "4 · ISA-95 Part 5 — B2M Transactions",
-      "title": "B2MML — Schémas XML",
-      "bodyMd": "## Le format standard\n\n**B2MML** (Business to Manufacturing Markup Language) = **schémas XML standards** pour les messages ISA-95.\n\n### Développé par\nMESA (MES Association) + OASIS.\n\n### Bénéfice\nInterop entre MES (SAP, POMSnet, custom) et ERP (SAP, Oracle, Odoo).",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 34,
-      "kind": "CONTENT",
-      "section": "4 · ISA-95 Part 5 — B2M Transactions",
-      "title": "Migration vers OPC UA et JSON",
-      "bodyMd": "## Modernisation\n\n### Trend 2020+\n- XML B2MML → JSON (plus léger, moderne)\n- Point-to-point → OPC UA / MQTT event-driven\n- Batch → streaming\n\n### OPC UA companion specs\nISA-95 objects mappés en OPC UA node types. Compatibilité native.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 35,
-      "kind": "QUIZ",
-      "section": "4 · ISA-95 Part 5 — B2M Transactions",
-      "title": "Quiz 4 — B2M",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "B2MML est…",
-            "options": [
-              "Un protocole réseau",
-              "Schémas XML standards pour messages ERP↔MES",
-              "Un langage",
-              "Un PLC"
+              "Le stock café"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Le trend moderne (2020+) pour messages ISA-95 est…",
+            "prompt": "L'activité Maintenance calcule typiquement quel indicateur ?",
             "options": [
-              "Rester XML uniquement",
-              "JSON + streaming (MQTT/OPC UA) event-driven",
-              "TXT files",
+              "OEE uniquement",
+              "MTBF et MTTR (Mean Time Between Failures / To Repair)",
+              "CA client",
               "Rien"
             ],
             "correctIndex": 1
@@ -471,11 +408,114 @@
       "imageUrl": null
     },
     {
+      "position": 29,
+      "kind": "CONTENT",
+      "section": "4 · ISA-95 Part 5 — B2M Transactions",
+      "title": "Business to MOM Transactions — le rôle",
+      "bodyMd": "## Comment ERP et MES s'échangent des messages\n\nLa **Part 5** d'ISA-95 traite spécifiquement de **comment ERP et MES échangent des informations**. C'est la partie la plus technique de la norme, celle qui définit les messages standardisés.\n\n### Le problème historique\nSans Part 5, chaque intégration ERP ↔ MES est un projet custom :\n- SAP envoie des ordres au format XML propriétaire\n- Le MES ré-interprète chaque champ\n- Le MES envoie des résultats dans un autre format XML\n- SAP re-parse à sa façon\n\nChaque projet réinvente ce parsing, ces mappings. Aucune réutilisabilité, coûts élevés, bugs fréquents.\n\n### La solution ISA-95 Part 5\nDéfinir **des schémas de messages standards** (structure XML/JSON validée) pour tous les échanges typiques :\n- Ordres de production (ERP → MES)\n- Résultats de production (MES → ERP)\n- Réceptions matières (ERP → MES)\n- Consommations (MES → ERP)\n- Personnel (ERP ↔ MES)\n- Équipements et disponibilités\n- Etc.\n\n### Bénéfices\nUn intégrateur qui maîtrise Part 5 peut intégrer un ERP SAP avec n'importe quel MES compatible ISA-95 en semaines au lieu de mois. Un ERP conforme peut être remplacé sans réécrire l'interface MES. Un MES peut être remplacé sans casser l'ERP.\n\nC'est pas juste théorique — le format **B2MML** (Business to Manufacturing Markup Language), qu'on couvrira bientôt, est directement issu de Part 5.\n\n[TIP|**Retour de terrain** : sur un projet de migration MES (ancien MES → PAS-X) chez UCB, l'utilisation de B2MML côté SAP a permis de ne PAS toucher à l'interface SAP. Économie : 3 mois de projet.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 30,
+      "kind": "CONTENT",
+      "section": "4 · ISA-95 Part 5 — B2M Transactions",
+      "title": "Types de messages ISA-95",
+      "bodyMd": "## Les 4 verbes principaux\n\nLes messages définis par ISA-95 Part 5 utilisent une taxonomie très simple : **4 verbes** couvrent tous les échanges.\n\n### Les 4 verbes\n[KV|**Get**:Demander une information · « Donne-moi la liste des Personnels qualifiés »||**Show**:Répondre avec l'information · « Voici la liste »||**Change**:Modifier une information · « Ajoute cette qualification »||**Process**:Effectuer une transaction complexe · « Traite cet ordre de production »]\n\n### Combinaison verbe + objet\nChaque type d'échange combine un verbe et une catégorie d'objet. Exemples :\n- **Get Production Order** : demander la liste des ordres de production\n- **Show Production Order** : renvoyer cette liste\n- **Change Production Schedule** : modifier le planning\n- **Process Production Performance** : soumettre les résultats de production complets\n\n### Exemple concret — ordre de production\nSuivons l'exécution d'un ordre de production entre SAP et un MES :\n\n1. **Le matin, le MES démarre** et interroge SAP : « Get Production Order pour aujourd'hui »\n2. **SAP répond** : « Show Production Order : voici 5 ordres pour Line 1 »\n3. **Le MES organise sa journée**, planifie les batchs\n4. **Un batch se termine** avec un rendement de 95 % au lieu des 98 % prévus\n5. **Le MES informe SAP** : « Change Production Schedule pour ajuster stocks »\n6. **En fin de shift** : « Process Production Performance » avec tous les KPIs\n\n### Modes de communication\nCes messages peuvent être échangés :\n- **Synchrone** : le demandeur attend la réponse (comme HTTP)\n- **Asynchrone** : le message est déposé, le récepteur traite quand il peut\n- **Publish/Subscribe** : le producteur publie, plusieurs consommateurs s'abonnent (moderne)\n\n### Format\nHistoriquement XML (via B2MML), aujourd'hui de plus en plus JSON via REST APIs modernes.\n\n[TIP|**Astuce** : ne pas confondre ces 4 verbes avec HTTP GET/POST/PUT/DELETE. Ce sont des concepts métier ISA-95, pas des méthodes HTTP. Ils peuvent être implémentés sur n'importe quel protocole.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 31,
+      "kind": "CONTENT",
+      "section": "4 · ISA-95 Part 5 — B2M Transactions",
+      "title": "B2MML — le format XML standard",
+      "bodyMd": "## Schémas ouverts pour l'interop\n\n**B2MML** (**B**usiness to **M**anufacturing **M**arkup **L**anguage) est l'implémentation XML standard des messages ISA-95. Développé par **MESA** (Manufacturing Enterprise Solutions Association) et soutenu par OASIS, il est **gratuit** et **ouvert**.\n\n### Ce que B2MML fournit\n- Environ **80 schémas XSD** couvrant les messages ISA-95\n- Des exemples XML complets\n- Une documentation d'usage\n- Une communauté d'utilisateurs\n\n### Un exemple de message B2MML\nVoici un ordre de production simplifié en B2MML :\n\n    <ProductionSchedule>\n      <ID>PROD-2026-09-18-001</ID>\n      <ProductionRequest>\n        <ID>REQ-001</ID>\n        <ProductionParameter>\n          <ID>QUANTITY</ID>\n          <Value>1000</Value>\n          <UoM>doses</UoM>\n        </ProductionParameter>\n        <SegmentRequirement>\n          <ProcessSegmentID>MAKE_VACCINE_XYZ</ProcessSegmentID>\n          <EarliestStartTime>2026-09-19T08:00:00</EarliestStartTime>\n          <LatestEndTime>2026-09-19T20:00:00</LatestEndTime>\n        </SegmentRequirement>\n      </ProductionRequest>\n    </ProductionSchedule>\n\nCe XML est **auto-descriptif** : n'importe quel intégrateur qui lit la doc B2MML peut le comprendre et l'implémenter.\n\n### Adoption\nB2MML est adopté par les grands vendeurs MES et ERP :\n- SAP support natif via SAP MII\n- POMSnet intègre B2MML in/out\n- Werum PAS-X supporte\n- Etc.\n\n### Alternatives modernes\nEn 2026, on voit émerger des alternatives à B2MML :\n- **JSON** au lieu de XML (plus léger)\n- **REST APIs** au lieu de messages fichiers\n- **OPC UA companion specs** pour ISA-95\n\nCes alternatives couvrent les mêmes concepts sémantiques, avec des transports modernes.\n\n[TIP|**Chez Dasolabs**, sur projets neufs, on préfère utiliser **JSON via REST** plutôt que B2MML XML. Plus léger, plus intégrable dans stacks modernes. Mais on garde la sémantique ISA-95.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 32,
+      "kind": "CONTENT",
+      "section": "4 · ISA-95 Part 5 — B2M Transactions",
+      "title": "Migration vers formats modernes",
+      "bodyMd": "## Comment évoluent les échanges MES/ERP en 2026\n\nB2MML XML était le standard des années 2000-2010. Aujourd'hui, la tendance est vers des formats plus modernes tout en gardant la sémantique ISA-95.\n\n### Trends 2020-2026\n[KV|**JSON au lieu de XML**:plus léger, plus lisible, standard IT moderne||**REST APIs au lieu de fichiers**:pull/push HTTP standardisé||**OPC UA companion specs**:les objets ISA-95 comme node types OPC UA||**Streaming (MQTT, Kafka)**:messages événementiels au lieu de batch|| **GraphQL émergent**:requêtes flexibles côté client]\n\n### Pourquoi cette évolution\nLe monde IT a évolué. Les développeurs modernes veulent :\n- Simplicité de parsing (JSON parse en 1 ligne)\n- Intégration facile dans stacks cloud\n- Communication temps réel (WebSockets, streaming)\n- Documentation OpenAPI/Swagger\n\nLe monde XML/SOAP semble aujourd'hui **daté** pour la nouvelle génération. B2MML est encore utilisé, mais surtout en legacy.\n\n### Impact ISA-95\nLa norme elle-même s'adapte. La Part 5 et la Part 6 sont régulièrement révisées pour intégrer les évolutions techniques. La sémantique (les objets, les verbes) reste identique — seul le transport change.\n\n### Recommandation pour un projet neuf\n[STEPS|**Coder** en JSON avec les concepts ISA-95||**Exposer** via REST APIs OpenAPI-documented||**Publier** événementiellement via MQTT Sparkplug B (à voir dans formation UNS)||**Fournir** compat B2MML si le client a des systèmes legacy||**Documenter** l'alignement conceptuel avec ISA-95]\n\n### Compatibilité\nSi le client demande explicitement B2MML XML (parce que son SAP l'exige), on le fournit. Si le client est ouvert au moderne, on part en JSON/REST. Les deux sont valables — la sémantique ISA-95 est ce qui compte.\n\n[TIP|Les jeunes développeurs qui rejoignent Dasolabs préfèrent JSON/REST à B2MML XML. C'est humain. On leur explique que la sémantique est identique — l'important est de bien modéliser, pas le format de sérialisation.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 33,
+      "kind": "QUIZ",
+      "section": "4 · ISA-95 Part 5 — B2M Transactions",
+      "title": "Quiz 4 — B2M Transactions",
+      "bodyMd": "",
+      "notes": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "B2MML est…",
+            "options": [
+              "Un protocole réseau",
+              "Schémas XML standards pour messages ERP↔MES basés sur ISA-95",
+              "Un langage de programmation",
+              "Un PLC"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Les 4 verbes principaux d'ISA-95 sont…",
+            "options": [
+              "POST, GET, PUT, DELETE",
+              "Get, Show, Change, Process",
+              "SELECT, INSERT, UPDATE, DELETE",
+              "Read, Write, Modify, Erase"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "En 2026, la tendance pour messages ISA-95 est…",
+            "options": [
+              "Rester XML B2MML uniquement",
+              "JSON + REST + streaming (MQTT/Kafka) event-driven, mais sémantique ISA-95 gardée",
+              "Fichiers TXT",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "imageUrl": null
+    },
+    {
+      "position": 34,
+      "kind": "CONTENT",
+      "section": "5 · ISA-88 Batch Control — modèle procédural",
+      "title": "Le procedural model — l'innovation d'ISA-88",
+      "bodyMd": "## Séparer la logique métier de l'exécution\n\nL'innovation majeure d'ISA-88 est la **séparation entre le procédural (ce qu'on veut faire) et le physique (avec quels équipements)**. Cette séparation, révolutionnaire dans les années 90, est aujourd'hui évidente mais reste mal comprise dans certains projets.\n\n### Le procedural model — 4 niveaux hiérarchiques\n[KV|**Procedure**:La recette globale · « Produire ProductA (10 kg) »||**Unit Procedure**:Sous-section réalisée dans une unité · « Préparation dans Reactor R1 »||**Operation**:Une opération significative · « Chauffage »||**Phase**:Action élémentaire · « Ouvrir vanne V1 pendant 30 sec »]\n\n### Un exemple concret complet\nPrenons une recette « Vaccin XYZ » chez UCB. Voici sa décomposition hiérarchique :\n\n**Procedure : Vaccin_XYZ**\n- **Unit Procedure R1** : Préparation dans Reactor R1\n  - **Operation** Charge : Dosage MP\n    - **Phase** OpenV1 : Ouvrir vanne V1\n    - **Phase** WaitWeight : Attendre 5kg poids\n    - **Phase** CloseV1 : Fermer vanne V1\n  - **Operation** Heat : Chauffage\n    - **Phase** SetSetpoint : Consigne 60°C\n    - **Phase** WaitTemp : Attendre atteinte\n    - **Phase** HoldTemp : Maintenir 30 min\n  - **Operation** Discharge : Vidange\n    - **Phase** OpenDrain\n    - **Phase** WaitEmpty\n- **Unit Procedure Filling** : Remplissage dans Filler M1\n  - **Operation** … : (etc.)\n\nChaque niveau a son rôle : la Procedure décrit le produit fini, l'Unit Procedure décrit ce qui se passe dans un équipement, l'Operation décrit une action significative (« chauffer »), la Phase est l'action élémentaire pilotable directement par le PLC.\n\n### La puissance de cette décomposition\nCette décomposition permet :\n1. **Réutilisation** : la Phase « OpenV1 » peut être utilisée dans 10 recettes différentes\n2. **Modification granulaire** : changer la température de chauffage = modifier une Operation, sans toucher aux Phases\n3. **Validation par niveau** : valider les Phases (unitaire) puis Operations (composant) puis Procedures (intégration)\n4. **Débogage** : quand un batch échoue, on identifie précisément la Phase problématique\n\n[TIP|**Bonne pratique Dasolabs** : maintenir une **bibliothèque de Phases validées**. Chaque nouvelle recette = assemblage de Phases existantes. Résultat : nouvelle recette en 2h au lieu de 3 semaines.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 35,
+      "kind": "CONTENT",
+      "section": "5 · ISA-88 Batch Control — modèle procédural",
+      "title": "Physical model — l'équipement séparé",
+      "bodyMd": "## Le côté physique du batch\n\nISA-88 **sépare radicalement** le procedural (recette) du physical (équipement). Cette séparation est ce qui donne toute la puissance à la norme.\n\n### La hiérarchie physique ISA-88\n[KV|**Enterprise**:l'entreprise||**Site**:un site physique||**Area**:zone du site||**Process Cell**:groupe d'unités partageant un objectif||**Unit**:équipement autonome (réacteur, mélangeur)||**Equipment Module**:partie d'une unit (agitateur, système chauffage)||**Control Module**:élément individuel (vanne, capteur)]\n\n### Un exemple concret\nPour l'usine UCB Braine-l'Alleud :\n\n- **Enterprise** : UCB\n- **Site** : Braine-l'Alleud\n- **Area** : Suspension Manufacturing\n- **Process Cell** : Réacteur Cell A (regroupe R1, R2, R3 + auxiliaires)\n- **Unit** : Reactor R1\n- **Equipment Module** : Agitateur, Système chauffage, Système dosage\n- **Control Module** : Vanne V1, Capteur température TT-01\n\n### Pourquoi cette séparation est révolutionnaire\nSans ISA-88, on aurait dit : « la recette de Vaccin XYZ s'exécute sur R1 en ouvrant V1 pendant 30 sec ». La recette et l'équipement sont **liés en dur**. Résultat : impossible d'exécuter la même recette sur R2 sans réécrire.\n\nAvec ISA-88, la recette dit : « ouvrir la vanne d'alimentation matière première pendant 30 sec ». Le moteur batch **résout** à l'exécution : « sur R1, la vanne d'alim = V1 · sur R2, c'est V15 ». La recette est **portable**.\n\n### Bénéfices concrets\n- 1 recette pour N équipements équivalents\n- Réaffectation de dernière minute possible (R1 en maintenance → basculer sur R2)\n- Formation opérateurs plus rapide (même IHM sur tous les réacteurs)\n\n[RULE|**Séparation procedural/physical** = principe non-négociable en pharma. Un projet qui hardcode l'équipement dans la recette = obsolète dès le lendemain.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 36,
       "kind": "CONTENT",
       "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "Le procedural model",
-      "bodyMd": "## Procedure → Unit Procedure → Operation → Phase\n\nISA-88 organise **la logique batch** en 4 niveaux hiérarchiques.\n\n### Structure\n[KV|**Procedure**:la recette globale (ProductA)||**Unit Procedure**:sous-section réalisée dans une unité (Réacteur R1)||**Operation**:une opération significative (Chauffage)||**Phase**:action élémentaire (Ouvrir vanne V1)]\n\n### Exemple concret\n- **Procedure** : Produire ProductA (10 kg)\n- **Unit Procedure R1** : Préparation dans réacteur R1\n  - **Operation Charge** : Dosage MP\n    - **Phase Open V1**\n    - **Phase Wait Weight 5kg**\n    - **Phase Close V1**\n  - **Operation Heat**\n  - **Operation Discharge**",
+      "title": "Recipe types — Master vs Control",
+      "bodyMd": "## Les 4 niveaux de recette\n\nISA-88 définit **4 niveaux de recette**, du plus abstrait au plus concret. Cette hiérarchie reflète le cycle de vie d'un produit pharma, de la R&D à la production.\n\n### Les 4 types\n[KV|**General Recipe**:Spécification produit indépendante du site · issue de R&D · « Comment faire ce produit en théorie »||**Site Recipe**:Adaptation pour un site donné · équipements et matières spécifiques disponibles · « Comment on peut le faire à Braine-l'Alleud »||**Master Recipe**:Recette pour une process cell spécifique · exécutable · « Comment on le fait sur Reactor Cell A »||**Control Recipe**:Instance concrète pour un batch précis · avec paramètres actuels · « Batch #12345 démarre maintenant »]\n\n### Cycle de vie d'une recette pharma\n1. **R&D** développe le produit et crée la **General Recipe** (« recette scientifique »)\n2. **Transfert techno** vers le site : la General Recipe devient **Site Recipe** (adaptée aux équipements du site)\n3. **Ingénierie industrialisation** : Site Recipe devient **Master Recipe** (validée, prête pour production)\n4. **Production** : chaque batch = **Control Recipe** (instance)\n\n### Différence Master vs Control\nLa distinction Master/Control est cruciale :\n- **Master Recipe** : la description « comment produire », validée, versionnée. Non-exécutable directement.\n- **Control Recipe** : instance particulière avec paramètres actuels (batch#, matières lots réels, opérateur, timestamps). Exécutable, unique par batch.\n\nChaque batch génère une Control Recipe qui reste **archivée à vie** — c'est le **Master Batch Record** légal en pharma.\n\n### Change control\nModifier une Master Recipe validée nécessite un **change control formel** :\n- Justification métier\n- Analyse d'impact\n- Validation tests\n- Approbation QA\n- Nouvelle version incrémentée\n\nCette rigueur est **imposée par GAMP 5**. Sans change control, la master recipe dérive, et l'audit trace des modifications non documentées → non-conformité.\n\n[TIP|**Retour d'expérience Dasolabs** : sur un projet UCB, on a mis 3 mois à formaliser le change control recette. Client râlait au début (« c'est lourd »). 6 mois après, l'auditeur FDA a félicité UCB pour la qualité de leur gestion recette. Client rétrospectivement ravi.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -484,8 +524,8 @@
       "position": 37,
       "kind": "CONTENT",
       "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "Physical model — l'équipement",
-      "bodyMd": "## Où se déroule le procédural\n\nISA-88 sépare **procédural** (recette) et **physique** (équipement).\n\n### Hiérarchie physique\n[KV|**Enterprise**||**Site**||**Area**||**Process Cell**:groupe d'unités||**Unit**:un équipement autonome (réacteur, mélangeur)||**Equipment Module**:partie d'une unit||**Control Module**:élément individuel (vanne, capteur)]\n\n### Bénéfice\nUne recette est **portable** entre différents équipements du même type. Deux réacteurs R1 et R2 exécutent la même recette.",
+      "title": "Batch execution — de l'ordre au résultat",
+      "bodyMd": "## Le workflow complet d'un batch\n\nMaintenant qu'on connaît le procedural model et les types de recettes, voyons **comment un batch s'exécute concrètement** de A à Z.\n\n### Le workflow standard\n[STEPS|**1. Ordre de production** : SAP envoie « Produire 10 000 doses Vaccin XYZ »||**2. Sélection Master Recipe** : Le MES choisit la Master Recipe validée (version 2.3 par ex.)||**3. Instanciation Control Recipe** : Copie de la Master avec batch#, opérateur, matières lots||**4. Assignation équipement** : Reactor R1 sélectionné (disponible + capable)||**5. Vérification pré-requis** : Matières disponibles, personnel qualifié, équipement calibré||**6. Démarrage** : Le moteur batch (AVEVA Batch, Werum) commence l'exécution||**7. Exécution phases** : Chaque Phase envoie commandes au PLC · le PLC exécute · retourne feedback||**8. Suivi temps réel** : L'opérateur voit la progression sur SCADA · alarmes gérées||**9. Fin nominale** : Toutes phases OK · matières produites transférées au stock||**10. Batch record** : Control Recipe complète archivée avec tous les événements||**11. Libération QA** : Tests QA finaux · e-signature libération||**12. Rapport à SAP** : Message ISA-95 « Process Production Performance »]\n\n### Rôle de chaque composant\n[KV|**MES**:orchestre le batch de bout en bout||**Moteur batch**:exécute la recette (AVEVA Batch, SIMATIC BATCH, DeltaV Batch)||**PLC**:reçoit commandes phases et pilote équipement||**SCADA**:visualisation opérateur||**Historian**:archives process values||**LIMS**:résultats tests QA||**MES ↔ ERP**:messages ISA-95 pour synchronisation]\n\n### Durée typique\nUn batch pharma dure typiquement **8-24 heures** :\n- 40-60 phases\n- 15-30 tests QA en cours\n- 3-6 changements d'équipe\n- Archives ~100 MB de data process\n- Rapport final 30-100 pages PDF\n\n[TIP|**Complexité assumée** : un batch pharma moderne est une orchestration complexe. Les MES commerciaux valent leur prix élevé (100k-500k€) parce qu'ils implémentent tout ce workflow selon ISA-88/95.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -494,8 +534,8 @@
       "position": 38,
       "kind": "CONTENT",
       "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "Recipe types — Master vs Control",
-      "bodyMd": "## Différencier les recettes\n\n### Master Recipe\nLa **recette maître** décrit COMMENT produire, indépendamment du site.\n- Ingrédients, étapes, contrôles\n- Non-exécutable directement\n- Base réglementaire\n\n### Control Recipe\nLa **recette de contrôle** est une master recipe **liée à un batch précis + équipement précis + paramètres actuels**.\n- Exécutable\n- Un par batch\n- Archivée pour audit",
+      "title": "États d'un batch — state machine",
+      "bodyMd": "## Le comportement dynamique d'un batch\n\nUn batch n'est pas juste « lancé » puis « fini ». Il transite entre plusieurs **états définis par ISA-88**, chaque état ayant des règles précises de transition et des actions possibles.\n\n### Les états principaux\n[KV|**Idle**:pas démarré · en attente||**Running**:en cours d'exécution nominal||**Held**:en pause · sur alarme ou demande opérateur||**Restarting**:reprise après pause||**Complete**:terminé avec succès||**Stopped**:arrêté normalement avant fin (fin de test par exemple)||**Aborted**:annulé (erreur critique, rejet QA)||**Failed**:erreur non récupérable]\n\n### Transitions permises\nToutes les transitions ne sont pas possibles. Exemples :\n- Running → Held : oui (pause)\n- Held → Running : oui (reprise)\n- Held → Aborted : oui (opérateur décide d'abandonner)\n- Running → Complete : oui (fin nominale)\n- Complete → Running : **NON** (un batch fini reste fini)\n- Aborted → Running : **NON** (un batch avorté reste avorté)\n\n### Cas d'usage — pause opérateur\nExemple typique : à mi-batch, un opérateur détecte une odeur suspecte. Il appuie sur « Hold » à l'IHM.\n\n1. Le moteur batch passe le batch en état **Held**\n2. Toutes les régulations passent en mode manuel/sûr\n3. Alarme envoyée au superviseur\n4. Investigation menée (5 min ou 1h selon cas)\n5. Décision :\n   - Reprendre → **Running** (le batch continue là où il en était)\n   - Abandonner → **Aborted** (le batch est perdu, matières décontaminées)\n\n### Cas d'usage — timeout\nSi une Phase attend une condition (ex : « attendre que T° atteigne 60°C ») pendant plus longtemps qu'un timeout défini (ex : 45 min), le moteur batch passe le batch en **Held** automatiquement. Investigation nécessaire.\n\n### Archivage des transitions\nToutes les transitions d'état sont **archivées** dans le batch record. En cas d'audit, on peut retracer précisément quand un batch a été mis en pause, par qui, pourquoi, quand il a repris.\n\n[RULE|En pharma, **toute transition d'état est loguée** avec horodatage précis + user + raison. C'est ce qui rend un batch « audit-proof ».]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -504,8 +544,8 @@
       "position": 39,
       "kind": "CONTENT",
       "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "General vs Site vs Master",
-      "bodyMd": "## 3 niveaux de recette\n\n### General Recipe\nSpécification produit indépendante du site (recherche R&D).\n\n### Site Recipe\nAdaptation pour un site donné (équipements disponibles).\n\n### Master Recipe\nRecette pour une process cell spécifique.\n\n### Control Recipe\nExécution particulière (batch #12345).\n\n[TIP|En pharma pilotée, une recette passe par ces 4 étapes : R&D → transfert techno → validation site → production.]",
+      "title": "Common Procedure Building Blocks",
+      "bodyMd": "## Réutiliser des briques validées\n\nLe concept de **Common Procedure Building Blocks** (« blocs de procédure commun ») consiste à **définir des Phases standardisées réutilisables** entre les recettes.\n\n### Le principe\nAu lieu que chaque recette code sa propre logique pour « doser une matière première », on crée une Phase générique **DoserMatiere(quelle_MP, quelle_quantite)** avec paramètres. Cette Phase est utilisée par toutes les recettes qui doivent doser.\n\n### Exemples de Phases réutilisables typiques\n[KV|**DoserMatiere**:paramètres = matière, quantité, tolérance||**ChaufferControle**:paramètres = température cible, rampe, durée maintien||**Agiter**:paramètres = vitesse rpm, durée||**Verifier**:paramètres = valeur à vérifier, min, max||**AttendreCondition**:paramètres = tag à surveiller, condition, timeout||**RemplirCuve**:paramètres = cuve source, cuve destination, volume||**TransfererVolume**:transferts contrôlés entre cuves]\n\n### Bénéfices majeurs\n[STEPS|**Développement plus rapide** : nouvelle recette = assemblage de Phases existantes||**Validation économisée** : la Phase est validée une fois, réutilisée N fois||**Cohérence** : toutes les recettes utilisent la même logique de dosage||**Formation opérateurs** : ils apprennent les concepts génériques, réutilisables||**Maintenance** : corriger un bug dans la Phase = corriger dans TOUTES les recettes]\n\n### Bibliothèque de Phases Dasolabs\nChez Dasolabs, on maintient une **bibliothèque de 30-40 Phases** validées, utilisées comme point de départ sur tout projet batch pharma/chimie. Chaque nouvelle recette réutilise 90 % des Phases existantes, 10 % de nouvelles à valider.\n\n### Validation multi-niveau\nAvec des Phases réutilisables, la validation devient hiérarchique :\n1. **Validation unitaire** de chaque Phase (une fois pour toutes)\n2. **Validation d'Operation** (assemblage de Phases)\n3. **Validation de Recipe** (Master Recipe complète)\n\nCette hiérarchie réduit considérablement la charge de validation par rapport à valider chaque recette en monolithique.\n\n[TIP|**Investissement de départ** : construire la bibliothèque de Phases prend 2-4 mois. Amortissement : dès la 3ème recette développée. À partir de là, chaque nouvelle recette = 2-3 jours au lieu de 2-3 semaines.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -514,44 +554,14 @@
       "position": 40,
       "kind": "CONTENT",
       "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "Batch execution",
-      "bodyMd": "## Lancer un batch\n\n### Workflow\n[STEPS|**Master Recipe** sélectionnée||**Instancier Control Recipe** avec paramètres batch||**Assigner équipement** (Process Cell + Units)||**Vérifier disponibilité** ressources||**Démarrer batch** · exécution unit procedures dans l'ordre||**Suivre en temps réel** · alertes, arrêts||**Terminer batch** · rapport et archivage]",
+      "title": "Batch reporting — le rapport de batch",
+      "bodyMd": "## Le livrable final de tout batch\n\nChaque batch se conclut par un **Batch Report** (rapport de batch). En pharma, on parle d'**Electronic Batch Record** (EBR) — signé électroniquement, archivé 10+ ans.\n\n### Contenu obligatoire en pharma GAMP 5\n[STEPS|**Header** : batch#, product, dates start/end, site, area||**Personnel** : opérateurs, superviseurs, QA · avec horodatages||**Recipe used** : Master Recipe ID + version + Control Recipe ID||**Equipment used** : réacteurs, filtres, capteurs · avec calibrations||**Material lots consumed** : chaque MP avec lot#, quantité, statut QA||**Process values timeline** : T°, pH, agitation... archivées à intervalles réguliers||**Events** : alarmes, interventions manuelles, transitions d'état||**Deviations** : écarts vs recette · documentés, justifiés||**Quality tests results** : tous les tests avec résultats||**Yield** : rendement effectif vs prévu||**QA release** : signature électronique QA autorisant libération]\n\n### Format et volume\nUn EBR pharma typique fait **30 à 150 pages PDF**. Contient parfois plusieurs milliers de valeurs process archivées, des dizaines d'alarmes.\n\n### Génération\nL'EBR n'est pas rédigé manuellement. Il est **généré automatiquement** par un outil comme **AVEVA BatchReport** ou intégré dans le MES (Werum PAS-X, POMSnet).\n\n### Signature électronique 21 CFR Part 11\nLa signature QA est **électronique** conformément au 21 CFR Part 11 :\n- Authentification forte (mot de passe complexe + éventuellement MFA)\n- Non-répudiable (log immutable)\n- Meaningful (l'utilisateur voit ce qu'il signe)\n- Horodatage précis\n\n### Archivage\nEBR archivé **10 ans minimum** (souvent plus). Stockage typiquement dans un GED (Gestion Électronique de Documents) comme SharePoint, Documentum, ou un système dédié pharma.\n\n### Récupération pour audit\nEn cas d'audit FDA/EMA, tout EBR doit être **retrouvable en moins de 24h** avec métadonnées complètes. La traçabilité SharePoint + convention de nommage clair est cruciale.\n\n[RULE|**L'EBR est le document légal du batch**. En cas de contentieux (rappel produit, procès), l'EBR est le premier document demandé. Sa qualité et son intégrité conditionnent la responsabilité de l'entreprise.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 41,
-      "kind": "CONTENT",
-      "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "États d'un batch",
-      "bodyMd": "## State machine\n\nUn batch a des **états** définis par ISA-88 :\n[KV|**Idle**:pas démarré||**Running**:en cours||**Held**:en pause · sur alarme ou demande opérateur||**Restarting**:reprise après pause||**Complete**:terminé avec succès||**Stopped**:arrêté normalement||**Aborted**:annulé (erreur, rejet QA)]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 42,
-      "kind": "CONTENT",
-      "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "Common Procedure Building Blocks",
-      "bodyMd": "## Réutiliser des briques\n\n### Concept\nDéfinir des **phases standardisées** réutilisables entre recettes.\n\n### Exemples\n- Phase \"Doser une matière première\" → paramétrable (quelle MP, quelle quantité)\n- Phase \"Chauffage contrôlé\" → paramètres (T° cible, rampe)\n- Phase \"Agitation\" → paramètres (rpm, durée)\n\n### Bénéfice\n- Développement plus rapide\n- Tests unitaires possibles\n- Validation phases individuelles\n\n[TIP|En pharma, on maintient une **bibliothèque de phases validées**. Nouvelle recette = assemblage de phases existantes.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 43,
-      "kind": "CONTENT",
-      "section": "5 · ISA-88 Batch Control — modèle procédural",
-      "title": "Batch reporting",
-      "bodyMd": "## Rapport de batch\n\n### Contenu (obligatoire GAMP 5)\n[STEPS|**Batch #** et product||**Timestamps** start/stop||**Personnel** opérateur, superviseur, QA||**Recipe used** (Master ID + Control ID)||**Equipment used**||**Material lots** consommés||**Process values** (T°, pH, agitation…) archivés||**Events** (alarmes, interventions manuelles)||**Deviations** (écarts vs recette)||**QA release** signature électronique]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 44,
       "kind": "QUIZ",
       "section": "5 · ISA-88 Batch Control — modèle procédural",
       "title": "Quiz 5 — Procedural model",
@@ -573,9 +583,19 @@
             "prompt": "Différence Master Recipe vs Control Recipe…",
             "options": [
               "Aucune",
-              "Master = spec indépendante équipement · Control = instanciée pour batch précis",
-              "Master pour dev · Control pour prod",
-              "Rien"
+              "Master = spec indépendante équipement, non-exécutable · Control = instance concrète pour un batch précis, exécutable",
+              "Master pour dev, Control pour prod uniquement",
+              "Rien de significatif"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un batch qui rencontre une alarme critique passe en état…",
+            "options": [
+              "Complete",
+              "Held (pause) ou Aborted selon gravité et décision opérateur",
+              "Idle",
+              "Failed automatiquement"
             ],
             "correctIndex": 1
           }
@@ -584,11 +604,41 @@
       "imageUrl": null
     },
     {
+      "position": 42,
+      "kind": "CONTENT",
+      "section": "6 · Contrôle batch en pratique",
+      "title": "Batch Management Systems commerciaux",
+      "bodyMd": "## Les logiciels qui implémentent ISA-88\n\nAujourd'hui, on n'écrit pas un moteur batch from scratch. On utilise des logiciels commerciaux qui implémentent ISA-88 nativement. Chaque a ses forces, ses faiblesses, et ses clients de prédilection.\n\n### Les leaders du marché\n[KV|**AVEVA Batch Management (ex-Wonderware)**:le standard historique · intégré avec AVEVA System Platform · pharma + agroalimentaire · ~200k€ setup||**Emerson DeltaV Batch**:DCS Emerson intégré · chimie et pharma · complet mais lock-in Emerson · ~500k€+||**Rockwell FactoryTalk Batch**:écosystème Rockwell · fort en Amérique du Nord · pharma et chimie||**Siemens SIMATIC BATCH**:pour architectures Siemens · pharma + chimie · fort en Europe||**Werum PAS-X**:pharma pur · GAMP 5 native · très cher (1M€+) · ultra-standard pharma||**Emerson Syncade**:pharma pur alternative · workflow-oriented · ~500k€]\n\n### Comment choisir ?\nLe choix dépend de plusieurs facteurs :\n1. **Écosystème existant** : usine Siemens → SIMATIC BATCH · usine Rockwell → FactoryTalk\n2. **Industrie** : pharma pure → Werum ou Syncade · pharma/chimie mixte → AVEVA ou DeltaV\n3. **Budget** : petit → SIMATIC ou Rockwell · gros → Werum ou DeltaV\n4. **Historique client** : ce qui est déjà installé et connu par les équipes\n5. **Vendor lock-in acceptable ?** : DeltaV = très lockin · AVEVA = plus ouvert\n\n### Bénéfices d'un vrai Batch Management vs code custom\n[STEPS|**Conformité ISA-88** : nativement, pas à réinventer||**GAMP 5 friendly** : pré-validé par le vendor||**Recipe Editor visuel** : les process engineers font eux-mêmes||**Historisation intégrée**||**Reporting inclus**||**Support et communauté** : problèmes déjà résolus||**Formation** disponible||**Maintenance simplifiée** : mises à jour par le vendor]\n\n### Attention aux mauvais choix\nJ'ai vu des projets où le client voulait « faire simple » et coder son moteur batch en PLC + WinCC. Résultat après 2 ans : 500k€ dépensés, système ingérable, opérateurs frustrés. La migration vers un vrai BMS a coûté 3x plus cher que si on avait fait ça dès le départ.\n\n[RULE|**Ne jamais coder un moteur batch from scratch en pharma sérieuse**. C'est un investissement structurel dans un outil qui implémente ISA-88 correctement.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 43,
+      "kind": "CONTENT",
+      "section": "6 · Contrôle batch en pratique",
+      "title": "AVEVA Batch Management — le workhorse",
+      "bodyMd": "## Le classique du marché\n\nAVEVA Batch Management (ex-Wonderware) est probablement le Batch Management System **le plus déployé au monde**. Voyons ses composants et pourquoi il domine.\n\n### Composants principaux\n[KV|**Recipe Editor**:designer recettes ISA-88 en graphique · glisser-déposer phases · paramètres||**Batch Manager**:exécuter et surveiller les batchs en temps réel||**Batch History**:archives complètes des batchs passés · consultation via portail||**ActiveX controls**:pour intégration dans HMI custom · legacy mais fonctionnel||**Documentation Manager**:gestion des versions recettes · change control]\n\n### Intégration native\nAVEVA Batch Management fait partie de l'écosystème AVEVA :\n- **AVEVA System Platform** (l'infrastructure objets)\n- **AVEVA Historian** (archives time-series)\n- **AVEVA Report** (BatchReport pour EBR)\n- **AVEVA InTouch/Comfort** (HMI opérateur)\n- **AVEVA MES** (couverture MES complète)\n\nCette intégration native est un **argument commercial fort** : on achète l'écosystème, pas juste un logiciel.\n\n### Interop OPC UA\nAVEVA supporte OPC UA nativement · permet intégration avec PLC Siemens, Rockwell, Mitsubishi. Pas d'obligation d'écosystème 100 % AVEVA.\n\n### Pricing indicatif\n[KV|**Setup initial**:150 k€ à 300 k€ selon complexité||**Licences**:50 k€ à 100 k€ par site||**Support annuel**:20 % des licences||**Formation intégrateur**:10 k€ à 30 k€||**Formation utilisateurs**:5 k€ à 15 k€]\n\n### Client typique Dasolabs\nZoetis, UCB, Technochim - tous nos gros clients pharma utilisent AVEVA Batch Management. C'est notre expertise principale en batch pharma.\n\n[TIP|**Formation Dasolabs** : notre formation dédiée à AVEVA Batch Management est à venir. En attendant, la formation AVEVA System Platform (planifiée) couvre les fondamentaux.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 44,
+      "kind": "CONTENT",
+      "section": "6 · Contrôle batch en pratique",
+      "title": "Approche state-based vs recipe-based",
+      "bodyMd": "## Deux philosophies opposées\n\nDeux philosophies s'affrontent en contrôle batch : l'approche **state-based** (traditionnelle PLC) et l'approche **recipe-based** (ISA-88 moderne).\n\n### State-based — la vieille école\nDans cette approche, **toute la logique batch est codée dans le PLC**. Le PLC a un « état actuel » (par exemple : IDLE, DOSING, HEATING, COMPLETE) et transite entre états selon des conditions.\n\n### Recipe-based — l'approche ISA-88\nDans cette approche, la logique est **séparée** :\n- Le PLC ne connaît que les **Phases** (briques élémentaires : ouvrir V1, chauffer à X°C, agiter à Y rpm)\n- La **recette** (séquence des phases) est stockée dans un moteur batch séparé (AVEVA Batch, etc.)\n- Le moteur batch pilote le PLC phase par phase\n\n### Comparaison\n[KV|**Modification recette**:State-based : re-programmer PLC (jours) · Recipe-based : modifier recette dans BMS (heures)||**Nouvelle recette**:State-based : 3-6 semaines · Recipe-based : 2-3 jours||**Validation**:State-based : re-valider TOUT le PLC · Recipe-based : valider uniquement la recette modifiée||**Portabilité**:State-based : lié à un équipement · Recipe-based : portable entre équipements équivalents||**Coût initial**:State-based : moins cher au setup · Recipe-based : plus cher au setup||**Coût opérationnel**:State-based : très cher long terme · Recipe-based : économique long terme]\n\n### Pourquoi recipe-based domine en 2026\nLa flexibilité l'emporte. Une usine pharma moderne produit 20+ produits différents. Modifier chaque recette prend des semaines en state-based, des heures en recipe-based. Amortissement rapide.\n\n### Cas d'usage state-based légitime\nIl y a encore des cas où state-based fait sens :\n- **Petits équipements très spécifiques** avec 1 seule recette qui ne bouge jamais\n- **Machines de série** produites en masse (produit standardisé)\n- **Budget initial minimal** et pas d'évolution attendue\n\nMais en pharma sérieuse, recipe-based est **obligatoire de fait**.\n\n[RULE|**Recipe-based (ISA-88) = obligatoire** pour tout projet pharma/chimie moderne. Refuser de le faire = pénalité long terme majeure.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 45,
       "kind": "CONTENT",
       "section": "6 · Contrôle batch en pratique",
-      "title": "Batch Management Systems",
-      "bodyMd": "## Les logiciels\n\n### Systèmes leaders\n[KV|**AVEVA Batch Management** (ex-Wonderware):standard historique||**Emerson DeltaV Batch**:DCS Emerson intégré||**Rockwell FactoryTalk Batch**:écosystème Rockwell||**Siemens SIMATIC BATCH**:écosystème Siemens||**Werum PAS-X**:pharma pure||**Emerson Syncade**:pharma pure]\n\n### Choix\nDépend souvent de l'écosystème existant (Siemens, Rockwell, Emerson).",
+      "title": "Validation GAMP 5 des recettes",
+      "bodyMd": "## Chaque recette validée formellement\n\nEn pharma, une recette n'est pas juste « écrite ». Elle est **validée formellement** selon GAMP 5 (Good Automated Manufacturing Practice 5), norme de référence pour la validation des systèmes automatisés en pharma.\n\n### Le cycle de validation\n[STEPS|**URS** (User Requirement Specification) : besoins fonctionnels de la recette · qui définit ce qu'elle doit produire, quels critères||**FS** (Functional Specification) : traduction des besoins en fonctionnalités précises||**DS** (Design Specification) : détails techniques d'implémentation||**Testing unitaire** : chaque Phase testée individuellement||**IQ** (Installation Qualification) : vérification de l'installation correcte||**OQ** (Operational Qualification) : tests fonctionnels dans conditions opérationnelles||**PQ** (Performance Qualification) : tests en conditions de production réelles||**Master Batch Record signé** : document définitif approuvé par QA||**Utilisation en prod** commence||**Change control** : toute modif future suit ce cycle en mini]\n\n### Documentation requise\nUn projet de validation recette pharma génère typiquement :\n- URS (~30 pages)\n- FS (~50 pages)\n- DS (~80 pages)\n- Protocoles de test IQ/OQ/PQ (~100 pages)\n- Rapports de tests (~150 pages)\n- Master Batch Record (le document final)\n\nTotal : 400-600 pages de documentation par recette. Absurde ? Non — en cas d'audit, chaque page compte.\n\n### Traçabilité totale\nChaque exigence dans URS → traduite en spec dans FS → implémentée dans DS → testée dans les protocoles → validée dans les rapports. Cette chaîne de traçabilité est **obligatoire**.\n\n### Coût\nLa validation représente typiquement **30-40 %** du coût d'un projet recette pharma. C'est énorme, mais non-négociable.\n\n### Change control\nAprès la validation initiale, TOUT changement recette suit un **change control** :\n1. Demande de changement\n2. Analyse d'impact\n3. Approbation QA\n4. Implémentation\n5. Tests de validation partielle\n6. Approbation finale\n7. Nouvelle version\n\nCe cycle prend 2-6 semaines selon complexité. C'est long, mais évite les modifications sauvages qui casseraient la conformité.\n\n[RULE|**En pharma, aucune modification recette sans change control formel**. Non-négociable. Un intégrateur qui « ajuste vite fait » = client en risque d'audit.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -597,8 +647,8 @@
       "position": 46,
       "kind": "CONTENT",
       "section": "6 · Contrôle batch en pratique",
-      "title": "AVEVA Batch Management",
-      "bodyMd": "## Le classique\n\n### Composants\n[KV|**Recipe Editor**:designer recettes ISA-88||**Batch Manager**:exécuter et surveiller||**Batch History**:archive complète||**ActiveX controls**:pour intégration HMI]\n\n### Intégration\n- AVEVA System Platform\n- AVEVA Historian\n- AVEVA Report\n- Interop OPC UA",
+      "title": "Cas UCB — batch pharma exemplaire",
+      "bodyMd": "## Setup complet en pratique\n\nDécrivons concrètement un batch pharma UCB pour ancrer tous les concepts vus.\n\n### Le contexte\nUCB produit un vaccin thérapeutique en batches de 5 000 doses. Chaque batch dure 12-18 heures. La production tourne 24/7 avec 3 équipes.\n\n### L'architecture technique\n[KV|**Enterprise ressources planning**:SAP · gère les commandes et matières||**MES**:Werum PAS-X · orchestre la production||**Batch execution engine**:AVEVA Batch Management · exécute les recettes ISA-88||**Historian**:AVEVA Historian · archive T°, pH, agitation à 1 sec||**HMI**:AVEVA InTouch · interface opérateur||**PLC**:S7-1500 F (safety) · pilote les équipements physiques||**LIMS**:Labware · gère les tests QA||**Documentation**:SharePoint · stocke EBRs signés]\n\n### Le workflow d'un batch\n[STEPS|**J-1 soir** : Planning UCB charge dans SAP les batchs de demain||**J 6h** : MES Werum interroge SAP · récupère l'ordre||**J 6h15** : MES sélectionne la Master Recipe validée (v2.3)||**J 6h20** : MES instancie Control Recipe · assigne Reactor R1 · vérifie disponibilité matières||**J 6h30** : Opérateur Jean arrive, login sur IHM · vérifie sa qualification||**J 6h35** : Jean démarre le batch · première Phase = ouverture V1 pour dosage MP||**J 6h35 → J 18h** : Exécution de 42 phases · agitation, chauffage, refroidissement, filtration||**Pendant** : Historian archive 15 000 valeurs process · Alarmes gérées · 8 tests QA prélevés||**J 18h** : Fin de la dernière phase · batch en état Complete||**J 18h30** : Kevin (superviseur) valide clôture batch||**J 18h30 → J+1** : Tests QA finaux au labo||**J+1 matin** : Anaïs (QA Manager) reçoit les résultats · tous OK · signe la libération||**J+1 midi** : AVEVA BatchReport génère l'EBR (65 pages) · signature électronique QA||**J+1 après-midi** : MES envoie « Process Production Performance » à SAP · stock mis à jour]\n\n### Volumes de données\nPar batch, on génère :\n- ~100 MB de process values (Historian)\n- ~150 événements (alarmes, transitions)\n- ~30 tests QA\n- EBR de 65 pages\n\nSur une année : ~500 batchs · ~50 GB de data · 500 EBRs archivés 10 ans.\n\n[TIP|Ce cas UCB est notre référence Dasolabs pour tout nouveau projet pharma. On l'utilise pour expliquer aux clients potentiels ce qu'est un vrai projet pharma moderne.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -607,8 +657,8 @@
       "position": 47,
       "kind": "CONTENT",
       "section": "6 · Contrôle batch en pratique",
-      "title": "Approche state-based vs recipe-based",
-      "bodyMd": "## Deux philosophies\n\n### State-based (traditionnel PLC)\nProgrammer chaque étape dans le PLC. Rigide, difficile à modifier.\n\n### Recipe-based (ISA-88)\nSéparer logique (recette) et exécution (moteur batch). Flexible, modifiable sans toucher au PLC.\n\n[TIP|**Recipe-based = obligatoire** en pharma moderne. Permet validation recettes indépendante du code PLC.]",
+      "title": "Non-conformités et déviations",
+      "bodyMd": "## Gérer les écarts en pharma\n\nDans la vraie vie, tout ne se passe pas parfaitement. Il y a des écarts, des non-conformités (NC), des interventions manuelles. La gestion structurée de ces événements est cruciale.\n\n### Types d'événements courants\n[KV|**Déviation process**:T° hors bornes pendant 2 min||**Retard opérateur**:ajout MP à 6h15 au lieu de 6h00||**Test QA hors spec**:pH mesuré 6.8 au lieu de 6.5-6.7||**Panne équipement**:balance BM01 en défaut pendant 30 min||**Alarme sécurité**:portail réacteur ouvert alors que Batch en Running||**Modification recette temporaire**:opérateur décide d'agiter 5 min de plus]\n\n### Workflow standard de gestion\n[STEPS|**Détection** : automatique (SCADA/PLC) ou observation opérateur||**Alarme** : notification opérateur + horodatage précis||**Décision** : continuer, mettre en pause (Held), arrêter (Stopped/Aborted)||**Documentation** : obligatoire · description écart, action prise, justification||**Investigation QA** : si NC critique · analyse cause racine||**CAPA** (Corrective and Preventive Actions) : plan d'actions correctives||**Trend analysis** : prévention future · pattern reconnaissance||**Impact sur libération** : décision QA finale d'accepter ou refuser le batch]\n\n### Documentation obligatoire\nChaque déviation doit être documentée avec :\n- Description factuelle (« T° montée à 62°C au lieu de 60±1°C pendant 3 min »)\n- Action immédiate (« aucune, dérive faible, régulation a corrigé »)\n- Cause racine (« condition ambiante chaude, régulateur PID sous-tuné »)\n- Impact sur produit (« négligeable, T° reste dans specs GMP »)\n- CAPA (« retuner PID · ajouter action fenêtre climatique dans master recipe »)\n\n### E-signature\nToutes ces décisions sont **e-signées** par les responsables (opérateur, superviseur, QA). Traçabilité totale.\n\n### Learning organizationel\nUne bonne gestion des NC nourrit l'**amélioration continue**. Trend analysis mensuelle → identification patterns → amélioration process/recette/équipement/formation. C'est le cycle vertueux.\n\n[TIP|**Anecdote** : sur un projet Zoetis, l'analyse mensuelle des NC a révélé que 30 % des déviations venaient d'un seul capteur défectueux qui glissait. Remplacement du capteur : 3 heures. NC réduites de 30 %. Simple mais impact énorme.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -617,66 +667,26 @@
       "position": 48,
       "kind": "CONTENT",
       "section": "6 · Contrôle batch en pratique",
-      "title": "Validation GAMP 5 des recettes",
-      "bodyMd": "## Chaque recette validée\n\n### Cycle\n[STEPS|**URS** : User Requirement Spec de la recette||**FS** : Functional Spec||**DS** : Design Spec||**Testing** : unit tests des phases||**IQ/OQ/PQ** en environnement production||**Master Batch Record signé** par QA||**Utilisation en prod** commencée|| **Change control** pour toute modif future]\n\n### Documentation\nTraçabilité totale : qui a modifié, quand, pourquoi.",
+      "title": "Batch cleaning et changeover",
+      "bodyMd": "## Ce qui se passe entre 2 batchs\n\nEntre deux batchs de produits différents, il y a des procédures **critiques** de nettoyage et changement de configuration. Elles sont souvent **modélisées comme des recettes ISA-88** elles-mêmes.\n\n### CIP — Clean In Place\nLe **CIP** est un nettoyage automatisé des équipements sans démontage. Chargé de vider, rincer, nettoyer chimique (soude ou acide), rincer eau pure, sécher.\n\n**Contexte pharma** : entre chaque batch, ou entre chaque campagne, un CIP est obligatoire pour éviter contamination croisée. Les procédures CIP sont **validées GAMP 5** comme n'importe quelle recette.\n\n**Cycle CIP typique** :\n1. Pré-rinçage à l'eau (5 min)\n2. Circulation soude 1 % à 70°C (30 min)\n3. Rinçage eau (5 min)\n4. Circulation acide phosphorique (20 min)\n5. Rinçage eau pure (10 min)\n6. Séchage air comprimé (10 min)\n7. Test de conductivité (validation propreté)\n\nDurée totale : 1h30-2h.\n\n### SIP — Sterilization In Place\nLe **SIP** est une stérilisation par vapeur haute température (typiquement 121°C pendant 30 min). Obligatoire en pharma stérile (biotech, vaccins).\n\n**Cycle SIP** :\n1. Purge vapeur\n2. Montée en température (10 min pour atteindre 121°C)\n3. Maintien 30 min à 121°C\n4. Refroidissement contrôlé\n5. Test biologique (spores)\n\n### Changeover\nLe **changeover** est le passage d'un produit A à un produit B :\n- CIP entre les 2\n- Éventuellement SIP\n- Changement de recette dans MES\n- Recalibration des capteurs si nécessaire\n- Chargement nouvelles matières premières\n- Verification pré-batch\n\n### Économie du changeover\nEn pharma, un changeover typique prend 2-6 heures. C'est **du temps d'usine perdu** — pas de production pendant ce temps. Optimiser les changeovers = augmenter la capacité productive.\n\nExemple concret : réduire les changeovers de 4h à 3h chez UCB → +250h de production/an → ~2M€ de CA supplémentaire.\n\n[TIP|Les procédures CIP/SIP/changeover sont **codées comme recettes ISA-88** dans les BMS modernes. Elles bénéficient de tous les avantages (réutilisabilité, validation, versioning) qu'une recette de production normale.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 49,
-      "kind": "CONTENT",
-      "section": "6 · Contrôle batch en pratique",
-      "title": "Cas UCB — batch pharma",
-      "bodyMd": "## Exemple concret\n\n### Contexte\nUCB produit un vaccin en batches de 5 000 doses.\n\n### Setup\n- **AVEVA System Platform** orchestre\n- **AVEVA Batch Management** exécute recettes\n- **S7-1500 F** pilote équipement\n- **AVEVA Historian** archive process values\n- **AVEVA Report** génère BatchReports\n\n### Recette type\n40 phases · 8-12 heures d'exécution · 30 paramètres process suivis · 15 tests QA en cours de batch",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 50,
-      "kind": "CONTENT",
-      "section": "6 · Contrôle batch en pratique",
-      "title": "Cas GROUPEMECA — batch chimique",
-      "bodyMd": "## Traitement de surface\n\n### Contexte\nBain chimique pour traitement métaux · 12 recettes différentes.\n\n### Setup\n- **Siemens SIMATIC BATCH**\n- **S7-1500** pilote\n- **WinCC Comfort** IHM opérateur\n- **SQL Server** archive\n\n### Bénéfice\nMême code PLC pour toutes les recettes. Changement recette = 5 min via IHM. Avant : re-programmation PLC 2 jours.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 51,
-      "kind": "CONTENT",
-      "section": "6 · Contrôle batch en pratique",
-      "title": "Non-conformités et déviations",
-      "bodyMd": "## Gérer les écarts\n\n### Événements courants\n- T° process hors bornes\n- Ajout MP retard\n- Résultat labo hors spec\n- Panne équipement pendant batch\n\n### Workflow standard\n[STEPS|**Détection automatique** ou opérateur||**Alarme HMI**||**Décision** : continuer, mettre en pause, arrêter||**Documentation** obligatoire||**Investigation QA** si NC critique||**CAPA** (Corrective and Preventive Actions) mise en place||**Trend analysis** pour prévention future]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 52,
-      "kind": "CONTENT",
-      "section": "6 · Contrôle batch en pratique",
-      "title": "Batch cleaning et changeover",
-      "bodyMd": "## Entre 2 batches\n\n### CIP (Clean In Place)\nNettoyage automatisé entre batches, spécialement en pharma/agro.\n\n### SIP (Sterilization In Place)\nStérilisation (vapeur haute température).\n\n### Changeover\nPasser d'un produit A à un produit B (rinçage, calibration, changement recette).\n\n### Ces procédures\nSont modélisées comme des **recettes ISA-88** aussi. Automatisation complète.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 53,
       "kind": "QUIZ",
       "section": "6 · Contrôle batch en pratique",
-      "title": "Quiz 6 — Pratique batch",
+      "title": "Quiz 6 — Batch en pratique",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Approche recipe-based (ISA-88) permet…",
+            "prompt": "Approche recipe-based (ISA-88) vs state-based permet…",
             "options": [
               "Rien de spécial",
-              "Séparer logique recette et code PLC · modifiable sans toucher PLC",
+              "Séparer logique recette et code PLC · modification recette possible en heures au lieu de semaines",
               "Aller plus lentement",
               "Rigidité"
             ],
@@ -686,9 +696,19 @@
             "prompt": "En pharma, une modification de recette validée nécessite…",
             "options": [
               "Rien",
-              "Change control complet (docs, tests, approbation QA)",
-              "Un simple click",
+              "Change control formel complet (docs, tests, approbation QA, nouvelle version)",
+              "Un simple click sur bouton",
               "Un email"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un CIP (Clean In Place) est…",
+            "options": [
+              "Un test QA",
+              "Une procédure automatisée de nettoyage entre batchs, souvent modélisée comme recette ISA-88",
+              "Un logiciel MES",
+              "Rien"
             ],
             "correctIndex": 1
           }
@@ -697,11 +717,51 @@
       "imageUrl": null
     },
     {
+      "position": 50,
+      "kind": "CONTENT",
+      "section": "7 · Cas pratiques et intégration MES/ERP",
+      "title": "Cas 1 — Zoetis intégration ISA-95 complète",
+      "bodyMd": "## Setup pharma vétérinaire moderne\n\nZoetis est un de nos clients pharma vétérinaires majeurs. Voyons leur setup complet ISA-95 pour comprendre à quoi ressemble une architecture moderne intégrée.\n\n### Le contexte Zoetis\nUsine Zoetis Louvain-la-Neuve · production de vaccins pour animaux · 5 lignes de production · 24/7 · ~500 batchs/an · réglementé équivalent pharma humaine.\n\n### L'architecture des systèmes\n[KV|**ERP**:SAP · gère commandes clients, planification globale, comptabilité||**MES**:Werum PAS-X · implémente ISA-95 Part 3 (les 4 activités MOM)||**Batch execution**:AVEVA Batch Management · recettes ISA-88||**System Platform**:AVEVA System Platform · infrastructure objets ISA-95||**Historian**:AVEVA Historian · archive time-series||**HMI**:AVEVA InTouch · IHM opérateurs||**PLC**:S7-1500 · pilote équipements||**LIMS**:Labware · tests QA||**GMAO**:SAP PM · maintenance||**Reporting**:AVEVA Report · EBR + rapports QA|| **UNS**:HighByte · pont data OT/IT]\n\n### Les flux ISA-95 en action\nSuivons un ordre de production de bout en bout :\n\n1. **Client passe commande** → SAP crée un ordre de production\n2. **SAP envoie ordre au MES** via message B2MML (Process Production Schedule)\n3. **MES organise** : sélectionne les Master Recipes, planifie sur 5 lignes\n4. **MES démarre chaque batch** en envoyant l'ordre à AVEVA Batch Management\n5. **AVEVA Batch pilote le S7-1500** via OPC UA · exécute la recette phase par phase\n6. **Data process archivées** dans Historian toutes les 100 ms\n7. **Tests QA prélevés** aux étapes définies · résultats vers LIMS\n8. **LIMS remonte résultats** au MES via ISA-95 message\n9. **En fin de batch, MES agrège** toutes les données\n10. **AVEVA Report génère EBR** signé électroniquement\n11. **MES envoie résultats à SAP** (Process Production Performance)\n12. **SAP met à jour stocks** · gère facturation client\n\n### Bénéfice de cette intégration\nTraçabilité **bout en bout** : de la commande client au vaccin livré, tout est tracé. En cas de rappel, on peut identifier tous les batchs concernés en 30 minutes.\n\n### Investissement\nSetup complet a coûté ~2 M€ sur 3 ans (matériel + licences + intégration + validation). ROI : couvert par la réduction des NC + facilitation d'audit + capacité de production augmentée de 15 %.\n\n[TIP|Ce cas Zoetis est un référentiel Dasolabs. On le présente à tout prospect pharma qui envisage un projet MES.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 51,
+      "kind": "CONTENT",
+      "section": "7 · Cas pratiques et intégration MES/ERP",
+      "title": "Cas 2 — UCB electronic batch record",
+      "bodyMd": "## Focus EBR conformité 21 CFR Part 11\n\nUCB pharma humaine doit produire des EBRs (Electronic Batch Records) conformes 21 CFR Part 11 pour vente aux États-Unis. Voyons leur setup EBR détaillé.\n\n### Le contexte\nUCB Braine-l'Alleud · production d'un anti-épileptique · 200 batchs/an · vente USA + Europe · réglementé FDA + EMA.\n\n### La chaîne EBR\n[STEPS|**Master Batch Record** créé lors de validation initiale · document légal · versionné · signé QA + Production||**Control Batch Record** instancié à chaque batch · contient les données spécifiques||**Data collection** en temps réel · process values, tests QA, événements||**Aggregation en fin de batch** · toutes les données consolidées||**EBR généré** en PDF via AVEVA BatchReport · 80-120 pages||**Review QA** · superviseur QA vérifie les déviations · valide ou refuse||**E-signature QA** · si validé · avec MFA (double auth)||**Archivage GED** · SharePoint QMS · 15 ans obligatoire||**Traçabilité audit** · possibilité de retrouver n'importe quel EBR en < 24h]\n\n### Éléments obligatoires 21 CFR Part 11\n[KV|**Unique identifier**:chaque EBR a un identifiant unique · non modifiable||**Time stamp**:horodatage précis synchronisé NTP||**Electronic signature**:non-répudiable · avec MFA||**Access control**:seuls users autorisés voient les EBRs||**Audit trail**:tous les accès sont logués||**Data integrity**:pas de modification post-signature|| **Backup + restore**:testés régulièrement]\n\n### La revue QA\nLe processus le plus critique est la **revue QA** avant signature. Un QA Manager parcourt l'EBR (80-120 pages) et vérifie :\n- Cohérence des données\n- Justification des déviations\n- Résultats QA dans specs\n- Aucune omission\n\nUne revue prend 2-4 heures par EBR. Si tout OK, signature. Si problème, batch en Held, investigation.\n\n### Ce qui rend un EBR robuste\n1. **Auto-généré** : pas de saisie manuelle = pas d'erreur humaine\n2. **Toutes les données** : rien de laissé de côté\n3. **Format standardisé** : QA trouve les infos toujours au même endroit\n4. **Signature unique** : une seule personne peut signer un EBR donné\n5. **Immutable** : après signature, aucune modification possible\n\n[RULE|**L'EBR est le document légal du batch**. Sa qualité et sa conformité conditionnent la responsabilité juridique. Investissement dans un EBR robuste = protection contre les risques réglementaires.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 52,
+      "kind": "CONTENT",
+      "section": "7 · Cas pratiques et intégration MES/ERP",
+      "title": "Cas 3 — Technochim recettes multi-sites",
+      "bodyMd": "## Standardisation groupe international\n\nTechnochim est un client chimie fine qui a 3 sites en Europe (Belgique, France, Allemagne). Chaque site produit les mêmes gammes de produits, mais avec des équipements différents. Comment standardiser ?\n\n### Le défi\nAvant Dasolabs, chaque site avait ses propres recettes maison :\n- Belgique : format Excel + Word · 500 recettes non versionnées\n- France : dans le PLC directement (state-based) · 400 recettes\n- Allemagne : dans un vieux MES custom · 600 recettes\n\nRésultat : impossible de comparer, impossible de transférer un savoir-faire d'un site à un autre, formation opérateurs redondante, coûts multipliés par 3.\n\n### L'approche Dasolabs — hiérarchie des recettes ISA-88\n[STEPS|**Phase 1 (6 mois)** : Analyse existant + documentation des 500 produits communs||**Phase 2 (4 mois)** : Écriture des General Recipes au niveau groupe · standard scientifique unique||**Phase 3 (6 mois par site)** : Adaptation en Site Recipes selon équipements locaux||**Phase 4 (2 mois par site)** : Écriture des Master Recipes exécutables · migration vers AVEVA Batch Management||**Phase 5 (permanent)** : Bibliothèque de 40 Phases communes maintenues au niveau groupe]\n\n### Bénéfices concrets\n1. **Transfert techno rapide** : un nouveau produit développé à Bruxelles est disponible en France en 3 semaines (vs 6 mois auparavant)\n2. **Cohérence qualité** : le même produit fait à Bruxelles et à Munich a exactement les mêmes specs\n3. **Formation mutualisée** : opérateurs formés une fois sur les concepts ISA-88 · applicables partout\n4. **Économies** : bibliothèque Phases mutualisée = pas de duplication d'ingénierie\n5. **Change control unifié** : modification produit = validation une fois au niveau groupe, roll-out synchronisé\n\n### Investissement\nProjet total : 2 ans · 900 k€. ROI : 400 k€/an d'économies sur ingénierie + qualité + formation. Amortissement : 27 mois.\n\n### Best practice à retenir\nLa clé : **hiérarchie de recettes** utilisée à fond. General Recipe au groupe → Site Recipe par site → Master Recipe par process cell → Control Recipe par batch. Chaque niveau apporte sa valeur.\n\n[TIP|**Anecdote** : au démarrage, le directeur Technochim voulait « juste des recettes ». On a insisté sur la hiérarchie ISA-88. Retour 2 ans après : « Vous aviez raison, on ne pourrait plus revenir en arrière. »]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
+      "position": 53,
+      "kind": "CONTENT",
+      "section": "7 · Cas pratiques et intégration MES/ERP",
+      "title": "Cas 4 — Migration MES pharma",
+      "bodyMd": "## Refonte du niveau 3\n\nMigration d'un vieux MES custom vers un MES moderne (Werum PAS-X) chez un client pharma anonyme. Retour d'expérience Dasolabs.\n\n### Le contexte\nClient pharma · MES custom développé en 2005 · devenu ingérable :\n- Plus personne dans l'équipe ne connaît la codebase\n- Plus de support vendor\n- Impossible d'intégrer de nouvelles fonctionnalités\n- Risque cyber élevé (technos obsolètes)\n\nDécision : migrer vers Werum PAS-X, standard pharma.\n\n### Le plan de migration\n[STEPS|**Phase 1 - Analyse (3 mois)** : documenter existant · lister recettes, workflows, utilisateurs · évaluer complexité||**Phase 2 - Modélisation ISA-88/95 (4 mois)** : re-modéliser toutes les recettes en ISA-88 standard · re-structurer selon ISA-95||**Phase 3 - Migration data (3 mois)** : matières, personnel, équipements, batch history · via ETL||**Phase 4 - Développement PAS-X (6 mois)** : configuration du MES · développement de custom si besoin||**Phase 5 - Tests parallèles (4 mois)** : ancien et nouveau MES tournent en parallèle · comparaison résultats||**Phase 6 - Cutover (weekend prolongé)** : bascule finale · ancien MES en lecture seule||**Phase 7 - Support intense (3 mois)** : équipe Dasolabs sur site · résolution problèmes rapide]\n\n### Durée totale\n20 mois de projet, ~1.8 M€ de budget. Équipe : 15 personnes en pointe (5 Dasolabs + 3 Werum + 7 client).\n\n### Difficultés rencontrées\n- **Résistance au changement** des opérateurs habitués au vieux MES\n- **Data historique** difficile à migrer (formats propriétaires legacy)\n- **Recettes non documentées** : re-verse-engineering à partir du code\n- **Formation utilisateurs** : 60 personnes à former en 3 mois\n\n### Réussites\n- **Zéro perte de production** pendant la migration\n- **Recettes validées** GAMP 5 avant cutover\n- **Auditor FDA** consulté préventivement pour valider approche\n- **Rollback plan** documenté (jamais utilisé, heureusement)\n\n### ROI\nMaintenance annuelle réduite de 400 k€ à 100 k€. Nouvelles fonctionnalités possibles (impossible avant). Amortissement : 5 ans.\n\n[TIP|Une migration MES pharma est un **projet stratégique majeur**. À ne pas prendre à la légère · préparation minutieuse · équipe dédiée · support intense post-cutover.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 54,
       "kind": "CONTENT",
       "section": "7 · Cas pratiques et intégration MES/ERP",
-      "title": "Cas 1 — Zoetis intégration full ISA-95",
-      "bodyMd": "## Setup complet\n\n### Composants\n- **ERP** (SAP)\n- **MES** (Werum PAS-X) — implémente ISA-95 activities\n- **System Platform** (AVEVA)\n- **PLC** S7-1500 · WinCC HMI\n- **Historian** AVEVA\n\n### Flux ISA-95\n- ERP envoie ordres au MES (Get/Show Production Order via B2MML)\n- MES organise batches, planifie ressources\n- MES démarre batches via SP + PLC\n- MES collecte résultats + Historian\n- MES rapporte au ERP (Process Production Performance)\n\n### Bénéfice\nTraçabilité **bout en bout** (ordre client → batch produit → stock).",
+      "title": "Erreurs classiques et retours d'expérience",
+      "bodyMd": "## Ce qu'on a vu échouer\n\nDasolabs a vu de près plusieurs projets qui ont échoué. Analyse des causes récurrentes.\n\n### Erreur 1 — Skip ISA-88, coder « rapide »\nLe client dit « pas besoin d'ISA-88, on va coder simple ». 6 mois après, la première modification recette prend 2 semaines. 1 an après, on ne peut plus rien faire. Refonte totale = 3x le budget initial.\n\n[DANGER|Skip ISA-88 en pharma = catastrophe garantie à moyen terme]\n\n### Erreur 2 — Custom au lieu de commercial\nLe client dit « on va développer notre MES en interne, moins cher ». Estimation initiale : 500 k€. Coût réel après 3 ans : 3 M€. Fonctionnalités : 30 % de ce qu'un MES commercial offre out-of-the-box.\n\n[DANGER|Développer un MES custom en pharma = 5-10x plus cher long terme qu'un MES commercial]\n\n### Erreur 3 — Sous-estimer la validation\nProjet mené comme un projet IT classique, sans planifier la validation GAMP 5. Résultat : 4 mois de retard, budget × 1.5, stress énorme sur les équipes.\n\n[DANGER|La validation GAMP 5 = 30-40 % du budget projet · non-négociable en pharma]\n\n### Erreur 4 — Change control ignoré\nAprès mise en service, les opérateurs demandent des modifs recette « rapides ». Ingénieur cède sans documentation. 6 mois après : audit FDA. Constatation de modifications non documentées. Site à risque de fermeture.\n\n[DANGER|Céder à la pression « juste une petite modif » = catastrophe réglementaire]\n\n### Erreur 5 — Batch reporting bricolé\nEBR généré via Excel + Word manuellement. Erreurs de copier-coller, incohérences. Auditor FDA très mécontent.\n\n[DANGER|EBR pharma sans BatchReport automatique = risque de non-conformité]\n\n### Erreur 6 — Couplage tightly PLC et recettes\nRecettes codées directement dans PLC (state-based). Changement recette = re-programmer PLC. Impossible d'évoluer.\n\n[DANGER|Coupler tightly PLC + logique batch = rigidité, coûts exponentiels]\n\n### Leçons pour Dasolabs\nOn refuse maintenant certains projets où le client insiste sur les mauvaises approches. C'est une décision commerciale douloureuse à court terme mais protège notre réputation. Un projet qui échoue chez nous = 5 clients qu'on ne signera pas ensuite.\n\n[RULE|Un consultant Dasolabs qui accepte un projet mal cadré = met en danger toute l'entreprise. Éduquer le client avant de signer.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -710,8 +770,8 @@
       "position": 55,
       "kind": "CONTENT",
       "section": "7 · Cas pratiques et intégration MES/ERP",
-      "title": "Cas 2 — UCB pharma dossier électronique",
-      "bodyMd": "## Batch Record électronique\n\n### Contexte\nUCB doit produire un dossier de batch (Electronic Batch Record, EBR) signé pour chaque batch.\n\n### Solution\n- **Werum PAS-X MES**\n- **AVEVA System Platform** pour data process\n- **EBR digital** avec signatures 21 CFR Part 11\n\n### Contenu EBR\n[STEPS|**En-tête**: batch#, produit, opérateurs||**Recipe used** (master + control)||**Process data** archivées||**QA test results**||**Deviations** documentées||**Approbations** QA + Production manager||**Signature électronique** avec horodatage]",
+      "title": "Bonnes pratiques Dasolabs — méthodologie",
+      "bodyMd": "## Notre framework standardisé\n\nAprès des dizaines de projets pharma/chimie, Dasolabs a codifié une méthodologie qu'on applique systématiquement.\n\n### Nos règles absolues\n\n[RULE|**ISA-88 pour tout batch** en pharma/chimie · pas de compromis]\n\n[RULE|**Bibliothèque de Phases** validées maintenue et versionnée · investissement structurel]\n\n[RULE|**Namespace ISA-95** documenté dès le début · fil rouge de tout le projet]\n\n[RULE|**MES commercial** recommandé en pharma sérieuse · custom réservé à cas très spécifiques]\n\n[RULE|**Change control** formel dès la mise en service · rigueur non-négociable]\n\n[RULE|**Documentation à jour** : chaque livrable maintenu vivant · pas de doc de tiroir]\n\n[RULE|**Formation utilisateurs** avant mise en service · pas d'exception]\n\n[RULE|**Validation GAMP 5** planifiée dès la phase avant-vente · budgétisée honnêtement]\n\n### Notre framework projet\n[STEPS|**Phase 0** - Cadrage (2-4 semaines) : URS, budget, planning, équipe||**Phase 1** - Spécifications (2-3 mois) : FS, DS, architecture, plan de validation||**Phase 2** - Développement (4-8 mois) : implémentation itérative avec tests continus||**Phase 3** - Validation (2-3 mois) : IQ, OQ, PQ officiels||**Phase 4** - Formation (2 semaines) : utilisateurs formés||**Phase 5** - Mise en service (1 mois) : cutover, support intense||**Phase 6** - Support post-go-live (3 mois) : présence sur site, résolution rapide||**Phase 7** - Amélioration continue (permanent) : lessons learned, améliorations, formations continues]\n\n### Formation continue de nos équipes\nNos consultants suivent des formations régulières sur :\n- Nouvelles versions des normes ISA\n- Évolutions des MES commerciaux\n- Cybersécurité IEC 62443\n- Change control et compliance\n\n### Culture de l'excellence\nDasolabs valorise :\n- La rigueur méthodologique\n- La transparence avec le client\n- Le refus des raccourcis dangereux\n- La formation continue\n\nC'est ce qui nous permet d'attirer les meilleurs clients (UCB, Zoetis, Roche) et les meilleurs consultants.\n\n[TIP|Cette culture est ce qui nous différencie de la concurrence. Nos concurrents low-cost promettent moins cher · nos clients savent qu'on livre mieux et durable.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -720,54 +780,14 @@
       "position": 56,
       "kind": "CONTENT",
       "section": "7 · Cas pratiques et intégration MES/ERP",
-      "title": "Cas 3 — Technochim recettes multi-sites",
-      "bodyMd": "## Standardisation groupe\n\n### Défi\nTechnochim a 3 sites (Belgique, France, Allemagne). Chaque site avait ses recettes maison.\n\n### Approche\n[STEPS|**General Recipes** définies au groupe · standard produit||**Site Recipes** adaptées par site (équipements différents)||**Master Recipes** par process cell||**Control Recipes** exécutées|| **Central library** des phases réutilisables]\n\n### Résultat\nMême produit fabriqué de manière **cohérente** dans les 3 sites. Transfert techno rapide.",
+      "title": "Formations complémentaires à suivre",
+      "bodyMd": "## Approfondir dans l'écosystème Dasolabs\n\nCette formation ISA-95/88 est un socle. Pour aller plus loin, voici les formations Dasolabs complémentaires (existantes ou en préparation).\n\n### Formations existantes\n[KV|**Matériel PLC Siemens**:matériel S7-1500/1200/LOGO! · fondamentaux automates||**Programmation TIA Portal**:programmer S7-1500 en LAD/SCL/GRAPH||**WinCC SCADA**:HMI et SCADA Comfort/Unified||**AVEVA Report**:reporting BatchReport pharma||**SQL Server**:DB pour MES/SCADA||**HighByte**:UNS moderne||**HiveMQ**:MQTT broker enterprise||**Protocoles industriels**:vue exhaustive des protocoles]\n\n### Formations en préparation\n[KV|**AVEVA System Platform**:l'infrastructure objets ISA-95||**AVEVA Batch Management**:le moteur batch ISA-88||**AVEVA Historian**:archives time-series||**AVEVA MES**:le MES complet||**Validation GAMP 5**:méthodologie validation pharma||**Cybersécurité IEC 62443**:sécurité OT||**Werum PAS-X**:MES pharma pur||**Ignition SCADA**:l'alternative moderne||**ISA-101 HMI Design**:ergonomie IHM opérateur||**ISA-18.2 Alarm Management**:éviter la fatigue d'alarme]\n\n### Certifications professionnelles individuelles\nAu-delà de nos formations, les consultants seniors peuvent viser :\n- **ISA CAP** (Certified Automation Professional)\n- **ISA CCST** (Certified Control Systems Technician)\n- **ISA CSPA** (Certified Systems Professional Automation)\n- **PMP** (Project Management Professional)\n- **CISSP** (Certified Information Systems Security Professional) pour cybersec\n\n### Recommandation pour évolution\nUn parcours type Dasolabs :\n1. **1ère année** : PLC Siemens + TIA Portal + WinCC + ISA-95/88 (le socle)\n2. **2ème année** : AVEVA System Platform + Batch Management + Report + validation GAMP 5\n3. **3ème année** : Spécialisation (UNS moderne, ou pharma pure, ou cybersécurité)\n4. **4ème année et +** : Certifications ISA CAP/CSPA, leadership technique\n\n[TIP|La formation continue chez Dasolabs est valorisée · 5 jours de formation/an minimum + accès à toutes nos formations internes.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 57,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques et intégration MES/ERP",
-      "title": "Cas 4 — Migration MES",
-      "bodyMd": "## Refonte système\n\n### Contexte\nClient pharma passe d'un vieux MES custom vers Werum PAS-X.\n\n### Plan\n[STEPS|**Analyse existant** · recettes, workflows||**Modélisation ISA-88** des recettes actuelles||**Migration data** matières, personnel, équipement||**Développement MES** avec Werum + intégrateur||**Tests parallèles** · ancien + nouveau système||**Cutover** un weekend||**Support intense** 3 mois post-migration]\n\n### Durée typique\n18-24 mois pour projet complet. Budget 1-3 M€.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 58,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques et intégration MES/ERP",
-      "title": "Erreurs à éviter",
-      "bodyMd": "## Retours d'expérience\n\n[DANGER|Ne pas suivre ISA-88 → recettes ingérables long terme]\n[DANGER|Custom au lieu de standard → maintenance impossible dans 5 ans]\n[DANGER|Skip validation recettes → non-conformité audit]\n[DANGER|Oublier le change control → dérive rapide]\n[DANGER|Batch reporting manuel → erreurs humaines · non conforme]\n[DANGER|Coupler tightly PLC et recettes → refonte totale pour changement recette]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 59,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques et intégration MES/ERP",
-      "title": "Bonnes pratiques Dasolabs",
-      "bodyMd": "## Méthodologie\n\n[RULE|**Toujours** ISA-88 pour tout batch dans nos projets pharma/chimie]\n[RULE|**Bibliothèque de phases** validées à disposition]\n[RULE|**Namespace ISA-95** dans tous les projets · même petits]\n[RULE|**MES recommandé** en pharma dès que possible · réduire complexité]\n[RULE|**Documentation à jour** systématique]\n[RULE|**Formation équipes clients** aux normes]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 60,
-      "kind": "CONTENT",
-      "section": "7 · Cas pratiques et intégration MES/ERP",
-      "title": "Formations complémentaires",
-      "bodyMd": "## Approfondir\n\n### Prochaines étapes\n- **AVEVA System Platform** (Dasolabs)\n- **AVEVA Batch Management**\n- **Validation GAMP 5** (formation à venir)\n- **Cybersécurité IEC 62443** (formation à venir)\n- **ISA CAP / CSPA** (certification pro individuelle)\n\n[TIP|Un consultant Dasolabs senior maîtrise ISA-95/88 + GAMP 5 + un SCADA moderne. Portrait type.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 61,
       "kind": "QUIZ",
       "section": "7 · Cas pratiques et intégration MES/ERP",
       "title": "Quiz 7 — Cas pratiques",
@@ -779,7 +799,7 @@
             "prompt": "Un EBR (Electronic Batch Record) doit contenir…",
             "options": [
               "Rien de spécifique",
-              "Batch#, recette, data process, QA results, deviations, signatures",
+              "Batch#, recette utilisée, data process, résultats QA, déviations, signatures électroniques 21 CFR Part 11",
               "Uniquement le produit",
               "Rien"
             ],
@@ -790,27 +810,37 @@
             "options": [
               "1 semaine",
               "1 mois",
-              "18-24 mois",
+              "18-24 mois avec validation IQ/OQ/PQ complète",
               "10 ans"
             ],
             "correctIndex": 2
+          },
+          {
+            "prompt": "L'erreur classique de skip ISA-88 en pharma mène à…",
+            "options": [
+              "Un projet moins cher long terme",
+              "Rigidité, coûts exponentiels de maintenance, refonte forcée à moyen terme",
+              "Rien de grave",
+              "Un projet plus rapide"
+            ],
+            "correctIndex": 1
           }
         ]
       },
       "imageUrl": null
     },
     {
-      "position": 62,
+      "position": 58,
       "kind": "CONTENT",
       "section": "8 · Certification",
       "title": "Prêt pour l'évaluation ?",
-      "bodyMd": "## Quiz certifiant final\n\n10 questions, seuil 70 %. Bonne chance !",
+      "bodyMd": "## Quiz certifiant final — ISA-95 & ISA-88\n\nBravo, tu as parcouru l'ensemble de la formation ! Le prochain quiz est le **quiz certifiant** qui valide ta maîtrise. Il couvre l'ensemble des chapitres :\n\n- Introduction ISA · historique · modèle Purdue\n- ISA-95 Part 1 · terminologie et modèles\n- ISA-95 Part 3 · activités MOM (Production, Quality, Maintenance, Inventory)\n- ISA-95 Part 5 · transactions B2M et B2MML\n- ISA-88 · modèle procédural (Procedure → Unit Procedure → Operation → Phase)\n- Recette Master vs Control · validation GAMP 5\n- Cas pratiques Dasolabs (Zoetis, UCB, Technochim)\n- Bonnes pratiques et erreurs à éviter\n\n[TIP|**Score minimum : 70 %** (7 réponses correctes sur 10). En cas d'échec, tu peux recommencer autant de fois que nécessaire. Tes tentatives sont sauvegardées.]\n\n[RULE|Prends ton temps. Une bonne réponse choisie posément vaut mieux qu'une devinette rapide. Il n'y a **pas de chrono**.]\n\nBonne chance !",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
-      "position": 63,
+      "position": 59,
       "kind": "QUIZ",
       "section": "8 · Certification",
       "title": "🎓 Quiz certifiant final — ISA-95 & ISA-88",
@@ -821,10 +851,10 @@
           {
             "prompt": "ISA-95 traite de…",
             "options": [
-              "Cybersécurité",
-              "Enterprise-Control System Integration",
-              "HMI",
-              "Batch"
+              "Cybersécurité industrielle",
+              "Enterprise-Control System Integration (intégration entreprise-contrôle)",
+              "Design d'IHM",
+              "Batch control"
             ],
             "correctIndex": 1
           },
@@ -832,19 +862,19 @@
             "prompt": "ISA-88 traite de…",
             "options": [
               "Enterprise integration",
-              "Batch control",
-              "Safety",
-              "Wireless"
+              "Batch control (contrôle batch)",
+              "Safety systems",
+              "Réseaux sans fil"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Le modèle Purdue a combien de niveaux ?",
+            "prompt": "Le modèle Purdue définit les niveaux…",
             "options": [
-              "3",
-              "5 (0-4)",
-              "10",
-              "2"
+              "0 à 2",
+              "0 à 4 (5 niveaux)",
+              "1 à 10",
+              "Aléatoirement"
             ],
             "correctIndex": 1
           },
@@ -853,23 +883,23 @@
             "options": [
               "Phase → Operation → Unit Procedure → Procedure",
               "Procedure → Unit Procedure → Operation → Phase",
-              "Random",
+              "Aléatoire",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Master Recipe vs Control Recipe…",
+            "prompt": "La différence entre Master Recipe et Control Recipe…",
             "options": [
-              "Aucune diff",
-              "Master = spec indépendante · Control = instanciée pour batch précis",
-              "Master dev · Control prod",
+              "Aucune",
+              "Master = spec indépendante équipement, non-exécutable directement · Control = instance concrète pour un batch précis, exécutable",
+              "Master pour dev, Control pour prod",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "ISA-95 définit combien de catégories d'objets ?",
+            "prompt": "ISA-95 définit combien de catégories d'objets métier principaux ?",
             "options": [
               "2",
               "4 (Personnel, Equipment, Material, Process Segment)",
@@ -881,20 +911,20 @@
           {
             "prompt": "B2MML est…",
             "options": [
-              "Un langage",
-              "Schémas XML standards ISA-95 · messages ERP↔MES",
+              "Un langage de programmation",
+              "Schémas XML standards issus d'ISA-95 pour les messages ERP↔MES",
               "Un PLC",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Approche recipe-based ISA-88 permet…",
+            "prompt": "L'approche recipe-based (ISA-88) permet…",
             "options": [
               "Rien",
-              "Séparer logique et code PLC · modifiable sans toucher PLC",
-              "Rigidité",
-              "Aller lentement"
+              "Séparer la logique recette du code PLC · modification recette possible en heures au lieu de semaines · réutilisation de Phases entre recettes",
+              "Rigidité augmentée",
+              "Aller plus lentement"
             ],
             "correctIndex": 1
           },
@@ -902,18 +932,18 @@
             "prompt": "Un EBR pharma doit contenir…",
             "options": [
               "Rien",
-              "Batch#, recette, data process, QA, signatures 21 CFR Part 11",
-              "Seulement produit",
+              "Batch#, recette utilisée, data process, résultats QA, déviations documentées, signatures électroniques 21 CFR Part 11",
+              "Seulement le produit",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Modification recette validée pharma nécessite…",
+            "prompt": "Modification d'une recette pharma validée nécessite…",
             "options": [
-              "Rien",
-              "Change control complet · docs, tests, approbation QA",
-              "Un click",
+              "Rien de spécial",
+              "Change control complet formel (justification, impact, tests, approbation QA, nouvelle version)",
+              "Un simple click sur bouton",
               "Un email"
             ],
             "correctIndex": 1
