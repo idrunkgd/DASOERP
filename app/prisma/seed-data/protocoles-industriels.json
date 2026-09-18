@@ -1,19 +1,19 @@
 {
   "slug": "protocoles-industriels",
   "title": "Protocoles industriels",
-  "subtitle": "Formation exhaustive — bus terrain, Ethernet industriel, OPC, MQTT, cybersécurité",
-  "level": "Intermédiaire à avancé",
-  "duration": "≈ 8 h",
+  "subtitle": "Modbus, Profinet, OPC UA, MQTT · standards de communication OT",
+  "level": "Débutant à intermédiaire",
+  "duration": "≈ 10 h",
   "isCertifying": true,
   "passThreshold": 70,
-  "certificateWording": "Formation « Protocoles industriels » — connaissances fondamentales sur les protocoles de communication industriels, incluant Modbus, Profibus, Profinet, EtherNet/IP, EtherCAT, HART, OPC (Classic et UA), MQTT/Sparkplug B, wireless, cybersécurité IEC 62443 et sélection/migration.",
+  "certificateWording": "Formation « Protocoles industriels » — panorama complet des protocoles de communication OT : Modbus (RTU/TCP), Profibus (DP/PA), Profinet (RT/IRT), EtherNet/IP, OPC UA (address space, services, security), MQTT + Sparkplug B (UNS), HART, IO-Link, cybersécurité IEC 62443, bonnes pratiques Dasolabs.",
   "slides": [
     {
       "position": 1,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Bienvenue — Protocoles industriels",
-      "bodyMd": "## Formation exhaustive\n\nBienvenue ! Formation complète aux **protocoles industriels** de A à Z : bus terrain, Ethernet industriel, OPC, MQTT, wireless, cybersécurité.\n\n### Ce que tu vas maîtriser\n- Fondamentaux réseau OSI/TCP-IP\n- Bus terrain historiques (Modbus, Profibus, HART)\n- Ethernet industriel (Profinet, EtherNet/IP, EtherCAT)\n- OPC (DA, HDA, AE, UA)\n- MQTT et Sparkplug B\n- Wireless industriel\n- Building automation (BACnet, KNX)\n- Sélection et migration\n- Cybersécurité protocoles\n\n[RULE|Quiz certifiant final : 70 %.]",
+      "section": "1 · Introduction aux protocoles",
+      "title": "Bienvenue — Panorama des protocoles industriels",
+      "bodyMd": "## Pourquoi cette formation\n\nLes **protocoles industriels** sont le langage qui permet aux équipements de l'usine de communiquer. Sans eux, un PLC ne peut pas piloter un moteur, un SCADA ne peut pas lire un capteur, un MES ne peut pas orchestrer une production. Comprendre les protocoles = comprendre l'infrastructure fondamentale de toute usine.\n\nLe paysage a énormément évolué : des vieux protocoles série (Modbus RTU, Profibus) aux protocoles Ethernet modernes (Profinet, EtherNet/IP), en passant par MQTT/OPC UA pour l'ouverture IT/OT. Un consultant automation moderne doit maîtriser un peu de tout.\n\n### Ce que tu vas apprendre\n- Vue d'ensemble des couches OSI industrielles\n- Modbus (RTU, TCP) — le classique universel\n- Profibus (DP, PA) — la légende Siemens\n- Profinet (RT, IRT) — le remplaçant moderne\n- EtherNet/IP — le standard Rockwell/ODVA\n- HART — pour l'instrumentation analogique\n- OPC UA — le pont IT/OT moderne\n- MQTT + Sparkplug B — le futur UNS\n- Bus de terrain (AS-i, IO-Link, CANopen)\n- Sécurité et cybersec des protocoles\n\n[RULE|Quiz certifiant · 70 % · refaisable]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -21,29 +21,62 @@
     {
       "position": 2,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Histoire des protocoles industriels",
-      "bodyMd": "## De 4-20 mA à MQTT\n\n### Timeline\n[KV|**1950s**:signaux analog 4-20 mA · point-à-point||**1970s**:PLC · logique digitale · encore câblage direct||**1980s**:premiers bus terrain (Modbus 1979)||**1990s**:explosion (Profibus, DeviceNet, ControlNet, CANopen)||**2000s**:Ethernet industriel (Profinet, EtherNet/IP)||**2010s**:convergence OPC UA, IoT||**2020s**:MQTT, Sparkplug B, UNS · découplage total]",
+      "section": "1 · Introduction aux protocoles",
+      "title": "Le modèle OSI appliqué à l'industrie",
+      "bodyMd": "## Les couches qu'on trouve en usine\n\nLe modèle OSI classique (7 couches) est présent partout, mais avec des spécificités industrielles.\n\n### Les 7 couches OSI\n[KV|**7 - Application**:les données métier · Modbus function codes, OPC UA services, MQTT messages||**6 - Presentation**:formatage · rare en industriel||**5 - Session**:gestion connexion · rare en industriel||**4 - Transport**:TCP ou UDP · en Ethernet · pas de layer en série||**3 - Network**:IP · pour protocoles Ethernet · pas en série||**2 - Data Link**:MAC · Ethernet · ou RS-485/RS-232 en série||**1 - Physical**:câbles, connecteurs, signaux électriques]\n\n### Les 3 grandes familles industrielles\n[STEPS|**Protocoles série** : RS-232/485 · débit 9600-115200 bps · courts (100 m max) · legacy · Modbus RTU, Profibus DP||**Protocoles Ethernet industriels** : sur 100 Mbps/1 Gbps · Profinet, EtherNet/IP, EtherCAT, Modbus TCP · standard moderne||**Protocoles TCP/IP** : au-dessus de l'IP · OPC UA, MQTT, HTTP REST · pour interop IT/OT]\n\n### Les débits typiques\n[KV|**Modbus RTU sur RS-485**:9.6, 19.2, 38.4 kbps · lent||**Profibus DP**:12 Mbps (fixe) · rapide en son temps||**Profinet RT**:100 Mbps · standard 2020s||**Profinet IRT (Isochronous Real Time)**:1 Gbps · déterministe · pour drives||**Modbus TCP**:100 Mbps-1 Gbps · fluide||**OPC UA**:jusqu'à 1 Gbps · dépend de la charge||**Ethernet standard**:1 Gbps · pour usage IT/OT hybride]\n\n### Temps de réponse typiques\n[KV|**Contrôle temps réel dur** (drive) :< 1 ms · Profinet IRT ou EtherCAT||**Contrôle temps réel** (PLC) :10-100 ms · Profinet RT, Modbus TCP||**SCADA read** :100 ms-1 sec · OPC UA, Modbus||**MES/ERP** :seconde-minute · REST APIs, MQTT||**Reporting** :heure-jour · SQL queries, ETL]\n\nComprendre le temps de réponse requis pour un besoin = choix protocole adapté.\n\n### Le grand débat série vs Ethernet\nDepuis 2010-2015, l'Ethernet industriel remplace progressivement le série. Raisons :\n- Plus rapide\n- Plus flexible\n- Compatible IT\n- Plus économique long terme\n\nMais le série reste :\n- Sur legacy · vieilles usines\n- En environnements très perturbés (EMI extrême)\n- En budgets serrés\n- Pour capteurs isolés\n\nEn 2026, un projet neuf part quasi systématiquement en Ethernet. Le série est en fin de vie.\n\n[TIP|Un consultant Dasolabs doit **maîtriser les 2** : Ethernet pour projets neufs, série pour intégrer legacy. Pas de choix, c'est la réalité du terrain.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 3,
-      "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Pourquoi tant de protocoles ?",
-      "bodyMd": "## L'histoire des batailles standards\n\n### Raisons de la fragmentation\n- Chaque grand constructeur voulait son propre standard\n- Verrouiller les clients dans son écosystème\n- Différentes contraintes techniques (vitesse, distance, robustesse)\n- Standards régionaux (US, Europe, Asie)\n\n### Exemples\n- Siemens → Profibus/Profinet\n- Rockwell → DeviceNet/EtherNet/IP\n- Modicon → Modbus\n- Beckhoff → EtherCAT\n\n[TIP|Aujourd'hui : convergence vers OPC UA et MQTT. Les guerres s'apaisent avec l'adoption des standards ouverts.]",
+      "kind": "QUIZ",
+      "section": "1 · Introduction aux protocoles",
+      "title": "Quiz 1 — Introduction",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "En 2026, un projet neuf choisit typiquement…",
+            "options": [
+              "Série RS-485",
+              "Ethernet industriel (Profinet, EtherNet/IP, Modbus TCP) · série uniquement pour legacy ou cas très spécifiques",
+              "Fibrenoire uniquement",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Temps de réponse pour contrôle temps réel dur (drive)…",
+            "options": [
+              "1 seconde",
+              "< 1 ms · Profinet IRT ou EtherCAT · déterministe garanti",
+              "1 minute",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "OPC UA, MQTT, HTTP REST sont…",
+            "options": [
+              "Protocoles séries",
+              "Au-dessus de TCP/IP · pour interop IT/OT · protocoles applicatifs modernes",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 4,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Modèle OSI — les 7 couches",
-      "bodyMd": "## Le référentiel\n\n[KV|**7 - Application**:HTTP, MQTT, OPC UA||**6 - Presentation**:formats data (JSON, XML)||**5 - Session**:établir/maintenir sessions||**4 - Transport**:TCP, UDP||**3 - Network**:IP, routage||**2 - Data Link**:Ethernet frames, MAC||**1 - Physical**:câble, radio · signaux électriques]\n\n### Utilité\nRaisonner par couche pour comprendre où un problème se situe (physical layer défaillant · protocole applicatif buggé).",
+      "section": "2 · Modbus — le classique universel",
+      "title": "Modbus RTU — le vieux briscard",
+      "bodyMd": "## L'ancêtre encore vivant\n\n**Modbus** a été inventé par Modicon (maintenant Schneider Electric) en **1979**. Il est probablement **le protocole industriel le plus déployé au monde**, avec des dizaines de millions d'appareils en fonctionnement.\n\nSon succès vient de sa **simplicité** : c'est un protocole master-slave (client-server), sans overhead, facile à implémenter, gratuit, ouvert.\n\n### Architecture Modbus RTU\n[STEPS|**1 master (client)** interroge · **1-247 slaves (servers)** répondent||**Support série** : RS-232 point-à-point ou RS-485 multi-drop||**Frame** : Slave address + Function code + Data + CRC||**Half-duplex** : un parle à la fois||**Timing** strict : silence entre trames pour délimiter]\n\n### Function codes principaux\nModbus définit des \"function codes\" pour opérations :\n[KV|**0x01 Read Coils**:lire N bits de sortie||**0x02 Read Discrete Inputs**:lire N bits d'entrée||**0x03 Read Holding Registers**:lire N registres 16-bit (les plus utilisés)||**0x04 Read Input Registers**:lire N registres d'entrée||**0x05 Write Single Coil**:écrire 1 bit||**0x06 Write Single Register**:écrire 1 registre||**0x0F Write Multiple Coils**:écrire N bits||**0x10 Write Multiple Registers**:écrire N registres]\n\nUn master lit typiquement 10-100 registres à intervalles réguliers (1 sec par ex).\n\n### Table mémoire Modbus\nChaque slave Modbus expose 4 tables :\n- **Discrete Inputs** (%I) : bits lecture seule\n- **Coils** (%Q) : bits lecture/écriture\n- **Input Registers** (%IR) : 16-bit lecture seule\n- **Holding Registers** (%HR) : 16-bit lecture/écriture\n\nChaque table est adressée de 0 à 65535 (adressage). C'est simple mais limité.\n\n### Un exemple concret\nLire la température d'un régulateur JUMO :\n- Slave address : 1\n- Function : 0x03 (Read Holding Registers)\n- Start address : 40001 (adresse T° du régulateur)\n- Quantity : 1 register\n- Response : 16-bit value = 245 → 24.5°C (division x10)\n\nSimple, direct, marche depuis 1979.\n\n### Limitations\n[DANGER|**Pas de types natifs** : uniquement 16-bit registers · les floats et 32-bit nécessitent 2 registres · endianness variable selon vendor]\n[DANGER|**Master-slave rigide** : slave ne peut pas initier communication]\n[DANGER|**Pas d'auth ni chiffrement** : en clair · vulnerable]\n[DANGER|**Adressage limité** : max 247 slaves par bus]\n[DANGER|**Débit faible** : 115200 bps max · lent pour data volumineuse]\n\n### Où on trouve Modbus RTU en 2026\n- Régulateurs de température, débitmètres, indicateurs\n- Vieux drives (variateurs de fréquence)\n- Compteurs d'énergie\n- Capteurs simples budget-friendly\n- Nombreuses usines legacy\n\nIl est en déclin mais **partout**. Un consultant Dasolabs le rencontre chaque semaine.\n\n[TIP|**Astuce Dasolabs** : sur intervention avec Modbus RTU, un multimètre TrueRMS pour vérifier les niveaux RS-485 · souvent le problème est électrique (impédance, terminaisons), pas protocolaire.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -51,29 +84,62 @@
     {
       "position": 5,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Protocoles réseau vs bus terrain",
-      "bodyMd": "## Deux mondes\n\n### Bus terrain (fieldbus)\nDédiés à l'industrie · basse vitesse (kbps à Mbps) · robustes · déterministes.\n- Modbus, Profibus, CANopen, HART, AS-Interface\n\n### Ethernet industriel\nBasé sur Ethernet standard · haute vitesse (100 Mbps à 10 Gbps) · flexibilité IT · moderne.\n- Profinet, EtherNet/IP, EtherCAT, POWERLINK\n\n[TIP|**Trend 2026** : bus terrain historiques déclinent, Ethernet industriel domine. Migration progressive de tous les sites.]",
+      "section": "2 · Modbus — le classique universel",
+      "title": "Modbus TCP — la version moderne",
+      "bodyMd": "## Modbus sur Ethernet\n\n**Modbus TCP** est la version Ethernet de Modbus. Introduite en 1999. Mêmes concepts (function codes, registres) mais transportés sur TCP/IP.\n\n### Ce qui change\n[KV|**Support**:Ethernet 100 Mbps-1 Gbps · pas RS-485||**Port**:502 (standard)||**Master → Client**:le master devient \"client\" (vocabulaire IT)||**Slave → Server**:le slave devient \"server\"||**Nb devices**:illimité (limité par adressage IP)||**Vitesse**:1000x plus rapide||**Distance**:limité par Ethernet standard (100 m Cu, km fibre)]\n\n### Frame Modbus TCP\nLa frame contient toujours Modbus RTU original + un header MBAP (Modbus Application Protocol) pour TCP :\n\n- Transaction ID (2 bytes) · pour matcher requête/réponse\n- Protocol ID (2 bytes) · toujours 0\n- Length (2 bytes) · nb bytes qui suivent\n- Unit ID (1 byte) · comme slave address\n- Function code (1 byte)\n- Data (N bytes)\n\nPas de CRC (TCP gère les erreurs).\n\n### Bénéfices vs RTU\n1. **Vitesse** : lire 1000 registres en 5 ms vs 500 ms en RTU\n2. **Simultanéité** : plusieurs masters peuvent lire un slave (multiplexage TCP)\n3. **Distance** : illimitée (via routers)\n4. **Diagnostic** : ping, wireshark, outils IT standard\n5. **Combinaison** : passerelles RTU→TCP pour intégrer legacy\n\n### Utilisation typique\n- **PLC ↔ SCADA** : la plus courante · WinCC lit un PLC Siemens en Modbus TCP\n- **PLC ↔ RTU** : PLC principal parle à des petits contrôleurs\n- **Data acquisition** : DAQ modules qui exposent Modbus TCP\n- **Integration** : facile depuis Python, Java, C#, Node.js\n\n### Attention à l'endianness\nModbus a un problème historique : **l'ordre des bytes** pour les données 32-bit (float, int32) est variable selon vendors.\n\nUn float 25.5 peut être stocké en 4 combinaisons :\n- Big Endian, Big Word : 41 CC 00 00\n- Little Endian, Little Word : 00 00 CC 41\n- Big Endian, Little Word : 00 00 41 CC\n- Little Endian, Big Word : CC 41 00 00\n\nSur chaque projet, on doit **tester** ou lire la doc vendor. Sinon, on obtient 3.4e-38 au lieu de 25.5.\n\n### Sécurité — le point faible\n[DANGER|Modbus TCP **n'a pas d'auth ni de chiffrement**. Un attaquant sur le réseau peut lire toutes les data ET écrire]\n\nDans les usines modernes, on protège :\n- Segmentation réseau (VLAN OT dédié)\n- Firewall entre OT et IT\n- Modbus TCP Security (extension récente avec TLS) — encore rare\n\nNe **jamais** exposer un slave Modbus TCP sur Internet ou un LAN non-protégé.\n\n### Modbus TCP Security\nDepuis 2018, il existe **Modbus TCP Security** :\n- Port 802 au lieu de 502\n- TLS chiffré\n- Authentification par certificat\n- Pas encore ubiquitaire mais émergent\n\n[TIP|**Chez Dasolabs**, on utilise Modbus TCP quotidiennement pour connecter petit équipement · c'est robuste et éprouvé. Mais toujours dans un VLAN OT protégé.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 6,
-      "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Vitesse vs déterminisme",
-      "bodyMd": "## Le trade-off\n\n### Vitesse\nPlus rapide = meilleur pour data volume · vidéo · streaming.\n\n### Déterminisme\nGarantie de délai de livraison max. Critique pour contrôle temps réel.\n\n### Types\n[KV|**Non-déterministe**:HTTP, MQTT · latence variable||**Soft real-time**:Ethernet standard · best effort||**Hard real-time**:EtherCAT, Profinet IRT · < 1 ms garanti|| **Isochrone**:multi-axes sync à la ns]",
+      "kind": "QUIZ",
+      "section": "2 · Modbus — le classique universel",
+      "title": "Quiz 2 — Modbus",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Modbus est né en…",
+            "options": [
+              "2020",
+              "1979 · protocol Modicon (maintenant Schneider Electric) · un des plus déployés au monde",
+              "1990",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Modbus TCP utilise le port…",
+            "options": [
+              "80",
+              "502 (standard) ou 802 pour Modbus TCP Security (TLS)",
+              "443",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Modbus TCP a un problème historique avec…",
+            "options": [
+              "Rien",
+              "L'endianness (ordre des bytes) pour données 32-bit · varie selon vendor · à tester ou documenter",
+              "Le chiffrement toujours",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 7,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Topologies",
-      "bodyMd": "## Comment câbler les devices\n\n[KV|**Bus (linéaire)**:tous sur une même ligne · ancien · Profibus DP||**Étoile**:tous vers un switch central · standard Ethernet||**Anneau**:boucle · redondance (MRP en Profinet)||**Daisy-chain**:en série via 2 ports · devices Ethernet moderne||**Maille (mesh)**:redondance max · complexité max]\n\n### En pratique\nÉtoile pour Ethernet standard. Daisy-chain pour Profinet moderne. Anneau pour redondance critique.",
+      "section": "3 · Profibus et Profinet",
+      "title": "Profibus — l'héritage Siemens",
+      "bodyMd": "## Le protocole série Siemens\n\n**Profibus** (Process Field Bus) a été créé par Siemens en 1989. Standardisé IEC 61158. Il a dominé le marché européen des bus de terrain pendant 20 ans, avant d'être supplanté par Profinet (Ethernet).\n\n### Deux variantes\n[KV|**Profibus DP** (Decentralized Peripherals) : le classique · pour I/O distribuées · vitesse 9.6 kbps à 12 Mbps||**Profibus PA** (Process Automation) : version pour zone Ex (atmosphères explosibles) · 31.25 kbps · alimentation via bus]\n\nDP est le plus courant en industrie manufacturière · PA en process (chimie, pharma) pour raisons de sécurité intrinsèque.\n\n### Architecture Profibus DP\n- **Master** (PLC) et **slaves** (I/O modules, drives, HMI)\n- Câble à paires torsadées blindé (bleu/vert Siemens)\n- 32 devices max par segment · extensible par répéteurs (jusqu'à 126 total)\n- Longueur : 100 m à 12 Mbps · 1200 m à 9.6 kbps\n- Terminaisons obligatoires aux 2 extrémités (résistance 220 Ω)\n\n### Configuration\nHistoriquement configuré via **STEP 7** (avant TIA Portal). Dans TIA :\n1. Ajouter un master DP (module CP dans le rack CPU)\n2. Ajouter des slaves à la ligne bus\n3. Chaque slave a une adresse (1-126)\n4. Configurer les paramètres (baudrate, watchdog)\n5. Compile + download\n\n### Utilisation typique en 2026\nProfibus est **legacy** mais massif :\n- Usines des années 90-2010 : encore beaucoup\n- Migration progressive vers Profinet\n- Cohabitation Profibus + Profinet dans certains projets\n\nDasolabs intervient régulièrement sur des installations Profibus héritées : diagnostic, extension, migration.\n\n### Diagnostic Profibus\nOutils standard :\n- **BW-Test** (Softing) : mesure signal, terminaisons, ordre bytes\n- **PB-Q ONE** : diagnostic bus intégral\n- **TIA Portal** : diagnostic online des slaves\n\nUn bus Profibus mal cablé (terminaisons, blindage, longueur) génère 90 % des problèmes. Pas le protocole lui-même.\n\n### Migration Profibus → Profinet\nChez UCB, on a migré 3 lignes Profibus → Profinet en 18 mois :\n- **Phase 1** : nouveau réseau Ethernet Profinet en parallèle\n- **Phase 2** : PLC modernes (S7-1500) avec both Profibus et Profinet\n- **Phase 3** : passer progressivement les slaves (via ET 200S Profinet ou passerelles)\n- **Phase 4** : décommissionner Profibus quand tous les slaves migrés\n\nCoût : ~150 k€/ligne · gain : maintenance simplifiée, diagnostic amélioré, extensions faciles.\n\n[TIP|Un client encore en Profibus en 2026 = candidat prioritaire pour projet migration Dasolabs. Vaut la peine de sonder son intention à moyen terme.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -81,29 +147,62 @@
     {
       "position": 8,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Adressage réseau",
-      "bodyMd": "## IP, MAC, node addresses\n\n### Adressage Ethernet\n- **IP address** : 192.168.1.10\n- **MAC address** : hex 48 bits · identifiant hardware unique\n- **Port** : TCP/UDP port (502 Modbus, 44818 EtherNet/IP)\n\n### Bus terrain\n- **Node address** : 0-125 (Profibus), 0-247 (Modbus)\n- Configuré manuellement sur device (dip switch ou softwarement)\n\n[WARN|Attention aux **conflits d'adresses**. 2 devices avec même IP/node → conflit, comm cassée.]",
+      "section": "3 · Profibus et Profinet",
+      "title": "Profinet — le successeur Ethernet",
+      "bodyMd": "## L'Ethernet industriel Siemens\n\n**Profinet** est le successeur Ethernet de Profibus, lancé en 2003. Aujourd'hui, c'est **le standard européen** pour l'automation Siemens. Base : Ethernet standard 100 Mbps ou 1 Gbps.\n\n### Trois classes de temps réel\n[KV|**Profinet NRT** (Non Real Time) : trafic Ethernet standard TCP/UDP · pour SCADA, config · latence > 100 ms||**Profinet RT** (Real Time) : trafic prioritaire · pour PLC ↔ IO · latence < 10 ms · le plus courant||**Profinet IRT** (Isochronous Real Time) : déterministe · slots temporels réservés · pour drives synchronisés · latence < 1 ms]\n\nUn même câble Ethernet transporte les 3 classes simultanément.\n\n### Architecture\n- **Controller** (Master · le PLC)\n- **Devices** (Slaves · IO, drives, HMI)\n- **Switches managés** pour Profinet RT/IRT (PoE et redondance)\n- Topologies : ligne, étoile, anneau, arborescence\n\n### Câblage\n- Câble Ethernet standard (Cat 5e ou mieux)\n- Connecteurs RJ45 industriels IP67\n- Codes couleurs Siemens : câbles verts pour Profinet\n- Longueur : 100 m entre 2 switches\n\n### Configuration TIA Portal\n- Network View → glisser-déposer les devices Profinet\n- Configuration automatique · TIA détecte les modules\n- IP adressage · plan d'adressage documenté\n- Assign device names · noms fixes pour chaque device\n- Compile + download\n\nSimple et intuitif.\n\n### Diagnostic\nProfinet offre un diagnostic **excellent** :\n- **LEDs** sur chaque module : status, com, erreurs\n- **TIA Portal online** : voir l'état de chaque device\n- **PRONETA** (outil Siemens gratuit) : scan et diagnostic bus\n- **Wireshark** : capture réseau · plugins Profinet\n\nUn consultant peut identifier un problème en 5 minutes.\n\n### Profisafe — la couche safety\nSur Profinet, on peut ajouter **Profisafe** pour communication safety (F-DI/DO ↔ F-CPU). Certifié SIL 3 · pour arrêts d'urgence, verrouillages sécurité.\n\n### Comparaison avec les alternatives\n[KV|**Profinet**:Siemens dominant en Europe · rich features · complexité moyenne||**EtherNet/IP** (ODVA) : Rockwell dominant en Amérique · concurrent direct||**EtherCAT** (Beckhoff) : ultra-rapide · pour drives et robotique · niche performance||**POWERLINK**:B&R · niche · perte de vitesse]\n\n### Utilisation typique\nChez Dasolabs, Profinet est **le standard** sur tous nos projets Siemens neufs. Utilisé pour :\n- PLC ↔ IO distribuées (ET 200SP)\n- PLC ↔ Drives SINAMICS\n- PLC ↔ HMI Comfort/Unified\n- PLC ↔ PLC (pour architectures distribuées)\n- Certification safety via Profisafe\n\n[TIP|Investissement Dasolabs : chaque nouveau consultant fait 2 jours de formation Profinet · diagnostic avancé · dépannage. C'est notre force sur le terrain.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 9,
-      "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Câbles et connecteurs",
-      "bodyMd": "## Le physique\n\n### Câbles courants\n[KV|**Cat 5e / 6a**:Ethernet 100 Mbps à 10 Gbps||**Fibre optique multi-mode**:jusqu'à 2 km||**Fibre optique single-mode**:jusqu'à 100 km||**Câble Profibus**:2 paires torsadées blindées||**Câble HART**:2 fils · 4-20 mA + signal HART superposé||**Coaxial**:legacy · ControlNet]\n\n### Connecteurs\n- **RJ45** : Ethernet armoire\n- **M12 D-code** : Profinet IP65 sur terrain\n- **M12 X-code** : Gigabit sur terrain\n- **Sub-D 9 pin** : Profibus DP",
+      "kind": "QUIZ",
+      "section": "3 · Profibus et Profinet",
+      "title": "Quiz 3 — Profinet",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Profinet a 3 classes de temps réel…",
+            "options": [
+              "Aucune",
+              "NRT (SCADA), RT (< 10 ms · PLC IO), IRT (< 1 ms déterministe · drives synchronisés)",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Profibus vs Profinet…",
+            "options": [
+              "Identiques",
+              "Profibus = série 12 Mbps max · legacy · Profinet = Ethernet 100M-1G · standard moderne · migration en cours",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Profisafe est…",
+            "options": [
+              "Un HMI",
+              "Couche safety sur Profinet · pour communication F-DI/DO ↔ F-CPU · certifié SIL 3",
+              "Un backup",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 10,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Environnement industriel",
-      "bodyMd": "## Contraintes hard\n\n### Défis\n[STEPS|**Température**: -40 °C à +85 °C||**Vibrations**: machines rotatives||**EMC**: perturbations électromagnétiques||**Humidité et poussière**: IP65 ou plus||**ATEX**: zones explosives · barrières intrinsèquement sûres]\n\n### Sélection matériel\nCâbles et devices **industriels** obligatoires, pas de matériel bureautique.",
+      "section": "4 · OPC UA et MQTT — protocoles IT/OT",
+      "title": "OPC UA — le pont IT/OT",
+      "bodyMd": "## Le standard d'interopérabilité moderne\n\n**OPC UA** (Unified Architecture) est la spécification de l'OPC Foundation qui remplace le vieux OPC Classic (OPC DA/HDA sur DCOM). Lancé en 2008, adopté massivement depuis 2015-2020.\n\n### Pourquoi OPC UA ?\nLes vieux OPC Classic avaient des limites :\n- Windows uniquement (DCOM)\n- Firewalls difficiles\n- Pas sécurisé\n- Complexe à déployer\n\nOPC UA résout tout ça :\n- **Multi-platform** : Windows, Linux, embedded\n- **Firewall-friendly** : port unique 4840\n- **Sécurisé** : TLS + auth + audit\n- **Simple** : APIs modernes en tous langages\n- **Riche** : model d'information puissant\n\n### Architecture OPC UA\n[STEPS|**Server** : le PLC ou l'application qui expose des data||**Client** : le SCADA, MES, dashboard qui consomme||**Endpoint** : URL de connexion (opc.tcp://192.168.1.10:4840)||**Security policy** : None, Basic256Sha256, etc.||**Authentication** : anonymous, username/password, certificate||**Address space** : arbre hiérarchique des nodes exposés]\n\n### L'address space\nUn serveur OPC UA expose ses data dans un **arbre hiérarchique** :\n- Racine \"/\"\n- \"Reactor R1\"\n  - \"Temperature\" (value: 62.5, unit: °C, timestamp: ..., quality: Good)\n  - \"Pressure\" (value: 3.1, unit: bar)\n  - \"State\" (value: \"Running\")\n- \"Reactor R2\"\n  - ...\n\nChaque node a des attributs : DisplayName, Value, DataType, Description, etc.\n\n### Services OPC UA\n[KV|**Read/Write**:lecture/écriture des valeurs||**Browse**:navigation dans l'address space||**Subscribe/Monitor**:notification sur changement · plus efficace que polling||**Method call**:appeler une méthode (RPC) · comme StartBatch()||**Historical access (HA)**:lire les archives historiques||**Alarms & Conditions (A&C)**:gestion alarmes||**Events**:notifications événementielles]\n\n### PLC Siemens et OPC UA\nDepuis TIA Portal V14, un **S7-1500 expose nativement un serveur OPC UA** :\n- Configuration dans TIA · quelques clicks\n- Sélectionner les tags à exposer\n- Configurer sécurité\n- Le PLC devient serveur OPC UA sur port 4840\n\nRésultat : n'importe quel client OPC UA (SCADA, MES, HighByte) peut lire le PLC sans driver custom.\n\n### OPC UA vs les alternatives\n[KV|**OPC UA**:standard universel · multi-platform · sécurisé · riche modèle||**OPC Classic (DCOM)**:legacy Windows · à migrer||**Modbus TCP**:simple mais limité · pas de types complexes||**MQTT**:pub/sub · complémentaire à OPC UA||**REST APIs**:pour intégration IT · pas temps réel]\n\n### Companion Specifications\nOPC UA a des **Companion Specifications** — extensions pour domaines spécifiques :\n- OPC UA for Robotics\n- OPC UA for Machinery\n- OPC UA for ISA-95 (mapping des objets ISA-95 en OPC UA)\n- OPC UA for Field-eXchange\n\nCes companions standardisent la sémantique pour interop cross-vendor.\n\n### Sécurité\nOPC UA a un modèle sécurité solide :\n- **Encryption** : Basic256Sha256 obligatoire en prod\n- **Auth** : certificat X.509 par client · révocation via CRL\n- **Auth users** : optionnel · via username/password ou tokens\n- **Audit** : log des connexions et actions\n\nCorrectement configuré, OPC UA est **sûr** — bien plus que Modbus TCP.\n\n[TIP|**Chez Dasolabs**, on migre systématiquement OPC Classic vers OPC UA. Le vieux DCOM est un cauchemar cyber-sécurité à maintenir.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -111,59 +210,49 @@
     {
       "position": 11,
       "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Diagnostic réseau industriel",
-      "bodyMd": "## Outils courants\n\n[KV|**Ping, traceroute**:tests basiques IP||**Wireshark**:analyseur de paquets · essentiel||**Wireshark Profinet plugin**:décodage trames Profinet||**Softing Diagnostics**:diagnostics bus terrain||**Fluke Networks**:tests câbles physiques||**Nmap**:scan de ports · sécurité||**tcpdump**:capture Linux|| **SIMATIC Ident**:Profinet Siemens]\n\n[TIP|**Wireshark** est **la référence**. Gratuit, open-source, décodage de dizaines de protocoles industriels.]",
+      "section": "4 · OPC UA et MQTT — protocoles IT/OT",
+      "title": "MQTT et Sparkplug B — le futur",
+      "bodyMd": "## Le pub/sub industriel\n\n**MQTT** est le protocole publish/subscribe léger, initialement pour télémétrie IoT. Sparkplug B est l'extension industrielle qui standardise son usage en automation.\n\n### Pourquoi MQTT en industrie ?\n[STEPS|**Pub/sub découplé** : les producteurs et consommateurs ne se connaissent pas||**Léger** : header 2 bytes minimum · idéal réseaux contraints||**Fiable** : QoS 0/1/2 selon besoin||**Retained messages** : nouveaux subscribers récupèrent état actuel immédiatement||**Bidirectionnel** : contrôleurs peuvent envoyer commandes||**Standard** : broker MQTT partout · Mosquitto, HiveMQ, EMQX]\n\n### Le concept Unified Namespace\nAvec MQTT + Sparkplug B, on construit un **Unified Namespace** (UNS) :\n- Un seul broker central\n- Structure hiérarchique ISA-95\n- Tous les producteurs publient\n- Tous les consommateurs souscrivent\n\nRésultat : découplement total · évolutivité · découvrabilité.\n\n### Sparkplug B — la spec industrielle\nMQTT est trop général pour l'industrie. **Sparkplug B** ajoute :\n- **Topic namespace obligatoire** : /spBv1.0/Group/EdgeNode/DeviceId\n- **Format binaire protobuf** : compact\n- **Types définis** : Boolean, Int, Float, Double, String, DateTime, Dataset\n- **State messages** : NBIRTH, DBIRTH, NDATA, DDATA, NDEATH, DDEATH\n- **Alias numériques** : optimisation bande passante\n\n### Bénéfices concrets\n1. **Broker central** = 1 seul point à sécuriser\n2. **Découvrabilité** : un consommateur peut lister ce qui est publié\n3. **Résilience** : broker persiste, consommateurs peuvent se déconnecter\n4. **Multi-consumers** : ajouter un dashboard, un MES, une IA · sans toucher aux producteurs\n5. **Cross-vendor** : Sparkplug B = standard · fonctionne avec tous les brokers\n\n### Écosystème\n[KV|**Brokers**:HiveMQ (enterprise), Mosquitto (open source), EMQX, AWS IoT, Azure IoT||**Publishers industrie**:HighByte, Ignition, Kepware, InoData, Cirrus Link||**Subscribers**:dashboards Grafana, MES, IA/ML, data lakes]\n\n### Cas d'usage typique Dasolabs\nSur projet Zoetis :\n- HighByte lit les PLC via OPC UA\n- HighByte publie sur HiveMQ en Sparkplug B\n- 5 consommateurs souscrivent simultanément :\n  - Dashboards Grafana (temps réel)\n  - MES Werum (integration data)\n  - Snowflake data lake (archive long terme)\n  - IA prédictive Azure ML (features)\n  - Backup CSV local (sécurité)\n\nSans MQTT/Sparkplug, il aurait fallu 5 intégrations point-à-point. Avec, 1 seule.\n\n### MQTT vs OPC UA — complémentaires\n[KV|**OPC UA**:point-à-point client/server · pour interop synchrone · discover, method calls · standard automation||**MQTT**:pub/sub via broker central · pour découplement · UNS · massive scaling]\n\nSouvent utilisés ensemble : HighByte lit PLC en OPC UA, publie sur UNS en MQTT Sparkplug B.\n\n[TIP|**Le futur industriel** = OPC UA pour lire les producteurs + MQTT/Sparkplug B pour publier au UNS. C'est la référence Dasolabs pour projets modernes 2026+.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 12,
-      "kind": "CONTENT",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Concepts clés",
-      "bodyMd": "## Vocabulaire\n\n[KV|**Master/Slave**:1 maître initie, N esclaves répondent (Modbus, Profibus)||**Client/Server**:demande/réponse (HTTP, OPC UA)||**Publisher/Subscriber**:découplé · N producteurs, N consommateurs (MQTT)||**Polling**:master demande cycliquement||**Event-driven**:message envoyé sur changement||**Cyclic**:messages à intervalle fixe||**Acyclic**:messages sur événement]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 13,
       "kind": "QUIZ",
-      "section": "1 · Introduction et fondamentaux",
-      "title": "Quiz 1 — Fondamentaux",
+      "section": "4 · OPC UA et MQTT — protocoles IT/OT",
+      "title": "Quiz 4 — OPC UA et MQTT",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Le modèle OSI a combien de couches ?",
+            "prompt": "OPC UA remplace…",
             "options": [
-              "3",
-              "5",
-              "7",
-              "10"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Wireshark sert à…",
-            "options": [
-              "Configurer un PLC",
-              "Analyser paquets réseau · debug protocoles",
-              "Créer HMI",
+              "Rien",
+              "OPC Classic (DCOM Windows) legacy · nouvelle version multi-platform, sécurisée, moderne, standard universel",
+              "Rien",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Hard real-time garantit…",
+            "prompt": "Sparkplug B ajoute à MQTT…",
             "options": [
               "Rien",
-              "Latence maximale déterministe (< 1 ms typique)",
-              "Meilleure vitesse en moyenne",
-              "Non-déterminisme"
+              "Spec industrielle · topic namespace obligatoire · format protobuf binaire · types définis · state messages",
+              "Uniquement une couleur",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Un S7-1500 expose OPC UA…",
+            "options": [
+              "Non jamais",
+              "Nativement depuis TIA Portal V14 · serveur OPC UA sur port 4840 · exposition tags configurables",
+              "Uniquement Modbus",
+              "Rien"
             ],
             "correctIndex": 1
           }
@@ -172,31 +261,74 @@
       "imageUrl": null
     },
     {
+      "position": 13,
+      "kind": "CONTENT",
+      "section": "5 · Bus de terrain spécifiques",
+      "title": "HART — l'instrumentation analogique",
+      "bodyMd": "## Le vieux protocole survivant\n\n**HART** (Highway Addressable Remote Transducer) est un protocole utilisé sur les capteurs d'instrumentation (température, pression, débit) depuis les années 80. Encore massif en 2026.\n\n### Le concept ingénieux\nHART **superpose** un signal digital sur la boucle 4-20 mA classique :\n- **4-20 mA** : la variable process principale (température, pression) · analogique\n- **Signal HART** : superposé · pour config, diagnostic, paramétrage\n\nRésultat : compatibilité avec les systèmes 4-20 mA existants + ajout de capabilities digitales sans changer le câblage.\n\n### Usage typique\nSur un projet pharma :\n- Capteur Pt100 → transmetteur 4-20 mA · HART pour config\n- L'API lit la variable process en 4-20 mA (temps réel)\n- L'ingénieur config le capteur via HART (setup, calibration)\n- Diagnostic HART : sonde defective, dérive, batterie faible\n\n### Outils HART\n- **Handheld communicator** (Emerson, Yokogawa) : device portable · connecte au capteur · config sur place\n- **HART multiplexer** : concentre plusieurs capteurs · centralise config\n- **AMS Device Manager** (Emerson) : software pour gestion parc capteurs\n\n### HART vs Fieldbus\nAujourd'hui, HART est en concurrence avec les bus **Fieldbus** modernes :\n- **Foundation Fieldbus H1** : purement digital · concurrent\n- **Profibus PA** : version Siemens pour process\n- **Wireless HART** : sans-fil pour zones difficiles\n\nMais HART reste **massif** car compatible legacy. En 2026, encore 90 % des instrumentations pharma sont en HART sur 4-20 mA.\n\n### Utilisation Dasolabs\nSur projets pharma, on rencontre HART tous les jours :\n- Recevoir les 4-20 mA sur cartes AI Siemens ET 200SP\n- Configurer les capteurs via handheld ou multiplexer\n- Diagnostiquer via AMS Device Manager\n- Migration éventuelle vers Foundation Fieldbus (rare, coûteux)\n\n### Investment interne\nDasolabs a un handheld HART Emerson · loué aux consultants pour interventions terrain. ~5 k€ investment initial · usage régulier.\n\n[TIP|Un consultant pharma doit **maîtriser HART** · c'est encore incontournable. Formation 1 jour, pratique 1 semaine.]",
+      "notes": null,
+      "quiz": null,
+      "imageUrl": null
+    },
+    {
       "position": 14,
       "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Modbus histoire",
-      "bodyMd": "## Le premier bus terrain\n\n### Origine\nCréé par **Modicon** en **1979** (aujourd'hui Schneider Electric). Le premier vrai bus de terrain.\n\n### Caractéristiques\n- Open standard depuis 2004 (Modbus.org)\n- Extrêmement simple\n- Ubiquitaire dans l'industrie\n- Encore massivement utilisé en 2026\n\n### Variantes\n- **Modbus RTU** : sur série RS-232/RS-485\n- **Modbus ASCII** : sur série · lisible humain · rare\n- **Modbus TCP** : sur Ethernet · standard moderne",
+      "section": "5 · Bus de terrain spécifiques",
+      "title": "IO-Link — le fieldbus moderne pour capteurs",
+      "bodyMd": "## Le protocole simple pour I/O intelligentes\n\n**IO-Link** (standardisé IEC 61131-9) est un protocole de communication point-à-point pour capteurs et actionneurs \"intelligents\". Introduit ~2010, adoption massive depuis 2018.\n\n### Le concept\nIO-Link remplace un simple câble 24V par une communication digitale :\n- **Master IO-Link** : dans PLC ou station distribué (ex ET 200SP IO-Link master)\n- **Devices IO-Link** : capteurs (proximité, photocell, laser distance) · actionneurs (vannes, éclairages)\n- **Câble standard** : M12 3-fils · alimentation + signal\n- **Distance** : jusqu'à 20 m par device\n\n### Bénéfices\n[STEPS|**Auto-parameterization** : le PLC configure automatiquement le capteur au démarrage||**Diagnostic** : le capteur remonte son état (température interne, cycles, dérives)||**Identification** : chaque capteur a son identité unique · plug-and-play||**Parameter changes** : depuis IHM sans intervention physique||**Universal port** : port M12 standard remplace 5 types de câbles différents||**Data intégrité** : detection erreurs · retry auto]\n\n### Un exemple concret\nUn capteur photoélectrique standard :\n- **Avant IO-Link** : câble 24V, config par petit potentiomètre physique\n- **Avec IO-Link** : câble M12, config depuis TIA Portal · seuil sensibilité, hystérésis, mode\n- **En prod** : le capteur remonte \"usure LED = 65 %, cycles = 12 M, temp = 47°C\" au PLC · maintenance prédictive possible\n\n### Utilisation typique\nChez UCB, on utilise IO-Link pour :\n- Capteurs de position vérin (proximité inductive · sortie/rentrée)\n- Photocells pour détection produits sur convoyeurs\n- Débitmètres à ultrasons pour rinçage\n- Capteurs de niveau capacitifs\n- Actionneurs simples (vannes pilotes, éclairages LED intelligents)\n\n### Coût\nIO-Link est légèrement plus cher que capteur classique :\n- Capteur IO-Link : +10-30 % vs équivalent 24V\n- Master IO-Link : +20-30 % vs carte DI/DO classique\n\nMais gain sur :\n- Setup (auto-parameterization)\n- Maintenance (diagnostic)\n- Documentation (config auto)\n- Traçabilité (identification unique)\n\nAmortissement typique : 12-18 mois.\n\n### Adoption\nEn 2026 :\n- **Nouveaux projets pharma** : IO-Link est le standard pour tous nouveaux capteurs\n- **Legacy** : conservé jusqu'au remplacement naturel\n- **Trend** : croissance +30 %/an · en train de devenir universel\n\n[TIP|**Chez Dasolabs**, on impose IO-Link pour tous nos nouveaux projets pharma. Le petit surcoût est vite compensé par gain maintenance et diagnostic.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 15,
-      "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Modbus RTU — série",
-      "bodyMd": "## Le classique\n\n### Physical layer\n- **RS-485** : différentiel · jusqu'à 32 devices · 1200 m à 9600 bps\n- **RS-232** : point-à-point · legacy\n\n### Vitesses\n- 9 600, 19 200, 38 400, 57 600, 115 200 bps\n- Standard : 19 200 bps\n\n### Frame\n    [ Addr | Function | Data | CRC ]\n\n### Bytes par frame\n8N1 typique (8 bits data, no parity, 1 stop)",
+      "kind": "QUIZ",
+      "section": "5 · Bus de terrain spécifiques",
+      "title": "Quiz 5 — Bus spécifiques",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "HART superpose…",
+            "options": [
+              "Rien",
+              "Un signal digital sur la boucle 4-20 mA · compat legacy · pour config/diagnostic capteurs",
+              "Modbus",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "IO-Link permet…",
+            "options": [
+              "Rien",
+              "Auto-parameterization, diagnostic, identification unique · pour capteurs et actionneurs intelligents · standard 2020s",
+              "PLC seulement",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "En 2026, un nouveau projet pharma choisit typiquement pour capteurs…",
+            "options": [
+              "Câble 24V basique",
+              "IO-Link pour tous nouveaux capteurs · HART pour instrumentation legacy 4-20 mA",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 16,
       "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Modbus TCP — Ethernet",
-      "bodyMd": "## Version moderne\n\n### Caractéristiques\n- Sur Ethernet TCP/IP\n- Port **502** par défaut\n- Master appelé **Client**, slave appelé **Server** (vocabulaire IT)\n- Illimité en nombre de devices (limite = adressage IP)\n- 100 Mbps à 10 Gbps\n\n### Frame\n    [ Header MBAP | Function | Data ]\n\n### Sans CRC\nTCP fait le check erreur, pas besoin de CRC applicatif.",
+      "section": "6 · Sécurité et cybersec des protocoles",
+      "title": "Vulnerabilités des protocoles industriels",
+      "bodyMd": "## Pourquoi c'est un sujet critique\n\nLa plupart des protocoles industriels ont été conçus avant l'ère cyber. Résultat : **beaucoup sont vulnérables** par design.\n\n### Les vulnérabilités classiques\n[KV|**Modbus TCP**:aucune auth ni chiffrement · qui a réseau peut tout lire/écrire||**Profinet**:auth simple · pas de chiffrement natif · sniffable||**EtherNet/IP**:auth limitée · vulnérable si exposé||**OPC Classic (DCOM)**:pas de firewall-friendly · vulnerable à attaques réseau||**MQTT sans TLS**:sniffable · tout en clair · attaquant peut publier n'importe quoi||**HART wireless**:vulnérable à jamming · replay attacks]\n\n### Types d'attaques industrielles\n[STEPS|**Reconnaissance passive** : sniffer réseau · lister les devices et tags||**Reconnaissance active** : scan Modbus (masscan, plcscan) · découvrir topologie||**Denial of Service** : flooder le broker MQTT ou faire crasher un PLC||**Man-in-the-Middle** : intercepter et modifier des messages · classique en série||**Replay attacks** : rejouer d'anciens messages capturés · pour force actions||**Command injection** : envoyer commandes malicieuses aux actionneurs||**Ransomware OT** : chiffrer les configs SCADA, PLC · demander rançon]\n\n### Cas réels notoires\nHistorique récent :\n- **Stuxnet** (2010) : ver informatique ciblant Siemens · programme uranium Iran · sabotage\n- **Ukraine 2015-2016** : attaques sur réseau électrique · 225 000 personnes sans courant\n- **Colonial Pipeline 2021** : ransomware sur système pipeline · 12 jours de fermeture · essence USA\n- **Norsk Hydro 2019** : ransomware · 71 M USD de pertes · production arrêtée\n\nCes attaques ne sont **plus théoriques**. Elles arrivent régulièrement.\n\n### IEC 62443 — le standard cybersec OT\n**IEC 62443** est le standard de référence pour la cybersécurité industrielle. Structure :\n- **Part 1** : Terminologie et concepts\n- **Part 2** : Programme de gestion cybersec (governance)\n- **Part 3** : Sécurité au niveau système (architecture)\n- **Part 4** : Sécurité au niveau produit (dev sécurisé)\n\nPoints clés :\n- **Zones et conduits** : segmentation stricte\n- **Security Levels** SL 1-4 selon criticité\n- **Defense in depth** : plusieurs couches de sécurité\n- **Least privilege** : minimum de permissions\n- **Monitoring** : détection anomalies\n\n### Chez Dasolabs\nNos projets appliquent IEC 62443 systématiquement :\n- **SL 2 minimum** pour projets standards\n- **SL 3** pour pharma sensible\n- **SL 4** rare · réservé nucléaire ou infrastructures critiques\n\nUn consultant senior Sophie est certifiée IEC 62443 · elle audite chaque projet Dasolabs.\n\n### Bonnes pratiques concrètes\n[STEPS|**Segmentation réseau** : VLAN OT séparé du IT · firewall entre les 2||**Défaut deny** : bloquer tout · autoriser explicitement||**Patches réguliers** : PLC, SCADA, OS · avec fenêtres maintenance||**Auth forte** : mTLS ou username/password + MFA||**Chiffrement** : TLS partout où possible · pas de plaintext||**Monitoring** : logs analytics · détection anomalies||**Backups immuables** : off-network · testés||**Incident response plan** : documenté et répété]\n\n[RULE|Un projet automation moderne **sans plan cybersécurité** = négligence professionnelle. En 2026, on ne peut plus ignorer.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
@@ -204,1218 +336,171 @@
     {
       "position": 17,
       "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Function codes",
-      "bodyMd": "## Ce qu'on peut faire\n\n[KV|**01**:Read Coils (bits sortie)||**02**:Read Discrete Inputs (bits entrée)||**03**:Read Holding Registers (mots)||**04**:Read Input Registers (mots)||**05**:Write Single Coil||**06**:Write Single Register||**15**:Write Multiple Coils||**16**:Write Multiple Registers||**23**:Read/Write Multiple Registers]",
+      "section": "6 · Sécurité et cybersec des protocoles",
+      "title": "Bonnes pratiques Dasolabs et cas",
+      "bodyMd": "## Notre méthodologie\n\nRésumé du framework Dasolabs pour choisir et sécuriser les protocoles.\n\n### Choix protocole — décision Dasolabs\n[STEPS|**Priorité 1** : réutiliser ce qui existe si legacy · Profibus, Modbus RTU · pas re-inventer||**Priorité 2** : Ethernet moderne pour tout ce qui est neuf · Profinet, EtherNet/IP, Modbus TCP||**Priorité 3** : IO-Link pour capteurs intelligents · standard 2020s||**Priorité 4** : OPC UA pour interop PLC ↔ SCADA/MES · standard universel||**Priorité 5** : MQTT + Sparkplug B pour UNS · découplement · évolutivité]\n\n### Ne PAS choisir\n[DANGER|**Modbus TCP exposé Internet** · risque cyber majeur]\n[DANGER|**OPC Classic DCOM** · legacy à migrer, plus supporté long terme]\n[DANGER|**Protocoles propriétaires** vendor-lock sans issue · éviter]\n[DANGER|**Cocktail de protocoles** sans stratégie · maintenabilité catastrophique]\n\n### Cas typique — projet pharma neuf UCB\nSur un nouveau projet UCB :\n- **PLC S7-1500** avec Profinet pour IO (ET 200SP) et drives (SINAMICS)\n- **HMI Comfort** via Profinet · aussi\n- **PLC ↔ SCADA WinCC** en OPC UA\n- **PLC ↔ MES Werum** en OPC UA\n- **HighByte** connecte tout ça au UNS MQTT + Sparkplug B\n- **Instrumentation** : HART 4-20 mA (existing) + IO-Link (nouveaux capteurs)\n- **Sécurité** : IEC 62443 SL 3 · segmentation stricte · monitoring\n\nCette architecture est **moderne et éprouvée** · applicable à tout projet pharma neuf 2026+.\n\n### Migration progressive\nPour un client legacy avec Profibus + OPC Classic :\n1. **Phase 1** : audit sécurité · identifier les gaps\n2. **Phase 2** : segmentation réseau · VLAN OT · firewall\n3. **Phase 3** : migration OPC Classic → OPC UA\n4. **Phase 4** : migration Profibus → Profinet\n5. **Phase 5** : ajout HighByte + UNS pour ouverture IT/OT\n\nChaque phase 6-12 mois · budget adapté au client.\n\n### Formation continue\nNos consultants suivent chaque année :\n- 2 jours cybersec OT (IEC 62443)\n- 1 jour nouveautés protocoles (Profinet, OPC UA versions)\n- Diagnostic terrain hands-on (avec équipements réels)\n\nCe budget formation est significatif mais **paie**. Un consultant à jour = un consultant qui vend.\n\n### Différenciation vs concurrence\nBeaucoup de concurrents bricolent avec les protocoles. Dasolabs :\n- Approche méthodique standardisée\n- Sécurité intégrée systématiquement\n- Documentation exhaustive\n- Formation clients incluse\n\nC'est ce qui fait qu'UCB, Zoetis, Technochim nous font confiance.\n\n[TIP|La formation \"Réseaux et cybersec OT\" Dasolabs (prochaine à venir) approfondira spécifiquement l'aspect sécurité. Complémentaire à cette formation protocoles.]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 18,
-      "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Registres et adressage",
-      "bodyMd": "## Data model\n\n### 4 tables de mémoire\n[KV|**Coils**:bits R/W · adresses 0-9999||**Discrete Inputs**:bits R · adresses 10001-19999||**Input Registers**:mots R · adresses 30001-39999||**Holding Registers**:mots R/W · adresses 40001-49999]\n\n### Types\n- 16 bits par registre (Word)\n- Combinaisons pour Float 32 bits, Int 32/64 bits\n\n### Endianness\n**Piège** : Big-endian vs Little-endian selon vendor. Toujours tester avec device réel.",
+      "kind": "QUIZ",
+      "section": "6 · Sécurité et cybersec des protocoles",
+      "title": "Quiz 6 — Sécurité",
+      "bodyMd": "",
       "notes": null,
-      "quiz": null,
+      "quiz": {
+        "questions": [
+          {
+            "prompt": "Modbus TCP en cybersec…",
+            "options": [
+              "Sécurisé",
+              "Aucune auth ni chiffrement par défaut · vulnérable · toujours dans VLAN OT protégé · Modbus TCP Security (TLS) émergent",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "IEC 62443 est…",
+            "options": [
+              "Un PLC",
+              "Standard cybersec industrielle · zones et conduits · security levels SL 1-4 · defense in depth",
+              "Un SCADA",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Choix Dasolabs pour projet pharma neuf…",
+            "options": [
+              "Rien",
+              "Profinet PLC/IO/drives · OPC UA PLC↔SCADA/MES · IO-Link capteurs · MQTT+Sparkplug B UNS · IEC 62443 SL 3",
+              "Modbus RTU seul",
+              "Rien"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
       "imageUrl": null
     },
     {
       "position": 19,
       "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Configuration Modbus TCP",
-      "bodyMd": "## Setup\n\n### Master (client)\n- IP du slave\n- Port 502\n- Slave ID (1 par défaut)\n- Registres à lire (start + count)\n- Fréquence de polling (chaque 1 sec typique)\n\n### Slave (server)\n- IP fixe recommandée\n- Autoriser IP master (whitelist)\n\n[TIP|Toujours **allocations d'adresses documentées** dans une matrice Excel. Modbus est vite le chaos sans docs.]",
+      "section": "7 · Certification",
+      "title": "Prêt pour l'évaluation ?",
+      "bodyMd": "## Quiz certifiant Protocoles industriels\n\nRécap :\n- Vue d'ensemble OSI industriel\n- Modbus RTU et TCP (histoire, function codes, table mémoire)\n- Profibus DP/PA et Profinet (RT, IRT)\n- OPC UA (address space, services, security)\n- MQTT + Sparkplug B (UNS, pub/sub)\n- HART et IO-Link (instrumentation moderne)\n- Sécurité cybersec (IEC 62443, vulnerabilités classiques)\n\n[TIP|Seuil 70 % · refaisable]",
       "notes": null,
       "quiz": null,
       "imageUrl": null
     },
     {
       "position": 20,
-      "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Exemple concret",
-      "bodyMd": "## Lire une centrale de mesure\n\n### Contexte\nCentrale Schneider PM8000 · Modbus TCP\n\n### Config\n- IP : 192.168.1.20\n- Slave ID : 1\n\n### Registres\n- 40001-40002 : tension L1 (Float 32)\n- 40003-40004 : tension L2\n- 40005-40006 : tension L3\n- 40007-40008 : courant total\n\n### Query type\nFunction 03 (Read Holding Registers) · start 40001 · count 8",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 21,
-      "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Modbus sécurité",
-      "bodyMd": "## Le talon d'Achille\n\n### Modbus est intrinsèquement non-sécurisé\n[DANGER|Pas de chiffrement TLS natif · data en clair]\n[DANGER|Pas d'authentification standard]\n[DANGER|Sur Internet = compromise immédiate]\n\n### Modbus TCP Secure\nExtension récente avec TLS · encore peu supportée.\n\n### Recommandations\n- VLAN OT séparé\n- VPN pour accès distant\n- Firewall filtrant port 502\n- Jamais exposé Internet\n\n[WARN|Beaucoup de devices Modbus exposés sur Internet · trouvables sur Shodan · attaques faciles.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 22,
-      "kind": "CONTENT",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Modbus vs alternatives",
-      "bodyMd": "## Choix moderne\n\n### Quand utiliser Modbus\n- Instrument tiers (centrales mesure, onduleurs) qui ne supporte que Modbus\n- Intégration ponctuelle simple\n- Legacy à ne pas casser\n\n### Alternatives modernes\n- OPC UA (recommandé pour projets neufs)\n- MQTT (pour data cloud)\n- Protocoles vendor (Profinet, EtherNet/IP)\n\n[TIP|Modbus n'est **pas mort**. Il reste utile pour interopérabilité tiers. Mais pas backbone de nouveau projet 2026.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 23,
       "kind": "QUIZ",
-      "section": "2 · Modbus — le vétéran",
-      "title": "Quiz 2 — Modbus",
+      "section": "7 · Certification",
+      "title": "🎓 Quiz certifiant Protocoles industriels",
       "bodyMd": "",
       "notes": null,
       "quiz": {
         "questions": [
           {
-            "prompt": "Modbus TCP utilise quel port ?",
+            "prompt": "Modbus a été créé en…",
             "options": [
-              "80",
-              "443",
-              "502",
-              "1883"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Function code 03 permet…",
-            "options": [
-              "Écrire bit",
-              "Read Holding Registers",
-              "Reboot device",
+              "2020",
+              "1979 par Modicon · un des protocoles industriels les plus déployés au monde",
+              "1990",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Modbus a-t-il chiffrement TLS natif ?",
+            "prompt": "Modbus TCP utilise…",
             "options": [
-              "Oui",
-              "Non · exposé en clair · sécuriser via VLAN/VPN",
-              "Optionnel",
+              "Port 80",
+              "Port 502 (standard) ou 802 pour Modbus TCP Security (TLS émergent)",
+              "Port 443",
               "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 24,
-      "kind": "CONTENT",
-      "section": "3 · Profibus DP et PA",
-      "title": "Profibus histoire",
-      "bodyMd": "## Le champion Siemens\n\n### Origine\nDéveloppé par un consortium allemand en **1989** · adopté standard IEC 61158 · popularisé par Siemens.\n\n### Variantes\n[KV|**Profibus DP**:Decentralized Peripherals · pour I/O · le plus courant||**Profibus PA**:Process Automation · pour zones ATEX · intrinsèquement sûr||**Profibus FMS**:Fieldbus Message Specification · legacy · obsolète]\n\n### Adoption\n- Millions de nœuds installés worldwide\n- Legacy massif mais migration progressive vers Profinet",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 25,
-      "kind": "CONTENT",
-      "section": "3 · Profibus DP et PA",
-      "title": "Profibus DP — le workhorse",
-      "bodyMd": "## Caractéristiques\n\n### Physical\n- **RS-485** paire torsadée blindée\n- Vitesses : 9.6 kbps à **12 Mbps**\n- Longueur : 100 m à 12 Mbps · jusqu'à 1200 m à 187.5 kbps\n- Nodes : 32 par segment · 126 avec répéteurs\n\n### Adressage\n- 0-125 · configuré sur device\n- 126 réservé (default before assignment)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 26,
-      "kind": "CONTENT",
-      "section": "3 · Profibus DP et PA",
-      "title": "Structure d'un réseau Profibus DP",
-      "bodyMd": "## Master + slaves\n\n### Master\n- 1 seul master par segment (mono-master)\n- Multi-master possible mais complexe\n- Typiquement une CPU S7 avec interface DP intégrée\n\n### Slaves\n- ET 200 stations (Siemens)\n- Variateurs (Sinamics)\n- Instruments (débitmètres, régulateurs)\n\n### Communication\n- Cyclique : master polle tous les slaves chaque cycle\n- Acyclique : commandes ponctuelles",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 27,
-      "kind": "CONTENT",
-      "section": "3 · Profibus DP et PA",
-      "title": "Configuration Profibus DP",
-      "bodyMd": "## Setup dans TIA Portal\n\n[STEPS|**Config CPU** avec interface DP (X3 sur CPU 1516-3 PN/DP)||**Ajouter slave** dans Network View||**Assigner adresse** (0-125)||**Choisir GSD file** (device description)||**Config modules** signaux dans le slave||**Vitesse bus** : automatique ou manuel||**Test comm** online]\n\n### GSD file\nFichier fourni par vendor décrivant le device. Import obligatoire.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 28,
-      "kind": "CONTENT",
-      "section": "3 · Profibus DP et PA",
-      "title": "Profibus PA — pour Ex",
-      "bodyMd": "## Zones ATEX\n\n### Différences vs DP\n- **31.25 kbps** uniquement (lent)\n- Alimentation via le bus (2 fils)\n- Intrinsèquement sûr (ATEX Zone 0-1)\n- Longueur : 1900 m par segment\n\n### Cas d'usage\n- Pharma zones classées\n- Pétrochimie\n- Chimie fine\n- Extraction gaz",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 29,
-      "kind": "CONTENT",
-      "section": "3 · Profibus DP et PA",
-      "title": "Diagnostic Profibus",
-      "bodyMd": "## Debug\n\n### Outils\n- **BT200** (Softing) : analyseur bus terrain\n- **PB-Diag** (Siemens) : intégré TIA\n- **Multimètre** pour tests physiques (résistance ligne 220 Ω à chaque terminaison)\n\n### Problèmes courants\n[KV|**Terminaisons manquantes**:oscillations · comm erratique||**Câble trop long**:vitesse limitée||**Nœud défectueux**:coupe le bus||**Vitesse mal calée**:tous les nodes doivent être à même vitesse]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 30,
-      "kind": "CONTENT",
-      "section": "3 · Profibus DP et PA",
-      "title": "Profibus vs Profinet",
-      "bodyMd": "## Migration\n\n### Tendance 2026\n- Profibus : legacy, plus vendu neuf en 2028\n- Profinet : moderne, standard actuel\n\n### Migration\n- Coexistence possible (S7-1500 supporte les 2)\n- Progressive : ligne par ligne\n- Coût migration : dépend de la taille\n\n[TIP|**Ne pas démarrer un projet neuf en Profibus DP**. Sauf integration d'un instrument tiers qui n'a que Profibus.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 31,
-      "kind": "QUIZ",
-      "section": "3 · Profibus DP et PA",
-      "title": "Quiz 3 — Profibus",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Profibus DP max speed est…",
-            "options": [
-              "100 kbps",
-              "1.5 Mbps",
-              "12 Mbps",
-              "1 Gbps"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Profibus PA sert pour…",
-            "options": [
-              "Vitesses élevées",
-              "Zones ATEX intrinsèquement sûres · alim via bus",
-              "Gaming",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 32,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Profinet vue d'ensemble",
-      "bodyMd": "## Ethernet industriel Siemens\n\n### Standard\nIEC 61158 · norme depuis 2003 · développé par PI (Profibus International).\n\n### Caractéristiques\n- Sur Ethernet standard (100 Mbps · 1 Gbps possible)\n- Adressage IP\n- Multi-vendor (mais Siemens dominant)\n- Compatible avec Ethernet standard (peut coexister)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 33,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Les 3 classes de temps réel",
-      "bodyMd": "## RT levels\n\n[KV|**Non-RT**:trafic standard TCP/IP · pour config, diagnostic · latence 100 ms||**RT**:Real-Time · latence 1-10 ms · cycles I/O standard · 90% des cas||**IRT**:Isochronous Real-Time · latence 250 μs · axes multi-synchronisés]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 34,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Trames RT vs Non-RT",
-      "bodyMd": "## Le trick performance\n\n### RT frames\n- **Ethertype 0x8892** (Profinet-specific)\n- **NE PASSENT PAS** par la stack TCP/IP\n- Traitement direct au niveau L2\n- **Latence ultra faible**\n\n### Non-RT frames\n- Standard TCP/IP\n- Utilisées pour diagnostic, config\n- Passent par toutes les couches\n\n[TIP|Un switch industriel Profinet prioritise les trames 0x8892 automatiquement.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 35,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Isochronous Real-Time (IRT)",
-      "bodyMd": "## Ultra sync\n\n### Cas d'usage\n- Robots multi-axes synchronisés\n- Découpe rotative à haute vitesse\n- Machines d'impression\n\n### Config\n- Domaine sync défini dans TIA\n- Cycle (250 μs · 500 μs · 1 ms)\n- Tous les devices doivent supporter IRT\n- Topology fixe obligatoire\n\n### Précision\n< 1 μs de dérive entre devices",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 36,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "MRP — redondance anneau",
-      "bodyMd": "## Media Redundancy Protocol\n\n### Concept\nDevices en **anneau** · MRP monitore · si un câble coupe, re-route en < 200 ms.\n\n### Config\n- 1 device = **MRP Manager** (gère l'anneau)\n- N devices = **MRP Client**\n- Câblage physique en boucle\n\n### Cas d'usage\nLigne critique où arrêt = perte 10 k€/heure. MRP paye son investissement au premier crash évité.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 37,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Topologies Profinet",
-      "bodyMd": "## Options\n\n[KV|**Étoile**:switch central · simple||**Ligne (daisy-chain)**:devices en série via 2 ports · économique||**Anneau + MRP**:redondance · critique|| **Ligne redondante**:2 lignes indépendantes · le plus fiable]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 38,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "GSDML files",
-      "bodyMd": "## Device description\n\n**GSDML** (Generic Station Description Markup Language) = fichier XML décrivant un device Profinet.\n\n### Import dans TIA\nOptions → Manage general station description files → import\n\n### Contenu\n- Modules disponibles\n- Adressage I/O\n- Diagnostic\n- Paramètres configurables",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 39,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Câblage Profinet",
-      "bodyMd": "## Physical\n\n### Connecteurs\n- **RJ45** industriels (Fast Connect)\n- **M12 D-code** IP65 sur terrain\n\n### Câbles\n- **Cat 5e Fast Connect** minimum\n- **Cat 6a** recommandé\n- Blindé FTP ou STP\n\n### Longueur\n- 100 m max par segment Cu\n- Fibre optique pour plus long",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 40,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "OPC UA over Profinet",
-      "bodyMd": "## Convergence\n\n### Trend\nProfinet + OPC UA cohabitent :\n- Profinet pour I/O temps réel\n- OPC UA (via TCP) pour data engineering, MES\n\n### Même câble\nMême Ethernet physique · différentes couches applicatives.\n\n[TIP|C'est l'architecture moderne 2026 : Profinet couche 2, OPC UA couche 7.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 41,
-      "kind": "CONTENT",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Diagnostic Profinet",
-      "bodyMd": "## Outils\n\n### Dans TIA Portal\n- **Diagnostic Network** : graphe santé\n- **Topology View** : câblage physique observé\n- **Port stats** : erreurs par port\n\n### Externe\n- **Wireshark + plugin Profinet**\n- **Softing PN-Diag**\n- **Siemens SIMATIC Ident**",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 42,
-      "kind": "QUIZ",
-      "section": "4 · Profinet — le moderne Siemens",
-      "title": "Quiz 4 — Profinet",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Profinet RT (Real-Time) latence typique…",
-            "options": [
-              "100 ms",
-              "1-10 ms",
-              "< 1 μs",
-              "1 heure"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "MRP (Media Redundancy Protocol) sert à…",
+            "prompt": "Profinet vs Profibus…",
+            "options": [
+              "Identiques",
+              "Profibus = série legacy · Profinet = Ethernet moderne · migration en cours en Europe",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "Profinet 3 classes temps réel…",
+            "options": [
+              "Aucune",
+              "NRT (SCADA), RT (< 10 ms), IRT (< 1 ms déterministe · drives synchronisés)",
+              "Rien",
+              "Rien"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "prompt": "OPC UA remplace…",
             "options": [
               "Rien",
-              "Redondance anneau · bascule < 200 ms si câble coupe",
-              "Encryption",
-              "Rien"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Ethertype des trames Profinet RT est…",
-            "options": [
-              "0x0800",
-              "0x8892",
-              "0xABCD",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 43,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "EtherNet/IP — vue générale",
-      "bodyMd": "## Le concurrent Rockwell\n\n### Origine\nDéveloppé par **ODVA** (Open DeviceNet Vendors Association) · popularisé par Rockwell.\n\n### Caractéristiques\n- Basé Ethernet standard\n- Utilise **CIP** (Common Industrial Protocol) au niveau applicatif\n- Multi-vendor (Rockwell, Omron, Bosch, Endress+Hauser)\n- 100 Mbps standard, Gigabit émergent",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 44,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "CIP — Common Industrial Protocol",
-      "bodyMd": "## Le protocole applicatif\n\n### CIP couvre\n- Explicit messaging (config, diagnostic)\n- Implicit messaging (I/O cyclique)\n- Modeling objets industriels\n\n### Utilisé aussi par\n- **DeviceNet** (CIP sur CAN)\n- **ControlNet** (CIP sur coax)\n- **EtherNet/IP** (CIP sur Ethernet)\n\nUne famille cohérente.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 45,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "Comparatif EtherNet/IP vs Profinet",
-      "bodyMd": "## Deux mondes\n\n[KV|**Vendor dominant**:Rockwell/Allen-Bradley vs Siemens||**Marché**:USA fort · UE Siemens fort||**Temps réel**:RT/IRT similaires||**Écosystème**:CIP objects · GSDML/GSD (Profinet)||**Adoption**:équivalents en 2026]\n\n### Choix\nDépend de l'écosystème PLC. Rockwell → EtherNet/IP. Siemens → Profinet. Mixte possible avec passerelles.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 46,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "EtherCAT — l'ultra rapide",
-      "bodyMd": "## Le champion Beckhoff\n\n### Origine\nDéveloppé par **Beckhoff Automation** · standard IEC 61158.\n\n### Caractéristiques uniques\n- Passe par les devices à la volée (processing on-the-fly)\n- Cycles < 100 μs possibles\n- Précision de sync ultra fine\n- Économie de câblage · daisy-chain natif\n\n### Cas d'usage\n- Robotique multi-axes\n- Motion control précis\n- Machines à haute cadence",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 47,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "POWERLINK",
-      "bodyMd": "## L'open-source\n\n### Origine\nDéveloppé par **B&R** · aujourd'hui open-source.\n\n### Caractéristiques\n- 100% déterministe\n- Basé Ethernet standard\n- Support Linux (openPOWERLINK)\n\n### Adoption\nNiche, mais présent dans certaines industries (packaging, semi-conducteur).",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 48,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "Sercos III",
-      "bodyMd": "## Motion control",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 49,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "CC-Link IE",
-      "bodyMd": "## Le japonais\n\n### Origine\n**Mitsubishi Electric** · standard IEC 61784.\n\n### Caractéristiques\n- Gigabit Ethernet natif\n- Populaire au Japon\n- Rare en Europe\n\n### Adoption\nSurtout dans industries japonaises et export vers Asie.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 50,
-      "kind": "CONTENT",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "Choisir son Ethernet industriel",
-      "bodyMd": "## Décision\n\n### Critères\n[STEPS|**Vendor** du PLC principal (Siemens, Rockwell, Beckhoff…)||**Besoin motion control** ultra rapide → EtherCAT/POWERLINK||**Standardisation existante** dans l'entreprise||**Compétence équipe** disponible||**Écosystème** de devices supportés]\n\n### Chez Dasolabs\n- Siemens → Profinet (80% des projets)\n- Rockwell/AB → EtherNet/IP\n- Motion multi-axes → EtherCAT si besoin",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 51,
-      "kind": "QUIZ",
-      "section": "5 · EtherNet/IP et autres Ethernet industriels",
-      "title": "Quiz 5 — Ethernet industriel",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "EtherNet/IP utilise quel protocole applicatif ?",
-            "options": [
+              "OPC Classic (DCOM legacy) · multi-platform, sécurisé, standard universel · un S7-1500 expose OPC UA nativement",
               "Modbus",
-              "CIP (Common Industrial Protocol)",
-              "HTTP",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "EtherCAT peut atteindre des cycles de…",
-            "options": [
-              "1 sec",
-              "100 ms",
-              "< 100 μs",
-              "10 min"
-            ],
-            "correctIndex": 2
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 52,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "HART — analog + digital",
-      "bodyMd": "## Le hybride\n\n### Concept\n**HART** (Highway Addressable Remote Transducer) superpose un signal **digital** sur une boucle **4-20 mA analog** existante.\n\n### Bénéfice\nMigration douce · le 4-20 mA fonctionne toujours · HART ajoute diagnostic et config.\n\n### Adoption\n- 40+ million de devices HART installés dans le monde\n- Massif en pétrochimie, pharma",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 53,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "HART fonctionnement",
-      "bodyMd": "## Comment ça marche\n\n### Physical\n- Signal analog 4-20 mA (transporte la mesure)\n- Signal digital superposé (fréquences 1200/2200 Hz · modulation FSK)\n- Puissance : quelques mA seulement\n\n### Ce qu'on peut faire\n- Lire la mesure primaire (analog)\n- Lire mesures secondaires (T° capteur, statut)\n- Configurer le device à distance\n- Diagnostic (drift, alarme)\n\n[TIP|HART = **couteau suisse** de l'instrumentation. Compat total avec 4-20 mA legacy + digital sur le même fil.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 54,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "HART Multi-drop",
-      "bodyMd": "## Plusieurs devices sur 1 câble\n\n### Standard\n1 device par câble en 4-20 mA classique.\n\n### Multi-drop\nJusqu'à 15 devices sur le même câble en mode HART pur (pas de 4-20 mA proportionnel).\n\n### Cas d'usage\nRéduction câblage massif dans grandes usines.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 55,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "WirelessHART",
-      "bodyMd": "## HART sans fil\n\n### Origine\nStandard IEC 62591 · 2010.\n\n### Caractéristiques\n- 2.4 GHz\n- Mesh network (auto-organizing)\n- Batterie 5+ ans typique\n- Sécurité AES 128\n\n### Cas d'usage\n- Sites difficiles à câbler\n- Extensions provisoires\n- Retrofit sans passer câbles",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 56,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "DeviceNet",
-      "bodyMd": "## CIP sur CAN\n\n### Origine\nRockwell · basé CAN bus.\n\n### Caractéristiques\n- Jusqu'à 64 devices\n- 125-500 kbps\n- Alimentation via câble possible\n- Legacy · déclin\n\n### Aujourd'hui\nRemplacé par EtherNet/IP dans les projets neufs.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 57,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "AS-Interface (AS-i)",
-      "bodyMd": "## Simplicité extrême\n\n### Origine\nStandard EN 50295 · développé pour capteurs simples.\n\n### Caractéristiques\n- Bus 2 fils (data + alim)\n- Jusqu'à 62 slaves\n- 100 m de câble typique\n- Capteurs discrets uniquement\n\n### Cas d'usage\n- Convoyeurs\n- Capteurs présence/fin de course en série\n- Systèmes de sécurité simples\n\n[TIP|AS-i = **low-cost, low-tech** parfait pour bulk de capteurs simples.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 58,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "IO-Link",
-      "bodyMd": "## Le moderne pour capteurs intelligents\n\n### Concept\nBus point-à-point entre un capteur intelligent et un master IO-Link. Communication digitale bidirectionnelle sur 3 fils standard.\n\n### Bénéfices\n[STEPS|**Configuration à distance** capteurs||**Diagnostic** capteurs (contamination, drift)||**Data supplémentaire** (température ambient, statut)||**Traçabilité** capteur (numéro série, dernier étalonnage)||**Remplacement plug & play** avec restauration config]\n\n### Adoption\nExplosion depuis 2020 · standard 2026 pour capteurs intelligents.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 59,
-      "kind": "CONTENT",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "CANopen",
-      "bodyMd": "## Auto industrie\n\n### Origine\nBasé CAN bus automotive.\n\n### Caractéristiques\n- Multi-vendor\n- Robuste\n- Populaire embarqué (mobile machinery, agriculture)\n\n### Cas d'usage\nEngin agricole, mobile machinery, ferroviaire.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 60,
-      "kind": "QUIZ",
-      "section": "6 · HART, DeviceNet, AS-Interface",
-      "title": "Quiz 6 — Bus terrain",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "HART superpose signal digital sur…",
-            "options": [
-              "Ethernet",
-              "Boucle 4-20 mA analog · compat legacy",
-              "Bluetooth",
-              "Rien"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "IO-Link est utilisé pour…",
+            "prompt": "Sparkplug B apporte à MQTT…",
             "options": [
               "Rien",
-              "Capteurs intelligents · config à distance · diagnostic",
-              "SCADA",
-              "PLC"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 61,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC — origine",
-      "bodyMd": "## L'ancêtre de l'interop\n\n### OPC = OLE for Process Control\nCréé en **1996** par un consortium industriel · basé sur Microsoft OLE/COM.\n\n### Vision\nCommuniquer entre applications Windows industrielles (SCADA, Historian, MES) sans coding vendor-specific.\n\n### Adoption\nUltra massive dans les années 2000-2010. Décline aujourd'hui au profit d'OPC UA.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 62,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC DA — Data Access",
-      "bodyMd": "## Le classique\n\n### Fonctionnalité\nLire/écrire les valeurs actuelles des tags.\n\n### Modèle\n- **Server** : expose des tags\n- **Client** : lit/écrit les tags\n- Communication via COM/DCOM (Windows uniquement)\n\n### Limitations\n[DANGER|Windows uniquement · DCOM difficile à configurer · sécurité faible]\n[DANGER|Traversée firewalls problématique]\n[DANGER|Pas de modélisation d'objets]\n\n### Aujourd'hui\nOPC DA est **legacy**. Migrer vers OPC UA.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 63,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC HDA — Historical Data Access",
-      "bodyMd": "## Accès aux archives\n\n### Fonctionnalité\nRequêter des données historisées (archives Historian).\n\n### Utilisation\nUn reporting tool (AVEVA Report) demande à Historian les data de 24h passées.\n\n### Statut\nToujours utilisé · aussi legacy · remplacé par OPC UA HA.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 64,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC AE — Alarms & Events",
-      "bodyMd": "## Les alarmes\n\n### Fonctionnalité\nGérer les alarmes et événements process.\n\n### Utilisation\nUn SCADA remonte ses alarmes à un centralized alarm manager via OPC AE.\n\n### Statut\nLegacy · remplacé par OPC UA AE.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 65,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "Migration Classic OPC vers UA",
-      "bodyMd": "## Passage moderne\n\n### Approche\n- **OPC UA** unifie DA + HDA + AE en un seul framework\n- Multi-platform (pas juste Windows)\n- Chiffré nativement (TLS)\n- Traverse firewalls facilement\n\n### Migration\n- Utiliser des **wrappers** (Classic → UA) pour legacy\n- Nouveau développement : UA direct",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 66,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC UA — nouveau standard",
-      "bodyMd": "## Unified Architecture\n\n### Origine\n2008 · OPC Foundation.\n\n### Points forts\n[STEPS|**Multi-platform** · Windows, Linux, embedded||**TLS security** natif||**Modélisation objets** riche · Companion Specs||**Client/Server + Pub/Sub** depuis 1.04||**Certifié** par OPC Foundation||**Standard IEC 62541**]\n\n### Adoption\n**Standard de facto industriel moderne**. Tous les vendors majeurs supportent OPC UA.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 67,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC UA Client-Server",
-      "bodyMd": "## Le mode classique\n\n### Concept\nUn client se connecte à un serveur · navigue l'espace d'adresses · lit/écrit.\n\n### Port\n**4840** par défaut.\n\n### Sessions\nAuthentification à la connexion · certificats X.509 · permission granulaires.\n\n### Modélisation\n- **Address space** : arbre d'objets et variables\n- **Node types** : typage strict\n- **References** : liens entre nodes",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 68,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC UA Pub/Sub",
-      "bodyMd": "## Le mode moderne\n\n### Ajouté en 2018 (spec 1.04)\nOPC UA supporte aussi **publish/subscribe** en plus de client/server.\n\n### Transports\n- UDP multicast (LAN)\n- MQTT (WAN, cloud)\n- AMQP (cloud)\n\n### Bénéfice\nDécouplé, scalable · idéal pour UNS.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 69,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC UA Companion Specs",
-      "bodyMd": "## Standards par industrie\n\n### Concept\nSpec qui définit un modèle d'objets standardisé pour un secteur.\n\n### Exemples\n[KV|**VDMA 40001**:packaging||**Umati**:machine tools||**Weihenstephan**:agroalimentaire||**PLCopen**:programmation PLC||**PackML**:packaging (SESA)||**Auto-ISA**:automotive]\n\n### Bénéfice\nInterop **native** entre machines vendues par des vendors différents.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 70,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC UA sécurité",
-      "bodyMd": "## Robuste\n\n### Éléments\n[STEPS|**Certificats X.509** signés (auto ou CA)||**TLS chiffrement**||**Authentification user** en plus du certificat||**ACL** par node|| **Audit** logging]\n\n### Modes\n- None (dev uniquement)\n- Sign\n- Sign & Encrypt (prod)",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 71,
-      "kind": "CONTENT",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "OPC UA en pratique — S7-1500",
-      "bodyMd": "## Serveur natif Siemens\n\n### Config TIA\n1. Device config CPU · Runtime · OPC UA server · Enable\n2. Port 4840 par défaut\n3. Certificats auto-signés ou CA\n4. Publier variables via OPC UA server interface\n\n### Test\nUaExpert (gratuit) → connecter → naviguer → lire/écrire\n\n[TIP|OPC UA natif S7-1500 = killer feature. Aucune passerelle nécessaire.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 72,
-      "kind": "QUIZ",
-      "section": "7 · OPC — DA, HDA, AE, UA",
-      "title": "Quiz 7 — OPC",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "OPC UA port standard est…",
-            "options": [
-              "502",
-              "1883",
-              "4840",
-              "80"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "OPC Classic (DA/HDA/AE) est…",
-            "options": [
-              "Le standard moderne",
-              "Legacy · Windows uniquement · migrer vers UA",
-              "Meilleur qu'UA",
+              "Spec industrielle · topic namespace obligatoire · format protobuf · types définis · state messages BIRTH/DEATH",
+              "Uniquement couleur",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "OPC UA supporte…",
+            "prompt": "HART superpose…",
             "options": [
-              "Client-Server uniquement",
-              "Client-Server ET Pub/Sub (depuis 2018)",
-              "Uniquement Pub/Sub",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 73,
-      "kind": "CONTENT",
-      "section": "8 · MQTT et wireless",
-      "title": "MQTT — rappel",
-      "bodyMd": "## Le pub/sub léger\n\nDéjà couvert dans formation **HiveMQ** dédiée. Résumé :\n- Protocol pub/sub\n- Léger, robuste\n- Standard IoT/OT moderne\n- Sparkplug B pour industriel",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 74,
-      "kind": "CONTENT",
-      "section": "8 · MQTT et wireless",
-      "title": "WirelessHART",
-      "bodyMd": "## HART sans fil\n\n### Standard\nIEC 62591 · 2010.\n\n### Caractéristiques\n- 2.4 GHz ISM band\n- Mesh network self-organizing\n- AES 128 encryption\n- Batterie 5+ ans typique\n\n### Cas d'usage\n- Retrofit sans câbles\n- Extensions temporaires\n- Sites difficiles d'accès",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 75,
-      "kind": "CONTENT",
-      "section": "8 · MQTT et wireless",
-      "title": "ISA100.11a",
-      "bodyMd": "## Alternative wireless\n\n### Standard\nISA100 · 2011.\n\n### Caractéristiques\n- 2.4 GHz\n- Optimisé pour data process\n- Compatibilité multi-vendor\n\n### Vs WirelessHART\nMoins adopté commercialement.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 76,
-      "kind": "CONTENT",
-      "section": "8 · MQTT et wireless",
-      "title": "5G industriel",
-      "bodyMd": "## L'avenir\n\n### Trend 2024+\n5G privé pour usines · latence < 1 ms · scale masse.\n\n### Cas d'usage\n- AGV (Automated Guided Vehicles)\n- AR/VR pour maintenance\n- Robotique mobile\n- Vision haute cadence\n\n### Adoption\nÉmergente · encore rare en 2026 mais explosion attendue.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 77,
-      "kind": "CONTENT",
-      "section": "8 · MQTT et wireless",
-      "title": "WiFi 6 industrial",
-      "bodyMd": "## L'alternative pragmatique\n\n### Avantages\n- Écosystème mature\n- Cost effective\n- Dev/setup connu\n\n### Cas d'usage\n- Tablettes opérateurs\n- Portable devices\n- IoT léger",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 78,
-      "kind": "QUIZ",
-      "section": "8 · MQTT et wireless",
-      "title": "Quiz 8 — Wireless",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "WirelessHART opère sur bande…",
-            "options": [
-              "800 MHz",
-              "2.4 GHz ISM",
-              "5 GHz",
+              "Rien",
+              "Signal digital sur boucle 4-20 mA · compat legacy · config/diagnostic capteurs · encore massif en pharma",
+              "Modbus",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "5G industriel promet latence…",
+            "prompt": "IO-Link permet…",
             "options": [
-              "100 ms",
-              "10 ms",
-              "< 1 ms",
-              "1 sec"
-            ],
-            "correctIndex": 2
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 79,
-      "kind": "CONTENT",
-      "section": "9 · Building automation et connexion IT",
-      "title": "BACnet",
-      "bodyMd": "## Bâtiments intelligents\n\n### Standard\nASHRAE 135 · pour HVAC, éclairage, sécurité bâtiment.\n\n### Caractéristiques\n- Multi-vendor\n- IP et MS/TP\n- Objets standardisés\n\n### Cas d'usage\nBâtiments intelligents · immotique · intégration BMS.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 80,
-      "kind": "CONTENT",
-      "section": "9 · Building automation et connexion IT",
-      "title": "KNX",
-      "bodyMd": "## L'européen\n\n### Origine\nStandard européen · développé par KNX Association.\n\n### Caractéristiques\n- Bus dédié\n- Multi-vendor\n- Fort en résidentiel/tertiaire\n\n### Cas d'usage\nMaisons intelligentes, immeubles tertiaires haut de gamme.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 81,
-      "kind": "CONTENT",
-      "section": "9 · Building automation et connexion IT",
-      "title": "REST APIs",
-      "bodyMd": "## HTTP moderne\n\n### Utilisation industrielle\n- MES expose REST API pour SCADA\n- ERP REST pour ordres de production\n- Cloud services (AWS, Azure)\n\n### Standards\n- **JSON** payload\n- **HTTPS** obligatoire\n- **OAuth 2.0** ou API keys\n\n### Trend\nExplosion depuis 2015 · standard IT qui pénètre OT.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 82,
-      "kind": "CONTENT",
-      "section": "9 · Building automation et connexion IT",
-      "title": "WebSockets",
-      "bodyMd": "## Temps réel navigateur\n\n### Concept\nConnexion persistante bidirectionnelle HTTP.\n\n### Cas d'usage\n- Dashboards temps réel (Grafana)\n- HMI web (WinCC Unified)\n- Notifications push",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 83,
-      "kind": "CONTENT",
-      "section": "9 · Building automation et connexion IT",
-      "title": "Kafka",
-      "bodyMd": "## Data streaming\n\n### Concept\nSystème de streaming distribué open-source · Apache.\n\n### Cas d'usage industriel\n- Data lake industriel\n- Analytics temps réel\n- Backup off-site\n\n### Alternative à MQTT ?\nKafka pour **data lake persistant** · MQTT pour **temps réel opérationnel**. Complémentaires.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 84,
-      "kind": "QUIZ",
-      "section": "9 · Building automation et connexion IT",
-      "title": "Quiz 9 — IT-OT",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "BACnet sert pour…",
-            "options": [
-              "PLC industriel",
-              "Automation bâtiment · HVAC · éclairage",
-              "SCADA",
+              "Rien",
+              "Auto-parameterization, diagnostic, identification unique · pour capteurs et actionneurs intelligents · standard 2020s",
+              "Uniquement PLC",
               "Rien"
             ],
             "correctIndex": 1
           },
-          {
-            "prompt": "REST API industriel utilise typiquement…",
-            "options": [
-              "XML",
-              "JSON sur HTTPS · souvent OAuth 2.0",
-              "TXT",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 85,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "IEC 62443 — le cadre",
-      "bodyMd": "## Standard cybersécurité OT\n\n### Structure\n- **62443-1** : concepts, terminologie\n- **62443-2** : politiques, procedures\n- **62443-3** : requirements systèmes\n- **62443-4** : requirements composants\n\n### Zones et conduits\nSéparer réseau en **zones de sécurité** · communication entre zones via **conduits** contrôlés.\n\n[RULE|IEC 62443 = **le standard** de fait pour cybersécurité OT. À connaître pour tout intégrateur.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 86,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Menaces courantes",
-      "bodyMd": "## Cyber industriel\n\n[KV|**Stuxnet (2010)**:premier malware ciblant SCADA · centrifugeuses iraniennes||**BlackEnergy (2015)**:coupure électrique Ukraine||**Triton (2017)**:cible SIS · potentiel destructif||**Colonial Pipeline (2021)**:ransomware · perte production||**LockerGoga (2019)**:Norsk Hydro · $75M pertes]\n\n### Menaces génériques\n- Ransomware\n- Espionnage industriel\n- Sabotage (state-actor)\n- Erreur employé",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 87,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Segmentation réseau",
-      "bodyMd": "## Défense en couches\n\n### Zones typiques\n[STEPS|**IT bureau** (niveau 4-5) · internet||**DMZ IT/OT** · buffer||**MES (niveau 3)**||**SCADA (niveau 2)**||**PLC (niveau 1)**||**Terrain (niveau 0)**]\n\n### Firewalls entre chaque\nAvec règles strictes · whitelist protocoles autorisés.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 88,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Chiffrement et auth",
-      "bodyMd": "## Protection data\n\n### Standards modernes\n- **TLS 1.2+** pour toute comm IP\n- **AES 256** pour data\n- **Certificats X.509** pour auth device\n- **Password fort + MFA** pour humains\n\n### Rotation\n- Certificats : 1 an\n- Passwords : 90 jours\n- Clés : rotation régulière",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 89,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Monitoring et détection",
-      "bodyMd": "## SIEM OT\n\n### Concept\nSecurity Information and Event Management dédié OT.\n\n### Solutions\n- **Nozomi Networks**\n- **Claroty**\n- **Dragos**\n- **Tenable OT Security**\n\n### Fonctions\n- Détection anomalies\n- Inventory assets\n- Alerting temps réel\n- Response automation",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 90,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Choisir protocole moderne",
-      "bodyMd": "## Guide décisionnel\n\n### 2026 recommandations\n[KV|**Nouveau projet Siemens**:Profinet + OPC UA||**Nouveau projet Rockwell**:EtherNet/IP + OPC UA||**Motion multi-axes**:EtherCAT||**Instrument tiers**:Modbus TCP si nécessaire · sinon OPC UA||**Cloud/IoT**:MQTT + Sparkplug B||**Capteurs simples bulk**:AS-Interface ou IO-Link||**Capteurs intelligents**:IO-Link||**Zones ATEX**:Profibus PA ou WirelessHART|| **Batch pharma**:OPC UA + ISA-88 recipe]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 91,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Migration legacy",
-      "bodyMd": "## Passer au moderne\n\n### Approche progressive\n[STEPS|**Audit** protocoles existants||**Prioriser** ce qui bloque évolutions futures||**Passerelles temporaires** (Modbus↔OPC UA, Profibus↔Profinet)||**Migration par ligne** · pas big-bang||**Formation équipes** aux nouveaux protocoles||**Décommissionnement** legacy progressif]\n\n### Timeline typique\n2-5 ans pour un site industriel moyen.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 92,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Passerelles multi-protocoles",
-      "bodyMd": "## Compat sans big-bang\n\n### Solutions\n[KV|**Kepware KEPServerEX**:multi-vendor · standard historique||**Softing Datafeed**:OPC UA multi-source||**HighByte**:multi-protocoles + data engineering||**Node-RED**:open-source · scripting||**Custom Python**:Mesh flexible]\n\n### Cas d'usage\nInstruments Modbus + PLC Siemens + SCADA AVEVA · une passerelle centralise.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 93,
-      "kind": "CONTENT",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Formation équipes",
-      "bodyMd": "## Le facteur humain\n\n### Nouveaux protocoles = nouvelles compétences\n- OPC UA (config, sécurité)\n- MQTT/Sparkplug B (design pub/sub)\n- Cybersécurité (mots de passe, certificats, ACL)\n- Ethernet industriel (VLAN, QoS, MRP)\n\n### Programme Dasolabs\n- Formation continue interne\n- Cursus certifiant clients\n- Documentation à jour\n\n[TIP|Un projet migration réussi = 50% technique + 50% formation.]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 94,
-      "kind": "QUIZ",
-      "section": "10 · Cybersécurité et migration",
-      "title": "Quiz 10 — Sécurité et migration",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
           {
             "prompt": "IEC 62443 est…",
             "options": [
-              "Standard HMI",
-              "Standard cybersécurité OT · zones/conduits",
-              "Safety",
+              "Un PLC",
+              "Standard cybersec industrielle · zones et conduits · security levels SL 1-4 · defense in depth",
+              "Un SCADA",
               "Rien"
             ],
             "correctIndex": 1
           },
           {
-            "prompt": "Migration de protocole legacy vers moderne prend typiquement…",
+            "prompt": "Architecture pharma neuf recommandée…",
             "options": [
-              "1 semaine",
-              "1 mois",
-              "2-5 ans pour un site industriel",
-              "Jamais"
-            ],
-            "correctIndex": 2
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 95,
-      "kind": "CONTENT",
-      "section": "11 · Cas pratiques Dasolabs",
-      "title": "Cas 1 — Zoetis multi-vendor",
-      "bodyMd": "## Setup mixte\n\n### Contexte\nZoetis · 5 lignes · Siemens principal + 2 skids Rockwell + 20 instruments Modbus + capteurs IO-Link.\n\n### Setup\n- **Profinet** backbone Siemens\n- **EtherNet/IP** pour skids Rockwell\n- **HighByte** passerelle multi-protocole\n- **OPC UA** pour data engineering\n- **MQTT** vers cloud\n\n### Bénéfice\nÉcosystème hétérogène qui parle une langue commune (UNS via HighByte).",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 96,
-      "kind": "CONTENT",
-      "section": "11 · Cas pratiques Dasolabs",
-      "title": "Cas 2 — UCB pharma safety",
-      "bodyMd": "## Multi-protocoles safety\n\n### Contexte\nUCB · production vaccin · safety niveau SIL 3.\n\n### Setup\n- **Profinet + PROFIsafe** pour I/O safety\n- **Profinet standard** pour I/O process\n- **OPC UA** vers MES\n- **HART** pour instruments process (mesure T°, débit)\n\n### Cybersécurité\nSegmentation IEC 62443 · SIEM Nozomi · certificats pour tout",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 97,
-      "kind": "CONTENT",
-      "section": "11 · Cas pratiques Dasolabs",
-      "title": "Cas 3 — Vivaqua legacy",
-      "bodyMd": "## Migration en cours\n\n### Contexte\nStation de traitement d'eau · S7-400 legacy · Profibus DP · à moderniser.\n\n### Plan Dasolabs\n[STEPS|**Phase 1** : audit complet + priorisation||**Phase 2** : nouveaux capteurs IO-Link en parallèle||**Phase 3** : remplacer S7-400 par S7-1500 · Profinet backbone||**Phase 4** : passerelle Profibus → Profinet pour instruments legacy||**Phase 5** : décommissionner Profibus progressivement||**Phase 6** : OPC UA + MQTT pour cloud analytics]\n\n### Durée : 3 ans",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 98,
-      "kind": "CONTENT",
-      "section": "11 · Cas pratiques Dasolabs",
-      "title": "Cas 4 — GROUPEMECA skid",
-      "bodyMd": "## Modernité et interop\n\n### Setup neuf\n- **S7-1500** avec Profinet + OPC UA server\n- **WinCC Unified** HMI\n- **Modbus TCP** pour intégration onduleur client\n- **HART** pour capteurs process\n- **IO-Link** pour capteurs intelligents\n\n### Bénéfice client\nSkid livré · s'intègre nativement dans SCADA client existant via OPC UA · installation en 2 jours.",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 99,
-      "kind": "CONTENT",
-      "section": "11 · Cas pratiques Dasolabs",
-      "title": "Bonnes pratiques finales",
-      "bodyMd": "## Notre méthodologie\n\n[RULE|**OPC UA** pour tout nouveau projet 2026]\n[RULE|**MQTT/Sparkplug B** pour cloud et UNS]\n[RULE|**Profinet/EtherNet-IP** selon écosystème PLC]\n[RULE|**IO-Link** pour capteurs intelligents]\n[RULE|**IEC 62443** pour cybersécurité systématique]\n[RULE|**Documentation à jour** de toutes les intégrations]\n[RULE|**Formation équipes** avant migration]\n[RULE|**Migration progressive** vs big-bang]",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 100,
-      "kind": "QUIZ",
-      "section": "11 · Cas pratiques Dasolabs",
-      "title": "Quiz 11 — Cas pratiques",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Un projet mixte Siemens + Rockwell utilise typiquement…",
-            "options": [
-              "Un seul protocole",
-              "Profinet + EtherNet/IP + passerelle OPC UA/HighByte pour interop",
+              "Modbus RTU uniquement",
+              "Profinet (PLC/IO/drives) + OPC UA (PLC↔SCADA/MES) + IO-Link (capteurs) + MQTT/Sparkplug B (UNS) + IEC 62443 SL 3",
               "Rien",
-              "Modbus partout"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "Pour intégrer un vieux skid Profibus dans un nouveau projet Profinet…",
-            "options": [
-              "Refaire tout",
-              "Passerelle Profibus↔Profinet ou proxy",
-              "Impossible",
-              "Rien"
-            ],
-            "correctIndex": 1
-          }
-        ]
-      },
-      "imageUrl": null
-    },
-    {
-      "position": 101,
-      "kind": "CONTENT",
-      "section": "12 · Certification",
-      "title": "Prêt pour l'évaluation ?",
-      "bodyMd": "## Quiz certifiant final\n\n10 questions, seuil 70 %. Bonne chance !",
-      "notes": null,
-      "quiz": null,
-      "imageUrl": null
-    },
-    {
-      "position": 102,
-      "kind": "QUIZ",
-      "section": "12 · Certification",
-      "title": "🎓 Quiz certifiant final — Protocoles industriels",
-      "bodyMd": "",
-      "notes": null,
-      "quiz": {
-        "questions": [
-          {
-            "prompt": "Modbus TCP utilise port…",
-            "options": [
-              "80",
-              "443",
-              "502",
-              "1883"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Profibus DP max speed est…",
-            "options": [
-              "100 kbps",
-              "1.5 Mbps",
-              "12 Mbps",
-              "1 Gbps"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Profinet RT latence typique…",
-            "options": [
-              "100 ms",
-              "1-10 ms",
-              "< 1 μs",
-              "1 heure"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "OPC UA port standard est…",
-            "options": [
-              "502",
-              "1883",
-              "4840",
-              "80"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "MQTT sécurisé (TLS) utilise port…",
-            "options": [
-              "1883",
-              "8883",
-              "80",
-              "443"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "IEC 62443 traite de…",
-            "options": [
-              "HMI",
-              "Cybersécurité OT · zones et conduits",
-              "Safety",
-              "Rien"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "HART superpose signal digital sur…",
-            "options": [
-              "Ethernet",
-              "Boucle 4-20 mA · compat legacy",
-              "Bluetooth",
-              "Rien"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "IO-Link sert pour…",
-            "options": [
-              "SCADA",
-              "Capteurs intelligents · config à distance",
-              "PLC",
-              "Rien"
-            ],
-            "correctIndex": 1
-          },
-          {
-            "prompt": "EtherCAT peut atteindre cycles de…",
-            "options": [
-              "1 sec",
-              "100 ms",
-              "< 100 μs",
-              "10 min"
-            ],
-            "correctIndex": 2
-          },
-          {
-            "prompt": "Choix moderne 2026 pour nouveau projet Siemens…",
-            "options": [
-              "Profibus uniquement",
-              "Profinet + OPC UA + MQTT selon besoin",
-              "Modbus RTU",
               "Rien"
             ],
             "correctIndex": 1
