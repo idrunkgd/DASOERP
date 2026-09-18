@@ -330,7 +330,7 @@ export async function setCoursePrerequisite(courseId: string, prerequisiteCourse
  */
 export async function setCourseLayer(courseId: string, layerKey: string | null) {
   await requirePermission("training.manage");
-  const validLayers = ["cloud", "mes", "uns", "scada", "control", "field"];
+  const validLayers = ["transversal", "cloud", "mes", "uns", "scada", "control", "field"];
   if (layerKey && !validLayers.includes(layerKey)) {
     throw new Error(`Couche invalide : ${layerKey}`);
   }

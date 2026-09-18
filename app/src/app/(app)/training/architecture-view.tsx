@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { GraduationCap, CheckCircle2, PlayCircle, EyeOff, Lock, Cloud, Layers, Server, Cpu, Zap, GripVertical } from "lucide-react";
+import { GraduationCap, CheckCircle2, PlayCircle, EyeOff, Lock, Cloud, Layers, Server, Cpu, Zap, GripVertical, Compass } from "lucide-react";
 import { ToggleCourseVisibility } from "./toggle-visibility";
 import { DeleteCourse } from "./delete-course";
 import { PrerequisiteManager } from "./prerequisite-manager";
@@ -36,7 +36,21 @@ type LayerConfig = {
 
 // Mapping par défaut : appliqué SI layerKey est null en base.
 // Une fois que l'admin a fait un drag-drop, le champ layerKey en base prend le dessus.
+//
+// Note : la couche "transversal" s'applique à TOUTES les couches — normes, validation,
+// méthodo, cybersécurité — et n'a pas de niveau Purdue. Visuellement distincte (dashed).
 const LAYERS: LayerConfig[] = [
+  {
+    key: "transversal",
+    label: "Transversal · Normes · Validation · Cybersécurité",
+    sub: "S'applique à toutes les couches — ISA-95, ISA-88, GAMP 5, 21 CFR Part 11, IEC 62443, méthodologie projet",
+    icon: <Compass className="w-5 h-5" />,
+    gradient: "from-slate-500/10 to-neutral-500/10",
+    iconBg: "bg-slate-100",
+    iconColor: "text-slate-600",
+    defaultSlugs: [],
+    extraSystems: ["ISA-95 · ISA-88", "GAMP 5 · 21 CFR Part 11", "IEC 62443", "Change management", "Documentation", "Audit trail"]
+  },
   {
     key: "cloud",
     label: "Niveau 5 · Cloud & IT Entreprise",
@@ -238,8 +252,12 @@ function LayerRow({
   return (
     <section
       className={
-        `rounded-2xl border bg-gradient-to-r ${layer.gradient} p-5 mb-4 relative overflow-hidden transition-all ` +
-        (isDragOver && canManage ? "border-indigoaccent border-2 ring-4 ring-indigoaccent/20 scale-[1.005]" : "border-border")
+        `rounded-2xl bg-gradient-to-r ${layer.gradient} p-5 mb-4 relative overflow-hidden transition-all ` +
+        (isDragOver && canManage
+          ? "border-2 border-indigoaccent ring-4 ring-indigoaccent/20 scale-[1.005]"
+          : layer.key === "transversal"
+            ? "border-2 border-dashed border-slate-400"
+            : "border border-border")
       }
       onDragOver={(e) => canManage && onDragOver(e, layer.key)}
       onDragLeave={() => canManage && onDragLeave(layer.key)}
