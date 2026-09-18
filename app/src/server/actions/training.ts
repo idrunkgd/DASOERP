@@ -162,6 +162,18 @@ export async function saveQuizAttempt(
             scorePercent: percent
           });
           certificateIssued = { documentId: r.documentId, scorePercent: percent, passed: true, threshold };
+          // Marque le cours "Terminé" définitivement (le fait d'avoir un cert
+          // est le vrai signal d'achèvement d'un cours certifiant).
+          await prisma.userCourseProgress.upsert({
+            where: { userId_courseId: { userId: session.user.id, courseId: slide.courseId } },
+            create: {
+              userId: session.user.id,
+              courseId: slide.courseId,
+              lastSlide: slide.position,
+              completedAt: new Date()
+            },
+            update: { completedAt: new Date(), lastSlide: slide.position }
+          });
         } catch (err) {
           // eslint-disable-next-line no-console
           console.error("[training] emission certificat échouée:", err);
@@ -180,28 +192,52 @@ export async function saveQuizAttempt(
 /**
  * Mémorise la dernière slide vue et marque completedAt quand on atteint la
  * dernière slide.
+ *
+ * IMPORTANT — cours certifiant :
+ *   Un cours `isCertifying` n'est marqué "Terminé" QUE si l'utilisateur a
+ *   effectivement obtenu son certificat (Document tagué `certificat` +
+ *   `course:<id>`). Le simple fait de défiler jusqu'à la slide finale (quiz)
+ *   ne suffit pas — sinon l'user voit "Terminé" alors qu'il n'a jamais cliqué
+ *   sur « Valider mes réponses », et n'a donc pas de PDF.
  */
 export async function updateCourseProgress(courseId: string, slidePosition: number) {
   const session = await requireSession();
-  const maxPos = await prisma.courseSlide.aggregate({
-    where: { courseId },
-    _max: { position: true }
-  });
+  const [maxPos, course] = await Promise.all([
+    prisma.courseSlide.aggregate({
+      where: { courseId },
+      _max: { position: true }
+    }),
+    prisma.course.findUnique({ where: { id: courseId }, select: { isCertifying: true } })
+  ]);
   const isLast = maxPos._max.position === slidePosition;
+
+  let completed = isLast;
+  if (isLast && course?.isCertifying) {
+    // Sur un cours certifiant, "Terminé" = cert émis (pas juste défilement)
+    const cert = await prisma.document.findFirst({
+      where: {
+        consultantId: session.user.id,
+        tags: { hasEvery: ["certificat", `course:${courseId}`] }
+      },
+      select: { id: true }
+    });
+    completed = !!cert;
+  }
+
   await prisma.userCourseProgress.upsert({
     where: { userId_courseId: { userId: session.user.id, courseId } },
     create: {
       userId: session.user.id,
       courseId,
       lastSlide: slidePosition,
-      completedAt: isLast ? new Date() : null
+      completedAt: completed ? new Date() : null
     },
     update: {
       lastSlide: slidePosition,
-      completedAt: isLast ? new Date() : undefined
+      completedAt: completed ? new Date() : undefined
     }
   });
-  return { ok: true, completed: isLast };
+  return { ok: true, completed };
 }
 
 /**
