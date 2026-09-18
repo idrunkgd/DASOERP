@@ -34,7 +34,9 @@ const COURSES = [
   "aveva-report",
   "sql-server",
   "highbyte",
-  "hivemq"
+  "hivemq",
+  "isa-95-88",
+  "protocoles-industriels"
 ];
 
 const prisma = new PrismaClient();
