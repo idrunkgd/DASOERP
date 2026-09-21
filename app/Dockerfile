@@ -5,35 +5,32 @@
 # Image finale ~150 MB, utilisateur non-root, healthcheck inclus.
 # ─────────────────────────────────────────────────────────────
 
-# ─── Stage 1 : dépendances (cache aggressif) ───
-FROM node:20-alpine AS deps
+# ─── Stage 1 : dépendances + build (fusionné pour éviter COPY node_modules 77s) ───
+# Auparavant on avait 2 stages (deps → builder) avec un COPY --from=deps node_modules
+# qui prenait ~1min15 (200+ MB à copier). En fusionnant, on économise cette copie.
+# Le runtime stage 2 ne prend que .next/standalone (~50 MB), donc l'image finale
+# reste minimale.
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # libc6-compat + openssl nécessaires à Prisma sur Alpine
 RUN apk add --no-cache libc6-compat openssl
 
+# Étape 1 : installer les dépendances (cache mount .npm)
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
 # On utilise `npm install` (pas `npm ci`) pour tolérer un lockfile légèrement
-# désynchronisé après ajout de deps (nodemailer, web-push, @types/*). Le lock
-# sera régénéré dans l'image ; côté hôte on peut le committer plus tard via
-# `npm install --package-lock-only` si l'on veut refigure `npm ci`.
-# BuildKit cache mount : évite de retélécharger tous les packages à chaque build.
-# Gain typique : 2-4 min → 20-40 sec sur builds successifs (cache Coolify).
+# désynchronisé après ajout de deps. Le cache mount BuildKit persiste les tarballs
+# entre builds : gain typique 2-4 min → 15-20 sec sur builds successifs.
 RUN --mount=type=cache,target=/root/.npm,sharing=locked \
     npm install --no-audit --no-fund --include=dev
 
-# ─── Stage 2 : build ───
-FROM node:20-alpine AS builder
-WORKDIR /app
-RUN apk add --no-cache libc6-compat openssl
-
-COPY --from=deps /app/node_modules ./node_modules
+# Étape 2 : copier le code source et builder
 COPY . .
 
 RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
-# BuildKit cache mount pour le cache webpack/turbopack de Next.js.
+# Cache mount pour le cache webpack/turbopack de Next.js.
 # Sur des builds incrémentaux, gain 1-2 min car seul le code modifié recompile.
 RUN --mount=type=cache,target=/app/.next/cache,sharing=locked \
     npm run build
