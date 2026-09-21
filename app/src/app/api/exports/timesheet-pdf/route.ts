@@ -19,8 +19,9 @@ import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { prisma } from "@/lib/db";
 import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
-import { TimesheetPdf, type TimesheetPdfData, type TimesheetPdfEntry, type TimesheetPdfWeek } from "@/lib/timesheet-pdf-template";
-import { startOfWeek, addDays, parseISO, format, isSameDay } from "date-fns";
+import { TimesheetPdf, type TimesheetPdfData, type TimesheetPdfEntry, type TimesheetPdfWeek, type TimesheetPdfMonth, type TimesheetPdfMonthRow } from "@/lib/timesheet-pdf-template";
+import { startOfWeek, addDays, parseISO, format, isSameDay, startOfMonth, endOfMonth, getDaysInMonth } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export const dynamic = "force-dynamic";
 
@@ -192,12 +193,93 @@ export async function GET(req: NextRequest) {
 
   const grandTotal = weeks.reduce((s, w) => s + w.weekTotal, 0);
 
+  // Layout MONTHLY : découper la période en mois calendaires et agréger par jour
+  const months: TimesheetPdfMonth[] = [];
+  if (layout === "monthly") {
+    // Trouver le 1er du mois du periodStart et le dernier du mois du periodEnd-1
+    const firstMonth = startOfMonth(periodStart);
+    const lastDay = new Date(periodEnd.getTime() - 86400000);
+    const lastMonth = startOfMonth(lastDay);
+
+    let cursor = new Date(firstMonth);
+    while (cursor <= lastMonth) {
+      const monthStart = startOfMonth(cursor);
+      const monthEnd = endOfMonth(cursor);
+      const daysInMonth = getDaysInMonth(cursor);
+      const year = cursor.getFullYear();
+      const monthIdx = cursor.getMonth();
+      const monthLabel = format(cursor, "MMMM yyyy", { locale: fr }).replace(/^./, (c) => c.toUpperCase());
+
+      // Filtrer entries de ce mois calendaire ∩ période
+      const monthEntries = entries.filter((e) =>
+        e.date >= monthStart && e.date <= monthEnd &&
+        e.date >= periodStart && e.date < periodEnd
+      );
+
+      // Agrégation par target × jour du mois
+      const rowsByKey = new Map<string, {
+        targetLabel: string; targetType: "PRJ" | "MIS" | "CC"; targetClient?: string;
+        daysHours: number[]; monthTotal: number;
+      }>();
+
+      for (const e of monthEntries) {
+        let key: string, label: string, type: "PRJ" | "MIS" | "CC", client: string | undefined;
+        if (e.projectId && e.project) {
+          key = `PRJ:${e.projectId}`;
+          label = `${e.project.reference} — ${e.project.name}`;
+          type = "PRJ";
+          client = e.project.company?.name;
+        } else if (e.missionId && e.mission) {
+          key = `MIS:${e.missionId}`;
+          label = `${e.mission.reference} — ${e.mission.title}`;
+          type = "MIS";
+          client = e.mission.company?.name;
+        } else if (e.costCenterId && e.costCenter) {
+          key = `CC:${e.costCenterId}`;
+          label = `${e.costCenter.code} — ${e.costCenter.name}`;
+          type = "CC";
+        } else {
+          continue;
+        }
+
+        if (!rowsByKey.has(key)) {
+          rowsByKey.set(key, {
+            targetLabel: label, targetType: type, targetClient: client,
+            daysHours: Array(daysInMonth).fill(0), monthTotal: 0
+          });
+        }
+        const row = rowsByKey.get(key)!;
+        const dayIdx = e.date.getDate() - 1; // 0-indexed
+        row.daysHours[dayIdx] += Number(e.hours);
+        row.monthTotal += Number(e.hours);
+      }
+
+      const rows: TimesheetPdfMonthRow[] = Array.from(rowsByKey.values()).sort((a, b) => {
+        const order = { PRJ: 0, MIS: 1, CC: 2 };
+        if (order[a.targetType] !== order[b.targetType]) return order[a.targetType] - order[b.targetType];
+        return a.targetLabel.localeCompare(b.targetLabel);
+      });
+
+      const dayTotals = Array(daysInMonth).fill(0);
+      for (const r of rows) for (let i = 0; i < daysInMonth; i++) dayTotals[i] += r.daysHours[i];
+      const monthTotal = dayTotals.reduce((s, v) => s + v, 0);
+
+      months.push({
+        year, month: monthIdx, monthLabel, daysInMonth,
+        rows, dayTotals, monthTotal
+      });
+
+      // Passer au mois suivant
+      cursor = new Date(year, monthIdx + 1, 1);
+    }
+  }
+
   const data: TimesheetPdfData = {
     consultantName: `${targetUser.firstName} ${targetUser.lastName}`.trim(),
     consultantEmail: targetUser.email,
     consultantRole: ROLE_LABEL[targetUser.role as string] ?? targetUser.role,
     periodStart, periodEnd,
-    weeks, grandTotal,
+    weeks, months, grandTotal,
     layout, mode,
     generatedBy: `${actor?.firstName ?? ""} ${actor?.lastName ?? ""}`.trim() || session.user.id,
     generatedAt: new Date(),

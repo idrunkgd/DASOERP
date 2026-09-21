@@ -134,13 +134,13 @@ export function PdfExportButton({
         <div className="flex gap-2">
           <label className={`flex-1 border rounded p-2 cursor-pointer text-xs ${layout === "weekly" ? "border-indigoaccent bg-indigoaccent/5" : "border-border"}`}>
             <input type="radio" name="layout" value="weekly" checked={layout === "weekly"} onChange={() => setLayout("weekly")} className="mr-1" />
-            <span className="font-medium">Détail par semaine</span>
-            <div className="text-[10px] text-midnight-500 mt-0.5">1 page A4 par semaine · avec détail jour</div>
+            <span className="font-medium">Par semaine</span>
+            <div className="text-[10px] text-midnight-500 mt-0.5">1 page A4 par semaine (7 jours)</div>
           </label>
           <label className={`flex-1 border rounded p-2 cursor-pointer text-xs ${layout === "monthly" ? "border-indigoaccent bg-indigoaccent/5" : "border-border"}`}>
             <input type="radio" name="layout" value="monthly" checked={layout === "monthly"} onChange={() => setLayout("monthly")} className="mr-1" />
-            <span className="font-medium">Récap 1 page</span>
-            <div className="text-[10px] text-midnight-500 mt-0.5">Toute la période sur 1 seule page · par semaine</div>
+            <span className="font-medium">Par mois</span>
+            <div className="text-[10px] text-midnight-500 mt-0.5">1 page A4 par mois calendaire (détail 28-31 jours)</div>
           </label>
         </div>
       </div>

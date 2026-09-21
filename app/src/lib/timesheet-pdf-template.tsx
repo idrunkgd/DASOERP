@@ -33,6 +33,28 @@ export type TimesheetPdfWeek = {
   weekTotal: number;
 };
 
+/**
+ * Ligne d'un mois (layout monthly) : projet avec les heures par jour du mois.
+ * daysHours a exactement daysInMonth entrées (index 0 = jour 1, etc.)
+ */
+export type TimesheetPdfMonthRow = {
+  targetLabel: string;
+  targetType: "PRJ" | "MIS" | "CC";
+  targetClient?: string;
+  daysHours: number[];    // 1 valeur par jour du mois (28-31 valeurs)
+  monthTotal: number;
+};
+
+export type TimesheetPdfMonth = {
+  year: number;
+  month: number;          // 0-11
+  monthLabel: string;     // "Septembre 2026"
+  daysInMonth: number;    // 28-31
+  rows: TimesheetPdfMonthRow[];
+  dayTotals: number[];    // taille = daysInMonth
+  monthTotal: number;
+};
+
 export type TimesheetPdfLayout = "weekly" | "monthly";
 export type TimesheetPdfMode = "full" | "client";
 
@@ -42,11 +64,12 @@ export type TimesheetPdfData = {
   consultantRole: string;
   periodStart: Date;      // début période demandée (peut être milieu de semaine)
   periodEnd: Date;        // fin période demandée (exclusive)
-  weeks: TimesheetPdfWeek[];  // 1 semaine ou N semaines
+  weeks: TimesheetPdfWeek[];  // pour layout=weekly
+  months: TimesheetPdfMonth[];// pour layout=monthly (1 page par mois calendaire, détail par jour)
   grandTotal: number;     // somme totale de la période
   generatedBy: string;
   generatedAt: Date;
-  /** "weekly" = 1 page A4 par semaine (détail) · "monthly" = 1 page A4 récap toute la période */
+  /** "weekly" = 1 page A4 par semaine (détail 7 jours) · "monthly" = 1 page A4 par mois calendaire (détail 28-31 jours) */
   layout: TimesheetPdfLayout;
   /** "full" = toutes les entrées (avec statut) · "client" = uniquement les heures validées (APPROVED), sans statut */
   mode: TimesheetPdfMode;
@@ -347,201 +370,228 @@ function WeekPage({
 }
 
 /**
- * Rend TOUTE la période sur une seule page A4 paysage.
- * Format : lignes = projets/missions/CC (agrégés sur la période),
- * colonnes = 1 par semaine ISO couverte + total. Idéal pour envoyer
- * un récap mensuel/trimestriel au client.
+ * Rend UN MOIS calendaire sur une page A4 paysage.
+ * Format : lignes = projets/missions/CC, colonnes = 1 par jour (28-31 colonnes)
+ * + colonne Total. Idéal pour envoyer un récap mensuel avec le détail au jour.
+ *
+ * Contraintes A4 paysage : cellules par jour très étroites (~18pt),
+ * font-size 6-7 pour tenir. Weekends grisés.
  */
-function MonthlyPage({ data }: { data: TimesheetPdfData }) {
-  // Agrégation cross-semaines par target
-  type MonthlyRow = {
-    targetLabel: string;
-    targetType: "PRJ" | "MIS" | "CC";
-    targetClient?: string;
-    weekTotals: number[]; // 1 valeur par semaine du PDF
-    total: number;
+function MonthPage({
+  data, month, index, total
+}: { data: TimesheetPdfData; month: TimesheetPdfMonth; index: number; total: number }) {
+  const isLast = index === total - 1;
+  const days = Array.from({ length: month.daysInMonth }, (_, i) => i + 1);
+
+  // Détecter les weekends dans le mois pour griser les colonnes
+  const isDayWeekend = (dayNum: number): boolean => {
+    const d = new Date(month.year, month.month, dayNum);
+    const w = d.getDay();
+    return w === 0 || w === 6; // dim=0, sam=6
   };
-  const rowsByKey = new Map<string, MonthlyRow>();
-  for (let wi = 0; wi < data.weeks.length; wi++) {
-    for (const row of data.weeks[wi].rows) {
-      const key = `${row.targetType}:${row.targetLabel}`;
-      if (!rowsByKey.has(key)) {
-        rowsByKey.set(key, {
-          targetLabel: row.targetLabel,
-          targetType: row.targetType,
-          targetClient: row.targetClient,
-          weekTotals: Array(data.weeks.length).fill(0),
-          total: 0
-        });
-      }
-      const acc = rowsByKey.get(key)!;
-      acc.weekTotals[wi] += row.rowTotal;
-      acc.total += row.rowTotal;
-    }
-  }
-  const monthlyRows = Array.from(rowsByKey.values()).sort((a, b) => {
-    const order = { PRJ: 0, MIS: 1, CC: 2 };
-    if (order[a.targetType] !== order[b.targetType]) return order[a.targetType] - order[b.targetType];
-    return a.targetLabel.localeCompare(b.targetLabel);
-  });
-  const weekTotals = data.weeks.map((w) => w.weekTotal);
 
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
-      {/* HEADER */}
+      {/* HEADER compact */}
       <View style={styles.header}>
         <View style={styles.brandRow}>
-          <DasolabsIcon size={30} color={C.ink} />
+          <DasolabsIcon size={26} color={C.ink} />
           <View>
             <Text style={styles.brandName}>Dasolabs</Text>
             <Text style={styles.brandTag}>
-              Rapport de temps · Récap période
+              Rapport mensuel · {month.monthLabel}
               {data.mode === "client" ? " · Vue client (heures validées)" : ""}
+              {total > 1 ? ` · Mois ${index + 1} / ${total}` : ""}
             </Text>
           </View>
         </View>
         <View>
-          <Text style={styles.title}>Timesheet</Text>
+          <Text style={styles.title}>Timesheet {month.monthLabel}</Text>
           <Text style={styles.subtitle}>
-            Du {fmtDate(data.periodStart)} au {fmtDate(new Date(data.periodEnd.getTime() - 86400000))}
-            {" · "}{data.weeks.length} semaine{data.weeks.length > 1 ? "s" : ""}
+            {data.consultantName} · Total mois : {month.monthTotal.toFixed(2)}h
           </Text>
         </View>
       </View>
 
-      {/* INFOS CONSULTANT */}
-      <View style={styles.infoRow}>
+      {/* INFOS CONSULTANT très compact sur 1 ligne */}
+      <View style={{ ...styles.infoRow, paddingVertical: 6, marginBottom: 8 }}>
         <View style={styles.infoCol}>
-          <Text style={styles.infoLabel}>Consultant</Text>
-          <Text style={styles.infoValue}>{data.consultantName}</Text>
-          <Text style={styles.cellTextSm}>{data.consultantEmail}</Text>
+          <Text style={styles.infoLabel}>Consultant · {data.consultantRole}</Text>
+          <Text style={{ ...styles.infoValue, fontSize: 10 }}>{data.consultantName}</Text>
         </View>
         <View style={styles.infoCol}>
-          <Text style={styles.infoLabel}>Rôle</Text>
-          <Text style={styles.infoValue}>{data.consultantRole}</Text>
+          <Text style={styles.infoLabel}>Email</Text>
+          <Text style={styles.cellText}>{data.consultantEmail}</Text>
         </View>
         <View style={styles.infoCol}>
-          <Text style={styles.infoLabel}>Total période</Text>
-          <Text style={{ ...styles.infoValue, color: C.accent, fontSize: 18 }}>
-            {data.grandTotal.toFixed(2)}h
+          <Text style={styles.infoLabel}>Total mois</Text>
+          <Text style={{ ...styles.infoValue, color: C.accent, fontSize: 14 }}>
+            {month.monthTotal.toFixed(2)}h
           </Text>
         </View>
-      </View>
-
-      {/* Tableau récap */}
-      <View style={styles.table}>
-        {/* Header */}
-        <View style={[styles.tableRow, styles.tableRowHead]}>
-          <View style={{ ...styles.cellTarget, flex: 4 }}>
-            <Text style={styles.cellHead}>Projet / Mission / Centre de coût</Text>
+        {total > 1 && (
+          <View style={styles.infoCol}>
+            <Text style={styles.infoLabel}>Cumul période</Text>
+            <Text style={{ ...styles.infoValue, color: C.grey, fontSize: 11 }}>
+              {data.grandTotal.toFixed(2)}h
+            </Text>
           </View>
-          {data.weeks.map((w, i) => (
-            <View key={i} style={styles.cellDay}>
-              <Text style={styles.cellHead}>S {i + 1}</Text>
-              <Text style={{ ...styles.cellHead, fontSize: 6 }}>
-                {fmtDate(w.weekStart).slice(0, 5)}
-              </Text>
-            </View>
-          ))}
-          <View style={styles.cellTotal}>
+        )}
+      </View>
+
+      {/* Tableau : projets × jours */}
+      <View style={styles.table}>
+        {/* Header : numéros des jours */}
+        <View style={[styles.tableRow, styles.tableRowHead, { minHeight: 18 }]}>
+          <View style={{ paddingHorizontal: 4, paddingVertical: 2, justifyContent: "center", flexBasis: 130, flexGrow: 0, flexShrink: 0 }}>
+            <Text style={styles.cellHead}>Projet / Mission / CC</Text>
+          </View>
+          {days.map((d) => {
+            const isWknd = isDayWeekend(d);
+            return (
+              <View
+                key={d}
+                style={{
+                  flex: 1, paddingVertical: 2, justifyContent: "center", alignItems: "center",
+                  borderLeftWidth: 0.3, borderLeftColor: "#444",
+                  backgroundColor: isWknd ? "#3a3a55" : undefined
+                }}
+              >
+                <Text style={{ ...styles.cellHead, fontSize: 6 }}>{d}</Text>
+              </View>
+            );
+          })}
+          <View style={{ paddingVertical: 2, justifyContent: "center", alignItems: "flex-end", flexBasis: 50, flexGrow: 0, flexShrink: 0, paddingHorizontal: 4, borderLeftWidth: 0.5, borderLeftColor: "#444" }}>
             <Text style={styles.cellHead}>Total</Text>
           </View>
         </View>
 
         {/* Lignes projets */}
-        {monthlyRows.length === 0 ? (
-          <View style={styles.tableRow}>
-            <View style={{ flex: data.weeks.length + 5, padding: 16, alignItems: "center" }}>
+        {month.rows.length === 0 ? (
+          <View style={{ ...styles.tableRow, minHeight: 40 }}>
+            <View style={{ flex: 1, padding: 16, alignItems: "center" }}>
               <Text style={{ ...styles.cellTextSm, fontStyle: "italic" }}>
                 {data.mode === "client"
-                  ? "Aucune heure validée sur cette période."
-                  : "Aucune entrée saisie sur cette période."}
+                  ? "Aucune heure validée sur ce mois."
+                  : "Aucune entrée saisie sur ce mois."}
               </Text>
             </View>
           </View>
         ) : (
-          monthlyRows.map((row, ri) => (
-            <View key={ri} style={styles.tableRow}>
-              <View style={{ ...styles.cellTarget, flex: 4 }}>
-                <Text style={styles.cellText}>{row.targetLabel}</Text>
-                <View style={{ flexDirection: "row", gap: 4, alignItems: "center", marginTop: 2 }}>
+          month.rows.map((row, ri) => (
+            <View key={ri} style={{ ...styles.tableRow, minHeight: 18 }}>
+              <View style={{ paddingHorizontal: 4, paddingVertical: 2, justifyContent: "center", flexBasis: 130, flexGrow: 0, flexShrink: 0 }}>
+                <Text style={{ fontSize: 7, color: C.ink }}>{row.targetLabel}</Text>
+                <View style={{ flexDirection: "row", gap: 2, alignItems: "center", marginTop: 1 }}>
                   <Text style={[
                     styles.badge,
+                    { fontSize: 5, paddingHorizontal: 2, paddingVertical: 0 },
                     row.targetType === "PRJ" ? styles.badgePRJ : row.targetType === "MIS" ? styles.badgeMIS : styles.badgeCC
                   ]}>
-                    {row.targetType === "PRJ" ? "Projet" : row.targetType === "MIS" ? "Mission" : "Centre coût"}
+                    {row.targetType}
                   </Text>
-                  {row.targetClient && <Text style={styles.cellTextSm}>· {row.targetClient}</Text>}
+                  {row.targetClient && <Text style={{ fontSize: 6, color: C.grey }}>· {row.targetClient}</Text>}
                 </View>
               </View>
-              {row.weekTotals.map((t, wi) => (
-                <View key={wi} style={styles.cellDay}>
-                  {t > 0 ? (
-                    <Text style={styles.cellHours}>{t.toFixed(2)}</Text>
-                  ) : (
-                    <Text style={styles.cellHoursMuted}>—</Text>
-                  )}
-                </View>
-              ))}
-              <View style={styles.cellTotal}>
-                <Text style={{ ...styles.cellHours, color: C.accent }}>{row.total.toFixed(2)}</Text>
+              {row.daysHours.map((h, di) => {
+                const dayNum = di + 1;
+                const isWknd = isDayWeekend(dayNum);
+                return (
+                  <View
+                    key={di}
+                    style={{
+                      flex: 1, paddingVertical: 2, justifyContent: "center", alignItems: "center",
+                      borderLeftWidth: 0.3, borderLeftColor: C.border,
+                      backgroundColor: isWknd ? C.light : undefined
+                    }}
+                  >
+                    {h > 0 ? (
+                      <Text style={{ fontSize: 6.5, color: C.ink, fontWeight: 700 }}>
+                        {h % 1 === 0 ? h.toFixed(0) : h.toFixed(1)}
+                      </Text>
+                    ) : (
+                      <Text style={{ fontSize: 6, color: C.border }}>·</Text>
+                    )}
+                  </View>
+                );
+              })}
+              <View style={{ paddingHorizontal: 4, paddingVertical: 2, justifyContent: "center", alignItems: "flex-end", flexBasis: 50, flexGrow: 0, flexShrink: 0, borderLeftWidth: 0.5, borderLeftColor: C.border, backgroundColor: C.light }}>
+                <Text style={{ fontSize: 8, color: C.ink, fontWeight: 700 }}>{row.monthTotal.toFixed(2)}</Text>
               </View>
             </View>
           ))
         )}
 
-        {/* Footer totaux */}
-        <View style={[styles.tableRow, styles.tableRowFoot]}>
-          <View style={{ ...styles.cellTarget, flex: 4 }}>
-            <Text style={{ ...styles.cellText, fontWeight: 700, textAlign: "right" }}>Total / semaine</Text>
+        {/* Footer : total par jour */}
+        <View style={[styles.tableRow, styles.tableRowFoot, { minHeight: 20 }]}>
+          <View style={{ paddingHorizontal: 4, paddingVertical: 3, justifyContent: "center", flexBasis: 130, flexGrow: 0, flexShrink: 0 }}>
+            <Text style={{ fontSize: 7, color: C.ink, fontWeight: 700, textAlign: "right" }}>Total / jour</Text>
           </View>
-          {weekTotals.map((t, i) => (
-            <View key={i} style={styles.cellDay}>
-              <Text style={styles.cellHours}>{t > 0 ? t.toFixed(2) : "—"}</Text>
-            </View>
-          ))}
-          <View style={styles.cellTotal}>
-            <Text style={{ ...styles.cellHours, color: C.accent, fontSize: 12 }}>
-              {data.grandTotal.toFixed(2)}h
-            </Text>
+          {month.dayTotals.map((t, di) => {
+            const dayNum = di + 1;
+            const isWknd = isDayWeekend(dayNum);
+            return (
+              <View
+                key={di}
+                style={{
+                  flex: 1, paddingVertical: 3, justifyContent: "center", alignItems: "center",
+                  borderLeftWidth: 0.3, borderLeftColor: C.border,
+                  backgroundColor: isWknd ? "#eaeaef" : undefined
+                }}
+              >
+                {t > 0 ? (
+                  <Text style={{ fontSize: 6.5, color: C.ink, fontWeight: 700 }}>
+                    {t % 1 === 0 ? t.toFixed(0) : t.toFixed(1)}
+                  </Text>
+                ) : (
+                  <Text style={{ fontSize: 6, color: C.border }}>·</Text>
+                )}
+              </View>
+            );
+          })}
+          <View style={{ paddingHorizontal: 4, paddingVertical: 3, justifyContent: "center", alignItems: "flex-end", flexBasis: 50, flexGrow: 0, flexShrink: 0, borderLeftWidth: 0.5, borderLeftColor: C.ink }}>
+            <Text style={{ fontSize: 10, color: C.accent, fontWeight: 700 }}>{month.monthTotal.toFixed(2)}h</Text>
           </View>
         </View>
       </View>
 
       {/* Note mode client */}
       {data.mode === "client" && (
-        <View style={{ marginBottom: 12 }}>
+        <View style={{ marginBottom: 8 }}>
           <Text style={{ ...styles.cellTextSm, color: C.grey, fontStyle: "italic" }}>
             Ce rapport ne contient que les heures validées (approuvées par le manager). Il tient lieu de justificatif client.
           </Text>
         </View>
       )}
 
-      {/* Notes optionnelles */}
-      {data.notes && (
+      {/* Notes optionnelles — dernière page seulement */}
+      {isLast && data.notes && (
         <View style={styles.notesBlock}>
           <Text style={styles.notesH}>Notes / Commentaires</Text>
           <Text style={styles.notesTxt}>{data.notes}</Text>
         </View>
       )}
 
-      {/* Signatures */}
-      <View style={styles.sigs}>
-        <View style={styles.sigBox}>
-          <Text style={styles.sigLabel}>Signature consultant</Text>
-          <Text style={styles.sigName}>{data.consultantName}</Text>
-          <Text style={styles.sigDate}>Date : ___________</Text>
+      {/* Signatures — dernière page seulement */}
+      {isLast && (
+        <View style={styles.sigs}>
+          <View style={styles.sigBox}>
+            <Text style={styles.sigLabel}>Signature consultant</Text>
+            <Text style={styles.sigName}>{data.consultantName}</Text>
+            <Text style={styles.sigDate}>Date : ___________</Text>
+          </View>
+          <View style={styles.sigBox}>
+            <Text style={styles.sigLabel}>Signature {data.mode === "client" ? "client" : "valideur / manager"}</Text>
+            <Text style={styles.sigName}>&nbsp;</Text>
+            <Text style={styles.sigDate}>Date : ___________</Text>
+          </View>
         </View>
-        <View style={styles.sigBox}>
-          <Text style={styles.sigLabel}>Signature {data.mode === "client" ? "client" : "valideur / manager"}</Text>
-          <Text style={styles.sigName}>&nbsp;</Text>
-          <Text style={styles.sigDate}>Date : ___________</Text>
-        </View>
-      </View>
+      )}
 
       {/* Footer */}
       <Text style={styles.footer}>
         Généré le {fmtDate(data.generatedAt)} à {data.generatedAt.toLocaleTimeString("fr-BE", { hour: "2-digit", minute: "2-digit" })} par {data.generatedBy}
+        {total > 1 ? ` · Page ${index + 1} / ${total}` : ""}
         {" · "}Dasolabs Timesheet Report · Document confidentiel
       </Text>
     </Page>
@@ -551,13 +601,14 @@ function MonthlyPage({ data }: { data: TimesheetPdfData }) {
 export function TimesheetPdf({ data }: { data: TimesheetPdfData }) {
   return (
     <Document>
-      {data.layout === "monthly" ? (
-        <MonthlyPage data={data} />
-      ) : (
-        data.weeks.map((week, i) => (
-          <WeekPage key={i} data={data} week={week} index={i} total={data.weeks.length} />
-        ))
-      )}
+      {data.layout === "monthly"
+        ? data.months.map((month, i) => (
+            <MonthPage key={i} data={data} month={month} index={i} total={data.months.length} />
+          ))
+        : data.weeks.map((week, i) => (
+            <WeekPage key={i} data={data} week={week} index={i} total={data.weeks.length} />
+          ))
+      }
     </Document>
   );
 }
