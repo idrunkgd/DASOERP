@@ -52,6 +52,10 @@ export async function GET(req: NextRequest) {
   const explicitUserId = req.nextUrl.searchParams.get("userId");
   const inline = req.nextUrl.searchParams.get("inline") === "1";
   const notes = req.nextUrl.searchParams.get("notes")?.slice(0, 500) ?? undefined;
+  // "weekly" (défaut) = 1 page/semaine · "monthly" = 1 seule page A4 récap
+  const layout = (req.nextUrl.searchParams.get("layout") === "monthly" ? "monthly" : "weekly") as "weekly" | "monthly";
+  // "full" (défaut) = toutes les entrées · "client" = uniquement APPROVED (pour envoi client)
+  const mode = (req.nextUrl.searchParams.get("mode") === "client" ? "client" : "full") as "full" | "client";
 
   // Résolution période : from/to prioritaire, sinon week
   let periodStart: Date, periodEnd: Date;
@@ -102,8 +106,12 @@ export async function GET(req: NextRequest) {
   if (!targetUser) return new Response("User not found", { status: 404 });
 
   // Récupérer toutes les entrées sur la période
+  // En mode "client" : uniquement les entrées APPROVED (validées) → justificatif propre
+  const entriesWhere: any = { userId: targetUserId, date: { gte: periodStart, lt: periodEnd } };
+  if (mode === "client") entriesWhere.status = "APPROVED";
+
   const entries = await prisma.timesheetEntry.findMany({
-    where: { userId: targetUserId, date: { gte: periodStart, lt: periodEnd } },
+    where: entriesWhere,
     include: {
       project: { include: { company: { select: { name: true } } } },
       mission: { include: { company: { select: { name: true } } } },
@@ -190,6 +198,7 @@ export async function GET(req: NextRequest) {
     consultantRole: ROLE_LABEL[targetUser.role as string] ?? targetUser.role,
     periodStart, periodEnd,
     weeks, grandTotal,
+    layout, mode,
     generatedBy: `${actor?.firstName ?? ""} ${actor?.lastName ?? ""}`.trim() || session.user.id,
     generatedAt: new Date(),
     notes
@@ -202,7 +211,8 @@ export async function GET(req: NextRequest) {
     const suffix = weeks.length === 1
       ? format(periodStart, "yyyy-MM-dd")
       : `${format(periodStart, "yyyy-MM-dd")}_${format(addDays(periodEnd, -1), "yyyy-MM-dd")}`;
-    const filename = `Timesheet-${slug}-${suffix}.pdf`;
+    const prefix = mode === "client" ? "Timesheet-CLIENT" : "Timesheet";
+    const filename = `${prefix}-${slug}-${suffix}.pdf`;
     return new Response(u8, {
       headers: {
         "Content-Type": "application/pdf",

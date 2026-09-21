@@ -26,6 +26,8 @@ export function PdfExportButton({
   const weekEnd = addDays(weekStart, 6);
   const [from, setFrom] = useState(format(weekStart, "yyyy-MM-dd"));
   const [to, setTo] = useState(format(weekEnd, "yyyy-MM-dd"));
+  const [layout, setLayout] = useState<"weekly" | "monthly">("weekly");
+  const [mode, setMode] = useState<"full" | "client">("full");
   const btnRef = useRef<HTMLButtonElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
@@ -79,13 +81,17 @@ export function PdfExportButton({
     }
   }
 
-  const href = `/api/exports/timesheet-pdf?from=${from}&to=${to}${onBehalfOfUserId ? `&userId=${onBehalfOfUserId}` : ""}&inline=1`;
+  const params = new URLSearchParams({
+    from, to, layout, mode, inline: "1"
+  });
+  if (onBehalfOfUserId) params.set("userId", onBehalfOfUserId);
+  const href = `/api/exports/timesheet-pdf?${params.toString()}`;
 
   const popover = open && pos && (
     <div
       ref={popRef}
       style={{ position: "fixed", top: pos.top, right: pos.right, zIndex: 9999 }}
-      className="w-[340px] card p-3 shadow-2xl bg-white border border-border rounded-lg"
+      className="w-[360px] card p-3 shadow-2xl bg-white border border-border rounded-lg"
     >
       <div className="text-xs font-mono uppercase tracking-widest text-midnight-500 mb-2">
         Période d'export
@@ -122,8 +128,42 @@ export function PdfExportButton({
         </label>
       </div>
 
+      {/* Format PDF */}
+      <div className="mb-3">
+        <div className="text-[10px] text-midnight-500 uppercase tracking-wider mb-1">Format</div>
+        <div className="flex gap-2">
+          <label className={`flex-1 border rounded p-2 cursor-pointer text-xs ${layout === "weekly" ? "border-indigoaccent bg-indigoaccent/5" : "border-border"}`}>
+            <input type="radio" name="layout" value="weekly" checked={layout === "weekly"} onChange={() => setLayout("weekly")} className="mr-1" />
+            <span className="font-medium">Détail par semaine</span>
+            <div className="text-[10px] text-midnight-500 mt-0.5">1 page A4 par semaine · avec détail jour</div>
+          </label>
+          <label className={`flex-1 border rounded p-2 cursor-pointer text-xs ${layout === "monthly" ? "border-indigoaccent bg-indigoaccent/5" : "border-border"}`}>
+            <input type="radio" name="layout" value="monthly" checked={layout === "monthly"} onChange={() => setLayout("monthly")} className="mr-1" />
+            <span className="font-medium">Récap 1 page</span>
+            <div className="text-[10px] text-midnight-500 mt-0.5">Toute la période sur 1 seule page · par semaine</div>
+          </label>
+        </div>
+      </div>
+
+      {/* Mode contenu */}
+      <div className="mb-3">
+        <div className="text-[10px] text-midnight-500 uppercase tracking-wider mb-1">Contenu</div>
+        <div className="flex gap-2">
+          <label className={`flex-1 border rounded p-2 cursor-pointer text-xs ${mode === "full" ? "border-indigoaccent bg-indigoaccent/5" : "border-border"}`}>
+            <input type="radio" name="mode" value="full" checked={mode === "full"} onChange={() => setMode("full")} className="mr-1" />
+            <span className="font-medium">Toutes les entrées</span>
+            <div className="text-[10px] text-midnight-500 mt-0.5">Avec statuts (validé, soumis, brouillon)</div>
+          </label>
+          <label className={`flex-1 border rounded p-2 cursor-pointer text-xs ${mode === "client" ? "border-amber-500 bg-amber-50/70" : "border-border"}`}>
+            <input type="radio" name="mode" value="client" checked={mode === "client"} onChange={() => setMode("client")} className="mr-1" />
+            <span className="font-medium">Vue client</span>
+            <div className="text-[10px] text-midnight-500 mt-0.5">Uniquement les heures validées · pour envoi client</div>
+          </label>
+        </div>
+      </div>
+
       <div className="text-[10px] text-midnight-500 mb-3 italic">
-        Max 12 semaines (~3 mois) par PDF. Une page A4 paysage par semaine.
+        Max 12 semaines (~3 mois) par PDF.
       </div>
 
       <div className="flex justify-end gap-2">
