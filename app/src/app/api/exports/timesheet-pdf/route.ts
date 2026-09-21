@@ -1,21 +1,25 @@
 /**
- * Export PDF timesheet hebdomadaire.
- * GET /api/exports/timesheet-pdf?week=YYYY-MM-DD[&userId=xxx][&inline=1][&notes=...]
+ * Export PDF timesheet — supporte plage de dates ou une semaine unique.
+ *
+ * GET /api/exports/timesheet-pdf?from=YYYY-MM-DD&to=YYYY-MM-DD[&userId=xxx][&inline=1][&notes=...]
+ * GET /api/exports/timesheet-pdf?week=YYYY-MM-DD[&userId=xxx][&inline=1]  ← rétrocompat
+ *
+ * - `from`/`to` : plage libre. Le PDF génère 1 page A4 paysage par semaine
+ *   ISO (lundi → dimanche) couverte par la plage. Les jours hors plage
+ *   d'une semaine partielle sont inclus dans le tableau (une entrée hors
+ *   plage sera juste absente de la source data).
+ * - `week` : rétrocompat — équivaut à from=lundi&to=dimanche+1.
  *
  * ACL :
- * - Un consultant peut télécharger son PROPRE timesheet (userId = session ou absent)
- * - Un valideur (Admin/Manager/Ops · permission timesheet.validate) peut télécharger
- *   celui de n'importe quel autre utilisateur en passant ?userId=...
- *
- * Le PDF contient une semaine complète (lun→dim), tableau des entrées, totaux,
- * statuts, zone signatures. Format A4 paysage.
+ * - Consultant : son propre timesheet uniquement
+ * - Admin/Manager (permission timesheet.validate) : PDF de n'importe quel user via ?userId=...
  */
 import { NextRequest } from "next/server";
 import React from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { prisma } from "@/lib/db";
 import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
-import { TimesheetPdf, type TimesheetPdfData, type TimesheetPdfEntry } from "@/lib/timesheet-pdf-template";
+import { TimesheetPdf, type TimesheetPdfData, type TimesheetPdfEntry, type TimesheetPdfWeek } from "@/lib/timesheet-pdf-template";
 import { startOfWeek, addDays, parseISO, format, isSameDay } from "date-fns";
 
 export const dynamic = "force-dynamic";
@@ -28,18 +32,54 @@ const ROLE_LABEL: Record<string, string> = {
   FINANCE: "Finance"
 };
 
+/** Découpe une plage [from, to) en semaines ISO (lundi 00:00 → lundi 00:00 semaine suivante) */
+function splitIntoWeeks(from: Date, to: Date): Array<{ start: Date; end: Date }> {
+  const weeks: Array<{ start: Date; end: Date }> = [];
+  let cursor = startOfWeek(from, { weekStartsOn: 1 });
+  while (cursor < to) {
+    const next = addDays(cursor, 7);
+    weeks.push({ start: cursor, end: next });
+    cursor = next;
+  }
+  return weeks;
+}
+
 export async function GET(req: NextRequest) {
   const session = await requireSession();
+  const fromParam = req.nextUrl.searchParams.get("from");
+  const toParam = req.nextUrl.searchParams.get("to");
   const weekParam = req.nextUrl.searchParams.get("week");
   const explicitUserId = req.nextUrl.searchParams.get("userId");
   const inline = req.nextUrl.searchParams.get("inline") === "1";
   const notes = req.nextUrl.searchParams.get("notes")?.slice(0, 500) ?? undefined;
 
-  if (!weekParam) return new Response("Missing 'week' param (YYYY-MM-DD)", { status: 400 });
-  const anchor = parseISO(weekParam);
-  if (isNaN(anchor.getTime())) return new Response("Invalid 'week' param", { status: 400 });
+  // Résolution période : from/to prioritaire, sinon week
+  let periodStart: Date, periodEnd: Date;
+  if (fromParam && toParam) {
+    periodStart = parseISO(fromParam);
+    periodEnd = addDays(parseISO(toParam), 1); // to inclusif → end exclusif
+    if (isNaN(periodStart.getTime()) || isNaN(periodEnd.getTime())) {
+      return new Response("Invalid 'from' or 'to' param (YYYY-MM-DD attendu)", { status: 400 });
+    }
+    if (periodEnd <= periodStart) {
+      return new Response("La date de fin doit être ≥ la date de début", { status: 400 });
+    }
+  } else if (weekParam) {
+    const anchor = parseISO(weekParam);
+    if (isNaN(anchor.getTime())) return new Response("Invalid 'week' param", { status: 400 });
+    periodStart = startOfWeek(anchor, { weekStartsOn: 1 });
+    periodEnd = addDays(periodStart, 7);
+  } else {
+    return new Response("Missing 'from'+'to' or 'week' params", { status: 400 });
+  }
 
-  // Résolution du user cible
+  // Garde-fou : max 12 semaines (3 mois) par PDF pour éviter les abus
+  const nbDays = Math.ceil((periodEnd.getTime() - periodStart.getTime()) / 86400000);
+  if (nbDays > 12 * 7) {
+    return new Response("Période trop longue — maximum 12 semaines (3 mois)", { status: 400 });
+  }
+
+  // ACL user cible
   let targetUserId = session.user.id;
   if (explicitUserId && explicitUserId !== session.user.id) {
     const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
@@ -49,7 +89,6 @@ export async function GET(req: NextRequest) {
     targetUserId = explicitUserId;
   }
 
-  // Charger l'utilisateur cible + les entrées de la semaine
   const [targetUser, actor] = await Promise.all([
     prisma.user.findUnique({
       where: { id: targetUserId },
@@ -62,11 +101,9 @@ export async function GET(req: NextRequest) {
   ]);
   if (!targetUser) return new Response("User not found", { status: 404 });
 
-  const weekStart = startOfWeek(anchor, { weekStartsOn: 1 });
-  const weekEnd = addDays(weekStart, 7);
-
+  // Récupérer toutes les entrées sur la période
   const entries = await prisma.timesheetEntry.findMany({
-    where: { userId: targetUserId, date: { gte: weekStart, lt: weekEnd } },
+    where: { userId: targetUserId, date: { gte: periodStart, lt: periodEnd } },
     include: {
       project: { include: { company: { select: { name: true } } } },
       mission: { include: { company: { select: { name: true } } } },
@@ -75,83 +112,84 @@ export async function GET(req: NextRequest) {
     orderBy: { date: "asc" }
   });
 
-  // Agrégation par target (projet/mission/CC) + par jour
-  type RowAcc = {
-    key: string;
-    targetLabel: string;
-    targetType: "PRJ" | "MIS" | "CC";
-    targetClient?: string;
-    daysHours: number[];
-    daysStatus: (string | null)[];
-    rowTotal: number;
-  };
-  const rowsByKey = new Map<string, RowAcc>();
+  // Découper en semaines et agréger par semaine × target × jour
+  const weekRanges = splitIntoWeeks(periodStart, periodEnd);
+  const weeks: TimesheetPdfWeek[] = [];
 
-  for (const e of entries) {
-    let key: string, label: string, type: "PRJ" | "MIS" | "CC", client: string | undefined;
-    if (e.projectId && e.project) {
-      key = `PRJ:${e.projectId}`;
-      label = `${e.project.reference} — ${e.project.name}`;
-      type = "PRJ";
-      client = e.project.company?.name;
-    } else if (e.missionId && e.mission) {
-      key = `MIS:${e.missionId}`;
-      label = `${e.mission.reference} — ${e.mission.title}`;
-      type = "MIS";
-      client = e.mission.company?.name;
-    } else if (e.costCenterId && e.costCenter) {
-      key = `CC:${e.costCenterId}`;
-      label = `${e.costCenter.code} — ${e.costCenter.name}`;
-      type = "CC";
-    } else {
-      continue;
+  for (const { start: weekStart, end: weekEnd } of weekRanges) {
+    type RowAcc = {
+      targetLabel: string;
+      targetType: "PRJ" | "MIS" | "CC";
+      targetClient?: string;
+      daysHours: number[];
+      daysStatus: (string | null)[];
+      rowTotal: number;
+    };
+    const rowsByKey = new Map<string, RowAcc>();
+
+    const weekEntries = entries.filter((e) => e.date >= weekStart && e.date < weekEnd);
+    for (const e of weekEntries) {
+      let key: string, label: string, type: "PRJ" | "MIS" | "CC", client: string | undefined;
+      if (e.projectId && e.project) {
+        key = `PRJ:${e.projectId}`;
+        label = `${e.project.reference} — ${e.project.name}`;
+        type = "PRJ";
+        client = e.project.company?.name;
+      } else if (e.missionId && e.mission) {
+        key = `MIS:${e.missionId}`;
+        label = `${e.mission.reference} — ${e.mission.title}`;
+        type = "MIS";
+        client = e.mission.company?.name;
+      } else if (e.costCenterId && e.costCenter) {
+        key = `CC:${e.costCenterId}`;
+        label = `${e.costCenter.code} — ${e.costCenter.name}`;
+        type = "CC";
+      } else {
+        continue;
+      }
+
+      if (!rowsByKey.has(key)) {
+        rowsByKey.set(key, {
+          targetLabel: label, targetType: type, targetClient: client,
+          daysHours: Array(7).fill(0), daysStatus: Array(7).fill(null), rowTotal: 0
+        });
+      }
+      const row = rowsByKey.get(key)!;
+
+      let dayIdx = -1;
+      for (let i = 0; i < 7; i++) {
+        if (isSameDay(e.date, addDays(weekStart, i))) { dayIdx = i; break; }
+      }
+      if (dayIdx < 0) continue;
+
+      row.daysHours[dayIdx] += Number(e.hours);
+      row.daysStatus[dayIdx] = e.status;
+      row.rowTotal += Number(e.hours);
     }
 
-    if (!rowsByKey.has(key)) {
-      rowsByKey.set(key, {
-        key,
-        targetLabel: label,
-        targetType: type,
-        targetClient: client,
-        daysHours: Array(7).fill(0),
-        daysStatus: Array(7).fill(null),
-        rowTotal: 0
-      });
-    }
-    const row = rowsByKey.get(key)!;
+    const rows: TimesheetPdfEntry[] = Array.from(rowsByKey.values()).sort((a, b) => {
+      const order = { PRJ: 0, MIS: 1, CC: 2 };
+      if (order[a.targetType] !== order[b.targetType]) return order[a.targetType] - order[b.targetType];
+      return a.targetLabel.localeCompare(b.targetLabel);
+    });
 
-    // Index jour (lundi = 0)
-    let dayIdx = -1;
-    for (let i = 0; i < 7; i++) {
-      if (isSameDay(e.date, addDays(weekStart, i))) { dayIdx = i; break; }
-    }
-    if (dayIdx < 0) continue;
+    const dayTotals = Array(7).fill(0);
+    for (const r of rows) for (let i = 0; i < 7; i++) dayTotals[i] += r.daysHours[i];
+    const weekTotal = dayTotals.reduce((s, v) => s + v, 0);
 
-    row.daysHours[dayIdx] += Number(e.hours);
-    row.daysStatus[dayIdx] = e.status;
-    row.rowTotal += Number(e.hours);
+    weeks.push({
+      weekStart, weekEnd, rows, dayTotals, weekTotal
+    });
   }
 
-  const rows: TimesheetPdfEntry[] = Array.from(rowsByKey.values()).sort((a, b) => {
-    // Tri : Projets, puis Missions, puis Centres de coût, puis alpha
-    const order = { PRJ: 0, MIS: 1, CC: 2 };
-    if (order[a.targetType] !== order[b.targetType]) return order[a.targetType] - order[b.targetType];
-    return a.targetLabel.localeCompare(b.targetLabel);
-  });
-
-  const dayTotals = Array(7).fill(0);
-  for (const r of rows) for (let i = 0; i < 7; i++) dayTotals[i] += r.daysHours[i];
-  const weekTotal = dayTotals.reduce((s, v) => s + v, 0);
+  const grandTotal = weeks.reduce((s, w) => s + w.weekTotal, 0);
 
   const data: TimesheetPdfData = {
     consultantName: `${targetUser.firstName} ${targetUser.lastName}`.trim(),
     consultantEmail: targetUser.email,
     consultantRole: ROLE_LABEL[targetUser.role as string] ?? targetUser.role,
-    weekStart,
-    weekEnd,
-    rows,
-    dayTotals,
-    weekTotal,
+    periodStart, periodEnd,
+    weeks, grandTotal,
     generatedBy: `${actor?.firstName ?? ""} ${actor?.lastName ?? ""}`.trim() || session.user.id,
     generatedAt: new Date(),
     notes
@@ -161,7 +199,10 @@ export async function GET(req: NextRequest) {
     const buffer = await renderToBuffer(React.createElement(TimesheetPdf, { data }) as any);
     const u8 = new Uint8Array(buffer);
     const slug = `${targetUser.firstName}-${targetUser.lastName}`.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const filename = `Timesheet-${slug}-${format(weekStart, "yyyy-MM-dd")}.pdf`;
+    const suffix = weeks.length === 1
+      ? format(periodStart, "yyyy-MM-dd")
+      : `${format(periodStart, "yyyy-MM-dd")}_${format(addDays(periodEnd, -1), "yyyy-MM-dd")}`;
+    const filename = `Timesheet-${slug}-${suffix}.pdf`;
     return new Response(u8, {
       headers: {
         "Content-Type": "application/pdf",

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { TimesheetGrid } from "./timesheet-grid";
+import { PdfExportButton } from "./pdf-export-button";
 import { startOfWeek, addDays, format, parseISO } from "date-fns";
 import Link from "next/link";
 
@@ -87,13 +88,10 @@ export default async function TimesheetPage({ searchParams }: { searchParams: { 
             <Link href={`/timesheet${impersonatedUserId ? `?userId=${impersonatedUserId}` : ""}`} className="btn-ghost">Aujourd'hui</Link>
             <Link href={`/timesheet?week=${nextWeek}${impersonateQs}`} className="btn-secondary">Sem. suivante →</Link>
             <Link href="/timesheet/validation" className="btn-secondary">À valider</Link>
-            <a
-              href={`/api/exports/timesheet-pdf?week=${format(weekStart, "yyyy-MM-dd")}${impersonatedUserId ? `&userId=${impersonatedUserId}` : ""}&inline=1`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary"
-              title="Imprimer / télécharger cette semaine en PDF"
-            >📄 PDF</a>
+            <PdfExportButton
+              weekStartISO={format(weekStart, "yyyy-MM-dd")}
+              onBehalfOfUserId={impersonatedUserId}
+            />
             <a href={`/api/exports/timesheet?from=${format(weekStart, "yyyy-MM-dd")}&to=${format(weekEnd, "yyyy-MM-dd")}${impersonatedUserId ? `&userId=${impersonatedUserId}` : ""}`} className="btn-secondary" title="Export CSV">CSV</a>
           </>
         }
