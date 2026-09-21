@@ -14,12 +14,18 @@ import { createPortal } from "react-dom";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, subMonths, subWeeks } from "date-fns";
 import { FileDown } from "lucide-react";
 
+export type PdfTarget = { key: string; label: string; type: "PRJ" | "MIS" | "CC"; client?: string };
+
 export function PdfExportButton({
   weekStartISO,
-  onBehalfOfUserId
+  onBehalfOfUserId,
+  targets = []
 }: {
   weekStartISO: string;
   onBehalfOfUserId?: string | null;
+  /** Missions / projets / CC sur lesquels le consultant a des heures.
+   *  Utilisé pour filtrer le PDF sur une seule cible (ex : envoi client). */
+  targets?: PdfTarget[];
 }) {
   const [open, setOpen] = useState(false);
   const weekStart = new Date(weekStartISO);
@@ -28,6 +34,7 @@ export function PdfExportButton({
   const [to, setTo] = useState(format(weekEnd, "yyyy-MM-dd"));
   const [layout, setLayout] = useState<"weekly" | "monthly">("weekly");
   const [mode, setMode] = useState<"full" | "client">("full");
+  const [target, setTarget] = useState<string>(""); // "" = toutes, sinon "PRJ:id" / "MIS:id" / "CC:id"
   const btnRef = useRef<HTMLButtonElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
@@ -85,6 +92,7 @@ export function PdfExportButton({
     from, to, layout, mode, inline: "1"
   });
   if (onBehalfOfUserId) params.set("userId", onBehalfOfUserId);
+  if (target) params.set("target", target);
   const href = `/api/exports/timesheet-pdf?${params.toString()}`;
 
   const popover = open && pos && (
@@ -127,6 +135,49 @@ export function PdfExportButton({
           />
         </label>
       </div>
+
+      {/* Filtre par mission/projet/CC */}
+      {targets.length > 0 && (
+        <div className="mb-3">
+          <div className="text-[10px] text-midnight-500 uppercase tracking-wider mb-1">
+            Filtrer sur (optionnel)
+          </div>
+          <select
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+            className="input h-8 w-full text-sm"
+            title="Ne garder que les heures d'une seule mission / projet / CC dans le PDF"
+          >
+            <option value="">— Toutes les cibles ({targets.length}) —</option>
+            {targets.filter(t => t.type === "MIS").length > 0 && (
+              <optgroup label="Missions T&M (client)">
+                {targets.filter(t => t.type === "MIS").map(t => (
+                  <option key={t.key} value={t.key}>{t.label}{t.client ? ` — ${t.client}` : ""}</option>
+                ))}
+              </optgroup>
+            )}
+            {targets.filter(t => t.type === "PRJ").length > 0 && (
+              <optgroup label="Projets forfait">
+                {targets.filter(t => t.type === "PRJ").map(t => (
+                  <option key={t.key} value={t.key}>{t.label}{t.client ? ` — ${t.client}` : ""}</option>
+                ))}
+              </optgroup>
+            )}
+            {targets.filter(t => t.type === "CC").length > 0 && (
+              <optgroup label="Centres de coût internes">
+                {targets.filter(t => t.type === "CC").map(t => (
+                  <option key={t.key} value={t.key}>{t.label}</option>
+                ))}
+              </optgroup>
+            )}
+          </select>
+          {target && (
+            <div className="text-[10px] text-amber-700 mt-1 italic">
+              Seules les heures liées à cette cible seront dans le PDF. Parfait pour un envoi client.
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Format PDF */}
       <div className="mb-3">

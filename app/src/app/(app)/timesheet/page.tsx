@@ -48,7 +48,7 @@ export default async function TimesheetPage({ searchParams }: { searchParams: { 
   const missionsWhere: any = { status: { in: ["ACTIVE", "EXTENDED", "PLANNED"] } };
   if (!canValidateTs) missionsWhere.consultantId = effectiveUserId;
 
-  const [entries, projects, missions, costCenters] = await Promise.all([
+  const [entries, projects, missions, costCenters, historicalEntries] = await Promise.all([
     prisma.timesheetEntry.findMany({
       where: { userId: effectiveUserId, date: { gte: weekStart, lt: weekEnd } },
       include: { project: true, mission: true, costCenter: true },
@@ -64,8 +64,39 @@ export default async function TimesheetPage({ searchParams }: { searchParams: { 
       orderBy: { reference: "desc" },
       select: { id: true, reference: true, title: true, company: { select: { name: true } } }
     }),
-    prisma.costCenter.findMany({ where: { active: true }, orderBy: { code: "asc" } })
+    prisma.costCenter.findMany({ where: { active: true }, orderBy: { code: "asc" } }),
+    // Toutes les cibles distinctes sur lesquelles le consultant a déjà saisi (pour dropdown filtre PDF)
+    prisma.timesheetEntry.findMany({
+      where: { userId: effectiveUserId },
+      select: {
+        projectId: true, missionId: true, costCenterId: true,
+        project: { select: { reference: true, name: true, company: { select: { name: true } } } },
+        mission: { select: { reference: true, title: true, company: { select: { name: true } } } },
+        costCenter: { select: { code: true, name: true } }
+      },
+      distinct: ["projectId", "missionId", "costCenterId"]
+    })
   ]);
+
+  // Aplatir en liste unique pour le dropdown PDF
+  const pdfTargetsMap = new Map<string, { key: string; label: string; type: "PRJ" | "MIS" | "CC"; client?: string }>();
+  for (const e of historicalEntries) {
+    if (e.projectId && e.project) {
+      const key = `PRJ:${e.projectId}`;
+      pdfTargetsMap.set(key, { key, label: `${e.project.reference} — ${e.project.name}`, type: "PRJ", client: e.project.company?.name });
+    } else if (e.missionId && e.mission) {
+      const key = `MIS:${e.missionId}`;
+      pdfTargetsMap.set(key, { key, label: `${e.mission.reference} — ${e.mission.title}`, type: "MIS", client: e.mission.company?.name });
+    } else if (e.costCenterId && e.costCenter) {
+      const key = `CC:${e.costCenterId}`;
+      pdfTargetsMap.set(key, { key, label: `${e.costCenter.code} — ${e.costCenter.name}`, type: "CC" });
+    }
+  }
+  const pdfTargets = Array.from(pdfTargetsMap.values()).sort((a, b) => {
+    const order = { PRJ: 0, MIS: 1, CC: 2 };
+    if (order[a.type] !== order[b.type]) return order[a.type] - order[b.type];
+    return a.label.localeCompare(b.label);
+  });
 
   const prevWeek = format(addDays(weekStart, -7), "yyyy-MM-dd");
   const nextWeek = format(addDays(weekStart, 7), "yyyy-MM-dd");
@@ -91,6 +122,7 @@ export default async function TimesheetPage({ searchParams }: { searchParams: { 
             <PdfExportButton
               weekStartISO={format(weekStart, "yyyy-MM-dd")}
               onBehalfOfUserId={impersonatedUserId}
+              targets={pdfTargets}
             />
             <a href={`/api/exports/timesheet?from=${format(weekStart, "yyyy-MM-dd")}&to=${format(weekEnd, "yyyy-MM-dd")}${impersonatedUserId ? `&userId=${impersonatedUserId}` : ""}`} className="btn-secondary" title="Export CSV">CSV</a>
           </>

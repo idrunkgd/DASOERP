@@ -53,10 +53,21 @@ export async function GET(req: NextRequest) {
   const explicitUserId = req.nextUrl.searchParams.get("userId");
   const inline = req.nextUrl.searchParams.get("inline") === "1";
   const notes = req.nextUrl.searchParams.get("notes")?.slice(0, 500) ?? undefined;
-  // "weekly" (défaut) = 1 page/semaine · "monthly" = 1 seule page A4 récap
+  // "weekly" (défaut) = 1 page/semaine · "monthly" = 1 page/mois calendaire (détail par jour)
   const layout = (req.nextUrl.searchParams.get("layout") === "monthly" ? "monthly" : "weekly") as "weekly" | "monthly";
   // "full" (défaut) = toutes les entrées · "client" = uniquement APPROVED (pour envoi client)
   const mode = (req.nextUrl.searchParams.get("mode") === "client" ? "client" : "full") as "full" | "client";
+  // target=PRJ:xxx | MIS:xxx | CC:xxx pour filtrer sur une seule cible (envoi client)
+  const targetParam = req.nextUrl.searchParams.get("target");
+  let targetFilter: { projectId?: string; missionId?: string; costCenterId?: string } | null = null;
+  let targetLabelForFilename: string | null = null;
+  if (targetParam) {
+    const [kind, id] = targetParam.split(":");
+    if (kind === "PRJ" && id) { targetFilter = { projectId: id }; targetLabelForFilename = "PRJ"; }
+    else if (kind === "MIS" && id) { targetFilter = { missionId: id }; targetLabelForFilename = "MIS"; }
+    else if (kind === "CC" && id) { targetFilter = { costCenterId: id }; targetLabelForFilename = "CC"; }
+    else return new Response("Invalid 'target' param — attendu PRJ:id, MIS:id ou CC:id", { status: 400 });
+  }
 
   // Résolution période : from/to prioritaire, sinon week
   let periodStart: Date, periodEnd: Date;
@@ -110,6 +121,12 @@ export async function GET(req: NextRequest) {
   // En mode "client" : uniquement les entrées APPROVED (validées) → justificatif propre
   const entriesWhere: any = { userId: targetUserId, date: { gte: periodStart, lt: periodEnd } };
   if (mode === "client") entriesWhere.status = "APPROVED";
+  // Filtre cible : ne garder que les heures d'une seule mission/projet/CC
+  if (targetFilter) {
+    if (targetFilter.projectId) entriesWhere.projectId = targetFilter.projectId;
+    if (targetFilter.missionId) entriesWhere.missionId = targetFilter.missionId;
+    if (targetFilter.costCenterId) entriesWhere.costCenterId = targetFilter.costCenterId;
+  }
 
   const entries = await prisma.timesheetEntry.findMany({
     where: entriesWhere,
@@ -294,7 +311,8 @@ export async function GET(req: NextRequest) {
       ? format(periodStart, "yyyy-MM-dd")
       : `${format(periodStart, "yyyy-MM-dd")}_${format(addDays(periodEnd, -1), "yyyy-MM-dd")}`;
     const prefix = mode === "client" ? "Timesheet-CLIENT" : "Timesheet";
-    const filename = `${prefix}-${slug}-${suffix}.pdf`;
+    const targetSuffix = targetLabelForFilename ? `-${targetLabelForFilename}` : "";
+    const filename = `${prefix}${targetSuffix}-${slug}-${suffix}.pdf`;
     return new Response(u8, {
       headers: {
         "Content-Type": "application/pdf",
