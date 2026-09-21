@@ -30,13 +30,15 @@ const ACTIVITIES = [
 ];
 
 export function TimesheetGrid({
-  weekStartISO, entries, projects, missions, costCenters
+  weekStartISO, entries, projects, missions, costCenters, onBehalfOfUserId
 }: {
   weekStartISO: string;
   entries: Entry[];
   projects: Project[];
   missions: Mission[];
   costCenters: CC[];
+  /** Si fourni, la saisie/soumission est déléguée pour cet utilisateur (mode admin). */
+  onBehalfOfUserId?: string | null;
 }) {
   const weekStart = parseISO(weekStartISO);
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStartISO]);
@@ -94,7 +96,7 @@ export function TimesheetGrid({
         const hours = defaultHours;
         start(async () => {
           try {
-            const r = await upsertCellsBulk({ target: key, dates, hours });
+            const r = await upsertCellsBulk({ target: key, dates, hours, onBehalfOfUserId });
             toast.success(`${r.touched} jour(s) rempli(s) à ${hours}h`);
           } catch (err: any) { toast.error(err.message); }
         });
@@ -113,11 +115,11 @@ export function TimesheetGrid({
     const dates = days.filter(d => !isWeekend(d)).map(d => format(d, "yyyy-MM-dd"));
     start(async () => {
       try {
-        const r = await upsertCellsBulk({ target: key, dates, hours });
+        const r = await upsertCellsBulk({ target: key, dates, hours, onBehalfOfUserId });
         toast.success(`${r.touched} jour(s) rempli(s) à ${hours}h`);
       } catch (err: any) { toast.error(err.message); }
     });
-  }, [days]);
+  }, [days, onBehalfOfUserId]);
 
   return (
     <div className="space-y-4">
@@ -145,11 +147,11 @@ export function TimesheetGrid({
         <button
           disabled={pending}
           onClick={() => start(async () => {
-            try { const n = await submitWeek(weekStartISO); toast.success(`${n} entrée(s) soumises`); }
+            try { const n = await submitWeek(weekStartISO, onBehalfOfUserId); toast.success(`${n} entrée(s) soumises`); }
             catch (e: any) { toast.error(e.message); }
           })}
           className="btn-primary btn-sm"
-        >Soumettre la semaine</button>
+        >{onBehalfOfUserId ? "Soumettre pour ce consultant" : "Soumettre la semaine"}</button>
       </div>
       <div className="text-[11px] text-midnight-500 italic px-1">
         💡 Astuce : maintenez le clic et glissez sur une ligne pour remplir plusieurs jours à {defaultHours}h. Cliquez sur une cellule seule pour ajuster une valeur précise.
@@ -253,7 +255,11 @@ export function TimesheetGrid({
                             isActive={active?.key === k && active?.date === dateStr}
                             onCancel={() => setActive(null)}
                             onSubmit={(fd) => start(async () => {
-                              try { await upsertCell(fd); setActive(null); }
+                              try {
+                                if (onBehalfOfUserId) fd.set("onBehalfOfUserId", onBehalfOfUserId);
+                                await upsertCell(fd);
+                                setActive(null);
+                              }
                               catch (err: any) { toast.error(err.message); }
                             })}
                             target={k}

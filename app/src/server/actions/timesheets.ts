@@ -23,12 +23,34 @@ function parseTarget(target: string) {
   throw new Error("Cible invalide (projet, mission ou centre de coût)");
 }
 
+/**
+ * Résout l'utilisateur cible pour une action de saisie timesheet.
+ * - Si `onBehalfOfUserId` fourni ET actor a `timesheet.validate` → utilise cet ID
+ *   (saisie déléguée par un admin/manager pour un consultant)
+ * - Sinon → session.user.id (saisie personnelle)
+ * Retourne { userId, isDelegated, canValidate }
+ */
+async function resolveTargetUser(session: { user: { id: string; role: any } }, onBehalfOfUserId?: string | null) {
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canValidate = perms.includes("timesheet.validate");
+  if (onBehalfOfUserId && onBehalfOfUserId !== session.user.id) {
+    if (!canValidate) throw new Error("Forbidden: seuls Admin/Manager peuvent saisir pour un autre utilisateur.");
+    // Vérifier que l'utilisateur cible existe et est actif
+    const target = await prisma.user.findUnique({ where: { id: onBehalfOfUserId }, select: { id: true, active: true } });
+    if (!target || !target.active) throw new Error("Utilisateur cible introuvable ou inactif.");
+    return { userId: onBehalfOfUserId, isDelegated: true, canValidate };
+  }
+  return { userId: session.user.id, isDelegated: false, canValidate };
+}
+
 export async function upsertEntry(formData: FormData) {
   const session = await requirePermission("timesheet.self.write");
   const id = (formData.get("id") || "").toString() || null;
+  const onBehalf = (formData.get("onBehalfOfUserId") || "").toString() || null;
   const parsed = Schema.parse(Object.fromEntries(formData));
   const { target, ...rest } = parsed;
   const targetIds = parseTarget(target);
+  const { userId, isDelegated } = await resolveTargetUser(session, onBehalf);
   const data = { ...rest, ...targetIds };
   if (id) {
     const existing = await prisma.timesheetEntry.findUniqueOrThrow({ where: { id } });
@@ -39,7 +61,13 @@ export async function upsertEntry(formData: FormData) {
     if (existing.status === "APPROVED") throw new Error("Entrée déjà validée");
     await prisma.timesheetEntry.update({ where: { id }, data });
   } else {
-    await prisma.timesheetEntry.create({ data: { ...data, userId: session.user.id, status: "DRAFT" } });
+    await prisma.timesheetEntry.create({ data: { ...data, userId, status: "DRAFT" } });
+    if (isDelegated) {
+      await logActivity({
+        actorId: session.user.id, action: "CREATE", entityType: "TimesheetEntry",
+        message: `Saisie déléguée pour userId=${userId} · ${rest.hours}h le ${rest.date.toISOString().slice(0, 10)}`
+      });
+    }
   }
   revalidatePath("/timesheet");
 }
@@ -56,28 +84,29 @@ export async function deleteEntry(id: string) {
   revalidatePath("/timesheet");
 }
 
-export async function submitWeek(weekStartISO: string) {
+export async function submitWeek(weekStartISO: string, onBehalfOfUserId?: string | null) {
   const session = await requirePermission("timesheet.self.write");
+  const { userId, isDelegated } = await resolveTargetUser(session, onBehalfOfUserId ?? null);
   const start = new Date(weekStartISO);
   const end = new Date(start); end.setDate(end.getDate() + 7);
   const updated = await prisma.timesheetEntry.updateMany({
-    where: { userId: session.user.id, date: { gte: start, lt: end }, status: "DRAFT" },
+    where: { userId, date: { gte: start, lt: end }, status: "DRAFT" },
     data: { status: "SUBMITTED" }
   });
   await logActivity({
     actorId: session.user.id, action: "TIMESHEET_SUBMITTED", entityType: "TimesheetEntry",
-    message: `${updated.count} entrée(s) soumises pour validation (semaine ${weekStartISO.slice(0, 10)})`
+    message: `${updated.count} entrée(s) soumises pour validation (semaine ${weekStartISO.slice(0, 10)})${isDelegated ? ` — saisie déléguée pour userId=${userId}` : ""}`
   });
-  // Notifier les valideurs
+  // Notifier les valideurs (sauf l'acteur en cas de délégation par un admin)
   if (updated.count > 0) {
     const { createNotification, getUserIdsWithPermission } = await import("@/lib/notifications");
     const validators = await getUserIdsWithPermission("timesheet.validate", session.user.id);
-    const me = await prisma.user.findUnique({ where: { id: session.user.id }, select: { firstName: true, lastName: true } });
+    const target = await prisma.user.findUnique({ where: { id: userId }, select: { firstName: true, lastName: true } });
     await createNotification({
       userId: validators,
       type: "TIMESHEET_SUBMITTED",
-      title: `Timesheet à valider — ${me?.firstName ?? ""} ${me?.lastName ?? ""}`.trim(),
-      message: `${updated.count} entrée(s) · semaine du ${weekStartISO.slice(0, 10)}`,
+      title: `Timesheet à valider — ${target?.firstName ?? ""} ${target?.lastName ?? ""}`.trim(),
+      message: `${updated.count} entrée(s) · semaine du ${weekStartISO.slice(0, 10)}${isDelegated ? " (saisie déléguée)" : ""}`,
       href: "/timesheet/validation",
       entityType: "TimesheetEntry"
     });
@@ -107,6 +136,9 @@ export async function approveEntry(id: string) {
  * - 1 entrée DRAFT par (user, projectId/costCenterId, date)
  * - hours = 0 → suppression
  * - écrase si existe déjà (impossible si APPROVED)
+ *
+ * Le champ optionnel `onBehalfOfUserId` (dans le FormData) permet à un
+ * Admin/Manager de saisir pour un consultant. Trace d'audit systématique.
  */
 const CellSchema = z.object({
   target: z.string().min(1),                                    // "PRJ:<id>" | "CC:<id>"
@@ -118,21 +150,19 @@ const CellSchema = z.object({
 
 export async function upsertCell(formData: FormData) {
   const session = await requirePermission("timesheet.self.write");
+  const onBehalf = (formData.get("onBehalfOfUserId") || "").toString() || null;
   const data = CellSchema.parse(Object.fromEntries(formData));
   const targetIds = parseTarget(data.target);
-  const userId = session.user.id;
+  const { userId, isDelegated, canValidate } = await resolveTargetUser(session, onBehalf);
 
-  const sp = await getUserEffectivePermissions(session.user.id, session.user.role);
-  const canValidate = sp.includes("timesheet.validate");
-
-  // Si projet : vérifier appartenance équipe (sauf rôles avec timesheet.validate)
+  // Guards équipe/consultant : ne s'appliquent PAS quand l'acteur est un valideur
+  // (Admin/Manager peut saisir n'importe quel projet pour un consultant délégué).
   if (targetIds.projectId && !canValidate) {
     const member = await prisma.projectMember.findUnique({
       where: { projectId_userId: { projectId: targetIds.projectId, userId } }
     });
     if (!member) throw new Error("Vous ne faites pas partie de l'équipe de ce projet.");
   }
-  // Si mission : vérifier que c'est bien le consultant assigné
   if (targetIds.missionId && !canValidate) {
     const mission = await prisma.mission.findUnique({ where: { id: targetIds.missionId }, select: { consultantId: true } });
     if (mission?.consultantId !== userId) throw new Error("Vous n'êtes pas le consultant assigné à cette mission.");
@@ -167,6 +197,12 @@ export async function upsertCell(formData: FormData) {
     await prisma.timesheetEntry.create({
       data: { userId, ...targetIds, date: data.date, hours: data.hours, activityType: data.activityType, description: data.description, status: "DRAFT" }
     });
+    if (isDelegated) {
+      await logActivity({
+        actorId: session.user.id, action: "CREATE", entityType: "TimesheetEntry",
+        message: `Saisie déléguée pour userId=${userId} · ${data.hours}h le ${data.date.toISOString().slice(0, 10)}`
+      });
+    }
   }
   revalidatePath("/timesheet");
 }
@@ -190,9 +226,8 @@ export async function rejectEntry(id: string, note: string) {
  * (projet / mission / centre de coût). Utilisé par le drag & drop et le
  * bouton "Remplir la semaine" du grid.
  *
- * Aucune description requise, activityType par défaut DEVELOPMENT.
- * Les entrées existantes en APPROVED sont ignorées silencieusement pour
- * ne pas bloquer un drag sur une semaine partiellement validée.
+ * Le champ `onBehalfOfUserId` (input parameter) permet à un Admin/Manager
+ * de remplir un timesheet pour un consultant. Trace d'audit.
  */
 const BulkSchema = z.object({
   target: z.string().min(1),
@@ -200,16 +235,13 @@ const BulkSchema = z.object({
   hours: z.coerce.number().min(0).max(24)
 });
 
-export async function upsertCellsBulk(input: { target: string; dates: string[]; hours: number }) {
+export async function upsertCellsBulk(input: { target: string; dates: string[]; hours: number; onBehalfOfUserId?: string | null }) {
   const session = await requirePermission("timesheet.self.write");
   const parsed = BulkSchema.parse(input);
   const targetIds = parseTarget(parsed.target);
-  const userId = session.user.id;
+  const { userId, isDelegated, canValidate } = await resolveTargetUser(session, input.onBehalfOfUserId ?? null);
 
-  const sp = await getUserEffectivePermissions(session.user.id, session.user.role);
-  const canValidate = sp.includes("timesheet.validate");
-
-  // Guards équipe / consultant
+  // Guards équipe / consultant (sautés en mode admin/valideur)
   if (targetIds.projectId && !canValidate) {
     const member = await prisma.projectMember.findUnique({
       where: { projectId_userId: { projectId: targetIds.projectId, userId } }
@@ -234,6 +266,7 @@ export async function upsertCellsBulk(input: { target: string; dates: string[]; 
   const existingByDate = new Map(existing.map((e) => [e.date.toISOString().slice(0, 10), e]));
 
   const ops: Promise<any>[] = [];
+  let created = 0;
   for (const d of parsed.dates) {
     const ex = existingByDate.get(d);
     if (parsed.hours === 0) {
@@ -246,6 +279,7 @@ export async function upsertCellsBulk(input: { target: string; dates: string[]; 
       if (ex.status === "APPROVED") continue;  // pas touche
       ops.push(prisma.timesheetEntry.update({ where: { id: ex.id }, data: { hours: parsed.hours } }));
     } else {
+      created++;
       ops.push(prisma.timesheetEntry.create({
         data: {
           userId, date: new Date(d), hours: parsed.hours,
@@ -259,6 +293,12 @@ export async function upsertCellsBulk(input: { target: string; dates: string[]; 
     }
   }
   await prisma.$transaction(ops as any);
+  if (isDelegated && created > 0) {
+    await logActivity({
+      actorId: session.user.id, action: "CREATE", entityType: "TimesheetEntry",
+      message: `Saisie déléguée en lot pour userId=${userId} · ${created} entrée(s) créée(s) à ${parsed.hours}h`
+    });
+  }
   revalidatePath("/timesheet");
   return { touched: ops.length };
 }
