@@ -30,13 +30,10 @@ export default async function TimesheetPage({ searchParams }: { searchParams: { 
       })
     : null;
 
-  // Liste des consultants sélectionnables pour l'admin (users actifs avec timesheet.self.write en base)
+  // Liste des consultants sélectionnables pour l'admin (tous users actifs)
   const consultants = canValidateTs
     ? await prisma.user.findMany({
-        where: {
-          active: true,
-          role: { in: ["ADMIN", "MANAGER", "OPS_MANAGER", "CONSULTANT"] as any }
-        },
+        where: { active: true },
         select: { id: true, firstName: true, lastName: true, role: true },
         orderBy: [{ firstName: "asc" }, { lastName: "asc" }]
       })
