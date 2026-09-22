@@ -247,7 +247,11 @@ export default async function CashflowPage({
         <KpiCard
           label="Entrées année"
           value={formatCurrency(data.yearTotals.inflow)}
-          hint={`+${formatCurrency(data.yearTotals.inflowWithSim - data.yearTotals.inflow)} avec sim.`}
+          hint={
+            data.yearTotals.inProgressAmount > 0
+              ? `Dont ${formatCurrency(data.yearTotals.inProgressAmount)} facturés non encore encaissés · +${formatCurrency(data.yearTotals.inflowWithSim - data.yearTotals.inflow)} avec sim.`
+              : `+${formatCurrency(data.yearTotals.inflowWithSim - data.yearTotals.inflow)} avec sim.`
+          }
           icon={TrendingUp}
           tone="success"
         />
@@ -259,9 +263,9 @@ export default async function CashflowPage({
           tone="danger"
         />
         <KpiCard
-          label="Net année"
+          label="Net année (prévisionnel)"
           value={formatCurrency(data.yearTotals.net)}
-          hint={`Inclut factures ouvertes · Avec sim : ${formatCurrency(data.yearTotals.netWithSim)}`}
+          hint={`Prévisionnel toutes tranches non annulées · Avec sim : ${formatCurrency(data.yearTotals.netWithSim)}`}
           icon={Activity}
           tone={data.yearTotals.net >= 0 ? "success" : "danger"}
         />
