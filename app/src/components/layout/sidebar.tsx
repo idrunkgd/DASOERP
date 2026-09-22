@@ -11,7 +11,7 @@ import {
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
   AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown, BookOpen,
-  Car, FileSignature
+  Car, FileSignature, PiggyBank
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -29,6 +29,7 @@ const SECTIONS: Section[] = [
       { href: "/commercial",        label: "Activité",             icon: MessageSquare, perm: "contacts.read" },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
+      { href: "/financial-resume",  label: "Résumé financier",     icon: PiggyBank,     perm: "finance.read" },
       { href: "/employees",         label: "Employés",             icon: Users,         perm: "finance.write" },
       { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       perm: "finance.read" },
       { href: "/app-links",         label: "Outils & apps",        icon: AppWindow,     perm: "applinks.read" }
