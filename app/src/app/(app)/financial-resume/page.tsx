@@ -58,7 +58,7 @@ export default async function FinancialResumePage({ searchParams }: { searchPara
     // Toutes les tranches de facturation non annulées attendues cette année
     prisma.billingMilestone.findMany({
       where: {
-        status: { notIn: ["CANCELLED" as any, "SKIPPED" as any] },
+        status: { notIn: ["CANCELLED"] },
         expectedAt: { gte: yearStart, lt: yearEnd }
       },
       include: {
@@ -71,15 +71,15 @@ export default async function FinancialResumePage({ searchParams }: { searchPara
     prisma.supplierInvoice.findMany({
       where: {
         invoiceDate: { gte: yearStart, lt: yearEnd },
-        status: { notIn: ["CANCELLED" as any] }
+        status: { notIn: ["CANCELLED"] }
       },
       orderBy: { amountTtc: "desc" }
     }),
-    // Notes de frais approuvées / payées de l'année
+    // Notes de frais approuvées / payées / soumises de l'année
     prisma.expenseReport.findMany({
       where: {
         date: { gte: yearStart, lt: yearEnd },
-        status: { in: ["APPROVED" as any, "PAID" as any, "SUBMITTED" as any] }
+        status: { in: ["APPROVED", "PAID", "SUBMITTED"] }
       },
       include: {
         user: { select: { firstName: true, lastName: true } },
