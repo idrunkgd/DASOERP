@@ -845,15 +845,21 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         };
       }
       // Résolution du montant, priorités :
-      //   1. override manuel du mois (le user a saisi une valeur)
-      //   2. si ligne TVA + mois de paiement futur → calcul dynamique
-      //      (TVA collectée sur factures émises − TVA déductible sur achats)
-      //   3. sinon → defaultAmount de la RecurringExpense
+      //   Pour une ligne TVA (label contient "TVA" / "VAT") non PAID :
+      //     1. calcul dynamique (TVA réelle collectée − déductible du mois source)
+      //     2. override manuel (fallback si calcul indisponible)
+      //     3. defaultAmount
+      //   Pour toutes les autres lignes :
+      //     1. override manuel
+      //     2. defaultAmount
+      //   Rationale : sur la ligne TVA, l'override saisi par le user est une
+      //   estimation ; le calcul réel doit primer tant que le mois n'est pas
+      //   marqué PAID (auquel cas on garde la valeur historique payée).
       const vatDynamic = isVatLine && entry?.status !== "PAID" ? vatByMonth.get(monthIdx) : undefined;
-      const amount = entry?.amountOverride
-        ? Number(entry.amountOverride)
-        : vatDynamic != null
-          ? vatDynamic
+      const amount = vatDynamic != null
+        ? vatDynamic
+        : entry?.amountOverride
+          ? Number(entry.amountOverride)
           : Number(r.defaultAmount);
       return {
         amount,
