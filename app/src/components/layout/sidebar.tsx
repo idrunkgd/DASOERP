@@ -192,11 +192,13 @@ export function Sidebar({
 
   const footer = (
     <div className="border-t border-white/10">
-      {(demoAllowed || demoModeActive) && (
-        <div className="px-3 py-2 border-b border-white/5">
-          <DemoModeToggle active={demoModeActive} allowed={demoAllowed} />
+      {/* Bouton mode démo — TEMPORAIREMENT toujours affiché pour debug */}
+      <div className="px-3 py-2 border-b border-white/5 bg-red-950/30">
+        <div className="text-[9px] text-red-300 mb-1">
+          debug: role={String(role)} allowed={String(demoAllowed)} active={String(demoModeActive)}
         </div>
-      )}
+        <DemoModeToggle active={demoModeActive} allowed={true} />
+      </div>
       <div className="px-4 py-3 text-[11px] text-indigo-200/70 flex items-center justify-between">
         <span>v0.2</span>
         <span className="text-indigo-300/50">© {new Date().getFullYear()}</span>
