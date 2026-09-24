@@ -43,7 +43,9 @@ async function seedDemoConsultant() {
       firstName: "Jean",
       lastName: "Démo",
       role: "CONSULTANT",
-      active: true,
+      // INACTIF par défaut → invisible dans l'app. Activé UNIQUEMENT quand
+      // enableDemoMode() est appelé (bouton Mode démo dans le sidebar).
+      active: false,
       isDemo: true,
       city: "Bruxelles",
       seniority: "Confirmé",
@@ -64,7 +66,7 @@ async function seedDemoConsultant() {
       isDemo: true,
       firstName: "Jean",
       lastName: "Démo",
-      active: true,
+      // On NE force PAS active ici — respecte le toggle demo-mode côté UI
       role: "CONSULTANT",
       hourlyCost: 45,
       dailyCost: 360,
@@ -228,9 +230,11 @@ async function seedDemoConsultant() {
         brand: "Peugeot",
         model: "3008 Hybrid · démo",
         category: "LEASING",
-        status: "ACTIVE",
+        // ARCHIVED par défaut → invisible dans la flotte. Passé en ACTIVE
+        // uniquement quand le mode démo est activé côté UI.
+        status: "ARCHIVED",
         commissioningDate: daysAgo(300),
-        notes: "Véhicule fictif — démonstration HUB. Sera nettoyé avec le user isDemo."
+        notes: "Véhicule fictif — démonstration HUB. Basculé actif via bouton Mode démo."
       }
     });
     console.log("[seed-demo] véhicule créé");

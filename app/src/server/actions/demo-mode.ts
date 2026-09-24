@@ -27,11 +27,24 @@ const DEMO_COOKIE_NAME = "demo-mode";
 export async function enableDemoMode() {
   const session = await requireSession();
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
-  const isAdmin = session.user.role === "ADMIN" || session.user.role === "MANAGER" || perms.includes("users.manage");
+  const roleStr = String(session.user.role ?? "").toUpperCase();
+  const isAdmin =
+    roleStr === "ADMIN" || roleStr === "MANAGER" ||
+    roleStr.startsWith("ADMIN") || roleStr.startsWith("MANAG") ||
+    perms.includes("users.manage");
   if (!isAdmin) throw new Error("Forbidden — seul un admin/manager peut activer le mode démo.");
 
-  const demoUser = await prisma.user.findFirst({ where: { isDemo: true, active: true } as any });
+  // Chercher le user démo — même s'il est inactive (défaut off)
+  const demoUser = await prisma.user.findFirst({ where: { isDemo: true } as any });
   if (!demoUser) throw new Error("Aucun user démo trouvé — le seed-demo n'a pas encore tourné ?");
+
+  // ACTIVE-ON : Jean Démo devient visible partout dans l'app
+  await prisma.user.update({ where: { id: demoUser.id }, data: { active: true } });
+  // Idem véhicule fictif
+  await prisma.vehicle.updateMany({
+    where: { plate: "1-DEMO-42" },
+    data: { status: "ACTIVE" }
+  });
 
   cookies().set(DEMO_COOKIE_NAME, "1", {
     httpOnly: true,
@@ -53,9 +66,20 @@ export async function enableDemoMode() {
 }
 
 export async function disableDemoMode() {
-  // Pas de contrôle de perm ici : n'importe qui peut sortir du mode démo
-  // (utile si quelqu'un est bloqué par erreur avec l'identité démo).
+  // Ordre critique :
+  // 1. Retirer le cookie D'ABORD → la prochaine requête voit le vrai user
+  // 2. Désactiver Jean Démo ENSUITE → il disparaît des listes (consultants,
+  //    véhicules, dashboards) mais ses données restent en DB (isDemo=true)
+  //    pour la prochaine démo.
   cookies().delete(DEMO_COOKIE_NAME);
+  await prisma.user.updateMany({
+    where: { isDemo: true } as any,
+    data: { active: false }
+  });
+  await prisma.vehicle.updateMany({
+    where: { plate: "1-DEMO-42" },
+    data: { status: "ARCHIVED" }
+  });
   revalidatePath("/", "layout");
 }
 
