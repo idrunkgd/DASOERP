@@ -80,9 +80,8 @@ HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
 
 # Séquence de démarrage :
 # 1. migrate deploy — SYNCHRONE : les nouvelles pages peuvent dépendre du schema
-# 2. seed-training  — ASYNCHRONE en arrière-plan : ~30-60s d'upserts qui ne
-#    doivent PAS bloquer le healthcheck /api/health (le healthcheck teste juste
-#    la DB, pas la présence des cours). Coolify voit l'app "healthy" dès que
-#    Next.js écoute, sans attendre la fin du seed.
-# 3. server.js      — SYNCHRONE : c'est le processus principal (PID 1)
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && (node prisma/seed-training.mjs > /tmp/seed.log 2>&1 &) && node server.js"]
+# 2. seed-training + seed-demo — ASYNCHRONE en parallèle en arrière-plan.
+#    Le seed-demo dépend du seed-training (courses) → on le lance après un
+#    petit délai. Aucun ne bloque le healthcheck.
+# 3. server.js — SYNCHRONE : c'est le processus principal (PID 1)
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && (node prisma/seed-training.mjs > /tmp/seed.log 2>&1 && node prisma/seed-demo-consultant.mjs > /tmp/seed-demo.log 2>&1 &) && node server.js"]
