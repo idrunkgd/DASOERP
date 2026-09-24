@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
 import { type Permission } from "@/lib/rbac";
+import { DemoModeToggle } from "./demo-mode-toggle";
 
 type NavItem = { href: string; label: string; icon: any; perm?: Permission | Permission[]; allowedRoles?: Role[] };
 type Section = { label: string; items: NavItem[] };
@@ -110,13 +111,19 @@ export function Sidebar({
   permissions,
   restricted = false,
   mobileOpen = false,
-  onMobileClose
+  onMobileClose,
+  demoModeActive = false,
+  demoAllowed = false
 }: {
   role: Role;
   permissions: Permission[];
   restricted?: boolean;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  /** True si le cookie demo-mode=1 est présent → on affiche le bouton "Sortir" */
+  demoModeActive?: boolean;
+  /** True si l'utilisateur peut activer le mode démo (Admin/Manager) */
+  demoAllowed?: boolean;
 }) {
   const path = usePathname();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
@@ -184,9 +191,16 @@ export function Sidebar({
   );
 
   const footer = (
-    <div className="px-4 py-3 border-t border-white/10 text-[11px] text-indigo-200/70 flex items-center justify-between">
-      <span>v0.2</span>
-      <span className="text-indigo-300/50">© {new Date().getFullYear()}</span>
+    <div className="border-t border-white/10">
+      {(demoAllowed || demoModeActive) && (
+        <div className="px-3 py-2 border-b border-white/5">
+          <DemoModeToggle active={demoModeActive} allowed={demoAllowed} />
+        </div>
+      )}
+      <div className="px-4 py-3 text-[11px] text-indigo-200/70 flex items-center justify-between">
+        <span>v0.2</span>
+        <span className="text-indigo-300/50">© {new Date().getFullYear()}</span>
+      </div>
     </div>
   );
 

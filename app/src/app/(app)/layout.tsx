@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { LayoutShell } from "@/components/layout/layout-shell";
@@ -18,12 +19,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       select: { id: true, label: true, href: true, icon: true }
     })
   ]);
-  // Mode restreint = aucune permission effective. Si un user "Visiteur" a reçu
-  // des overrides de permission (grants individuels), il sort du mode restreint
-  // et accède aux modules correspondants. Avant on excluait aussi sur le nom
-  // de groupe, ce qui ignorait les overrides → la sidebar restait vide alors
-  // que les droits étaient bien là.
   const isRestricted = permissions.length === 0;
+
+  // ─── Mode démo ───
+  // Bouton visible pour les admin/manager. Cookie posé par enableDemoMode()
+  // dans /server/actions/demo-mode.ts.
+  const demoAllowed = session.user.role === "ADMIN" || session.user.role === "MANAGER";
+  const demoModeActive = cookies().get("demo-mode")?.value === "1";
 
   return (
     <Providers>
@@ -33,7 +35,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         restricted={isRestricted}
         accessGroupName={groupName}
         favorites={favorites}
+        demoAllowed={demoAllowed}
+        demoModeActive={demoModeActive}
       >
+        {demoModeActive && (
+          <div className="bg-amber-500 text-white text-center text-xs py-1.5 px-4 sticky top-0 z-40">
+            <strong>Mode démo actif</strong> — vous voyez le HUB comme <strong>Jean Démo</strong>.
+            Utilisez le bouton du menu de gauche pour sortir.
+          </div>
+        )}
         {children}
       </LayoutShell>
     </Providers>

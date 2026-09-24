@@ -213,6 +213,39 @@ export const getUserAccessGroupName = cache(async (userId: string): Promise<stri
 export async function requireSession() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/login");
+
+  // ─── Mode démo : impersonation Jean Démo ─────────────────────────────
+  // Si le cookie demo-mode=1 est présent ET que l'utilisateur RÉEL a un
+  // rôle admin/manager, on remplace la session par celle de Jean Démo.
+  // Tout le code downstream (permissions, queries, actions) verra Jean
+  // Démo comme user actif. Voir server/actions/demo-mode.ts.
+  try {
+    const { cookies } = await import("next/headers");
+    const demoCookie = cookies().get("demo-mode");
+    if (demoCookie?.value === "1") {
+      const realRole = (session.user as { role?: Role }).role;
+      if (realRole === "ADMIN" || realRole === "MANAGER") {
+        const demoUser = await prisma.user.findFirst({
+          where: { isDemo: true, active: true } as any,
+          select: { id: true, firstName: true, lastName: true, email: true, role: true }
+        });
+        if (demoUser) {
+          // Mutation directe de la session — pas de recréation d'objet
+          const su = session.user as { id: string; name?: string | null; email?: string | null; role?: Role };
+          // On garde une référence au user réel pour affichage bannière
+          (session as unknown as { impersonating?: { realUserId: string; realUserName: string } }).impersonating = {
+            realUserId: su.id,
+            realUserName: su.name ?? su.email ?? "?"
+          };
+          su.id = demoUser.id;
+          su.name = `${demoUser.firstName} ${demoUser.lastName}`;
+          su.email = demoUser.email;
+          su.role = demoUser.role;
+        }
+      }
+    }
+  } catch { /* import cookies() peut échouer hors contexte requête — ignore */ }
+
   return session;
 }
 

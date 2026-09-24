@@ -20,6 +20,8 @@ export function LayoutShell({
   restricted,
   accessGroupName,
   favorites,
+  demoModeActive,
+  demoAllowed,
   children
 }: {
   role: Role;
@@ -27,6 +29,8 @@ export function LayoutShell({
   restricted: boolean;
   accessGroupName: string;
   favorites: Favorite[];
+  demoModeActive?: boolean;
+  demoAllowed?: boolean;
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -66,6 +70,8 @@ export function LayoutShell({
         restricted={restricted}
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
+        demoModeActive={demoModeActive}
+        demoAllowed={demoAllowed}
       />
 
       <div className="flex-1 flex flex-col min-w-0">

@@ -218,6 +218,39 @@ async function seedDemoConsultant() {
   }
   console.log(`[seed-demo] formations · ${courses.length} inscrites`);
 
+  // ─── 9. Véhicule fictif attribué à Jean Démo ──────────────────────────
+  const DEMO_PLATE = "1-DEMO-42";
+  let demoVehicle = await prisma.vehicle.findUnique({ where: { plate: DEMO_PLATE } });
+  if (!demoVehicle) {
+    demoVehicle = await prisma.vehicle.create({
+      data: {
+        plate: DEMO_PLATE,
+        brand: "Peugeot",
+        model: "3008 Hybrid · démo",
+        category: "LEASING",
+        status: "ACTIVE",
+        commissioningDate: daysAgo(300),
+        notes: "Véhicule fictif — démonstration HUB. Sera nettoyé avec le user isDemo."
+      }
+    });
+    console.log("[seed-demo] véhicule créé");
+  }
+  // Assignation active (une seule à la fois : on ferme les précédentes)
+  await prisma.vehicleAssignment.updateMany({
+    where: { vehicleId: demoVehicle.id, endDate: null },
+    data: { endDate: daysAgo(1) }
+  });
+  await prisma.vehicleAssignment.create({
+    data: {
+      vehicleId: demoVehicle.id,
+      userId: demo.id,
+      startDate: daysAgo(200),
+      endDate: null,
+      startKm: 12000
+    }
+  });
+  console.log("[seed-demo] véhicule assigné à Jean Démo");
+
   console.log("[seed-demo] terminé ✓");
   await prisma.$disconnect();
 }
