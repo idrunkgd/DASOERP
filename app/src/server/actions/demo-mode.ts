@@ -22,7 +22,7 @@ import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
-export const DEMO_COOKIE_NAME = "demo-mode";
+const DEMO_COOKIE_NAME = "demo-mode";
 
 export async function enableDemoMode() {
   const session = await requireSession();
