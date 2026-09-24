@@ -120,9 +120,42 @@ async function getMissionVatRateMap(missionIds: string[]): Promise<Record<string
   }
 }
 
+/**
+ * Wrapper trimestriel — inchangé, appelé par la page /test/tva.
+ */
 export async function computeVatReport(year: number, quarter: Quarter): Promise<VatReport> {
   const period = periodForQuarter(year, quarter);
+  return computeVatReportForRange(period);
+}
 
+/**
+ * Retourne la période mensuelle (utilisée en régime TVA mensuel — Dasolabs).
+ * Le champ `quarter` est indicatif (trimestre auquel le mois appartient).
+ */
+export function periodForMonth(year: number, month0to11: number): VatPeriod {
+  const startDate = new Date(Date.UTC(year, month0to11, 1));
+  const endDate = new Date(Date.UTC(year, month0to11 + 1, 0, 23, 59, 59, 999));
+  const quarter = (Math.floor(month0to11 / 3) + 1) as Quarter;
+  return { year, quarter, startDate, endDate };
+}
+
+/**
+ * Wrapper mensuel — pour le régime TVA mensuel belge (déclaration + paiement
+ * au 20 du mois M+1 pour le mois M). Utilisé par le cashflow pour calculer
+ * dynamiquement la ligne TVA de chaque mois de paiement.
+ */
+export async function computeVatReportForMonth(year: number, month0to11: number): Promise<VatReport> {
+  return computeVatReportForRange(periodForMonth(year, month0to11));
+}
+
+/**
+ * Cœur du calcul TVA — accepte n'importe quelle période { startDate, endDate }.
+ * Charge ventes (BillingMilestone), achats (Purchase, SupplierInvoice,
+ * ExpenseReport), applique les règles belges de déduction (50 % voiture,
+ * 0 % restau/hôtel/cadeau, 100 % le reste, overrides par ligne), et retourne
+ * la grille de déclaration + le solde net dû (case 71) ou à récupérer (case 72).
+ */
+export async function computeVatReportForRange(period: VatPeriod): Promise<VatReport> {
   // ─── VENTES ──────────────────────────────────────────────────────────────
   const milestones = await prisma.billingMilestone.findMany({
     where: {

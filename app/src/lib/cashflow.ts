@@ -768,47 +768,45 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     });
   }
 
-  // ─── Calcul dynamique TVA trimestrielle ───
+  // ─── Calcul dynamique TVA mensuelle (régime belge mensuel Dasolabs) ───
   // Si l'utilisateur a une RecurringExpense dont le label contient "TVA",
   // on remplace la valeur fixe (defaultAmount) par la TVA due réellement
-  // calculée depuis les factures émises et reçues du trimestre concerné.
+  // calculée depuis les factures émises et reçues du mois concerné.
   //
-  // Mapping mois → trimestre à payer (Belgique : paiement le 20 du mois M
-  // pour le trimestre qui s'est terminé fin du mois M-1) :
-  //   janvier (1)  → Q4 année précédente
-  //   avril (4)    → Q1 année courante
-  //   juillet (7)  → Q2 année courante
-  //   octobre (10) → Q3 année courante
+  // Régime mensuel Belgique : déclaration + paiement au 20 du mois M+1
+  // pour la TVA du mois M. Donc la cellule "mois M" du cashflow = TVA
+  // sur le mois M-1 :
+  //   janvier   (idx 0)  → TVA de décembre  année précédente
+  //   février   (idx 1)  → TVA de janvier   année courante
+  //   ...
+  //   décembre  (idx 11) → TVA de novembre  année courante
   //
   // On ne recalcule QUE pour les mois futurs sans override PAID — ce qui est
   // déjà payé garde sa valeur historique.
   const hasVatLine = recurring.some((r: any) => /tva|vat/i.test(r.label));
   const vatByMonth = new Map<number, number>(); // monthIdx (0-11) → montant TVA due
   if (hasVatLine) {
-    const { computeVatReport } = await import("@/lib/tva");
+    const { computeVatReportForMonth } = await import("@/lib/tva");
     const today = new Date();
     const todayYM = today.getUTCFullYear() * 12 + today.getUTCMonth();
-    // 4 mois de paiement : jan (idx 0), avr (3), juil (6), oct (9)
-    const paymentMonthsForYear: Array<{ monthIdx: number; quarterYear: number; quarter: 1 | 2 | 3 | 4 }> = [
-      { monthIdx: 0, quarterYear: year - 1, quarter: 4 }, // janvier → Q4 année-1
-      { monthIdx: 3, quarterYear: year,     quarter: 1 }, // avril   → Q1 année
-      { monthIdx: 6, quarterYear: year,     quarter: 2 }, // juillet → Q2 année
-      { monthIdx: 9, quarterYear: year,     quarter: 3 }  // octobre → Q3 année
-    ];
-    for (const p of paymentMonthsForYear) {
-      const cellYM = year * 12 + p.monthIdx;
+    // Pour chaque mois M du cashflow (0-11), calculer la TVA due sur M-1
+    for (let monthIdx = 0; monthIdx < 12; monthIdx++) {
+      const cellYM = year * 12 + monthIdx;
       // Ne calcule QUE pour les mois de paiement à venir (>= mois courant)
       if (cellYM < todayYM) continue;
+      // Mois "source" = mois précédent (M-1)
+      const sourceYear = monthIdx === 0 ? year - 1 : year;
+      const sourceMonth = monthIdx === 0 ? 11 : monthIdx - 1;
       try {
-        const report = await computeVatReport(p.quarterYear, p.quarter);
+        const report = await computeVatReportForMonth(sourceYear, sourceMonth);
         // case71 = TVA due à l'État (à payer) · case72 = crédit TVA (à récupérer)
-        // On prend case71 comme sortie ; si case72 > 0, on met 0 (pas de sortie ce trimestre).
+        // On prend case71 comme sortie ; si case72 > 0, on met 0 (pas de sortie ce mois).
         const amountDue = Number(report.grid.case71) || 0;
-        if (amountDue > 0) vatByMonth.set(p.monthIdx, amountDue);
+        if (amountDue > 0) vatByMonth.set(monthIdx, amountDue);
       } catch (e) {
         // Si le calcul TVA échoue (schema pas migré, données manquantes),
         // on laisse le defaultAmount s'appliquer (fallback silencieux).
-        console.warn(`[cashflow] TVA dynamique Q${p.quarter} ${p.quarterYear} : ${(e as Error).message}`);
+        console.warn(`[cashflow] TVA dynamique mois ${sourceMonth + 1}/${sourceYear} : ${(e as Error).message}`);
       }
     }
   }
