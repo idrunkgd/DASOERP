@@ -25,13 +25,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Bouton visible pour les admin/manager. Cookie posé par enableDemoMode()
   // dans /server/actions/demo-mode.ts. Comparaison case-insensitive au cas
   // où la casse serait différente dans le token.
-  const roleStr = String(session.user.role ?? "").toUpperCase();
-  // Accepte enum Prisma (ADMIN, MANAGER) OU labels FR (Administrateur, Manager)
-  const demoAllowed =
-    roleStr === "ADMIN" ||
-    roleStr === "MANAGER" ||
-    roleStr.startsWith("ADMIN") ||          // Administrateur, admin, etc.
-    roleStr.startsWith("MANAG");            // Manager, Managing, etc.
+  // Bouton visible pour tous les users connectés. La restriction est faite
+  // server-side dans enableDemoMode() : seul un admin/manager peut activer.
+  // Un consultant qui clique verra une erreur, ce qui est acceptable.
+  const demoAllowed = true;
   const demoModeActive = cookies().get("demo-mode")?.value === "1";
 
   return (
