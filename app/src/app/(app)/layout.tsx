@@ -23,8 +23,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // ─── Mode démo ───
   // Bouton visible pour les admin/manager. Cookie posé par enableDemoMode()
-  // dans /server/actions/demo-mode.ts.
-  const demoAllowed = session.user.role === "ADMIN" || session.user.role === "MANAGER";
+  // dans /server/actions/demo-mode.ts. Comparaison case-insensitive au cas
+  // où la casse serait différente dans le token.
+  const roleUpper = String(session.user.role ?? "").toUpperCase();
+  const demoAllowed = roleUpper === "ADMIN" || roleUpper === "MANAGER";
   const demoModeActive = cookies().get("demo-mode")?.value === "1";
 
   return (

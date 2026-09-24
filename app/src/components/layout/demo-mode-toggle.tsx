@@ -32,10 +32,10 @@ export function DemoModeToggle({ active, allowed }: { active: boolean; allowed: 
       onClick={handleToggle}
       disabled={pending}
       className={[
-        "w-full flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition",
+        "w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-md text-sm font-bold transition shadow-md",
         active
-          ? "bg-amber-500 text-white hover:bg-amber-600"
-          : "bg-white/5 text-indigo-100 hover:bg-white/10 border border-white/10"
+          ? "bg-amber-500 text-white hover:bg-amber-600 ring-2 ring-amber-300"
+          : "bg-orange-500 text-white hover:bg-orange-600"
       ].join(" ")}
       title={active
         ? "Vous êtes en train d'impersonner Jean Démo. Cliquez pour revenir à votre compte."
@@ -44,13 +44,13 @@ export function DemoModeToggle({ active, allowed }: { active: boolean; allowed: 
     >
       {active ? (
         <>
-          <Square className="w-3.5 h-3.5" />
+          <Square className="w-4 h-4" />
           <span>Sortir du mode démo</span>
         </>
       ) : (
         <>
-          <Play className="w-3.5 h-3.5" />
-          <span>Mode démo</span>
+          <Play className="w-4 h-4" />
+          <span>▶ Mode démo</span>
         </>
       )}
     </button>
