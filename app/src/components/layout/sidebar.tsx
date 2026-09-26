@@ -31,6 +31,7 @@ const SECTIONS: Section[] = [
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
       { href: "/financial-resume",  label: "Résumé financier",     icon: PiggyBank,     perm: "finance.read" },
+      { href: "/logs",              label: "Logs d'erreurs",       icon: FileScan,      perm: "users.manage" },
       { href: "/employees",         label: "Employés",             icon: Users,         perm: "finance.write" },
       { href: "/test/tva",          label: "TVA trimestrielle",    icon: Percent,       perm: "finance.read" },
       { href: "/app-links",         label: "Outils & apps",        icon: AppWindow,     perm: "applinks.read" }

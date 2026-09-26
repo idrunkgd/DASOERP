@@ -273,6 +273,8 @@ model User {
   /// à démontrer les modules du HUB à des employés sans impacter les vraies
   /// données. Peut être filtré des rapports finance et exports comptables.
   isDemo            Boolean   @default(false)
+
+  appLogs           AppLog[]  @relation("AppLogUser")
   // Lien si recruté depuis le vivier candidats (back-relation, défini sur Candidate)
   recruitedFromCandidate Candidate? @relation("CandidatePromotion")
   // Si l'utilisateur est un candidat à qui on a donné un accès portail
@@ -3290,4 +3292,28 @@ model UserQuizAttempt {
 
   @@index([userId, courseId])
   @@index([slideId])
+}
+
+/// Log runtime des erreurs applicatives — visible dans /logs pour les admins.
+/// Sert à diagnostiquer les erreurs sans avoir à ouvrir Coolify. Rétention
+/// gérée par un cron : suppression auto au-delà de 30 jours.
+model AppLog {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  /// ERROR | WARN | INFO
+  level      String
+  message    String   @db.Text
+  /// Stack trace complète si dispo
+  stack      String?  @db.Text
+  /// URL / route où l'erreur s'est produite
+  path       String?
+  /// User connecté au moment de l'erreur (nullable si non authentifié)
+  userId     String?
+  user       User?    @relation("AppLogUser", fields: [userId], references: [id], onDelete: SetNull)
+  /// Contexte JSON libre (params, IDs, etc.)
+  meta       Json?
+
+  @@index([createdAt])
+  @@index([level, createdAt])
+  @@index([userId])
 }
