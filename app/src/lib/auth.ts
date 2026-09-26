@@ -112,33 +112,63 @@ export const authOptions: NextAuthOptions = {
         session.user.email = session.user.email ?? "";
 
         // ─── Mode démo : impersonation Jean Démo ────────────────────────
-        // Si le cookie demo-mode=1 est présent ET que l'utilisateur RÉEL a
-        // un rôle admin/manager, on remplace COMPLÈTEMENT la session par
-        // celle de Jean Démo (id, name, email, role). Tous les consommateurs
-        // — getServerSession(), useSession(), requireSession() — voient le
-        // même swap.
+        // Debug tracing : on log chaque étape dans AppLog (visible sur /logs)
+        // pour diagnostiquer pourquoi le swap ne se déclenche pas.
+        const trace: string[] = [];
         try {
           const { cookies } = await import("next/headers");
-          const demoCookie = cookies().get("demo-mode");
+          let demoCookie;
+          try {
+            demoCookie = cookies().get("demo-mode");
+            trace.push(`cookies() OK — demo-mode = "${demoCookie?.value ?? "<absent>"}"`);
+          } catch (e: any) {
+            trace.push(`cookies() THROW : ${e?.message ?? e}`);
+            throw e;
+          }
           if (demoCookie?.value === "1") {
             const realRole = String(token.role ?? "").toUpperCase();
+            trace.push(`realRole = "${realRole}"`);
             const canDemo =
               realRole === "ADMIN" || realRole === "MANAGER" ||
               realRole.startsWith("ADMIN") || realRole.startsWith("MANAG");
+            trace.push(`canDemo = ${canDemo}`);
             if (canDemo) {
               const demoUser = await prisma.user.findFirst({
                 where: { isDemo: true } as any,
                 select: { id: true, firstName: true, lastName: true, email: true, role: true }
               });
+              trace.push(`demoUser = ${demoUser ? `${demoUser.firstName} ${demoUser.lastName} (${demoUser.role})` : "null"}`);
               if (demoUser) {
                 session.user.id = demoUser.id;
                 session.user.name = `${demoUser.firstName} ${demoUser.lastName}`;
                 session.user.email = demoUser.email;
                 session.user.role = demoUser.role;
+                trace.push("SWAP DONE");
               }
             }
           }
-        } catch { /* cookies() hors requête (build time) — ignore */ }
+          // Log toujours (INFO) pour voir chaque appel dans /logs
+          try {
+            const { logAppError } = await import("./app-log");
+            await logAppError({
+              level: "INFO",
+              message: `[demo-mode session callback] ${trace.join(" | ")}`,
+              userId: token.id as string,
+              meta: { trace, realRole: token.role, sessionName: session.user.name }
+            });
+          } catch { /* app-log pas dispo — silencieux */ }
+        } catch (e: any) {
+          try {
+            const { logAppError } = await import("./app-log");
+            await logAppError({
+              level: "ERROR",
+              message: `[demo-mode session callback] FAILED : ${e?.message ?? e}`,
+              stack: e?.stack ?? null,
+              userId: token.id as string,
+              meta: { trace }
+            });
+          } catch { /* silent */ }
+        }
       }
       return session;
     }
