@@ -108,6 +108,37 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.name = session.user.name ?? "";
+        session.user.email = session.user.email ?? "";
+
+        // ─── Mode démo : impersonation Jean Démo ────────────────────────
+        // Si le cookie demo-mode=1 est présent ET que l'utilisateur RÉEL a
+        // un rôle admin/manager, on remplace COMPLÈTEMENT la session par
+        // celle de Jean Démo (id, name, email, role). Tous les consommateurs
+        // — getServerSession(), useSession(), requireSession() — voient le
+        // même swap.
+        try {
+          const { cookies } = await import("next/headers");
+          const demoCookie = cookies().get("demo-mode");
+          if (demoCookie?.value === "1") {
+            const realRole = String(token.role ?? "").toUpperCase();
+            const canDemo =
+              realRole === "ADMIN" || realRole === "MANAGER" ||
+              realRole.startsWith("ADMIN") || realRole.startsWith("MANAG");
+            if (canDemo) {
+              const demoUser = await prisma.user.findFirst({
+                where: { isDemo: true } as any,
+                select: { id: true, firstName: true, lastName: true, email: true, role: true }
+              });
+              if (demoUser) {
+                session.user.id = demoUser.id;
+                session.user.name = `${demoUser.firstName} ${demoUser.lastName}`;
+                session.user.email = demoUser.email;
+                session.user.role = demoUser.role;
+              }
+            }
+          }
+        } catch { /* cookies() hors requête (build time) — ignore */ }
       }
       return session;
     }
