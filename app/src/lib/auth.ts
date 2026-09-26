@@ -126,25 +126,22 @@ export const authOptions: NextAuthOptions = {
             throw e;
           }
           if (demoCookie?.value === "1") {
-            const realRole = String(token.role ?? "").toUpperCase();
-            trace.push(`realRole = "${realRole}"`);
-            const canDemo =
-              realRole === "ADMIN" || realRole === "MANAGER" ||
-              realRole.startsWith("ADMIN") || realRole.startsWith("MANAG");
-            trace.push(`canDemo = ${canDemo}`);
-            if (canDemo) {
-              const demoUser = await prisma.user.findFirst({
-                where: { isDemo: true } as any,
-                select: { id: true, firstName: true, lastName: true, email: true, role: true }
-              });
-              trace.push(`demoUser = ${demoUser ? `${demoUser.firstName} ${demoUser.lastName} (${demoUser.role})` : "null"}`);
-              if (demoUser) {
-                session.user.id = demoUser.id;
-                session.user.name = `${demoUser.firstName} ${demoUser.lastName}`;
-                session.user.email = demoUser.email;
-                session.user.role = demoUser.role;
-                trace.push("SWAP DONE");
-              }
+            // Le check de sécurité est fait dans enableDemoMode() — seul le
+            // chemin admin/manager peut poser le cookie. Ici on trust le cookie
+            // et on applique le swap. Ça évite le piège du User.role vs
+            // AccessGroup.permissions (un user role=CONSULTANT peut être admin
+            // via son AccessGroup).
+            const demoUser = await prisma.user.findFirst({
+              where: { isDemo: true } as any,
+              select: { id: true, firstName: true, lastName: true, email: true, role: true }
+            });
+            trace.push(`demoUser = ${demoUser ? `${demoUser.firstName} ${demoUser.lastName} (${demoUser.role})` : "null"}`);
+            if (demoUser) {
+              session.user.id = demoUser.id;
+              session.user.name = `${demoUser.firstName} ${demoUser.lastName}`;
+              session.user.email = demoUser.email;
+              session.user.role = demoUser.role;
+              trace.push("SWAP DONE");
             }
           }
           // Log toujours (INFO) pour voir chaque appel dans /logs
