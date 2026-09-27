@@ -203,7 +203,8 @@ export async function submitExpenseReport(id: string) {
     title: `NDF à valider — ${report.user.firstName} ${report.user.lastName}`,
     message: `${Number(report.amount).toFixed(2)} € · ${report.category}`,
     href: `/expenses?filter=submitted`,
-    entityType: "ExpenseReport", entityId: id
+    entityType: "ExpenseReport", entityId: id,
+    actorId: session.user.id
   });
   revalidatePath("/expenses");
 }
@@ -281,7 +282,8 @@ export async function approveExpenseReport(id: string, approve: boolean, rejecti
       ? `${Number(report.amountTtc).toFixed(2)} € — sera payée sous peu`
       : (rejectionReason ?? "Motif non précisé"),
     href: `/expenses`,
-    entityType: "ExpenseReport", entityId: id
+    entityType: "ExpenseReport", entityId: id,
+    actorId: session.user.id
   });
   revalidatePath("/expenses");
   revalidatePath("/cashflow");

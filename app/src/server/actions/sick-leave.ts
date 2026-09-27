@@ -76,7 +76,8 @@ export async function createSickLeave(formData: FormData) {
     title: `Arrêt maladie — ${name}`,
     message: `${data.startDate} → ${data.endDate}${data.reason ? ` · ${data.reason}` : ""}`,
     href: `/sick-leaves`,
-    entityType: "SickLeave", entityId: created.id
+    entityType: "SickLeave", entityId: created.id,
+    actorId: session.user.id
   });
   if (isForOther) {
     // Prévenir aussi la personne concernée que son admin a déclaré à sa place
@@ -86,7 +87,8 @@ export async function createSickLeave(formData: FormData) {
       title: "Un arrêt maladie a été déclaré pour toi",
       message: `${data.startDate} → ${data.endDate}`,
       href: `/me`,
-      entityType: "SickLeave", entityId: created.id
+      entityType: "SickLeave", entityId: created.id,
+      actorId: session.user.id
     });
   }
   revalidatePath("/me");

@@ -1,11 +1,23 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
-import { useState, useRef, useEffect } from "react";
-import { Search, LogOut, ChevronDown, User as UserIcon, Menu, BookOpen } from "lucide-react";
+import { useState, useRef, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Search, LogOut, ChevronDown, User as UserIcon, Menu, BookOpen, Play, Square } from "lucide-react";
 import Link from "next/link";
 import { NotificationBell } from "./notification-bell";
+import { enableDemoMode, disableDemoMode } from "@/server/actions/demo-mode";
 
-export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: string; onToggleMenu?: () => void }) {
+export function Topbar({
+  accessGroupName,
+  onToggleMenu,
+  demoModeActive,
+  demoAllowed
+}: {
+  accessGroupName: string;
+  onToggleMenu?: () => void;
+  demoModeActive?: boolean;
+  demoAllowed?: boolean;
+}) {
   const { data: session } = useSession();
   // On détecte la plateforme pour afficher ⌘ (Mac) ou Ctrl (Windows/Linux).
   const [isMac, setIsMac] = useState(false);
@@ -62,12 +74,61 @@ export function Topbar({ accessGroupName, onToggleMenu }: { accessGroupName: str
         <span className="hidden md:inline">Wiki</span>
       </a>
       <NotificationBell />
-      <UserMenu name={session?.user?.name ?? ""} accessGroupName={accessGroupName} />
+      <UserMenu
+        name={session?.user?.name ?? ""}
+        accessGroupName={accessGroupName}
+        demoModeActive={demoModeActive ?? false}
+        demoAllowed={demoAllowed ?? false}
+      />
     </header>
   );
 }
 
-function UserMenu({ name, accessGroupName }: { name: string; accessGroupName: string }) {
+function DemoToggleIcon({ active, allowed }: { active: boolean; allowed: boolean }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  if (!allowed && !active) return null;
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        start(async () => {
+          try {
+            if (active) await disableDemoMode();
+            else await enableDemoMode();
+            // Reload complet — sinon useSession() garde la session en cache
+            window.location.reload();
+          } catch (err) {
+            alert((err as Error).message);
+          }
+        });
+      }}
+      disabled={pending}
+      title={active ? "Sortir du mode démo" : "Activer le mode démo"}
+      className={[
+        "w-7 h-7 rounded-full grid place-items-center transition shadow-sm shrink-0",
+        active
+          ? "bg-amber-500 hover:bg-amber-600 text-white ring-2 ring-amber-300"
+          : "bg-orange-500 hover:bg-orange-600 text-white"
+      ].join(" ")}
+    >
+      {active ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
+    </button>
+  );
+}
+
+function UserMenu({
+  name,
+  accessGroupName,
+  demoModeActive,
+  demoAllowed
+}: {
+  name: string;
+  accessGroupName: string;
+  demoModeActive: boolean;
+  demoAllowed: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -79,7 +140,10 @@ function UserMenu({ name, accessGroupName }: { name: string; accessGroupName: st
   }, []);
   const isVisitor = accessGroupName === "Visiteur";
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative flex items-center gap-1.5" ref={ref}>
+      {/* Petit bouton play/stop pour le mode démo, à gauche du nom.
+          Bouton client isolé — ne déclenche pas l'ouverture du menu. */}
+      <DemoToggleIcon active={demoModeActive} allowed={demoAllowed} />
       <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-midnight-50">
         <div className="w-8 h-8 rounded-full bg-midnight-900 text-white grid place-items-center text-xs font-semibold">
           {name.split(" ").map(s => s[0]).slice(0,2).join("").toUpperCase()}

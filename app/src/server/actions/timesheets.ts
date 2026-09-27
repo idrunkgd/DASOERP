@@ -108,7 +108,8 @@ export async function submitWeek(weekStartISO: string, onBehalfOfUserId?: string
       title: `Timesheet à valider — ${target?.firstName ?? ""} ${target?.lastName ?? ""}`.trim(),
       message: `${updated.count} entrée(s) · semaine du ${weekStartISO.slice(0, 10)}${isDelegated ? " (saisie déléguée)" : ""}`,
       href: "/timesheet/validation",
-      entityType: "TimesheetEntry"
+      entityType: "TimesheetEntry",
+      actorId: session.user.id
     });
   }
   revalidatePath("/timesheet");

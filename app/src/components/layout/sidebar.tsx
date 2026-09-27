@@ -16,7 +16,6 @@ import {
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
 import { type Permission } from "@/lib/rbac";
-import { DemoModeToggle } from "./demo-mode-toggle";
 
 type NavItem = { href: string; label: string; icon: any; perm?: Permission | Permission[]; allowedRoles?: Role[] };
 type Section = { label: string; items: NavItem[] };
@@ -193,11 +192,8 @@ export function Sidebar({
 
   const footer = (
     <div className="border-t border-white/10">
-      {(demoAllowed || demoModeActive) && (
-        <div className="px-3 py-2 border-b border-white/5">
-          <DemoModeToggle active={demoModeActive} allowed={demoAllowed} />
-        </div>
-      )}
+      {/* Le toggle mode démo est maintenant dans le topbar (petit bouton play
+          orange à côté du nom) — retiré d'ici pour ne pas doubler l'UI. */}
       <div className="px-4 py-3 text-[11px] text-indigo-200/70 flex items-center justify-between">
         <span>v0.2</span>
         <span className="text-indigo-300/50">© {new Date().getFullYear()}</span>

@@ -28,11 +28,30 @@ export type CreateNotifInput = {
   href?: string | null;
   entityType?: string | null;
   entityId?: string | null;
+  /**
+   * ID de l'utilisateur à l'origine de l'action (l'acteur). Si cet utilisateur
+   * a `isDemo=true` (Jean Démo & co), la notification n'est PAS créée — les
+   * actions de démo ne doivent pas polluer les cloches/emails des vrais users.
+   */
+  actorId?: string | null;
 };
 
 export async function createNotification(input: CreateNotifInput): Promise<void> {
   const userIds = Array.isArray(input.userId) ? input.userId : [input.userId];
   if (userIds.length === 0) return;
+
+  // Court-circuit : si l'acteur est un user démo, on ne crée AUCUNE notif
+  // (in-app, email, push) — pas de pollution pour les vrais destinataires.
+  if (input.actorId) {
+    try {
+      const actor = await (prisma as any).user.findUnique({
+        where: { id: input.actorId },
+        select: { isDemo: true }
+      });
+      if (actor?.isDemo) return;
+    } catch { /* silencieux — best effort */ }
+  }
+
   try {
     // 1) Écrit en base (in-app / cloche + page /notifications)
     // On respecte la préférence inAppEnabled : si un user a explicitement

@@ -78,6 +78,8 @@ export function LayoutShell({
         <Topbar
           accessGroupName={accessGroupName}
           onToggleMenu={() => setSidebarOpen((v) => !v)}
+          demoModeActive={demoModeActive}
+          demoAllowed={demoAllowed}
         />
         {!restricted && <FavoritesBar initial={favorites} />}
         <main className="flex-1 p-4 md:p-6">{children}</main>
