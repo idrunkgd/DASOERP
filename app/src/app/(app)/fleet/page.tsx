@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
@@ -21,9 +22,15 @@ export default async function FleetPage() {
 
   // Un utilisateur sans droit "fleet.manage" ne voit que ses propres véhicules
   // (actuellement attribués ou passés). Ceux avec fleet.manage voient toute la flotte.
-  const vehicleWhere = canManage
+  // Hors mode démo : on cache tous les véhicules de démo (plaque *DEMO*) pour
+  // qu'ils n'apparaissent pas dans la flotte réelle.
+  const demoActive = cookies().get("demo-mode")?.value === "1";
+  const baseWhere: any = canManage
     ? {}
     : { assignments: { some: { userId: session.user.id } } };
+  const vehicleWhere = demoActive
+    ? baseWhere
+    : { AND: [baseWhere, { NOT: { plate: { contains: "DEMO", mode: "insensitive" } } }] };
 
   const vehicles = await prisma.vehicle.findMany({
     where: vehicleWhere,
