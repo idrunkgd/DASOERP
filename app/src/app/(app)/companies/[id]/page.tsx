@@ -28,8 +28,9 @@ export default async function CompanyDetail({ params }: { params: { id: string }
       },
       offers: { orderBy: { createdAt: "desc" } },
       projects: { orderBy: { createdAt: "desc" } },
-      owner: true
-    }
+      owner: true,
+      sites: { orderBy: [{ isPrimary: "desc" }, { name: "asc" }] }
+    } as any
   });
   if (!company) notFound();
 
@@ -54,6 +55,72 @@ export default async function CompanyDetail({ params }: { params: { id: string }
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <CompanyForm initial={company as any} />
+
+          {/* Sites de production / implantations */}
+          <section className="card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold">
+                Sites ({(company as any).sites?.length ?? 0})
+              </h2>
+              <Link href={`/companies/${company.id}/sites/new`} className="btn-secondary btn-sm">
+                + Site
+              </Link>
+            </div>
+            {!((company as any).sites?.length) ? (
+              <p className="text-sm text-midnight-500">
+                Aucun site enregistré. Un site = une usine, un dépôt, un siège, un bureau.
+              </p>
+            ) : (
+              <table className="table-base">
+                <thead>
+                  <tr>
+                    <th>Site</th>
+                    <th>Type</th>
+                    <th>Adresse</th>
+                    <th>Téléphone</th>
+                    <th>Statut</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(company as any).sites.map((s: any) => (
+                    <tr key={s.id}>
+                      <td>
+                        <Link href={`/companies/${company.id}/sites/${s.id}`}
+                              className="hover:underline font-medium">
+                          {s.name}
+                        </Link>
+                        {s.isPrimary && (
+                          <span className="ml-2 text-[9px] font-bold uppercase tracking-wider
+                                           bg-indigoaccent/10 text-indigoaccent px-1.5 py-0.5 rounded">
+                            Principal
+                          </span>
+                        )}
+                      </td>
+                      <td className="text-midnight-600 text-sm">{s.siteType ?? "—"}</td>
+                      <td className="text-midnight-700 text-sm">
+                        {[s.street, s.postalCode, s.city].filter(Boolean).join(", ") || "—"}
+                      </td>
+                      <td className="text-midnight-700 text-sm">{s.phone ?? "—"}</td>
+                      <td>
+                        {s.verificationStatus ? (
+                          <span className={
+                            "text-[10px] font-semibold px-1.5 py-0.5 rounded " +
+                            (s.verificationStatus === "Documenté"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : s.verificationStatus === "Partiel"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-midnight-100 text-midnight-500")
+                          }>
+                            {s.verificationStatus}
+                          </span>
+                        ) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
 
           <section className="card p-5">
             <div className="flex items-center justify-between mb-3">
