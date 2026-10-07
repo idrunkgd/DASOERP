@@ -476,11 +476,48 @@ model Company {
   supplierInvoicesIssued SupplierInvoice[] @relation("CompanySupplierInvoices")
   // Documents rattachés à cette entreprise (contrats, NDAs, ...)
   documents              Document[]        @relation("DocumentCompany")
+  // Sites de production / implantations (usines, dépôts, sièges) rattachés
+  // à cette société. Permet de modéliser un groupe avec plusieurs usines
+  // (ex: AGC Glass Europe → Fleurus + Mol + Moustier).
+  sites                  CompanySite[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
   @@index([name])
   @@index([status])
+}
+
+/// Site / implantation d'une société (usine, dépôt, siège, bureau).
+/// Une société peut avoir N sites. Chaque site a son adresse, téléphone,
+/// et éventuellement un numéro d'unité d'établissement BCE (BE).
+model CompanySite {
+  id                 String   @id @default(cuid())
+  companyId          String
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// Libellé du site : "Fleurus", "Siège social", "Dépôt Nord"
+  name               String
+  /// Type : "Siège", "Usine", "Usine / siège", "Dépôt", "Bureau"
+  siteType           String?
+  street             String?
+  postalCode         String?
+  city               String?
+  country            String?
+  phone              String?
+  email              String?
+  /// Numéro d'unité d'établissement BCE (10 chiffres, FR 2.xxx.xxx.xxx)
+  establishmentUnit  String?
+  /// Statut de la donnée : "Documenté" (source publiée), "Partiel", "À confirmer"
+  verificationStatus String?
+  /// URL de la source des coordonnées
+  sourceUrl          String?
+  notes              String?
+  isPrimary          Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([city])
+  @@index([postalCode])
 }
 
 model Contact {
