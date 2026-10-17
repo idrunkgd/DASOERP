@@ -1,22 +1,15 @@
 "use server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { requirePermission } from "@/lib/rbac";
+import { requirePermission, ALL_PERMISSIONS as RBAC_ALL_PERMISSIONS } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
-const ALL_PERMISSIONS = [
-  "users.manage","settings.manage",
-  "companies.read","companies.write",
-  "contacts.read","contacts.write",
-  "offers.read","offers.write",
-  "projects.read","projects.write",
-  "timesheet.self.write","timesheet.validate",
-  "purchases.read","purchases.write",
-  "planning.read","planning.write",
-  "finance.read","finance.write",
-  "consulting.read","consulting.write"
-] as const;
+// On réutilise la liste exhaustive définie dans rbac.ts (source de vérité).
+// Précédemment hardcodée partiellement ici → les overrides sur expenses.*,
+// leaves.*, documents.*, fleet.*, etc. étaient rejetés par zod avec une
+// erreur server component peu claire.
+const ALL_PERMISSIONS = RBAC_ALL_PERMISSIONS;
 
 /**
  * Définit la valeur d'une surcharge de permission pour un utilisateur.
