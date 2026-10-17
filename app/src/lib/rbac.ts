@@ -318,6 +318,16 @@ export const PERMISSION_GROUPS: { label: string; permissions: { value: Permissio
     { value: "onboarding.read",  label: "Onboarding (lecture)" },
     { value: "onboarding.write", label: "Onboarding (écriture)" }
   ]},
+  { label: "Notes de frais", permissions: [
+    { value: "expenses.read",    label: "Voir les notes de frais" },
+    { value: "expenses.write",   label: "Saisir & soumettre ses notes" },
+    { value: "expenses.approve", label: "Approuver / refuser / rembourser" }
+  ]},
+  { label: "Congés & maladie", permissions: [
+    { value: "leaves.read",      label: "Voir les demandes de congés / maladie" },
+    { value: "leaves.write",     label: "Demander ses congés" },
+    { value: "leaves.approve",   label: "Approuver / refuser les congés" }
+  ]},
   { label: "Documents", permissions: [
     { value: "documents.read",  label: "Documents (lecture)" },
     { value: "documents.write", label: "Documents (écriture)" },
