@@ -1117,7 +1117,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     }),
     prisma.recurringExpenseMonth.findMany({
       where: { status: "PAID" },
-      include: { recurringExpense: { select: { isIncome: true } } }
+      include: { recurringExpense: { select: { isIncome: true, defaultAmount: true } } }
     }),
     prisma.payrollMonth.findMany({
       where: { status: "PAID" }
