@@ -773,6 +773,9 @@ model BillingMilestone {
   percentage  Decimal?                @db.Decimal(5, 2)
   amount      Decimal                 @db.Decimal(12, 2)   // HTVA
   expectedAt  DateTime?
+  /// Date d'ÉMISSION de la facture — c'est elle qui détermine la TVA due
+  /// en Belgique (pas la date d'encaissement). Si NULL, fallback sur expectedAt.
+  invoiceDate DateTime?
   trigger     String?                 // condition de déclenchement
   status      BillingMilestoneStatus  @default(PLANNED)
   comment     String?

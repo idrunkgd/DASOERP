@@ -9,6 +9,7 @@ const Schema = z.object({
   label: z.string().min(1),
   amount: z.coerce.number().nonnegative(),
   expectedAt: z.string().optional().nullable().transform(v => v ? new Date(v) : null),
+  invoiceDate: z.string().optional().nullable().transform(v => v ? new Date(v) : null),
   trigger: z.string().optional().nullable()
 });
 
@@ -56,4 +57,35 @@ export async function updateMilestoneDate(milestoneId: string, expectedAt: strin
   if (before.offerId) revalidatePath(`/offers/${before.offerId}`);
   revalidatePath("/cashflow");
   revalidatePath("/dashboard");
+}
+
+/**
+ * Met à jour la date d'ÉMISSION DE FACTURE d'une tranche.
+ * invoiceDate = date de la facture = ce qui détermine la TVA due en Belgique.
+ * Peut être différente de expectedAt (ex: facturé 30/09, encaissement attendu 30/10).
+ */
+export async function updateMilestoneInvoiceDate(milestoneId: string, invoiceDate: string | null) {
+  const session = await requirePermission("finance.write");
+  const before = await (prisma as any).billingMilestone.findUniqueOrThrow({
+    where: { id: milestoneId },
+    select: { id: true, label: true, invoiceDate: true, projectId: true, missionId: true, offerId: true }
+  });
+  const newDate = invoiceDate ? new Date(invoiceDate) : null;
+  await (prisma as any).billingMilestone.update({
+    where: { id: milestoneId },
+    data: { invoiceDate: newDate }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "BillingMilestone",
+    entityId: milestoneId,
+    message: `Tranche '${before.label}' : date de facture ${before.invoiceDate?.toISOString().slice(0, 10) ?? "—"} → ${invoiceDate ?? "—"}`
+  });
+  if (before.projectId) revalidatePath(`/projects/${before.projectId}`);
+  if (before.missionId) revalidatePath(`/missions/${before.missionId}`);
+  if (before.offerId) revalidatePath(`/offers/${before.offerId}`);
+  revalidatePath("/cashflow");
+  revalidatePath("/finance");
+  revalidatePath("/test/tva");
 }

@@ -157,13 +157,25 @@ export async function computeVatReportForMonth(year: number, month0to11: number)
  */
 export async function computeVatReportForRange(period: VatPeriod): Promise<VatReport> {
   // ─── VENTES ──────────────────────────────────────────────────────────────
-  const milestones = await prisma.billingMilestone.findMany({
+  // En Belgique, la TVA est due sur la DATE DE FACTURE (invoiceDate), pas la
+  // date d'encaissement. On filtre donc sur invoiceDate si disponible, avec
+  // fallback sur expectedAt pour la rétro-compat (milestones créés avant le
+  // champ invoiceDate).
+  const milestones = await (prisma as any).billingMilestone.findMany({
     where: {
       status: { not: "CANCELLED" },
-      expectedAt: { gte: period.startDate, lte: period.endDate }
+      OR: [
+        { invoiceDate: { gte: period.startDate, lte: period.endDate } },
+        {
+          AND: [
+            { invoiceDate: null },
+            { expectedAt: { gte: period.startDate, lte: period.endDate } }
+          ]
+        }
+      ]
     },
     select: {
-      id: true, label: true, amount: true, expectedAt: true, paidAt: true,
+      id: true, label: true, amount: true, expectedAt: true, invoiceDate: true, paidAt: true,
       status: true, missionId: true,
       mission: { select: { id: true, company: { select: { name: true } } } },
       offer: { select: { company: { select: { name: true } } } },
@@ -187,7 +199,7 @@ export async function computeVatReportForRange(period: VatPeriod): Promise<VatRe
       m.company?.name ?? null;
     const box = rate === 6 ? 1 : rate === 12 ? 2 : rate === 0 ? 47 : 3;
     return {
-      date: m.expectedAt ?? m.paidAt ?? period.startDate,
+      date: (m as any).invoiceDate ?? m.expectedAt ?? m.paidAt ?? period.startDate,
       label: m.label,
       company,
       amountHt: ht,
