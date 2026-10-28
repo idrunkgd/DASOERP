@@ -29,22 +29,22 @@ export default async function MyProfile({
     : "general";
 
   const [me, groupName, skillCatalog, candidateProfile, sickLeaves, myExpenses, pendingPolicies] = await Promise.all([
-    // Inclut les expériences pro pour l'espace "Mon CV" côté consultant interne
+    // Inclut les expériences pro pour l'espace "Mon CV" côté consultant interne.
+    // Les trainings sont chargés séparément plus bas (évite une dépendance au
+    // Prisma Client regénéré en prod après la migration).
     prisma.user.findUniqueOrThrow({
       where: { id: session.user.id },
       include: {
-        experiences: { orderBy: { startDate: "desc" } },
-        trainings: { orderBy: { createdAt: "desc" } }
-      } as any
+        experiences: { orderBy: { startDate: "desc" } }
+      }
     }),
     getUserAccessGroupName(session.user.id),
     prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
     prisma.candidate.findUnique({
       where: { portalUserId: session.user.id },
       include: {
-        experiences: { orderBy: { startDate: "desc" } },
-        trainings: { orderBy: { createdAt: "desc" } }
-      } as any
+        experiences: { orderBy: { startDate: "desc" } }
+      }
     }),
     prisma.sickLeave.findMany({
       where: { userId: session.user.id },
@@ -66,6 +66,23 @@ export default async function MyProfile({
       orderBy: { assignedAt: "desc" }
     })
   ]);
+
+  // Chargement séparé des formations (nouvelle table UserTraining) — tolérant
+  // à l'absence du modèle dans le Prisma Client au premier déploiement.
+  let myTrainings: Array<{ institution: string; title: string; period: string | null; description: string | null }> = [];
+  try {
+    const t = await (prisma as any).userTraining.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" }
+    });
+    myTrainings = t.map((x: any) => ({
+      institution: x.institution,
+      title: x.title,
+      period: x.period ?? null,
+      description: x.description ?? null
+    }));
+  } catch { /* table absente avant migration → liste vide, silencieux */ }
+  (me as any).trainings = myTrainings;
 
   // Congés — solde annuel + demandes récentes + missions actives (pour la
   // case "demandé chez le client et accordé").
