@@ -63,18 +63,6 @@ export default async function CandidateDetail({ params, searchParams }: { params
   ]);
   if (!c) notFound();
 
-  // Trainings chargées séparément (tolérant à l'absence de la table avant
-  // migration applied). Attachées au candidate pour que CandidateForm
-  // puisse les éditer.
-  let candidateTrainings: any[] = [];
-  try {
-    candidateTrainings = await (prisma as any).candidateTraining.findMany({
-      where: { candidateId: params.id },
-      orderBy: { createdAt: "desc" }
-    });
-  } catch { /* silencieux */ }
-  (c as any).trainings = candidateTrainings;
-
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canRecruit = sessionPerms.includes("users.manage");
   const canApplyScenarios = sessionPerms.includes("consulting.write");

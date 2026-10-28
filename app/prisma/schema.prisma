@@ -1068,21 +1068,6 @@ model CandidateExperience {
   @@index([candidateId, startDate])
 }
 
-/// Formation / diplôme / certification d'un candidat (symétrique à UserTraining).
-model CandidateTraining {
-  id          String    @id @default(cuid())
-  candidateId String
-  candidate   Candidate @relation("CandidateTrainings", fields: [candidateId], references: [id], onDelete: Cascade)
-  institution String
-  title       String
-  period      String?
-  description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@index([candidateId])
-}
-
 /// Expérience professionnelle d'un consultant interne (User). Structure
 /// identique à CandidateExperience — les deux tables sont maintenues en
 /// parallèle plutôt que fusionnées pour éviter une contrainte polymorphique
@@ -1298,17 +1283,9 @@ model Candidate {
   source          String?         // LinkedIn, recommandation, plateforme...
 
   skills          String[]        @default([])
-  // Centres d'intérêt (hobbies, passions) — affichés sur le CV
-  interests       String[]        @default([])
   yearsExperience Int?
   seniority       String?
   spokenLanguages String[]        @default([])
-
-  // ─── Point de contact Dasolabs affiché sur le CV à la place du candidat ───
-  cvContactName   String?
-  cvContactRole   String?
-  cvContactEmail  String?
-  cvContactPhone  String?
 
   // Tarifs (côté coût pour Dasolabs)
   dailyCost       Decimal?        @db.Decimal(10, 2)
@@ -1352,7 +1329,6 @@ model Candidate {
   hiringInterviews Interview[]    @relation("CandidateHiringInterviews")
   // Expériences professionnelles (CV) — alimentées par le candidat ou l'admin
   experiences     CandidateExperience[]
-  trainings       CandidateTraining[] @relation("CandidateTrainings")
   // Simulations de package salarial rattachées à ce candidat
   salaryScenarios CandidateSalaryScenario[]
   // Tests techniques assignés

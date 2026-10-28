@@ -5,45 +5,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { CandidateAvatar } from "./avatar";
 import { SkillsPicker } from "@/components/forms/skills-picker";
-import { Upload, X, Plus, Trash2 } from "lucide-react";
-
-type Training = {
-  institution: string;
-  title: string;
-  period: string | null;
-  description: string | null;
-};
-
-function TrainingsEditor({ initial }: { initial: Training[] }) {
-  const [list, setList] = useState<Training[]>(initial);
-  function add() {
-    setList((l) => [...l, { institution: "", title: "", period: "", description: "" }]);
-  }
-  function update(i: number, patch: Partial<Training>) {
-    setList((l) => l.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
-  }
-  function remove(i: number) {
-    setList((l) => l.filter((_, idx) => idx !== i));
-  }
-  return (
-    <div className="space-y-2">
-      <input type="hidden" name="trainings" value={JSON.stringify(list)} />
-      {list.length === 0 && (
-        <p className="text-xs text-midnight-500 italic">Aucune formation. Clique "+ Ajouter" pour commencer.</p>
-      )}
-      {list.map((t, i) => (
-        <div key={i} className="card p-3 bg-midnight-50/40 border-border/60 grid grid-cols-12 gap-2 items-start">
-          <input value={t.title} onChange={(e) => update(i, { title: e.target.value })} placeholder="Intitulé (ex: Bachelier info industrielle)" className="input col-span-5 text-xs h-8" />
-          <input value={t.institution} onChange={(e) => update(i, { institution: e.target.value })} placeholder="École / organisme" className="input col-span-4 text-xs h-8" />
-          <input value={t.period ?? ""} onChange={(e) => update(i, { period: e.target.value })} placeholder="2010-2013" className="input col-span-2 text-xs h-8" />
-          <button type="button" onClick={() => remove(i)} className="btn-ghost btn-sm col-span-1 text-red-600" aria-label="Supprimer"><Trash2 className="w-3.5 h-3.5" /></button>
-          <input value={t.description ?? ""} onChange={(e) => update(i, { description: e.target.value })} placeholder="Détails (optionnel)" className="input col-span-11 text-xs h-8" />
-        </div>
-      ))}
-      <button type="button" onClick={add} className="btn-secondary btn-sm"><Plus className="w-3 h-3" /> Ajouter une formation</button>
-    </div>
-  );
-}
+import { Upload, X } from "lucide-react";
 
 type SkillCatalogEntry = { id: string; name: string; category: string | null };
 
@@ -124,7 +86,6 @@ export function CandidateForm({ initial, skillCatalog = [] }: { initial?: any; s
           <SkillsPicker name="skills" catalog={skillCatalog} initial={initial?.skills ?? []} />
         </div>
         <div className="col-span-12"><label className="label">Langues parlées (séparées par virgule)</label><input name="spokenLanguages" defaultValue={(initial?.spokenLanguages ?? []).join(", ")} className="input" placeholder="FR, EN, NL..." /></div>
-        <div className="col-span-12"><label className="label">Centres d'intérêt (séparés par virgule)</label><input name="interests" defaultValue={(initial?.interests ?? []).join(", ")} className="input" placeholder="Course à pied, lecture, drone, ..." /></div>
         <div className="col-span-3"><label className="label">Cout / j (€)</label><input name="dailyCost" type="number" step="0.01" defaultValue={initial?.dailyCost ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Cout / h (€)</label><input name="hourlyCost" type="number" step="0.01" defaultValue={initial?.hourlyCost ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Tarif min souhaité / j</label><input name="minDailyRate" type="number" step="0.01" defaultValue={initial?.minDailyRate ?? ""} className="input" /></div>
@@ -148,26 +109,6 @@ export function CandidateForm({ initial, skillCatalog = [] }: { initial?: any; s
         </div>
         <div className="col-span-6"><label className="label">Disponible à partir du</label><input name="availableFrom" type="date" defaultValue={initial?.availableFrom ? new Date(initial.availableFrom).toISOString().slice(0,10) : ""} className="input" /></div>
         <div className="col-span-12"><label className="label">Notes</label><textarea name="notes" defaultValue={initial?.notes ?? ""} className="input min-h-[80px] py-2" /></div>
-      </div>
-
-      {/* Point de contact Dasolabs affiché sur le CV à la place du candidat */}
-      <div className="mt-6">
-        <h3 className="font-semibold text-sm uppercase tracking-wide text-midnight-500 mb-2">Point de contact pour le CV</h3>
-        <p className="text-xs text-midnight-500 mb-3">
-          Si renseigné, le CV du candidat affichera ces coordonnées à la place des siennes.
-        </p>
-        <div className="grid grid-cols-12 gap-3">
-          <div className="col-span-6"><label className="label">Nom du contact</label><input name="cvContactName" defaultValue={initial?.cvContactName ?? ""} className="input" placeholder="Louise Dupont" /></div>
-          <div className="col-span-6"><label className="label">Fonction</label><input name="cvContactRole" defaultValue={initial?.cvContactRole ?? ""} className="input" placeholder="Operations Manager" /></div>
-          <div className="col-span-6"><label className="label">Email</label><input name="cvContactEmail" type="email" defaultValue={initial?.cvContactEmail ?? ""} className="input" placeholder="louise@dasolabs.be" /></div>
-          <div className="col-span-6"><label className="label">Téléphone</label><input name="cvContactPhone" defaultValue={initial?.cvContactPhone ?? ""} className="input" placeholder="+32 ..." /></div>
-        </div>
-      </div>
-
-      {/* Éditeur de formations */}
-      <div className="mt-6">
-        <h3 className="font-semibold text-sm uppercase tracking-wide text-midnight-500 mb-2">Formations & certifications</h3>
-        <TrainingsEditor initial={initial?.trainings ?? []} />
       </div>
       <div className="flex justify-between">
         {initial?.id ? (
