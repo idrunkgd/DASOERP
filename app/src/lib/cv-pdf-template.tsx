@@ -63,9 +63,7 @@ const styles = StyleSheet.create({
   },
   contactBoxName: { fontSize: 11, fontFamily: "Helvetica-Bold", color: C.ink },
   contactBoxRole: { fontSize: 9, color: C.accent, marginTop: 1 },
-  contactBoxLineRow: { flexDirection: "row", alignItems: "center", marginTop: 2 },
-  contactBoxLineIcon: { width: 12, fontSize: 9, color: C.grey },
-  contactBoxLineText: { fontSize: 9, color: C.ink },
+  contactBoxLine: { fontSize: 9, color: C.ink, marginTop: 2 },
 
   // Cartouches KPI — compactes, affichées à droite du bandeau profil
   kpiStack: { flexDirection: "column", gap: 4, width: 150 },
@@ -264,18 +262,8 @@ export function CvPdf({
             <Text style={styles.contactBoxLabel}>Votre contact</Text>
             <Text style={styles.contactBoxName}>{profile.cvContact.name}</Text>
             {profile.cvContact.role && <Text style={styles.contactBoxRole}>{profile.cvContact.role}</Text>}
-            {profile.cvContact.email && (
-              <View style={styles.contactBoxLineRow}>
-                <Text style={styles.contactBoxLineIcon}>✉</Text>
-                <Text style={styles.contactBoxLineText}>{profile.cvContact.email}</Text>
-              </View>
-            )}
-            {profile.cvContact.phone && (
-              <View style={styles.contactBoxLineRow}>
-                <Text style={styles.contactBoxLineIcon}>☎</Text>
-                <Text style={styles.contactBoxLineText}>{profile.cvContact.phone}</Text>
-              </View>
-            )}
+            {profile.cvContact.email && <Text style={styles.contactBoxLine}>{profile.cvContact.email}</Text>}
+            {profile.cvContact.phone && <Text style={styles.contactBoxLine}>{profile.cvContact.phone}</Text>}
           </View>
         )}
 
