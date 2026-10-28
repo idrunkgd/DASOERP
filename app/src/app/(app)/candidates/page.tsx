@@ -7,7 +7,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages, LayoutGrid, List } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CandidateAvatar } from "./avatar";
-import { LinkedInImportButton } from "./linkedin-import-button";
 import { CvImportButton } from "./cv-import-button";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
@@ -64,7 +63,6 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
                 <List className="w-3.5 h-3.5" /><span>Liste</span>
               </Link>
             </div>
-            <LinkedInImportButton />
             <CvImportButton />
             <Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau candidat</Link>
           </div>

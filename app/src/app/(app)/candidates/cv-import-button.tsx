@@ -1,5 +1,6 @@
 "use client";
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FileUp, Sparkles, Loader2, X, Check, Upload, Trash2, Plus } from "lucide-react";
@@ -79,16 +80,18 @@ export function CvImportButton() {
     setParsed((p) => p ? { ...p, [key]: value } : p);
   }
 
-  return (
-    <>
-      <button onClick={() => setOpen(true)} className="btn-secondary">
-        <Sparkles className="w-4 h-4" /> Importer depuis CV
-      </button>
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4 overflow-y-auto"
-          onClick={() => { setOpen(false); reset(); }}
-        >
+  // Portal : rendu dans document.body pour éviter que des ancêtres avec
+  // `transform` ou `filter` cassent le `position: fixed` (bug "modal derrière
+  // les photos candidats" vu quand on l'ouvrait depuis la page /candidates).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const modal = open && mounted ? createPortal(
+    (
+      <div
+        className="fixed inset-0 z-[9999] bg-black/50 grid place-items-center p-4 overflow-y-auto"
+        onClick={() => { setOpen(false); reset(); }}
+      >
           <div
             className="card p-6 w-full max-w-3xl my-8 relative"
             onClick={(e) => e.stopPropagation()}
@@ -279,7 +282,16 @@ export function CvImportButton() {
             )}
           </div>
         </div>
-      )}
+    ),
+    document.body
+  ) : null;
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="btn-secondary">
+        <Sparkles className="w-4 h-4" /> Importer depuis CV
+      </button>
+      {modal}
     </>
   );
 }
