@@ -63,16 +63,19 @@ const styles = StyleSheet.create({
   },
   contactBoxName: { fontSize: 11, fontFamily: "Helvetica-Bold", color: C.ink },
   contactBoxRole: { fontSize: 9, color: C.accent, marginTop: 1 },
-  contactBoxLine: { fontSize: 9, color: C.ink, marginTop: 2 },
+  contactBoxLineRow: { flexDirection: "row", alignItems: "center", marginTop: 2 },
+  contactBoxLineIcon: { width: 12, fontSize: 9, color: C.grey },
+  contactBoxLineText: { fontSize: 9, color: C.ink },
 
-  // Cartouches KPI
-  kpiRow: { flexDirection: "row", gap: 8, marginBottom: 10 },
+  // Cartouches KPI — compactes, affichées à droite du bandeau profil
+  kpiStack: { flexDirection: "column", gap: 4, width: 150 },
   kpi: {
-    flex: 1, backgroundColor: C.light, padding: 8, borderRadius: 4,
-    borderLeft: `3 solid ${C.accent}`
+    backgroundColor: C.light, padding: 6, borderRadius: 4,
+    borderLeft: `3 solid ${C.accent}`, flexDirection: "row",
+    justifyContent: "space-between", alignItems: "center"
   },
   kpiLabel: { fontSize: 7, color: C.grey, textTransform: "uppercase", letterSpacing: 0.5 },
-  kpiValue: { fontSize: 13, fontFamily: "Helvetica-Bold", color: C.ink, marginTop: 2 },
+  kpiValue: { fontSize: 10, fontFamily: "Helvetica-Bold", color: C.ink },
 
   // Sections
   h2: {
@@ -222,10 +225,7 @@ export function CvPdf({
             <Text style={styles.name}>{profile.firstName} {profile.lastName}</Text>
             {profile.seniority && <Text style={styles.role}>{profile.seniority}</Text>}
             <View style={styles.contactRow}>
-              {/* Toujours afficher la localisation du consultant.
-                  Email/phone/linkedin ne sont affichés QUE s'il n'y a pas de
-                  point de contact Dasolabs (sinon ils seront dans l'encadré). */}
-              {profile.city && <Text style={styles.contact}>📍 {profile.city}</Text>}
+              {/* Email/phone/linkedin uniquement s'il n'y a pas de point de contact */}
               {!profile.cvContact && (
                 <>
                   {profile.email && <Text style={styles.contact}>✉ {profile.email}</Text>}
@@ -233,6 +233,27 @@ export function CvPdf({
                   {profile.linkedinUrl && <Text style={styles.contact}>{profile.linkedinUrl}</Text>}
                 </>
               )}
+            </View>
+          </View>
+          {/* KPI compacts à droite du bandeau profil */}
+          <View style={styles.kpiStack}>
+            <View style={styles.kpi}>
+              <Text style={styles.kpiLabel}>Expérience</Text>
+              <Text style={styles.kpiValue}>
+                {profile.yearsExperience != null ? `${profile.yearsExperience} ans` : "—"}
+              </Text>
+            </View>
+            <View style={styles.kpi}>
+              <Text style={styles.kpiLabel}>Taux / j</Text>
+              <Text style={styles.kpiValue}>
+                {profile.dailyRate != null
+                  ? pdfSafe(new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(profile.dailyRate))
+                  : "—"}
+              </Text>
+            </View>
+            <View style={styles.kpi}>
+              <Text style={styles.kpiLabel}>Lieu</Text>
+              <Text style={styles.kpiValue}>{profile.city ?? "—"}</Text>
             </View>
           </View>
         </View>
@@ -243,32 +264,20 @@ export function CvPdf({
             <Text style={styles.contactBoxLabel}>Votre contact</Text>
             <Text style={styles.contactBoxName}>{profile.cvContact.name}</Text>
             {profile.cvContact.role && <Text style={styles.contactBoxRole}>{profile.cvContact.role}</Text>}
-            {profile.cvContact.email && <Text style={styles.contactBoxLine}>✉ {profile.cvContact.email}</Text>}
-            {profile.cvContact.phone && <Text style={styles.contactBoxLine}>☎ {profile.cvContact.phone}</Text>}
+            {profile.cvContact.email && (
+              <View style={styles.contactBoxLineRow}>
+                <Text style={styles.contactBoxLineIcon}>✉</Text>
+                <Text style={styles.contactBoxLineText}>{profile.cvContact.email}</Text>
+              </View>
+            )}
+            {profile.cvContact.phone && (
+              <View style={styles.contactBoxLineRow}>
+                <Text style={styles.contactBoxLineIcon}>☎</Text>
+                <Text style={styles.contactBoxLineText}>{profile.cvContact.phone}</Text>
+              </View>
+            )}
           </View>
         )}
-
-        {/* KPI cartouches */}
-        <View style={styles.kpiRow}>
-          <View style={styles.kpi}>
-            <Text style={styles.kpiLabel}>Expérience</Text>
-            <Text style={styles.kpiValue}>
-              {profile.yearsExperience != null ? `${profile.yearsExperience} ans` : "—"}
-            </Text>
-          </View>
-          <View style={styles.kpi}>
-            <Text style={styles.kpiLabel}>Taux journalier</Text>
-            <Text style={styles.kpiValue}>
-              {profile.dailyRate != null
-                ? pdfSafe(new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(profile.dailyRate))
-                : "—"}
-            </Text>
-          </View>
-          <View style={styles.kpi}>
-            <Text style={styles.kpiLabel}>Localisation</Text>
-            <Text style={styles.kpiValue}>{profile.city ?? "—"}</Text>
-          </View>
-        </View>
 
         {profile.spokenLanguages.length > 0 && (
           <>
