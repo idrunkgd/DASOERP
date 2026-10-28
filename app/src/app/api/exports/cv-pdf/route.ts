@@ -38,24 +38,40 @@ export async function GET(req: NextRequest) {
   if (candidateId) {
     // Accès candidat = même permission que voir sa fiche
     await requirePermission("consulting.read");
-    const c = await prisma.candidate.findUnique({
+    const c = await (prisma as any).candidate.findUnique({
       where: { id: candidateId },
       include: { experiences: { orderBy: { startDate: "desc" } } }
     });
     if (!c) return new Response("Not found", { status: 404 });
+    // Formations chargées séparément (tolérant à l'absence de la table)
+    let candidateTrainings: any[] = [];
+    try {
+      candidateTrainings = await (prisma as any).candidateTraining.findMany({
+        where: { candidateId },
+        orderBy: { createdAt: "desc" }
+      });
+    } catch { /* table pas encore présente → ignore */ }
+    const cvContact = c.cvContactName
+      ? { name: c.cvContactName, role: c.cvContactRole ?? null, email: c.cvContactEmail ?? null, phone: c.cvContactPhone ?? null }
+      : null;
     profile = {
       kind: "candidate",
       firstName: c.firstName, lastName: c.lastName,
       photoUrl: c.photoUrl, seniority: c.seniority,
       yearsExperience: c.yearsExperience, city: c.city,
       email: c.email, phone: c.phone, linkedinUrl: c.linkedinUrl,
-      // Taux journalier CLIENT (dailyRate) — distinct du dailyCost interne.
       dailyRate: c.dailyRate != null ? Number(c.dailyRate) : null,
       skills: c.skills, spokenLanguages: c.spokenLanguages,
-      experiences: c.experiences.map((e) => ({
+      interests: c.interests ?? [],
+      experiences: c.experiences.map((e: any) => ({
         companyName: e.companyName, jobTitle: e.jobTitle,
         startDate: e.startDate, endDate: e.endDate, description: e.description
-      }))
+      })),
+      trainings: candidateTrainings.map((t: any) => ({
+        institution: t.institution, title: t.title,
+        period: t.period ?? null, description: t.description ?? null
+      })),
+      cvContact
     };
     filename = `CV-${c.firstName}-${c.lastName}.pdf`.replace(/[^a-zA-Z0-9.\-_]/g, "_");
   } else {
@@ -69,12 +85,17 @@ export async function GET(req: NextRequest) {
     }
     const u = await (prisma as any).user.findUnique({
       where: { id: userId! },
-      include: {
-        experiences: { orderBy: { startDate: "desc" } },
-        trainings: { orderBy: { createdAt: "desc" } }
-      }
+      include: { experiences: { orderBy: { startDate: "desc" } } }
     });
     if (!u) return new Response("Not found", { status: 404 });
+    // Trainings chargées séparément — tolérant à l'absence de la table
+    let userTrainings: any[] = [];
+    try {
+      userTrainings = await (prisma as any).userTraining.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" }
+      });
+    } catch { /* ignore */ }
     const cvContact = u.cvContactName
       ? { name: u.cvContactName, role: u.cvContactRole ?? null, email: u.cvContactEmail ?? null, phone: u.cvContactPhone ?? null }
       : null;
@@ -92,9 +113,9 @@ export async function GET(req: NextRequest) {
         companyName: e.companyName, jobTitle: e.jobTitle,
         startDate: e.startDate, endDate: e.endDate, description: e.description
       })),
-      trainings: (u.trainings ?? []).map((t: any) => ({
+      trainings: userTrainings.map((t: any) => ({
         institution: t.institution, title: t.title,
-        period: t.period, description: t.description
+        period: t.period ?? null, description: t.description ?? null
       })),
       cvContact
     };

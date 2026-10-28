@@ -22,7 +22,27 @@ const Schema = z.object({
   city: z.string().optional().nullable(),
   source: z.string().optional().nullable(),
   skills: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
+  interests: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
   spokenLanguages: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
+  cvContactName:  z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  cvContactRole:  z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  cvContactEmail: z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  cvContactPhone: z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  trainings: z.string().optional().transform(v => {
+    if (!v) return [] as Array<{ institution: string; title: string; period: string | null; description: string | null }>;
+    try {
+      const arr = JSON.parse(v);
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .map((t: any) => ({
+          institution: String(t.institution ?? "").trim(),
+          title: String(t.title ?? "").trim(),
+          period: t.period ? String(t.period).trim() : null,
+          description: t.description ? String(t.description).trim() : null
+        }))
+        .filter((t) => t.institution || t.title);
+    } catch { return []; }
+  }),
   yearsExperience: z.coerce.number().int().nonnegative().optional().nullable(),
   seniority: z.string().optional().nullable(),
   dailyCost: z.coerce.number().nonnegative().optional().nullable(),
@@ -44,7 +64,8 @@ const Schema = z.object({
 
 export async function createCandidate(formData: FormData) {
   const session = await requirePermission("consulting.write");
-  const data = Schema.parse(Object.fromEntries(formData));
+  const parsed = Schema.parse(Object.fromEntries(formData));
+  const { trainings, ...data } = parsed;
   // Garde-fou exclusivité : un User actif (consultant interne) avec ce mail empêche
   // la création d'un Candidat homonyme dans le vivier externe.
   if (data.email) {
@@ -53,7 +74,15 @@ export async function createCandidate(formData: FormData) {
       throw new Error(`Un consultant actif (${collidingUser.firstName} ${collidingUser.lastName}) utilise déjà cet email. Une personne ne peut pas être à la fois consultant interne et candidat externe.`);
     }
   }
-  const c = await prisma.candidate.create({ data: { ...data, ownerId: session.user.id } });
+  const c = await (prisma as any).candidate.create({ data: { ...data, ownerId: session.user.id } });
+  // Formations initiales si fournies dès la création
+  if (trainings.length > 0) {
+    try {
+      await (prisma as any).candidateTraining.createMany({
+        data: trainings.map((t) => ({ ...t, candidateId: c.id }))
+      });
+    } catch { /* silencieux */ }
+  }
   await logActivity({ actorId: session.user.id, action: "CREATE", entityType: "Candidate", entityId: c.id, message: `Candidat ${c.firstName} ${c.lastName} créé`, after: c });
   revalidatePath("/candidates");
   redirect(`/candidates/${c.id}`);
@@ -62,8 +91,18 @@ export async function createCandidate(formData: FormData) {
 export async function updateCandidate(id: string, formData: FormData) {
   const session = await requirePermission("consulting.write");
   const before = await prisma.candidate.findUniqueOrThrow({ where: { id } });
-  const data = Schema.parse(Object.fromEntries(formData));
-  const after = await prisma.candidate.update({ where: { id }, data });
+  const parsed = Schema.parse(Object.fromEntries(formData));
+  const { trainings, ...data } = parsed;
+  const after = await (prisma as any).candidate.update({ where: { id }, data });
+  // Replace-all des formations
+  try {
+    await (prisma as any).candidateTraining.deleteMany({ where: { candidateId: id } });
+    if (trainings.length > 0) {
+      await (prisma as any).candidateTraining.createMany({
+        data: trainings.map((t) => ({ ...t, candidateId: id }))
+      });
+    }
+  } catch { /* table absente avant migration → silencieux */ }
   await logActivity({ actorId: session.user.id, action: "UPDATE", entityType: "Candidate", entityId: id, message: `Candidat mis à jour`, before, after });
   revalidatePath(`/candidates/${id}`); revalidatePath("/candidates");
 }
