@@ -37,22 +37,6 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
     where, orderBy: [{ status: "asc" }, { lastName: "asc" }],
     include: { _count: { select: { applications: true } } }
   });
-
-<<<<<<< HEAD
-  const view: "grid" | "list" = searchParams?.view === "list" ? "list" : "grid";
-  // Construit l'URL de l'autre vue en préservant les autres filtres
-  function buildViewHref(targetView: "grid" | "list") {
-    const params = new URLSearchParams();
-    for (const [k, v] of Object.entries(searchParams ?? {})) {
-      if (k === "view" || !v) continue;
-      params.set(k, String(v));
-    }
-    params.set("view", targetView);
-    return `/candidates?${params.toString()}`;
-  }
-
-=======
->>>>>>> parent of 5849bc1 (feat(candidates): vue liste + grille compacte + actions rapides statut)
   return (
     <div>
       <PageHeader
