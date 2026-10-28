@@ -12,7 +12,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   User, FileText, Briefcase, ClipboardCheck, FileSignature,
-  Users, ClipboardList, MessageSquare, Building2, GraduationCap
+  Users, ClipboardList, MessageSquare, Building2, GraduationCap, FolderOpen
 } from "lucide-react";
 
 export type PersonTabIcon =
@@ -25,7 +25,8 @@ export type PersonTabIcon =
   | "list"
   | "message"
   | "company"
-  | "graduation";
+  | "graduation"
+  | "folder";
 
 const ICON_MAP: Record<PersonTabIcon, typeof User> = {
   user:      User,
@@ -37,7 +38,8 @@ const ICON_MAP: Record<PersonTabIcon, typeof User> = {
   list:      ClipboardList,
   message:   MessageSquare,
   company:   Building2,
-  graduation: GraduationCap
+  graduation: GraduationCap,
+  folder:    FolderOpen
 };
 
 export type PersonTab = {

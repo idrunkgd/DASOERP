@@ -1380,6 +1380,8 @@ model Candidate {
   contractType    ContractType?
   /// Paie configurée pour ce candidat (si contractType=EMPLOYEE).
   payrollEmployee PayrollEmployee? @relation("PayrollFromCandidate")
+  /// Fichiers rattachés à ce candidat (CV externes, rapports d'entretien...)
+  documents       Document[]       @relation("DocumentCandidate")
 
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -2196,6 +2198,8 @@ model Document {
   consultant   User?    @relation("DocumentConsultant", fields: [consultantId], references: [id], onDelete: SetNull)
   vehicleId    String?
   vehicle      Vehicle? @relation("DocumentVehicle", fields: [vehicleId], references: [id], onDelete: SetNull)
+  candidateId  String?
+  candidate    Candidate? @relation("DocumentCandidate", fields: [candidateId], references: [id], onDelete: SetNull)
 
   // Versioning : V1 = parent=null, V2/V3/Vn = parent=V1.id
   parentDocumentId String?
@@ -2212,6 +2216,7 @@ model Document {
   @@index([projectId])
   @@index([offerId])
   @@index([consultantId])
+  @@index([candidateId])
   @@index([parentDocumentId])
   @@index([expiresAt])
   @@index([createdAt])

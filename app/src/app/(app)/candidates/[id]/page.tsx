@@ -18,13 +18,14 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { CheckCircle2, MessageSquare, FileDown, Eye } from "lucide-react";
 import { SalaryScenariosPanel } from "./salary-scenarios-panel";
 import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
+import { CandidateDocumentsPanel } from "./documents-panel";
 
-type CandidateTab = "general" | "cv" | "recruitment" | "contracts";
+type CandidateTab = "general" | "cv" | "recruitment" | "contracts" | "files";
 
 export default async function CandidateDetail({ params, searchParams }: { params: { id: string }; searchParams: { tab?: string } }) {
   await requirePermission("consulting.read");
   const session = await requireSession();
-  const tab: CandidateTab = (["general", "cv", "recruitment", "contracts"].includes(searchParams.tab ?? "")
+  const tab: CandidateTab = (["general", "cv", "recruitment", "contracts", "files"].includes(searchParams.tab ?? "")
     ? searchParams.tab
     : "general") as CandidateTab;
   const [c, skillCatalog, candidateContracts, contractTemplates] = await Promise.all([
@@ -77,6 +78,16 @@ export default async function CandidateDetail({ params, searchParams }: { params
     select: { id: true, firstName: true, lastName: true, email: true, seniority: true },
     orderBy: [{ firstName: "asc" }, { lastName: "asc" }]
   });
+
+  // Fichiers rattachés — tolérant à l'absence de la colonne candidateId (avant migration)
+  let candidateDocuments: any[] = [];
+  try {
+    candidateDocuments = await (prisma as any).document.findMany({
+      where: { candidateId: params.id, parentDocumentId: null },
+      orderBy: { createdAt: "desc" },
+      include: { uploadedBy: { select: { firstName: true, lastName: true } } }
+    });
+  } catch { /* colonne absente — silencieux */ }
 
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canRecruit = sessionPerms.includes("users.manage");
@@ -190,7 +201,9 @@ export default async function CandidateDetail({ params, searchParams }: { params
           { key: "recruitment", label: "Recrutement", icon: "briefcase",
             badge: c.applications.length + c.hiringInterviews.length || undefined },
           { key: "contracts",   label: "Contrats",    icon: "contract",
-            badge: candidateContracts.length || undefined }
+            badge: candidateContracts.length || undefined },
+          { key: "files",       label: "Fichiers",    icon: "folder",
+            badge: candidateDocuments.length || undefined }
         ];
         return <PersonTabsNav tabs={CANDIDATE_TABS} current={tab} />;
       })()}
@@ -301,6 +314,23 @@ export default async function CandidateDetail({ params, searchParams }: { params
             <div className="card p-6 text-sm text-midnight-500 italic">
               Tu n'as pas la permission pour voir les contrats de ce candidat.
             </div>
+          )}
+
+          {tab === "files" && (
+            <CandidateDocumentsPanel
+              candidateId={c.id}
+              canManage={sessionPerms.includes("consulting.write")}
+              documents={candidateDocuments.map((d: any) => ({
+                id: d.id,
+                title: d.title,
+                originalName: d.originalName,
+                mimeType: d.mimeType,
+                size: d.size,
+                tags: d.tags ?? [],
+                createdAt: d.createdAt.toISOString(),
+                uploadedBy: d.uploadedBy ?? null
+              }))}
+            />
           )}
         </div>
 
