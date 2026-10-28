@@ -21,14 +21,14 @@ import { BRAND_COLORS as C, DasolabsIcon } from "./dasolabs-brand";
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 36, paddingBottom: 50, paddingHorizontal: 36,
+    paddingTop: 28, paddingBottom: 40, paddingHorizontal: 32,
     fontSize: 10, fontFamily: "Helvetica", color: C.ink
   },
 
   // Header : logo + titre
   header: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start",
-    paddingBottom: 12, borderBottom: `2 solid ${C.ink}`, marginBottom: 16
+    paddingBottom: 8, borderBottom: `2 solid ${C.ink}`, marginBottom: 10
   },
   brand: { flexDirection: "row", alignItems: "center", gap: 10 },
   brandName: { fontSize: 18, fontFamily: "Helvetica-Bold", color: C.ink },
@@ -37,10 +37,10 @@ const styles = StyleSheet.create({
   docSubtitle: { fontSize: 8, color: C.grey, textAlign: "right", marginTop: 2 },
 
   // Bandeau profil : photo + nom
-  profile: { flexDirection: "row", gap: 16, alignItems: "center", marginBottom: 14 },
-  photo: { width: 82, height: 82, borderRadius: 41 },
+  profile: { flexDirection: "row", gap: 14, alignItems: "center", marginBottom: 10 },
+  photo: { width: 72, height: 72, borderRadius: 36 },
   photoPlaceholder: {
-    width: 82, height: 82, borderRadius: 41, backgroundColor: C.ink,
+    width: 72, height: 72, borderRadius: 36, backgroundColor: C.ink,
     justifyContent: "center", alignItems: "center"
   },
   photoInitials: { fontSize: 30, fontFamily: "Helvetica-Bold", color: "#FFF" },
@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
 
   // Encadré "Votre contact"
   contactBox: {
-    marginTop: 10, marginBottom: 14,
-    padding: 10, backgroundColor: C.light,
+    marginBottom: 10,
+    padding: 8, backgroundColor: C.light,
     borderLeft: `3 solid ${C.accent}`, borderRadius: 4
   },
   contactBoxLabel: {
@@ -66,9 +66,9 @@ const styles = StyleSheet.create({
   contactBoxLine: { fontSize: 9, color: C.ink, marginTop: 2 },
 
   // Cartouches KPI
-  kpiRow: { flexDirection: "row", gap: 8, marginBottom: 14 },
+  kpiRow: { flexDirection: "row", gap: 8, marginBottom: 10 },
   kpi: {
-    flex: 1, backgroundColor: C.light, padding: 10, borderRadius: 4,
+    flex: 1, backgroundColor: C.light, padding: 8, borderRadius: 4,
     borderLeft: `3 solid ${C.accent}`
   },
   kpiLabel: { fontSize: 7, color: C.grey, textTransform: "uppercase", letterSpacing: 0.5 },
@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
   // Sections
   h2: {
     fontSize: 11, fontFamily: "Helvetica-Bold", color: C.ink,
-    marginTop: 6, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5
+    marginTop: 4, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5
   },
-  h2Line: { borderBottom: `1 solid ${C.border}`, marginBottom: 8, paddingBottom: 2 },
+  h2Line: { borderBottom: `1 solid ${C.border}`, marginBottom: 6, paddingBottom: 2 },
 
   // Skills / langues (pills)
-  pills: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginBottom: 12 },
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginBottom: 8 },
   skill: {
     fontSize: 9, padding: "3pt 8pt", backgroundColor: C.light,
     borderRadius: 10, color: C.ink
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
 
   // Expériences pro
   expItem: {
-    paddingLeft: 12, borderLeft: `2 solid ${C.accent}`, marginBottom: 9, paddingVertical: 2
+    paddingLeft: 10, borderLeft: `2 solid ${C.accent}`, marginBottom: 6, paddingVertical: 1
   },
   expTitle: { fontSize: 10.5, fontFamily: "Helvetica-Bold", color: C.ink },
   expCompany: { fontSize: 10, color: C.accent, marginTop: 1 },
