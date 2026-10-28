@@ -36,26 +36,56 @@ export async function GET(req: NextRequest) {
   let filename: string;
 
   if (candidateId) {
-    // Accès candidat = même permission que voir sa fiche
     await requirePermission("consulting.read");
-    const c = await prisma.candidate.findUnique({
+    const c = await (prisma as any).candidate.findUnique({
       where: { id: candidateId },
       include: { experiences: { orderBy: { startDate: "desc" } } }
     });
     if (!c) return new Response("Not found", { status: 404 });
+    // Trainings chargées séparément
+    let candidateTrainings: any[] = [];
+    try {
+      candidateTrainings = await (prisma as any).candidateTraining.findMany({
+        where: { candidateId },
+        orderBy: { createdAt: "desc" }
+      });
+    } catch { /* ignore */ }
+    // Point de contact
+    let cvContact: { name: string; role: string | null; email: string | null; phone: string | null } | null = null;
+    if (c.cvContactUserId) {
+      try {
+        const contact = await (prisma as any).user.findUnique({
+          where: { id: c.cvContactUserId },
+          select: { firstName: true, lastName: true, email: true, phone: true, seniority: true }
+        });
+        if (contact) {
+          cvContact = {
+            name:  `${contact.firstName} ${contact.lastName}`,
+            role:  c.cvContactRole ?? contact.seniority ?? null,
+            email: contact.email ?? null,
+            phone: contact.phone ?? null
+          };
+        }
+      } catch { /* ignore */ }
+    }
     profile = {
       kind: "candidate",
       firstName: c.firstName, lastName: c.lastName,
       photoUrl: c.photoUrl, seniority: c.seniority,
       yearsExperience: c.yearsExperience, city: c.city,
       email: c.email, phone: c.phone, linkedinUrl: c.linkedinUrl,
-      // Taux journalier CLIENT (dailyRate) — distinct du dailyCost interne.
       dailyRate: c.dailyRate != null ? Number(c.dailyRate) : null,
       skills: c.skills, spokenLanguages: c.spokenLanguages,
-      experiences: c.experiences.map((e) => ({
+      interests: c.interests ?? [],
+      experiences: c.experiences.map((e: any) => ({
         companyName: e.companyName, jobTitle: e.jobTitle,
         startDate: e.startDate, endDate: e.endDate, description: e.description
-      }))
+      })),
+      trainings: candidateTrainings.map((t: any) => ({
+        institution: t.institution, title: t.title,
+        period: t.period ?? null, description: t.description ?? null
+      })),
+      cvContact
     };
     filename = `CV-${c.firstName}-${c.lastName}.pdf`.replace(/[^a-zA-Z0-9.\-_]/g, "_");
   } else {

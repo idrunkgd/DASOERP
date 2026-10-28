@@ -5,11 +5,18 @@ import { prisma } from "@/lib/db";
 
 export default async function NewCandidate() {
   await requirePermission("consulting.write");
-  const skillCatalog = await prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] });
+  const [skillCatalog, cvContactChoices] = await Promise.all([
+    prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    prisma.user.findMany({
+      where: { active: true },
+      select: { id: true, firstName: true, lastName: true, email: true, seniority: true },
+      orderBy: [{ firstName: "asc" }, { lastName: "asc" }]
+    })
+  ]);
   return (
     <div>
       <PageHeader title="Nouveau candidat" breadcrumb={[{ label: "Candidats", href: "/candidates" }, { label: "Nouveau" }]} />
-      <CandidateForm skillCatalog={skillCatalog} />
+      <CandidateForm skillCatalog={skillCatalog} cvContactChoices={cvContactChoices as any} />
     </div>
   );
 }

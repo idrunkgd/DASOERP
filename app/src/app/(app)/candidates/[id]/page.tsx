@@ -63,6 +63,21 @@ export default async function CandidateDetail({ params, searchParams }: { params
   ]);
   if (!c) notFound();
 
+  // Trainings + liste des users HUB pour le dropdown "Point de contact CV"
+  let candidateTrainings: any[] = [];
+  try {
+    candidateTrainings = await (prisma as any).candidateTraining.findMany({
+      where: { candidateId: params.id },
+      orderBy: { createdAt: "desc" }
+    });
+  } catch { /* table absente — silencieux */ }
+  (c as any).trainings = candidateTrainings;
+  const cvContactChoices = await prisma.user.findMany({
+    where: { active: true },
+    select: { id: true, firstName: true, lastName: true, email: true, seniority: true },
+    orderBy: [{ firstName: "asc" }, { lastName: "asc" }]
+  });
+
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canRecruit = sessionPerms.includes("users.manage");
   const canApplyScenarios = sessionPerms.includes("consulting.write");
@@ -183,7 +198,7 @@ export default async function CandidateDetail({ params, searchParams }: { params
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {tab === "general" && (
-            <CandidateForm initial={c as any} skillCatalog={skillCatalog} />
+            <CandidateForm initial={c as any} skillCatalog={skillCatalog} cvContactChoices={cvContactChoices as any} />
           )}
 
           {tab === "cv" && (
