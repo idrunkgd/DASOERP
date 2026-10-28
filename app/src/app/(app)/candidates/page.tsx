@@ -125,7 +125,7 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
       ) : view === "list" ? (
         <CandidateListView list={list as any[]} />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2.5">
           {list.map(c => <CandidateTile key={c.id} c={c as any} />)}
         </div>
       )}
@@ -195,57 +195,59 @@ function CandidateTile({ c }: { c: any }) {
   const unavailable = c.status === "UNAVAILABLE";
   return (
     <div className="relative group">
-      {/* Menu actions rapides au hover, en haut à droite */}
-      <div className="absolute top-1 right-1 z-20 opacity-0 group-hover:opacity-100 transition">
+      {/* Action rapide positionnée sur la tuile, visible au hover */}
+      <div className="absolute top-1 left-1 z-20 opacity-0 group-hover:opacity-100 transition">
         <CandidateQuickActions id={c.id} current={c.status} compact />
       </div>
       <Link
         href={`/candidates/${c.id}`}
         className={
-          "card overflow-hidden flex items-start gap-2 p-2 hover:shadow-md hover:border-indigoaccent/40 transition-all h-full " +
+          "card overflow-hidden flex flex-col hover:shadow-lg hover:border-indigoaccent/40 transition-all h-full " +
           (archived ? "opacity-60" : "")
         }
       >
-        {/* Photo compacte en avatar carré-arrondi 48px — ~1/3 de l'ancienne taille */}
-        <div className="relative shrink-0">
+        {/* Photo compacte — ratio 4:3 au lieu de carré pour gagner en hauteur */}
+        <div className="relative bg-gradient-to-br from-midnight-900 to-midnight-700 aspect-[4/3] overflow-hidden">
           {c.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={c.photoUrl}
               alt={`${c.firstName} ${c.lastName}`}
               className={
-                "w-12 h-12 rounded-lg object-cover " +
+                "w-full h-full object-cover transition-transform group-hover:scale-105 " +
                 (unavailable ? "grayscale-[40%]" : "")
               }
               loading="lazy"
             />
           ) : (
-            <CandidateAvatar firstName={c.firstName} lastName={c.lastName} size={48} className="rounded-lg" />
+            <div className="w-full h-full grid place-items-center">
+              <CandidateAvatar firstName={c.firstName} lastName={c.lastName} size={42} className="rounded-full ring-2 ring-white/10" />
+            </div>
           )}
+          <div className="absolute top-1 right-1 scale-75 origin-top-right">
+            <StatusBadge status={c.status === "ACTIVE" ? "ACTIVE_CT" : c.status} />
+          </div>
           {c._count?.applications > 0 && (
-            <div className="absolute -bottom-1 -right-1 bg-indigoaccent text-white text-[9px] font-bold rounded-full w-4 h-4 grid place-items-center">
-              {c._count.applications}
+            <div className="absolute bottom-1 left-1 bg-white/90 text-midnight-900 text-[9px] font-medium rounded-full px-1.5 py-0.5">
+              {c._count.applications} mis.
             </div>
           )}
         </div>
 
-        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-          <div className="flex items-start justify-between gap-1">
-            <h3 className="font-semibold text-midnight-900 leading-tight text-xs truncate flex-1">{c.firstName} {c.lastName}</h3>
-            <div className="scale-75 origin-top-right shrink-0 -mr-1 -mt-0.5">
-              <StatusBadge status={c.status === "ACTIVE" ? "ACTIVE_CT" : c.status} />
-            </div>
+        <div className="p-2 flex-1 flex flex-col gap-1">
+          <div>
+            <h3 className="font-semibold text-midnight-900 leading-tight text-xs truncate">{c.firstName} {c.lastName}</h3>
+            {c.seniority && <p className="text-[10px] text-midnight-500 truncate">{c.seniority}{c.yearsExperience ? ` · ${c.yearsExperience}a` : ""}</p>}
           </div>
-          {c.seniority && <p className="text-[10px] text-midnight-500 truncate leading-tight">{c.seniority}{c.yearsExperience ? ` · ${c.yearsExperience}a` : ""}</p>}
 
-          <div className="flex flex-wrap gap-0.5 mt-0.5">
+          <div className="flex flex-wrap gap-0.5">
             {(c.skills as string[]).slice(0, 2).map(s => <span key={s} className="badge-info text-[9px] px-1 py-0">{s}</span>)}
             {c.skills.length > 2 && <span className="badge-neutral text-[9px] px-1 py-0">+{c.skills.length - 2}</span>}
           </div>
 
-          <div className="flex items-center gap-2 text-[10px] text-midnight-700 mt-0.5">
-            {c.city && <span className="flex items-center gap-0.5 truncate"><MapPin className="w-2.5 h-2.5 text-midnight-400 shrink-0" /> {c.city}</span>}
-            {c.dailyCost && <span className="flex items-center gap-0.5 tabular-nums ml-auto shrink-0"><Briefcase className="w-2.5 h-2.5 text-midnight-400" /> {formatCurrency(c.dailyCost)}</span>}
+          <div className="flex flex-col gap-0.5 text-[10px] text-midnight-700 mt-auto pt-1 border-t border-border/60">
+            {c.city && <span className="flex items-center gap-1 truncate"><MapPin className="w-2.5 h-2.5 text-midnight-400 shrink-0" /> {c.city}</span>}
+            {c.dailyCost && <span className="flex items-center gap-1 tabular-nums"><Briefcase className="w-2.5 h-2.5 text-midnight-400" /> {formatCurrency(c.dailyCost)}/j</span>}
           </div>
         </div>
       </Link>
