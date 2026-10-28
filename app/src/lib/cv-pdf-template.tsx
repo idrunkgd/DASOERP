@@ -115,6 +115,8 @@ export type CvProfile = {
   dailyRate: number | null;
   skills: string[];
   spokenLanguages: string[];
+  /// Centres d'intérêt (hobbies, passions)
+  interests?: string[];
   experiences: Array<{
     companyName: string;
     jobTitle: string | null;
@@ -122,6 +124,21 @@ export type CvProfile = {
     endDate: Date | null;
     description: string | null;
   }>;
+  /// Formations / diplômes / certifications
+  trainings?: Array<{
+    institution: string;
+    title: string;
+    period: string | null;
+    description: string | null;
+  }>;
+  /// Point de contact Dasolabs affiché sur le CV à la place des coordonnées
+  /// personnelles du consultant. Si fourni, remplace email/phone/linkedin.
+  cvContact?: {
+    name: string;
+    role: string | null;
+    email: string | null;
+    phone: string | null;
+  } | null;
 };
 
 /**
@@ -192,10 +209,23 @@ export function CvPdf({
             <Text style={styles.name}>{profile.firstName} {profile.lastName}</Text>
             {profile.seniority && <Text style={styles.role}>{profile.seniority}</Text>}
             <View style={styles.contactRow}>
-              {profile.email && <Text style={styles.contact}>✉ {profile.email}</Text>}
-              {profile.phone && <Text style={styles.contact}>☎ {profile.phone}</Text>}
-              {profile.city && <Text style={styles.contact}>📍 {profile.city}</Text>}
-              {profile.linkedinUrl && <Text style={styles.contact}>{profile.linkedinUrl}</Text>}
+              {/* Point de contact Dasolabs si configuré, sinon on retombe sur les
+                  coordonnées directes du consultant (compat historique). */}
+              {profile.cvContact ? (
+                <>
+                  <Text style={styles.contact}>👤 {profile.cvContact.name}{profile.cvContact.role ? ` · ${profile.cvContact.role}` : ""}</Text>
+                  {profile.cvContact.email && <Text style={styles.contact}>✉ {profile.cvContact.email}</Text>}
+                  {profile.cvContact.phone && <Text style={styles.contact}>☎ {profile.cvContact.phone}</Text>}
+                  {profile.city && <Text style={styles.contact}>📍 {profile.city}</Text>}
+                </>
+              ) : (
+                <>
+                  {profile.email && <Text style={styles.contact}>✉ {profile.email}</Text>}
+                  {profile.phone && <Text style={styles.contact}>☎ {profile.phone}</Text>}
+                  {profile.city && <Text style={styles.contact}>📍 {profile.city}</Text>}
+                  {profile.linkedinUrl && <Text style={styles.contact}>{profile.linkedinUrl}</Text>}
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -253,6 +283,31 @@ export function CvPdf({
                 {exp.description && <Text style={styles.expDesc}>{exp.description}</Text>}
               </View>
             ))}
+          </>
+        )}
+
+        {profile.trainings && profile.trainings.length > 0 && (
+          <>
+            <View style={styles.h2Line}><Text style={styles.h2}>Formations & certifications</Text></View>
+            {profile.trainings.map((t, idx) => (
+              <View key={idx} style={styles.expItem}>
+                <Text style={styles.expTitle}>{t.title}</Text>
+                <Text style={styles.expCompany}>{t.institution}</Text>
+                {t.period && <Text style={styles.expDates}>{t.period}</Text>}
+                {t.description && <Text style={styles.expDesc}>{t.description}</Text>}
+              </View>
+            ))}
+          </>
+        )}
+
+        {profile.interests && profile.interests.length > 0 && (
+          <>
+            <View style={styles.h2Line}><Text style={styles.h2}>Centres d'intérêt</Text></View>
+            <View style={styles.pills}>
+              {profile.interests.map((i) => (
+                <Text key={i} style={styles.skill}>{i}</Text>
+              ))}
+            </View>
           </>
         )}
 

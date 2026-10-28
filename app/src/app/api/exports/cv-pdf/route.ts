@@ -67,11 +67,17 @@ export async function GET(req: NextRequest) {
         return new Response("Forbidden", { status: 403 });
       }
     }
-    const u = await prisma.user.findUnique({
+    const u = await (prisma as any).user.findUnique({
       where: { id: userId! },
-      include: { experiences: { orderBy: { startDate: "desc" } } }
+      include: {
+        experiences: { orderBy: { startDate: "desc" } },
+        trainings: { orderBy: { createdAt: "desc" } }
+      }
     });
     if (!u) return new Response("Not found", { status: 404 });
+    const cvContact = u.cvContactName
+      ? { name: u.cvContactName, role: u.cvContactRole ?? null, email: u.cvContactEmail ?? null, phone: u.cvContactPhone ?? null }
+      : null;
     profile = {
       kind: "user",
       firstName: u.firstName, lastName: u.lastName,
@@ -81,10 +87,16 @@ export async function GET(req: NextRequest) {
       // Consultant interne : taux journalier CLIENT (dailyRate).
       dailyRate: u.dailyRate != null ? Number(u.dailyRate) : null,
       skills: u.skills, spokenLanguages: u.spokenLanguages,
-      experiences: u.experiences.map((e) => ({
+      interests: u.interests ?? [],
+      experiences: u.experiences.map((e: any) => ({
         companyName: e.companyName, jobTitle: e.jobTitle,
         startDate: e.startDate, endDate: e.endDate, description: e.description
-      }))
+      })),
+      trainings: (u.trainings ?? []).map((t: any) => ({
+        institution: t.institution, title: t.title,
+        period: t.period, description: t.description
+      })),
+      cvContact
     };
     filename = `CV-${u.firstName}-${u.lastName}.pdf`.replace(/[^a-zA-Z0-9.\-_]/g, "_");
   }

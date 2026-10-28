@@ -266,6 +266,16 @@ model User {
   country           String?   @default("Belgique")
   // Compétences (tags simples)
   skills            String[]  @default([])
+  // Centres d'intérêt (hobbies, passions) — affichés sur le CV
+  interests         String[]  @default([])
+  // ─── Point de contact affiché sur le CV à la place du consultant ───
+  // Permet d'exposer un commercial / account manager au client au lieu
+  // des coordonnées directes du consultant. Si null, on retombe sur les
+  // coordonnées du consultant (compat historique).
+  cvContactName     String?
+  cvContactRole     String?    // ex "Account Manager", "Operations Manager"
+  cvContactEmail    String?
+  cvContactPhone    String?
   joinedAt          DateTime?
   leftAt            DateTime?
   /// Marqueur "utilisateur de démo" — recréé à chaque boot avec des données
@@ -324,6 +334,7 @@ model User {
   /// ou via /me par l'utilisateur lui-même. Affichées sur le PDF de
   /// proposition consultant page 2.
   experiences         UserExperience[]
+  trainings           UserTraining[]              @relation("UserTrainings")
   // Intégration bancaire — connexions créées par ce user + réconciliations
   bankConnections     BankConnection[]      @relation("BankConnectionCreator")
   bankReconciliations BankTransaction[]     @relation("BankReconciler")
@@ -1074,6 +1085,25 @@ model UserExperience {
   updatedAt   DateTime  @updatedAt
 
   @@index([userId, startDate])
+}
+
+/// Formation / diplôme / certification d'un consultant.
+/// Affiché sur le CV sous "Formations".
+model UserTraining {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation("UserTrainings", fields: [userId], references: [id], onDelete: Cascade)
+  /// Nom de l'école / organisme / éditeur de la certif
+  institution String
+  /// Intitulé du diplôme ou de la certification
+  title       String
+  /// Année ou période (ex: "2015 - 2018" ou "Mai 2024")
+  period      String?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
 }
 
 // Catalogue de compétences pré-configurées (autocomplete + cases à cocher)
