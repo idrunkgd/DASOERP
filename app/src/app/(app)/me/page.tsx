@@ -32,13 +32,19 @@ export default async function MyProfile({
     // Inclut les expériences pro pour l'espace "Mon CV" côté consultant interne
     prisma.user.findUniqueOrThrow({
       where: { id: session.user.id },
-      include: { experiences: { orderBy: { startDate: "desc" } } }
+      include: {
+        experiences: { orderBy: { startDate: "desc" } },
+        trainings: { orderBy: { createdAt: "desc" } }
+      } as any
     }),
     getUserAccessGroupName(session.user.id),
     prisma.skill.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
     prisma.candidate.findUnique({
       where: { portalUserId: session.user.id },
-      include: { experiences: { orderBy: { startDate: "desc" } } }
+      include: {
+        experiences: { orderBy: { startDate: "desc" } },
+        trainings: { orderBy: { createdAt: "desc" } }
+      } as any
     }),
     prisma.sickLeave.findMany({
       where: { userId: session.user.id },

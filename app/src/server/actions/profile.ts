@@ -24,6 +24,28 @@ const SelfSchema = z.object({
   city: z.string().optional().nullable(),
   spokenLanguages: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
   skills: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
+  interests: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
+  // Point de contact pour le CV
+  cvContactName:  z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  cvContactRole:  z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  cvContactEmail: z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  cvContactPhone: z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  // Formations — JSON serialisé depuis l'UI
+  trainings: z.string().optional().transform(v => {
+    if (!v) return [] as Array<{ institution: string; title: string; period: string | null; description: string | null }>;
+    try {
+      const arr = JSON.parse(v);
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .map((t: any) => ({
+          institution: String(t.institution ?? "").trim(),
+          title: String(t.title ?? "").trim(),
+          period: t.period ? String(t.period).trim() : null,
+          description: t.description ? String(t.description).trim() : null
+        }))
+        .filter((t) => t.institution || t.title);
+    } catch { return []; }
+  }),
   currentPassword: z.string().optional().or(z.literal("")),
   newPassword: z.string().optional().or(z.literal(""))
 });
@@ -39,7 +61,12 @@ export async function updateMyProfile(formData: FormData) {
     linkedinUrl: data.linkedinUrl,
     city: data.city,
     spokenLanguages: data.spokenLanguages,
-    skills: data.skills
+    skills: data.skills,
+    interests: data.interests,
+    cvContactName:  data.cvContactName,
+    cvContactRole:  data.cvContactRole,
+    cvContactEmail: data.cvContactEmail,
+    cvContactPhone: data.cvContactPhone
   };
 
   // Changement de mot de passe optionnel
@@ -52,6 +79,15 @@ export async function updateMyProfile(formData: FormData) {
   }
 
   await prisma.user.update({ where: { id: me.id }, data: updateData });
+
+  // Formations : replace-all simple (supprime les anciennes, insère les nouvelles).
+  // Pour un volume raisonnable (quelques entrées par consultant) c'est suffisant.
+  await (prisma as any).userTraining.deleteMany({ where: { userId: me.id } });
+  if (data.trainings.length > 0) {
+    await (prisma as any).userTraining.createMany({
+      data: data.trainings.map((t) => ({ ...t, userId: me.id }))
+    });
+  }
   await logActivity({
     actorId: me.id, action: "UPDATE", entityType: "User", entityId: me.id,
     message: `Profil personnel mis à jour${data.newPassword ? " (mot de passe modifié)" : ""}`
