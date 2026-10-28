@@ -52,6 +52,19 @@ const styles = StyleSheet.create({
   },
   contact: { fontSize: 9, color: C.grey },
 
+  // Encadré "Votre contact"
+  contactBox: {
+    marginTop: 10, marginBottom: 14,
+    padding: 10, backgroundColor: C.light,
+    borderLeft: `3 solid ${C.accent}`, borderRadius: 4
+  },
+  contactBoxLabel: {
+    fontSize: 7, color: C.grey, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4
+  },
+  contactBoxName: { fontSize: 11, fontFamily: "Helvetica-Bold", color: C.ink },
+  contactBoxRole: { fontSize: 9, color: C.accent, marginTop: 1 },
+  contactBoxLine: { fontSize: 9, color: C.ink, marginTop: 2 },
+
   // Cartouches KPI
   kpiRow: { flexDirection: "row", gap: 8, marginBottom: 14 },
   kpi: {
@@ -209,26 +222,31 @@ export function CvPdf({
             <Text style={styles.name}>{profile.firstName} {profile.lastName}</Text>
             {profile.seniority && <Text style={styles.role}>{profile.seniority}</Text>}
             <View style={styles.contactRow}>
-              {/* Point de contact Dasolabs si configuré, sinon on retombe sur les
-                  coordonnées directes du consultant (compat historique). */}
-              {profile.cvContact ? (
-                <>
-                  <Text style={styles.contact}>👤 {profile.cvContact.name}{profile.cvContact.role ? ` · ${profile.cvContact.role}` : ""}</Text>
-                  {profile.cvContact.email && <Text style={styles.contact}>✉ {profile.cvContact.email}</Text>}
-                  {profile.cvContact.phone && <Text style={styles.contact}>☎ {profile.cvContact.phone}</Text>}
-                  {profile.city && <Text style={styles.contact}>📍 {profile.city}</Text>}
-                </>
-              ) : (
+              {/* Toujours afficher la localisation du consultant.
+                  Email/phone/linkedin ne sont affichés QUE s'il n'y a pas de
+                  point de contact Dasolabs (sinon ils seront dans l'encadré). */}
+              {profile.city && <Text style={styles.contact}>📍 {profile.city}</Text>}
+              {!profile.cvContact && (
                 <>
                   {profile.email && <Text style={styles.contact}>✉ {profile.email}</Text>}
                   {profile.phone && <Text style={styles.contact}>☎ {profile.phone}</Text>}
-                  {profile.city && <Text style={styles.contact}>📍 {profile.city}</Text>}
                   {profile.linkedinUrl && <Text style={styles.contact}>{profile.linkedinUrl}</Text>}
                 </>
               )}
             </View>
           </View>
         </View>
+
+        {/* Encadré "Votre contact" — point de contact Dasolabs pour le CV */}
+        {profile.cvContact && (
+          <View style={styles.contactBox}>
+            <Text style={styles.contactBoxLabel}>Votre contact</Text>
+            <Text style={styles.contactBoxName}>{profile.cvContact.name}</Text>
+            {profile.cvContact.role && <Text style={styles.contactBoxRole}>{profile.cvContact.role}</Text>}
+            {profile.cvContact.email && <Text style={styles.contactBoxLine}>✉ {profile.cvContact.email}</Text>}
+            {profile.cvContact.phone && <Text style={styles.contactBoxLine}>☎ {profile.cvContact.phone}</Text>}
+          </View>
+        )}
 
         {/* KPI cartouches */}
         <View style={styles.kpiRow}>
