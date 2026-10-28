@@ -269,13 +269,21 @@ model User {
   // Centres d'intérêt (hobbies, passions) — affichés sur le CV
   interests         String[]  @default([])
   // ─── Point de contact affiché sur le CV à la place du consultant ───
-  // Permet d'exposer un commercial / account manager au client au lieu
-  // des coordonnées directes du consultant. Si null, on retombe sur les
-  // coordonnées du consultant (compat historique).
+  // Sélectionné parmi les utilisateurs du HUB (dropdown dans le profil).
+  // Si renseigné, le CV reprendra le nom, email et téléphone de ce user.
+  // null → fallback sur les coordonnées perso du consultant.
+  cvContactUserId   String?
+  cvContactUser     User?      @relation("UserCvContact", fields: [cvContactUserId], references: [id], onDelete: SetNull)
+  // Fonction à afficher à côté du nom (optionnel). Si vide, on utilise
+  // la seniority / le role du user de contact.
+  cvContactRole     String?
+  // Les cvContactName/Email/Phone restent en legacy pour compat (si
+  // besoin de forcer manuellement un contact qui n'est pas un User HUB).
   cvContactName     String?
-  cvContactRole     String?    // ex "Account Manager", "Operations Manager"
   cvContactEmail    String?
   cvContactPhone    String?
+  // Back-relation : liste des users qui me désignent comme leur contact CV
+  cvContactOf       User[]     @relation("UserCvContact")
   joinedAt          DateTime?
   leftAt            DateTime?
   /// Marqueur "utilisateur de démo" — recréé à chaque boot avec des données

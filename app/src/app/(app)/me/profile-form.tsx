@@ -46,7 +46,13 @@ function TrainingsEditor({ initial }: { initial: Training[] }) {
   );
 }
 
-export function ProfileForm({ initial, skillCatalog }: { initial: any; skillCatalog: { id: string; name: string; category: string | null }[] }) {
+type CvContactChoice = { id: string; firstName: string; lastName: string; email: string; phone: string | null; seniority: string | null; role: string };
+
+export function ProfileForm({ initial, skillCatalog, cvContactChoices = [] }: {
+  initial: any;
+  skillCatalog: { id: string; name: string; category: string | null }[];
+  cvContactChoices?: CvContactChoice[];
+}) {
   const [pending, start] = useTransition();
   const router = useRouter();
   const [photoUrl, setPhotoUrl] = useState<string>(initial.photoUrl ?? "");
@@ -110,14 +116,27 @@ export function ProfileForm({ initial, skillCatalog }: { initial: any; skillCata
           Point de contact pour le CV
         </h2>
         <p className="text-xs text-midnight-500 mb-3">
-          Si renseigné, le CV affichera ces coordonnées au lieu des tiennes.
-          Laisse vide pour exposer tes propres coordonnées.
+          Sélectionne un membre de l'équipe HUB — ses coordonnées (email, téléphone)
+          seront affichées sur ton CV à la place des tiennes. Laisse "—" pour exposer
+          tes propres coordonnées.
         </p>
         <div className="grid grid-cols-12 gap-3">
-          <div className="col-span-6"><label className="label">Nom du contact</label><input name="cvContactName" defaultValue={initial.cvContactName ?? ""} className="input" placeholder="Louise Dupont" /></div>
-          <div className="col-span-6"><label className="label">Fonction</label><input name="cvContactRole" defaultValue={initial.cvContactRole ?? ""} className="input" placeholder="Operations Manager" /></div>
-          <div className="col-span-6"><label className="label">Email</label><input name="cvContactEmail" type="email" defaultValue={initial.cvContactEmail ?? ""} className="input" placeholder="louise@dasolabs.be" /></div>
-          <div className="col-span-6"><label className="label">Téléphone</label><input name="cvContactPhone" defaultValue={initial.cvContactPhone ?? ""} className="input" placeholder="+32 ..." /></div>
+          <div className="col-span-8">
+            <label className="label">Membre de l'équipe</label>
+            <select name="cvContactUserId" defaultValue={initial.cvContactUserId ?? ""} className="input">
+              <option value="">— Mes propres coordonnées —</option>
+              {cvContactChoices.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.firstName} {u.lastName}{u.seniority ? ` · ${u.seniority}` : ""} ({u.email})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="col-span-4">
+            <label className="label">Fonction (override)</label>
+            <input name="cvContactRole" defaultValue={initial.cvContactRole ?? ""} className="input" placeholder="ex: Account Manager" />
+            <p className="text-[11px] text-midnight-500 mt-1">Si vide, on utilise la séniorité du contact.</p>
+          </div>
         </div>
       </section>
 

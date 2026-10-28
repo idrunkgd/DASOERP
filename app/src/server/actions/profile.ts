@@ -25,11 +25,10 @@ const SelfSchema = z.object({
   spokenLanguages: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
   skills: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
   interests: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
-  // Point de contact pour le CV
-  cvContactName:  z.string().optional().nullable().transform(v => (v?.trim() || null)),
-  cvContactRole:  z.string().optional().nullable().transform(v => (v?.trim() || null)),
-  cvContactEmail: z.string().optional().nullable().transform(v => (v?.trim() || null)),
-  cvContactPhone: z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  // Point de contact pour le CV — sélection d'un user HUB
+  cvContactUserId: z.string().optional().nullable().transform(v => (v?.trim() || null)),
+  // Override fonction (optionnel), remplace la seniority du contact
+  cvContactRole:   z.string().optional().nullable().transform(v => (v?.trim() || null)),
   // Formations — JSON serialisé depuis l'UI
   trainings: z.string().optional().transform(v => {
     if (!v) return [] as Array<{ institution: string; title: string; period: string | null; description: string | null }>;
@@ -63,10 +62,8 @@ export async function updateMyProfile(formData: FormData) {
     spokenLanguages: data.spokenLanguages,
     skills: data.skills,
     interests: data.interests,
-    cvContactName:  data.cvContactName,
-    cvContactRole:  data.cvContactRole,
-    cvContactEmail: data.cvContactEmail,
-    cvContactPhone: data.cvContactPhone
+    cvContactUserId: data.cvContactUserId,
+    cvContactRole:   data.cvContactRole
   };
 
   // Changement de mot de passe optionnel

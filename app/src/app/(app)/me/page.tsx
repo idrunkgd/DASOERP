@@ -84,6 +84,13 @@ export default async function MyProfile({
   } catch { /* table absente avant migration → liste vide, silencieux */ }
   (me as any).trainings = myTrainings;
 
+  // Liste des users HUB actifs pour le dropdown "Point de contact CV"
+  const cvContactChoices = await prisma.user.findMany({
+    where: { active: true },
+    select: { id: true, firstName: true, lastName: true, email: true, phone: true, seniority: true, role: true },
+    orderBy: [{ firstName: "asc" }, { lastName: "asc" }]
+  });
+
   // Congés — solde annuel + demandes récentes + missions actives (pour la
   // case "demandé chez le client et accordé").
   const [leaveBalance, leaveRequests, activeMissions] = await Promise.all([
@@ -267,7 +274,7 @@ export default async function MyProfile({
 
               {tab === "general" && (
                 <div className="space-y-6">
-                  <ProfileForm initial={me as any} skillCatalog={skillCatalog} />
+                  <ProfileForm initial={me as any} skillCatalog={skillCatalog} cvContactChoices={cvContactChoices as any} />
                 </div>
               )}
 

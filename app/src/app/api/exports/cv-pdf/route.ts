@@ -69,22 +69,43 @@ export async function GET(req: NextRequest) {
     }
     const u = await (prisma as any).user.findUnique({
       where: { id: userId! },
-      include: {
-        experiences: { orderBy: { startDate: "desc" } },
-        trainings: { orderBy: { createdAt: "desc" } }
-      }
+      include: { experiences: { orderBy: { startDate: "desc" } } }
     });
     if (!u) return new Response("Not found", { status: 404 });
-    const cvContact = u.cvContactName
-      ? { name: u.cvContactName, role: u.cvContactRole ?? null, email: u.cvContactEmail ?? null, phone: u.cvContactPhone ?? null }
-      : null;
+    // Trainings chargées séparément — tolérant à l'absence de la table
+    let userTrainings: any[] = [];
+    try {
+      userTrainings = await (prisma as any).userTraining.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" }
+      });
+    } catch { /* ignore */ }
+    // Point de contact : FK vers un User HUB (prioritaire) → fallback legacy
+    let cvContact: { name: string; role: string | null; email: string | null; phone: string | null } | null = null;
+    if (u.cvContactUserId) {
+      try {
+        const contact = await (prisma as any).user.findUnique({
+          where: { id: u.cvContactUserId },
+          select: { firstName: true, lastName: true, email: true, phone: true, seniority: true }
+        });
+        if (contact) {
+          cvContact = {
+            name:  `${contact.firstName} ${contact.lastName}`,
+            role:  u.cvContactRole ?? contact.seniority ?? null,
+            email: contact.email ?? null,
+            phone: contact.phone ?? null
+          };
+        }
+      } catch { /* ignore */ }
+    } else if (u.cvContactName) {
+      cvContact = { name: u.cvContactName, role: u.cvContactRole ?? null, email: u.cvContactEmail ?? null, phone: u.cvContactPhone ?? null };
+    }
     profile = {
       kind: "user",
       firstName: u.firstName, lastName: u.lastName,
       photoUrl: u.photoUrl, seniority: u.seniority,
       yearsExperience: u.yearsExperience, city: u.city,
       email: u.email, phone: u.phone, linkedinUrl: u.linkedinUrl,
-      // Consultant interne : taux journalier CLIENT (dailyRate).
       dailyRate: u.dailyRate != null ? Number(u.dailyRate) : null,
       skills: u.skills, spokenLanguages: u.spokenLanguages,
       interests: u.interests ?? [],
@@ -92,9 +113,9 @@ export async function GET(req: NextRequest) {
         companyName: e.companyName, jobTitle: e.jobTitle,
         startDate: e.startDate, endDate: e.endDate, description: e.description
       })),
-      trainings: (u.trainings ?? []).map((t: any) => ({
+      trainings: userTrainings.map((t: any) => ({
         institution: t.institution, title: t.title,
-        period: t.period, description: t.description
+        period: t.period ?? null, description: t.description ?? null
       })),
       cvContact
     };
