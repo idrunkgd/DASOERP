@@ -4,7 +4,7 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages } from "lucide-react";
+import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages, LayoutGrid, List } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CandidateAvatar } from "./avatar";
 import { LinkedInImportButton } from "./linkedin-import-button";
@@ -14,7 +14,7 @@ import { parseMulti, inFilter } from "@/lib/filters";
 
 export const dynamic = "force-dynamic";
 
-export default async function CandidatesPage({ searchParams }: { searchParams: { q?: string; status?: string; skill?: string } }) {
+export default async function CandidatesPage({ searchParams }: { searchParams: { q?: string; status?: string; skill?: string; view?: string } }) {
   await requirePermission("consulting.read");
   const statuses = parseMulti(searchParams.status);
   const where: any = {};
@@ -37,13 +37,32 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
     where, orderBy: [{ status: "asc" }, { lastName: "asc" }],
     include: { _count: { select: { applications: true } } }
   });
+  const view: "grid" | "list" = searchParams?.view === "list" ? "list" : "grid";
+  function buildViewHref(targetView: "grid" | "list") {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(searchParams ?? {})) {
+      if (k === "view" || !v) continue;
+      params.set(k, String(v));
+    }
+    params.set("view", targetView);
+    return `/candidates?${params.toString()}`;
+  }
+
   return (
     <div>
       <PageHeader
         title="Candidats"
         subtitle={`${list.length} candidat(s) — vivier consultance`}
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <div className="flex items-center rounded-md border border-border overflow-hidden">
+              <Link href={buildViewHref("grid")} className={`px-2 py-1.5 text-xs flex items-center gap-1 ${view === "grid" ? "bg-midnight-900 text-white" : "text-midnight-600 hover:bg-midnight-50"}`} title="Vue grille">
+                <LayoutGrid className="w-3.5 h-3.5" /> Grille
+              </Link>
+              <Link href={buildViewHref("list")} className={`px-2 py-1.5 text-xs flex items-center gap-1 border-l border-border ${view === "list" ? "bg-midnight-900 text-white" : "text-midnight-600 hover:bg-midnight-50"}`} title="Vue liste">
+                <List className="w-3.5 h-3.5" /> Liste
+              </Link>
+            </div>
             <LinkedInImportButton />
             <Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau candidat</Link>
           </div>
@@ -83,6 +102,52 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
             description="Construisez votre vivier en ajoutant vos premiers profils."
             action={<Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau</Link>}
           />
+        </div>
+      ) : view === "list" ? (
+        <div className="card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-midnight-50 text-midnight-600 text-xs uppercase tracking-wide">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium">Candidat</th>
+                <th className="px-3 py-2 text-left font-medium">Séniorité</th>
+                <th className="px-3 py-2 text-left font-medium">Compétences</th>
+                <th className="px-3 py-2 text-left font-medium">Ville</th>
+                <th className="px-3 py-2 text-right font-medium">Coût / j</th>
+                <th className="px-3 py-2 text-left font-medium">Statut</th>
+                <th className="px-3 py-2 text-right font-medium">Missions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((c: any) => {
+                const archived = c.status === "ARCHIVED";
+                return (
+                  <tr key={c.id} className={`border-t border-border/60 hover:bg-midnight-50/60 ${archived ? "opacity-60" : ""}`}>
+                    <td className="px-3 py-2">
+                      <Link href={`/candidates/${c.id}`} className="flex items-center gap-2">
+                        <CandidateAvatar firstName={c.firstName} lastName={c.lastName} photoUrl={c.photoUrl} size={28} className="rounded-full" />
+                        <span className="font-medium text-midnight-900 hover:text-indigoaccent">{c.firstName} {c.lastName}</span>
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2 text-midnight-700">
+                      {c.seniority ?? "—"}{c.yearsExperience ? ` · ${c.yearsExperience} ans` : ""}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex flex-wrap gap-1">
+                        {(c.skills as string[]).slice(0, 4).map(s => <span key={s} className="badge-info text-[10px] px-1.5 py-0">{s}</span>)}
+                        {c.skills.length > 4 && <span className="badge-neutral text-[10px] px-1.5 py-0">+{c.skills.length - 4}</span>}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-midnight-700">{c.city ?? "—"}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-midnight-700">
+                      {c.dailyCost ? `${formatCurrency(c.dailyCost)}` : "—"}
+                    </td>
+                    <td className="px-3 py-2"><StatusBadge status={c.status === "ACTIVE" ? "ACTIVE_CT" : c.status} /></td>
+                    <td className="px-3 py-2 text-right tabular-nums text-midnight-700">{c._count?.applications ?? 0}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3">
