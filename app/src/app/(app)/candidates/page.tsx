@@ -54,13 +54,13 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
         title="Candidats"
         subtitle={`${list.length} candidat(s) — vivier consultance`}
         actions={
-          <div className="flex gap-2 items-center">
-            <div className="flex items-center rounded-md border border-border overflow-hidden">
-              <Link href={buildViewHref("grid")} className={`px-2 py-1.5 text-xs flex items-center gap-1 ${view === "grid" ? "bg-midnight-900 text-white" : "text-midnight-600 hover:bg-midnight-50"}`} title="Vue grille">
-                <LayoutGrid className="w-3.5 h-3.5" /> Grille
+          <div className="flex gap-2 items-center flex-wrap">
+            <div className="inline-flex items-center rounded-md border border-border overflow-hidden bg-white">
+              <Link href={buildViewHref("grid")} className={`px-2.5 py-1.5 text-xs flex items-center gap-1 ${view === "grid" ? "bg-midnight-900 text-white" : "text-midnight-600 hover:bg-midnight-50"}`} title="Vue grille">
+                <LayoutGrid className="w-3.5 h-3.5" /><span>Grille</span>
               </Link>
-              <Link href={buildViewHref("list")} className={`px-2 py-1.5 text-xs flex items-center gap-1 border-l border-border ${view === "list" ? "bg-midnight-900 text-white" : "text-midnight-600 hover:bg-midnight-50"}`} title="Vue liste">
-                <List className="w-3.5 h-3.5" /> Liste
+              <Link href={buildViewHref("list")} className={`px-2.5 py-1.5 text-xs flex items-center gap-1 border-l border-border ${view === "list" ? "bg-midnight-900 text-white" : "text-midnight-600 hover:bg-midnight-50"}`} title="Vue liste">
+                <List className="w-3.5 h-3.5" /><span>Liste</span>
               </Link>
             </div>
             <LinkedInImportButton />
@@ -150,7 +150,7 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
           </table>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-10 gap-2">
           {list.map(c => <CandidateTile key={c.id} c={c as any} />)}
         </div>
       )}
@@ -168,8 +168,9 @@ function CandidateTile({ c }: { c: any }) {
         "card overflow-hidden flex flex-col hover:shadow-lg hover:border-indigoaccent/40 transition-all group " +
         (archived ? "opacity-60" : "")
       }
+      title={`${c.firstName} ${c.lastName}${c.seniority ? " · " + c.seniority : ""}`}
     >
-      {/* Photo — carrée pour gagner en compacité */}
+      {/* Photo — carrée, c'est le gros visuel de la dalle */}
       <div className="relative bg-gradient-to-br from-midnight-900 to-midnight-700 aspect-square overflow-hidden">
         {c.photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -184,34 +185,19 @@ function CandidateTile({ c }: { c: any }) {
           />
         ) : (
           <div className="w-full h-full grid place-items-center">
-            <CandidateAvatar firstName={c.firstName} lastName={c.lastName} size={56} className="rounded-full ring-2 ring-white/10" />
+            <CandidateAvatar firstName={c.firstName} lastName={c.lastName} size={40} className="rounded-full ring-2 ring-white/10" />
           </div>
         )}
-        <div className="absolute top-1 right-1 scale-90 origin-top-right">
-          <StatusBadge status={c.status === "ACTIVE" ? "ACTIVE_CT" : c.status} />
-        </div>
         {c._count?.applications > 0 && (
-          <div className="absolute bottom-1 left-1 bg-white/90 text-midnight-900 text-[10px] font-medium rounded-full px-1.5 py-0.5">
-            {c._count.applications} mis.
+          <div className="absolute top-0.5 right-0.5 bg-white/90 text-midnight-900 text-[9px] font-medium rounded-full px-1 py-0">
+            {c._count.applications}
           </div>
         )}
       </div>
 
-      <div className="p-2.5 flex-1 flex flex-col gap-1.5">
-        <div>
-          <h3 className="font-semibold text-midnight-900 leading-tight text-sm truncate">{c.firstName} {c.lastName}</h3>
-          {c.seniority && <p className="text-[11px] text-midnight-500 truncate">{c.seniority}{c.yearsExperience ? ` · ${c.yearsExperience} ans` : ""}</p>}
-        </div>
-
-        <div className="flex flex-wrap gap-0.5">
-          {(c.skills as string[]).slice(0, 3).map(s => <span key={s} className="badge-info text-[9px] px-1.5 py-0">{s}</span>)}
-          {c.skills.length > 3 && <span className="badge-neutral text-[9px] px-1.5 py-0">+{c.skills.length - 3}</span>}
-        </div>
-
-        <div className="flex flex-col gap-0.5 text-[11px] text-midnight-700 mt-auto pt-1.5 border-t border-border/60">
-          {c.city && <span className="flex items-center gap-1 truncate"><MapPin className="w-3 h-3 text-midnight-400 shrink-0" /> {c.city}</span>}
-          {c.dailyCost && <span className="flex items-center gap-1 tabular-nums"><Briefcase className="w-3 h-3 text-midnight-400" /> {formatCurrency(c.dailyCost)}/j</span>}
-        </div>
+      <div className="px-1.5 py-1 flex flex-col">
+        <h3 className="font-medium text-midnight-900 leading-tight text-[11px] truncate">{c.firstName} {c.lastName}</h3>
+        {c.seniority && <p className="text-[10px] text-midnight-500 truncate">{c.seniority}</p>}
       </div>
     </Link>
   );
