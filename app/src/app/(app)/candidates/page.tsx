@@ -39,11 +39,11 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
     include: { _count: { select: { applications: true } } }
   });
 
-  const view: "grid" | "list" = searchParams.view === "list" ? "list" : "grid";
+  const view: "grid" | "list" = searchParams?.view === "list" ? "list" : "grid";
   // Construit l'URL de l'autre vue en préservant les autres filtres
   function buildViewHref(targetView: "grid" | "list") {
     const params = new URLSearchParams();
-    for (const [k, v] of Object.entries(searchParams)) {
+    for (const [k, v] of Object.entries(searchParams ?? {})) {
       if (k === "view" || !v) continue;
       params.set(k, String(v));
     }
