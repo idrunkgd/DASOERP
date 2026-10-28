@@ -68,6 +68,26 @@ export async function updateCandidate(id: string, formData: FormData) {
   revalidatePath(`/candidates/${id}`); revalidatePath("/candidates");
 }
 
+/**
+ * Change rapide du statut d'un candidat (ACTIVE / UNAVAILABLE / ARCHIVED).
+ * Utilisée depuis la liste pour archiver ou marquer indispo en 1 clic
+ * sans ouvrir le formulaire d'édition complet.
+ */
+export async function setCandidateStatus(
+  id: string,
+  status: "ACTIVE" | "UNAVAILABLE" | "ENGAGED" | "ARCHIVED"
+) {
+  const session = await requirePermission("consulting.write");
+  const before = await prisma.candidate.findUniqueOrThrow({ where: { id } });
+  await prisma.candidate.update({ where: { id }, data: { status } });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "Candidate", entityId: id,
+    message: `Candidat ${before.firstName} ${before.lastName} : statut ${before.status} → ${status}`
+  });
+  revalidatePath("/candidates");
+  revalidatePath(`/candidates/${id}`);
+}
+
 export async function deleteCandidate(id: string) {
   const session = await requirePermission("consulting.write");
   const before = await prisma.candidate.findUniqueOrThrow({ where: { id } });
