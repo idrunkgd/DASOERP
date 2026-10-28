@@ -8,6 +8,7 @@ import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages, LayoutGrid
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CandidateAvatar } from "./avatar";
 import { LinkedInImportButton } from "./linkedin-import-button";
+import { CvImportButton } from "./cv-import-button";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
@@ -64,6 +65,7 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
               </Link>
             </div>
             <LinkedInImportButton />
+            <CvImportButton />
             <Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau candidat</Link>
           </div>
         }
