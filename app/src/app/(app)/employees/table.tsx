@@ -40,7 +40,9 @@ type Employee = {
   } | null;
 };
 
-export function EmployeesTable({ employees }: { employees: Employee[] }) {
+type ConsultantChoice = { id: string; firstName: string; lastName: string; email: string };
+
+export function EmployeesTable({ employees, availableConsultants = [] }: { employees: Employee[]; availableConsultants?: ConsultantChoice[] }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -108,7 +110,7 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
             {employees.map((e) => editingId === e.id ? (
               <tr key={e.id}>
                 <td colSpan={9} className="p-0">
-                  <EmployeeForm employee={e} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
+                  <EmployeeForm employee={e} availableConsultants={availableConsultants} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
                 </td>
               </tr>
             ) : (
@@ -124,7 +126,8 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
   );
 }
 
-function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
+type RowProps = { e: Employee; onEdit: () => void };
+function Row({ e, onEdit }: RowProps) {
   const [pending, start] = useTransition();
   const isGone = e.endDate && new Date(e.endDate) < new Date();
 
@@ -168,10 +171,16 @@ function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
             {formatCurrency(e.effectiveGross)}
           </span>
         ) : (
-          <span className="text-amber-600 text-xs" title="Pas de brut configuré. Ouvre l'onglet Rémunération sur la fiche consultant pour créer un scénario de package.">
+          <span className="text-amber-600 text-xs">
             {e.sourceLink?.href?.startsWith("/consultants/") ? (
-              <Link href={`${e.sourceLink.href}?tab=compensation`} className="hover:underline">Configurer ↗</Link>
-            ) : "—"}
+              <Link href={`${e.sourceLink.href}?tab=compensation`} className="hover:underline" title="Créer un scénario de package sur la fiche consultant">
+                Configurer ↗
+              </Link>
+            ) : (
+              <button type="button" onClick={onEdit} className="hover:underline" title="Saisir le brut directement dans la fiche employé">
+                Configurer ✎
+              </button>
+            )}
           </span>
         )}
       </td>
@@ -204,7 +213,7 @@ function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
 }
 
 function EmployeeForm({
-  employee, prefill, onDone, onCancel
+  employee, prefill, availableConsultants = [], onDone, onCancel
 }: {
   employee?: Employee;
   prefill?: {
@@ -213,6 +222,7 @@ function EmployeeForm({
     firstName: string;
     lastName: string;
   };
+  availableConsultants?: ConsultantChoice[];
   onDone: () => void;
   onCancel: () => void;
 }) {
@@ -242,6 +252,25 @@ function EmployeeForm({
       {/* Liens source cachés — l'utilisateur ne les touche pas */}
       {prefill?.candidateId && <input type="hidden" name="candidateId" value={prefill.candidateId} />}
       {prefill?.userId && <input type="hidden" name="userId" value={prefill.userId} />}
+
+      {/* En édition : permet de lier (ou re-lier) cette ligne payroll à un consultant existant.
+          Essentiel pour que le brut remonte depuis l'onglet Rémunération. */}
+      {employee && !employee.candidateId && (
+        <div>
+          <label className="label">Lier à un consultant (pour récupérer le brut depuis la fiche)</label>
+          <select name="userId" defaultValue={employee.userId ?? ""} className="input max-w-md">
+            <option value="">— Aucun lien (standalone) —</option>
+            {availableConsultants.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.firstName} {u.lastName} ({u.email})
+              </option>
+            ))}
+          </select>
+          <p className="text-[11px] text-midnight-500 mt-1">
+            Lie cette ligne de paie à un consultant actif. Son brut mensuel du simulateur de package sera utilisé automatiquement.
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="label">Prénom *</label>
