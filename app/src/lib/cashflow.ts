@@ -699,9 +699,20 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     const monthlySalary  = new Array<number>(12).fill(0);
     const monthlyTax     = new Array<number>(12).fill(0);
     const monthlyOnss    = new Array<number>(12).fill(0);
+    // Agrégation base (ONSS = employé seul, historique). L'ONSS patronal est
+    // ajouté dynamiquement UNIQUEMENT aux cellules PLANNED ci-dessous — les
+    // cellules PAID gardent leur valeur historique pour ne pas perturber le solde.
+    const monthlyOnssEmployerExtra = new Array<number>(12).fill(0);
     for (const e of employees) {
       const start = e.startDate;
       const end = e.endDate;
+      // Brut utilisé pour calculer l'ONSS patronal :
+      //  - priorité au brut stocké (monthlyGrossReference)
+      //  - sinon reconstitué par identité comptable : net + précompte + ONSS employé
+      const grossRef = Number(e.monthlyGrossReference ?? 0);
+      const grossFromParts = Number(e.monthlyNetPay) + Number(e.monthlyWithholdingTax) + Number(e.monthlyOnss);
+      const grossForEmployer = grossRef > 0 ? grossRef : grossFromParts;
+      const onssEmployer = grossForEmployer * 0.25;
       for (let m = 0; m < 12; m++) {
         const monthEnd = new Date(Date.UTC(year, m + 1, 0));
         const monthStart = new Date(Date.UTC(year, m, 1));
@@ -710,6 +721,7 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         monthlySalary[m] += Number(e.monthlyNetPay);
         monthlyTax[m]    += Number(e.monthlyWithholdingTax);
         monthlyOnss[m]   += Number(e.monthlyOnss);
+        monthlyOnssEmployerExtra[m] += onssEmployer;
       }
     }
     const roundArr = (arr: number[]) => arr.map((v) => Math.round(v * 100) / 100);
@@ -723,7 +735,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
 
     const mkRow = (
       label: string, id: string, values: number[],
-      kind: "NET_PAY" | "WITHHOLDING_TAX" | "ONSS"
+      kind: "NET_PAY" | "WITHHOLDING_TAX" | "ONSS",
+      // Supplément ajouté aux cellules PLANNED uniquement (ex: ONSS patronal
+      // calculé dynamiquement sans toucher l'historique PAID).
+      plannedExtra?: number[]
     ): CashflowRow => ({
       id, kind: "recurring_expense", label, category: "PAYROLL",
       isIncome: false,
@@ -731,23 +746,29 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         const monthNum = i + 1;
         const pm = pmIndex.get(`${kind}-${monthNum}`);
         const overriden = pm?.amountOverride != null ? Number(pm.amountOverride) : null;
-        const effectiveAmount = overriden != null ? overriden : v;
         const status = pm?.status === "PAID"
           ? "PAID" as const
           : pm?.status === "SKIPPED"
             ? "SKIPPED" as const
             : "PLANNED" as const;
+        // Supplément planned-only : jamais sur PAID (préserve historique)
+        const extra = (status === "PLANNED" && plannedExtra) ? plannedExtra[i] : 0;
+        const effectiveAmount = overriden != null ? overriden : (v + extra);
         return {
           amount: status === "SKIPPED" ? 0 : effectiveAmount,
           status,
           payroll: { year, month: monthNum, kind }
         };
       }),
-      totalYear: values.reduce((a, b) => a + b, 0)
+      totalYear: values.reduce((a, b, i) => a + b + ((plannedExtra?.[i]) ?? 0), 0)
     });
     if (s.some((v) => v > 0)) rows.push(mkRow("Salaires (net)",         "payroll-salary", s, "NET_PAY"));
     if (t.some((v) => v > 0)) rows.push(mkRow("Précompte professionnel","payroll-tax",    t, "WITHHOLDING_TAX"));
-    if (o.some((v) => v > 0)) rows.push(mkRow("ONSS",                   "payroll-onss",   o, "ONSS"));
+    // ONSS = employé (historique) + patronal (ajouté seulement aux PLANNED)
+    const onssExtra = monthlyOnssEmployerExtra.map((v) => Math.round(v * 100) / 100);
+    if (o.some((v) => v > 0) || onssExtra.some((v) => v > 0)) {
+      rows.push(mkRow("ONSS (employé + patronal)", "payroll-onss", o, "ONSS", onssExtra));
+    }
   }
 
   // ─── Lignes RecurringExpense ───
