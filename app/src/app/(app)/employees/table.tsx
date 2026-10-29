@@ -167,9 +167,12 @@ function Row({ e, onEdit }: RowProps) {
   // Net en main = net cash + perks (ou juste net cash si pas de package)
   const showNetInHand = e.packageDetail?.netTotalInHand ?? showNetCash;
 
-  // Coût employeur = depuis calcul complet si package, sinon approx barème
+  // Coût employeur :
+  //  - avec package complet → totalEmployerCost (brut + ONSS patronal + voiture + perks)
+  //  - sinon fallback mathématique : net + précompte + ONSS total = brut + ONSS patronal
+  //    (identité comptable, ONSS stocké étant déjà la somme employé + patronal)
   const employerCost = e.payrollCalc?.totalEmployerCost
-                     ?? ((showNetCash ?? 0) + (showWht ?? 0) + (showOnss ?? 0) + ((e.effectiveGross ?? 0) * 0.25));
+                     ?? ((showNetCash ?? 0) + (showWht ?? 0) + (showOnss ?? 0));
 
   function Cell({ value, auto }: { value: number | null; auto: boolean }) {
     if (value == null) return <span className="text-midnight-400">—</span>;
@@ -436,10 +439,13 @@ function PayrollSection({ employee }: { employee?: Employee }) {
             <Sparkles className="w-3 h-3" /> CALCUL AUTO · Barème I belge (isolé, 0 enfant)
           </div>
           <div className="grid grid-cols-4 gap-3 text-sm">
-            <KV lbl="ONSS employé (13,07 %)" val={formatCurrency(calc.onssEmployee)} />
+            <KV lbl="ONSS total (employé + patronal)" val={formatCurrency(calc.onssEmployee + calc.onssEmployerEstimate)} />
             <KV lbl="Précompte prof." val={formatCurrency(calc.withholdingTax)} />
             <KV lbl="Net" val={formatCurrency(calc.net)} highlight />
             <KV lbl="Coût employeur" val={formatCurrency(calc.totalEmployerCost)} />
+          </div>
+          <div className="mt-2 text-[10px] text-midnight-500">
+            Détail ONSS → employé 13,07 % · patronal ~25 % · total {formatCurrency(calc.onssEmployee + calc.onssEmployerEstimate)}
           </div>
           <p className="text-[11px] text-midnight-500 mt-2">
             Ces valeurs sont utilisées automatiquement si tu laisses les champs manuels ci-dessous vides.

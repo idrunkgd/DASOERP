@@ -255,7 +255,9 @@ export default async function EmployeesPage() {
           payrollCalc: payrollCalc ? {
             net: payrollCalc.net,
             withholdingTax: payrollCalc.withholdingTax,
-            onssEmployee: payrollCalc.onssEmployee,
+            // ONSS affiché = employé 13,07 % + patronal ~25 % (ce que Dasolabs
+            // verse réellement à l'ONSS chaque mois).
+            onssEmployee: Number(payrollCalc.onssEmployee ?? 0) + Number((payrollCalc as any).onssEmployerEstimate ?? 0),
             totalEmployerCost: payrollCalc.totalEmployerCost
           } : null,
           packageDetail: fullCalc ? {

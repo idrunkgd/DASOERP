@@ -45,29 +45,26 @@ function fillAutoPayroll(d: z.infer<typeof Schema>) {
     d.ecoVouchersAnnual + d.hospitalInsuranceMonthly +
     d.phoneInternetMonthly + d.netExpensesMonthly) > 0;
   const gross = Number(d.monthlyGrossReference);
-  if (hasPackage) {
-    const calc = computeBelgianPayrollFromPackage({
-      grossMonthly: gross,
-      carMonthlyTco: d.carMonthlyTco,
-      mealVoucherEmployerPerDay: d.mealVoucherEmployerPerDay,
-      ecoVouchersAnnual: d.ecoVouchersAnnual,
-      hospitalInsuranceMonthly: d.hospitalInsuranceMonthly,
-      phoneInternetMonthly: d.phoneInternetMonthly,
-      netExpensesMonthly: d.netExpensesMonthly
-    });
-    return {
-      ...d,
-      monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : calc.netCash,
-      monthlyWithholdingTax: d.monthlyWithholdingTax > 0 ? d.monthlyWithholdingTax : calc.withholdingTax,
-      monthlyOnss:           d.monthlyOnss           > 0 ? d.monthlyOnss           : calc.onssEmployee
-    };
-  }
-  const calc = computeBelgianPayroll(gross);
+  const calc = hasPackage
+    ? computeBelgianPayrollFromPackage({
+        grossMonthly: gross,
+        carMonthlyTco: d.carMonthlyTco,
+        mealVoucherEmployerPerDay: d.mealVoucherEmployerPerDay,
+        ecoVouchersAnnual: d.ecoVouchersAnnual,
+        hospitalInsuranceMonthly: d.hospitalInsuranceMonthly,
+        phoneInternetMonthly: d.phoneInternetMonthly,
+        netExpensesMonthly: d.netExpensesMonthly
+      })
+    : computeBelgianPayroll(gross);
+  // ONSS stocké = ONSS employé + ONSS patronal (ce que Dasolabs verse à l'ONSS
+  // chaque mois). Cashflow ligne "ONSS" = cette valeur agrégée.
+  const totalOnss = Number((calc as any).onssEmployee ?? 0) + Number((calc as any).onssEmployerEstimate ?? 0);
+  const netVal = (calc as any).netCash ?? (calc as any).net;
   return {
     ...d,
-    monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : calc.net,
+    monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : netVal,
     monthlyWithholdingTax: d.monthlyWithholdingTax > 0 ? d.monthlyWithholdingTax : calc.withholdingTax,
-    monthlyOnss:           d.monthlyOnss           > 0 ? d.monthlyOnss           : calc.onssEmployee
+    monthlyOnss:           d.monthlyOnss           > 0 ? d.monthlyOnss           : totalOnss
   };
 }
 
