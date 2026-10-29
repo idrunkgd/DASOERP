@@ -4,7 +4,7 @@
  * en cliquant sur "+ Ajouter", et chaque ligne peut passer en mode édition
  * via l'icône crayon. Suppression via poubelle.
  */
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -12,13 +12,13 @@ import {
   createEmployee, updateEmployee, deleteEmployee
 } from "@/server/actions/payroll-employees";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Loader2, Save, Trash2, Edit3, X, User as UserIcon } from "lucide-react";
+import { computeBelgianPayroll } from "@/lib/belgian-payroll";
+import { Plus, Loader2, Save, Trash2, Edit3, X, User as UserIcon, Sparkles } from "lucide-react";
 
 type Employee = {
   id: string;
   firstName: string;
   lastName: string;
-  role: string | null;
   startDate: string;
   endDate: string | null;
   monthlyNetPay: number;
@@ -30,6 +30,14 @@ type Employee = {
   candidateId?: string | null;
   userId?: string | null;
   sourceLink?: { href: string; label: string } | null;
+  scenarioGross?: number | null;
+  effectiveGross?: number | null;
+  payrollCalc?: {
+    net: number;
+    withholdingTax: number;
+    onssEmployee: number;
+    totalEmployerCost: number;
+  } | null;
 };
 
 export function EmployeesTable({ employees }: { employees: Employee[] }) {
@@ -79,12 +87,13 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
         <table className="table-base">
           <thead>
             <tr>
-              <th>Nom</th><th>Rôle</th>
+              <th>Nom</th>
               <th>Entrée</th><th>Sortie</th>
+              <th className="text-right">Brut / mois</th>
               <th className="text-right">Net / mois</th>
               <th className="text-right">Précompte</th>
               <th className="text-right">ONSS</th>
-              <th className="text-right">Total</th>
+              <th className="text-right">Coût employeur</th>
               <th></th>
             </tr>
           </thead>
@@ -107,6 +116,9 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
             ))}
           </tbody>
         </table>
+        <div className="p-3 text-[11px] text-midnight-500 border-t border-border/60">
+          Valeurs <span className="font-mono text-indigoaccent">en italique</span> = calculées depuis le brut via barème I belge (isolé, 0 enfant). Les valeurs manuelles stockées remplacent le calcul si saisies.
+        </div>
       </div>
     </>
   );
@@ -114,8 +126,29 @@ export function EmployeesTable({ employees }: { employees: Employee[] }) {
 
 function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
   const [pending, start] = useTransition();
-  const total = e.monthlyNetPay + e.monthlyWithholdingTax + e.monthlyOnss;
   const isGone = e.endDate && new Date(e.endDate) < new Date();
+
+  // Priorité valeur manuelle stockée → sinon calcul auto depuis le brut
+  const calc = e.payrollCalc;
+  const showNet       = e.monthlyNetPay          > 0 ? e.monthlyNetPay          : (calc?.net ?? null);
+  const showWht       = e.monthlyWithholdingTax  > 0 ? e.monthlyWithholdingTax  : (calc?.withholdingTax ?? null);
+  const showOnss      = e.monthlyOnss            > 0 ? e.monthlyOnss            : (calc?.onssEmployee ?? null);
+  const isNetAuto     = !(e.monthlyNetPay > 0)         && showNet  != null;
+  const isWhtAuto     = !(e.monthlyWithholdingTax > 0) && showWht  != null;
+  const isOnssAuto    = !(e.monthlyOnss > 0)           && showOnss != null;
+
+  const employerCost  = (showNet ?? 0) + (showWht ?? 0) + (showOnss ?? 0)
+                        + ((e.effectiveGross ?? 0) * 0.25); // ONSS patronal ~25 %
+
+  function Cell({ value, auto }: { value: number | null; auto: boolean }) {
+    if (value == null) return <span className="text-midnight-400">—</span>;
+    return (
+      <span className={auto ? "italic text-indigoaccent" : ""} title={auto ? "Calculé auto depuis le brut (barème I belge)" : "Valeur manuelle"}>
+        {formatCurrency(value)}
+      </span>
+    );
+  }
+
   return (
     <tr className={isGone ? "opacity-50" : ""}>
       <td>
@@ -127,13 +160,19 @@ function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
         )}
         {e.notes && <div className="text-xs text-midnight-500 truncate max-w-[200px]">{e.notes}</div>}
       </td>
-      <td className="text-sm">{e.role ?? "—"}</td>
       <td className="text-xs">{formatDate(e.startDate)}</td>
       <td className="text-xs">{e.endDate ? formatDate(e.endDate) : <span className="text-emerald-700">en poste</span>}</td>
-      <td className="text-right tabular-nums">{formatCurrency(e.monthlyNetPay)}</td>
-      <td className="text-right tabular-nums">{formatCurrency(e.monthlyWithholdingTax)}</td>
-      <td className="text-right tabular-nums">{formatCurrency(e.monthlyOnss)}</td>
-      <td className="text-right tabular-nums font-semibold">{formatCurrency(total)}</td>
+      <td className="text-right tabular-nums">
+        {e.effectiveGross != null ? (
+          <span className={e.monthlyGrossReference == null ? "italic text-indigoaccent" : ""} title={e.monthlyGrossReference == null ? "Depuis la fiche candidat (simulateur package)" : "Brut saisi manuellement"}>
+            {formatCurrency(e.effectiveGross)}
+          </span>
+        ) : <span className="text-midnight-400" title="Pas de brut configuré ni de scénario de package lié">—</span>}
+      </td>
+      <td className="text-right tabular-nums"><Cell value={showNet}  auto={isNetAuto}  /></td>
+      <td className="text-right tabular-nums"><Cell value={showWht}  auto={isWhtAuto}  /></td>
+      <td className="text-right tabular-nums"><Cell value={showOnss} auto={isOnssAuto} /></td>
+      <td className="text-right tabular-nums font-semibold">{e.effectiveGross ? formatCurrency(employerCost) : "—"}</td>
       <td className="text-right">
         <div className="flex gap-1 justify-end">
           <button onClick={onEdit} className="text-midnight-500 hover:text-midnight-900">
@@ -197,7 +236,7 @@ function EmployeeForm({
       {/* Liens source cachés — l'utilisateur ne les touche pas */}
       {prefill?.candidateId && <input type="hidden" name="candidateId" value={prefill.candidateId} />}
       {prefill?.userId && <input type="hidden" name="userId" value={prefill.userId} />}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="label">Prénom *</label>
           <input name="firstName" required defaultValue={firstName} className="input" />
@@ -205,10 +244,6 @@ function EmployeeForm({
         <div>
           <label className="label">Nom *</label>
           <input name="lastName" required defaultValue={lastName} className="input" />
-        </div>
-        <div className="col-span-2">
-          <label className="label">Rôle</label>
-          <input name="role" defaultValue={employee?.role ?? ""} className="input" placeholder="ex. Sourceuse, Consultant Data" />
         </div>
       </div>
 
@@ -223,30 +258,11 @@ function EmployeeForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <div>
-          <label className="label">Salaire net / mois (€)</label>
-          <input type="number" step="0.01" name="monthlyNetPay" required defaultValue={employee?.monthlyNetPay ?? ""} className="input" />
-        </div>
-        <div>
-          <label className="label">Précompte / mois (€)</label>
-          <input type="number" step="0.01" name="monthlyWithholdingTax" required defaultValue={employee?.monthlyWithholdingTax ?? ""} className="input" />
-        </div>
-        <div>
-          <label className="label">ONSS / mois (€)</label>
-          <input type="number" step="0.01" name="monthlyOnss" required defaultValue={employee?.monthlyOnss ?? ""} className="input" />
-        </div>
-      </div>
+      <PayrollSection employee={employee} />
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="label">Brut de référence (facultatif)</label>
-          <input type="number" step="0.01" name="monthlyGrossReference" defaultValue={employee?.monthlyGrossReference ?? ""} className="input" />
-        </div>
-        <div>
-          <label className="label">Mois versés / an</label>
-          <input type="number" step="0.01" name="monthsPerYear" defaultValue={employee?.monthsPerYear ?? 13.92} className="input" />
-        </div>
+      <div>
+        <label className="label">Mois versés / an</label>
+        <input type="number" step="0.01" name="monthsPerYear" defaultValue={employee?.monthsPerYear ?? 13.92} className="input max-w-[180px]" />
       </div>
 
       <textarea name="notes" rows={2} defaultValue={employee?.notes ?? ""} className="input" placeholder="Notes (voiture, avantages...)" />
@@ -261,5 +277,81 @@ function EmployeeForm({
         </button>
       </div>
     </form>
+  );
+}
+
+/**
+ * Section paie : saisie du brut → calcul auto net / précompte / ONSS en live.
+ * Les 3 champs manuels sont optionnels ; s'ils sont vides, l'ERP utilise le
+ * calcul auto depuis le brut (barème I belge).
+ */
+function PayrollSection({ employee }: { employee?: Employee }) {
+  const [gross, setGross] = useState<number>(() => employee?.monthlyGrossReference ?? employee?.effectiveGross ?? 0);
+  const [netOverride, setNetOverride] = useState<string>(() => employee?.monthlyNetPay ? String(employee.monthlyNetPay) : "");
+  const [whtOverride, setWhtOverride] = useState<string>(() => employee?.monthlyWithholdingTax ? String(employee.monthlyWithholdingTax) : "");
+  const [onssOverride, setOnssOverride] = useState<string>(() => employee?.monthlyOnss ? String(employee.monthlyOnss) : "");
+
+  const calc = useMemo(() => (gross > 0 ? computeBelgianPayroll(gross) : null), [gross]);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <label className="label">Salaire brut / mois (€) *</label>
+        <input
+          type="number" step="0.01" name="monthlyGrossReference" required
+          value={gross || ""}
+          onChange={(e) => setGross(parseFloat(e.target.value) || 0)}
+          className="input max-w-[200px]"
+          placeholder="ex: 4200"
+        />
+        <p className="text-[11px] text-midnight-500 mt-1">
+          Si une fiche candidat liée existe, le brut est pré-rempli depuis le dernier scénario de package.
+        </p>
+      </div>
+
+      {calc && (
+        <div className="rounded-md border border-indigoaccent/30 bg-indigoaccent/5 p-3">
+          <div className="flex items-center gap-2 text-xs text-indigoaccent font-semibold mb-2">
+            <Sparkles className="w-3 h-3" /> CALCUL AUTO · Barème I belge (isolé, 0 enfant)
+          </div>
+          <div className="grid grid-cols-4 gap-3 text-sm">
+            <KV lbl="ONSS employé (13,07 %)" val={formatCurrency(calc.onssEmployee)} />
+            <KV lbl="Précompte prof." val={formatCurrency(calc.withholdingTax)} />
+            <KV lbl="Net" val={formatCurrency(calc.net)} highlight />
+            <KV lbl="Coût employeur" val={formatCurrency(calc.totalEmployerCost)} />
+          </div>
+          <p className="text-[11px] text-midnight-500 mt-2">
+            Ces valeurs sont utilisées automatiquement si tu laisses les champs manuels ci-dessous vides.
+          </p>
+        </div>
+      )}
+
+      <details className="text-sm">
+        <summary className="cursor-pointer text-xs text-midnight-500 uppercase tracking-wide">Override manuels (facultatif)</summary>
+        <div className="grid grid-cols-3 gap-2 mt-3">
+          <div>
+            <label className="label">Net manuel</label>
+            <input type="number" step="0.01" name="monthlyNetPay" value={netOverride} onChange={(e) => setNetOverride(e.target.value)} className="input" placeholder={calc ? String(calc.net) : "—"} />
+          </div>
+          <div>
+            <label className="label">Précompte manuel</label>
+            <input type="number" step="0.01" name="monthlyWithholdingTax" value={whtOverride} onChange={(e) => setWhtOverride(e.target.value)} className="input" placeholder={calc ? String(calc.withholdingTax) : "—"} />
+          </div>
+          <div>
+            <label className="label">ONSS manuel</label>
+            <input type="number" step="0.01" name="monthlyOnss" value={onssOverride} onChange={(e) => setOnssOverride(e.target.value)} className="input" placeholder={calc ? String(calc.onssEmployee) : "—"} />
+          </div>
+        </div>
+      </details>
+    </div>
+  );
+}
+
+function KV({ lbl, val, highlight }: { lbl: string; val: string; highlight?: boolean }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wide text-midnight-500">{lbl}</div>
+      <div className={"font-mono tabular-nums text-sm " + (highlight ? "text-indigoaccent font-semibold" : "text-midnight-900")}>{val}</div>
+    </div>
   );
 }

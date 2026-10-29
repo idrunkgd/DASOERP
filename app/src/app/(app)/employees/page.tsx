@@ -4,6 +4,7 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmployeesTable } from "./table";
 import { formatCurrency } from "@/lib/utils";
+import { computeBelgianPayroll } from "@/lib/belgian-payroll";
 import { UserPlus, AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -31,8 +32,28 @@ export default async function EmployeesPage() {
     prisma.payrollEmployee.findMany({
       orderBy: [{ endDate: { sort: "asc", nulls: "first" } }, { startDate: "asc" }],
       include: {
-        candidate: { select: { id: true, firstName: true, lastName: true } },
-        user:      { select: { id: true, firstName: true, lastName: true } }
+        candidate: {
+          select: {
+            id: true, firstName: true, lastName: true,
+            salaryScenarios: {
+              orderBy: { createdAt: "desc" }, take: 1,
+              select: { grossMonthly: true, label: true }
+            }
+          }
+        },
+        user: {
+          select: {
+            id: true, firstName: true, lastName: true,
+            candidateProfile: {
+              select: {
+                salaryScenarios: {
+                  orderBy: { createdAt: "desc" }, take: 1,
+                  select: { grossMonthly: true, label: true }
+                }
+              }
+            }
+          }
+        }
       }
     }),
     // Consultants internes flag=EMPLOYEE sans PayrollEmployee lié
@@ -119,26 +140,43 @@ export default async function EmployeesPage() {
         </section>
       )}
 
-      <EmployeesTable employees={employees.map((e) => ({
-        id: e.id,
-        firstName: e.firstName, lastName: e.lastName,
-        role: e.role,
-        startDate: e.startDate.toISOString().slice(0, 10),
-        endDate: e.endDate ? e.endDate.toISOString().slice(0, 10) : null,
-        monthlyNetPay: Number(e.monthlyNetPay),
-        monthlyWithholdingTax: Number(e.monthlyWithholdingTax),
-        monthlyOnss: Number(e.monthlyOnss),
-        monthlyGrossReference: e.monthlyGrossReference ? Number(e.monthlyGrossReference) : null,
-        monthsPerYear: Number(e.monthsPerYear),
-        notes: e.notes,
-        candidateId: e.candidateId,
-        userId: e.userId,
-        sourceLink: e.candidate
-          ? { href: `/candidates/${e.candidate.id}`, label: "Fiche candidat" }
-          : e.user
-            ? { href: `/users/${e.user.id}`, label: "Fiche consultant" }
-            : null
-      }))} />
+      <EmployeesTable employees={employees.map((e) => {
+        // Brut : priorité au Brut stocké sur PayrollEmployee → fallback dernier
+        // scénario de package depuis la fiche candidat / consultant.
+        const scenarioGross = e.candidate?.salaryScenarios?.[0]?.grossMonthly
+          ?? (e.user as any)?.candidateProfile?.salaryScenarios?.[0]?.grossMonthly
+          ?? null;
+        const storedGross = e.monthlyGrossReference ? Number(e.monthlyGrossReference) : null;
+        const effectiveGross = storedGross ?? (scenarioGross ? Number(scenarioGross) : null);
+        const payrollCalc = effectiveGross ? computeBelgianPayroll(effectiveGross) : null;
+        return {
+          id: e.id,
+          firstName: e.firstName, lastName: e.lastName,
+          startDate: e.startDate.toISOString().slice(0, 10),
+          endDate: e.endDate ? e.endDate.toISOString().slice(0, 10) : null,
+          monthlyNetPay: Number(e.monthlyNetPay),
+          monthlyWithholdingTax: Number(e.monthlyWithholdingTax),
+          monthlyOnss: Number(e.monthlyOnss),
+          monthlyGrossReference: storedGross,
+          monthsPerYear: Number(e.monthsPerYear),
+          notes: e.notes,
+          candidateId: e.candidateId,
+          userId: e.userId,
+          scenarioGross: scenarioGross ? Number(scenarioGross) : null,
+          effectiveGross,
+          payrollCalc: payrollCalc ? {
+            net: payrollCalc.net,
+            withholdingTax: payrollCalc.withholdingTax,
+            onssEmployee: payrollCalc.onssEmployee,
+            totalEmployerCost: payrollCalc.totalEmployerCost
+          } : null,
+          sourceLink: e.candidate
+            ? { href: `/candidates/${e.candidate.id}`, label: "Fiche candidat" }
+            : e.user
+              ? { href: `/users/${e.user.id}`, label: "Fiche consultant" }
+              : null
+        };
+      })} />
     </div>
   );
 }

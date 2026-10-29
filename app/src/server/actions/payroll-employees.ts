@@ -8,11 +8,11 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { revalidatePath } from "next/cache";
+import { computeBelgianPayroll } from "@/lib/belgian-payroll";
 
 const Schema = z.object({
   firstName: z.string().min(1),
   lastName:  z.string().min(1),
-  role:      z.string().optional().nullable().transform((v) => v?.trim() || null),
   startDate: z.string().min(1),
   endDate:   z.string().optional().nullable().transform((v) => v || null),
   monthlyNetPay:         z.coerce.number().nonnegative().default(0),
@@ -26,9 +26,25 @@ const Schema = z.object({
   notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
 
+/**
+ * Si les montants manuels (net/précompte/ONSS) sont 0 et qu'un brut est fourni,
+ * on complète automatiquement depuis le calcul barème I belge.
+ */
+function fillAutoPayroll(d: z.infer<typeof Schema>) {
+  if (!d.monthlyGrossReference || d.monthlyGrossReference <= 0) return d;
+  const calc = computeBelgianPayroll(Number(d.monthlyGrossReference));
+  return {
+    ...d,
+    monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : calc.net,
+    monthlyWithholdingTax: d.monthlyWithholdingTax > 0 ? d.monthlyWithholdingTax : calc.withholdingTax,
+    monthlyOnss:           d.monthlyOnss           > 0 ? d.monthlyOnss           : calc.onssEmployee
+  };
+}
+
 export async function createEmployee(formData: FormData) {
   await requirePermission("finance.write");
-  const data = Schema.parse(Object.fromEntries(formData));
+  const parsed = Schema.parse(Object.fromEntries(formData));
+  const data = fillAutoPayroll(parsed);
   // XOR : au max un seul lien source
   if (data.candidateId && data.userId) {
     throw new Error("Un employé ne peut pas être lié à la fois à un candidat et un consultant interne.");
@@ -47,7 +63,8 @@ export async function createEmployee(formData: FormData) {
 
 export async function updateEmployee(id: string, formData: FormData) {
   await requirePermission("finance.write");
-  const data = Schema.parse(Object.fromEntries(formData));
+  const parsed = Schema.parse(Object.fromEntries(formData));
+  const data = fillAutoPayroll(parsed);
   await prisma.payrollEmployee.update({
     where: { id },
     data: {
