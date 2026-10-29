@@ -56,15 +56,15 @@ function fillAutoPayroll(d: z.infer<typeof Schema>) {
         netExpensesMonthly: d.netExpensesMonthly
       })
     : computeBelgianPayroll(gross);
-  // ONSS stocké = ONSS employé + ONSS patronal (ce que Dasolabs verse à l'ONSS
-  // chaque mois). Cashflow ligne "ONSS" = cette valeur agrégée.
-  const totalOnss = Number((calc as any).onssEmployee ?? 0) + Number((calc as any).onssEmployerEstimate ?? 0);
+  // IMPORTANT : on stocke ici l'ONSS EMPLOYÉ seul (13,07 %). La partie patronale
+  // est calculée dynamiquement par le cashflow pour l'affichage mais pas écrite
+  // en DB — évite de modifier les mois PAID historiques.
   const netVal = (calc as any).netCash ?? (calc as any).net;
   return {
     ...d,
     monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : netVal,
     monthlyWithholdingTax: d.monthlyWithholdingTax > 0 ? d.monthlyWithholdingTax : calc.withholdingTax,
-    monthlyOnss:           d.monthlyOnss           > 0 ? d.monthlyOnss           : totalOnss
+    monthlyOnss:           d.monthlyOnss           > 0 ? d.monthlyOnss           : calc.onssEmployee
   };
 }
 
@@ -91,7 +91,11 @@ export async function createEmployee(formData: FormData) {
 export async function updateEmployee(id: string, formData: FormData) {
   await requirePermission("finance.write");
   const parsed = Schema.parse(Object.fromEntries(formData));
-  const data = fillAutoPayroll(parsed);
+  // IMPORTANT : à l'édition, on ne recalcule PAS automatiquement net/wht/onss
+  // pour éviter d'écraser des valeurs stockées (qui alimentent cashflow). Seule
+  // la création initiale fait le fillAutoPayroll. Pour recalculer explicitement,
+  // il faut vider les 3 champs manuels dans le formulaire.
+  const data = parsed;
   await prisma.payrollEmployee.update({
     where: { id },
     data: {
