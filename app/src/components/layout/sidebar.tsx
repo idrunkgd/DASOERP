@@ -41,14 +41,13 @@ const SECTIONS: Section[] = [
     label: "Commerciale",
     items: [
       { href: "/companies",   label: "Entreprises",          icon: Building2,       perm: "companies.read" },
-      { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" }
+      { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" },
+      { href: "/candidates",  label: "Candidats",            icon: UserPlus,        perm: "consulting.read" }
     ]
   },
   {
     label: "Consultance",
     items: [
-      { href: "/prospection",      label: "Prospection",          icon: UserPlus,        perm: "consulting.write" },
-      { href: "/candidates",       label: "Candidats",            icon: UserPlus,        perm: "consulting.read" },
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },
       { href: "/missions",         label: "Missions",             icon: Plane,           perm: ["consulting.read", "self.read"] as Permission[] },

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ContactForm } from "../contact-form";
 import { ContactCompaniesSection } from "./contact-companies-section";
+import { InteractionItem } from "./interaction-item";
 import { addInteraction, deleteContact } from "@/server/actions/contacts";
 import { ConfirmButton } from "@/components/ui/confirm";
 import { formatDate } from "@/lib/utils";
@@ -79,13 +80,11 @@ export default async function ContactDetail({ params }: { params: { id: string }
             ) : (
               <ul className="space-y-3">
                 {contact.interactions.map(i => (
-                  <li key={i.id} className="flex gap-3 border-l-2 border-indigoaccent/40 pl-3">
-                    <div className="flex-1">
-                      <div className="text-xs text-midnight-500">{formatDate(i.occurredAt, { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} · <span className="badge-info">{i.kind}</span> · {i.user ? `${i.user.firstName} ${i.user.lastName}` : "—"}</div>
-                      <div className="font-medium text-midnight-900 text-sm">{i.subject}</div>
-                      {i.body && <div className="text-sm text-midnight-700 mt-0.5">{i.body}</div>}
-                    </div>
-                  </li>
+                  <InteractionItem key={i.id} interaction={{
+                    id: i.id, kind: i.kind, subject: i.subject, body: i.body,
+                    occurredAt: i.occurredAt,
+                    user: i.user ? { firstName: i.user.firstName, lastName: i.user.lastName } : null
+                  }} />
                 ))}
               </ul>
             )}

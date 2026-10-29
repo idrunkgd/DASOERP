@@ -119,6 +119,7 @@ export default async function TimesheetPage({ searchParams }: { searchParams: { 
             <Link href={`/timesheet${impersonatedUserId ? `?userId=${impersonatedUserId}` : ""}`} className="btn-ghost">Aujourd'hui</Link>
             <Link href={`/timesheet?week=${nextWeek}${impersonateQs}`} className="btn-secondary">Sem. suivante →</Link>
             <Link href="/timesheet/validation" className="btn-secondary">À valider</Link>
+            {canValidateTs && <Link href="/timesheet/overview" className="btn-secondary">Vue mensuelle équipe</Link>}
             <PdfExportButton
               weekStartISO={format(weekStart, "yyyy-MM-dd")}
               onBehalfOfUserId={impersonatedUserId}

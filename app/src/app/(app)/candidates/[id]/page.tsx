@@ -19,13 +19,15 @@ import { CheckCircle2, MessageSquare, FileDown, Eye } from "lucide-react";
 import { SalaryScenariosPanel } from "./salary-scenarios-panel";
 import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
 import { CandidateDocumentsPanel } from "./documents-panel";
+import { CandidateInteractionsPanel } from "./interactions-panel";
+import { RecruitmentPipeline } from "./recruitment-pipeline";
 
-type CandidateTab = "general" | "cv" | "recruitment" | "contracts" | "files";
+type CandidateTab = "general" | "cv" | "recruitment" | "contracts" | "files" | "interactions";
 
 export default async function CandidateDetail({ params, searchParams }: { params: { id: string }; searchParams: { tab?: string } }) {
   await requirePermission("consulting.read");
   const session = await requireSession();
-  const tab: CandidateTab = (["general", "cv", "recruitment", "contracts", "files"].includes(searchParams.tab ?? "")
+  const tab: CandidateTab = (["general", "cv", "recruitment", "contracts", "files", "interactions"].includes(searchParams.tab ?? "")
     ? searchParams.tab
     : "general") as CandidateTab;
   const [c, skillCatalog, candidateContracts, contractTemplates] = await Promise.all([
@@ -88,6 +90,24 @@ export default async function CandidateDetail({ params, searchParams }: { params
       include: { uploadedBy: { select: { firstName: true, lastName: true } } }
     });
   } catch { /* colonne absente — silencieux */ }
+
+  // Interactions candidat (appels/mails/meetings/notes)
+  let candidateInteractions: any[] = [];
+  try {
+    candidateInteractions = await (prisma as any).candidateInteraction.findMany({
+      where: { candidateId: params.id },
+      orderBy: { occurredAt: "desc" },
+      include: { user: { select: { firstName: true, lastName: true } } }
+    });
+  } catch { /* table absente — silencieux */ }
+
+  // Pipeline recrutement (6 étapes avec notes)
+  let recruitmentStages: any[] = [];
+  try {
+    recruitmentStages = await (prisma as any).candidateRecruitmentStage.findMany({
+      where: { candidateId: params.id }
+    });
+  } catch { /* table absente — silencieux */ }
 
   const sessionPerms = await getUserEffectivePermissions(session.user.id, session.user.role);
   const canRecruit = sessionPerms.includes("users.manage");
@@ -203,7 +223,9 @@ export default async function CandidateDetail({ params, searchParams }: { params
           { key: "contracts",   label: "Contrats",    icon: "contract",
             badge: candidateContracts.length || undefined },
           { key: "files",       label: "Fichiers",    icon: "folder",
-            badge: candidateDocuments.length || undefined }
+            badge: candidateDocuments.length || undefined },
+          { key: "interactions",label: "Interactions",icon: "message",
+            badge: candidateInteractions.length || undefined }
         ];
         return <PersonTabsNav tabs={CANDIDATE_TABS} current={tab} />;
       })()}
@@ -250,6 +272,16 @@ export default async function CandidateDetail({ params, searchParams }: { params
 
           {tab === "recruitment" && (
             <>
+              <RecruitmentPipeline
+                candidateId={c.id}
+                canManage={sessionPerms.includes("consulting.write")}
+                stages={recruitmentStages.map((s: any) => ({
+                  stageKey: s.stageKey,
+                  done: s.done,
+                  doneAt: s.doneAt ? s.doneAt.toISOString() : null,
+                  notes: s.notes
+                }))}
+              />
               <HiringInterviewsPanel
                 candidateId={c.id}
                 interviews={c.hiringInterviews.map(i => ({
@@ -314,6 +346,18 @@ export default async function CandidateDetail({ params, searchParams }: { params
             <div className="card p-6 text-sm text-midnight-500 italic">
               Tu n'as pas la permission pour voir les contrats de ce candidat.
             </div>
+          )}
+
+          {tab === "interactions" && (
+            <CandidateInteractionsPanel
+              candidateId={c.id}
+              canManage={sessionPerms.includes("consulting.write")}
+              interactions={candidateInteractions.map((i: any) => ({
+                id: i.id, kind: i.kind, subject: i.subject, body: i.body,
+                occurredAt: i.occurredAt.toISOString(),
+                user: i.user ? { firstName: i.user.firstName, lastName: i.user.lastName } : null
+              }))}
+            />
           )}
 
           {tab === "files" && (

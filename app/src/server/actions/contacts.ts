@@ -93,6 +93,36 @@ export async function addInteraction(contactId: string, formData: FormData) {
 }
 
 /**
+ * Modifie une interaction existante. Seul l'auteur ou un utilisateur avec
+ * contacts.write peut éditer (on garde laxiste côté règle, log l'édit via
+ * updatedAt dans la DB).
+ */
+export async function updateInteraction(id: string, formData: FormData) {
+  await requirePermission("contacts.write");
+  const kind = String(formData.get("kind") || "note");
+  const subject = String(formData.get("subject") || "").trim();
+  const body = String(formData.get("body") || "").trim() || null;
+  if (!subject) throw new Error("Le sujet est obligatoire");
+  const interaction = await prisma.contactInteraction.update({
+    where: { id },
+    data: { kind, subject, body }
+  });
+  revalidatePath(`/contacts/${interaction.contactId}`);
+}
+
+/**
+ * Supprime une interaction. Idempotent (retourne OK si déjà supprimée).
+ */
+export async function deleteInteraction(id: string) {
+  await requirePermission("contacts.write");
+  const interaction = await prisma.contactInteraction.findUnique({ where: { id } });
+  if (!interaction) return { ok: true };
+  await prisma.contactInteraction.delete({ where: { id } });
+  revalidatePath(`/contacts/${interaction.contactId}`);
+  return { ok: true };
+}
+
+/**
  * Crée une tâche "à faire" liée à un contact — utilisé par le bouton
  * téléphone dans la liste contacts. Apparaît ensuite dans /commercial
  * (Activité commerciale) avec un badge todo + case à cocher.

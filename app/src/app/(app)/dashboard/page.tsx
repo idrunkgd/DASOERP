@@ -9,6 +9,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { projectsOverBudget } from "@/server/services/project-service";
 import { userPlannedHoursForWeek } from "@/server/services/load-service";
+import { getMissionsEndingSoon } from "@/server/services/mission-end-alerts";
+import { AlertTriangle as AlertIcon, CalendarClock } from "lucide-react";
 import { Briefcase, FolderKanban, Users as UsersIcon, AlertTriangle, Clock, ShoppingCart, FileText, Receipt, Headset, UserPlus, HeartPulse, ReceiptText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +59,9 @@ export default async function Dashboard() {
     prisma.mission.count({ where: { status: { in: ["PLANNED", "ACTIVE", "EXTENDED"] } } }),
     prisma.candidate.count({ where: { status: "ACTIVE" } })
   ]);
+
+  // Alerte fin de mission dans 3 mois
+  const missionsEndingSoon = await getMissionsEndingSoon();
 
   // ─── Bloc RH — malades du jour, notes à approuver, timesheets en attente ───
   const today = new Date();
@@ -121,6 +126,57 @@ export default async function Dashboard() {
         <KpiCard label="Missions ouvertes" value={openMissions} icon={Headset} tone="info" />
         <KpiCard label="Candidats disponibles" value={candidatesAvailable} icon={UserPlus} />
       </div>
+
+      {/* ─── Alerte : fins de mission dans 3 mois ─── */}
+      {missionsEndingSoon.length > 0 && (
+        <section className="card p-4 mb-6 border-amber-200 bg-amber-50/40">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold flex items-center gap-2 text-amber-900">
+              <CalendarClock className="w-4 h-4 text-amber-700" />
+              Fins de mission dans les 3 mois ({missionsEndingSoon.length})
+            </h2>
+            <span className="text-xs text-midnight-500">Pense à anticiper les renouvellements / reclassements</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase tracking-wide text-midnight-500 border-b border-amber-200">
+                <tr>
+                  <th className="py-2 px-2">Référence</th>
+                  <th className="py-2 px-2">Client</th>
+                  <th className="py-2 px-2">Consultant</th>
+                  <th className="py-2 px-2">Fin</th>
+                  <th className="py-2 px-2 text-right">Reste</th>
+                </tr>
+              </thead>
+              <tbody>
+                {missionsEndingSoon.map((m) => (
+                  <tr key={m.id} className="border-b border-amber-100/60 hover:bg-amber-100/30">
+                    <td className="py-2 px-2">
+                      <Link href={`/missions/${m.id}`} className="font-medium text-indigoaccent hover:underline">{m.reference}</Link>
+                      <div className="text-xs text-midnight-500">{m.title}</div>
+                    </td>
+                    <td className="py-2 px-2 text-midnight-700">{m.clientName}</td>
+                    <td className="py-2 px-2 text-midnight-700">
+                      {m.consultantName
+                        ? <Link href={`/consultants/${m.consultantId}`} className="hover:underline">{m.consultantName}</Link>
+                        : <span className="text-midnight-400">—</span>}
+                    </td>
+                    <td className="py-2 px-2 text-xs">{m.endDate.toLocaleDateString("fr-BE")}</td>
+                    <td className="py-2 px-2 text-right">
+                      <span className={
+                        "font-mono tabular-nums font-semibold " +
+                        (m.daysLeft < 30 ? "text-red-700" : m.daysLeft < 60 ? "text-amber-700" : "text-emerald-700")
+                      }>
+                        J-{m.daysLeft}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {/* ─── RH — vue rapide équipe ─── */}
       <div className="grid lg:grid-cols-3 gap-4 mb-6">

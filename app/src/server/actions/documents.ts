@@ -34,7 +34,9 @@ const MetaSchema = z.object({
   offerId: z.string().optional().nullable(),
   consultantId: z.string().optional().nullable(),
   vehicleId: z.string().optional().nullable(),
-  candidateId: z.string().optional().nullable()
+  candidateId: z.string().optional().nullable(),
+  missionId: z.string().optional().nullable(),
+  audience: z.string().optional().nullable()
 });
 
 /**
@@ -66,7 +68,9 @@ export async function uploadDocument(formData: FormData) {
     offerId: raw.offerId || null,
     consultantId: raw.consultantId || null,
     vehicleId: raw.vehicleId || null,
-    candidateId: raw.candidateId || null
+    candidateId: raw.candidateId || null,
+    missionId: raw.missionId || null,
+    audience: raw.audience || null
   });
 
   const tags = parseTags(meta.tags);
@@ -106,6 +110,8 @@ export async function uploadDocument(formData: FormData) {
         consultantId: meta.consultantId,
         vehicleId: meta.vehicleId,
         candidateId: meta.candidateId,
+        missionId: meta.missionId,
+        audience: meta.audience,
         uploadedById: session.user.id
       } as any
     });
@@ -119,6 +125,7 @@ export async function uploadDocument(formData: FormData) {
     revalidatePath("/documents");
     if (meta.vehicleId) revalidatePath(`/fleet/${meta.vehicleId}`);
     if (meta.candidateId) revalidatePath(`/candidates/${meta.candidateId}`);
+    if (meta.missionId) revalidatePath(`/missions/${meta.missionId}`);
     return created;
   } catch (e) {
     // Cleanup fichier si DB a planté

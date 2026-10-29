@@ -309,6 +309,8 @@ model User {
   managedProjects     Project[]          @relation("ProjectManager")
   remainingUpdatesOnProjects Project[]   @relation("ProjectRemainingUpdater")
   salaryScenariosCreated CandidateSalaryScenario[] @relation("ScenarioCreator")
+  missionNotesAuthored MissionNote[] @relation("MissionNoteAuthor")
+  candidateInteractionsAuthored CandidateInteraction[] @relation("CandidateInteractionAuthor")
   cashflowSettingsUpdates CashflowSettings[] @relation("CashflowSettingsUpdater")
   recurringExpensesCreated RecurringExpense[] @relation("RecurringExpenseCreator")
   oneOffCashflowEntriesCreated OneOffCashflowEntry[] @relation("OneOffCashflowCreator")
@@ -1382,6 +1384,11 @@ model Candidate {
   payrollEmployee PayrollEmployee? @relation("PayrollFromCandidate")
   /// Fichiers rattachés à ce candidat (CV externes, rapports d'entretien...)
   documents       Document[]       @relation("DocumentCandidate")
+  /// Timeline d'interactions (appels, mails, réunions, notes) — même pattern
+  /// que ContactInteraction mais lié au Candidate.
+  interactions    CandidateInteraction[] @relation("CandidateInteractions")
+  /// Pipeline recrutement : 6 étapes (qualification → placement) avec notes.
+  recruitmentStages CandidateRecruitmentStage[] @relation("CandidateRecruitmentStages")
 
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -1554,6 +1561,10 @@ model Mission {
   milestones        BillingMilestone[]
   expenseReports    ExpenseReport[]         @relation("MissionExpenseReports")
   leaveRequests     LeaveRequest[]          @relation("MissionLeaveRequests")
+  /// Notes de suivi de mission (côté client ou consultant) — rapides, inline.
+  followUpNotes     MissionNote[]           @relation("MissionNotes")
+  /// Documents de suivi de mission (upload fichiers client/consultant).
+  followUpDocuments Document[]              @relation("DocumentMission")
 
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
@@ -1562,6 +1573,67 @@ model Mission {
   @@index([companyId])
   @@index([status, endDate])
   @@index([intermediaryCompanyId])
+}
+
+/// Pipeline recrutement du candidat avec 6 étapes fixes.
+/// Chaque étape stocke un flag done + notes libres. Lazy-créée au premier toggle.
+///   QUALIFICATION   = screening initial, call découverte
+///   CV_SENT         = CV envoyé au client
+///   TECH_INTERVIEW  = entretien technique
+///   CLIENT_MEETING  = rencontre client finale
+///   OFFER           = offre envoyée / acceptée
+///   PLACEMENT       = placé / démarre mission
+model CandidateRecruitmentStage {
+  id          String    @id @default(cuid())
+  candidateId String
+  candidate   Candidate @relation("CandidateRecruitmentStages", fields: [candidateId], references: [id], onDelete: Cascade)
+  /// Clé de l'étape (voir enum au-dessus)
+  stageKey    String
+  done        Boolean   @default(false)
+  doneAt      DateTime?
+  notes       String?
+  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime  @default(now())
+
+  @@unique([candidateId, stageKey])
+  @@index([candidateId])
+}
+
+/// Timeline d'interactions avec un candidat — appels, mails, meetings, notes.
+model CandidateInteraction {
+  id          String   @id @default(cuid())
+  candidateId String
+  candidate   Candidate @relation("CandidateInteractions", fields: [candidateId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation("CandidateInteractionAuthor", fields: [userId], references: [id], onDelete: SetNull)
+  /// note, call, email, meeting
+  kind        String   @default("note")
+  subject     String
+  body        String?
+  occurredAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([candidateId, occurredAt])
+}
+
+/// Note rapide attachée à une mission pour le suivi quotidien.
+/// 2 audiences : CLIENT (contexte visible côté client/portage) et CONSULTANT
+/// (notes internes / échanges consultant). Permet un suivi granulaire.
+model MissionNote {
+  id         String   @id @default(cuid())
+  missionId  String
+  mission    Mission  @relation("MissionNotes", fields: [missionId], references: [id], onDelete: Cascade)
+  authorId   String?
+  author     User?    @relation("MissionNoteAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  /// CLIENT ou CONSULTANT
+  audience   String   @default("CONSULTANT")
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([missionId, audience])
+  @@index([createdAt])
 }
 
 // =============================================================
@@ -2200,6 +2272,11 @@ model Document {
   vehicle      Vehicle? @relation("DocumentVehicle", fields: [vehicleId], references: [id], onDelete: SetNull)
   candidateId  String?
   candidate    Candidate? @relation("DocumentCandidate", fields: [candidateId], references: [id], onDelete: SetNull)
+  missionId    String?
+  mission      Mission?   @relation("DocumentMission", fields: [missionId], references: [id], onDelete: SetNull)
+  /// Audience du document (CLIENT, CONSULTANT, INTERNAL) — utilisé pour
+  /// filtrer les documents partagés dans le suivi mission (2 onglets).
+  audience     String?
 
   // Versioning : V1 = parent=null, V2/V3/Vn = parent=V1.id
   parentDocumentId String?
@@ -2217,6 +2294,7 @@ model Document {
   @@index([offerId])
   @@index([consultantId])
   @@index([candidateId])
+  @@index([missionId])
   @@index([parentDocumentId])
   @@index([expiresAt])
   @@index([createdAt])

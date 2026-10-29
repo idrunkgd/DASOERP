@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { MissionExecForm } from "./mission-exec-form";
 import { MissionExecStatusActions } from "./status-actions";
 import { GenerateCashflowButton } from "./generate-cashflow-button";
+import { MissionFollowUpPanel } from "./followup-panel";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { differenceInCalendarDays } from "date-fns";
 
@@ -46,6 +47,22 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
     prisma.contact.findMany({ orderBy: [{ lastName: "asc" }], select: { id: true, firstName: true, lastName: true, companyId: true } })
   ]);
 
+  // Notes de suivi + documents (tolérant à l'absence de migration)
+  let followUpNotes: any[] = []; let followUpDocuments: any[] = [];
+  try {
+    followUpNotes = await (prisma as any).missionNote.findMany({
+      where: { missionId: m.id }, orderBy: { createdAt: "desc" },
+      include: { author: { select: { firstName: true, lastName: true } } }
+    });
+  } catch { /* table absente — silencieux */ }
+  try {
+    followUpDocuments = await (prisma as any).document.findMany({
+      where: { missionId: m.id, parentDocumentId: null },
+      orderBy: { createdAt: "desc" },
+      include: { uploadedBy: { select: { firstName: true, lastName: true } } }
+    });
+  } catch { /* colonne absente — silencieux */ }
+
   // Heures validées / chiffré
   const tsAggr = await prisma.timesheetEntry.aggregate({
     where: { missionId: m.id, status: "APPROVED" }, _sum: { hours: true }
@@ -81,7 +98,26 @@ export default async function MissionExecDetail({ params }: { params: { id: stri
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {canWrite ? (
-            <MissionExecForm initial={m as any} companies={companies} consultants={consultants} contacts={contacts} />
+            <>
+              <MissionExecForm initial={m as any} companies={companies} consultants={consultants} contacts={contacts} />
+              <MissionFollowUpPanel
+                missionId={m.id}
+                clientLabel={m.company.name}
+                consultantLabel={m.consultant ? `${m.consultant.firstName} ${m.consultant.lastName}` : null}
+                canManage={canWrite}
+                notes={followUpNotes.map((n: any) => ({
+                  id: n.id, content: n.content, audience: n.audience as any,
+                  createdAt: n.createdAt.toISOString(),
+                  author: n.author ? { firstName: n.author.firstName, lastName: n.author.lastName } : null
+                }))}
+                documents={followUpDocuments.map((d: any) => ({
+                  id: d.id, title: d.title, originalName: d.originalName, size: d.size,
+                  audience: d.audience ?? null,
+                  createdAt: d.createdAt.toISOString(),
+                  uploadedBy: d.uploadedBy ?? null
+                }))}
+              />
+            </>
           ) : (
             <div className="card p-6 space-y-4">
               <h3 className="font-semibold text-midnight-900">Ma mission</h3>

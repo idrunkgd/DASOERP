@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dasolabs — The Journey of Data</title>
+<style>
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #040812; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; color: #eaf3ff; height: 100%; width: 100%; }
+  #scene { position: fixed; inset: 0; display: block; }
+
+  /* HUD texte scène */
+  .hud { position: fixed; left: 0; right: 0; bottom: 10vh; display: flex; justify-content: center; pointer-events: none; z-index: 10; }
+  .hud-inner {
+    text-align: center;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    text-shadow: 0 0 24px rgba(0, 200, 255, 0.6);
+  }
+  .hud-inner.on { opacity: 1; }
+  .scene-label { font-size: 12px; color: #4bc8ff; margin-bottom: 10px; }
+  .scene-title { font-size: 36px; color: #fff; letter-spacing: 0.08em; }
+  .scene-sub   { font-size: 14px; color: #a0bddd; margin-top: 10px; font-weight: 400; letter-spacing: 0.1em; }
+
+  /* HUD style "FPS cockpit" permanent */
+  .fps-hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between;
+    padding: 20px 30px; pointer-events: none; z-index: 8;
+    font-size: 10px; letter-spacing: 0.25em; color: #4bc8ff; text-transform: uppercase;
+    opacity: 0; transition: opacity 0.4s ease;
+  }
+  .fps-hud.on { opacity: 1; }
+  .fps-hud .cell { display: flex; align-items: center; gap: 8px; }
+  .fps-hud .dot { width: 6px; height: 6px; border-radius: 50%; background: #4bc8ff; box-shadow: 0 0 10px #4bc8ff; animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+  .crosshair { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9; pointer-events: none; opacity: 0; transition: opacity 0.4s ease; }
+  .crosshair.on { opacity: 0.6; }
+  .crosshair svg { display: block; }
+
+  /* Panneau sensor */
+  .sensor {
+    position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(2, 8, 20, 0.9);
+    border: 1px solid rgba(75, 200, 255, 0.5);
+    padding: 20px 30px; border-radius: 8px;
+    text-align: center;
+    opacity: 0; transition: opacity 0.4s ease;
+    box-shadow: 0 0 60px rgba(75, 200, 255, 0.4);
+    z-index: 11;
+  }
+  .sensor.on { opacity: 1; }
+  .sensor .lbl { font-size: 10px; color: #4bc8ff; letter-spacing: 0.3em; margin-bottom: 6px; }
+  .sensor .val { font-size: 42px; color: #fff; font-weight: 300; letter-spacing: 0.05em; }
+  .sensor .val .u { font-size: 20px; color: #4bc8ff; }
+
+  /* MQTT message payload flottant */
+  .payload {
+    position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(2, 8, 20, 0.9);
+    border: 1px solid rgba(170, 100, 255, 0.6);
+    padding: 16px 20px; border-radius: 6px;
+    text-align: left;
+    font-family: "SF Mono", "Monaco", monospace;
+    font-size: 11px; line-height: 1.6;
+    color: #d8c0ff;
+    opacity: 0; transition: opacity 0.4s ease;
+    box-shadow: 0 0 60px rgba(170, 100, 255, 0.4);
+    z-index: 11;
+    min-width: 320px;
+  }
+  .payload.on { opacity: 1; }
+  .payload .k { color: #ff9bff; }
+  .payload .s { color: #8be0ff; }
+  .payload .n { color: #ffd089; }
+  .payload .lbl { font-size: 9px; color: #ff9bff; letter-spacing: 0.3em; margin-bottom: 10px; text-transform: uppercase; }
+
+  /* Logo final */
+  .finale {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;
+    opacity: 0; transition: opacity 1.5s ease; pointer-events: none; z-index: 12;
+    background: radial-gradient(circle at center, rgba(10, 25, 50, 0.4) 0%, transparent 70%);
+  }
+  .finale.on { opacity: 1; }
+  .finale .brand {
+    font-size: clamp(50px, 10vw, 120px);
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    color: #fff;
+    text-shadow: 0 0 60px rgba(75, 200, 255, 0.8), 0 0 120px rgba(75, 200, 255, 0.4);
+  }
+  .finale .brand b { font-weight: 700; color: #4bc8ff; }
+  .finale .tag {
+    margin-top: 24px;
+    font-size: clamp(12px, 1.4vw, 18px);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: #a0bddd;
+  }
+  .finale .divider {
+    width: 60px; height: 1px; background: #4bc8ff; margin: 16px 0;
+    box-shadow: 0 0 20px #4bc8ff;
+  }
+
+  /* UI contrôles */
+  .controls {
+    position: fixed; top: 20px; right: 20px; z-index: 20;
+    display: flex; gap: 10px;
+  }
+  .controls button {
+    background: rgba(2, 10, 24, 0.75);
+    border: 1px solid rgba(75, 200, 255, 0.4);
+    color: #eaf3ff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+  }
+  .controls button:hover { background: rgba(75, 200, 255, 0.15); border-color: #4bc8ff; }
+
+  /* Barre progression */
+  .progress { position: fixed; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255, 255, 255, 0.05); z-index: 20; }
+  .progress .bar { height: 100%; background: linear-gradient(90deg, #4bc8ff, #fff); width: 0%; box-shadow: 0 0 20px #4bc8ff; transition: width 0.1s linear; }
+
+  /* Start overlay */
+  .start {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, #0a1830 0%, #040812 70%);
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    z-index: 30; cursor: pointer;
+    transition: opacity 0.6s ease;
+  }
+  .start.hidden { opacity: 0; pointer-events: none; }
+  .start .title { font-size: clamp(28px, 5vw, 52px); font-weight: 300; letter-spacing: 0.15em; color: #fff; text-shadow: 0 0 40px rgba(75, 200, 255, 0.5); }
+  .start .title b { color: #4bc8ff; font-weight: 600; }
+  .start .sub   { font-size: 13px; color: #a0bddd; letter-spacing: 0.3em; text-transform: uppercase; margin-top: 20px; }
+  .start .meta  { font-size: 10px; color: #4bc8ff; letter-spacing: 0.4em; text-transform: uppercase; margin-top: 10px; }
+  .start .play {
+    margin-top: 40px;
+    width: 80px; height: 80px; border-radius: 50%;
+    border: 2px solid #4bc8ff;
+    display: grid; place-items: center;
+    animation: pulse 2s infinite ease-in-out;
+  }
+  .start .play::after {
+    content: ""; display: block;
+    width: 0; height: 0;
+    border-left: 20px solid #4bc8ff;
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent;
+    margin-left: 6px;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(75, 200, 255, 0.6); }
+    50%     { box-shadow: 0 0 40px 15px rgba(75, 200, 255, 0); }
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<!-- HUD FPS style cockpit permanent -->
+<div class="fps-hud" id="fpsHud">
+  <div class="cell"><span class="dot"></span><span id="fpsLoc">SENSOR T-104 · ZONE A</span></div>
+  <div class="cell"><span id="fpsSpeed">BIT RATE 0.0 Mbit/s</span></div>
+</div>
+<div class="crosshair" id="crosshair">
+  <svg width="60" height="60" viewBox="-30 -30 60 60">
+    <circle cx="0" cy="0" r="12" fill="none" stroke="#4bc8ff" stroke-width="0.5" opacity="0.6" />
+    <circle cx="0" cy="0" r="1.5" fill="#4bc8ff" />
+    <line x1="-24" y1="0" x2="-16" y2="0" stroke="#4bc8ff" stroke-width="1" />
+    <line x1="24"  y1="0" x2="16"  y2="0" stroke="#4bc8ff" stroke-width="1" />
+    <line x1="0" y1="-24" x2="0" y2="-16" stroke="#4bc8ff" stroke-width="1" />
+    <line x1="0" y1="24"  x2="0" y2="16"  stroke="#4bc8ff" stroke-width="1" />
+  </svg>
+</div>
+
+<div class="sensor" id="sensor">
+  <div class="lbl">INDUSTRIAL SENSOR · T-104</div>
+  <div class="val"><span id="sensorVal">72.5</span><span class="u">°C</span></div>
+</div>
+
+<div class="payload" id="payload">
+  <div class="lbl">MQTT PAYLOAD · DASOLABS/SITE-A/LINE-01/T-104/TEMPERATURE</div>
+  <pre style="margin:0; color:#d8c0ff; font-family:inherit; font-size:11px;">{
+  <span class="k">"value"</span>: <span class="n">72.5</span>,
+  <span class="k">"unit"</span>: <span class="s">"°C"</span>,
+  <span class="k">"timestamp"</span>: <span class="s">"2026-10-28T14:12:04Z"</span>,
+  <span class="k">"machine"</span>: <span class="s">"MIX-REACTOR-01"</span>,
+  <span class="k">"line"</span>: <span class="s">"LINE-01"</span>,
+  <span class="k">"site"</span>: <span class="s">"SITE-A"</span>,
+  <span class="k">"quality"</span>: <span class="s">"GOOD"</span>
+}</pre>
+</div>
+
+<div class="hud"><div class="hud-inner" id="hud">
+  <div class="scene-label" id="sceneLabel">Scene 01</div>
+  <div class="scene-title" id="sceneTitle">The Birth</div>
+  <div class="scene-sub"   id="sceneSub">Industrial Sensor · Temperature Reading</div>
+</div></div>
+
+<div class="finale" id="finale">
+  <div class="brand">DASO<b>LABS</b></div>
+  <div class="divider"></div>
+  <div class="tag">From Industrial Data to Intelligence</div>
+</div>
+
+<div class="controls">
+  <button id="restart">Replay</button>
+</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+
+<div class="start" id="start">
+  <div class="title">THE JOURNEY OF <b>DATA</b></div>
+  <div class="sub">An industrial data odyssey</div>
+  <div class="meta">FPS Mode · 72 Sec</div>
+  <div class="play"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  const THREE = window.THREE;
+  const canvas = document.getElementById("scene");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x040812, 1);
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x040812, 0.018);
+
+  const camera = new THREE.PerspectiveCamera(78, window.innerWidth / window.innerHeight, 0.1, 3000);
+  camera.position.set(0, 0, 0);
+
+  // Lumières
+  scene.add(new THREE.AmbientLight(0x2a4466, 0.6));
+  const dLight = new THREE.DirectionalLight(0x8bc5ff, 0.9);
+  dLight.position.set(5, 10, 2);
+  scene.add(dLight);
+
+  // ─── MONDE : chaque scène occupe une plage Z ─────────────────────────
+  // Caméra avance vers -Z. On construit un long couloir de ~2500 unités.
+  // Scene 1 : usine    (z 0 → -400)
+  // Scene 2 : PLC      (z -400 → -900)
+  // Scene 3 : SCADA    (z -900 → -1400)
+  // Scene 4 : HighByte (z -1400 → -1900)
+  // Scene 5 : UNS      (z -1900 → -2500)
+
+  // === UTIL ===
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function neonMat(col, op = 1) {
+    return new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, wireframe: false });
+  }
+  function wireMat(col, op = 0.6) {
+    return new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, wireframe: true });
+  }
+
+  // ── Infinite starfield (toujours visible, donne sensation d'espace)
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 1500;
+  const sp = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    sp[i * 3    ] = rand(-800, 800);
+    sp[i * 3 + 1] = rand(-400, 400);
+    sp[i * 3 + 2] = rand(-2500, 100);
+  }
+  starGeo.setAttribute("position", new THREE.BufferAttribute(sp, 3));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x4bc8ff, size: 0.6, transparent: true, opacity: 0.5 }));
+  scene.add(stars);
+
+  // ─── SCÈNE 1 : USINE INDUSTRIELLE ────────────────────────────────────
+  const scene1 = new THREE.Group();
+  // Sol métallique
+  const floorGeo = new THREE.PlaneGeometry(80, 500, 20, 100);
+  const floor = new THREE.Mesh(floorGeo, wireMat(0x3a7ab4, 0.4));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, -8, -200);
+  scene1.add(floor);
+  // Plafond poutres (I-beams)
+  for (let i = 0; i < 10; i++) {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(80, 0.5, 1), neonMat(0x1a3a5a, 0.8));
+    beam.position.set(0, 10, -i * 50);
+    scene1.add(beam);
+  }
+  // Machines industrielles de chaque côté
+  for (let i = 0; i < 8; i++) {
+    const machineGrp = new THREE.Group();
+    const base = new THREE.Mesh(new THREE.BoxGeometry(6, 5, 6), neonMat(0x1a4068, 0.9));
+    base.position.y = -5;
+    machineGrp.add(base);
+    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.5, 6, 16), neonMat(0x3078b8, 0.9));
+    cyl.position.y = -2;
+    machineGrp.add(cyl);
+    // Petit voyant
+    const light = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), neonMat(0x4bc8ff, 1));
+    light.position.set(0, 0.5, 3.1);
+    machineGrp.add(light);
+    // Edge glow
+    const edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(6, 5, 6)),
+      new THREE.LineBasicMaterial({ color: 0x4bc8ff, transparent: true, opacity: 0.5 })
+    );
+    edges.position.y = -5;
+    machineGrp.add(edges);
+    machineGrp.position.set(i % 2 === 0 ? -12 : 12, 0, -40 - i * 45);
+    scene1.add(machineGrp);
+  }
+  // Capteur T-104 (gros) à ~z = -350 (fin de scène 1)
+  const sensorGrp = new THREE.Group();
+  const sensorBody = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 2.5, 16), neonMat(0x4bc8ff, 1));
+  sensorBody.rotation.x = Math.PI / 2;
+  sensorGrp.add(sensorBody);
+  const sensorGlow = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0x4bc8ff, transparent: true, opacity: 0.15 }));
+  sensorGrp.add(sensorGlow);
+  sensorGrp.position.set(0, 0, -380);
+  scene1.add(sensorGrp);
+  // Câble (tunnel bleu) après sensor
+  for (let i = 0; i < 20; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(3, 0.08, 8, 32),
+      new THREE.MeshBasicMaterial({ color: 0x4bc8ff, transparent: true, opacity: 0.7 })
+    );
+    ring.position.set(0, 0, -390 - i * 2);
+    scene1.add(ring);
+  }
+  scene.add(scene1);
+
+  // ─── SCÈNE 2 : PLC (circuit board city) ──────────────────────────────
+  const scene2 = new THREE.Group();
+  // Grid floor circuit
+  const circuitFloor = new THREE.Mesh(new THREE.PlaneGeometry(100, 600, 20, 60), wireMat(0x2a8c6a, 0.5));
+  circuitFloor.rotation.x = -Math.PI / 2;
+  circuitFloor.position.set(0, -10, -650);
+  scene2.add(circuitFloor);
+  // Microchips (boxes)
+  for (let i = 0; i < 40; i++) {
+    const chip = new THREE.Mesh(
+      new THREE.BoxGeometry(rand(2, 5), rand(0.3, 1.2), rand(2, 5)),
+      neonMat(0x1a6a4a, 0.8)
+    );
+    chip.position.set(rand(-30, 30), rand(-9, -8), rand(-440, -850));
+    scene2.add(chip);
+    // chip top glow
+    const top = new THREE.Mesh(
+      new THREE.PlaneGeometry(chip.geometry.parameters.width * 0.8, chip.geometry.parameters.depth * 0.8),
+      new THREE.MeshBasicMaterial({ color: 0x6afca8, transparent: true, opacity: 0.4 })
+    );
+    top.rotation.x = -Math.PI / 2;
+    top.position.copy(chip.position);
+    top.position.y = chip.position.y + chip.geometry.parameters.height / 2 + 0.01;
+    scene2.add(top);
+  }
+  // Vertical pillars (processors)
+  for (let i = 0; i < 15; i++) {
+    const col = new THREE.Mesh(
+      new THREE.BoxGeometry(2, rand(15, 40), 2),
+      wireMat(0x4bffaa, 0.7)
+    );
+    col.position.set(rand(-25, 25), col.geometry.parameters.height / 2 - 10, rand(-440, -850));
+    scene2.add(col);
+    // Add internal glow
+    const inner = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, col.geometry.parameters.height - 2, 0.5),
+      new THREE.MeshBasicMaterial({ color: 0x6afca8, transparent: true, opacity: 0.8 })
+    );
+    inner.position.copy(col.position);
+    scene2.add(inner);
+  }
+  // Trace lines (circuit paths)
+  for (let i = 0; i < 60; i++) {
+    const trace = new THREE.Mesh(
+      new THREE.BoxGeometry(rand(5, 15), 0.1, 0.3),
+      new THREE.MeshBasicMaterial({ color: 0x4bffaa, transparent: true, opacity: 0.8 })
+    );
+    trace.position.set(rand(-30, 30), -9.8, rand(-440, -850));
+    trace.rotation.y = Math.random() > 0.5 ? Math.PI / 2 : 0;
+    scene2.add(trace);
+  }
+  // Logic gates floating
+  for (let i = 0; i < 20; i++) {
+    const gate = new THREE.Mesh(
+      new THREE.OctahedronGeometry(rand(0.8, 1.5)),
+      wireMat(0x4bffaa, 0.9)
+    );
+    gate.position.set(rand(-20, 20), rand(-5, 8), rand(-440, -850));
+    gate.userData = { spin: rand(0.01, 0.03) };
+    scene2.add(gate);
+  }
+  scene.add(scene2);
+
+  // ─── SCÈNE 3 : SCADA (control room with giant dashboards) ────────────
+  const scene3 = new THREE.Group();
+  // Dark floor
+  const scadaFloor = new THREE.Mesh(new THREE.PlaneGeometry(80, 500, 10, 50), wireMat(0x4080c8, 0.5));
+  scadaFloor.rotation.x = -Math.PI / 2;
+  scadaFloor.position.set(0, -12, -1150);
+  scene3.add(scadaFloor);
+  // Dashboards (big panels)
+  for (let i = 0; i < 14; i++) {
+    const dash = new THREE.Group();
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(rand(8, 14), rand(5, 9)),
+      new THREE.MeshBasicMaterial({ color: 0x083060, transparent: true, opacity: 0.85, side: THREE.DoubleSide })
+    );
+    dash.add(panel);
+    const frame = new THREE.LineSegments(
+      new THREE.EdgesGeometry(panel.geometry),
+      new THREE.LineBasicMaterial({ color: 0x8be0ff, transparent: true, opacity: 0.9 })
+    );
+    dash.add(frame);
+    // Dashboard inside : lines (graph) + bars
+    const gw = panel.geometry.parameters.width * 0.8;
+    const gh = panel.geometry.parameters.height * 0.3;
+    const pts = [];
+    for (let k = 0; k < 12; k++) {
+      pts.push(new THREE.Vector3(-gw / 2 + k * (gw / 11), rand(-gh / 2, gh / 2), 0.05));
+    }
+    const graph = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(pts),
+      new THREE.LineBasicMaterial({ color: 0x4bc8ff })
+    );
+    graph.position.y = panel.geometry.parameters.height * 0.1;
+    dash.add(graph);
+    // Bars
+    for (let k = 0; k < 5; k++) {
+      const bar = new THREE.Mesh(
+        new THREE.PlaneGeometry(gw / 7, rand(0.5, gh * 0.9)),
+        new THREE.MeshBasicMaterial({ color: 0x4bffe0, transparent: true, opacity: 0.9 })
+      );
+      bar.position.set(-gw / 2 + k * (gw / 5) + gw / 10, -panel.geometry.parameters.height * 0.25, 0.06);
+      dash.add(bar);
+    }
+    // Big number
+    // (textures too costly — skip, rely on neon)
+    const side = i % 2 === 0 ? -1 : 1;
+    dash.position.set(side * rand(14, 22), rand(-2, 6), -920 - i * 30);
+    dash.rotation.y = side * -0.5;
+    scene3.add(dash);
+  }
+  // Alarm indicators (red orbs)
+  for (let i = 0; i < 10; i++) {
+    const alarm = new THREE.Mesh(
+      new THREE.SphereGeometry(0.6, 12, 12),
+      new THREE.MeshBasicMaterial({ color: Math.random() > 0.5 ? 0xff6060 : 0x60ff80, transparent: true, opacity: 0.9 })
+    );
+    alarm.position.set(rand(-20, 20), rand(-6, 8), rand(-920, -1380));
+    alarm.userData = { pulse: Math.random() * Math.PI * 2 };
+    scene3.add(alarm);
+  }
+  scene.add(scene3);
+
+  // ─── SCÈNE 4 : HIGHBYTE (data refinery) ──────────────────────────────
+  const scene4 = new THREE.Group();
+  // Streams converging — curved tubes
+  for (let i = 0; i < 30; i++) {
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(rand(-40, 40), rand(-10, 15), -1420),
+      new THREE.Vector3(rand(-20, 20), rand(-5, 10), -1560),
+      new THREE.Vector3(rand(-5, 5),   rand(-2, 4),  -1700),
+      new THREE.Vector3(0, 0, -1850)
+    ]);
+    const tubeGeo = new THREE.TubeGeometry(curve, 40, 0.08, 6, false);
+    const tube = new THREE.Mesh(tubeGeo, new THREE.MeshBasicMaterial({ color: 0xaa70ff, transparent: true, opacity: 0.7 }));
+    scene4.add(tube);
+  }
+  // Metadata tags floating
+  for (let i = 0; i < 30; i++) {
+    const tag = new THREE.Mesh(
+      new THREE.PlaneGeometry(rand(3, 6), rand(0.8, 1.5)),
+      new THREE.MeshBasicMaterial({ color: 0xd8a0ff, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+    );
+    tag.position.set(rand(-25, 25), rand(-8, 10), rand(-1420, -1850));
+    tag.rotation.y = rand(-0.4, 0.4);
+    scene4.add(tag);
+    const tagEdge = new THREE.LineSegments(
+      new THREE.EdgesGeometry(tag.geometry),
+      new THREE.LineBasicMaterial({ color: 0xffaaff })
+    );
+    tagEdge.position.copy(tag.position);
+    tagEdge.rotation.copy(tag.rotation);
+    scene4.add(tagEdge);
+  }
+  // Central refinery core — big transformation structure
+  const refinery = new THREE.Group();
+  const refCore = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 20, 16, 1, true), wireMat(0xaa70ff, 0.8));
+  refinery.add(refCore);
+  for (let i = 0; i < 6; i++) {
+    const r = new THREE.Mesh(new THREE.TorusGeometry(5.5 + i * 0.3, 0.15, 8, 32), neonMat(0xd8a0ff, 0.8));
+    r.position.y = -8 + i * 3.2;
+    r.rotation.x = Math.PI / 2;
+    refinery.add(r);
+  }
+  refinery.position.set(0, 0, -1750);
+  refinery.userData = { spin: true };
+  scene4.add(refinery);
+  scene.add(scene4);
+
+  // ─── SCÈNE 5 : UNS UNIVERSE (MQTT broker + branches) ─────────────────
+  const scene5 = new THREE.Group();
+  // Central broker hub (gros)
+  const hubGroup = new THREE.Group();
+  const hubCore = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(8, 1),
+    wireMat(0x4bc8ff, 0.9)
+  );
+  hubGroup.add(hubCore);
+  const hubGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(10, 24, 24),
+    new THREE.MeshBasicMaterial({ color: 0x4bc8ff, transparent: true, opacity: 0.1 })
+  );
+  hubGroup.add(hubGlow);
+  for (let i = 0; i < 4; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(12 + i * 4, 0.15, 8, 60),
+      new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.7 })
+    );
+    ring.rotation.x = Math.random() * Math.PI;
+    ring.rotation.y = Math.random() * Math.PI;
+    ring.userData.spin = (Math.random() - 0.5) * 0.012;
+    hubGroup.add(ring);
+  }
+  hubGroup.position.set(0, 0, -2250);
+  scene5.add(hubGroup);
+  // Subscriber nodes with labels (MES, ERP, AI, Cloud, Analytics, Apps)
+  const SUBS = ["MES", "ERP", "AI", "CLOUD", "ANALYTICS", "APPS"];
+  const subNodes = [];
+  SUBS.forEach((lbl, i) => {
+    const ang = (i / SUBS.length) * Math.PI * 2;
+    const r = 35;
+    const nx = Math.cos(ang) * r;
+    const ny = Math.sin(ang) * r;
+    const nz = -2250;
+    // Node (cube wireframe)
+    const nodeGrp = new THREE.Group();
+    const nodeCube = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 5), wireMat(0x4bc8ff, 0.9));
+    nodeGrp.add(nodeCube);
+    const nodeCore = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), neonMat(0x4bc8ff, 1));
+    nodeGrp.add(nodeCore);
+    nodeGrp.position.set(nx, ny, nz);
+    scene5.add(nodeGrp);
+    subNodes.push(nodeGrp);
+    // Connection line hub → node
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(nx, ny, 0)
+      ]),
+      new THREE.LineBasicMaterial({ color: 0x4bc8ff, transparent: true, opacity: 0.6 })
+    );
+    line.position.set(0, 0, nz);
+    scene5.add(line);
+  });
+  // Many smaller particles streaming between hub and nodes
+  const brokerParticles = new THREE.Group();
+  for (let i = 0; i < 300; i++) {
+    const p = new THREE.Mesh(
+      new THREE.SphereGeometry(0.15, 6, 6),
+      new THREE.MeshBasicMaterial({ color: 0x8be0ff, transparent: true, opacity: 0.9 })
+    );
+    const ang = Math.random() * Math.PI * 2;
+    const r = rand(10, 35);
+    p.position.set(Math.cos(ang) * r, Math.sin(ang) * r, -2250 + rand(-20, 20));
+    p.userData = {
+      angle: ang,
+      radius: r,
+      zOff: rand(-20, 20),
+      speed: rand(0.005, 0.02) * (Math.random() > 0.5 ? 1 : -1)
+    };
+    brokerParticles.add(p);
+  }
+  scene5.add(brokerParticles);
+  scene.add(scene5);
+
+  // ─── Streaming particles autour de la caméra (toujours visibles) ─────
+  const streamCount = 1200;
+  const streamPos = new Float32Array(streamCount * 3);
+  const streamCol = new Float32Array(streamCount * 3);
+  for (let i = 0; i < streamCount; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const r = rand(2, 20);
+    streamPos[i * 3    ] = Math.cos(ang) * r;
+    streamPos[i * 3 + 1] = Math.sin(ang) * r;
+    streamPos[i * 3 + 2] = rand(-30, 30);
+    streamCol[i * 3    ] = 0.3;
+    streamCol[i * 3 + 1] = 0.78;
+    streamCol[i * 3 + 2] = 1;
+  }
+  const streamGeo = new THREE.BufferGeometry();
+  streamGeo.setAttribute("position", new THREE.BufferAttribute(streamPos, 3));
+  streamGeo.setAttribute("color", new THREE.BufferAttribute(streamCol, 3));
+  const streamMat = new THREE.PointsMaterial({ size: 0.25, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, sizeAttenuation: true });
+  const streamPoints = new THREE.Points(streamGeo, streamMat);
+  scene.add(streamPoints);
+
+  // ─── Scénario : timing et effets ─────────────────────────────────────
+  const SCENES = [
+    { t: 0,     zStart: 0,     zEnd: -400,  label: "Scene 01", title: "The Birth",     sub: "Industrial sensor · Zone A", fog: 0x0a1830, fogDensity: 0.012, color: [0.3, 0.78, 1.0], loc: "SENSOR T-104 · ZONE A", showSensor: true },
+    { t: 10000, zStart: -400,  zEnd: -900,  label: "Scene 02", title: "The PLC",       sub: "Logic processing · Circuit matrix", fog: 0x061a10, fogDensity: 0.015, color: [0.5, 1.0,  0.7], loc: "PLC CORE · BLOCK A2.3" },
+    { t: 20000, zStart: -900,  zEnd: -1400, label: "Scene 03", title: "The SCADA",     sub: "Supervisory control · Dashboards live", fog: 0x0a0a28, fogDensity: 0.012, color: [0.6, 0.95, 1.0], loc: "SCADA · CONTROL ROOM" },
+    { t: 30000, zStart: -1400, zEnd: -1900, label: "Scene 04", title: "HighByte",      sub: "Data refinery · Context · Metadata", fog: 0x1a0a28, fogDensity: 0.014, color: [0.85, 0.6, 1.0], loc: "DATAHUB · HIGHBYTE EDGE", showPayload: true },
+    { t: 42000, zStart: -1900, zEnd: -2300, label: "Scene 05", title: "The Unified Namespace", sub: "MQTT broker · Industrial data universe", fog: 0x002040, fogDensity: 0.008, color: [0.2, 1.0,  1.0], loc: "UNS BROKER · GLOBAL BUS" },
+    { t: 58000, zStart: -2300, zEnd: -2400, label: "Finale",   title: "DASOLABS",      sub: "From industrial data to intelligence", fog: 0x040812, fogDensity: 0.006, color: [1.0, 1.0, 1.0], loc: "DASOLABS NETWORK", finale: true }
+  ];
+  const TOTAL = 72000;
+
+  let startTime = null;
+  let running = false;
+  const hud = document.getElementById("hud");
+  const sceneLabel = document.getElementById("sceneLabel");
+  const sceneTitle = document.getElementById("sceneTitle");
+  const sceneSub   = document.getElementById("sceneSub");
+  const sensorEl   = document.getElementById("sensor");
+  const sensorVal  = document.getElementById("sensorVal");
+  const payloadEl  = document.getElementById("payload");
+  const finaleEl   = document.getElementById("finale");
+  const barEl      = document.getElementById("bar");
+  const fpsHud     = document.getElementById("fpsHud");
+  const fpsLoc     = document.getElementById("fpsLoc");
+  const fpsSpeed   = document.getElementById("fpsSpeed");
+  const crosshair  = document.getElementById("crosshair");
+
+  let activeIndex = -1;
+  function activateScene(idx) {
+    if (idx === activeIndex) return;
+    activeIndex = idx;
+    const s = SCENES[idx];
+    sceneLabel.textContent = s.label;
+    sceneTitle.textContent = s.title;
+    sceneSub.textContent   = s.sub;
+    hud.classList.add("on");
+    setTimeout(() => { if (idx === activeIndex && !s.finale) hud.classList.remove("on"); }, 4000);
+
+    fpsLoc.textContent = s.loc;
+    sensorEl.classList.toggle("on", !!s.showSensor);
+    if (s.showSensor) {
+      let v = 69.0;
+      const int = setInterval(() => {
+        v += (Math.random() - 0.3) * 1.2;
+        if (v > 72.5) v = 72.5;
+        sensorVal.textContent = v.toFixed(1);
+        if (v >= 72.5) clearInterval(int);
+      }, 180);
+    }
+    payloadEl.classList.toggle("on", !!s.showPayload);
+    if (s.showPayload) {
+      setTimeout(() => payloadEl.classList.remove("on"), 7000);
+    }
+    scene.fog.color.setHex(s.fog);
+    scene.fog.density = s.fogDensity;
+    renderer.setClearColor(s.fog, 1);
+    if (s.finale) {
+      finaleEl.classList.add("on");
+      hud.classList.remove("on");
+      fpsHud.classList.remove("on");
+      crosshair.classList.remove("on");
+    }
+  }
+
+  // ─── Animation loop ──────────────────────────────────────────────────
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    if (running) {
+      const now = performance.now();
+      const t = Math.min(now - startTime, TOTAL);
+      barEl.style.width = (t / TOTAL * 100) + "%";
+
+      const idx = Math.max(0, SCENES.map(s => s.t).findIndex((tt, i, arr) => tt <= t && (arr[i + 1] == null || arr[i + 1] > t)));
+      if (idx !== activeIndex) activateScene(idx);
+
+      // Interpolate camera Z based on scene time range
+      const s = SCENES[idx];
+      const sNext = SCENES[idx + 1];
+      const sceneDuration = (sNext ? sNext.t : TOTAL) - s.t;
+      const sceneProgress = Math.min(1, (t - s.t) / sceneDuration);
+      const zTarget = lerp(s.zStart, s.zEnd, easeInOut(sceneProgress));
+      camera.position.z = zTarget;
+
+      // Caméra oscille légèrement (sensation de vol / FPS)
+      camera.position.x = Math.sin(now * 0.0005) * 0.6;
+      camera.position.y = Math.cos(now * 0.0007) * 0.4;
+      camera.rotation.z = Math.sin(now * 0.0003) * 0.015;
+      // Target look-ahead
+      const laX = Math.sin(now * 0.00037) * 2;
+      const laY = Math.cos(now * 0.00042) * 1.5;
+      camera.lookAt(laX, laY, camera.position.z - 10);
+
+      // Vitesse (en Mbit/s simulé)
+      const spd = sceneProgress < 0.1 ? 0.1 + sceneProgress * 10 : (idx + 1) * 125 + Math.sin(now * 0.005) * 15;
+      fpsSpeed.textContent = "BIT RATE " + spd.toFixed(1) + " Mbit/s";
+
+      // Fade in HUD FPS après 1s
+      if (t > 500 && !fpsHud.classList.contains("on") && !s.finale) {
+        fpsHud.classList.add("on");
+        crosshair.classList.add("on");
+      }
+
+      // Stream particles autour caméra
+      const sPos = streamGeo.attributes.position;
+      const sCol = streamGeo.attributes.color;
+      const [cr, cg, cb] = s.color;
+      for (let i = 0; i < streamCount; i++) {
+        const zi = i * 3 + 2;
+        sPos.array[zi] += 1.5;
+        if (sPos.array[zi] > 15) {
+          sPos.array[zi] = -30;
+          const ang = Math.random() * Math.PI * 2;
+          const r = rand(2, 20);
+          sPos.array[i * 3    ] = Math.cos(ang) * r;
+          sPos.array[i * 3 + 1] = Math.sin(ang) * r;
+        }
+        const ci = i * 3;
+        sCol.array[ci    ] += (cr - sCol.array[ci    ]) * 0.03;
+        sCol.array[ci + 1] += (cg - sCol.array[ci + 1]) * 0.03;
+        sCol.array[ci + 2] += (cb - sCol.array[ci + 2]) * 0.03;
+      }
+      sPos.needsUpdate = true;
+      sCol.needsUpdate = true;
+      // Déplace les particules stream en gardant référentiel caméra
+      streamPoints.position.z = camera.position.z;
+
+      // Animations objets scènes
+      // Scene 2 — gates spinning
+      scene2.children.forEach((c) => {
+        if (c.userData && c.userData.spin) c.rotation.y += c.userData.spin;
+      });
+      // Scene 3 — alarms pulse
+      scene3.children.forEach((c) => {
+        if (c.userData && c.userData.pulse != null) {
+          c.userData.pulse += 0.05;
+          c.material.opacity = 0.6 + Math.sin(c.userData.pulse) * 0.4;
+        }
+      });
+      // Scene 4 — refinery spinning
+      refinery.rotation.y += 0.008;
+      refinery.children.forEach((c, i) => {
+        if (c.geometry.type === "TorusGeometry") c.rotation.z += 0.01;
+      });
+      // Scene 5 — hub, rings, broker particles
+      hubGroup.rotation.y += 0.004;
+      hubGroup.children.forEach((c) => {
+        if (c.userData && c.userData.spin) { c.rotation.x += c.userData.spin; c.rotation.y += c.userData.spin; }
+      });
+      brokerParticles.children.forEach((p) => {
+        p.userData.angle += p.userData.speed;
+        p.position.x = Math.cos(p.userData.angle) * p.userData.radius;
+        p.position.y = Math.sin(p.userData.angle) * p.userData.radius;
+        p.position.z = -2250 + p.userData.zOff + Math.sin(p.userData.angle * 2) * 5;
+      });
+      subNodes.forEach((n, i) => {
+        n.rotation.y += 0.015;
+        n.rotation.x += 0.008;
+      });
+
+      // Stars breathing
+      stars.rotation.y += 0.0003;
+    }
+
+    renderer.render(scene, camera);
+  }
+  function easeInOut(x) { return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+  animate();
+
+  // ─── Resize ──────────────────────────────────────────────────────────
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ─── Start / replay ──────────────────────────────────────────────────
+  const startEl = document.getElementById("start");
+  function startVideo() {
+    startTime = performance.now();
+    running = true;
+    activeIndex = -1;
+    finaleEl.classList.remove("on");
+    camera.position.set(0, 0, 0);
+    startEl.classList.add("hidden");
+  }
+  startEl.addEventListener("click", startVideo);
+  document.getElementById("restart").addEventListener("click", () => {
+    finaleEl.classList.remove("on");
+    camera.position.set(0, 0, 0);
+    startTime = performance.now();
+    running = true;
+    activeIndex = -1;
+  });
+})();
+</script>
+</body>
+</html>

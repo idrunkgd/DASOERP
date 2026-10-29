@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<title>Dasolabs Showroom — Expertise interactive</title>
+<style>
+:root {
+  --bg: #040812; --bg2: #091429; --ink: #eaf3ff; --mute: #7a97b8;
+  --cyan: #4bc8ff; --cyan2: #8be0ff; --green: #4bffaa; --purple: #c488ff;
+  --red: #ff5566; --amber: #ffb94a; --pink: #ff80d0;
+  --border: rgba(75, 200, 255, 0.22); --panel: rgba(6, 14, 32, 0.9);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); font-family: -apple-system, "Inter", "SF Pro Text", sans-serif; color: var(--ink); height: 100%; width: 100%; -webkit-user-select: none; user-select: none; }
+#scene3d { position: fixed; inset: 0; z-index: 1; }
+
+/* ─── Brand (top-left) ─── */
+.brand {
+  position: fixed; top: 24px; left: 28px; z-index: 100; display: flex; align-items: center; gap: 12px;
+  cursor: pointer;
+}
+.brand .logo {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--cyan) 0%, #ffffff 100%);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  box-shadow: 0 0 24px rgba(75, 200, 255, 0.5);
+}
+.brand .name { font-size: 20px; letter-spacing: 0.3em; font-weight: 600; }
+.brand .name b { color: var(--cyan); font-weight: 700; }
+.brand .sub { font-size: 9px; color: var(--cyan); letter-spacing: 0.4em; margin-top: 2px; }
+
+/* ─── Hero (center of constellation) ─── */
+.hero {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  z-index: 2; pointer-events: none; text-align: center;
+  transition: opacity 0.5s;
+}
+.hero.hidden { opacity: 0; }
+.hero .big {
+  font-size: clamp(42px, 7vw, 86px);
+  font-weight: 200; letter-spacing: 0.15em;
+  color: #fff; text-shadow: 0 0 40px rgba(75, 200, 255, 0.5);
+}
+.hero .big b { font-weight: 700; color: var(--cyan); }
+.hero .tagline {
+  margin-top: 16px; font-size: clamp(12px, 1.2vw, 16px);
+  color: var(--mute); letter-spacing: 0.35em; text-transform: uppercase;
+}
+.hero .cta {
+  margin-top: 32px; font-size: 11px; color: var(--cyan); letter-spacing: 0.4em; text-transform: uppercase;
+  animation: breath 2s ease-in-out infinite;
+}
+@keyframes breath { 50% { opacity: 0.4; } }
+
+/* ─── Expertise panel (fullscreen slide-in on click) ─── */
+.panel {
+  position: fixed; inset: 0; z-index: 50;
+  background: radial-gradient(circle at center, rgba(10, 25, 50, 0.6) 0%, rgba(4, 8, 18, 0.95) 70%);
+  backdrop-filter: blur(16px);
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s;
+  padding: 60px 48px;
+  overflow-y: auto;
+}
+.panel.on { opacity: 1; pointer-events: auto; }
+
+.panel .head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+.panel .meta { max-width: 60%; }
+.panel .cat { font-size: 10px; letter-spacing: 0.4em; color: var(--cyan); text-transform: uppercase; margin-bottom: 10px; }
+.panel .title { font-size: clamp(32px, 4.5vw, 56px); font-weight: 300; letter-spacing: 0.03em; color: #fff; margin: 0; line-height: 1.05; }
+.panel .title b { color: var(--cyan); font-weight: 700; }
+.panel .pitch { margin-top: 14px; font-size: clamp(14px, 1.3vw, 18px); color: var(--cyan2); line-height: 1.5; max-width: 680px; }
+.panel .closeBtn {
+  background: var(--panel); border: 1px solid var(--border); color: var(--mute);
+  padding: 10px 18px; border-radius: 6px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; cursor: pointer; backdrop-filter: blur(10px);
+}
+.panel .closeBtn:hover { color: var(--ink); border-color: var(--cyan); }
+
+.panel .body { display: grid; grid-template-columns: 1fr 1.3fr; gap: 36px; flex: 1; min-height: 0; }
+
+.panel .side .section { margin-bottom: 28px; }
+.panel .side .section .lbl { font-size: 10px; letter-spacing: 0.35em; color: var(--cyan); text-transform: uppercase; margin-bottom: 12px; opacity: 0.9; }
+.panel .side .realizations li {
+  list-style: none; padding: 12px 14px; margin-bottom: 8px;
+  background: rgba(75, 200, 255, 0.05); border: 1px solid var(--border); border-left: 3px solid var(--cyan);
+  border-radius: 6px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.panel .side .realizations li .co { color: var(--mute); font-size: 11px; letter-spacing: 0.1em; }
+.panel .side .stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.panel .side .stack span {
+  background: rgba(75, 200, 255, 0.08); border: 1px solid var(--border);
+  padding: 5px 12px; border-radius: 20px; font-size: 11px; color: var(--cyan2); letter-spacing: 0.08em;
+}
+
+.panel .demo {
+  background: rgba(6, 14, 32, 0.6); border: 1px solid var(--border); border-radius: 12px;
+  padding: 22px; display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden;
+}
+.panel .demo h4 { margin: 0; font-size: 11px; letter-spacing: 0.3em; color: var(--cyan); text-transform: uppercase; font-weight: 600; }
+.panel .demo .demoHint { font-size: 12px; color: var(--mute); margin: -8px 0 4px; }
+.panel .demo .stage { flex: 1; min-height: 400px; display: flex; align-items: center; justify-content: center; position: relative; }
+
+/* ─── Nav (top bar) between domains ─── */
+.nav {
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 60;
+  display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--border); border-radius: 24px; padding: 4px; backdrop-filter: blur(14px);
+  opacity: 0; pointer-events: none; transition: opacity 0.4s;
+  max-width: 90vw; overflow-x: auto;
+}
+.nav.on { opacity: 1; pointer-events: auto; }
+.nav button {
+  background: transparent; border: 0; color: var(--mute);
+  padding: 8px 14px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; border-radius: 20px; font-weight: 600; white-space: nowrap;
+}
+.nav button:hover { color: var(--ink); }
+.nav button.on { background: var(--cyan); color: #061024; }
+
+/* ─── Mini-demo components (shared) ─── */
+.mini-chart { width: 100%; height: 100%; }
+.mini-btn {
+  background: rgba(75, 200, 255, 0.1); border: 1px solid var(--border); color: var(--ink);
+  padding: 9px 16px; border-radius: 6px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; font-weight: 600;
+}
+.mini-btn:hover { background: rgba(75, 200, 255, 0.2); border-color: var(--cyan); }
+.mini-btn.danger { color: var(--red); border-color: rgba(255, 85, 102, 0.4); }
+.mini-btn.ok { color: var(--green); border-color: rgba(75, 255, 170, 0.4); }
+
+/* Gauges */
+.gauge-wrap { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.gauge { position: relative; width: 160px; height: 160px; }
+.gauge svg { width: 100%; height: 100%; }
+.gauge .val { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 300; }
+.gauge .val .n { font-size: 28px; color: #fff; }
+.gauge .val .u { font-size: 10px; color: var(--mute); letter-spacing: 0.3em; margin-top: 4px; }
+.gauge .val .label { font-size: 9px; color: var(--cyan); letter-spacing: 0.3em; text-transform: uppercase; margin-top: 10px; }
+
+/* Topic/JSON display */
+.code {
+  font-family: "SF Mono", monospace; font-size: 12px; line-height: 1.5;
+  background: rgba(0, 0, 0, 0.4); padding: 14px; border-radius: 8px; border: 1px solid var(--border);
+  overflow: auto; max-height: 100%;
+}
+.code .k { color: var(--purple); }
+.code .s { color: var(--cyan2); }
+.code .n { color: var(--amber); }
+.code .c { color: var(--mute); font-style: italic; }
+
+/* Hidden until first click */
+.first-cue {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 3;
+  font-size: 11px; letter-spacing: 0.4em; color: var(--mute); text-transform: uppercase;
+  animation: breath 2s ease-in-out infinite;
+}
+.first-cue.hidden { display: none; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(75, 200, 255, 0.3); border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Idle attract hint */
+.attract-mask {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(circle at center, transparent 30%, rgba(4, 8, 18, 0.5) 90%);
+  opacity: 0; transition: opacity 1s;
+}
+.attract-mask.on { opacity: 1; }
+
+/* Robot arm demo */
+.robot-stage { position: relative; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+
+<canvas id="scene3d"></canvas>
+
+<div class="brand" id="brandLogo">
+  <div class="logo"></div>
+  <div>
+    <div class="name">DASO<b>LABS</b></div>
+    <div class="sub">SHOWROOM · EXPERTISE INTERACTIVE</div>
+  </div>
+</div>
+
+<div class="nav" id="nav"></div>
+
+<div class="hero" id="hero">
+  <div class="big">DASO<b>LABS</b></div>
+  <div class="tagline">From industrial data to intelligence</div>
+  <div class="cta">↻ Clique un pôle d'expertise</div>
+</div>
+
+<div class="first-cue" id="firstCue">Tourne autour · Clique un pôle · Explore</div>
+
+<div class="panel" id="panel">
+  <div class="head">
+    <div class="meta">
+      <div class="cat" id="pCat">—</div>
+      <h1 class="title" id="pTitle">—</h1>
+      <div class="pitch" id="pPitch">—</div>
+    </div>
+    <button class="closeBtn" id="pClose">← Retour constellation</button>
+  </div>
+  <div class="body">
+    <div class="side">
+      <div class="section">
+        <div class="lbl">Réalisations concrètes</div>
+        <ul class="realizations" id="pReal"></ul>
+      </div>
+      <div class="section">
+        <div class="lbl">Stack technique</div>
+        <div class="stack" id="pStack"></div>
+      </div>
+      <div class="section">
+        <div class="lbl">Ce qu'on fait pour vous</div>
+        <div id="pValue" style="font-size: 13px; color: var(--cyan2); line-height: 1.6;"></div>
+      </div>
+    </div>
+    <div class="demo" id="pDemo"></div>
+  </div>
+</div>
+
+<div class="attract-mask" id="attractMask"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+"use strict";
+const THREE = window.THREE;
+
+// ═════════════════════════════════════════════════════════════════════
+// 1. CATALOGUE DES MÉTIERS
+// ═════════════════════════════════════════════════════════════════════
+const DOMAINS = [
+  {
+    id: "plc", key: "01", short: "PLC", cat: "Layer 1 · Control",
+    title: ["Automatisation & ", "PLC"],
+    color: 0x4bffaa,
+    pitch: "Nous programmons et modernisons les automates qui pilotent vos lignes de production : Siemens TIA Portal, Beckhoff TwinCAT, Schneider M580. Robuste, modulaire, documenté.",
+    value: "Nous livrons un programme PLC maintenable, documenté, modulaire — qui tient 15 ans et qu'un autre intégrateur peut reprendre sans deviner.",
+    stack: ["Siemens TIA Portal", "Beckhoff TwinCAT", "Rockwell Studio 5000", "Codesys", "ISA-88", "PLCopen"],
+    realizations: [
+      ["Automatisation ligne mélange", "Pharma · Belgique"],
+      ["Migration S7-300 → S7-1500", "Food & Beverage"],
+      ["Pilotage réacteur stérile", "Biotech"],
+      ["Standardisation lib. PLC", "Industriel multi-site"]
+    ],
+    demo: "plc"
+  },
+  {
+    id: "scada", key: "02", short: "SCADA", cat: "Layer 2 · Supervision",
+    title: ["SCADA & ", "Supervision"],
+    color: 0x8be0ff,
+    pitch: "Supervision industrielle moderne : AVEVA System Platform, Ignition, Wonderware. Mimics claires, alarmes utiles, historique fiable.",
+    value: "Un SCADA pensé opérateurs, pas gadget. L'écran dit en 2 secondes ce qui va mal et où intervenir.",
+    stack: ["AVEVA System Platform", "Ignition", "Wonderware InTouch", "FactoryTalk", "Historian", "Deadbands"],
+    realizations: [
+      ["AVEVA System Platform v2", "Pharma · Walloniê"],
+      ["Supervision 40 lignes", "Industrie agroalim."],
+      ["Historian + reporting ISA-95", "Chimie"],
+      ["Refonte mimic + ergonomie", "Hôpital · gaz médicaux"]
+    ],
+    demo: "scada"
+  },
+  {
+    id: "acquisition", key: "03", short: "ACQ", cat: "Layer 1→2 · Edge",
+    title: ["Acquisition de ", "données machines"],
+    color: 0x6afcff,
+    pitch: "Nous branchons physiquement vos machines : OPC UA, Modbus, Siemens S7, EtherNet/IP, drivers propriétaires. Peu importe l'âge, on connecte.",
+    value: "On fait parler même les machines des années 90 — proprement et sans toucher à votre PLC.",
+    stack: ["OPC UA", "Modbus TCP/RTU", "S7", "EtherNet/IP", "Profinet", "Kepware", "HighByte Edge"],
+    realizations: [
+      ["Acquisition 200 points OPC UA", "Pharma"],
+      ["Modernisation PLC Siemens S5", "Industrie manufacturière"],
+      ["Edge gateway sur ligne legacy", "Food"],
+      ["Capture balances OIML", "Labo analytique"]
+    ],
+    demo: "opcua"
+  },
+  {
+    id: "highbyte", key: "04", short: "HIGHBYTE", cat: "Layer 3 · DataOps",
+    title: ["HighByte ", "Intelligence Hub"],
+    color: 0xc488ff,
+    pitch: "Nous transformons la donnée brute en information industrielle contextualisée. Modèles ISA-88/95, lineage, qualité. Partenaire HighByte.",
+    value: "Fini le capteur 'tag_104.pv = 72.5' qui ne dit rien à personne. Place à un payload JSON structuré qui tient debout dans un data lake.",
+    stack: ["HighByte Intelligence Hub", "UNS modeling", "ISA-95", "ISA-88", "JSON Schema", "Sparkplug B"],
+    realizations: [
+      ["Mise en œuvre HighByte", "Pharma OEM"],
+      ["Modélisation UNS ISA-95", "Industrie laitière"],
+      ["Enrichissement contextuel multi-site", "Groupe industriel"],
+      ["Interface vers broker HiveMQ", "Pilote I4.0"]
+    ],
+    demo: "highbyte"
+  },
+  {
+    id: "uns", key: "05", short: "UNS", cat: "Layer 4 · Namespace",
+    title: ["Unified Namespace & ", "MQTT"],
+    color: 0x4bc8ff,
+    pitch: "Une seule source de vérité industrielle. HiveMQ, Mosquitto, EMQX. Topics bien pensés, QoS adapté, retain intelligent, Sparkplug quand ça compte.",
+    value: "Vos systèmes IT et OT parlent enfin la même langue — et quand vous ajoutez un consommateur de donnée, il n'y a plus rien à redévelopper.",
+    stack: ["HiveMQ", "Mosquitto", "EMQX", "Sparkplug B", "MQTT 5", "TLS", "Pub/Sub patterns"],
+    realizations: [
+      ["Architecture UNS 3 sites", "Groupe pharma"],
+      ["Broker HA HiveMQ production", "Automotive tier 1"],
+      ["Migration historique → UNS", "Industrie agro"],
+      ["Governance topics 500+ machines", "Chimie"]
+    ],
+    demo: "uns"
+  },
+  {
+    id: "mes", key: "06", short: "MES/ERP", cat: "Layer 5 · Enterprise",
+    title: ["Intégration ", "MES & ERP"],
+    color: 0xffb94a,
+    pitch: "On fait descendre les ordres de production et remonter la réalité terrain. MES (OpcenterEX, Werum PAS-X), ERP (SAP, D365). Interfaces REST, OPC UA, flat files quand il faut.",
+    value: "Les lots signés en 1 clic, la traçabilité GMP qui tient en inspection, l'ERP qui reçoit la vérité du terrain en temps réel.",
+    stack: ["Siemens Opcenter", "Werum PAS-X", "SAP S/4HANA", "Dynamics 365", "REST", "SOAP", "Flat files EDI"],
+    realizations: [
+      ["Interface MES ↔ SAP (batch complet)", "Pharma GMP"],
+      ["Récupération électronique lots", "Biotech"],
+      ["Traçabilité unitaire sérialisation", "CMO"],
+      ["Flow déclaration production ERP", "Industrie agro"]
+    ],
+    demo: "mes"
+  },
+  {
+    id: "tracking", key: "07", short: "TRACK", cat: "Logistics & Field",
+    title: ["Traçabilité & ", "géolocalisation"],
+    color: 0x4bffaa,
+    pitch: "Vous savez où est quoi, quand. Suivi de lots, matières premières, outils, chariots. Technologies LPWAN, BLE, RTLS, UWB.",
+    value: "Fini les 20 minutes à chercher le chariot. L'inventaire se fait tout seul, les écarts se détectent avant qu'ils coûtent.",
+    stack: ["Sigfox", "LoRaWAN", "BLE", "UWB RTLS", "QR / DataMatrix", "GS1-128", "RFID"],
+    realizations: [
+      ["Géoloc 400 chariots IoT", "Logistique industrielle"],
+      ["Traçabilité matières GMP", "Pharma"],
+      ["Suivi outillage usine", "Aéronautique"],
+      ["Localisation équipements hôpital", "Hospitalier"]
+    ],
+    demo: "tracking"
+  },
+  {
+    id: "robotics", key: "08", short: "ROBOTS", cat: "Robotics & AMR",
+    title: ["Robotique & ", "AMR"],
+    color: 0xff80d0,
+    pitch: "Bras robots industriels, cobots, AMR autonomes. Intégration, programmation, sécurité, interfaçage avec le MES et la supervision.",
+    value: "On déploie un robot qui s'intègre à votre ligne et à votre système d'info — pas juste un bras qui bouge dans son coin.",
+    stack: ["ABB RobotStudio", "KUKA", "Universal Robots", "MIR AMR", "Omron LD", "ROS2", "ISO 10218"],
+    realizations: [
+      ["Cellule pick & place pharma", "GMP"],
+      ["Intégration flotte AMR 12 robots", "Logistique interne"],
+      ["Cobot assemblage petites séries", "Industrie mécanique"],
+      ["Interfaçage robots ↔ MES", "Food"]
+    ],
+    demo: "robot"
+  },
+  {
+    id: "special", key: "09", short: "MACHINE SPÉCIALE", cat: "Custom automation",
+    title: ["Machines ", "spéciales"],
+    color: 0xff5566,
+    pitch: "Conception et développement de machines spéciales clé en main : mécanique, automatisation, supervision, interfaçage. Approche V-cycle, livraison en régie ou forfait.",
+    value: "Une machine conçue pour VOTRE process, prête à produire dès la mise en service, avec le dossier technique qui va avec.",
+    stack: ["Conception méca", "V-cycle", "FAT/SAT", "Gestion projet", "Documentation IQ/OQ", "Mode régie / forfait"],
+    realizations: [
+      ["Machine spéciale production SAFRAN", "Aéronautique"],
+      ["Cellule laser automatisée", "Médical"],
+      ["Banc de test automatisé", "Automotive"],
+      ["Ligne customisée emballage", "Pharma"]
+    ],
+    demo: "special"
+  },
+  {
+    id: "data-ai", key: "10", short: "DATA & IA", cat: "Analytics & ML",
+    title: ["Exploitation data & ", "IA industrielle"],
+    color: 0x9bb8ff,
+    pitch: "On transforme la donnée accumulée en levier : maintenance prédictive, détection d'anomalies, OEE temps réel, optimisation énergétique. ML explicable, pas de boîte noire.",
+    value: "Vous avez des millions de points historiques dans votre Historian — on les fait parler avec des modèles que vos équipes comprennent.",
+    stack: ["Python / scikit-learn", "PyTorch", "Grafana", "Timeseries DB", "Prophet", "XGBoost", "SHAP"],
+    realizations: [
+      ["Maintenance prédictive moteurs", "Industrie lourde"],
+      ["Détection anomalies qualité", "Food"],
+      ["OEE temps réel multi-ligne", "Pharma"],
+      ["Modèle énergie usine", "Agroalim."]
+    ],
+    demo: "ai"
+  }
+];
+
+// ═════════════════════════════════════════════════════════════════════
+// 2. 3D CONSTELLATION
+// ═════════════════════════════════════════════════════════════════════
+const canvas = document.getElementById("scene3d");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x040812, 1);
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x040812, 0.008);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+scene.add(new THREE.AmbientLight(0x2a4466, 0.7));
+const sun = new THREE.DirectionalLight(0xaad4ff, 0.9);
+sun.position.set(20, 40, 10);
+scene.add(sun);
+
+// Core (Dasolabs pulsing icosahedron)
+const coreGroup = new THREE.Group();
+const core = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(3, 1),
+  new THREE.MeshBasicMaterial({ color: 0x4bc8ff, wireframe: true, transparent: true, opacity: 0.9 })
+);
+coreGroup.add(core);
+const coreGlow = new THREE.Mesh(
+  new THREE.SphereGeometry(4.5, 32, 32),
+  new THREE.MeshBasicMaterial({ color: 0x4bc8ff, transparent: true, opacity: 0.08 })
+);
+coreGroup.add(coreGlow);
+for (let i = 0; i < 3; i++) {
+  const r = new THREE.Mesh(
+    new THREE.TorusGeometry(4.5 + i * 1.5, 0.04, 8, 60),
+    new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.5 })
+  );
+  r.rotation.x = Math.random() * Math.PI;
+  r.rotation.y = Math.random() * Math.PI;
+  r.userData.spin = (Math.random() - 0.5) * 0.008;
+  coreGroup.add(r);
+}
+scene.add(coreGroup);
+
+// Domain pods — organized in sphere pattern
+const pods = []; // { group, data, basePos, baseAngle }
+const PODS_RADIUS = 18;
+DOMAINS.forEach((d, i) => {
+  // Spread on sphere using fibonacci-like layout
+  const theta = (i / DOMAINS.length) * Math.PI * 2;
+  const phi = (i % 2 === 0 ? 0.3 : -0.3) + Math.sin(i * 0.9) * 0.4;
+  const x = PODS_RADIUS * Math.cos(theta) * Math.cos(phi);
+  const y = PODS_RADIUS * Math.sin(phi);
+  const z = PODS_RADIUS * Math.sin(theta) * Math.cos(phi);
+
+  const g = new THREE.Group();
+  g.userData.domain = d;
+  // Core sphere
+  const sphere = new THREE.Mesh(
+    new THREE.OctahedronGeometry(1.4, 1),
+    new THREE.MeshBasicMaterial({ color: d.color, wireframe: true, transparent: true, opacity: 0.85 })
+  );
+  g.add(sphere);
+  // Glow
+  const glow = new THREE.Mesh(
+    new THREE.SphereGeometry(2.0, 20, 20),
+    new THREE.MeshBasicMaterial({ color: d.color, transparent: true, opacity: 0.12 })
+  );
+  g.add(glow);
+  // Hit box (invisible larger sphere for easy clicking)
+  const hit = new THREE.Mesh(
+    new THREE.SphereGeometry(3.5, 8, 8),
+    new THREE.MeshBasicMaterial({ visible: false })
+  );
+  hit.userData.domain = d;
+  g.add(hit);
+  // Label sprite
+  const c = document.createElement("canvas"); c.width = 320; c.height = 100;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "rgba(4,10,30,0.85)"; ctx.fillRect(0, 0, 320, 100);
+  ctx.strokeStyle = "#" + d.color.toString(16).padStart(6, "0"); ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, 318, 98);
+  ctx.fillStyle = "#" + d.color.toString(16).padStart(6, "0");
+  ctx.font = "11px -apple-system, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(d.cat.toUpperCase(), 160, 24);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 24px -apple-system";
+  ctx.fillText(d.short, 160, 58);
+  ctx.fillStyle = "#7a97b8"; ctx.font = "11px -apple-system";
+  ctx.fillText("· " + d.key + " ·", 160, 82);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
+  spr.scale.set(5, 1.6, 1);
+  spr.position.y = 2.8;
+  g.add(spr);
+  // Line core → pod
+  const line = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(x, y, z)]),
+    new THREE.LineBasicMaterial({ color: d.color, transparent: true, opacity: 0.18 })
+  );
+  scene.add(line);
+
+  g.position.set(x, y, z);
+  scene.add(g);
+  pods.push({ group: g, data: d, basePos: new THREE.Vector3(x, y, z), hit, sphere, glow, line });
+});
+
+// Starfield
+const sgeo = new THREE.BufferGeometry();
+const stars = 800;
+const sp = new Float32Array(stars * 3);
+for (let i = 0; i < stars; i++) {
+  sp[i * 3    ] = (Math.random() - 0.5) * 400;
+  sp[i * 3 + 1] = (Math.random() - 0.5) * 200;
+  sp[i * 3 + 2] = (Math.random() - 0.5) * 400;
+}
+sgeo.setAttribute("position", new THREE.BufferAttribute(sp, 3));
+scene.add(new THREE.Points(sgeo, new THREE.PointsMaterial({ color: 0x4bc8ff, size: 0.3, transparent: true, opacity: 0.4 })));
+
+// Camera orbit controls
+let orbitAzim = 0, orbitElev = 0.1, orbitDist = 50;
+let dragging = false, pX = 0, pY = 0;
+let autoRotate = true;
+
+function updateCam() {
+  const x = Math.cos(orbitAzim) * Math.cos(orbitElev) * orbitDist;
+  const y = Math.sin(orbitElev) * orbitDist;
+  const z = Math.sin(orbitAzim) * Math.cos(orbitElev) * orbitDist;
+  camera.position.set(x, y, z);
+  camera.lookAt(0, 0, 0);
+}
+updateCam();
+
+canvas.addEventListener("pointerdown", (e) => {
+  if (document.getElementById("panel").classList.contains("on")) return;
+  dragging = true; pX = e.clientX; pY = e.clientY;
+  canvas.setPointerCapture(e.pointerId);
+  autoRotate = false;
+  document.getElementById("firstCue").classList.add("hidden");
+});
+canvas.addEventListener("pointermove", (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - pX, dy = e.clientY - pY;
+  pX = e.clientX; pY = e.clientY;
+  orbitAzim -= dx * 0.005;
+  orbitElev = Math.max(-0.6, Math.min(0.9, orbitElev + dy * 0.004));
+  updateCam();
+});
+canvas.addEventListener("pointerup", () => { dragging = false; });
+canvas.addEventListener("wheel", (e) => {
+  if (document.getElementById("panel").classList.contains("on")) return;
+  orbitDist = Math.max(25, Math.min(90, orbitDist + e.deltaY * 0.04));
+  updateCam();
+}, { passive: true });
+
+// Click to open domain
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let clickStart = 0, clickStartXY = [0, 0];
+canvas.addEventListener("pointerdown", (e) => { clickStart = Date.now(); clickStartXY = [e.clientX, e.clientY]; });
+canvas.addEventListener("pointerup", (e) => {
+  const dur = Date.now() - clickStart;
+  const dist = Math.hypot(e.clientX - clickStartXY[0], e.clientY - clickStartXY[1]);
+  if (dur < 400 && dist < 10) {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(pods.map(p => p.hit));
+    if (hits.length) {
+      const d = hits[0].object.userData.domain;
+      if (d) openDomain(d.id);
+    }
+  }
+});
+
+// ═════════════════════════════════════════════════════════════════════
+// 3. BUILD NAV
+// ═════════════════════════════════════════════════════════════════════
+const navEl = document.getElementById("nav");
+DOMAINS.forEach((d) => {
+  const b = document.createElement("button");
+  b.textContent = d.short;
+  b.dataset.id = d.id;
+  b.addEventListener("click", () => openDomain(d.id));
+  navEl.appendChild(b);
+});
+
+// ═════════════════════════════════════════════════════════════════════
+// 4. DOMAIN PANEL + MINI DEMOS
+// ═════════════════════════════════════════════════════════════════════
+const panel = document.getElementById("panel");
+const hero = document.getElementById("hero");
+const brandLogo = document.getElementById("brandLogo");
+let currentDomain = null;
+let demoDisposer = null;
+
+function openDomain(id) {
+  const d = DOMAINS.find(x => x.id === id);
+  if (!d) return;
+  currentDomain = d;
+  // Fill panel
+  document.getElementById("pCat").textContent = d.cat;
+  const [a, b] = d.title;
+  document.getElementById("pTitle").innerHTML = `${a}<b>${b}</b>`;
+  document.getElementById("pPitch").textContent = d.pitch;
+  document.getElementById("pValue").textContent = d.value;
+  document.getElementById("pReal").innerHTML = d.realizations.map(r =>
+    `<li><span>${r[0]}</span><span class="co">${r[1]}</span></li>`
+  ).join("");
+  document.getElementById("pStack").innerHTML = d.stack.map(s => `<span>${s}</span>`).join("");
+  // Panel accent color
+  panel.style.borderTop = `3px solid #${d.color.toString(16).padStart(6, "0")}`;
+  // Switch nav highlight
+  navEl.classList.add("on");
+  navEl.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.id === d.id));
+  // Hero off
+  hero.classList.add("hidden");
+  // Mount demo
+  if (demoDisposer) { demoDisposer(); demoDisposer = null; }
+  const demoEl = document.getElementById("pDemo");
+  demoEl.innerHTML = "";
+  demoDisposer = MINIS[d.demo] ? MINIS[d.demo](demoEl, d) : null;
+  // Show panel
+  panel.classList.add("on");
+}
+function closeDomain() {
+  panel.classList.remove("on");
+  hero.classList.remove("hidden");
+  if (demoDisposer) { demoDisposer(); demoDisposer = null; }
+}
+document.getElementById("pClose").addEventListener("click", closeDomain);
+brandLogo.addEventListener("click", closeDomain);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDomain(); });
+
+// ═════════════════════════════════════════════════════════════════════
+// 5. MINI DEMOS — chaque métier a sa petite démo interactive
+// ═════════════════════════════════════════════════════════════════════
+const MINIS = {
+
+  // ─── PLC — ladder-like logic + I/O ────────────────────────────────
+  plc(container, d) {
+    container.innerHTML = `
+      <h4>Démo · Logique PLC en direct</h4>
+      <div class="demoHint">Clique sur une entrée pour la basculer. La logique en bas calcule la sortie en temps réel (XIC / XIO / OTE comme en Studio 5000).</div>
+      <div class="stage" id="plcStage"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:11px;color:var(--mute);letter-spacing:0.2em;">SCAN TIME: <span style="color:var(--green);">98 ms</span></div>
+        <button class="mini-btn" id="plcAuto">Simulation auto</button>
+      </div>
+    `;
+    const stage = container.querySelector("#plcStage");
+    stage.innerHTML = `
+      <div style="width:100%;font-family:'SF Mono',monospace;font-size:13px;">
+        <div style="display:flex;gap:16px;margin-bottom:30px;justify-content:center;">
+          ${["Start","Stop","Overload","Reset"].map((n,i)=>`
+            <div class="plc-io" data-input="${n}" style="cursor:pointer;text-align:center;">
+              <div class="io-led" style="width:40px;height:40px;border-radius:50%;background:#1a3058;border:2px solid var(--border);margin:0 auto 6px;transition:all 0.2s;"></div>
+              <div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;">${n.toUpperCase()}</div>
+            </div>
+          `).join("")}
+        </div>
+        <div style="padding:14px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:6px;text-align:center;">
+          <div style="font-size:10px;color:var(--cyan);letter-spacing:0.3em;margin-bottom:8px;">LADDER LOGIC</div>
+          <div style="color:#fff;" id="ladderExpr">( <span style="color:var(--green)">Start</span> OR <span style="color:var(--green)">M_Run</span> ) AND <span style="color:var(--amber)">NOT Stop</span> AND <span style="color:var(--amber)">NOT Overload</span> → <span style="color:var(--cyan)">Motor</span></div>
+        </div>
+        <div style="margin-top:30px;text-align:center;">
+          <div style="display:inline-flex;align-items:center;gap:12px;padding:16px 28px;background:rgba(75,255,170,0.1);border:1px solid rgba(75,255,170,0.3);border-radius:8px;" id="motorOut">
+            <div class="io-led" id="motorLed" style="width:16px;height:16px;border-radius:50%;background:#1a3058;transition:all 0.3s;"></div>
+            <div><div style="font-size:9px;color:var(--mute);letter-spacing:0.3em;">OUTPUT Q0.0</div><div style="font-size:16px;color:#fff;font-weight:600;">MOTOR</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+    const inputs = { Start: false, Stop: false, Overload: false, Reset: false, M_Run: false };
+    function recompute() {
+      // Latching: Start → M_Run; Stop or Overload → clear
+      if (inputs.Start) inputs.M_Run = true;
+      if (inputs.Stop || inputs.Overload) inputs.M_Run = false;
+      const motor = (inputs.Start || inputs.M_Run) && !inputs.Stop && !inputs.Overload;
+      stage.querySelectorAll(".plc-io").forEach(el => {
+        const name = el.dataset.input;
+        el.querySelector(".io-led").style.background = inputs[name] ? "var(--green)" : "#1a3058";
+        el.querySelector(".io-led").style.boxShadow = inputs[name] ? "0 0 15px var(--green)" : "none";
+      });
+      const led = stage.querySelector("#motorLed");
+      led.style.background = motor ? "var(--green)" : "#1a3058";
+      led.style.boxShadow = motor ? "0 0 20px var(--green)" : "none";
+    }
+    stage.querySelectorAll(".plc-io").forEach(el => {
+      el.addEventListener("click", () => {
+        const n = el.dataset.input;
+        inputs[n] = !inputs[n];
+        if (n === "Reset" && inputs[n]) { inputs.Overload = false; inputs.M_Run = false; setTimeout(() => { inputs.Reset = false; recompute(); }, 300); }
+        recompute();
+      });
+    });
+    recompute();
+    let auto = null;
+    container.querySelector("#plcAuto").addEventListener("click", (e) => {
+      if (auto) { clearInterval(auto); auto = null; e.target.textContent = "Simulation auto"; return; }
+      e.target.textContent = "Stop simulation";
+      let step = 0;
+      auto = setInterval(() => {
+        step++;
+        if (step === 1) { inputs.Start = true; recompute(); }
+        else if (step === 2) { inputs.Start = false; recompute(); }
+        else if (step === 4) { inputs.Overload = true; recompute(); }
+        else if (step === 6) { inputs.Overload = false; inputs.Reset = true; recompute(); setTimeout(() => { inputs.Reset = false; recompute(); }, 300); step = 0; }
+      }, 1400);
+    });
+    return () => { if (auto) clearInterval(auto); };
+  },
+
+  // ─── SCADA — mimic + gauges + alarm ────────────────────────────────
+  scada(container, d) {
+    container.innerHTML = `
+      <h4>Démo · Supervision live</h4>
+      <div class="demoHint">Modifie les consignes avec les sliders. Les jauges, graphique et alarmes réagissent en temps réel comme sur un vrai SCADA.</div>
+      <div class="stage">
+        <div style="width:100%;">
+          <div class="gauge-wrap" id="scadaGauges"></div>
+          <div style="margin:30px 0 10px;">
+            <canvas id="scadaChart" style="width:100%;height:140px;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:6px;"></canvas>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px;">
+            <div><div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-bottom:4px;">TEMPERATURE</div><input id="scadaT" type="range" min="20" max="140" step="0.1" value="72" style="width:100%"></div>
+            <div><div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-bottom:4px;">PRESSURE</div><input id="scadaP" type="range" min="0" max="8" step="0.01" value="2.4" style="width:100%"></div>
+            <div><div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-bottom:4px;">FLOW</div><input id="scadaF" type="range" min="0" max="300" step="1" value="120" style="width:100%"></div>
+          </div>
+          <div style="margin-top:14px;padding:10px;border-radius:6px;background:rgba(75,255,170,0.08);border:1px solid rgba(75,255,170,0.3);color:var(--green);font-size:11px;letter-spacing:0.15em;text-align:center;" id="scadaAlarm">● SYSTEM NOMINAL · ALL CHANNELS GOOD</div>
+        </div>
+      </div>
+    `;
+    const gaugeDefs = [
+      { id: "T", label: "Temp", unit: "°C", min: 20, max: 140, warn: 100 },
+      { id: "P", label: "Press", unit: "bar", min: 0, max: 8, warn: 6 },
+      { id: "F", label: "Flow", unit: "L/min", min: 0, max: 300, warn: 250 }
+    ];
+    const gwrap = container.querySelector("#scadaGauges");
+    const gaugeEls = {};
+    gaugeDefs.forEach(g => {
+      const div = document.createElement("div");
+      div.className = "gauge";
+      div.innerHTML = `
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(75,200,255,0.1)" stroke-width="4"/>
+          <circle class="arc" cx="50" cy="50" r="42" fill="none" stroke="var(--cyan)" stroke-width="4" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 50 50)" stroke-linecap="round"/>
+        </svg>
+        <div class="val"><div class="n" data-n>—</div><div class="u">${g.unit}</div><div class="label">${g.label}</div></div>
+      `;
+      gwrap.appendChild(div);
+      gaugeEls[g.id] = { div, arc: div.querySelector(".arc"), n: div.querySelector("[data-n]") };
+    });
+    // Chart
+    const chart = container.querySelector("#scadaChart");
+    const ctx = chart.getContext("2d");
+    const history = [];
+    function resizeChart() { chart.width = chart.offsetWidth * 2; chart.height = chart.offsetHeight * 2; ctx.scale(2, 2); }
+    resizeChart();
+    const inputs = {
+      T: container.querySelector("#scadaT"),
+      P: container.querySelector("#scadaP"),
+      F: container.querySelector("#scadaF")
+    };
+    const vals = { T: 72, P: 2.4, F: 120 };
+    ["T", "P", "F"].forEach(k => inputs[k].addEventListener("input", () => vals[k] = parseFloat(inputs[k].value)));
+    const alarmEl = container.querySelector("#scadaAlarm");
+
+    let last = performance.now();
+    let raf = 0;
+    function loop() {
+      const now = performance.now(); if (now - last < 60) { raf = requestAnimationFrame(loop); return; }
+      last = now;
+      // Breathe sim values a bit
+      const dT = (parseFloat(inputs.T.value) - vals.T) * 0.1 + (Math.random() - 0.5) * 0.3;
+      const dP = (parseFloat(inputs.P.value) - vals.P) * 0.1 + (Math.random() - 0.5) * 0.05;
+      const dF = (parseFloat(inputs.F.value) - vals.F) * 0.1 + (Math.random() - 0.5) * 1;
+      vals.T += dT; vals.P += dP; vals.F += dF;
+      gaugeDefs.forEach(g => {
+        const v = vals[g.id];
+        const pct = Math.max(0, Math.min(1, (v - g.min) / (g.max - g.min)));
+        gaugeEls[g.id].arc.setAttribute("stroke-dashoffset", 264 - 264 * pct);
+        gaugeEls[g.id].arc.setAttribute("stroke", v > g.warn ? "#ff5566" : "#4bc8ff");
+        gaugeEls[g.id].n.textContent = v.toFixed(g.id === "F" ? 0 : 1);
+      });
+      // Draw chart (temperature)
+      history.push(vals.T);
+      if (history.length > 100) history.shift();
+      const w = chart.offsetWidth, h = chart.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      ctx.strokeStyle = "rgba(75,200,255,0.15)"; ctx.lineWidth = 0.5;
+      for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, h / 4 * i); ctx.lineTo(w, h / 4 * i); ctx.stroke(); }
+      ctx.beginPath();
+      history.forEach((v, i) => {
+        const x = (i / 99) * w;
+        const y = h - ((v - 20) / 120) * h;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = "#4bc8ff"; ctx.lineWidth = 1.6; ctx.stroke();
+      // warn line
+      ctx.strokeStyle = "rgba(255,85,102,0.5)"; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); const warnY = h - ((100 - 20) / 120) * h; ctx.moveTo(0, warnY); ctx.lineTo(w, warnY); ctx.stroke();
+      ctx.setLineDash([]);
+      // Alarm status
+      const alarms = [];
+      if (vals.T > 100) alarms.push("HIGH TEMP");
+      if (vals.P > 6) alarms.push("HIGH PRESSURE");
+      if (vals.F > 250) alarms.push("OVERFLOW");
+      if (alarms.length) {
+        alarmEl.textContent = "⚠ ALARM · " + alarms.join(" · ");
+        alarmEl.style.background = "rgba(255,85,102,0.08)";
+        alarmEl.style.borderColor = "rgba(255,85,102,0.4)";
+        alarmEl.style.color = "var(--red)";
+      } else {
+        alarmEl.textContent = "● SYSTEM NOMINAL · ALL CHANNELS GOOD";
+        alarmEl.style.background = "rgba(75,255,170,0.08)";
+        alarmEl.style.borderColor = "rgba(75,255,170,0.3)";
+        alarmEl.style.color = "var(--green)";
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  },
+
+  // ─── OPC UA Browser ────────────────────────────────────────────────
+  opcua(container, d) {
+    const nodes = [
+      { id: "Objects", type: "folder", children: [
+        { id: "Line_01", type: "folder", children: [
+          { id: "Reactor_01", type: "object", children: [
+            { id: "Temperature", type: "variable", value: 72.5, unit: "°C" },
+            { id: "Pressure", type: "variable", value: 2.4, unit: "bar" },
+            { id: "Status", type: "variable", value: "RUNNING", unit: "" },
+            { id: "SP_Temp", type: "variable", value: 75.0, unit: "°C" }
+          ]},
+          { id: "Mixer_02", type: "object", children: [
+            { id: "Speed", type: "variable", value: 1200, unit: "rpm" },
+            { id: "Torque", type: "variable", value: 42, unit: "Nm" }
+          ]}
+        ]},
+        { id: "Line_02", type: "folder", children: [
+          { id: "Filler_03", type: "object", children: [
+            { id: "FlowRate", type: "variable", value: 120, unit: "L/min" },
+            { id: "BatchCount", type: "variable", value: 1247, unit: "" }
+          ]}
+        ]}
+      ]}
+    ];
+    container.innerHTML = `
+      <h4>Démo · Browse OPC UA</h4>
+      <div class="demoHint">Explore une arborescence OPC UA type Server. Clique sur un nœud variable pour lire sa valeur en direct — c'est exactement ce qu'on fait pour acquérir vos données machines.</div>
+      <div class="stage" style="align-items:stretch;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;height:100%;">
+          <div class="code" id="opcTree" style="line-height:1.9;cursor:default;"></div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="font-size:10px;color:var(--cyan);letter-spacing:0.3em;">SELECTED NODE</div>
+            <div class="code" id="opcDetail" style="min-height:200px;">Clique un nœud variable à gauche</div>
+            <div style="font-size:10px;color:var(--mute);letter-spacing:0.2em;margin-top:auto;">
+              Protocole : <span style="color:var(--cyan);">opc.tcp://plc.site-a:4840</span><br>
+              Namespace : <span style="color:var(--cyan);">ns=2</span><br>
+              Security : <span style="color:var(--green);">Sign & Encrypt (Basic256Sha256)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    function render(nodes, depth = 0) {
+      let html = "";
+      nodes.forEach(n => {
+        const icon = n.type === "folder" ? "📁" : n.type === "object" ? "🔷" : "●";
+        const col = n.type === "variable" ? "var(--cyan2)" : "#fff";
+        html += `<div style="padding-left:${depth * 20}px;color:${col};${n.type === 'variable' ? 'cursor:pointer;' : ''}" ${n.type === 'variable' ? `data-id="${n.id}" data-value="${n.value}" data-unit="${n.unit}"` : ""}>${icon} ${n.id}${n.type === 'variable' ? ' <span style="color:var(--amber);">= ' + n.value + ' ' + n.unit + '</span>' : ''}</div>`;
+        if (n.children) html += render(n.children, depth + 1);
+      });
+      return html;
+    }
+    container.querySelector("#opcTree").innerHTML = render(nodes);
+    const detail = container.querySelector("#opcDetail");
+    container.querySelectorAll("#opcTree [data-id]").forEach(el => {
+      el.addEventListener("click", () => {
+        const id = el.dataset.id, v = el.dataset.value, u = el.dataset.unit;
+        const ts = new Date().toISOString();
+        detail.innerHTML = `<span class="c">// OPC UA Read Response</span>
+<span class="k">NodeId</span>: <span class="s">"ns=2;s=${id}"</span>
+<span class="k">Value</span>: <span class="n">${v}</span>
+<span class="k">Unit</span>: <span class="s">"${u}"</span>
+<span class="k">Timestamp</span>: <span class="s">"${ts}"</span>
+<span class="k">StatusCode</span>: <span class="s">"GOOD"</span>
+<span class="k">AccessLevel</span>: <span class="s">"CurrentRead"</span>`;
+      });
+    });
+    return () => {};
+  },
+
+  // ─── HighByte transformation ───────────────────────────────────────
+  highbyte(container, d) {
+    container.innerHTML = `
+      <h4>Démo · HighByte Transformation</h4>
+      <div class="demoHint">À gauche la donnée brute du PLC. HighByte ajoute le contexte, l'unité, la qualité, le modèle ISA-95. À droite, le JSON contextualisé prêt à publier.</div>
+      <div class="stage" style="align-items:stretch;">
+        <div style="display:grid;grid-template-columns:1fr auto 1.3fr;gap:14px;width:100%;height:100%;align-items:stretch;">
+          <div>
+            <div style="font-size:10px;color:var(--cyan);letter-spacing:0.3em;margin-bottom:8px;">RAW · PLC TAG</div>
+            <div class="code">tag_104.pv = <span class="n">72.5</span>
+tag_104.q  = <span class="n">192</span>
+tag_104.ts = <span class="n">1735394524</span></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--purple);">
+            <div style="font-size:30px;">→</div>
+            <div style="font-size:10px;letter-spacing:0.3em;">HIGHBYTE</div>
+            <div style="font-size:10px;letter-spacing:0.3em;">PIPELINE</div>
+            <div id="hbSteps" style="margin-top:14px;font-size:10px;line-height:1.6;color:var(--mute);">
+              <div data-step="1">· Mapping</div>
+              <div data-step="2">· Context ISA-95</div>
+              <div data-step="3">· Quality check</div>
+              <div data-step="4">· JSON output</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--purple);letter-spacing:0.3em;margin-bottom:8px;">OUTPUT · UNS PAYLOAD</div>
+            <div class="code" id="hbOut"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    const steps = container.querySelectorAll("#hbSteps [data-step]");
+    let s = 0;
+    const outputs = [
+      `<span class="c">// Step 1 : raw mapping</span>
+{ <span class="k">"value"</span>: <span class="n">72.5</span> }`,
+      `<span class="c">// Step 2 : add ISA-95 context</span>
+{
+  <span class="k">"value"</span>: <span class="n">72.5</span>,
+  <span class="k">"unit"</span>: <span class="s">"°C"</span>,
+  <span class="k">"machine"</span>: <span class="s">"MIX-REACTOR-01"</span>,
+  <span class="k">"line"</span>: <span class="s">"LINE-01"</span>,
+  <span class="k">"site"</span>: <span class="s">"SITE-A"</span>
+}`,
+      `<span class="c">// Step 3 : quality from PLC flags</span>
+{
+  <span class="k">"value"</span>: <span class="n">72.5</span>, <span class="k">"unit"</span>: <span class="s">"°C"</span>,
+  <span class="k">"machine"</span>: <span class="s">"MIX-REACTOR-01"</span>,
+  <span class="k">"line"</span>: <span class="s">"LINE-01"</span>, <span class="k">"site"</span>: <span class="s">"SITE-A"</span>,
+  <span class="k">"quality"</span>: <span class="s">"GOOD"</span>
+}`,
+      `<span class="c">// Step 4 : final UNS payload</span>
+{
+  <span class="k">"value"</span>: <span class="n">72.5</span>,
+  <span class="k">"unit"</span>: <span class="s">"°C"</span>,
+  <span class="k">"machine"</span>: <span class="s">"MIX-REACTOR-01"</span>,
+  <span class="k">"line"</span>: <span class="s">"LINE-01"</span>,
+  <span class="k">"site"</span>: <span class="s">"SITE-A"</span>,
+  <span class="k">"quality"</span>: <span class="s">"GOOD"</span>,
+  <span class="k">"ts"</span>: <span class="s">"2026-10-28T14:12:04.000Z"</span>,
+  <span class="k">"schema"</span>: <span class="s">"ISA95.Temperature.v1"</span>
+}
+<span class="c">// → publish mqtt topic:</span>
+<span class="c">// dasolabs/SITE-A/LINE-01/MIX-REACTOR-01/temperature</span>`
+    ];
+    const out = container.querySelector("#hbOut");
+    const tick = () => {
+      s = (s + 1) % 4;
+      steps.forEach((el, i) => el.style.color = i === s ? "var(--purple)" : "var(--mute)");
+      out.innerHTML = outputs[s];
+    };
+    const interval = setInterval(tick, 2200);
+    tick();
+    return () => clearInterval(interval);
+  },
+
+  // ─── UNS / MQTT ────────────────────────────────────────────────────
+  uns(container, d) {
+    container.innerHTML = `
+      <h4>Démo · UNS en direct</h4>
+      <div class="demoHint">Publie un message dans le namespace Dasolabs. Les abonnés concernés reçoivent le payload (visuellement) selon leurs topics de souscription.</div>
+      <div class="stage" style="align-items:stretch;">
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:16px;width:100%;height:100%;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="font-size:10px;color:var(--cyan);letter-spacing:0.3em;">PUBLISH NEW MESSAGE</div>
+            <select id="unsTopic" class="input" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--ink);padding:8px;border-radius:6px;font-family:'SF Mono',monospace;">
+              <option>dasolabs/SITE-A/LINE-01/REACT-01/temperature</option>
+              <option>dasolabs/SITE-A/LINE-01/REACT-01/batch</option>
+              <option>dasolabs/SITE-A/LINE-02/FILL-03/alarm</option>
+              <option>dasolabs/SITE-A/LINE-02/AMR-05/position</option>
+            </select>
+            <input id="unsValue" type="text" value='72.5' style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--ink);padding:8px;border-radius:6px;font-family:'SF Mono',monospace;">
+            <button class="mini-btn" id="unsPub">▲ Publish</button>
+            <div style="margin-top:14px;font-size:10px;color:var(--mute);letter-spacing:0.2em;line-height:1.8;">
+              Broker : <span style="color:var(--cyan);">HiveMQ · tcp://hivemq.local:1883</span><br>
+              QoS : <span style="color:var(--cyan);">1 · at-least-once</span><br>
+              Retain : <span style="color:var(--cyan);">true</span><br>
+              Schema : <span style="color:var(--cyan);">Sparkplug B</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="font-size:10px;color:var(--cyan);letter-spacing:0.3em;margin-bottom:4px;">SUBSCRIBERS · LIVE</div>
+            <div id="unsSubs" style="display:flex;flex-direction:column;gap:6px;flex:1;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    const subs = [
+      { name: "MES", topic: "dasolabs/+/+/+/+", color: "#4bc8ff" },
+      { name: "ERP", topic: "dasolabs/+/+/+/batch", color: "#4bffaa" },
+      { name: "BI / Historian", topic: "dasolabs/+/+/+/+", color: "#ffb94a" },
+      { name: "AI Models", topic: "dasolabs/+/+/+/temperature", color: "#c488ff" },
+      { name: "Cloud lakehouse", topic: "dasolabs/+/+/+/+", color: "#8be0ff" },
+      { name: "Edge analytics", topic: "dasolabs/+/+/+/#", color: "#ff80d0" }
+    ];
+    const subsEl = container.querySelector("#unsSubs");
+    subs.forEach(s => {
+      const d = document.createElement("div");
+      d.innerHTML = `
+        <div style="padding:10px 14px;background:rgba(75,200,255,0.04);border:1px solid var(--border);border-left:3px solid ${s.color};border-radius:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:600;color:${s.color};">${s.name}</div>
+            <div style="font-family:'SF Mono',monospace;font-size:10px;color:var(--mute);">${s.topic}</div>
+          </div>
+          <div style="margin-top:4px;font-size:11px;color:var(--mute);" data-last>Listening…</div>
+        </div>`;
+      subsEl.appendChild(d);
+      s.el = d.querySelector("[data-last]");
+      s.parent = d.firstElementChild;
+    });
+    function match(topic, pattern) {
+      const t = topic.split("/"), p = pattern.split("/");
+      if (p[p.length - 1] === "#") { return t.length >= p.length - 1 && p.slice(0, -1).every((seg, i) => seg === "+" || seg === t[i]); }
+      if (t.length !== p.length) return false;
+      return p.every((seg, i) => seg === "+" || seg === t[i]);
+    }
+    container.querySelector("#unsPub").addEventListener("click", () => {
+      const topic = container.querySelector("#unsTopic").value;
+      const value = container.querySelector("#unsValue").value;
+      const ts = new Date().toISOString();
+      subs.forEach(s => {
+        if (match(topic, s.topic)) {
+          s.el.innerHTML = `<span style="color:${s.color};">◉</span> Received: <span style="color:#fff;">${value}</span> · <span style="color:var(--mute);">${ts.slice(11, 19)}</span>`;
+          s.parent.style.boxShadow = `0 0 20px ${s.color}66`;
+          setTimeout(() => s.parent.style.boxShadow = "", 800);
+        }
+      });
+    });
+    return () => {};
+  },
+
+  // ─── MES / ERP batch flow ──────────────────────────────────────────
+  mes(container, d) {
+    container.innerHTML = `
+      <h4>Démo · Lot de production — bout en bout</h4>
+      <div class="demoHint">Lance un lot : l'ERP envoie l'ordre au MES, le MES pilote la ligne, les données terrain remontent, la libération automatique du lot génère la facture.</div>
+      <div class="stage" style="align-items:stretch;">
+        <div style="width:100%;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;" id="mesSteps">
+            ${[
+              ["ERP", "Ordre de prod.", "SAP S/4HANA"],
+              ["MES", "Ordonnancement", "Opcenter EX"],
+              ["Line", "Production", "LINE-01"],
+              ["QA", "Libération lot", "LIMS + e-sign"],
+              ["ERP", "Facturation", "SAP F-04"]
+            ].map(([a, b, c]) => `
+              <div style="padding:14px;background:rgba(75,200,255,0.05);border:1px solid var(--border);border-radius:8px;text-align:center;transition:all 0.3s;" data-mes-step>
+                <div style="font-size:10px;color:var(--amber);letter-spacing:0.3em;">${a}</div>
+                <div style="font-size:14px;color:#fff;font-weight:600;margin:6px 0;">${b}</div>
+                <div style="font-size:10px;color:var(--mute);">${c}</div>
+                <div class="io-led" style="width:10px;height:10px;border-radius:50%;background:#1a3058;margin:8px auto 0;transition:all 0.3s;" data-mes-led></div>
+              </div>
+            `).join("")}
+          </div>
+          <div class="code" id="mesLog" style="flex:1;min-height:180px;overflow:auto;"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="mini-btn" id="mesStart">▶ Lancer le lot BATCH-20261028-0043</button>
+            <button class="mini-btn danger" id="mesFault">⚠ Déclencher un écart qualité</button>
+          </div>
+        </div>
+      </div>
+    `;
+    const steps = container.querySelectorAll("[data-mes-step]");
+    const leds = container.querySelectorAll("[data-mes-led]");
+    const log = container.querySelector("#mesLog");
+    function reset() {
+      steps.forEach(s => { s.style.borderColor = "var(--border)"; });
+      leds.forEach(l => { l.style.background = "#1a3058"; l.style.boxShadow = ""; });
+      log.innerHTML = `<span class="c">// Ready. Click "Lancer le lot" to start the flow.</span>`;
+    }
+    reset();
+    let timers = [];
+    container.querySelector("#mesStart").addEventListener("click", () => {
+      reset();
+      const seq = [
+        [0, 400,  `<span class="s">[ERP]</span> Ordre OF-20261028-0043 créé → Opcenter EX`],
+        [1, 1200, `<span class="s">[MES]</span> Ordonnancement sur LINE-01 · recette RCP-A14 appliquée`],
+        [2, 2200, `<span class="s">[LINE-01]</span> Démarrage réacteur · lot BATCH-20261028-0043`],
+        [2, 3400, `<span class="s">[LINE-01]</span> Points critiques enregistrés · T=72.5°C P=2.4bar`],
+        [3, 4600, `<span class="s">[QA]</span> Analyses LIMS reçues · spec OK · libération électronique signée`],
+        [4, 5600, `<span class="s">[ERP]</span> Facture F-20261028-0043 générée · 1 240 €`]
+      ];
+      seq.forEach(([stepIdx, delay, msg]) => {
+        timers.push(setTimeout(() => {
+          leds[stepIdx].style.background = "var(--green)";
+          leds[stepIdx].style.boxShadow = "0 0 15px var(--green)";
+          steps[stepIdx].style.borderColor = "var(--green)";
+          log.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+          log.scrollTop = log.scrollHeight;
+        }, delay));
+      });
+    });
+    container.querySelector("#mesFault").addEventListener("click", () => {
+      leds[3].style.background = "var(--red)";
+      leds[3].style.boxShadow = "0 0 15px var(--red)";
+      steps[3].style.borderColor = "var(--red)";
+      log.innerHTML += `<div style="color:var(--red);">[${new Date().toLocaleTimeString()}] [QA] ⚠ Analyses LIMS : spec OUT · lot bloqué · déviation ouverte</div>`;
+      log.scrollTop = log.scrollHeight;
+    });
+    return () => timers.forEach(clearTimeout);
+  },
+
+  // ─── Tracking / AMR map ────────────────────────────────────────────
+  tracking(container, d) {
+    container.innerHTML = `
+      <h4>Démo · Suivi assets en direct</h4>
+      <div class="demoHint">Carte simulée d'une usine. Les actifs (chariots, lots, outils) sont géolocalisés en temps réel via LPWAN/BLE/UWB. Clique un asset pour voir son historique.</div>
+      <div class="stage">
+        <canvas id="trackCanvas" style="width:100%;height:360px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;"></canvas>
+      </div>
+      <div id="trackDetail" style="padding:12px;background:rgba(75,255,170,0.08);border:1px solid rgba(75,255,170,0.3);border-radius:6px;font-size:11px;color:var(--green);text-align:center;">Clique un asset sur la carte</div>
+    `;
+    const c = container.querySelector("#trackCanvas");
+    const ctx = c.getContext("2d");
+    function size() { c.width = c.offsetWidth * 2; c.height = c.offsetHeight * 2; ctx.scale(2, 2); }
+    size();
+    const assets = [
+      { id: "AMR-01",  type: "amr",   x: 100, y: 80,  color: "#4bffaa", path: 0 },
+      { id: "AMR-02",  type: "amr",   x: 200, y: 180, color: "#4bffaa", path: Math.PI / 2 },
+      { id: "LOT-A12", type: "batch", x: 320, y: 100, color: "#ffb94a", path: 0 },
+      { id: "TOOL-7",  type: "tool",  x: 180, y: 240, color: "#c488ff", path: Math.PI },
+      { id: "FORK-02", type: "fork",  x: 400, y: 200, color: "#8be0ff", path: 0 },
+      { id: "AMR-03",  type: "amr",   x: 260, y: 290, color: "#4bffaa", path: Math.PI * 1.5 }
+    ];
+    const detail = container.querySelector("#trackDetail");
+    let hoverIdx = -1;
+    c.addEventListener("click", (e) => {
+      const r = c.getBoundingClientRect();
+      const mx = (e.clientX - r.left), my = (e.clientY - r.top);
+      let hit = -1;
+      assets.forEach((a, i) => { if (Math.hypot(a.x - mx, a.y - my) < 12) hit = i; });
+      if (hit >= 0) {
+        const a = assets[hit];
+        detail.innerHTML = `<span style="color:${a.color};">◉</span> <b>${a.id}</b> · ${a.type.toUpperCase()} · position (${Math.round(a.x)}, ${Math.round(a.y)}) m · signal <b>-62 dBm</b> · dernière mise à jour : ${new Date().toLocaleTimeString()}`;
+      }
+    });
+    let raf;
+    function loop() {
+      const w = c.offsetWidth, h = c.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      // Grid floor
+      ctx.strokeStyle = "rgba(75,200,255,0.1)"; ctx.lineWidth = 0.5;
+      for (let i = 0; i <= w; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke(); }
+      for (let i = 0; i <= h; i += 40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke(); }
+      // Zones
+      ctx.fillStyle = "rgba(75,200,255,0.04)";
+      ctx.strokeStyle = "rgba(75,200,255,0.3)";
+      const zones = [[20, 20, 150, 120, "ZONE A"], [200, 20, 180, 120, "ZONE B"], [20, 170, 200, 180, "ZONE C"], [250, 170, 200, 180, "ZONE D"]];
+      zones.forEach(([x, y, w2, h2, lbl]) => {
+        ctx.fillRect(x, y, w2, h2); ctx.strokeRect(x, y, w2, h2);
+        ctx.fillStyle = "rgba(75,200,255,0.5)";
+        ctx.font = "9px -apple-system, sans-serif";
+        ctx.fillText(lbl, x + 6, y + 14);
+        ctx.fillStyle = "rgba(75,200,255,0.04)";
+      });
+      // Assets
+      assets.forEach(a => {
+        if (a.type === "amr") { a.path += 0.015; a.x += Math.cos(a.path) * 1.2; a.y += Math.sin(a.path) * 1.2; }
+        else { a.x += (Math.random() - 0.5) * 0.3; a.y += (Math.random() - 0.5) * 0.3; }
+        if (a.x < 15) a.x = 15; if (a.x > w - 15) a.x = w - 15;
+        if (a.y < 15) a.y = 15; if (a.y > h - 15) a.y = h - 15;
+        // Glow
+        ctx.beginPath(); ctx.arc(a.x, a.y, 14, 0, Math.PI * 2);
+        ctx.fillStyle = a.color + "22"; ctx.fill();
+        // Core
+        ctx.beginPath(); ctx.arc(a.x, a.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = a.color; ctx.fill();
+        // Label
+        ctx.fillStyle = "#eaf3ff"; ctx.font = "bold 9px -apple-system, sans-serif";
+        ctx.fillText(a.id, a.x + 10, a.y + 3);
+      });
+      raf = requestAnimationFrame(loop);
+    }
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  },
+
+  // ─── Robot pick & place ────────────────────────────────────────────
+  robot(container, d) {
+    container.innerHTML = `
+      <h4>Démo · Robot pick & place</h4>
+      <div class="demoHint">Un bras robotique animé effectue un cycle pick & place. Clique "Start/Stop" pour piloter.</div>
+      <div class="stage">
+        <canvas id="robotCanvas" style="width:100%;height:380px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;"></canvas>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="mini-btn" id="robotToggle">▶ Démarrer</button>
+        <button class="mini-btn" id="robotHome">⌂ Home</button>
+        <div style="margin-left:auto;align-self:center;font-size:11px;color:var(--mute);letter-spacing:0.2em;">
+          CYCLES <span style="color:var(--green);" id="robotCycles">0</span>
+        </div>
+      </div>
+    `;
+    const c = container.querySelector("#robotCanvas");
+    const ctx = c.getContext("2d");
+    function size() { c.width = c.offsetWidth * 2; c.height = c.offsetHeight * 2; ctx.scale(2, 2); }
+    size();
+    const state = { running: false, phase: 0, cycles: 0, hasPart: false, boxes: Array.from({ length: 5 }, (_, i) => ({ x: 60 + i * 24, y: 240, taken: false })), target: 0 };
+    const toggleBtn = container.querySelector("#robotToggle");
+    toggleBtn.addEventListener("click", () => {
+      state.running = !state.running;
+      toggleBtn.textContent = state.running ? "⏸ Stop" : "▶ Démarrer";
+    });
+    container.querySelector("#robotHome").addEventListener("click", () => {
+      state.phase = 0; state.hasPart = false;
+      state.boxes.forEach(b => b.taken = false);
+      container.querySelector("#robotCycles").textContent = state.cycles;
+    });
+    const cyclesEl = container.querySelector("#robotCycles");
+
+    let raf;
+    const BASE = { x: 240, y: 320 };
+    function loop() {
+      const w = c.offsetWidth, h = c.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      // Grid
+      ctx.strokeStyle = "rgba(75,200,255,0.08)"; ctx.lineWidth = 0.5;
+      for (let i = 0; i < h; i += 20) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke(); }
+      // Ground
+      ctx.fillStyle = "rgba(75,200,255,0.1)";
+      ctx.fillRect(0, h - 30, w, 30);
+      ctx.strokeStyle = "var(--cyan)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, h - 30); ctx.lineTo(w, h - 30); ctx.stroke();
+      // Source conveyor (left)
+      ctx.fillStyle = "rgba(255,128,208,0.1)";
+      ctx.fillRect(30, h - 60, 150, 10);
+      ctx.strokeStyle = "var(--pink)";
+      ctx.strokeRect(30, h - 60, 150, 10);
+      ctx.fillStyle = "var(--pink)"; ctx.font = "9px -apple-system, sans-serif";
+      ctx.fillText("INPUT", 40, h - 65);
+      // Target conveyor (right)
+      ctx.fillStyle = "rgba(75,255,170,0.1)";
+      ctx.fillRect(330, h - 60, 150, 10);
+      ctx.strokeStyle = "var(--green)";
+      ctx.strokeRect(330, h - 60, 150, 10);
+      ctx.fillStyle = "var(--green)";
+      ctx.fillText("OUTPUT", 340, h - 65);
+      // Boxes
+      state.boxes.forEach(b => {
+        if (!b.taken) {
+          ctx.fillStyle = "var(--pink)"; ctx.fillRect(b.x, b.y - 12, 16, 12);
+          ctx.strokeStyle = "#fff"; ctx.strokeRect(b.x, b.y - 12, 16, 12);
+        }
+      });
+      // Robot base
+      ctx.fillStyle = "#1a3058"; ctx.fillRect(BASE.x - 20, BASE.y - 10, 40, 20);
+      ctx.strokeStyle = "var(--purple)"; ctx.strokeRect(BASE.x - 20, BASE.y - 10, 40, 20);
+      // Compute arm position based on phase
+      let armX = BASE.x, armY = BASE.y - 100;
+      const activeBox = state.boxes.find(b => !b.taken);
+      if (state.running && activeBox) {
+        // phases: 0=idle→up, 1=left to pick, 2=down, 3=pick, 4=up, 5=right to drop, 6=down, 7=drop, 8=up→return
+        state.phase += 0.015;
+        const t = state.phase;
+        if (t < 1)        { armX = BASE.x - (BASE.x - (activeBox.x + 8)) * t;  armY = BASE.y - 100; }
+        else if (t < 2)   { armX = activeBox.x + 8;                           armY = BASE.y - 100 + (activeBox.y - (BASE.y - 100)) * (t - 1); }
+        else if (t < 2.3) { armX = activeBox.x + 8; armY = activeBox.y; if (!state.hasPart) { state.hasPart = true; activeBox.taken = true; } }
+        else if (t < 3.3) { armX = activeBox.x + 8; armY = activeBox.y - (activeBox.y - (BASE.y - 100)) * (t - 2.3); }
+        else if (t < 4.3) { armX = activeBox.x + 8 + (380 - (activeBox.x + 8)) * (t - 3.3); armY = BASE.y - 100; }
+        else if (t < 5.3) { armX = 380; armY = BASE.y - 100 + ((BASE.y - 60) - (BASE.y - 100)) * (t - 4.3); }
+        else if (t < 5.6) { armX = 380; armY = BASE.y - 60; state.hasPart = false; }
+        else if (t < 6.6) { armX = 380; armY = BASE.y - 60 - (60 - 40) * (t - 5.6) * 2; }
+        else { state.phase = 0; state.cycles++; cyclesEl.textContent = state.cycles; if (state.boxes.every(b => b.taken)) state.boxes.forEach(b => b.taken = false); }
+      } else { armY = BASE.y - 100; }
+      // Draw arm: base → joint → gripper
+      const jointX = BASE.x, jointY = BASE.y - 60;
+      ctx.strokeStyle = "var(--purple)"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(BASE.x, BASE.y - 10); ctx.lineTo(jointX, jointY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(jointX, jointY); ctx.lineTo(armX, armY); ctx.stroke();
+      // Gripper
+      ctx.fillStyle = "#fff"; ctx.fillRect(armX - 6, armY - 2, 12, 4);
+      // Carried box
+      if (state.hasPart) {
+        ctx.fillStyle = "var(--pink)"; ctx.fillRect(armX - 8, armY + 2, 16, 12);
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  },
+
+  // ─── Machine spéciale — line builder ───────────────────────────────
+  special(container, d) {
+    container.innerHTML = `
+      <h4>Démo · Concepteur de ligne</h4>
+      <div class="demoHint">Chaque machine spéciale est unique. Ici tu composes une ligne pas à pas (clic pour ajouter / retirer les modules). On évalue le temps de cycle et le coût estimé.</div>
+      <div class="stage">
+        <div style="width:100%;display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="specialPool">
+            ${[
+              ["Convoyeur", "convoyeur", 2500, 1.2],
+              ["Pick & place", "robot", 18000, 2.5],
+              ["Marquage laser", "laser", 24000, 1.8],
+              ["Inspection vision", "vision", 32000, 1.0],
+              ["Encaisseuse", "box", 14000, 2.0],
+              ["Palettiseur", "palette", 42000, 4.5]
+            ].map(([n, k, p, t]) => `<button class="mini-btn" data-mod='{"n":"${n}","k":"${k}","p":${p},"t":${t}}'>+ ${n}</button>`).join("")}
+          </div>
+          <div id="specialLine" style="min-height:120px;padding:14px;background:rgba(0,0,0,0.3);border:1px dashed var(--border);border-radius:8px;display:flex;align-items:center;gap:10px;overflow-x:auto;">
+            <div style="color:var(--mute);font-size:11px;">Ajoute des modules pour composer la ligne…</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div style="padding:14px;background:rgba(75,200,255,0.05);border:1px solid var(--border);border-radius:6px;text-align:center;">
+              <div style="font-size:10px;color:var(--mute);letter-spacing:0.3em;">MODULES</div>
+              <div style="font-size:28px;color:var(--cyan);font-weight:300;" id="specialCount">0</div>
+            </div>
+            <div style="padding:14px;background:rgba(75,200,255,0.05);border:1px solid var(--border);border-radius:6px;text-align:center;">
+              <div style="font-size:10px;color:var(--mute);letter-spacing:0.3em;">TEMPS CYCLE</div>
+              <div style="font-size:28px;color:var(--amber);font-weight:300;" id="specialTime">0.0 <span style="font-size:14px;">s</span></div>
+            </div>
+            <div style="padding:14px;background:rgba(75,200,255,0.05);border:1px solid var(--border);border-radius:6px;text-align:center;">
+              <div style="font-size:10px;color:var(--mute);letter-spacing:0.3em;">BUDGET MACHINE</div>
+              <div style="font-size:28px;color:var(--green);font-weight:300;" id="specialPrice">0 €</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    const line = [];
+    const lineEl = container.querySelector("#specialLine");
+    function render() {
+      if (line.length === 0) {
+        lineEl.innerHTML = `<div style="color:var(--mute);font-size:11px;">Ajoute des modules pour composer la ligne…</div>`;
+      } else {
+        lineEl.innerHTML = line.map((m, i) => `
+          <div style="padding:10px 14px;background:rgba(75,200,255,0.08);border:1px solid var(--cyan);border-radius:6px;color:#fff;font-size:12px;white-space:nowrap;cursor:pointer;" data-remove="${i}">
+            ${m.n} <span style="color:var(--mute);font-size:10px;">×</span>
+          </div>
+          ${i < line.length - 1 ? '<div style="color:var(--cyan);">→</div>' : ''}
+        `).join("");
+      }
+      container.querySelector("#specialCount").textContent = line.length;
+      container.querySelector("#specialTime").innerHTML = line.reduce((s, m) => s + m.t, 0).toFixed(1) + ' <span style="font-size:14px;">s</span>';
+      container.querySelector("#specialPrice").textContent = line.reduce((s, m) => s + m.p, 0).toLocaleString("fr-BE") + " €";
+      container.querySelectorAll("[data-remove]").forEach(el => {
+        el.addEventListener("click", () => { line.splice(parseInt(el.dataset.remove), 1); render(); });
+      });
+    }
+    container.querySelectorAll("[data-mod]").forEach(el => {
+      el.addEventListener("click", () => {
+        line.push(JSON.parse(el.dataset.mod));
+        render();
+      });
+    });
+    render();
+    return () => {};
+  },
+
+  // ─── AI anomaly detection ──────────────────────────────────────────
+  ai(container, d) {
+    container.innerHTML = `
+      <h4>Démo · Détection d'anomalie temps réel</h4>
+      <div class="demoHint">Un modèle statistique surveille un signal industriel. Déclenche une anomalie et vois le modèle détecter + expliquer la déviation.</div>
+      <div class="stage">
+        <canvas id="aiChart" style="width:100%;height:280px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;"></canvas>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="mini-btn danger" id="aiAnom">⚠ Injecter une anomalie</button>
+        <div style="margin-left:auto;align-self:center;padding:8px 14px;border-radius:6px;" id="aiStatus">
+          <span style="color:var(--green);">● Normal · 0 alertes</span>
+        </div>
+      </div>
+      <div class="code" id="aiExplain" style="font-size:11px;max-height:120px;overflow:auto;">
+<span class="c">// Model : Isolation Forest + XGBoost residuals</span>
+<span class="c">// Features: value, rolling_mean(60), rolling_std(60), lag(5), hour_of_day</span>
+<span class="c">// Explainer: SHAP</span>
+Waiting for anomaly signal…</div>
+    `;
+    const c = container.querySelector("#aiChart");
+    const ctx = c.getContext("2d");
+    function size() { c.width = c.offsetWidth * 2; c.height = c.offsetHeight * 2; ctx.scale(2, 2); }
+    size();
+    const data = []; const anoms = []; let inject = 0;
+    container.querySelector("#aiAnom").addEventListener("click", () => inject = 25);
+    let raf;
+    function loop() {
+      const base = 50 + Math.sin(Date.now() * 0.0008) * 6 + Math.sin(Date.now() * 0.003) * 2;
+      let v = base + (Math.random() - 0.5) * 2;
+      let anomaly = false;
+      if (inject > 0) {
+        v += 30 - inject * 0.5;
+        if (inject > 15) anomaly = true;
+        inject--;
+      }
+      data.push({ v, anomaly });
+      if (data.length > 150) data.shift();
+      if (anomaly) {
+        const explain = `<span class="c">// Anomaly detected</span>
+<span class="k">timestamp</span>: <span class="s">"${new Date().toISOString()}"</span>
+<span class="k">value</span>: <span class="n">${v.toFixed(2)}</span>
+<span class="k">expected</span>: <span class="n">${base.toFixed(2)}</span> ± <span class="n">2.1</span>
+<span class="k">anomaly_score</span>: <span class="n">0.94</span> <span class="c">(threshold 0.6)</span>
+<span class="k">top_contributors</span>: [
+  { <span class="k">feature</span>: <span class="s">"rolling_std(60)"</span>, <span class="k">shap</span>: <span class="n">+0.52</span> },
+  { <span class="k">feature</span>: <span class="s">"value"</span>, <span class="k">shap</span>: <span class="n">+0.33</span> }
+]
+<span class="k">suggested_action</span>: <span class="s">"check reactor cooling · maintenance ticket M-2026-1194 created"</span>`;
+        container.querySelector("#aiExplain").innerHTML = explain;
+        container.querySelector("#aiStatus").innerHTML = `<span style="color:var(--red);">● ALERT · 1 anomaly flagged</span>`;
+        setTimeout(() => container.querySelector("#aiStatus").innerHTML = `<span style="color:var(--amber);">● Monitoring · maintenance ticket raised</span>`, 2500);
+      }
+      // Draw
+      const w = c.offsetWidth, h = c.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      // Gridlines
+      ctx.strokeStyle = "rgba(75,200,255,0.12)"; ctx.lineWidth = 0.5;
+      for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(0, h / 4 * i); ctx.lineTo(w, h / 4 * i); ctx.stroke(); }
+      // Baseline band
+      ctx.fillStyle = "rgba(75,255,170,0.08)";
+      const bandMin = h - ((60 - 20) / 70) * h;
+      const bandMax = h - ((40 - 20) / 70) * h;
+      ctx.fillRect(0, bandMin, w, bandMax - bandMin);
+      // Signal
+      ctx.beginPath();
+      data.forEach((d, i) => {
+        const x = (i / 149) * w;
+        const y = h - ((d.v - 20) / 70) * h;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = "#4bc8ff"; ctx.lineWidth = 1.6; ctx.stroke();
+      // Anomaly markers
+      data.forEach((d, i) => {
+        if (d.anomaly) {
+          const x = (i / 149) * w;
+          const y = h - ((d.v - 20) / 70) * h;
+          ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = "#ff5566"; ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2);
+          ctx.strokeStyle = "rgba(255,85,102,0.5)"; ctx.lineWidth = 1; ctx.stroke();
+        }
+      });
+      raf = requestAnimationFrame(loop);
+    }
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }
+};
+
+// ═════════════════════════════════════════════════════════════════════
+// 6. ANIMATION LOOP (constellation)
+// ═════════════════════════════════════════════════════════════════════
+let idleStart = Date.now();
+["pointerdown", "pointermove", "wheel", "keydown"].forEach(ev => window.addEventListener(ev, () => idleStart = Date.now()));
+
+function animate() {
+  requestAnimationFrame(animate);
+  const now = performance.now();
+
+  // Core rotation
+  coreGroup.rotation.y += 0.005;
+  coreGroup.rotation.x += 0.002;
+  coreGroup.children.forEach((c) => { if (c.userData && c.userData.spin) { c.rotation.x += c.userData.spin; c.rotation.y += c.userData.spin; } });
+  const corePulse = 1 + Math.sin(now * 0.003) * 0.1;
+  coreGlow.scale.set(corePulse, corePulse, corePulse);
+
+  // Pods bob + rotate
+  pods.forEach((p, i) => {
+    p.group.rotation.y += 0.01;
+    p.group.rotation.x += 0.005;
+    const bob = Math.sin(now * 0.0015 + i * 0.6) * 0.3;
+    p.group.position.y = p.basePos.y + bob;
+    const sclP = 1 + Math.sin(now * 0.004 + i * 0.9) * 0.08;
+    p.glow.scale.set(sclP, sclP, sclP);
+    // Pulse line
+    p.line.material.opacity = 0.12 + Math.abs(Math.sin(now * 0.001 + i * 0.5)) * 0.2;
+  });
+
+  // Auto rotate camera when idle
+  if (autoRotate && !panel.classList.contains("on")) {
+    orbitAzim += 0.001;
+    updateCam();
+  }
+  if (!autoRotate && Date.now() - idleStart > 15000 && !panel.classList.contains("on")) {
+    autoRotate = true;
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// Resize
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+})();
+</script>
+</body>
+</html>
