@@ -8,7 +8,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { revalidatePath } from "next/cache";
-import { computeBelgianPayroll } from "@/lib/belgian-payroll";
+import { computeBelgianPayroll, computeBelgianPayrollFromPackage } from "@/lib/belgian-payroll";
 
 const Schema = z.object({
   firstName: z.string().min(1),
@@ -23,7 +23,14 @@ const Schema = z.object({
   /// Lien optionnel vers la source (candidat externe ou consultant interne)
   candidateId: z.string().optional().nullable().transform((v) => v || null),
   userId:      z.string().optional().nullable().transform((v) => v || null),
-  notes: z.string().optional().nullable().transform((v) => v?.trim() || null)
+  notes: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  // ─── Package avantages (surcharge scénario candidat) ───
+  carMonthlyTco:             z.coerce.number().nonnegative().default(0),
+  mealVoucherEmployerPerDay: z.coerce.number().nonnegative().default(0),
+  ecoVouchersAnnual:         z.coerce.number().nonnegative().default(0),
+  hospitalInsuranceMonthly:  z.coerce.number().nonnegative().default(0),
+  phoneInternetMonthly:      z.coerce.number().nonnegative().default(0),
+  netExpensesMonthly:        z.coerce.number().nonnegative().default(0)
 });
 
 /**
@@ -32,7 +39,30 @@ const Schema = z.object({
  */
 function fillAutoPayroll(d: z.infer<typeof Schema>) {
   if (!d.monthlyGrossReference || d.monthlyGrossReference <= 0) return d;
-  const calc = computeBelgianPayroll(Number(d.monthlyGrossReference));
+  // Si des avantages package sont saisis → calcul complet avec ATN + perks.
+  // Sinon → calcul simple barème I.
+  const hasPackage = (d.carMonthlyTco + d.mealVoucherEmployerPerDay +
+    d.ecoVouchersAnnual + d.hospitalInsuranceMonthly +
+    d.phoneInternetMonthly + d.netExpensesMonthly) > 0;
+  const gross = Number(d.monthlyGrossReference);
+  if (hasPackage) {
+    const calc = computeBelgianPayrollFromPackage({
+      grossMonthly: gross,
+      carMonthlyTco: d.carMonthlyTco,
+      mealVoucherEmployerPerDay: d.mealVoucherEmployerPerDay,
+      ecoVouchersAnnual: d.ecoVouchersAnnual,
+      hospitalInsuranceMonthly: d.hospitalInsuranceMonthly,
+      phoneInternetMonthly: d.phoneInternetMonthly,
+      netExpensesMonthly: d.netExpensesMonthly
+    });
+    return {
+      ...d,
+      monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : calc.netCash,
+      monthlyWithholdingTax: d.monthlyWithholdingTax > 0 ? d.monthlyWithholdingTax : calc.withholdingTax,
+      monthlyOnss:           d.monthlyOnss           > 0 ? d.monthlyOnss           : calc.onssEmployee
+    };
+  }
+  const calc = computeBelgianPayroll(gross);
   return {
     ...d,
     monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : calc.net,

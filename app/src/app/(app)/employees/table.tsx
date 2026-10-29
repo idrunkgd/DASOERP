@@ -27,6 +27,13 @@ type Employee = {
   monthlyGrossReference: number | null;
   monthsPerYear: number;
   notes: string | null;
+  // Package avantages stocké sur PayrollEmployee
+  carMonthlyTco?: number;
+  mealVoucherEmployerPerDay?: number;
+  ecoVouchersAnnual?: number;
+  hospitalInsuranceMonthly?: number;
+  phoneInternetMonthly?: number;
+  netExpensesMonthly?: number;
   candidateId?: string | null;
   userId?: string | null;
   sourceLink?: { href: string; label: string } | null;
@@ -357,6 +364,8 @@ function EmployeeForm({
 
       <PayrollSection employee={employee} />
 
+      <PackageSection employee={employee} />
+
       <div>
         <label className="label">Mois versés / an</label>
         <input type="number" step="0.01" name="monthsPerYear" defaultValue={employee?.monthsPerYear ?? 13.92} className="input max-w-[180px]" />
@@ -440,6 +449,41 @@ function PayrollSection({ employee }: { employee?: Employee }) {
           </div>
         </div>
       </details>
+    </div>
+  );
+}
+
+/**
+ * Section package / avantages : voiture, chèques-repas, éco-chèques, hospi,
+ * GSM/internet, frais de représentation. Ces montants viennent surcharger
+ * le scénario candidat si saisis ici.
+ */
+function PackageSection({ employee }: { employee?: Employee }) {
+  return (
+    <details className="rounded-md border border-border bg-midnight-50/30 p-3">
+      <summary className="cursor-pointer text-xs text-indigoaccent uppercase tracking-wide font-semibold">
+        Package / avantages (voiture, chèques, frais de représ…)
+      </summary>
+      <p className="text-[11px] text-midnight-500 mt-2 mb-3">
+        Ces montants viennent s'ajouter au calcul (ATN voiture, chèques-repas nets, éco-chèques, hospitalisation, GSM/internet, frais de représentation). Si une fiche candidat liée a déjà un scénario, les valeurs saisies ici le remplacent.
+      </p>
+      <div className="grid grid-cols-3 gap-3">
+        <PkgField label="Voiture (TCO / mois)"      name="carMonthlyTco"             initial={employee?.carMonthlyTco} />
+        <PkgField label="Chèques-repas / jour"      name="mealVoucherEmployerPerDay" initial={employee?.mealVoucherEmployerPerDay} />
+        <PkgField label="Éco-chèques / an"          name="ecoVouchersAnnual"         initial={employee?.ecoVouchersAnnual} />
+        <PkgField label="Hospitalisation / mois"    name="hospitalInsuranceMonthly"  initial={employee?.hospitalInsuranceMonthly} />
+        <PkgField label="GSM + internet / mois"     name="phoneInternetMonthly"      initial={employee?.phoneInternetMonthly} />
+        <PkgField label="Frais représentation / mois" name="netExpensesMonthly"      initial={employee?.netExpensesMonthly} />
+      </div>
+    </details>
+  );
+}
+
+function PkgField({ label, name, initial }: { label: string; name: string; initial?: number }) {
+  return (
+    <div>
+      <label className="label">{label}</label>
+      <input type="number" step="0.01" name={name} defaultValue={initial || ""} className="input" placeholder="0" />
     </div>
   );
 }

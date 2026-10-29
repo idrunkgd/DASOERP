@@ -2747,6 +2747,21 @@ model PayrollEmployee {
   /// Nb de mois versés / an (13.92 par défaut BE, tient compte du 13e + double pécule)
   monthsPerYear         Decimal   @default(13.92) @db.Decimal(5, 2)
   notes                 String?
+
+  // ─── Package / avantages (surcharge le scénario candidat si saisi ici) ───
+  /// TCO voiture de société / mois (leasing + carburant + assurances…)
+  carMonthlyTco             Decimal @default(0) @db.Decimal(10, 2)
+  /// Contribution employeur ticket-restaurant par jour (€)
+  mealVoucherEmployerPerDay Decimal @default(0) @db.Decimal(6, 2)
+  /// Éco-chèques annuels (max 250 € légalement)
+  ecoVouchersAnnual         Decimal @default(0) @db.Decimal(8, 2)
+  /// Prime hospitalisation + autres assurances / mois
+  hospitalInsuranceMonthly  Decimal @default(0) @db.Decimal(8, 2)
+  /// Abonnement GSM + internet / mois pris en charge employeur
+  phoneInternetMonthly      Decimal @default(0) @db.Decimal(8, 2)
+  /// Frais de représentation nets forfaitaires / mois
+  netExpensesMonthly        Decimal @default(0) @db.Decimal(8, 2)
+
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

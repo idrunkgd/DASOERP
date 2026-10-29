@@ -160,20 +160,33 @@ export default async function EmployeesPage() {
         const storedGross = storedGrossNum > 0 ? storedGrossNum : null;
         const effectiveGross = storedGross ?? (scenarioGross && scenarioGross > 0 ? scenarioGross : null);
 
-        // Calcul paie :
-        //  - avec package complet (préféré) : net, précompte, ONSS + chèques,
-        //    éco, frais représ., ATN voiture…
-        //  - sinon brut seul : approximation barème I
-        const fullCalc = scenario && effectiveGross
-          ? computeBelgianPayrollFromPackage({
-              grossMonthly:              effectiveGross,
-              carMonthlyTco:             Number(scenario.carMonthlyTco ?? 0),
-              mealVoucherEmployerPerDay: Number(scenario.mealVoucherEmployerPerDay ?? 0),
-              ecoVouchersAnnual:         Number(scenario.ecoVouchersAnnual ?? 0),
-              hospitalInsuranceMonthly:  Number(scenario.hospitalInsuranceMonthly ?? 0),
-              phoneInternetMonthly:      Number(scenario.phoneInternetMonthly ?? 0),
-              netExpensesMonthly:        Number(scenario.netExpensesMonthly ?? 0)
-            })
+        // Package merge : les champs saisis sur PayrollEmployee (> 0) ont la
+        // priorité sur ceux du scénario candidat. Permet d'ajouter des frais
+        // de représentation / voiture à n'importe quel employé, même sans
+        // candidat d'origine.
+        const pkgVal = (field: keyof typeof e, scenarioField?: string) => {
+          const stored = Number((e as any)[field] ?? 0);
+          if (stored > 0) return stored;
+          const scen = scenario && scenarioField ? Number((scenario as any)[scenarioField] ?? 0) : 0;
+          return scen;
+        };
+        const mergedPackage = effectiveGross ? {
+          grossMonthly:              effectiveGross,
+          carMonthlyTco:             pkgVal("carMonthlyTco",             "carMonthlyTco"),
+          mealVoucherEmployerPerDay: pkgVal("mealVoucherEmployerPerDay", "mealVoucherEmployerPerDay"),
+          ecoVouchersAnnual:         pkgVal("ecoVouchersAnnual",         "ecoVouchersAnnual"),
+          hospitalInsuranceMonthly:  pkgVal("hospitalInsuranceMonthly",  "hospitalInsuranceMonthly"),
+          phoneInternetMonthly:      pkgVal("phoneInternetMonthly",      "phoneInternetMonthly"),
+          netExpensesMonthly:        pkgVal("netExpensesMonthly",        "netExpensesMonthly")
+        } : null;
+        const hasAnyPerk = mergedPackage ? (
+          mergedPackage.carMonthlyTco + mergedPackage.mealVoucherEmployerPerDay +
+          mergedPackage.ecoVouchersAnnual + mergedPackage.hospitalInsuranceMonthly +
+          mergedPackage.phoneInternetMonthly + mergedPackage.netExpensesMonthly
+        ) > 0 : false;
+
+        const fullCalc = mergedPackage && hasAnyPerk
+          ? computeBelgianPayrollFromPackage(mergedPackage)
           : null;
         const simpleCalc = effectiveGross && !fullCalc ? computeBelgianPayroll(effectiveGross) : null;
         const payrollCalc = fullCalc ?? simpleCalc;
@@ -192,6 +205,12 @@ export default async function EmployeesPage() {
           userId: e.userId,
           scenarioGross: scenarioGross ? Number(scenarioGross) : null,
           effectiveGross,
+          carMonthlyTco:             Number((e as any).carMonthlyTco ?? 0),
+          mealVoucherEmployerPerDay: Number((e as any).mealVoucherEmployerPerDay ?? 0),
+          ecoVouchersAnnual:         Number((e as any).ecoVouchersAnnual ?? 0),
+          hospitalInsuranceMonthly:  Number((e as any).hospitalInsuranceMonthly ?? 0),
+          phoneInternetMonthly:      Number((e as any).phoneInternetMonthly ?? 0),
+          netExpensesMonthly:        Number((e as any).netExpensesMonthly ?? 0),
           payrollCalc: payrollCalc ? {
             net: payrollCalc.net,
             withholdingTax: payrollCalc.withholdingTax,
