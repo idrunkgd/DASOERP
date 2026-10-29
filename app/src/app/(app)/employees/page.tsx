@@ -59,6 +59,19 @@ export default async function EmployeesPage() {
                   orderBy: { createdAt: "desc" }, take: 1
                 }
               }
+            },
+            // Attribution véhicule active → récupère le montant leasing mensuel
+            vehicleAssignments: {
+              where: { endDate: null },
+              take: 1,
+              select: {
+                vehicle: {
+                  select: {
+                    plate: true, brand: true, model: true,
+                    leasingContract: { select: { monthlyAmount: true, lessor: true } }
+                  }
+                }
+              }
             }
           }
         }
@@ -170,9 +183,18 @@ export default async function EmployeesPage() {
           const scen = scenario && scenarioField ? Number((scenario as any)[scenarioField] ?? 0) : 0;
           return scen;
         };
+        // Priorité voiture : PayrollEmployee > scenario candidat > leasing actif du user
+        const resolveCar = (): number => {
+          const stored = Number((e as any).carMonthlyTco ?? 0);
+          if (stored > 0) return stored;
+          const scen = scenario ? Number(scenario.carMonthlyTco ?? 0) : 0;
+          if (scen > 0) return scen;
+          const leasing = (e.user as any)?.vehicleAssignments?.[0]?.vehicle?.leasingContract?.monthlyAmount;
+          return leasing != null ? Number(leasing) : 0;
+        };
         const mergedPackage = effectiveGross ? {
           grossMonthly:              effectiveGross,
-          carMonthlyTco:             pkgVal("carMonthlyTco",             "carMonthlyTco"),
+          carMonthlyTco:             resolveCar(),
           mealVoucherEmployerPerDay: pkgVal("mealVoucherEmployerPerDay", "mealVoucherEmployerPerDay"),
           ecoVouchersAnnual:         pkgVal("ecoVouchersAnnual",         "ecoVouchersAnnual"),
           hospitalInsuranceMonthly:  pkgVal("hospitalInsuranceMonthly",  "hospitalInsuranceMonthly"),
@@ -205,7 +227,26 @@ export default async function EmployeesPage() {
           userId: e.userId,
           scenarioGross: scenarioGross ? Number(scenarioGross) : null,
           effectiveGross,
-          carMonthlyTco:             Number((e as any).carMonthlyTco ?? 0),
+          // Montant voiture : stocké sur PayrollEmployee > sinon leasing actif du user
+          carMonthlyTco: (() => {
+            const stored = Number((e as any).carMonthlyTco ?? 0);
+            if (stored > 0) return stored;
+            const assignment = (e.user as any)?.vehicleAssignments?.[0];
+            const leasing = assignment?.vehicle?.leasingContract?.monthlyAmount;
+            return leasing != null ? Number(leasing) : 0;
+          })(),
+          carFromFleet: (() => {
+            const stored = Number((e as any).carMonthlyTco ?? 0);
+            if (stored > 0) return null;
+            const assignment = (e.user as any)?.vehicleAssignments?.[0];
+            if (!assignment?.vehicle?.leasingContract?.monthlyAmount) return null;
+            return {
+              plate: assignment.vehicle.plate,
+              brand: assignment.vehicle.brand,
+              model: assignment.vehicle.model,
+              amount: Number(assignment.vehicle.leasingContract.monthlyAmount)
+            };
+          })(),
           mealVoucherEmployerPerDay: Number((e as any).mealVoucherEmployerPerDay ?? 0),
           ecoVouchersAnnual:         Number((e as any).ecoVouchersAnnual ?? 0),
           hospitalInsuranceMonthly:  Number((e as any).hospitalInsuranceMonthly ?? 0),

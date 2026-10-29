@@ -34,6 +34,7 @@ type Employee = {
   hospitalInsuranceMonthly?: number;
   phoneInternetMonthly?: number;
   netExpensesMonthly?: number;
+  carFromFleet?: { plate: string; brand: string; model: string; amount: number } | null;
   candidateId?: string | null;
   userId?: string | null;
   sourceLink?: { href: string; label: string } | null;
@@ -227,9 +228,16 @@ function Row({ e, onEdit }: RowProps) {
       <td className="text-right tabular-nums"><Cell value={showWht}  auto={isWhtAuto}  /></td>
       <td className="text-right tabular-nums"><Cell value={showOnss} auto={isOnssAuto} /></td>
       <td className="text-right tabular-nums">
-        {e.carMonthlyTco && e.carMonthlyTco > 0
-          ? <span>{formatCurrency(e.carMonthlyTco)}</span>
-          : <span className="text-midnight-300">—</span>}
+        {e.carMonthlyTco && e.carMonthlyTco > 0 ? (
+          <span
+            className={e.carFromFleet ? "italic text-indigoaccent" : ""}
+            title={e.carFromFleet
+              ? `Leasing fleet · ${e.carFromFleet.plate} · ${e.carFromFleet.brand} ${e.carFromFleet.model}`
+              : "Montant saisi manuellement"}
+          >
+            {formatCurrency(e.carMonthlyTco)}
+          </span>
+        ) : <span className="text-midnight-300">—</span>}
       </td>
       <td className="text-right tabular-nums font-semibold">{hasGross ? formatCurrency(employerCost) : "—"}</td>
       <td className="text-right">

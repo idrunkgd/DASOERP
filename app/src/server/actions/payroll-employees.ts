@@ -125,20 +125,67 @@ type CashflowStatusStr = "PLANNED" | "PAID" | "SKIPPED";
  * Marque une cellule payroll comme payée / à venir / skip. Idempotent :
  * si aucune ligne PayrollMonth n'existe encore pour ce couple (year, month,
  * kind), elle est créée. Sinon on update.
+ *
+ * SNAPSHOT PAID : quand on passe en PAID, on fige automatiquement le
+ * montant courant dans amountOverride (si pas déjà défini). Les changements
+ * futurs sur PayrollEmployee ne pourront plus modifier ce mois payé.
  */
 export async function setPayrollMonthStatus(
   year: number, month: number, kind: PayrollKindStr, status: CashflowStatusStr
 ) {
   await requirePermission("finance.write");
   const paidAt = status === "PAID" ? new Date() : null;
+
+  // Récupère l'override existant pour éviter de l'écraser s'il est déjà défini
+  const existing = await prisma.payrollMonth.findUnique({
+    where: { year_month_kind: { year, month, kind } }
+  });
+
+  let snapshotOverride: number | null = null;
+  if (status === "PAID" && (existing?.amountOverride == null)) {
+    // On fige la valeur courante en snapshot. Calcul : somme des employés
+    // actifs au mois considéré, selon le kind demandé.
+    snapshotOverride = await computePayrollSnapshotForMonth(year, month, kind);
+  }
+
   await prisma.payrollMonth.upsert({
     where: { year_month_kind: { year, month, kind } },
-    create: { year, month, kind, status, paidAt },
-    update: { status, paidAt }
+    create: {
+      year, month, kind, status, paidAt,
+      amountOverride: snapshotOverride ?? undefined
+    },
+    update: {
+      status, paidAt,
+      ...(snapshotOverride != null ? { amountOverride: snapshotOverride } : {})
+    }
   });
   revalidatePath("/cashflow");
   revalidatePath("/employees");
   return { ok: true };
+}
+
+/**
+ * Calcule la somme payroll pour un mois / kind donné en additionnant tous
+ * les employés actifs ce mois-là. Utilisé pour snapshot au passage en PAID.
+ */
+async function computePayrollSnapshotForMonth(
+  year: number, month: number, kind: PayrollKindStr
+): Promise<number> {
+  const monthStart = new Date(Date.UTC(year, month - 1, 1));
+  const monthEnd = new Date(Date.UTC(year, month, 0));
+  const employees = await prisma.payrollEmployee.findMany({
+    where: {
+      startDate: { lte: monthEnd },
+      OR: [{ endDate: null }, { endDate: { gte: monthStart } }]
+    },
+    select: {
+      monthlyNetPay: true, monthlyWithholdingTax: true, monthlyOnss: true
+    }
+  });
+  const field = kind === "NET_PAY" ? "monthlyNetPay"
+              : kind === "WITHHOLDING_TAX" ? "monthlyWithholdingTax"
+              : "monthlyOnss";
+  return employees.reduce((sum, e) => sum + Number(e[field]), 0);
 }
 
 /**
