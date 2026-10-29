@@ -766,9 +766,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
     if (t.some((v) => v > 0)) rows.push(mkRow("Précompte professionnel","payroll-tax",    t, "WITHHOLDING_TAX"));
     // ONSS = employé (historique) + patronal (ajouté seulement aux PLANNED)
     const onssExtra = monthlyOnssEmployerExtra.map((v) => Math.round(v * 100) / 100);
-    if (o.some((v) => v > 0) || onssExtra.some((v) => v > 0)) {
-      rows.push(mkRow("ONSS (employé + patronal)", "payroll-onss", o, "ONSS", onssExtra));
-    }
+    // ONSS ligne cashflow = employé seul (stocké en DB). Le patronal est
+    // présenté séparément sur /employees mais NE RENTRE PAS dans le running
+    // balance pour ne pas déformer le solde actuel (demande utilisateur).
+    if (o.some((v) => v > 0)) rows.push(mkRow("ONSS", "payroll-onss", o, "ONSS"));
   }
 
   // ─── Lignes RecurringExpense ───
