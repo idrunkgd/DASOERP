@@ -44,7 +44,10 @@ export default async function EmployeesPage() {
         user: {
           select: {
             id: true, firstName: true, lastName: true,
-            candidateProfile: {
+            // Un User recruté depuis le vivier a sa fiche candidat liée via
+            // recruitedFromCandidate (relation CandidatePromotion). C'est là
+            // que vit le simulateur de package → le brut mensuel.
+            recruitedFromCandidate: {
               select: {
                 salaryScenarios: {
                   orderBy: { createdAt: "desc" }, take: 1,
@@ -144,7 +147,7 @@ export default async function EmployeesPage() {
         // Brut : priorité au Brut stocké sur PayrollEmployee → fallback dernier
         // scénario de package depuis la fiche candidat / consultant.
         const scenarioGross = e.candidate?.salaryScenarios?.[0]?.grossMonthly
-          ?? (e.user as any)?.candidateProfile?.salaryScenarios?.[0]?.grossMonthly
+          ?? (e.user as any)?.recruitedFromCandidate?.salaryScenarios?.[0]?.grossMonthly
           ?? null;
         const storedGross = e.monthlyGrossReference ? Number(e.monthlyGrossReference) : null;
         const effectiveGross = storedGross ?? (scenarioGross ? Number(scenarioGross) : null);
