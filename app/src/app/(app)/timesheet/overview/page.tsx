@@ -101,9 +101,6 @@ export default async function TimesheetOverviewPage({
           body { background: white !important; }
         }
       `}} />
-          </div>
-        }
-      />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-xs">
