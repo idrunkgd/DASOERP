@@ -38,6 +38,17 @@ type Employee = {
     onssEmployee: number;
     totalEmployerCost: number;
   } | null;
+  packageDetail?: {
+    atnCar: number;
+    atnPhone: number;
+    atnHospital: number;
+    mealVouchersNetMonthly: number;
+    ecoVouchersNetMonthly: number;
+    netExpensesMonthly: number;
+    netCash: number;
+    netTotalInHand: number;
+    packageValueMonthly: number;
+  } | null;
 };
 
 type ConsultantChoice = { id: string; firstName: string; lastName: string; email: string };
@@ -92,24 +103,25 @@ export function EmployeesTable({ employees, availableConsultants = [] }: { emplo
               <th>Nom</th>
               <th>Entrée</th><th>Sortie</th>
               <th className="text-right">Brut / mois</th>
-              <th className="text-right">Net / mois</th>
+              <th className="text-right" title="Net cash sur le compte">Net cash</th>
+              <th className="text-right" title="Net cash + chèques-repas + éco-chèques + frais représentation">Net en main</th>
               <th className="text-right">Précompte</th>
               <th className="text-right">ONSS</th>
-              <th className="text-right">Coût employeur</th>
+              <th className="text-right" title="Coût total employeur incluant brut, ONSS patronal, voiture, chèques, hospi…">Coût employeur</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {employees.length === 0 && (
               <tr>
-                <td colSpan={9} className="text-center text-midnight-500 py-6">
+                <td colSpan={10} className="text-center text-midnight-500 py-6">
                   Aucun employé enregistré. Utilise « Ajouter » ci-dessus.
                 </td>
               </tr>
             )}
             {employees.map((e) => editingId === e.id ? (
               <tr key={e.id}>
-                <td colSpan={9} className="p-0">
+                <td colSpan={10} className="p-0">
                   <EmployeeForm employee={e} availableConsultants={availableConsultants} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
                 </td>
               </tr>
@@ -129,19 +141,27 @@ export function EmployeesTable({ employees, availableConsultants = [] }: { emplo
 type RowProps = { e: Employee; onEdit: () => void };
 function Row({ e, onEdit }: RowProps) {
   const [pending, start] = useTransition();
+  const [expanded, setExpanded] = useState(false);
   const isGone = e.endDate && new Date(e.endDate) < new Date();
 
-  // Priorité valeur manuelle stockée → sinon calcul auto depuis le brut
+  // Si le brut manque, on ignore les valeurs manuelles orphelines (bruits de
+  // l'ancien schéma). Sinon la ligne affiche "net 2200 € mais brut —" qui n'a
+  // aucun sens cohérent.
+  const hasGross = (e.effectiveGross ?? 0) > 0;
   const calc = e.payrollCalc;
-  const showNet       = e.monthlyNetPay          > 0 ? e.monthlyNetPay          : (calc?.net ?? null);
-  const showWht       = e.monthlyWithholdingTax  > 0 ? e.monthlyWithholdingTax  : (calc?.withholdingTax ?? null);
-  const showOnss      = e.monthlyOnss            > 0 ? e.monthlyOnss            : (calc?.onssEmployee ?? null);
-  const isNetAuto     = !(e.monthlyNetPay > 0)         && showNet  != null;
-  const isWhtAuto     = !(e.monthlyWithholdingTax > 0) && showWht  != null;
-  const isOnssAuto    = !(e.monthlyOnss > 0)           && showOnss != null;
+  const showNetCash   = hasGross ? (e.monthlyNetPay          > 0 ? e.monthlyNetPay          : (calc?.net ?? null)) : null;
+  const showWht       = hasGross ? (e.monthlyWithholdingTax  > 0 ? e.monthlyWithholdingTax  : (calc?.withholdingTax ?? null)) : null;
+  const showOnss      = hasGross ? (e.monthlyOnss            > 0 ? e.monthlyOnss            : (calc?.onssEmployee ?? null)) : null;
+  const isNetAuto     = hasGross && !(e.monthlyNetPay > 0)         && showNetCash != null;
+  const isWhtAuto     = hasGross && !(e.monthlyWithholdingTax > 0) && showWht     != null;
+  const isOnssAuto    = hasGross && !(e.monthlyOnss > 0)           && showOnss    != null;
 
-  const employerCost  = (showNet ?? 0) + (showWht ?? 0) + (showOnss ?? 0)
-                        + ((e.effectiveGross ?? 0) * 0.25); // ONSS patronal ~25 %
+  // Net en main = net cash + perks (ou juste net cash si pas de package)
+  const showNetInHand = e.packageDetail?.netTotalInHand ?? showNetCash;
+
+  // Coût employeur = depuis calcul complet si package, sinon approx barème
+  const employerCost = e.payrollCalc?.totalEmployerCost
+                     ?? ((showNetCash ?? 0) + (showWht ?? 0) + (showOnss ?? 0) + ((e.effectiveGross ?? 0) * 0.25));
 
   function Cell({ value, auto }: { value: number | null; auto: boolean }) {
     if (value == null) return <span className="text-midnight-400">—</span>;
@@ -153,6 +173,7 @@ function Row({ e, onEdit }: RowProps) {
   }
 
   return (
+    <>
     <tr className={isGone ? "opacity-50" : ""}>
       <td>
         <div className="font-medium">{e.firstName} {e.lastName}</div>
@@ -184,10 +205,19 @@ function Row({ e, onEdit }: RowProps) {
           </span>
         )}
       </td>
-      <td className="text-right tabular-nums"><Cell value={showNet}  auto={isNetAuto}  /></td>
+      <td className="text-right tabular-nums"><Cell value={showNetCash} auto={isNetAuto} /></td>
+      <td className="text-right tabular-nums">
+        {showNetInHand != null && e.packageDetail ? (
+          <button onClick={() => setExpanded(!expanded)} className="text-indigoaccent hover:underline font-medium" title="Clic pour voir le détail package">
+            {formatCurrency(showNetInHand)}
+          </button>
+        ) : showNetInHand != null ? (
+          <span>{formatCurrency(showNetInHand)}</span>
+        ) : <span className="text-midnight-400">—</span>}
+      </td>
       <td className="text-right tabular-nums"><Cell value={showWht}  auto={isWhtAuto}  /></td>
       <td className="text-right tabular-nums"><Cell value={showOnss} auto={isOnssAuto} /></td>
-      <td className="text-right tabular-nums font-semibold">{e.effectiveGross ? formatCurrency(employerCost) : "—"}</td>
+      <td className="text-right tabular-nums font-semibold">{hasGross ? formatCurrency(employerCost) : "—"}</td>
       <td className="text-right">
         <div className="flex gap-1 justify-end">
           <button onClick={onEdit} className="text-midnight-500 hover:text-midnight-900">
@@ -209,6 +239,38 @@ function Row({ e, onEdit }: RowProps) {
         </div>
       </td>
     </tr>
+    {expanded && e.packageDetail && (
+      <tr className="bg-indigoaccent/5">
+        <td colSpan={10} className="p-4">
+          <div className="text-[10px] uppercase tracking-wide text-indigoaccent font-semibold mb-2">Décomposition du package — valeur mensuelle</div>
+          <div className="grid grid-cols-4 gap-x-6 gap-y-2 text-xs">
+            <KVLine lbl="Net cash sur le compte" val={e.packageDetail.netCash} />
+            <KVLine lbl="Chèques-repas (part employeur nette)" val={e.packageDetail.mealVouchersNetMonthly} />
+            <KVLine lbl="Éco-chèques (mensualisés)" val={e.packageDetail.ecoVouchersNetMonthly} />
+            <KVLine lbl="Frais de représentation" val={e.packageDetail.netExpensesMonthly} />
+            <KVLine lbl="ATN voiture (imposable)" val={e.packageDetail.atnCar} muted />
+            <KVLine lbl="ATN GSM / internet" val={e.packageDetail.atnPhone} muted />
+            <KVLine lbl="ATN hospi + assurances" val={e.packageDetail.atnHospital} muted />
+            <KVLine lbl="VALEUR PACKAGE TOTALE" val={e.packageDetail.packageValueMonthly} bold />
+          </div>
+          <div className="text-[10px] text-midnight-500 mt-3">
+            ATN = Avantage de Toute Nature. Ces montants ne sortent pas en cash, ils augmentent la base imposable pour le précompte. La voiture elle-même et l'hospi sont fournies en nature, donc valorisées dans la ligne « valeur package totale ».
+          </div>
+        </td>
+      </tr>
+    )}
+    </>
+  );
+}
+
+function KVLine({ lbl, val, bold, muted }: { lbl: string; val: number; bold?: boolean; muted?: boolean }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <span className={muted ? "text-midnight-400" : "text-midnight-600"}>{lbl}</span>
+      <span className={"tabular-nums font-mono " + (bold ? "font-bold text-indigoaccent" : muted ? "text-midnight-500" : "text-midnight-900")}>
+        {new Intl.NumberFormat("fr-BE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(val)}
+      </span>
+    </div>
   );
 }
 

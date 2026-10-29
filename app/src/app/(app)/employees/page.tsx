@@ -4,7 +4,7 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmployeesTable } from "./table";
 import { formatCurrency } from "@/lib/utils";
-import { computeBelgianPayroll } from "@/lib/belgian-payroll";
+import { computeBelgianPayroll, computeBelgianPayrollFromPackage } from "@/lib/belgian-payroll";
 import { UserPlus, AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +23,13 @@ export const dynamic = "force-dynamic";
  */
 export default async function EmployeesPage() {
   await requirePermission("finance.write");
+  // Liste des consultants internes auxquels on peut lier un payroll employee
+  // (pour les lignes payroll créées en standalone sans fiche source).
+  const availableConsultants = await prisma.user.findMany({
+    where: { contractType: "EMPLOYEE", active: true, candidateProfile: { is: null } },
+    select: { id: true, firstName: true, lastName: true, email: true },
+    orderBy: [{ firstName: "asc" }, { lastName: "asc" }]
+  });
   // Note : on ne liste PAS les Candidats ici, même flaggés EMPLOYEE. Tant
   // qu'ils ne sont pas recrutés (convertedToUserId=null), ils ne sont pas
   // encore engagés → aucune paie à configurer. Dès qu'ils passent User,
@@ -36,8 +43,7 @@ export default async function EmployeesPage() {
           select: {
             id: true, firstName: true, lastName: true,
             salaryScenarios: {
-              orderBy: { createdAt: "desc" }, take: 1,
-              select: { grossMonthly: true, label: true }
+              orderBy: { createdAt: "desc" }, take: 1
             }
           }
         },
@@ -46,12 +52,11 @@ export default async function EmployeesPage() {
             id: true, firstName: true, lastName: true,
             // Un User recruté depuis le vivier a sa fiche candidat liée via
             // recruitedFromCandidate (relation CandidatePromotion). C'est là
-            // que vit le simulateur de package → le brut mensuel.
+            // que vit le simulateur de package → brut + voiture + chèques + ATN
             recruitedFromCandidate: {
               select: {
                 salaryScenarios: {
-                  orderBy: { createdAt: "desc" }, take: 1,
-                  select: { grossMonthly: true, label: true }
+                  orderBy: { createdAt: "desc" }, take: 1
                 }
               }
             }
@@ -144,18 +149,34 @@ export default async function EmployeesPage() {
       )}
 
       <EmployeesTable employees={employees.map((e) => {
-        // Brut : priorité au Brut stocké sur PayrollEmployee (si > 0) → fallback
-        // dernier scénario de package depuis la fiche candidat / consultant.
-        // Attention : les Decimals Prisma sont des objets toujours truthy — on
-        // doit comparer avec Number() > 0, pas tester la valeur directement.
-        const scenarioGrossRaw = e.candidate?.salaryScenarios?.[0]?.grossMonthly
-          ?? (e.user as any)?.recruitedFromCandidate?.salaryScenarios?.[0]?.grossMonthly
+        // Récupère le dernier scénario de package complet depuis la fiche
+        // candidat ou le candidat recruté (consultant interne).
+        const scenario = e.candidate?.salaryScenarios?.[0]
+          ?? (e.user as any)?.recruitedFromCandidate?.salaryScenarios?.[0]
           ?? null;
-        const scenarioGross = scenarioGrossRaw != null ? Number(scenarioGrossRaw) : null;
+        const scenarioGross = scenario?.grossMonthly != null ? Number(scenario.grossMonthly) : null;
+        // Decimal Prisma = objet toujours truthy, donc on compare Number > 0.
         const storedGrossNum = e.monthlyGrossReference != null ? Number(e.monthlyGrossReference) : 0;
         const storedGross = storedGrossNum > 0 ? storedGrossNum : null;
         const effectiveGross = storedGross ?? (scenarioGross && scenarioGross > 0 ? scenarioGross : null);
-        const payrollCalc = effectiveGross ? computeBelgianPayroll(effectiveGross) : null;
+
+        // Calcul paie :
+        //  - avec package complet (préféré) : net, précompte, ONSS + chèques,
+        //    éco, frais représ., ATN voiture…
+        //  - sinon brut seul : approximation barème I
+        const fullCalc = scenario && effectiveGross
+          ? computeBelgianPayrollFromPackage({
+              grossMonthly:              effectiveGross,
+              carMonthlyTco:             Number(scenario.carMonthlyTco ?? 0),
+              mealVoucherEmployerPerDay: Number(scenario.mealVoucherEmployerPerDay ?? 0),
+              ecoVouchersAnnual:         Number(scenario.ecoVouchersAnnual ?? 0),
+              hospitalInsuranceMonthly:  Number(scenario.hospitalInsuranceMonthly ?? 0),
+              phoneInternetMonthly:      Number(scenario.phoneInternetMonthly ?? 0),
+              netExpensesMonthly:        Number(scenario.netExpensesMonthly ?? 0)
+            })
+          : null;
+        const simpleCalc = effectiveGross && !fullCalc ? computeBelgianPayroll(effectiveGross) : null;
+        const payrollCalc = fullCalc ?? simpleCalc;
         return {
           id: e.id,
           firstName: e.firstName, lastName: e.lastName,
@@ -177,13 +198,24 @@ export default async function EmployeesPage() {
             onssEmployee: payrollCalc.onssEmployee,
             totalEmployerCost: payrollCalc.totalEmployerCost
           } : null,
+          packageDetail: fullCalc ? {
+            atnCar: fullCalc.atnCar,
+            atnPhone: fullCalc.atnPhone,
+            atnHospital: fullCalc.atnHospital,
+            mealVouchersNetMonthly: fullCalc.mealVouchersNetMonthly,
+            ecoVouchersNetMonthly: fullCalc.ecoVouchersNetMonthly,
+            netExpensesMonthly: fullCalc.netExpensesMonthly,
+            netCash: fullCalc.netCash,
+            netTotalInHand: fullCalc.netTotalInHand,
+            packageValueMonthly: fullCalc.packageValueMonthly
+          } : null,
           sourceLink: e.candidate
             ? { href: `/candidates/${e.candidate.id}`, label: "Fiche candidat" }
             : e.user
               ? { href: `/consultants/${e.user.id}`, label: "Fiche consultant" }
               : null
         };
-      })} />
+      })} availableConsultants={availableConsultants} />
     </div>
   );
 }
