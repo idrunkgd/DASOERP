@@ -56,10 +56,11 @@ function fillAutoPayroll(d: z.infer<typeof Schema>) {
         netExpensesMonthly: d.netExpensesMonthly
       })
     : computeBelgianPayroll(gross);
-  // IMPORTANT : on stocke ici l'ONSS EMPLOYÉ seul (13,07 %). La partie patronale
-  // est calculée dynamiquement par le cashflow pour l'affichage mais pas écrite
-  // en DB — évite de modifier les mois PAID historiques.
-  const netVal = (calc as any).netCash ?? (calc as any).net;
+  // Cashflow "Salaires" = ce qu'on paie réellement = NET EN MAIN
+  //   (net cash + chèques-repas nets + éco-chèques + frais de représentation).
+  // ONSS stocké = employé seul (13,07 %). ONSS patronal pas inclus — reste
+  // visible sur /employees mais pas écrit en DB (évite d'impacter l'historique).
+  const netVal = (calc as any).netTotalInHand ?? (calc as any).net;
   return {
     ...d,
     monthlyNetPay:         d.monthlyNetPay         > 0 ? d.monthlyNetPay         : netVal,
@@ -91,11 +92,10 @@ export async function createEmployee(formData: FormData) {
 export async function updateEmployee(id: string, formData: FormData) {
   await requirePermission("finance.write");
   const parsed = Schema.parse(Object.fromEntries(formData));
-  // IMPORTANT : à l'édition, on ne recalcule PAS automatiquement net/wht/onss
-  // pour éviter d'écraser des valeurs stockées (qui alimentent cashflow). Seule
-  // la création initiale fait le fillAutoPayroll. Pour recalculer explicitement,
-  // il faut vider les 3 champs manuels dans le formulaire.
-  const data = parsed;
+  // fillAutoPayroll ne recalcule QUE les champs vides (0). Si l'utilisateur a
+  // saisi une valeur manuelle, elle est préservée. Si laissé à 0, la valeur
+  // est auto-calculée depuis le brut via barème I belge.
+  const data = fillAutoPayroll(parsed);
   await prisma.payrollEmployee.update({
     where: { id },
     data: {
