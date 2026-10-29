@@ -108,27 +108,27 @@ export function EmployeesTable({ employees, availableConsultants = [] }: { emplo
           <thead>
             <tr>
               <th>Nom</th>
-              <th>Entrée</th><th>Sortie</th>
               <th className="text-right">Brut / mois</th>
               <th className="text-right" title="Net cash sur le compte">Net cash</th>
               <th className="text-right" title="Net cash + chèques-repas + éco-chèques + frais représentation">Net en main</th>
               <th className="text-right">Précompte</th>
               <th className="text-right">ONSS</th>
-              <th className="text-right" title="Coût total employeur incluant brut, ONSS patronal, voiture, chèques, hospi…">Coût employeur</th>
+              <th className="text-right" title="TCO voiture mensuel (non inclus dans cashflow payroll)">Voiture</th>
+              <th className="text-right" title="Coût total employeur = brut + ONSS patronal + voiture + chèques + hospi + GSM + frais représentation">Coût total / mois</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {employees.length === 0 && (
               <tr>
-                <td colSpan={10} className="text-center text-midnight-500 py-6">
+                <td colSpan={9} className="text-center text-midnight-500 py-6">
                   Aucun employé enregistré. Utilise « Ajouter » ci-dessus.
                 </td>
               </tr>
             )}
             {employees.map((e) => editingId === e.id ? (
               <tr key={e.id}>
-                <td colSpan={10} className="p-0">
+                <td colSpan={9} className="p-0">
                   <EmployeeForm employee={e} availableConsultants={availableConsultants} onDone={() => setEditingId(null)} onCancel={() => setEditingId(null)} />
                 </td>
               </tr>
@@ -189,10 +189,12 @@ function Row({ e, onEdit }: RowProps) {
             <UserIcon className="w-2.5 h-2.5" /> {e.sourceLink.label}
           </Link>
         )}
+        <div className="text-[10px] text-midnight-500">
+          {formatDate(e.startDate)}
+          {e.endDate ? ` → ${formatDate(e.endDate)}` : <span className="text-emerald-700"> · en poste</span>}
+        </div>
         {e.notes && <div className="text-xs text-midnight-500 truncate max-w-[200px]">{e.notes}</div>}
       </td>
-      <td className="text-xs">{formatDate(e.startDate)}</td>
-      <td className="text-xs">{e.endDate ? formatDate(e.endDate) : <span className="text-emerald-700">en poste</span>}</td>
       <td className="text-right tabular-nums">
         {e.effectiveGross != null && e.effectiveGross > 0 ? (
           <span className={e.monthlyGrossReference == null ? "italic text-indigoaccent" : ""} title={e.monthlyGrossReference == null ? "Depuis la fiche consultant (onglet Rémunération)" : "Brut saisi manuellement"}>
@@ -224,6 +226,11 @@ function Row({ e, onEdit }: RowProps) {
       </td>
       <td className="text-right tabular-nums"><Cell value={showWht}  auto={isWhtAuto}  /></td>
       <td className="text-right tabular-nums"><Cell value={showOnss} auto={isOnssAuto} /></td>
+      <td className="text-right tabular-nums">
+        {e.carMonthlyTco && e.carMonthlyTco > 0
+          ? <span>{formatCurrency(e.carMonthlyTco)}</span>
+          : <span className="text-midnight-300">—</span>}
+      </td>
       <td className="text-right tabular-nums font-semibold">{hasGross ? formatCurrency(employerCost) : "—"}</td>
       <td className="text-right">
         <div className="flex gap-1 justify-end">
