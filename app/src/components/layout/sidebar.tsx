@@ -25,7 +25,7 @@ const SECTIONS: Section[] = [
     label: "Pilotage",
     items: [
       { href: "/dashboard",         label: "Tableau de bord",      icon: LayoutDashboard, perm: "dashboard.read" },
-      { href: "/my-hub",             label: "Mon espace",           icon: UserIcon,       perm: "self.read" },
+      { href: "/my-hub",             label: "Mon espace",           icon: UserIcon },
       { href: "/project-status",    label: "Statut projet",        icon: Gauge,         perm: "projects.read" },
       { href: "/commercial",        label: "Activité",             icon: MessageSquare, perm: "contacts.read" },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
