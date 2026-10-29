@@ -144,13 +144,17 @@ export default async function EmployeesPage() {
       )}
 
       <EmployeesTable employees={employees.map((e) => {
-        // Brut : priorité au Brut stocké sur PayrollEmployee → fallback dernier
-        // scénario de package depuis la fiche candidat / consultant.
-        const scenarioGross = e.candidate?.salaryScenarios?.[0]?.grossMonthly
+        // Brut : priorité au Brut stocké sur PayrollEmployee (si > 0) → fallback
+        // dernier scénario de package depuis la fiche candidat / consultant.
+        // Attention : les Decimals Prisma sont des objets toujours truthy — on
+        // doit comparer avec Number() > 0, pas tester la valeur directement.
+        const scenarioGrossRaw = e.candidate?.salaryScenarios?.[0]?.grossMonthly
           ?? (e.user as any)?.recruitedFromCandidate?.salaryScenarios?.[0]?.grossMonthly
           ?? null;
-        const storedGross = e.monthlyGrossReference ? Number(e.monthlyGrossReference) : null;
-        const effectiveGross = storedGross ?? (scenarioGross ? Number(scenarioGross) : null);
+        const scenarioGross = scenarioGrossRaw != null ? Number(scenarioGrossRaw) : null;
+        const storedGrossNum = e.monthlyGrossReference != null ? Number(e.monthlyGrossReference) : 0;
+        const storedGross = storedGrossNum > 0 ? storedGrossNum : null;
+        const effectiveGross = storedGross ?? (scenarioGross && scenarioGross > 0 ? scenarioGross : null);
         const payrollCalc = effectiveGross ? computeBelgianPayroll(effectiveGross) : null;
         return {
           id: e.id,
@@ -176,7 +180,7 @@ export default async function EmployeesPage() {
           sourceLink: e.candidate
             ? { href: `/candidates/${e.candidate.id}`, label: "Fiche candidat" }
             : e.user
-              ? { href: `/users/${e.user.id}`, label: "Fiche consultant" }
+              ? { href: `/consultants/${e.user.id}`, label: "Fiche consultant" }
               : null
         };
       })} />

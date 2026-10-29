@@ -163,11 +163,17 @@ function Row({ e, onEdit }: { e: Employee; onEdit: () => void }) {
       <td className="text-xs">{formatDate(e.startDate)}</td>
       <td className="text-xs">{e.endDate ? formatDate(e.endDate) : <span className="text-emerald-700">en poste</span>}</td>
       <td className="text-right tabular-nums">
-        {e.effectiveGross != null ? (
-          <span className={e.monthlyGrossReference == null ? "italic text-indigoaccent" : ""} title={e.monthlyGrossReference == null ? "Depuis la fiche candidat (simulateur package)" : "Brut saisi manuellement"}>
+        {e.effectiveGross != null && e.effectiveGross > 0 ? (
+          <span className={e.monthlyGrossReference == null ? "italic text-indigoaccent" : ""} title={e.monthlyGrossReference == null ? "Depuis la fiche consultant (onglet Rémunération)" : "Brut saisi manuellement"}>
             {formatCurrency(e.effectiveGross)}
           </span>
-        ) : <span className="text-midnight-400" title="Pas de brut configuré ni de scénario de package lié">—</span>}
+        ) : (
+          <span className="text-amber-600 text-xs" title="Pas de brut configuré. Ouvre l'onglet Rémunération sur la fiche consultant pour créer un scénario de package.">
+            {e.sourceLink?.href?.startsWith("/consultants/") ? (
+              <Link href={`${e.sourceLink.href}?tab=compensation`} className="hover:underline">Configurer ↗</Link>
+            ) : "—"}
+          </span>
+        )}
       </td>
       <td className="text-right tabular-nums"><Cell value={showNet}  auto={isNetAuto}  /></td>
       <td className="text-right tabular-nums"><Cell value={showWht}  auto={isWhtAuto}  /></td>
