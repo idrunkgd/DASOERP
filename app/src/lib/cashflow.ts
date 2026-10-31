@@ -339,11 +339,35 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       const fromM = y === startY ? startM : 1;
       for (let m = fromM; m <= 12; m++) monthsInRange.push({ year: y, month: m });
     }
+    // Pré-calcul : TVA dynamique pour les mois PLANNED des années antérieures.
+    // Même logique que dans la boucle principale : si c'est un mois futur non
+    // encore PAID, on calcule la TVA réelle depuis les factures du mois source.
+    // Ça garantit que "Solde fin année N" = "startingBalance année N+1".
+    const { computeVatReportForMonth } = await import("@/lib/tva");
+    const todayPrior = new Date();
+    const todayYMPrior = todayPrior.getUTCFullYear() * 12 + todayPrior.getUTCMonth();
+    const priorVatByYM = new Map<string, number>(); // "y-m" → TVA due
+    const hasVatLinePrior = priorRecurring.some((r: any) => /tva|vat/i.test(r.label) && r.category !== "SIMULATION");
+    if (hasVatLinePrior) {
+      for (const { year: y, month } of monthsInRange) {
+        const cellYM = y * 12 + (month - 1);
+        if (cellYM < todayYMPrior) continue;
+        const sourceYear = month === 1 ? y - 1 : y;
+        const sourceMonth = month === 1 ? 11 : month - 2;
+        try {
+          const report = await computeVatReportForMonth(sourceYear, sourceMonth);
+          const amountDue = Number(report.grid.case71) || 0;
+          if (amountDue > 0) priorVatByYM.set(`${y}-${month}`, amountDue);
+        } catch { /* fallback silencieux */ }
+      }
+    }
+
     for (const r of priorRecurring) {
       // Les lignes de SIMULATION ne doivent PAS contaminer le startingBalance
       // du baseline — sinon le solde "sans sim" de l'année courante hérite
       // de l'impact des simulations des années précédentes.
       if ((r as any).isSimulation === true) continue;
+      const isVatLineR = /tva|vat/i.test(r.label) && r.category !== "SIMULATION";
       const recStart = (r as { startDate?: Date | null }).startDate ?? null;
       const recEnd = (r as { endDate?: Date | null }).endDate ?? null;
       const startYM = recStart
@@ -359,7 +383,11 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         if (!falsOnMonth(r.frequency, r.paymentMonths, month)) continue;
         const me = r.months.find((x) => x.year === y && x.month === month);
         if (me?.status === "SKIPPED") continue;
-        const a = Number(me?.amountOverride ?? r.defaultAmount);
+        // TVA dynamique si cellule non-PAID — cohérent avec la vue annuelle
+        const vatDyn = isVatLineR && me?.status !== "PAID" ? priorVatByYM.get(`${y}-${month}`) : undefined;
+        const a = vatDyn != null
+          ? vatDyn
+          : Number(me?.amountOverride ?? r.defaultAmount);
         startingBalance += r.isIncome ? a : -a;
       }
     }
