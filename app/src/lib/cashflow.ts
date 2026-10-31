@@ -836,7 +836,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   }
 
   for (const r of recurring) {
-    const isVatLine = /tva|vat/i.test(r.label);
+    // La ligne est "TVA dynamique" (recalculée depuis les factures du mois) UNIQUEMENT
+    // si c'est la TVA réelle de Dasolabs. Les lignes "TVA ConsultantX" de la catégorie
+    // SIMULATION gardent leur defaultAmount stocké pour refléter la projection.
+    const isVatLine = /tva|vat/i.test(r.label) && r.category !== "SIMULATION";
     // Bornes temporelles : on n'affiche la récurrence que dans [startDate, endDate]
     // (vues comme yyyy-mm pour le bucketing mensuel). Si null, illimité.
     const recStart = (r as { startDate?: Date | null }).startDate ?? null;
