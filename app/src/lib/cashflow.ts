@@ -340,6 +340,10 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
       for (let m = fromM; m <= 12; m++) monthsInRange.push({ year: y, month: m });
     }
     for (const r of priorRecurring) {
+      // Les lignes de SIMULATION ne doivent PAS contaminer le startingBalance
+      // du baseline — sinon le solde "sans sim" de l'année courante hérite
+      // de l'impact des simulations des années précédentes.
+      if ((r as any).isSimulation === true) continue;
       const recStart = (r as { startDate?: Date | null }).startDate ?? null;
       const recEnd = (r as { endDate?: Date | null }).endDate ?? null;
       const startYM = recStart
