@@ -36,7 +36,13 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
   if (searchParams.skill) where.skills = { has: searchParams.skill };
   const list = await prisma.candidate.findMany({
     where, orderBy: [{ status: "asc" }, { lastName: "asc" }],
-    include: { _count: { select: { applications: true } } }
+    include: {
+      _count: { select: { applications: true } },
+      salaryScenarios: {
+        orderBy: { createdAt: "desc" }, take: 1,
+        select: { grossMonthly: true }
+      }
+    }
   });
   const view: "grid" | "list" = searchParams?.view === "list" ? "list" : "grid";
   function buildViewHref(targetView: "grid" | "list") {
@@ -68,7 +74,10 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
               id: c.id,
               firstName: c.firstName, lastName: c.lastName,
               years: c.yearsExperience ?? 0,
-              rate: c.minDailyRate ? Number(c.minDailyRate) : (c.dailyCost ? Number(c.dailyCost) : 0),
+              // Salaire brut mensuel demandé — depuis le dernier scénario de package.
+              rate: c.salaryScenarios?.[0]?.grossMonthly
+                ? Number(c.salaryScenarios[0].grossMonthly)
+                : 0,
               seniority: c.seniority ?? null,
               skills: c.skills ?? []
             }))} />

@@ -82,10 +82,10 @@ function BenchmarkModal({ candidates, onClose }: { candidates: CandidatePoint[];
           <X className="w-5 h-5" />
         </button>
         <h2 className="font-semibold text-lg mb-1 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-indigoaccent" /> Benchmark salaires candidats
+          <TrendingUp className="w-5 h-5 text-indigoaccent" /> Benchmark salaires bruts candidats
         </h2>
         <p className="text-xs text-midnight-500 mb-5">
-          Nuage de points : {points.length} candidat{points.length > 1 ? "s" : ""} avec expérience + tarif renseignés.
+          Nuage de points : {points.length} candidat{points.length > 1 ? "s" : ""} avec expérience + salaire brut mensuel demandé (depuis simulation de package).
           Médiane utilisée au lieu de la moyenne pour éviter l'influence des profils exceptionnels (expertise rare).
         </p>
 
@@ -109,7 +109,7 @@ function BenchmarkModal({ candidates, onClose }: { candidates: CandidatePoint[];
                 <td className="px-3 py-2 font-medium">{s.label}</td>
                 <td className="px-3 py-2 text-right tabular-nums">{s.count}</td>
                 <td className="px-3 py-2 text-right tabular-nums font-semibold text-indigoaccent">
-                  {s.count > 0 ? fmt(s.median) + " €" : "—"}
+                  {s.count > 0 ? fmt(s.median) + " €/mois" : "—"}
                 </td>
                 <td className="px-3 py-2 text-right tabular-nums text-midnight-600">
                   {s.count > 0 ? fmt(s.q1) + " €" : "—"}
@@ -154,8 +154,8 @@ function ScatterChart({ points }: { points: CandidatePoint[] }) {
   // Ticks X : chaque 2 ans
   const xTicks: number[] = [];
   for (let i = 0; i <= xMax; i += 2) xTicks.push(i);
-  // Ticks Y : chaque 100 €
-  const step = yRound > 1500 ? 250 : 100;
+  // Ticks Y : adapte le pas au range des salaires
+  const step = yRound > 10000 ? 2000 : yRound > 5000 ? 1000 : yRound > 2000 ? 500 : yRound > 500 ? 100 : 50;
   const yTicks: number[] = [];
   for (let i = 0; i <= yRound; i += step) yTicks.push(i);
 
@@ -168,7 +168,7 @@ function ScatterChart({ points }: { points: CandidatePoint[] }) {
       {/* Y axis labels */}
       {yTicks.map((t) => (
         <text key={t} x={pad - 6} y={y(t) + 3} textAnchor="end" fontSize="10" fill="#6b7280">
-          {t} €
+          {t >= 1000 ? (t / 1000) + "k €" : t + " €"}
         </text>
       ))}
       {/* X axis labels */}
@@ -194,7 +194,7 @@ function ScatterChart({ points }: { points: CandidatePoint[] }) {
             stroke="#1a7fb0"
             strokeWidth="0.5"
           >
-            <title>{`${p.firstName} ${p.lastName} · ${p.years} ans · ${p.rate} €/j${p.seniority ? ` · ${p.seniority}` : ""}`}</title>
+            <title>{`${p.firstName} ${p.lastName} · ${p.years} ans · ${p.rate.toLocaleString()} €/mois${p.seniority ? ` · ${p.seniority}` : ""}`}</title>
           </circle>
         </g>
       ))}
@@ -204,7 +204,7 @@ function ScatterChart({ points }: { points: CandidatePoint[] }) {
         Expérience (années)
       </text>
       <text x={14} y={H / 2} textAnchor="middle" fontSize="11" fill="#374151" fontWeight="600" transform={`rotate(-90 14 ${H / 2})`}>
-        Tarif demandé (€/jour)
+        Salaire brut demandé (€/mois)
       </text>
     </svg>
   );
