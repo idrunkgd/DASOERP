@@ -8,6 +8,7 @@ import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages, LayoutGrid
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CandidateAvatar } from "./avatar";
 import { CvImportButton } from "./cv-import-button";
+import { BenchmarkButton } from "./benchmark-button";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
@@ -63,6 +64,14 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
                 <List className="w-3.5 h-3.5" /><span>Liste</span>
               </Link>
             </div>
+            <BenchmarkButton candidates={list.map((c: any) => ({
+              id: c.id,
+              firstName: c.firstName, lastName: c.lastName,
+              years: c.yearsExperience ?? 0,
+              rate: c.minDailyRate ? Number(c.minDailyRate) : (c.dailyCost ? Number(c.dailyCost) : 0),
+              seniority: c.seniority ?? null,
+              skills: c.skills ?? []
+            }))} />
             <CvImportButton />
             <Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau candidat</Link>
           </div>
