@@ -310,7 +310,8 @@ export default async function CashflowPage({
                 defaultAmount: Number(r.defaultAmount),
                 isIncome: r.isIncome,
                 frequency: r.frequency,
-                paymentMonths: r.paymentMonths
+                paymentMonths: r.paymentMonths,
+                isSimulation: (r as any).isSimulation === true
               },
               entry: entry
                 ? {

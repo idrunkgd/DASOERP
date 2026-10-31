@@ -51,6 +51,7 @@ type RecurringWithEntry = {
     isIncome: boolean;
     frequency: string;
     paymentMonths: number[];
+    isSimulation?: boolean;
   };
   entry: {
     id: string;
@@ -194,14 +195,19 @@ export function CurrentMonthPanel({
       // Masque les lignes à 0€ ce mois (ex: EDEBEX un mois où pas facturé).
       // Un montant nul n'a aucune valeur informative dans "Ce mois-ci".
       if (!(amount > 0)) continue;
+      // Les RecurringExpense tagués SIMULATION (projections candidats non engagés)
+      // sont affichés avec un style distinct et NE comptent PAS dans les KPIs
+      // "À encaisser / À payer" — même traitement que les OneOff SIMULATION.
+      const isRecSim = (r.recurring as any).isSimulation === true;
       const item: UnifiedItem = {
         key: `r-${r.recurring.id}`,
-        category: r.recurring.category?.trim() || NO_CATEGORY,
+        category: isRecSim ? "Simulations (what-if)" : (r.recurring.category?.trim() || NO_CATEGORY),
         label: r.recurring.label,
         amount,
         isPaid: status === "PAID",
         isSkipped: false,
         isIncome: r.recurring.isIncome,
+        isSimulation: isRecSim,
         source: "recurring",
         sourceId: r.recurring.id,
         year,
