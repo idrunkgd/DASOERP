@@ -645,6 +645,19 @@ export function Simulator({
         </section>
       </div>
 
+      {/* === Projection sur X années === */}
+      <ProjectionSection
+        breakdown={breakdown}
+        soldDailyRate={inputs.soldDailyRate}
+        billableRate={breakdown.billableRate}
+        workingDaysPerYear={inputs.workingDaysPerYear}
+        consultantName={(() => {
+          const c = candidates.find((x) => x.id === candidateId);
+          if (!c) return "Consultant";
+          return c.label.split(" · ")[0];
+        })()}
+      />
+
       {/* === Notes + boutons === */}
       <section className="card p-5">
         <label className="text-xs font-medium text-midnight-600 mb-1 block">
@@ -680,6 +693,188 @@ export function Simulator({
         </div>
       </section>
     </form>
+  );
+}
+
+// ─────────── Section Projection cashflow sur X années ───────────
+/**
+ * Projette la rentabilité d'un engagement candidat sur plusieurs années.
+ * Pour chaque année, calcule :
+ *   - Rentrée (CA) = TJM facturable × jours prestés/an
+ *   - Coût consultant = totalAnnualCost (brut + ONSS pat + perks)
+ *   - TVA = 21 % × CA (payée tous les mois, on l'affiche brute)
+ *   - Marge nette = CA − coût − TVA
+ * Permet d'identifier à partir de quelle année l'engagement devient rentable.
+ */
+function ProjectionSection({
+  breakdown, soldDailyRate, billableRate, workingDaysPerYear, consultantName
+}: {
+  breakdown: any;
+  soldDailyRate: number;
+  billableRate: number;
+  workingDaysPerYear: number;
+  consultantName: string;
+}) {
+  const [years, setYears] = useState<number>(3);
+  const [startYear, setStartYear] = useState<number>(new Date().getFullYear());
+  const [occupancyPct, setOccupancyPct] = useState<number>(100);
+  const [salaryIncrease, setSalaryIncrease] = useState<number>(2);  // +2 %/an
+  const [rateIncrease, setRateIncrease] = useState<number>(3);      // +3 %/an
+
+  // TJM utilisé pour le revenu : vendu si > 0, sinon suggéré
+  const effectiveRate = soldDailyRate > 0 ? soldDailyRate : billableRate;
+
+  const rows = useMemo(() => {
+    const list: Array<{
+      year: number;
+      daysBilled: number;
+      rate: number;
+      revenue: number;
+      cost: number;
+      vat: number;
+      netMargin: number;
+      cumulative: number;
+    }> = [];
+    let cumulative = 0;
+    for (let i = 0; i < years; i++) {
+      const year = startYear + i;
+      const rateYear = effectiveRate * Math.pow(1 + rateIncrease / 100, i);
+      const costYear = Number(breakdown.totalAnnualCost) * Math.pow(1 + salaryIncrease / 100, i);
+      const daysBilled = Math.round(workingDaysPerYear * (occupancyPct / 100));
+      const revenue = Math.round(rateYear * daysBilled);
+      const vat = Math.round(revenue * 0.21);
+      const netMargin = Math.round(revenue - costYear);
+      cumulative += netMargin;
+      list.push({ year, daysBilled, rate: Math.round(rateYear), revenue, cost: Math.round(costYear), vat, netMargin, cumulative });
+    }
+    return list;
+  }, [years, startYear, effectiveRate, workingDaysPerYear, occupancyPct, salaryIncrease, rateIncrease, breakdown.totalAnnualCost]);
+
+  const totalRevenue = rows.reduce((s, r) => s + r.revenue, 0);
+  const totalCost = rows.reduce((s, r) => s + r.cost, 0);
+  const totalVat = rows.reduce((s, r) => s + r.vat, 0);
+  const totalMargin = totalRevenue - totalCost;
+  const roiMonths = totalMargin > 0 ? Math.ceil((totalCost / totalMargin) * 12) : null;
+
+  return (
+    <section className="card p-6 bg-gradient-to-br from-indigo-50/40 to-transparent border-indigo-200/60">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h3 className="font-semibold flex items-center gap-2 text-lg">
+            <TrendingUp className="w-5 h-5 text-indigoaccent" /> Projection engagement sur {years} année{years > 1 ? "s" : ""}
+          </h3>
+          <p className="text-xs text-midnight-500 mt-1">
+            Simule l'impact financier de <strong>{consultantName}</strong> sur ton compte de résultat : coût, revenu TJM, TVA et marge cumulée.
+          </p>
+        </div>
+      </div>
+
+      {/* Inputs */}
+      <div className="grid grid-cols-5 gap-3 mb-5">
+        <div>
+          <label className="text-[11px] uppercase tracking-wider text-midnight-500 mb-1 block">Durée</label>
+          <select value={years} onChange={(e) => setYears(Number(e.target.value))} className="input text-sm">
+            {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n} an{n > 1 ? "s" : ""}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-[11px] uppercase tracking-wider text-midnight-500 mb-1 block">Démarrage</label>
+          <input type="number" value={startYear} onChange={(e) => setStartYear(Number(e.target.value))} className="input text-sm" />
+        </div>
+        <div>
+          <label className="text-[11px] uppercase tracking-wider text-midnight-500 mb-1 block">Taux occupation</label>
+          <select value={occupancyPct} onChange={(e) => setOccupancyPct(Number(e.target.value))} className="input text-sm">
+            {[100, 90, 80, 70].map((n) => <option key={n} value={n}>{n} %</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-[11px] uppercase tracking-wider text-midnight-500 mb-1 block">Hausse salaire/an</label>
+          <select value={salaryIncrease} onChange={(e) => setSalaryIncrease(Number(e.target.value))} className="input text-sm">
+            {[0, 2, 3, 5].map((n) => <option key={n} value={n}>+{n} %</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-[11px] uppercase tracking-wider text-midnight-500 mb-1 block">Hausse TJM/an</label>
+          <select value={rateIncrease} onChange={(e) => setRateIncrease(Number(e.target.value))} className="input text-sm">
+            {[0, 2, 3, 5, 7].map((n) => <option key={n} value={n}>+{n} %</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="rounded-lg border border-indigo-200 overflow-hidden bg-white">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-indigo-50/60 text-indigoaccent uppercase text-[10px] tracking-wider">
+              <th className="text-left px-3 py-2">Année</th>
+              <th className="text-right px-3 py-2">TJM</th>
+              <th className="text-right px-3 py-2">Jours facturés</th>
+              <th className="text-right px-3 py-2 text-emerald-700">Revenu {consultantName}</th>
+              <th className="text-right px-3 py-2 text-red-700">Coût {consultantName}</th>
+              <th className="text-right px-3 py-2 text-amber-700">TVA 21 % {consultantName}</th>
+              <th className="text-right px-3 py-2 border-l border-indigo-200">Marge nette</th>
+              <th className="text-right px-3 py-2 font-semibold">Cumulé</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.year} className="border-t border-indigo-100 hover:bg-indigo-50/30">
+                <td className="px-3 py-2 font-semibold">{r.year}</td>
+                <td className="text-right tabular-nums px-3 py-2">{fmt(r.rate)}€</td>
+                <td className="text-right tabular-nums px-3 py-2 text-midnight-500">{r.daysBilled}</td>
+                <td className="text-right tabular-nums px-3 py-2 text-emerald-700 font-medium">+{fmt(r.revenue)}€</td>
+                <td className="text-right tabular-nums px-3 py-2 text-red-700">−{fmt(r.cost)}€</td>
+                <td className="text-right tabular-nums px-3 py-2 text-amber-700">{fmt(r.vat)}€</td>
+                <td className={"text-right tabular-nums px-3 py-2 font-semibold border-l border-indigo-100 " + (r.netMargin >= 0 ? "text-emerald-700" : "text-red-700")}>
+                  {r.netMargin >= 0 ? "+" : ""}{fmt(r.netMargin)}€
+                </td>
+                <td className={"text-right tabular-nums px-3 py-2 font-bold " + (r.cumulative >= 0 ? "text-emerald-800" : "text-red-800")}>
+                  {r.cumulative >= 0 ? "+" : ""}{fmt(r.cumulative)}€
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-indigo-100/60 border-t-2 border-indigo-200 font-bold">
+              <td className="px-3 py-2.5" colSpan={3}>Total sur {years} an{years > 1 ? "s" : ""}</td>
+              <td className="text-right tabular-nums px-3 py-2.5 text-emerald-800">+{fmt(totalRevenue)}€</td>
+              <td className="text-right tabular-nums px-3 py-2.5 text-red-800">−{fmt(totalCost)}€</td>
+              <td className="text-right tabular-nums px-3 py-2.5 text-amber-800">{fmt(totalVat)}€</td>
+              <td className={"text-right tabular-nums px-3 py-2.5 border-l border-indigo-200 " + (totalMargin >= 0 ? "text-emerald-800" : "text-red-800")}>
+                {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}€
+              </td>
+              <td className={"text-right tabular-nums px-3 py-2.5 " + (totalMargin >= 0 ? "text-emerald-800" : "text-red-800")}>
+                {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}€
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {/* Verdict */}
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        <div className="p-3 rounded border border-indigo-200 bg-white">
+          <div className="text-[10px] uppercase tracking-wider text-midnight-500">Chiffre d'affaires total</div>
+          <div className="text-xl font-bold text-emerald-700 tabular-nums mt-1">{fmt(totalRevenue)}€</div>
+        </div>
+        <div className="p-3 rounded border border-indigo-200 bg-white">
+          <div className="text-[10px] uppercase tracking-wider text-midnight-500">Marge nette totale</div>
+          <div className={"text-xl font-bold tabular-nums mt-1 " + (totalMargin >= 0 ? "text-emerald-700" : "text-red-700")}>
+            {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}€
+          </div>
+        </div>
+        <div className="p-3 rounded border border-indigo-200 bg-white">
+          <div className="text-[10px] uppercase tracking-wider text-midnight-500">ROI (retour sur coût)</div>
+          <div className="text-xl font-bold tabular-nums mt-1 text-indigoaccent">
+            {totalCost > 0 ? `${((totalMargin / totalCost) * 100).toFixed(0)} %` : "—"}
+          </div>
+        </div>
+      </div>
+
+      <p className="text-[11px] text-midnight-500 mt-4">
+        ℹ️ La TVA est affichée brute (21 % du CA facturé). En pratique tu récupères aussi la TVA déductible sur voiture / achats, le net payé à l'État est inférieur. Le coût consultant inclut brut, ONSS patronal estimé et tous les avantages (voiture, chèques, etc.).
+      </p>
+    </section>
   );
 }
 
