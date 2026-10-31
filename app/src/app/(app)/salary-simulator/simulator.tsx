@@ -23,6 +23,7 @@ import {
   type SalaryInputs
 } from "@/lib/salary-calc";
 import { saveSalaryScenario } from "@/server/actions/salary-scenarios";
+import { createCashflowFromProjection, deleteProjectionFromCashflow } from "@/server/actions/projection-to-cashflow";
 
 type CandidateOption = { id: string; label: string };
 
@@ -871,10 +872,86 @@ function ProjectionSection({
         </div>
       </div>
 
+      <PushToCashflow
+        consultantName={consultantName}
+        startYear={startYear}
+        durationYears={years}
+        monthlyRevenue={Math.round(totalRevenue / (years * 12))}
+        monthlyCost={Math.round(totalCost / (years * 12))}
+        monthlyVat={Math.round(totalVat / (years * 12))}
+      />
+
       <p className="text-[11px] text-midnight-500 mt-4">
         ℹ️ La TVA est affichée brute (21 % du CA facturé). En pratique tu récupères aussi la TVA déductible sur voiture / achats, le net payé à l'État est inférieur. Le coût consultant inclut brut, ONSS patronal estimé et tous les avantages (voiture, chèques, etc.).
       </p>
     </section>
+  );
+}
+
+function PushToCashflow({
+  consultantName, startYear, durationYears, monthlyRevenue, monthlyCost, monthlyVat
+}: {
+  consultantName: string;
+  startYear: number;
+  durationYears: number;
+  monthlyRevenue: number;
+  monthlyCost: number;
+  monthlyVat: number;
+}) {
+  const [pending, start] = useTransition();
+  function doPush() {
+    if (!window.confirm(
+      `Pousser dans cashflow : 3 lignes mensuelles pour ${consultantName}\n\n` +
+      `  • Revenu : ${monthlyRevenue.toLocaleString()} €/mois\n` +
+      `  • Coût : ${monthlyCost.toLocaleString()} €/mois\n` +
+      `  • TVA : ${monthlyVat.toLocaleString()} €/mois\n\n` +
+      `Période : ${startYear} → ${startYear + durationYears - 1}\n\n` +
+      `Si des lignes existent déjà pour ce consultant, elles seront remplacées.`
+    )) return;
+    start(async () => {
+      try {
+        const r = await createCashflowFromProjection({
+          consultantName, candidateId: null,
+          startYear, durationYears,
+          monthlyRevenue, monthlyCost, monthlyVat
+        });
+        toast.success(`${r.created} lignes créées dans le cashflow${r.replaced > 0 ? ` (${r.replaced} remplacées)` : ""}`);
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur push cashflow");
+      }
+    });
+  }
+  function doDelete() {
+    if (!window.confirm(`Supprimer les 3 lignes cashflow de ${consultantName} ?`)) return;
+    start(async () => {
+      try {
+        const r = await deleteProjectionFromCashflow(consultantName);
+        toast.success(r.deleted > 0 ? `${r.deleted} lignes supprimées` : "Aucune ligne à supprimer");
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur suppression");
+      }
+    });
+  }
+  return (
+    <div className="mt-5 flex items-center justify-between gap-3 p-4 rounded-lg bg-indigoaccent/5 border border-indigoaccent/30">
+      <div className="text-sm">
+        <div className="font-semibold text-indigoaccent flex items-center gap-2">
+          <Wallet className="w-4 h-4" /> Intégrer dans le cashflow
+        </div>
+        <div className="text-xs text-midnight-600 mt-1">
+          Crée 3 lignes récurrentes mensuelles catégorie <strong>SIMULATION</strong> : <em>Revenu / Coût / TVA</em> pour <strong>{consultantName}</strong>.
+          Idempotent : remplace les lignes existantes pour ce consultant.
+        </div>
+      </div>
+      <div className="flex gap-2 shrink-0">
+        <button type="button" onClick={doDelete} disabled={pending} className="btn-ghost btn-sm text-red-600">
+          Retirer du cashflow
+        </button>
+        <button type="button" onClick={doPush} disabled={pending} className="btn-primary">
+          {pending ? "..." : "Pousser dans le cashflow"}
+        </button>
+      </div>
+    </div>
   );
 }
 
