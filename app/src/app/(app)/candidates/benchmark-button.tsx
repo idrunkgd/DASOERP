@@ -8,7 +8,8 @@
  * médiane n'est pas tirée vers le haut par ce seul point. On montre aussi
  * Q1/Q3 pour visualiser la dispersion.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Euro, X, TrendingUp } from "lucide-react";
 
 type CandidatePoint = {
@@ -23,6 +24,8 @@ type CandidatePoint = {
 
 export function BenchmarkButton({ candidates }: { candidates: CandidatePoint[] }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   return (
     <>
       <button
@@ -32,7 +35,10 @@ export function BenchmarkButton({ candidates }: { candidates: CandidatePoint[] }
       >
         <Euro className="w-4 h-4" />
       </button>
-      {open && <BenchmarkModal candidates={candidates} onClose={() => setOpen(false)} />}
+      {open && mounted && createPortal(
+        <BenchmarkModal candidates={candidates} onClose={() => setOpen(false)} />,
+        document.body
+      )}
     </>
   );
 }

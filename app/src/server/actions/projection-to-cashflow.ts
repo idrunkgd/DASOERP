@@ -55,7 +55,7 @@ export async function createCashflowFromProjection(input: z.infer<typeof Input>)
   // Crée les 3 lignes
   const noteStub = `${TAG}:${d.consultantName} · engagement simulé ${d.startYear}-${d.startYear + d.durationYears - 1}`;
   const [revenue, cost, vat] = await Promise.all([
-    prisma.recurringExpense.create({
+    (prisma as any).recurringExpense.create({
       data: {
         label:         `Revenu ${d.consultantName}`,
         category:      "SIMULATION",
@@ -63,11 +63,12 @@ export async function createCashflowFromProjection(input: z.infer<typeof Input>)
         isIncome:      true,
         frequency:     "MONTHLY",
         startDate, endDate, isActive: true,
+        isSimulation:  true,
         notes:         noteStub,
         createdById:   session.user.id
       }
     }),
-    prisma.recurringExpense.create({
+    (prisma as any).recurringExpense.create({
       data: {
         label:         `Coût ${d.consultantName}`,
         category:      "SIMULATION",
@@ -75,11 +76,12 @@ export async function createCashflowFromProjection(input: z.infer<typeof Input>)
         isIncome:      false,
         frequency:     "MONTHLY",
         startDate, endDate, isActive: true,
+        isSimulation:  true,
         notes:         noteStub,
         createdById:   session.user.id
       }
     }),
-    prisma.recurringExpense.create({
+    (prisma as any).recurringExpense.create({
       data: {
         label:         `TVA ${d.consultantName}`,
         category:      "SIMULATION",
@@ -87,6 +89,7 @@ export async function createCashflowFromProjection(input: z.infer<typeof Input>)
         isIncome:      false,
         frequency:     "MONTHLY",
         startDate, endDate, isActive: true,
+        isSimulation:  true,
         notes:         noteStub,
         createdById:   session.user.id
       }

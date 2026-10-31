@@ -904,9 +904,13 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
         }`
       : r.label;
 
+    // Si la ligne est marquée comme simulation (projection what-if), on la
+    // classe en "simulation" pour que le dashboard l'exclue de la baseline
+    // et l'ajoute seulement dans la colonne "avec simulations".
+    const isSim = (r as any).isSimulation === true;
     rows.push({
       id: `rec-${r.id}`,
-      kind: r.isIncome ? "recurring_income" : "recurring_expense",
+      kind: isSim ? "simulation" : (r.isIncome ? "recurring_income" : "recurring_expense"),
       label: dynamicLabel,
       category: r.category,
       isIncome: r.isIncome,

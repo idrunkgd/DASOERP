@@ -1802,6 +1802,10 @@ model RecurringExpense {
   startDate       DateTime? @db.Date
   endDate         DateTime? @db.Date
   isActive        Boolean  @default(true)
+  /// Marque les lignes "what-if" (ex: projection candidat non engagé).
+  /// Le cashflow les isole dans la colonne "avec sim" et ne les compte pas
+  /// dans la projection baseline.
+  isSimulation    Boolean  @default(false)
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -1812,6 +1816,7 @@ model RecurringExpense {
 
   @@index([category])
   @@index([isActive])
+  @@index([isSimulation])
 }
 
 /// Entrée mensuelle d'une dépense récurrente : override du montant + statut paiement
