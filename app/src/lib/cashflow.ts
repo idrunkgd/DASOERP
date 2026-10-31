@@ -253,186 +253,23 @@ export async function computeCashflowYear(year: number): Promise<CashflowYear> {
   const isBootstrapYear = year === bootstrapYear;
 
   let startingBalance = bootstrapBalance;
-  if (year > bootstrapYear) try {
-    // Chaîne année → année : on prend la PROJECTION (PAID + PLANNED, non-SKIPPED,
-    // non-CANCELLED, hors simulations), pas uniquement le réel marqué payé.
-    // Sinon fin 2026 = 120K ≠ début 2027 = 45K (seulement les payés cochés).
-    const [priorMs, priorOo, priorRecurring, priorEmployees, priorPayrollMonths] =
-      await Promise.all([
-        prisma.billingMilestone.findMany({
-          where: {
-            status: { not: "CANCELLED" },
-            expectedAt: { gte: bootstrapDate, lt: yearStart }
-          },
-          select: { amount: true, missionId: true }
-        }),
-        prisma.oneOffCashflowEntry.findMany({
-          where: {
-            status: { not: "SKIPPED" },
-            // On exclut les SIMULATIONS des DEUX côtés (dépense simulée et
-            // recette simulée) : une projection what-if n'a rien à faire
-            // dans le solde reporté du 1er janvier.
-            kind: { notIn: ["SIMULATION", "SIMULATION_INCOME"] },
-            date: { gte: bootstrapDate, lt: yearStart }
-          },
-          select: { amount: true, kind: true }
-        }),
-        prisma.recurringExpense.findMany({
-          where: { isActive: true },
-          include: { months: true }
-        }),
-        // Payroll : mêmes 3 postes (Salaires / Précompte / ONSS) qui
-        // doivent être décomptés du solde reporté sinon fin 2026 ≠ début
-        // 2027 (le manque de 130k ≈ payroll d'une année).
-        prisma.payrollEmployee.findMany({
-          where: {
-            startDate: { lt: yearStart },
-            OR: [{ endDate: null }, { endDate: { gte: bootstrapDate } }]
-          }
-        }),
-        prisma.payrollMonth.findMany({
-          where: { year: { lt: year } }
-        })
-      ]);
-
-    // TVAC pour milestones liés à une mission — fetch vatRate en raw SQL
-    const priorMissionIds = new Set<string>();
-    for (const m of priorMs) if (m.missionId) priorMissionIds.add(m.missionId);
-    const priorVatByMissionId = new Map<string, number>();
-    if (priorMissionIds.size > 0) {
-      try {
-        const idList = Array.from(priorMissionIds)
-          .map((id) => `'${id.replace(/'/g, "''")}'`)
-          .join(",");
-        const rows = await prisma.$queryRawUnsafe<
-          { id: string; vatRate: string | number }[]
-        >(`SELECT id, "vatRate" FROM "Mission" WHERE id IN (${idList})`);
-        for (const r of rows) {
-          const v = Number(r.vatRate);
-          // On ignore 0 / NaN / négatif : on veut tomber sur le fallback 21%
-          // (0 en DB = colonne non renseignée par la migration vatRate).
-          if (Number.isFinite(v) && v > 0) priorVatByMissionId.set(r.id, v);
-        }
-      } catch {
-        // colonne absente → fallback 21%
-      }
+  if (year > bootstrapYear) {
+    try {
+      // RÉCURSIF — on calcule l'année précédente et on reprend sa
+      // cumulativeBalance de décembre comme startingBalance.
+      // Garantit par construction que "solde fin N = startingBalance N+1".
+      // Toutes les divergences (TVA dynamique, ONSS patronal, snapshots PAID,
+      // simulations isSimulation, etc.) sont nativement cohérentes puisqu'elles
+      // sont calculées une seule fois dans la vue annuelle réutilisée.
+      const prev = await computeCashflowYear(year - 1);
+      startingBalance = prev.monthlyTotals[11].cumulativeBalance;
+      startingBalance = Math.round(startingBalance * 100) / 100;
+    } catch (err) {
+      // Défense en profondeur : si la projection N-1 plante, on retombe sur
+      // le bootstrap plutôt que de crasher la page cashflow.
+      console.error("[cashflow] Recursive year chaining failed, falling back to bootstrap:", err);
+      startingBalance = bootstrapBalance;
     }
-    for (const m of priorMs) {
-      const vat = m.missionId
-        ? priorVatByMissionId.get(m.missionId) ?? 21
-        : 21;
-      startingBalance += Number(m.amount) * (1 + vat / 100);
-    }
-    for (const o of priorOo) {
-      const a = Number(o.amount);
-      if (o.kind === "INCOME") startingBalance += a;
-      else if (o.kind === "EXPENSE" || o.kind === "COMMITMENT")
-        startingBalance -= a;
-    }
-
-    // Récurrents : on itère tous les (year, month) entre bootstrap et yearStart
-    // et on applique falsOnMonth + amountOverride éventuel.
-    const startY = bootstrapDate.getUTCFullYear();
-    const startM = bootstrapDate.getUTCMonth() + 1; // 1..12
-    const monthsInRange: { year: number; month: number }[] = [];
-    for (let y = startY; y < year; y++) {
-      const fromM = y === startY ? startM : 1;
-      for (let m = fromM; m <= 12; m++) monthsInRange.push({ year: y, month: m });
-    }
-    // Pré-calcul : TVA dynamique pour les mois PLANNED des années antérieures.
-    // Même logique que dans la boucle principale : si c'est un mois futur non
-    // encore PAID, on calcule la TVA réelle depuis les factures du mois source.
-    // Ça garantit que "Solde fin année N" = "startingBalance année N+1".
-    const { computeVatReportForMonth } = await import("@/lib/tva");
-    const todayPrior = new Date();
-    const todayYMPrior = todayPrior.getUTCFullYear() * 12 + todayPrior.getUTCMonth();
-    const priorVatByYM = new Map<string, number>(); // "y-m" → TVA due
-    const hasVatLinePrior = priorRecurring.some((r: any) => /tva|vat/i.test(r.label) && r.category !== "SIMULATION");
-    if (hasVatLinePrior) {
-      for (const { year: y, month } of monthsInRange) {
-        const cellYM = y * 12 + (month - 1);
-        if (cellYM < todayYMPrior) continue;
-        const sourceYear = month === 1 ? y - 1 : y;
-        const sourceMonth = month === 1 ? 11 : month - 2;
-        try {
-          const report = await computeVatReportForMonth(sourceYear, sourceMonth);
-          const amountDue = Number(report.grid.case71) || 0;
-          if (amountDue > 0) priorVatByYM.set(`${y}-${month}`, amountDue);
-        } catch { /* fallback silencieux */ }
-      }
-    }
-
-    for (const r of priorRecurring) {
-      // Les lignes de SIMULATION ne doivent PAS contaminer le startingBalance
-      // du baseline — sinon le solde "sans sim" de l'année courante hérite
-      // de l'impact des simulations des années précédentes.
-      if ((r as any).isSimulation === true) continue;
-      const isVatLineR = /tva|vat/i.test(r.label) && r.category !== "SIMULATION";
-      const recStart = (r as { startDate?: Date | null }).startDate ?? null;
-      const recEnd = (r as { endDate?: Date | null }).endDate ?? null;
-      const startYM = recStart
-        ? recStart.getUTCFullYear() * 12 + recStart.getUTCMonth()
-        : null;
-      const endYM = recEnd
-        ? recEnd.getUTCFullYear() * 12 + recEnd.getUTCMonth()
-        : null;
-      for (const { year: y, month } of monthsInRange) {
-        const ym = y * 12 + (month - 1);
-        if (startYM != null && ym < startYM) continue;
-        if (endYM != null && ym > endYM) continue;
-        if (!falsOnMonth(r.frequency, r.paymentMonths, month)) continue;
-        const me = r.months.find((x) => x.year === y && x.month === month);
-        if (me?.status === "SKIPPED") continue;
-        // TVA dynamique si cellule non-PAID — cohérent avec la vue annuelle
-        const vatDyn = isVatLineR && me?.status !== "PAID" ? priorVatByYM.get(`${y}-${month}`) : undefined;
-        const a = vatDyn != null
-          ? vatDyn
-          : Number(me?.amountOverride ?? r.defaultAmount);
-        startingBalance += r.isIncome ? a : -a;
-      }
-    }
-
-    // Payroll : pour chaque (y, month) antérieur à l'année affichée, on
-    // somme les 3 postes (net + précompte + ONSS) pour tous les employés
-    // actifs ce mois-là (start/end dates), en appliquant amountOverride
-    // et le statut SKIPPED s'ils existent dans PayrollMonth.
-    const priorPmIndex = new Map<string, typeof priorPayrollMonths[number]>();
-    for (const pm of priorPayrollMonths) {
-      priorPmIndex.set(`${pm.year}-${pm.month}-${pm.kind}`, pm);
-    }
-    for (const { year: y, month } of monthsInRange) {
-      const monthStart = new Date(Date.UTC(y, month - 1, 1));
-      const monthEnd = new Date(Date.UTC(y, month, 0));
-      let sNet = 0, sTax = 0, sOnss = 0;
-      for (const e of priorEmployees) {
-        if (e.startDate > monthEnd) continue;
-        if (e.endDate != null && e.endDate < monthStart) continue;
-        sNet  += Number(e.monthlyNetPay);
-        sTax  += Number(e.monthlyWithholdingTax);
-        sOnss += Number(e.monthlyOnss);
-      }
-      const kinds: [string, number][] = [
-        ["NET_PAY", sNet],
-        ["WITHHOLDING_TAX", sTax],
-        ["ONSS", sOnss]
-      ];
-      for (const [kind, calc] of kinds) {
-        const pm = priorPmIndex.get(`${y}-${month}-${kind}`);
-        if (pm?.status === "SKIPPED") continue;
-        const overriden = pm?.amountOverride != null ? Number(pm.amountOverride) : null;
-        const amount = overriden != null ? overriden : calc;
-        startingBalance -= amount;
-      }
-    }
-
-    startingBalance = Math.round(startingBalance * 100) / 100;
-  } catch (err) {
-    // Défense en profondeur : si le calcul de projection année → année
-    // plante (colonne DB manquante, données corrompues, etc.), on log en
-    // console serveur et on retombe sur le bootstrapBalance plutôt que
-    // de casser toute la page cashflow avec une 500.
-    console.error("[cashflow] Year chaining failed, falling back to bootstrap:", err);
-    startingBalance = bootstrapBalance;
   }
 
   // Index des monthly entries par recurringId/month
