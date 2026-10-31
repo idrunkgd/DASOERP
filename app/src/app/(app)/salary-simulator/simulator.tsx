@@ -730,7 +730,8 @@ function ProjectionSection({
       year: number;
       daysBilled: number;
       rate: number;
-      revenue: number;
+      revenueHT: number;
+      revenueTTC: number;
       cost: number;
       vat: number;
       netMargin: number;
@@ -742,20 +743,23 @@ function ProjectionSection({
       const rateYear = effectiveRate * Math.pow(1 + rateIncrease / 100, i);
       const costYear = Number(breakdown.totalAnnualCost) * Math.pow(1 + salaryIncrease / 100, i);
       const daysBilled = Math.round(workingDaysPerYear * (occupancyPct / 100));
-      const revenue = Math.round(rateYear * daysBilled);
-      const vat = Math.round(revenue * 0.21);
-      const netMargin = Math.round(revenue - costYear);
+      // Revenu HT = TJM × jours. Revenu TTC = HT × 1,21 (ce qu'on reçoit sur le compte).
+      const revenueHT = Math.round(rateYear * daysBilled);
+      const revenueTTC = Math.round(revenueHT * 1.21);
+      const vat = Math.round(revenueHT * 0.21); // TVA collectée reversée à l'État
+      // Marge nette comptable = HT - coût (la TVA ne nous appartient pas)
+      const netMargin = Math.round(revenueHT - costYear);
       cumulative += netMargin;
-      list.push({ year, daysBilled, rate: Math.round(rateYear), revenue, cost: Math.round(costYear), vat, netMargin, cumulative });
+      list.push({ year, daysBilled, rate: Math.round(rateYear), revenueHT, revenueTTC, cost: Math.round(costYear), vat, netMargin, cumulative });
     }
     return list;
   }, [years, startYear, effectiveRate, workingDaysPerYear, occupancyPct, salaryIncrease, rateIncrease, breakdown.totalAnnualCost]);
 
-  const totalRevenue = rows.reduce((s, r) => s + r.revenue, 0);
+  const totalRevenueHT = rows.reduce((s, r) => s + r.revenueHT, 0);
+  const totalRevenueTTC = rows.reduce((s, r) => s + r.revenueTTC, 0);
   const totalCost = rows.reduce((s, r) => s + r.cost, 0);
   const totalVat = rows.reduce((s, r) => s + r.vat, 0);
-  const totalMargin = totalRevenue - totalCost;
-  const roiMonths = totalMargin > 0 ? Math.ceil((totalCost / totalMargin) * 12) : null;
+  const totalMargin = totalRevenueHT - totalCost;
 
   return (
     <section className="card p-6 bg-gradient-to-br from-indigo-50/40 to-transparent border-indigo-200/60">
@@ -809,11 +813,11 @@ function ProjectionSection({
             <tr className="bg-indigo-50/60 text-indigoaccent uppercase text-[10px] tracking-wider">
               <th className="text-left px-3 py-2">Année</th>
               <th className="text-right px-3 py-2">TJM</th>
-              <th className="text-right px-3 py-2">Jours facturés</th>
-              <th className="text-right px-3 py-2 text-emerald-700">Revenu {consultantName}</th>
+              <th className="text-right px-3 py-2">Jours</th>
+              <th className="text-right px-3 py-2 text-emerald-700" title="TTC : HT + TVA 21 % — ce qui tombe sur le compte">Entrée TTC {consultantName}</th>
               <th className="text-right px-3 py-2 text-red-700">Coût {consultantName}</th>
-              <th className="text-right px-3 py-2 text-amber-700">TVA 21 % {consultantName}</th>
-              <th className="text-right px-3 py-2 border-l border-indigo-200">Marge nette</th>
+              <th className="text-right px-3 py-2 text-amber-700" title="TVA à reverser à l'État (= TVA collectée)">TVA 21 % {consultantName}</th>
+              <th className="text-right px-3 py-2 border-l border-indigo-200" title="Entrée TTC − TVA − Coût = HT − Coût">Marge nette</th>
               <th className="text-right px-3 py-2 font-semibold">Cumulé</th>
             </tr>
           </thead>
@@ -823,9 +827,12 @@ function ProjectionSection({
                 <td className="px-3 py-2 font-semibold">{r.year}</td>
                 <td className="text-right tabular-nums px-3 py-2">{fmt(r.rate)}€</td>
                 <td className="text-right tabular-nums px-3 py-2 text-midnight-500">{r.daysBilled}</td>
-                <td className="text-right tabular-nums px-3 py-2 text-emerald-700 font-medium">+{fmt(r.revenue)}€</td>
+                <td className="text-right tabular-nums px-3 py-2 text-emerald-700 font-medium">
+                  +{fmt(r.revenueTTC)}€
+                  <div className="text-[9px] text-midnight-400 font-normal">dont HT {fmt(r.revenueHT)}€</div>
+                </td>
                 <td className="text-right tabular-nums px-3 py-2 text-red-700">−{fmt(r.cost)}€</td>
-                <td className="text-right tabular-nums px-3 py-2 text-amber-700">{fmt(r.vat)}€</td>
+                <td className="text-right tabular-nums px-3 py-2 text-amber-700">−{fmt(r.vat)}€</td>
                 <td className={"text-right tabular-nums px-3 py-2 font-semibold border-l border-indigo-100 " + (r.netMargin >= 0 ? "text-emerald-700" : "text-red-700")}>
                   {r.netMargin >= 0 ? "+" : ""}{fmt(r.netMargin)}€
                 </td>
@@ -838,9 +845,12 @@ function ProjectionSection({
           <tfoot>
             <tr className="bg-indigo-100/60 border-t-2 border-indigo-200 font-bold">
               <td className="px-3 py-2.5" colSpan={3}>Total sur {years} an{years > 1 ? "s" : ""}</td>
-              <td className="text-right tabular-nums px-3 py-2.5 text-emerald-800">+{fmt(totalRevenue)}€</td>
+              <td className="text-right tabular-nums px-3 py-2.5 text-emerald-800">
+                +{fmt(totalRevenueTTC)}€
+                <div className="text-[9px] text-midnight-500 font-normal">dont HT {fmt(totalRevenueHT)}€</div>
+              </td>
               <td className="text-right tabular-nums px-3 py-2.5 text-red-800">−{fmt(totalCost)}€</td>
-              <td className="text-right tabular-nums px-3 py-2.5 text-amber-800">{fmt(totalVat)}€</td>
+              <td className="text-right tabular-nums px-3 py-2.5 text-amber-800">−{fmt(totalVat)}€</td>
               <td className={"text-right tabular-nums px-3 py-2.5 border-l border-indigo-200 " + (totalMargin >= 0 ? "text-emerald-800" : "text-red-800")}>
                 {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}€
               </td>
@@ -853,19 +863,24 @@ function ProjectionSection({
       </div>
 
       {/* Verdict */}
-      <div className="mt-5 grid grid-cols-3 gap-3">
+      <div className="mt-5 grid grid-cols-4 gap-3">
         <div className="p-3 rounded border border-indigo-200 bg-white">
-          <div className="text-[10px] uppercase tracking-wider text-midnight-500">Chiffre d'affaires total</div>
-          <div className="text-xl font-bold text-emerald-700 tabular-nums mt-1">{fmt(totalRevenue)}€</div>
+          <div className="text-[10px] uppercase tracking-wider text-midnight-500">CA TTC total</div>
+          <div className="text-xl font-bold text-emerald-700 tabular-nums mt-1">{fmt(totalRevenueTTC)}€</div>
+          <div className="text-[9px] text-midnight-400">dont HT {fmt(totalRevenueHT)}€</div>
         </div>
         <div className="p-3 rounded border border-indigo-200 bg-white">
-          <div className="text-[10px] uppercase tracking-wider text-midnight-500">Marge nette totale</div>
+          <div className="text-[10px] uppercase tracking-wider text-midnight-500">TVA à reverser</div>
+          <div className="text-xl font-bold text-amber-700 tabular-nums mt-1">{fmt(totalVat)}€</div>
+        </div>
+        <div className="p-3 rounded border border-indigo-200 bg-white">
+          <div className="text-[10px] uppercase tracking-wider text-midnight-500">Marge nette</div>
           <div className={"text-xl font-bold tabular-nums mt-1 " + (totalMargin >= 0 ? "text-emerald-700" : "text-red-700")}>
             {totalMargin >= 0 ? "+" : ""}{fmt(totalMargin)}€
           </div>
         </div>
         <div className="p-3 rounded border border-indigo-200 bg-white">
-          <div className="text-[10px] uppercase tracking-wider text-midnight-500">ROI (retour sur coût)</div>
+          <div className="text-[10px] uppercase tracking-wider text-midnight-500">ROI (marge / coût)</div>
           <div className="text-xl font-bold tabular-nums mt-1 text-indigoaccent">
             {totalCost > 0 ? `${((totalMargin / totalCost) * 100).toFixed(0)} %` : "—"}
           </div>
@@ -876,13 +891,13 @@ function ProjectionSection({
         consultantName={consultantName}
         startYear={startYear}
         durationYears={years}
-        monthlyRevenue={Math.round(totalRevenue / (years * 12))}
+        monthlyRevenue={Math.round(totalRevenueTTC / (years * 12))}
         monthlyCost={Math.round(totalCost / (years * 12))}
         monthlyVat={Math.round(totalVat / (years * 12))}
       />
 
       <p className="text-[11px] text-midnight-500 mt-4">
-        ℹ️ La TVA est affichée brute (21 % du CA facturé). En pratique tu récupères aussi la TVA déductible sur voiture / achats, le net payé à l'État est inférieur. Le coût consultant inclut brut, ONSS patronal estimé et tous les avantages (voiture, chèques, etc.).
+        ℹ️ <strong>Entrée TTC</strong> = ce qui tombe sur ton compte (HT + 21 % TVA). <strong>TVA</strong> = ce que tu reverses à l'État (= TVA collectée). <strong>Marge nette</strong> = Entrée TTC − TVA − Coût = HT − Coût. Le coût inclut brut + ONSS patronal + avantages.
       </p>
     </section>
   );
