@@ -112,54 +112,23 @@ export const authOptions: NextAuthOptions = {
         session.user.email = session.user.email ?? "";
 
         // ─── Mode démo : impersonation Jean Démo ────────────────────────
-        // Debug tracing : on log chaque étape dans AppLog (visible sur /logs)
-        // pour diagnostiquer pourquoi le swap ne se déclenche pas.
-        const trace: string[] = [];
+        // Callback invoquée à CHAQUE getServerSession() → doit rester
+        // silencieuse (pas de log, pas de query inutile).
         try {
           const { cookies } = await import("next/headers");
-          let demoCookie;
-          try {
-            demoCookie = cookies().get("demo-mode");
-            trace.push(`cookies() OK — demo-mode = "${demoCookie?.value ?? "<absent>"}"`);
-          } catch (e: any) {
-            trace.push(`cookies() THROW : ${e?.message ?? e}`);
-            throw e;
-          }
-          if (demoCookie?.value === "1") {
-            // Le check de sécurité est fait dans enableDemoMode() — seul le
-            // chemin admin/manager peut poser le cookie. Ici on trust le cookie
-            // et on applique le swap. Ça évite le piège du User.role vs
-            // AccessGroup.permissions (un user role=CONSULTANT peut être admin
-            // via son AccessGroup).
+          if (cookies().get("demo-mode")?.value === "1") {
             const demoUser = await prisma.user.findFirst({
               where: { isDemo: true } as any,
               select: { id: true, firstName: true, lastName: true, email: true, role: true }
             });
-            trace.push(`demoUser = ${demoUser ? `${demoUser.firstName} ${demoUser.lastName} (${demoUser.role})` : "null"}`);
             if (demoUser) {
               session.user.id = demoUser.id;
               session.user.name = `${demoUser.firstName} ${demoUser.lastName}`;
               session.user.email = demoUser.email;
               session.user.role = demoUser.role;
-              trace.push("SWAP DONE");
             }
           }
-          // Pas de log INFO ici — cette callback est invoquée à CHAQUE
-          // getServerSession() et pollue /logs (une entrée toutes les
-          // millisecondes). On garde uniquement le log ERROR en cas de
-          // bug (bloc catch ci-dessous).
-        } catch (e: any) {
-          try {
-            const { logAppError } = await import("./app-log");
-            await logAppError({
-              level: "ERROR",
-              message: `[demo-mode session callback] FAILED : ${e?.message ?? e}`,
-              stack: e?.stack ?? null,
-              userId: token.id as string,
-              meta: { trace }
-            });
-          } catch { /* silent */ }
-        }
+        } catch { /* silent — pas de swap, user reste lui-même */ }
       }
       return session;
     }
