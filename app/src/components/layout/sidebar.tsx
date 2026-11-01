@@ -42,7 +42,8 @@ const SECTIONS: Section[] = [
     items: [
       { href: "/companies",   label: "Entreprises",          icon: Building2,       perm: "companies.read" },
       { href: "/contacts",    label: "Contacts",             icon: Users,           perm: "contacts.read" },
-      { href: "/candidates",  label: "Candidats",            icon: UserPlus,        perm: "consulting.read" }
+      { href: "/candidates",  label: "Candidats",            icon: UserPlus,        perm: "consulting.read" },
+      { href: "/client-portals", label: "Portails clients",   icon: ShieldCheck,     perm: "consulting.write" }
     ]
   },
   {

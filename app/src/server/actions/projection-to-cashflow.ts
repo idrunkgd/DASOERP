@@ -38,11 +38,16 @@ export async function createCashflowFromProjection(input: z.infer<typeof Input>)
   const startDate = new Date(Date.UTC(d.startYear, 0, 1));
   const endDate = new Date(Date.UTC(d.startYear + d.durationYears - 1, 11, 31));
 
-  // Supprime d'abord les éventuelles lignes existantes pour ce consultant (idempotence)
+  // Supprime d'abord les éventuelles lignes existantes pour ce consultant.
+  // On matche sur notes OU sur le label (filet de sécurité pour les lignes
+  // anciennes qui n'avaient pas encore le tag notes).
   const existing = await prisma.recurringExpense.findMany({
     where: {
       category: "SIMULATION",
-      notes: { contains: `${TAG}:${d.consultantName}` }
+      OR: [
+        { notes: { contains: `${TAG}:${d.consultantName}` } },
+        { label: { endsWith: d.consultantName } }
+      ]
     },
     select: { id: true }
   });
@@ -117,7 +122,10 @@ export async function deleteProjectionFromCashflow(consultantName: string) {
   const existing = await prisma.recurringExpense.findMany({
     where: {
       category: "SIMULATION",
-      notes: { contains: `${TAG}:${consultantName}` }
+      OR: [
+        { notes: { contains: `${TAG}:${consultantName}` } },
+        { label: { endsWith: consultantName } }
+      ]
     },
     select: { id: true }
   });

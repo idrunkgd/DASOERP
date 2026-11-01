@@ -412,6 +412,9 @@ model User {
   // Tests techniques (évaluation candidat/consultant)
   testAssignments         TestAssignment[]  @relation("TestAssigneeUser")
   testAssignmentsCreated  TestAssignment[]  @relation("TestAssignmentCreator")
+  // Portails client créés / propositions candidats poussées côté client
+  clientPortalsCreated    ClientPortal[]      @relation("ClientPortalCreator")
+  candidateProposalsCreated CandidateProposal[] @relation("CandidateProposalCreator")
 }
 
 // =============================================================
@@ -503,6 +506,9 @@ model Company {
   // à cette société. Permet de modéliser un groupe avec plusieurs usines
   // (ex: AGC Glass Europe → Fleurus + Mol + Moustier).
   sites                  CompanySite[]
+  /// Portails client/équipe (lien unique immuable) — chaque équipe
+  /// peut avoir son propre portail (ex: GSK Wavre, GSK Rixensart).
+  clientPortals          ClientPortal[]    @relation("CompanyClientPortals")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -1389,6 +1395,8 @@ model Candidate {
   interactions    CandidateInteraction[] @relation("CandidateInteractions")
   /// Pipeline recrutement : 6 étapes (qualification → placement) avec notes.
   recruitmentStages CandidateRecruitmentStage[] @relation("CandidateRecruitmentStages")
+  /// Propositions candidat poussées dans un portail client.
+  clientProposals   CandidateProposal[]       @relation("CandidateClientProposals")
 
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -3525,4 +3533,83 @@ model AppLog {
   @@index([createdAt])
   @@index([level, createdAt])
   @@index([userId])
+}
+
+// =============================================================
+// CLIENT PORTAL — Portails publics par équipe/client
+//
+// Un ClientPortal représente une équipe spécifique chez un client (ex: GSK
+// Wavre, GSK Rixensart). Chaque portail a son propre token immuable qui
+// sert d'URL (/portal/[token]). Pas d'auth : le token est la clé.
+// Les candidats sont proposés via CandidateProposal — le client peut
+// accepter, refuser ou demander un entretien directement.
+// =============================================================
+
+model ClientPortal {
+  id            String   @id @default(cuid())
+  /// Token immuable servant d'URL publique (/portal/[token]).
+  /// Généré au create avec cuid (24+ chars, impossible à bruteforcer).
+  /// Régénérable uniquement par bouton "Régénérer" côté admin.
+  token         String   @unique @default(cuid())
+  /// Nom affiché côté admin ET côté client (ex: "UCB Wavre - Process Auto")
+  name          String
+  /// Société mère (ex: UCB Pharma) — pour reporting Dasolabs.
+  companyId     String
+  company       Company  @relation("CompanyClientPortals", fields: [companyId], references: [id], onDelete: Cascade)
+  /// Logo du client (base64 data URI < 800 KB ou URL externe)
+  logoUrl       String?
+  /// Contact principal (optionnel, pour envoi email futur)
+  contactName   String?
+  contactEmail  String?
+  /// Si false, l'URL retourne 404 côté client (désactivé)
+  isActive      Boolean  @default(true)
+  notes         String?
+  createdById   String?
+  createdBy     User?    @relation("ClientPortalCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  /// Statistiques de visite (incrémentées sur chaque chargement portail)
+  lastViewedAt  DateTime?
+  viewCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  proposals     CandidateProposal[]
+
+  @@index([companyId])
+  @@index([token])
+  @@index([isActive])
+}
+
+/// Proposition d'un candidat à un portail client spécifique.
+/// Un même candidat peut être proposé à plusieurs portails en parallèle.
+model CandidateProposal {
+  id                String       @id @default(cuid())
+  portalId          String
+  portal            ClientPortal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  candidateId       String
+  candidate         Candidate    @relation("CandidateClientProposals", fields: [candidateId], references: [id], onDelete: Cascade)
+  /// Mission optionnellement liée (si proposition dans le cadre d'une mission)
+  missionRequestId  String?
+  /// TJM HT proposé au client (affiché côté client)
+  proposedDailyRate Decimal      @db.Decimal(10, 2)
+  /// PROPOSED (défaut), ACCEPTED, REJECTED, INTERVIEW_REQUESTED
+  status            String       @default("PROPOSED")
+  /// Message côté client (motif refus, créneaux souhaités, feedback)
+  clientMessage     String?
+  /// Horodatage de l'action client
+  clientActedAt     DateTime?
+  /// Note interne Dasolabs (NON visible côté client)
+  internalNote      String?
+  /// Si false, retiré de la vue côté client (historique conservé)
+  isVisible         Boolean      @default(true)
+  /// Owner du candidat (reçoit les notifs quand client agit)
+  ownerUserId       String?
+  /// Qui a créé la proposition (= qui a cliqué "Proposer à")
+  createdById       String?
+  createdBy         User?        @relation("CandidateProposalCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@index([portalId, isVisible])
+  @@index([candidateId])
+  @@index([status])
 }

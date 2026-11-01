@@ -22,6 +22,7 @@ import { CandidateDocumentsPanel } from "./documents-panel";
 import { CandidateInteractionsPanel } from "./interactions-panel";
 import { RecruitmentPipeline } from "./recruitment-pipeline";
 import { CvReimportButton } from "./cv-reimport-button";
+import { ProposeToPortalButton } from "./propose-to-portal-button";
 
 type CandidateTab = "general" | "cv" | "recruitment" | "contracts" | "files" | "interactions";
 
@@ -66,6 +67,20 @@ export default async function CandidateDetail({ params, searchParams }: { params
     })
   ]);
   if (!c) notFound();
+
+  // Portails clients actifs pour le bouton "Proposer à…"
+  const activePortals = await (prisma as any).clientPortal.findMany({
+    where: { isActive: true },
+    orderBy: [{ company: { name: "asc" } }, { name: "asc" }],
+    select: { id: true, name: true, company: { select: { name: true } } }
+  });
+  const portalOptions = activePortals.map((p: any) => ({
+    id: p.id, name: p.name, companyName: p.company?.name || "—"
+  }));
+  const latestScenario = (c.salaryScenarios as any[])?.[0];
+  const suggestedTjm = latestScenario?.soldDailyRate ? Number(latestScenario.soldDailyRate)
+    : latestScenario?.billableRate ? Number(latestScenario.billableRate)
+    : (c.minDailyRate ? Number(c.minDailyRate) : undefined);
 
   // Trainings + liste des users HUB pour le dropdown "Point de contact CV"
   let candidateTrainings: any[] = [];
@@ -163,6 +178,14 @@ export default async function CandidateDetail({ params, searchParams }: { params
             >
               <FileDown className="w-4 h-4" /> Exporter le CV
             </Link>
+            {canRecruit && c.status !== "ARCHIVED" && (
+              <ProposeToPortalButton
+                candidateId={c.id}
+                candidateName={`${c.firstName} ${c.lastName}`}
+                suggestedRate={suggestedTjm}
+                portals={portalOptions}
+              />
+            )}
             {!c.portalUser && canRecruit && c.status !== "ARCHIVED" && (
               <CandidatePortalButton candidateId={c.id} suggestedEmail={suggestedPortalEmail} />
             )}
