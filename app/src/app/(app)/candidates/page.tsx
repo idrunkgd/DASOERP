@@ -4,11 +4,10 @@ import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages, LayoutGrid, List } from "lucide-react";
+import { UserPlus, Plus, MapPin, CalendarClock, Briefcase, Languages, LayoutGrid, List, Euro } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { CandidateAvatar } from "./avatar";
 import { CvImportButton } from "./cv-import-button";
-import { BenchmarkButton } from "./benchmark-button";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
@@ -70,17 +69,9 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
                 <List className="w-3.5 h-3.5" /><span>Liste</span>
               </Link>
             </div>
-            <BenchmarkButton candidates={list.map((c: any) => ({
-              id: c.id,
-              firstName: c.firstName, lastName: c.lastName,
-              years: c.yearsExperience ?? 0,
-              // Salaire brut mensuel demandé — depuis le dernier scénario de package.
-              rate: c.salaryScenarios?.[0]?.grossMonthly
-                ? Number(c.salaryScenarios[0].grossMonthly)
-                : 0,
-              seniority: c.seniority ?? null,
-              skills: c.skills ?? []
-            }))} />
+            <Link href="/candidates/benchmark" className="btn-secondary btn-sm" title="Benchmark salaires candidats">
+              <Euro className="w-4 h-4" />
+            </Link>
             <CvImportButton />
             <Link href="/candidates/new" className="btn-primary"><Plus className="w-4 h-4" /> Nouveau candidat</Link>
           </div>
