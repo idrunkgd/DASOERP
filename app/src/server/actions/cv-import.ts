@@ -23,8 +23,11 @@ import { callLlmWithMedia, extractJson } from "@/lib/llm";
 
 // ─── Schéma attendu du LLM ──────────────────────────────────────────────
 
+// Schémas tolérants : accepte null pour TOUT champ car l'IA peut tronquer la
+// réponse et insérer des null sur des champs techniquement requis. On filtre
+// les lignes incomplètes après coup (voir .transform() au niveau du tableau).
 const ParsedExperienceSchema = z.object({
-  companyName: z.string().min(1),
+  companyName: z.string().nullable().optional(),
   jobTitle: z.string().nullable().optional(),
   startDate: z.string().nullable().optional(),  // "YYYY-MM" ou "YYYY"
   endDate: z.string().nullable().optional(),    // null = poste en cours
@@ -32,29 +35,36 @@ const ParsedExperienceSchema = z.object({
 });
 
 const ParsedTrainingSchema = z.object({
-  institution: z.string().min(1),
-  title: z.string().min(1),
+  institution: z.string().nullable().optional(),
+  title: z.string().nullable().optional(),
   period: z.string().nullable().optional(),
   description: z.string().nullable().optional()
 });
 
+// Schéma permissif : TOUS les champs sont nullable/optional pour tolérer les
+// réponses tronquées de l'IA. La validation des champs REQUIS (firstName,
+// lastName) est faite après le parsing dans createCandidateFromCv.
 const ParsedCandidateSchema = z.object({
-  firstName: z.string().min(1).max(80),
-  lastName: z.string().min(1).max(80),
-  email: z.string().email().nullable().optional().or(z.literal("").transform(() => null)),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  email: z.string().nullable().optional().transform((v) => v && v.includes("@") ? v : null),
   phone: z.string().nullable().optional(),
   city: z.string().nullable().optional(),
   linkedinUrl: z.string().nullable().optional(),
   currentTitle: z.string().nullable().optional(),
-  yearsExperience: z.number().int().min(0).max(60).nullable().optional(),
-  seniority: z.enum(["JUNIOR", "MEDIOR", "SENIOR", "EXPERT"]).nullable().optional(),
-  skills: z.array(z.string()).default([]),
-  spokenLanguages: z.array(z.string()).default([]),
-  interests: z.array(z.string()).default([]),
+  yearsExperience: z.coerce.number().int().min(0).max(60).nullable().optional().catch(null),
+  seniority: z.enum(["JUNIOR", "MEDIOR", "SENIOR", "EXPERT"]).nullable().optional().catch(null),
+  skills: z.array(z.string()).default([]).catch([]),
+  spokenLanguages: z.array(z.string()).default([]).catch([]),
+  interests: z.array(z.string()).default([]).catch([]),
   summary: z.string().nullable().optional(),
-  experiences: z.array(ParsedExperienceSchema).default([]),
-  trainings: z.array(ParsedTrainingSchema).default([])
-});
+  experiences: z.array(ParsedExperienceSchema).default([]).catch([]),
+  trainings: z.array(ParsedTrainingSchema).default([]).catch([])
+}).transform((p) => ({
+  ...p,
+  firstName: (p.firstName ?? "").trim(),
+  lastName: (p.lastName ?? "").trim()
+}));
 
 export type ParsedCvCandidate = z.infer<typeof ParsedCandidateSchema>;
 
@@ -167,6 +177,10 @@ export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSc
   const data = CreateFromCvSchema.parse(input);
   const p = data.parsed;
 
+  if (!p.firstName || !p.lastName) {
+    throw new Error("Prénom ou nom non détecté dans le CV. Vérifie / corrige dans le preview avant de valider.");
+  }
+
   // Anti-doublon email
   if (p.email) {
     const existing = await prisma.candidate.findFirst({
@@ -212,9 +226,9 @@ export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSc
       status: "ACTIVE",
       experiences: {
         create: p.experiences
-          .filter((e) => !!e.companyName)
+          .filter((e) => !!e.companyName && e.companyName.trim().length > 0)
           .map((e) => ({
-            companyName: e.companyName,
+            companyName: e.companyName!,
             jobTitle: e.jobTitle || null,
             startDate: parseDate(e.startDate) ?? new Date(),
             endDate: parseDate(e.endDate),
@@ -225,13 +239,14 @@ export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSc
   });
 
   // Formations — table facultative avant migration déployée, donc try/catch
-  if (p.trainings.length > 0) {
+  const validTrainings = p.trainings.filter((t) => t.institution || t.title);
+  if (validTrainings.length > 0) {
     try {
       await (prisma as any).candidateTraining.createMany({
-        data: p.trainings.map((t) => ({
+        data: validTrainings.map((t) => ({
           candidateId: created.id,
-          institution: t.institution,
-          title: t.title,
+          institution: t.institution || "—",
+          title: t.title || "—",
           period: t.period || null,
           description: t.description || null
         }))
@@ -315,7 +330,7 @@ export async function updateCandidateFromCv(input: z.infer<typeof UpdateFromCvSc
   // Ajoute les expériences qui n'existent pas déjà (par companyName + startDate)
   const existingKeys = new Set(existing.experiences.map((e) => `${e.companyName}|${e.startDate.toISOString().slice(0, 7)}`));
   const toAdd = p.experiences
-    .filter((e) => !!e.companyName)
+    .filter((e) => !!e.companyName && e.companyName.trim().length > 0)
     .filter((e) => {
       const d = parseDate(e.startDate);
       const key = `${e.companyName}|${d ? d.toISOString().slice(0, 7) : ""}`;
@@ -325,7 +340,7 @@ export async function updateCandidateFromCv(input: z.infer<typeof UpdateFromCvSc
     await (prisma as any).candidateExperience.createMany({
       data: toAdd.map((e) => ({
         candidateId: data.candidateId,
-        companyName: e.companyName,
+        companyName: e.companyName!,
         jobTitle: e.jobTitle || null,
         startDate: parseDate(e.startDate) ?? new Date(),
         endDate: parseDate(e.endDate),
@@ -335,13 +350,14 @@ export async function updateCandidateFromCv(input: z.infer<typeof UpdateFromCvSc
   }
 
   // Ajoute les formations
-  if (p.trainings.length > 0) {
+  const validTrainings = p.trainings.filter((t) => t.institution || t.title);
+  if (validTrainings.length > 0) {
     try {
       await (prisma as any).candidateTraining.createMany({
-        data: p.trainings.map((t) => ({
+        data: validTrainings.map((t) => ({
           candidateId: data.candidateId,
-          institution: t.institution,
-          title: t.title,
+          institution: t.institution || "—",
+          title: t.title || "—",
           period: t.period || null,
           description: t.description || null
         }))
