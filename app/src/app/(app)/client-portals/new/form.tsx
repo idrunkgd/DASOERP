@@ -28,10 +28,16 @@ export function NewPortalForm({ companies }: { companies: { id: string; name: st
     <form
       className="card p-6 space-y-4 max-w-2xl"
       action={(fd) => start(async () => {
+        if (logoDataUrl) fd.set("logoUrl", logoDataUrl);
         try {
-          if (logoDataUrl) fd.set("logoUrl", logoDataUrl);
           await createClientPortal(fd);
         } catch (e: any) {
+          // Next.js utilise des exceptions internes NEXT_REDIRECT / NEXT_NOT_FOUND
+          // pour navigation après server action — on NE les attrape PAS, sinon
+          // le router reste coincé ("parallelRoutes.get" null).
+          if (e?.digest?.startsWith?.("NEXT_REDIRECT") || e?.digest?.startsWith?.("NEXT_NOT_FOUND")) {
+            throw e;
+          }
           toast.error(e.message || "Erreur");
         }
       })}

@@ -12,6 +12,19 @@ export async function logActivity(params: {
   after?: any;
 }) {
   try {
+    // Court-circuit : les actions des users démo (Jean Démo & co) ne doivent
+    // pas polluer l'audit trail — ce sont des brouillons de démo, pas des
+    // faits métier à historiser.
+    if (params.actorId) {
+      try {
+        const actor = await (prisma as any).user.findUnique({
+          where: { id: params.actorId },
+          select: { isDemo: true }
+        });
+        if (actor?.isDemo) return;
+      } catch { /* silencieux — best effort */ }
+    }
+
     let diff = params.diff;
     if (!diff && (params.before || params.after)) diff = computeDiff(params.before, params.after) as any;
     await prisma.activityLog.create({
