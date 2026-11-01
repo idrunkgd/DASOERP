@@ -10,7 +10,6 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
-import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 
 const Input = z.object({
@@ -101,14 +100,8 @@ export async function createCashflowFromProjection(input: z.infer<typeof Input>)
     })
   ]);
 
-  await logActivity({
-    actorId: session.user.id,
-    action: "CREATE",
-    entityType: "RecurringExpense",
-    entityId: revenue.id,
-    message: `Projection cashflow créée pour ${d.consultantName} (${d.durationYears} ans)`
-  });
-
+  // Pas de logActivity : les projections de simulation polluent l'audit trail
+  // et n'ont aucune valeur juridique/compta — ce sont des brouillons de calcul.
   revalidatePath("/cashflow");
   revalidatePath("/salary-simulator");
   return { ok: true, created: 3, replaced: existing.length };
@@ -133,12 +126,7 @@ export async function deleteProjectionFromCashflow(consultantName: string) {
   await prisma.recurringExpense.deleteMany({
     where: { id: { in: existing.map((e) => e.id) } }
   });
-  await logActivity({
-    actorId: session.user.id,
-    action: "DELETE",
-    entityType: "RecurringExpense",
-    message: `Projection cashflow supprimée pour ${consultantName}`
-  });
+  // Pas de logActivity : voir commentaire dans projectToCashflow().
   revalidatePath("/cashflow");
   return { ok: true, deleted: existing.length };
 }

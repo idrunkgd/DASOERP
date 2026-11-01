@@ -19,10 +19,7 @@ export default async function PublicPortalPage({ params }: { params: { token: st
               id: true, firstName: true, lastName: true,
               headline: true, yearsExperience: true, seniority: true,
               photoUrl: true, city: true,
-              skills: {
-                select: { skill: { select: { name: true } } },
-                take: 20
-              },
+              skills: true,
               experiences: {
                 orderBy: { startDate: "desc" },
                 take: 6,
@@ -54,7 +51,7 @@ export default async function PublicPortalPage({ params }: { params: { token: st
       proposedDailyRate: Number(p.proposedDailyRate),
       candidate: {
         ...p.candidate,
-        skills: p.candidate.skills.map((s: any) => s.skill.name)
+        skills: Array.isArray(p.candidate.skills) ? p.candidate.skills : []
       }
     }))
   }));

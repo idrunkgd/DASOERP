@@ -22,7 +22,7 @@ export default async function ClientPortalDetailPage({ params }: { params: { id:
             select: {
               id: true, firstName: true, lastName: true, headline: true,
               yearsExperience: true, seniority: true, status: true, photoUrl: true,
-              skills: { select: { skill: { select: { name: true } } }, take: 10 }
+              skills: true
             }
           }
         }
