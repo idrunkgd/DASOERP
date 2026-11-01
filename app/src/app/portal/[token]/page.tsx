@@ -24,7 +24,7 @@ export default async function PublicPortalPage({ params }: { params: { token: st
                 orderBy: { startDate: "desc" },
                 take: 6,
                 select: {
-                  id: true, companyName: true, title: true,
+                  id: true, companyName: true, jobTitle: true,
                   startDate: true, endDate: true, description: true
                 }
               }

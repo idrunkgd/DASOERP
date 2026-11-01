@@ -16,7 +16,7 @@ type Candidate = {
   experiences: {
     id: string;
     companyName: string | null;
-    title: string | null;
+    jobTitle: string | null;
     startDate: string | null;
     endDate: string | null;
     description: string | null;
@@ -136,7 +136,7 @@ function ProposalCard({ token, proposal }: { token: string; proposal: Proposal }
                   {c.experiences.map((x) => (
                     <div key={x.id}>
                       <div className="font-medium text-sm">
-                        {x.title || "—"}{x.companyName ? ` · ${x.companyName}` : ""}
+                        {x.jobTitle || "—"}{x.companyName ? ` · ${x.companyName}` : ""}
                       </div>
                       <div className="text-[11px] text-slate-500">
                         {fmt(x.startDate)} → {x.endDate ? fmt(x.endDate) : "actuel"}
