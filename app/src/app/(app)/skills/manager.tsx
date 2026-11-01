@@ -1,13 +1,14 @@
 "use client";
 import { useMemo, useState, useTransition } from "react";
-import { createSkill, updateSkill, deleteSkill, mergeSkills } from "@/server/actions/skills";
+import { createSkill, updateSkill, deleteSkill, mergeSkills, mergeOrphanSkill } from "@/server/actions/skills";
 import { toast } from "sonner";
-import { Trash2, Plus, Edit3, GitMerge, AlertTriangle } from "lucide-react";
+import { Trash2, Plus, Edit3, GitMerge, AlertTriangle, Ghost } from "lucide-react";
 import { CategoryInput } from "@/components/forms/category-input";
 
 type Skill = { id: string; name: string; category: string | null; active: boolean };
+type Orphan = { name: string; users: number; candidates: number; missions: number; total: number };
 
-export function SkillsManager({ skills }: { skills: Skill[] }) {
+export function SkillsManager({ skills, orphans = [] }: { skills: Skill[]; orphans?: Orphan[] }) {
   const [pending, start] = useTransition();
   const [filter, setFilter] = useState("");
 
@@ -41,6 +42,25 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
 
   return (
     <div className="space-y-4">
+      {orphans.length > 0 && (
+        <section className="card p-4 border-rose-300 bg-rose-50/50">
+          <h2 className="font-semibold mb-2 flex items-center gap-2 text-rose-900">
+            <Ghost className="w-4 h-4" />
+            Compétences utilisées dans les CV, absentes du catalogue ({orphans.length})
+          </h2>
+          <p className="text-xs text-rose-800 mb-3">
+            Ces chaînes viennent d'imports CV ou de saisies libres mais n'existent pas comme <em>Skill</em>.
+            Fusionne-les vers une entrée du catalogue : la skill est remplacée directement dans
+            la fiche candidat/consultant (donc dans le CV généré) et dans les demandes de mission.
+          </p>
+          <div className="space-y-1.5 max-h-96 overflow-y-auto">
+            {orphans.map((o) => (
+              <OrphanRow key={o.name} orphan={o} catalog={skills} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {duplicates.length > 0 && (
         <section className="card p-4 border-amber-300 bg-amber-50/50">
           <h2 className="font-semibold mb-2 flex items-center gap-2 text-amber-900">
@@ -100,6 +120,100 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
           </section>
         )
       ))}
+    </div>
+  );
+}
+
+function OrphanRow({ orphan, catalog }: { orphan: Orphan; catalog: Skill[] }) {
+  const [open, setOpen] = useState(false);
+  const [pending, start] = useTransition();
+
+  function run(target: Skill) {
+    if (!window.confirm(`Remplacer « ${orphan.name} » par « ${target.name} » dans tous les CV / fiches candidat / consultants / missions ?`)) return;
+    start(async () => {
+      try {
+        const r = await mergeOrphanSkill(orphan.name, target.id);
+        toast.success(`Fusionné — ${r.candidatesUpdated} candidat, ${r.usersUpdated} user, ${r.missionsUpdated} mission mis à jour`);
+        setOpen(false);
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3 bg-white border border-rose-200 rounded px-3 py-2 text-xs">
+      <div className="flex-1 min-w-0">
+        <span className="font-medium truncate">« {orphan.name} »</span>
+        <span className="text-rose-700/80 ml-2 text-[10px]">
+          {orphan.candidates > 0 && `${orphan.candidates} candidat${orphan.candidates > 1 ? "s" : ""}`}
+          {orphan.users > 0 && `${orphan.candidates > 0 ? " · " : ""}${orphan.users} user${orphan.users > 1 ? "s" : ""}`}
+          {orphan.missions > 0 && `${orphan.users > 0 || orphan.candidates > 0 ? " · " : ""}${orphan.missions} mission${orphan.missions > 1 ? "s" : ""}`}
+        </span>
+      </div>
+      <button onClick={() => setOpen(true)} className="btn-primary btn-sm flex items-center gap-1">
+        <GitMerge className="w-3 h-3" /> Fusionner dans…
+      </button>
+      {open && (
+        <OrphanMergeModal
+          orphan={orphan}
+          catalog={catalog}
+          onClose={() => setOpen(false)}
+          onPick={run}
+          pending={pending}
+        />
+      )}
+    </div>
+  );
+}
+
+function OrphanMergeModal({
+  orphan, catalog, onClose, onPick, pending
+}: {
+  orphan: Orphan; catalog: Skill[];
+  onClose: () => void; onPick: (s: Skill) => void; pending: boolean;
+}) {
+  const [search, setSearch] = useState(orphan.name);
+  const list = catalog
+    .filter((s) => !search || s.name.toLowerCase().includes(search.toLowerCase()))
+    .slice(0, 50);
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40" onClick={onClose}>
+      <div className="card max-w-md w-full p-5 m-4" onClick={(e) => e.stopPropagation()}>
+        <h3 className="font-semibold mb-1 flex items-center gap-2">
+          <GitMerge className="w-4 h-4" /> Remplacer « {orphan.name} » par…
+        </h3>
+        <p className="text-xs text-midnight-500 mb-3">
+          La chaîne « {orphan.name} » sera remplacée par la compétence choisie dans les skills
+          des candidats, consultants et demandes de mission qui l'utilisent.
+        </p>
+        <input
+          autoFocus
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher la compétence cible…"
+          className="input mb-3"
+        />
+        <div className="max-h-72 overflow-y-auto border border-border rounded">
+          {list.length === 0 ? (
+            <p className="text-xs text-midnight-500 p-3 text-center">Aucune compétence du catalogue ne matche</p>
+          ) : list.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => onPick(s)}
+              disabled={pending}
+              className="w-full text-left px-3 py-2 hover:bg-indigoaccent/10 flex items-center justify-between text-sm border-b last:border-b-0"
+            >
+              <span>
+                <span className="font-medium">{s.name}</span>
+                {s.category && <span className="text-midnight-500 text-xs"> · {s.category}</span>}
+              </span>
+              <GitMerge className="w-3 h-3 text-midnight-400" />
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-end mt-3">
+          <button onClick={onClose} className="btn-ghost">Annuler</button>
+        </div>
+      </div>
     </div>
   );
 }

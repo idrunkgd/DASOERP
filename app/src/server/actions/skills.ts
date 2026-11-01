@@ -138,6 +138,153 @@ export async function mergeSkills(sourceId: string, targetId: string): Promise<{
 }
 
 /**
+ * Fusionne une compétence « orpheline » (string présente dans un ou plusieurs
+ * CV / fiches candidat / consultants / missions, MAIS absente du catalogue
+ * `Skill`) vers une entrée du catalogue.
+ *
+ * Même comportement que mergeSkills(), sauf qu'il n'y a pas de ligne Skill
+ * source à supprimer — on ne touche qu'aux String[] des entités.
+ *
+ * Case-insensitive sur le nom orphelin (pour que « siemens tia » matche
+ * aussi « Siemens Tia » si les deux variantes trainent dans la base).
+ */
+export async function mergeOrphanSkill(orphanName: string, targetId: string): Promise<{
+  usersUpdated: number;
+  candidatesUpdated: number;
+  missionsUpdated: number;
+  variantsReplaced: string[];
+}> {
+  const session = await requirePermission("settings.manage");
+  const trimmed = orphanName.trim();
+  if (!trimmed) throw new Error("Nom orphelin vide.");
+  const target = await prisma.skill.findUniqueOrThrow({ where: { id: targetId } });
+  const targetName = target.name;
+  if (trimmed.toLowerCase() === targetName.toLowerCase()) {
+    throw new Error("Le nom orphelin est déjà la cible — rien à fusionner.");
+  }
+
+  // On matche le nom orphelin en case-insensitive pour attraper toutes les
+  // variantes de casse qui n'auraient PAS d'entrée dans Skill.
+  const orphanLower = trimmed.toLowerCase();
+  const variantsReplaced = new Set<string>();
+
+  const merge = (arr: string[]): string[] => {
+    const kept: string[] = [];
+    let touched = false;
+    for (const s of arr) {
+      if (s.toLowerCase() === orphanLower) {
+        variantsReplaced.add(s);
+        touched = true;
+        continue;
+      }
+      kept.push(s);
+    }
+    if (touched && !kept.includes(targetName)) kept.push(targetName);
+    return kept;
+  };
+
+  const result = await prisma.$transaction(async (tx) => {
+    let usersUpdated = 0;
+    const users = await tx.user.findMany({ select: { id: true, skills: true } });
+    for (const u of users) {
+      if (!u.skills.some((s) => s.toLowerCase() === orphanLower)) continue;
+      await tx.user.update({ where: { id: u.id }, data: { skills: merge(u.skills) } });
+      usersUpdated++;
+    }
+
+    let candidatesUpdated = 0;
+    const candidates = await tx.candidate.findMany({ select: { id: true, skills: true } });
+    for (const c of candidates) {
+      if (!c.skills.some((s) => s.toLowerCase() === orphanLower)) continue;
+      await tx.candidate.update({ where: { id: c.id }, data: { skills: merge(c.skills) } });
+      candidatesUpdated++;
+    }
+
+    let missionsUpdated = 0;
+    const missions = await tx.missionRequest.findMany({ select: { id: true, requiredSkills: true } });
+    for (const m of missions) {
+      if (!m.requiredSkills.some((s) => s.toLowerCase() === orphanLower)) continue;
+      await tx.missionRequest.update({
+        where: { id: m.id },
+        data: { requiredSkills: merge(m.requiredSkills) }
+      });
+      missionsUpdated++;
+    }
+
+    return { usersUpdated, candidatesUpdated, missionsUpdated };
+  });
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Skill",
+    entityId: targetId,
+    message: `Fusion orpheline : « ${trimmed} » (${Array.from(variantsReplaced).join(", ")}) → « ${targetName} » (${result.usersUpdated} user, ${result.candidatesUpdated} candidat, ${result.missionsUpdated} mission mis à jour)`,
+    after: target
+  });
+
+  revalidatePath("/skills");
+  revalidatePath("/candidates");
+  revalidatePath("/consultants");
+  revalidatePath("/candidates/benchmark");
+  return { ...result, variantsReplaced: Array.from(variantsReplaced) };
+}
+
+/**
+ * Collecte toutes les skills utilisées dans les entités (User/Candidate/
+ * MissionRequest) qui n'existent PAS dans le catalogue Skill.
+ *
+ * Retourne un tableau trié avec, pour chaque orphelin, le nombre d'entités
+ * qui l'utilisent — pour aider à prioriser les fusions.
+ */
+export async function listOrphanSkills(): Promise<Array<{
+  name: string;
+  users: number;
+  candidates: number;
+  missions: number;
+  total: number;
+}>> {
+  await requirePermission("settings.manage");
+  const [catalog, users, candidates, missions] = await Promise.all([
+    prisma.skill.findMany({ select: { name: true } }),
+    prisma.user.findMany({ select: { skills: true } }),
+    prisma.candidate.findMany({ select: { skills: true } }),
+    prisma.missionRequest.findMany({ select: { requiredSkills: true } })
+  ]);
+  const catalogSet = new Set(catalog.map((s) => s.name.trim().toLowerCase()));
+  const counts = new Map<string, { display: string; users: number; candidates: number; missions: number }>();
+
+  const bump = (arr: string[], kind: "users" | "candidates" | "missions") => {
+    const seenInEntity = new Set<string>();
+    for (const raw of arr) {
+      const name = raw.trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (catalogSet.has(key)) continue;
+      if (seenInEntity.has(key)) continue;
+      seenInEntity.add(key);
+      const existing = counts.get(key);
+      if (existing) {
+        existing[kind]++;
+      } else {
+        counts.set(key, { display: name, users: 0, candidates: 0, missions: 0, [kind]: 1 } as any);
+      }
+    }
+  };
+
+  for (const u of users) bump(u.skills, "users");
+  for (const c of candidates) bump(c.skills, "candidates");
+  for (const m of missions) bump(m.requiredSkills, "missions");
+
+  return Array.from(counts.values())
+    .map((v) => ({
+      name: v.display, users: v.users, candidates: v.candidates, missions: v.missions,
+      total: v.users + v.candidates + v.missions
+    }))
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+}
+
+/**
  * Trouve un skill par nom (case-insensitive), ou le crée à la volée s'il
  * n'existe pas — avec la casse fournie par l'utilisateur.
  *
