@@ -8,6 +8,15 @@ export const dynamic = "force-dynamic";
 export default async function CandidatesBenchmarkPage() {
   await requirePermission("consulting.read");
 
+  // Catalogue officiel — seule source utilisée pour l'autocomplete du filtre.
+  // Évite que des strings libres venus d'anciens imports CV polluent la liste.
+  const catalog = await prisma.skill.findMany({
+    where: { active: true },
+    orderBy: [{ category: "asc" }, { name: "asc" }],
+    select: { name: true }
+  });
+  const catalogSkills = catalog.map((s) => s.name);
+
   const candidates = await prisma.candidate.findMany({
     where: {
       status: { in: ["ACTIVE", "UNAVAILABLE", "ENGAGED"] },
@@ -53,7 +62,7 @@ export default async function CandidatesBenchmarkPage() {
         subtitle={`${points.length} candidat${points.length > 1 ? "s" : ""} avec simulation de package renseignée · médiane utilisée pour éviter les biais d'extrêmes`}
         breadcrumb={[{ label: "Candidats", href: "/candidates" }, { label: "Benchmark" }]}
       />
-      <BenchmarkView points={points} />
+      <BenchmarkView points={points} catalogSkills={catalogSkills} />
     </div>
   );
 }

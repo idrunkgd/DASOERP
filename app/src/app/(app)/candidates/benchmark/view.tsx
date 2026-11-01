@@ -23,18 +23,24 @@ type Point = {
   skills: string[];
 };
 
-export function BenchmarkView({ points }: { points: Point[] }) {
+export function BenchmarkView({ points, catalogSkills }: { points: Point[]; catalogSkills?: string[] }) {
   const [skillFilters, setSkillFilters] = useState<string[]>([]);
   const [skillInput, setSkillInput] = useState("");
   const [filterSeniority, setFilterSeniority] = useState<string[]>([]);
   const [hover, setHover] = useState<Point | null>(null);
 
-  // Compétences uniques pour l'autocomplete
+  // Compétences pour l'autocomplete : UNIQUEMENT le catalogue officiel
+  // (/skills). On ignore les strings libres venues d'anciens imports CV
+  // pour éviter de polluer la liste. Si pas de catalogue (prop absente),
+  // fallback sur l'union des skills des candidats.
   const allSkills = useMemo(() => {
+    if (catalogSkills && catalogSkills.length > 0) {
+      return [...catalogSkills].sort((a, b) => a.localeCompare(b));
+    }
     const set = new Set<string>();
     points.forEach((p) => p.skills.forEach((s) => set.add(s)));
     return Array.from(set).sort();
-  }, [points]);
+  }, [points, catalogSkills]);
 
   function addSkillFilter(s: string) {
     const trimmed = s.trim();
