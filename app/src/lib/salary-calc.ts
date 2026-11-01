@@ -79,13 +79,15 @@ export const DEFAULT_SALARY_INPUTS: SalaryInputs = {
   employerChargesPct: 25,
   workingDaysPerWeek: 5,
   workingDaysPerYear: FULLTIME_WORKING_DAYS_PER_YEAR,
-  carMonthlyTco: 0,
+  // Package type Dasolabs par défaut — valeurs calibrées sur un consultant
+  // standard. Modifiables par l'utilisateur dans le simulateur.
+  carMonthlyTco: 1200,
   mealVoucherEmployerPerDay: 8.91,
   ecoVouchersAnnual: 250,
-  groupInsurancePct: 0,
-  hospitalInsuranceMonthly: 0,
-  phoneInternetMonthly: 0,
-  netExpensesMonthly: 0,
+  groupInsurancePct: 2,
+  hospitalInsuranceMonthly: 63,
+  phoneInternetMonthly: 60,
+  netExpensesMonthly: 200,
   targetMarginPct: 35,
   soldDailyRate: 0
 };
