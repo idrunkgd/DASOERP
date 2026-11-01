@@ -225,7 +225,7 @@ export function extractJson(text: string): string {
   const startsClean = (s.startsWith("{") || s.startsWith("[")) && (s.endsWith("}") || s.endsWith("]"));
   if (startsClean) return s;
 
-  // Sinon on cherche le premier { ou [ et le dernier } ou ] correspondants
+  // Sinon on cherche le premier { ou [ pour démarrer
   const firstBrace = s.indexOf("{");
   const firstBracket = s.indexOf("[");
   let start = -1;
@@ -234,10 +234,59 @@ export function extractJson(text: string): string {
   else start = Math.min(firstBrace, firstBracket);
   if (start === -1) return s; // pas de JSON apparent, on laisse échouer en aval
 
-  const lastBrace = s.lastIndexOf("}");
-  const lastBracket = s.lastIndexOf("]");
-  const end = Math.max(lastBrace, lastBracket);
-  if (end <= start) return s;
+  let body = s.slice(start).trim();
 
-  return s.slice(start, end + 1).trim();
+  // Nettoie tout suffixe markdown potentiellement collé après coup
+  body = body.replace(/```\s*$/, "").trim();
+
+  // Si le JSON finit correctement, on retourne tel quel
+  if (body.endsWith("}") || body.endsWith("]")) return body;
+
+  // Sinon : réponse LLM TRONQUÉE (dépassé maxTokens). On tente de la réparer
+  // en coupant à la dernière virgule / champ complet et en fermant les
+  // accolades/crochets manquants. Mieux vaut un JSON partiel exploitable
+  // qu'une erreur de parsing complète.
+  return attemptJsonRepair(body);
+}
+
+/**
+ * Répare un JSON tronqué :
+ *  1. Coupe la chaîne au dernier caractère "sûr" (virgule, close bracket)
+ *  2. Compte accolades / crochets ouverts restants
+ *  3. Ferme les structures ouvertes avec les bons caractères
+ */
+function attemptJsonRepair(body: string): string {
+  // Enlève tout suffixe incomplet (ex: `"description": "quelque chose à moi` → coupe la string ouverte)
+  let s = body;
+  // Supprime le dernier élément incomplet si la ligne finit sans guillemet fermé
+  // On cherche la dernière occurrence sûre : "," ou "}" ou "]"
+  const lastSafe = Math.max(
+    s.lastIndexOf('",'),
+    s.lastIndexOf('}'),
+    s.lastIndexOf(']')
+  );
+  if (lastSafe > 0) {
+    s = s.slice(0, lastSafe + 1);
+    // Si on a terminé par une virgule, c'est OK, on la supprimera après
+    if (s.endsWith(",")) s = s.slice(0, -1);
+  }
+
+  // Compte les ouvertures/fermetures NON escapées et hors strings
+  let depthObj = 0, depthArr = 0, inStr = false, escape = false;
+  for (const ch of s) {
+    if (escape) { escape = false; continue; }
+    if (ch === "\\") { escape = true; continue; }
+    if (ch === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (ch === "{") depthObj++;
+    else if (ch === "}") depthObj--;
+    else if (ch === "[") depthArr++;
+    else if (ch === "]") depthArr--;
+  }
+
+  // Ferme les structures ouvertes restantes (dans l'ordre inverse d'ouverture)
+  while (depthArr-- > 0) s += "]";
+  while (depthObj-- > 0) s += "}";
+
+  return s;
 }

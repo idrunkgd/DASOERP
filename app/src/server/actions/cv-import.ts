@@ -129,7 +129,7 @@ export async function parseCvFile(dataUri: string) {
     prompt: PARSE_PROMPT,
     dataUri,
     task: "cv",
-    maxTokens: 4000
+    maxTokens: 8000
   });
   if (!llmResp.ok) {
     return { ok: false as const, error: `IA indisponible : ${llmResp.error}` };
