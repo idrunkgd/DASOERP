@@ -1,8 +1,8 @@
 "use client";
 import { useMemo, useState, useTransition } from "react";
-import { createSkill, updateSkill, deleteSkill } from "@/server/actions/skills";
+import { createSkill, updateSkill, deleteSkill, mergeSkills } from "@/server/actions/skills";
 import { toast } from "sonner";
-import { Trash2, Plus, Edit3 } from "lucide-react";
+import { Trash2, Plus, Edit3, GitMerge, AlertTriangle } from "lucide-react";
 import { CategoryInput } from "@/components/forms/category-input";
 
 type Skill = { id: string; name: string; category: string | null; active: boolean };
@@ -27,8 +27,39 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
     return acc;
   }, {});
 
+  // Groupes de doublons : skills dont le nom lowercase est identique à un autre.
+  // Ex: "TIA Portal" et "TIA PORTAL" → 1 groupe de 2 entrées.
+  const duplicates = useMemo(() => {
+    const map = new Map<string, Skill[]>();
+    for (const s of skills) {
+      const key = s.name.trim().toLowerCase();
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(s);
+    }
+    return Array.from(map.values()).filter((grp) => grp.length > 1);
+  }, [skills]);
+
   return (
     <div className="space-y-4">
+      {duplicates.length > 0 && (
+        <section className="card p-4 border-amber-300 bg-amber-50/50">
+          <h2 className="font-semibold mb-2 flex items-center gap-2 text-amber-900">
+            <AlertTriangle className="w-4 h-4" />
+            Doublons détectés ({duplicates.length})
+          </h2>
+          <p className="text-xs text-amber-800 mb-3">
+            Ces compétences ont le même nom à la casse près.
+            Fusionne-les pour n'en garder qu'une — toutes les affectations candidat/consultant/mission
+            sont automatiquement mises à jour, sans perte.
+          </p>
+          <div className="space-y-2">
+            {duplicates.map((grp) => (
+              <DuplicateGroup key={grp[0].name.toLowerCase()} group={grp} />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="card p-4">
         <h2 className="font-semibold mb-3">Ajouter une compétence</h2>
         <form
@@ -64,7 +95,7 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
           <section key={cat} className="card p-4">
             <h3 className="font-semibold text-sm uppercase tracking-wide text-midnight-500 mb-2">{cat} ({list.length})</h3>
             <div className="flex flex-wrap gap-2">
-              {list.map(s => <SkillRow key={s.id} skill={s} categories={categories} />)}
+              {list.map(s => <SkillRow key={s.id} skill={s} categories={categories} allSkills={skills} />)}
             </div>
           </section>
         )
@@ -73,9 +104,51 @@ export function SkillsManager({ skills }: { skills: Skill[] }) {
   );
 }
 
-function SkillRow({ skill, categories }: { skill: Skill; categories: string[] }) {
+function DuplicateGroup({ group }: { group: Skill[] }) {
+  const [pending, start] = useTransition();
+  const [targetId, setTargetId] = useState(group[0].id);
+
+  function doMerge(sourceId: string) {
+    const sourceName = group.find((s) => s.id === sourceId)?.name;
+    const targetName = group.find((s) => s.id === targetId)?.name;
+    if (!window.confirm(`Fusionner « ${sourceName} » dans « ${targetName} » ?\nToutes les affectations seront mises à jour.`)) return;
+    start(async () => {
+      try {
+        const res = await mergeSkills(sourceId, targetId);
+        toast.success(`Fusionné — ${res.usersUpdated} user, ${res.candidatesUpdated} candidat, ${res.missionsUpdated} mission mis à jour`);
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap bg-white border border-amber-200 rounded px-3 py-2 text-xs">
+      <span className="font-semibold">Garder :</span>
+      <select
+        value={targetId}
+        onChange={(e) => setTargetId(e.target.value)}
+        className="border border-border rounded px-2 py-1 text-xs"
+      >
+        {group.map((s) => <option key={s.id} value={s.id}>« {s.name} » {s.category ? `(${s.category})` : ""}</option>)}
+      </select>
+      <span className="text-midnight-500">et fusionner :</span>
+      {group.filter((s) => s.id !== targetId).map((s) => (
+        <button
+          key={s.id}
+          onClick={() => doMerge(s.id)}
+          disabled={pending}
+          className="inline-flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-full px-2 py-1"
+        >
+          <GitMerge className="w-3 h-3" /> « {s.name} »
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SkillRow({ skill, categories, allSkills }: { skill: Skill; categories: string[]; allSkills: Skill[] }) {
   const [pending, start] = useTransition();
   const [edit, setEdit] = useState(false);
+  const [mergeOpen, setMergeOpen] = useState(false);
   if (edit) {
     return (
       <form
@@ -104,12 +177,81 @@ function SkillRow({ skill, categories }: { skill: Skill; categories: string[] })
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 bg-midnight-100 text-midnight-800 rounded-full px-2 py-1 text-xs">
-      <span className="font-medium">{skill.name}</span>
-      <button onClick={() => setEdit(true)} className="text-midnight-500 hover:text-midnight-900 ml-1"><Edit3 className="w-3 h-3" /></button>
-      <button
-        onClick={() => { if (window.confirm(`Supprimer « ${skill.name} » ?`)) start(async () => { await deleteSkill(skill.id); }); }}
-        className="text-midnight-500 hover:text-danger"><Trash2 className="w-3 h-3" /></button>
-    </span>
+    <>
+      <span className="inline-flex items-center gap-1 bg-midnight-100 text-midnight-800 rounded-full px-2 py-1 text-xs">
+        <span className="font-medium">{skill.name}</span>
+        <button onClick={() => setEdit(true)} className="text-midnight-500 hover:text-midnight-900 ml-1" title="Éditer"><Edit3 className="w-3 h-3" /></button>
+        <button onClick={() => setMergeOpen(true)} className="text-midnight-500 hover:text-indigoaccent" title="Fusionner dans une autre compétence"><GitMerge className="w-3 h-3" /></button>
+        <button
+          onClick={() => { if (window.confirm(`Supprimer « ${skill.name} » ?`)) start(async () => { await deleteSkill(skill.id); }); }}
+          className="text-midnight-500 hover:text-danger" title="Supprimer"><Trash2 className="w-3 h-3" /></button>
+      </span>
+      {mergeOpen && (
+        <MergeModal
+          source={skill}
+          others={allSkills.filter((s) => s.id !== skill.id)}
+          onClose={() => setMergeOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function MergeModal({ source, others, onClose }: { source: Skill; others: Skill[]; onClose: () => void }) {
+  const [pending, start] = useTransition();
+  const [search, setSearch] = useState("");
+  const list = others
+    .filter((s) => !search || s.name.toLowerCase().includes(search.toLowerCase()))
+    .slice(0, 30);
+
+  function run(targetId: string, targetName: string) {
+    if (!window.confirm(`Remplacer « ${source.name} » par « ${targetName} » partout ?\nToutes les affectations candidat/consultant/mission seront mises à jour, et « ${source.name} » sera supprimée du catalogue.`)) return;
+    start(async () => {
+      try {
+        const res = await mergeSkills(source.id, targetId);
+        toast.success(`Fusionné — ${res.usersUpdated} user, ${res.candidatesUpdated} candidat, ${res.missionsUpdated} mission mis à jour`);
+        onClose();
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40" onClick={onClose}>
+      <div className="card max-w-md w-full p-5 m-4" onClick={(e) => e.stopPropagation()}>
+        <h3 className="font-semibold mb-1 flex items-center gap-2"><GitMerge className="w-4 h-4" /> Fusionner « {source.name} » dans…</h3>
+        <p className="text-xs text-midnight-500 mb-3">
+          Choisis la compétence qui doit remplacer « {source.name} » partout.
+          Les affectations existantes sont mises à jour, aucun candidat ni consultant ne perd son skill.
+        </p>
+        <input
+          autoFocus
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher la compétence cible…"
+          className="input mb-3"
+        />
+        <div className="max-h-72 overflow-y-auto border border-border rounded">
+          {list.length === 0 ? (
+            <p className="text-xs text-midnight-500 p-3 text-center">Aucune compétence</p>
+          ) : list.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => run(s.id, s.name)}
+              disabled={pending}
+              className="w-full text-left px-3 py-2 hover:bg-indigoaccent/10 flex items-center justify-between text-sm border-b last:border-b-0"
+            >
+              <span>
+                <span className="font-medium">{s.name}</span>
+                {s.category && <span className="text-midnight-500 text-xs"> · {s.category}</span>}
+              </span>
+              <GitMerge className="w-3 h-3 text-midnight-400" />
+            </button>
+          ))}
+        </div>
+        <div className="flex justify-end mt-3">
+          <button onClick={onClose} className="btn-ghost">Annuler</button>
+        </div>
+      </div>
+    </div>
   );
 }

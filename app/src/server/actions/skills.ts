@@ -42,6 +42,102 @@ export async function deleteSkill(id: string) {
 }
 
 /**
+ * Fusionne la compétence `sourceId` DANS `targetId` :
+ *  - Pour chaque User / Candidate / MissionRequest contenant le nom source,
+ *    on remplace par le nom cible (en dédoublonnant).
+ *  - On supprime ensuite la Skill source du catalogue.
+ *
+ * Utile pour nettoyer les doublons de casse (ex: « TIA Portal » vs « TIA PORTAL »)
+ * sans perdre d'affectation.
+ *
+ * Idempotent : si la cible est déjà présente sur une entité, on supprime juste
+ * le doublon source.
+ */
+export async function mergeSkills(sourceId: string, targetId: string): Promise<{
+  usersUpdated: number;
+  candidatesUpdated: number;
+  missionsUpdated: number;
+}> {
+  const session = await requirePermission("settings.manage");
+  if (sourceId === targetId) throw new Error("Source et cible identiques — rien à fusionner.");
+  const [source, target] = await Promise.all([
+    prisma.skill.findUniqueOrThrow({ where: { id: sourceId } }),
+    prisma.skill.findUniqueOrThrow({ where: { id: targetId } })
+  ]);
+
+  const sourceName = source.name;
+  const targetName = target.name;
+
+  // Helper pour fusionner un String[] : enlève le nom source et ajoute le
+  // nom cible s'il n'y est pas déjà. Retourne le nouveau tableau.
+  const merge = (arr: string[]): string[] => {
+    const filtered = arr.filter((s) => s !== sourceName);
+    if (!filtered.includes(targetName)) filtered.push(targetName);
+    return filtered;
+  };
+
+  // Transaction pour tout faire d'un coup — si quelque chose casse, on
+  // ne laisse pas la base avec des user ayant perdu la skill source sans
+  // avoir reçu la target.
+  const result = await prisma.$transaction(async (tx) => {
+    // Users
+    const users = await tx.user.findMany({
+      where: { skills: { has: sourceName } },
+      select: { id: true, skills: true }
+    });
+    for (const u of users) {
+      await tx.user.update({ where: { id: u.id }, data: { skills: merge(u.skills) } });
+    }
+
+    // Candidates
+    const candidates = await tx.candidate.findMany({
+      where: { skills: { has: sourceName } },
+      select: { id: true, skills: true }
+    });
+    for (const c of candidates) {
+      await tx.candidate.update({ where: { id: c.id }, data: { skills: merge(c.skills) } });
+    }
+
+    // MissionRequest (requiredSkills)
+    const missions = await tx.missionRequest.findMany({
+      where: { requiredSkills: { has: sourceName } },
+      select: { id: true, requiredSkills: true }
+    });
+    for (const m of missions) {
+      await tx.missionRequest.update({
+        where: { id: m.id },
+        data: { requiredSkills: merge(m.requiredSkills) }
+      });
+    }
+
+    // Supprime la skill source du catalogue
+    await tx.skill.delete({ where: { id: sourceId } });
+
+    return {
+      usersUpdated: users.length,
+      candidatesUpdated: candidates.length,
+      missionsUpdated: missions.length
+    };
+  });
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Skill",
+    entityId: targetId,
+    message: `Fusion : « ${sourceName} » → « ${targetName} » (${result.usersUpdated} user${result.usersUpdated > 1 ? "s" : ""}, ${result.candidatesUpdated} candidat${result.candidatesUpdated > 1 ? "s" : ""}, ${result.missionsUpdated} mission${result.missionsUpdated > 1 ? "s" : ""} mis à jour)`,
+    before: source,
+    after: target
+  });
+
+  revalidatePath("/skills");
+  revalidatePath("/candidates");
+  revalidatePath("/consultants");
+  revalidatePath("/candidates/benchmark");
+  return result;
+}
+
+/**
  * Trouve un skill par nom (case-insensitive), ou le crée à la volée s'il
  * n'existe pas — avec la casse fournie par l'utilisateur.
  *
