@@ -151,6 +151,35 @@ export async function restoreProposal(id: string) {
   revalidatePath(`/candidates/${before.candidateId}`);
 }
 
+/**
+ * Remet une proposition à l'état « En attente » (PROPOSED) même après
+ * ACCEPTED / REJECTED / INTERVIEW_REQUESTED. Pratique si le client s'est
+ * trompé ou si on veut relancer la décision après discussion.
+ *
+ * Efface aussi le message client et la date d'action pour que le portail
+ * repropose les 3 boutons au client.
+ */
+export async function resetProposalStatus(id: string) {
+  const session = await requirePermission("consulting.write");
+  const before = await (prisma as any).candidateProposal.findUniqueOrThrow({ where: { id } });
+  await (prisma as any).candidateProposal.update({
+    where: { id },
+    data: {
+      status: "PROPOSED",
+      clientMessage: null,
+      clientActedAt: null,
+      isVisible: true
+    }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "CandidateProposal",
+    entityId: id,
+    message: `Proposition remise en « En attente » (ancien statut : ${before.status})`
+  });
+  revalidatePath(`/client-portals/${before.portalId}`);
+  revalidatePath(`/candidates/${before.candidateId}`);
+}
+
 export async function updateProposalRate(id: string, newRate: number, internalNote?: string) {
   const session = await requirePermission("consulting.write");
   if (newRate <= 0) throw new Error("Tarif invalide");

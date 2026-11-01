@@ -8,9 +8,10 @@ import {
   deleteClientPortal,
   retractProposal,
   restoreProposal,
-  updateProposalRate
+  updateProposalRate,
+  resetProposalStatus
 } from "@/server/actions/client-portals";
-import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil } from "lucide-react";
+import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw } from "lucide-react";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   PROPOSED:            { label: "En attente",      cls: "badge-muted" },
@@ -132,6 +133,19 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
                   </div>
                   <div className="flex flex-col gap-1">
                     <RateEditor id={p.id} current={Number(p.proposedDailyRate)} internalNote={p.internalNote} />
+                    {p.status !== "PROPOSED" && (
+                      <button
+                        onClick={() => {
+                          if (!window.confirm(`Repasser « ${p.candidate.firstName} ${p.candidate.lastName} » en « En attente » ? Le client pourra à nouveau répondre.`)) return;
+                          start(async () => {
+                            try { await resetProposalStatus(p.id); toast.success("Statut réinitialisé"); }
+                            catch (e: any) { toast.error(e.message); }
+                          });
+                        }}
+                        disabled={pending}
+                        className="btn-ghost btn-sm flex items-center gap-1 text-indigo-700"
+                      ><RotateCcw className="w-3 h-3" /> En attente</button>
+                    )}
                     {p.isVisible ? (
                       <button
                         onClick={() => start(async () => { try { await retractProposal(p.id); toast.success("Masqué"); } catch (e: any) { toast.error(e.message); } })}
