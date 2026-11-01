@@ -1,5 +1,6 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { createCandidatePortalAction } from "@/server/actions/recruitment";
 import { toast } from "sonner";
 import { KeyRound } from "lucide-react";
@@ -13,14 +14,12 @@ export function CandidatePortalButton({ candidateId, suggestedEmail }: { candida
   const [pending, start] = useTransition();
   const [pwd, setPwd] = useState(suggestPassword());
 
-  return (
-    <>
-      <button onClick={() => setOpen(true)} className="btn-secondary btn-sm flex items-center gap-1">
-        <KeyRound className="w-3 h-3" /> Créer compte portail
-      </button>
-      {open && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40" onClick={() => setOpen(false)}>
-          <div className="card max-w-md w-full p-6 m-4" onClick={(e) => e.stopPropagation()}>
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const modal = open && mounted ? createPortal(
+    <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/40" onClick={() => setOpen(false)}>
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 m-4" onClick={(e) => e.stopPropagation()}>
             <h2 className="font-semibold mb-1">Compte portail candidat</h2>
             <p className="text-xs text-midnight-500 mb-4">
               Crée un compte de connexion pour ce candidat. Il pourra se connecter avec ces identifiants
@@ -52,9 +51,17 @@ export function CandidatePortalButton({ candidateId, suggestedEmail }: { candida
                 <button disabled={pending} className="btn-primary">{pending ? "..." : "Créer le compte"}</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="btn-secondary btn-sm flex items-center gap-1">
+        <KeyRound className="w-3 h-3" /> Créer compte portail
+      </button>
+      {modal}
     </>
   );
 }

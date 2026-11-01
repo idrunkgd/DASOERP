@@ -1,5 +1,7 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
 import { createProposal } from "@/server/actions/client-portals";
 import { toast } from "sonner";
 import { Share2 } from "lucide-react";
@@ -46,25 +48,26 @@ export function ProposeToPortalButton({
     });
   }
 
-  if (portals.length === 0) {
-    return (
-      <button
-        onClick={() => toast("Crée d'abord un portail client dans Portails clients", { icon: "ℹ️" })}
-        className="btn-secondary btn-sm flex items-center gap-1"
-      >
-        <Share2 className="w-3 h-3" /> Proposer à…
-      </button>
-    );
-  }
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  return (
-    <>
-      <button onClick={() => setOpen(true)} className="btn-secondary btn-sm flex items-center gap-1">
-        <Share2 className="w-3 h-3" /> Proposer à…
-      </button>
-      {open && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40" onClick={() => setOpen(false)}>
-          <div className="card max-w-md w-full p-6 m-4" onClick={(e) => e.stopPropagation()}>
+  const modal = open && mounted ? createPortal(
+    <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/40" onClick={() => setOpen(false)}>
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 m-4" onClick={(e) => e.stopPropagation()}>
+        {portals.length === 0 ? (
+          <>
+            <h2 className="font-semibold mb-2">Aucun portail client actif</h2>
+            <p className="text-sm text-midnight-500 mb-4">
+              Tu dois d'abord créer un portail (un lien unique par client/équipe) avant de pouvoir y proposer un candidat.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setOpen(false)} className="btn-ghost">Fermer</button>
+              <Link href="/client-portals/new" className="btn-primary">Créer un portail</Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <h2 className="font-semibold mb-1">Proposer {candidateName}</h2>
             <h2 className="font-semibold mb-1">Proposer {candidateName}</h2>
             <p className="text-xs text-midnight-500 mb-4">
               Le candidat apparaîtra immédiatement dans le portail choisi, avec le TJM que tu indiques ici.
@@ -101,9 +104,19 @@ export function ProposeToPortalButton({
                 {pending ? "..." : "Proposer"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
+  return (
+    <>
+      <button onClick={() => setOpen(true)} className="btn-secondary btn-sm flex items-center gap-1">
+        <Share2 className="w-3 h-3" /> Proposer à…
+      </button>
+      {modal}
     </>
   );
 }
