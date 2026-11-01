@@ -16,13 +16,17 @@ type Point = {
   lastName: string;
   years: number;
   rate: number;
+  tjm?: number;
+  tjmLabel?: string;
+  costPerDay?: number;
   seniority: string | null;
   skills: string[];
 };
 
 export function BenchmarkView({ points }: { points: Point[] }) {
-  const [filterSkill, setFilterSkill] = useState("");
-  const [filterSeniority, setFilterSeniority] = useState<string>("");
+  const [skillFilters, setSkillFilters] = useState<string[]>([]);
+  const [skillInput, setSkillInput] = useState("");
+  const [filterSeniority, setFilterSeniority] = useState<string[]>([]);
   const [hover, setHover] = useState<Point | null>(null);
 
   // Compétences uniques pour l'autocomplete
@@ -32,16 +36,36 @@ export function BenchmarkView({ points }: { points: Point[] }) {
     return Array.from(set).sort();
   }, [points]);
 
+  function addSkillFilter(s: string) {
+    const trimmed = s.trim();
+    if (!trimmed) return;
+    if (!skillFilters.includes(trimmed)) setSkillFilters([...skillFilters, trimmed]);
+    setSkillInput("");
+  }
+  function removeSkillFilter(s: string) {
+    setSkillFilters(skillFilters.filter((x) => x !== s));
+  }
+  function toggleSeniority(key: string) {
+    setFilterSeniority(filterSeniority.includes(key)
+      ? filterSeniority.filter((x) => x !== key)
+      : [...filterSeniority, key]);
+  }
+
   const filtered = useMemo(() => {
     return points.filter((p) => {
-      if (filterSeniority && p.seniority !== filterSeniority) return false;
-      if (filterSkill) {
-        const s = filterSkill.toLowerCase();
-        if (!p.skills.some((x) => x.toLowerCase().includes(s))) return false;
+      // Séniorités : au moins une sélectionnée doit matcher (OR). Vide = toutes.
+      if (filterSeniority.length > 0 && (!p.seniority || !filterSeniority.includes(p.seniority))) return false;
+      // Compétences : TOUTES doivent matcher (AND strict pour affiner la recherche)
+      if (skillFilters.length > 0) {
+        const skillsLower = p.skills.map((s) => s.toLowerCase());
+        for (const f of skillFilters) {
+          const needle = f.toLowerCase();
+          if (!skillsLower.some((s) => s.includes(needle))) return false;
+        }
       }
       return true;
     });
-  }, [points, filterSkill, filterSeniority]);
+  }, [points, skillFilters, filterSeniority]);
 
   const buckets = [
     { label: "0-2 ans",   min: 0,  max: 2  },
@@ -64,36 +88,70 @@ export function BenchmarkView({ points }: { points: Point[] }) {
   return (
     <div className="space-y-5">
       {/* Filtres */}
-      <div className="card p-4 flex items-center gap-4 flex-wrap">
+      <div className="card p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-midnight-500" />
           <span className="text-sm font-semibold">Filtres</span>
+          <div className="ml-auto text-sm text-midnight-600">
+            <strong className="text-indigoaccent">{filtered.length}</strong> / {points.length} candidat{points.length > 1 ? "s" : ""}
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 text-midnight-400" />
-          <input
-            value={filterSkill}
-            onChange={(e) => setFilterSkill(e.target.value)}
-            placeholder="Compétence (ex: react, aveva, siemens…)"
-            className="input text-sm max-w-xs"
-            list="skills-list"
-          />
-          <datalist id="skills-list">
-            {allSkills.map((s) => <option key={s} value={s} />)}
-          </datalist>
-          {filterSkill && (
-            <button onClick={() => setFilterSkill("")} className="text-midnight-400 hover:text-red-600"><X className="w-3 h-3" /></button>
-          )}
+
+        {/* Compétences — multi-tag */}
+        <div className="flex items-start gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-midnight-400" />
+            <span className="text-xs uppercase tracking-wide text-midnight-500 font-semibold">Compétences (ET)</span>
+          </div>
+          <div className="flex items-center gap-2 flex-1 min-w-[300px] flex-wrap">
+            {skillFilters.map((s) => (
+              <span key={s} className="inline-flex items-center gap-1 bg-indigoaccent/10 text-indigoaccent text-xs px-2 py-1 rounded-full border border-indigoaccent/30">
+                {s}
+                <button onClick={() => removeSkillFilter(s)} className="hover:text-red-600"><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+            <input
+              value={skillInput}
+              onChange={(e) => setSkillInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addSkillFilter(skillInput); }
+                if (e.key === "Backspace" && skillInput === "" && skillFilters.length > 0) {
+                  setSkillFilters(skillFilters.slice(0, -1));
+                }
+              }}
+              placeholder={skillFilters.length === 0 ? "Compétences (Entrée pour ajouter)…" : "+ ajouter…"}
+              className="input text-sm flex-1 min-w-[160px]"
+              list="skills-list"
+            />
+            <datalist id="skills-list">
+              {allSkills.map((s) => <option key={s} value={s} />)}
+            </datalist>
+            {skillFilters.length > 0 && (
+              <button onClick={() => setSkillFilters([])} className="btn-ghost btn-sm">Reset</button>
+            )}
+          </div>
         </div>
-        <select value={filterSeniority} onChange={(e) => setFilterSeniority(e.target.value)} className="input text-sm max-w-[140px]">
-          <option value="">Toutes séniorités</option>
-          <option value="JUNIOR">Junior</option>
-          <option value="MEDIOR">Medior</option>
-          <option value="SENIOR">Senior</option>
-          <option value="EXPERT">Expert</option>
-        </select>
-        <div className="ml-auto text-sm text-midnight-600">
-          <strong className="text-indigoaccent">{filtered.length}</strong> candidat{filtered.length > 1 ? "s" : ""} affiché{filtered.length > 1 ? "s" : ""}
+
+        {/* Séniorité — multi select */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs uppercase tracking-wide text-midnight-500 font-semibold">Séniorité (OU)</span>
+          <div className="flex gap-2 flex-wrap">
+            {["JUNIOR", "MEDIOR", "SENIOR", "EXPERT"].map((s) => {
+              const active = filterSeniority.includes(s);
+              return (
+                <button
+                  key={s}
+                  onClick={() => toggleSeniority(s)}
+                  className={"px-3 py-1 rounded-full text-xs font-medium border transition " + (active ? "bg-indigoaccent text-white border-indigoaccent" : "bg-white text-midnight-700 border-border hover:border-indigoaccent")}
+                >
+                  {s}
+                </button>
+              );
+            })}
+            {filterSeniority.length > 0 && (
+              <button onClick={() => setFilterSeniority([])} className="btn-ghost btn-sm">Reset</button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -104,20 +162,41 @@ export function BenchmarkView({ points }: { points: Point[] }) {
 
       {/* Tooltip persistant */}
       {hover && (
-        <div className="fixed bottom-4 right-4 z-50 card p-3 bg-white shadow-lg max-w-sm">
-          <div className="text-sm font-semibold">
+        <div className="fixed bottom-4 right-4 z-50 card p-4 bg-white shadow-xl max-w-sm border border-indigoaccent/40">
+          <div className="text-base font-semibold">
             <Link href={`/candidates/${hover.id}`} className="text-indigoaccent hover:underline">
               {hover.firstName} {hover.lastName}
             </Link>
           </div>
           <div className="text-xs text-midnight-500 mt-1">
-            {hover.years} ans d'XP · {hover.rate.toLocaleString()} €/mois brut
+            {hover.years} ans d'XP
             {hover.seniority && ` · ${hover.seniority}`}
           </div>
+          <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-border/60">
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-midnight-500">Brut mensuel</div>
+              <div className="text-sm font-semibold text-midnight-900 tabular-nums">
+                {hover.rate.toLocaleString()} €
+              </div>
+            </div>
+            {hover.tjm != null && hover.tjm > 0 && (
+              <div>
+                <div className="text-[10px] uppercase tracking-wide text-emerald-700">
+                  {hover.tjmLabel ?? "TJM"}
+                </div>
+                <div className="text-sm font-semibold text-emerald-700 tabular-nums">
+                  {hover.tjm.toLocaleString()} €/j
+                </div>
+              </div>
+            )}
+          </div>
           {hover.skills.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {hover.skills.slice(0, 8).map((s) => <span key={s} className="badge-info text-[9px]">{s}</span>)}
-              {hover.skills.length > 8 && <span className="text-[10px] text-midnight-500">+{hover.skills.length - 8}</span>}
+            <div className="mt-3 pt-3 border-t border-border/60">
+              <div className="text-[10px] uppercase tracking-wide text-midnight-500 mb-1">Compétences</div>
+              <div className="flex flex-wrap gap-1">
+                {hover.skills.slice(0, 10).map((s) => <span key={s} className="badge-info text-[9px]">{s}</span>)}
+                {hover.skills.length > 10 && <span className="text-[10px] text-midnight-500">+{hover.skills.length - 10}</span>}
+              </div>
             </div>
           )}
         </div>
@@ -194,15 +273,54 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
     SENIOR: "#4b7fff",
     EXPERT: "#c488ff"
   };
+  const fallbackColor = "#4bc8ff"; // bleu Dasolabs pour les candidats sans séniorité renseignée
+
+  // Bandes de fond par tranche d'expérience — teintes très claires, alternées
+  const buckets = [
+    { min: 0,  max: 2,  color: "#fef3c7", label: "Junior" },         // amber-100
+    { min: 3,  max: 5,  color: "#dbeafe", label: "Confirmé" },       // blue-100
+    { min: 6,  max: 10, color: "#dcfce7", label: "Senior" },         // green-100
+    { min: 11, max: 15, color: "#f3e8ff", label: "Expert" },         // purple-100
+    { min: 16, max: xMax + 1, color: "#fce7f3", label: "Référent" }  // pink-100
+  ];
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+      {/* Bandes de couleur fond par tranche d'XP */}
+      {buckets.map((b, i) => {
+        const xStart = x(b.min);
+        const xEnd = x(Math.min(b.max + 1, xMax + 1));
+        return (
+          <g key={i}>
+            <rect
+              x={xStart}
+              y={pad}
+              width={xEnd - xStart}
+              height={H - 2 * pad}
+              fill={b.color}
+              opacity="0.5"
+            />
+            <text
+              x={(xStart + xEnd) / 2}
+              y={pad + 20}
+              textAnchor="middle"
+              fontSize="12"
+              fill="#64748b"
+              fontWeight="600"
+              opacity="0.7"
+            >
+              {b.label}
+            </text>
+          </g>
+        );
+      })}
+
       {/* Grid */}
       {yTicks.map((t) => (
-        <line key={t} x1={pad} x2={W - pad} y1={y(t)} y2={y(t)} stroke="#e5e7eb" strokeDasharray="2 2" />
+        <line key={t} x1={pad} x2={W - pad} y1={y(t)} y2={y(t)} stroke="#ffffff" strokeOpacity="0.7" strokeDasharray="2 2" />
       ))}
       {xTicks.filter((_, i) => i % 2 === 0).map((t) => (
-        <line key={t} x1={x(t)} x2={x(t)} y1={pad} y2={H - pad} stroke="#f3f4f6" />
+        <line key={t} x1={x(t)} x2={x(t)} y1={pad} y2={H - pad} stroke="#ffffff" strokeOpacity="0.5" />
       ))}
 
       {/* Axis labels */}
@@ -222,15 +340,17 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
       <line x1={pad} x2={pad} y1={pad} y2={H - pad} stroke="#374151" strokeWidth="1.5" />
 
       {/* Points — plus gros + colorés par séniorité */}
-      {points.map((p) => (
-        <g key={p.id}>
+      {points.map((p) => {
+        const col = p.seniority ? colorForSeniority[p.seniority] : fallbackColor;
+        return (
           <circle
+            key={p.id}
             cx={x(p.years)}
             cy={y(p.rate)}
-            r="7"
-            fill={p.seniority ? colorForSeniority[p.seniority] : "#9ca3af"}
-            fillOpacity="0.5"
-            stroke={p.seniority ? colorForSeniority[p.seniority] : "#4b5563"}
+            r="8"
+            fill={col}
+            fillOpacity="0.8"
+            stroke="#1e293b"
             strokeWidth="1.5"
             onMouseEnter={() => onHover(p)}
             onMouseLeave={() => onHover(null)}
@@ -238,8 +358,8 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
           >
             <title>{`${p.firstName} ${p.lastName} · ${p.years} ans · ${p.rate.toLocaleString()} €/mois${p.seniority ? " · " + p.seniority : ""}`}</title>
           </circle>
-        </g>
-      ))}
+        );
+      })}
 
       {/* Legends axes */}
       <text x={W / 2} y={H - 15} textAnchor="middle" fontSize="14" fill="#1f2937" fontWeight="600">

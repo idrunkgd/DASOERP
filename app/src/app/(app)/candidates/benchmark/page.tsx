@@ -17,22 +17,34 @@ export default async function CandidatesBenchmarkPage() {
     include: {
       salaryScenarios: {
         orderBy: { createdAt: "desc" }, take: 1,
-        select: { grossMonthly: true }
+        select: { grossMonthly: true, soldDailyRate: true, billableRate: true, costPerDay: true }
       }
     }
   });
 
   const points = candidates
     .filter((c: any) => c.salaryScenarios?.[0]?.grossMonthly)
-    .map((c: any) => ({
-      id: c.id,
-      firstName: c.firstName,
-      lastName: c.lastName,
-      years: c.yearsExperience ?? 0,
-      rate: Number(c.salaryScenarios[0].grossMonthly),
-      seniority: c.seniority ?? null,
-      skills: c.skills ?? []
-    }));
+    .map((c: any) => {
+      const sc = c.salaryScenarios[0];
+      // TJM : priorité au TJM vendu client (si > 0), sinon TJM suggéré (billableRate)
+      // avec marge, sinon le tarif min du candidat.
+      const sold = Number(sc.soldDailyRate ?? 0);
+      const billable = Number(sc.billableRate ?? 0);
+      const minDailyRate = c.minDailyRate ? Number(c.minDailyRate) : 0;
+      const tjm = sold > 0 ? sold : (billable > 0 ? billable : minDailyRate);
+      return {
+        id: c.id,
+        firstName: c.firstName,
+        lastName: c.lastName,
+        years: c.yearsExperience ?? 0,
+        rate: Number(sc.grossMonthly),
+        tjm,
+        tjmLabel: sold > 0 ? "TJM vendu" : (billable > 0 ? "TJM suggéré" : "Min. demandé"),
+        costPerDay: sc.costPerDay ? Number(sc.costPerDay) : 0,
+        seniority: c.seniority ?? null,
+        skills: c.skills ?? []
+      };
+    });
 
   return (
     <div>
