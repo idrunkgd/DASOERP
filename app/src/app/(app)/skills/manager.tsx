@@ -1,8 +1,8 @@
 "use client";
 import { useMemo, useState, useTransition } from "react";
-import { createSkill, updateSkill, deleteSkill, mergeSkills, mergeOrphanSkill } from "@/server/actions/skills";
+import { createSkill, updateSkill, deleteSkill, mergeSkills, mergeOrphanSkill, promoteOrphanSkill } from "@/server/actions/skills";
 import { toast } from "sonner";
-import { Trash2, Plus, Edit3, GitMerge, AlertTriangle, Ghost } from "lucide-react";
+import { Trash2, Plus, Edit3, GitMerge, AlertTriangle, Ghost, PlusCircle } from "lucide-react";
 import { CategoryInput } from "@/components/forms/category-input";
 
 type Skill = { id: string; name: string; category: string | null; active: boolean };
@@ -125,19 +125,32 @@ export function SkillsManager({ skills, orphans = [] }: { skills: Skill[]; orpha
 }
 
 function OrphanRow({ orphan, catalog }: { orphan: Orphan; catalog: Skill[] }) {
-  const [open, setOpen] = useState(false);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [pending, start] = useTransition();
 
-  function run(target: Skill) {
+  function doMerge(target: Skill) {
     if (!window.confirm(`Remplacer « ${orphan.name} » par « ${target.name} » dans tous les CV / fiches candidat / consultants / missions ?`)) return;
     start(async () => {
       try {
         const r = await mergeOrphanSkill(orphan.name, target.id);
         toast.success(`Fusionné — ${r.candidatesUpdated} candidat, ${r.usersUpdated} user, ${r.missionsUpdated} mission mis à jour`);
-        setOpen(false);
+        setMergeOpen(false);
       } catch (e: any) { toast.error(e.message); }
     });
   }
+
+  function doCreate(canonicalName: string, category: string) {
+    start(async () => {
+      try {
+        const r = await promoteOrphanSkill(orphan.name, { canonicalName, category: category || null });
+        toast.success(`« ${r.canonicalName} » créée — ${r.candidatesUpdated} candidat, ${r.usersUpdated} user, ${r.missionsUpdated} mission normalisés`);
+        setCreateOpen(false);
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  const categories = Array.from(new Set(catalog.map((s) => s.category).filter(Boolean) as string[])).sort();
 
   return (
     <div className="flex items-center justify-between gap-3 bg-white border border-rose-200 rounded px-3 py-2 text-xs">
@@ -149,18 +162,93 @@ function OrphanRow({ orphan, catalog }: { orphan: Orphan; catalog: Skill[] }) {
           {orphan.missions > 0 && `${orphan.users > 0 || orphan.candidates > 0 ? " · " : ""}${orphan.missions} mission${orphan.missions > 1 ? "s" : ""}`}
         </span>
       </div>
-      <button onClick={() => setOpen(true)} className="btn-primary btn-sm flex items-center gap-1">
-        <GitMerge className="w-3 h-3" /> Fusionner dans…
-      </button>
-      {open && (
+      <div className="flex gap-1 shrink-0">
+        <button onClick={() => setCreateOpen(true)} disabled={pending} className="btn-secondary btn-sm flex items-center gap-1" title="Ajouter au catalogue">
+          <PlusCircle className="w-3 h-3" /> Créer
+        </button>
+        <button onClick={() => setMergeOpen(true)} disabled={pending} className="btn-primary btn-sm flex items-center gap-1" title="Fusionner avec une compétence existante">
+          <GitMerge className="w-3 h-3" /> Fusionner
+        </button>
+      </div>
+      {mergeOpen && (
         <OrphanMergeModal
           orphan={orphan}
           catalog={catalog}
-          onClose={() => setOpen(false)}
-          onPick={run}
+          onClose={() => setMergeOpen(false)}
+          onPick={doMerge}
           pending={pending}
         />
       )}
+      {createOpen && (
+        <OrphanCreateModal
+          orphan={orphan}
+          categories={categories}
+          onClose={() => setCreateOpen(false)}
+          onSubmit={doCreate}
+          pending={pending}
+        />
+      )}
+    </div>
+  );
+}
+
+function OrphanCreateModal({
+  orphan, categories, onClose, onSubmit, pending
+}: {
+  orphan: Orphan; categories: string[];
+  onClose: () => void; onSubmit: (name: string, category: string) => void; pending: boolean;
+}) {
+  const [name, setName] = useState(orphan.name);
+  const [category, setCategory] = useState("");
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40" onClick={onClose}>
+      <div className="card max-w-md w-full p-5 m-4" onClick={(e) => e.stopPropagation()}>
+        <h3 className="font-semibold mb-1 flex items-center gap-2">
+          <PlusCircle className="w-4 h-4" /> Créer « {orphan.name} » dans le catalogue
+        </h3>
+        <p className="text-xs text-midnight-500 mb-3">
+          Ajoute cette compétence au catalogue officiel. Toutes les variantes de casse
+          présentes dans les CV / consultants / missions seront normalisées sur la casse ci-dessous.
+        </p>
+        <div className="space-y-3">
+          <div>
+            <label className="label">Nom canonique *</label>
+            <input
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="input"
+              placeholder="ex: TIA Portal"
+            />
+            <p className="text-[11px] text-midnight-500 mt-1">
+              C'est la casse exacte qui sera utilisée partout. Change-la si « {orphan.name} » n'est pas optimal.
+            </p>
+          </div>
+          <div>
+            <label className="label">Catégorie</label>
+            <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="input"
+              placeholder="ex: Automation, Backend, Soft skills…"
+              list="orphan-cat-list"
+            />
+            <datalist id="orphan-cat-list">
+              {categories.map((c) => <option key={c} value={c} />)}
+            </datalist>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose} className="btn-ghost">Annuler</button>
+          <button
+            onClick={() => { if (!name.trim()) { toast.error("Nom vide"); return; } onSubmit(name.trim(), category.trim()); }}
+            disabled={pending}
+            className="btn-primary"
+          >
+            {pending ? "..." : "Créer et normaliser"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

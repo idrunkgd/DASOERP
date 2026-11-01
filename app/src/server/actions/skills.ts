@@ -231,6 +231,118 @@ export async function mergeOrphanSkill(orphanName: string, targetId: string): Pr
 }
 
 /**
+ * Promeut une compétence orpheline en entrée du catalogue.
+ *  - Crée une Skill `name` (avec la casse fournie) + catégorie optionnelle.
+ *  - Normalise ensuite la casse dans TOUTES les entités qui utilisaient
+ *    une variante de casse différente (ex: "TIA portal" + "tia Portal" →
+ *    tous deviennent la casse canonique de la nouvelle entrée).
+ *
+ * Résultat : l'orpheline disparaît de la bannière rose, et sa variante
+ * canonique est utilisée partout.
+ */
+export async function promoteOrphanSkill(
+  orphanName: string,
+  opts?: { category?: string | null; canonicalName?: string }
+): Promise<{
+  skillId: string;
+  canonicalName: string;
+  usersUpdated: number;
+  candidatesUpdated: number;
+  missionsUpdated: number;
+}> {
+  const session = await requirePermission("settings.manage");
+  const trimmed = orphanName.trim();
+  if (!trimmed) throw new Error("Nom orphelin vide.");
+  const canonical = (opts?.canonicalName ?? trimmed).trim();
+  if (!canonical) throw new Error("Nom canonique vide.");
+
+  // 1) Crée (ou récupère) la Skill en case-insensitive.
+  let skill = await prisma.skill.findFirst({
+    where: { name: { equals: canonical, mode: "insensitive" } }
+  });
+  if (!skill) {
+    try {
+      skill = await prisma.skill.create({
+        data: {
+          name: canonical,
+          category: opts?.category?.trim() || null,
+          active: true
+        }
+      });
+    } catch (e: any) {
+      if (e?.code === "P2002") {
+        skill = await prisma.skill.findFirst({
+          where: { name: { equals: canonical, mode: "insensitive" } }
+        });
+      } else throw e;
+    }
+  }
+  if (!skill) throw new Error("Impossible de créer la compétence.");
+
+  // 2) Normalise la casse partout : toute variante de `orphanName` ET de
+  // `canonical` (case-insensitive) devient la casse exacte de `skill.name`.
+  const targetName = skill.name;
+  const lowersToReplace = new Set<string>([trimmed.toLowerCase(), canonical.toLowerCase()]);
+  const needsNormalization = (arr: string[]) =>
+    arr.some((s) => lowersToReplace.has(s.toLowerCase()) && s !== targetName);
+  const normalize = (arr: string[]): string[] => {
+    const out: string[] = [];
+    for (const s of arr) {
+      if (lowersToReplace.has(s.toLowerCase())) {
+        if (!out.includes(targetName)) out.push(targetName);
+      } else {
+        out.push(s);
+      }
+    }
+    return out;
+  };
+
+  const result = await prisma.$transaction(async (tx) => {
+    let usersUpdated = 0;
+    const users = await tx.user.findMany({ select: { id: true, skills: true } });
+    for (const u of users) {
+      if (!needsNormalization(u.skills)) continue;
+      await tx.user.update({ where: { id: u.id }, data: { skills: normalize(u.skills) } });
+      usersUpdated++;
+    }
+
+    let candidatesUpdated = 0;
+    const candidates = await tx.candidate.findMany({ select: { id: true, skills: true } });
+    for (const c of candidates) {
+      if (!needsNormalization(c.skills)) continue;
+      await tx.candidate.update({ where: { id: c.id }, data: { skills: normalize(c.skills) } });
+      candidatesUpdated++;
+    }
+
+    let missionsUpdated = 0;
+    const missions = await tx.missionRequest.findMany({ select: { id: true, requiredSkills: true } });
+    for (const m of missions) {
+      if (!needsNormalization(m.requiredSkills)) continue;
+      await tx.missionRequest.update({
+        where: { id: m.id },
+        data: { requiredSkills: normalize(m.requiredSkills) }
+      });
+      missionsUpdated++;
+    }
+    return { usersUpdated, candidatesUpdated, missionsUpdated };
+  });
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "CREATE",
+    entityType: "Skill",
+    entityId: skill.id,
+    message: `Compétence « ${targetName} » promue depuis orpheline « ${trimmed} » (${result.candidatesUpdated} candidat, ${result.usersUpdated} user, ${result.missionsUpdated} mission normalisés)`
+  });
+
+  revalidatePath("/skills");
+  revalidatePath("/candidates");
+  revalidatePath("/consultants");
+  revalidatePath("/candidates/benchmark");
+  return { skillId: skill.id, canonicalName: targetName, ...result };
+}
+
+/**
  * Collecte toutes les skills utilisées dans les entités (User/Candidate/
  * MissionRequest) qui n'existent PAS dans le catalogue Skill.
  *
