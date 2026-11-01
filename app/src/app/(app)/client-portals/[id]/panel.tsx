@@ -116,7 +116,7 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
                       <span className={`${sb.cls} text-[10px]`}>{sb.label}</span>
                       {!p.isVisible && <span className="badge-muted text-[10px]">Masqué côté client</span>}
                     </div>
-                    {p.candidate.headline && <div className="text-xs text-midnight-500 truncate">{p.candidate.headline}</div>}
+                    {p.candidate.cvContactRole && <div className="text-xs text-midnight-500 truncate">{p.candidate.cvContactRole}</div>}
                     <div className="mt-1 text-xs text-midnight-600">
                       TJM proposé client : <strong>{Number(p.proposedDailyRate)} €/j HT</strong>
                       {p.candidate.yearsExperience ? ` · ${p.candidate.yearsExperience} ans d'XP` : ""}

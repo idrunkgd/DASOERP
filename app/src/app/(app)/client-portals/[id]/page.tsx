@@ -20,7 +20,7 @@ export default async function ClientPortalDetailPage({ params }: { params: { id:
         include: {
           candidate: {
             select: {
-              id: true, firstName: true, lastName: true, headline: true,
+              id: true, firstName: true, lastName: true, cvContactRole: true,
               yearsExperience: true, seniority: true, status: true, photoUrl: true,
               skills: true
             }

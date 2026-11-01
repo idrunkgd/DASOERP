@@ -144,16 +144,10 @@ export const authOptions: NextAuthOptions = {
               trace.push("SWAP DONE");
             }
           }
-          // Log toujours (INFO) pour voir chaque appel dans /logs
-          try {
-            const { logAppError } = await import("./app-log");
-            await logAppError({
-              level: "INFO",
-              message: `[demo-mode session callback] ${trace.join(" | ")}`,
-              userId: token.id as string,
-              meta: { trace, realRole: token.role, sessionName: session.user.name }
-            });
-          } catch { /* app-log pas dispo — silencieux */ }
+          // Pas de log INFO ici — cette callback est invoquée à CHAQUE
+          // getServerSession() et pollue /logs (une entrée toutes les
+          // millisecondes). On garde uniquement le log ERROR en cas de
+          // bug (bloc catch ci-dessous).
         } catch (e: any) {
           try {
             const { logAppError } = await import("./app-log");

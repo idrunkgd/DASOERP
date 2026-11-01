@@ -7,7 +7,7 @@ type Candidate = {
   id: string;
   firstName: string;
   lastName: string;
-  headline: string | null;
+  cvContactRole: string | null;
   yearsExperience: number | null;
   seniority: string | null;
   photoUrl: string | null;
@@ -120,7 +120,7 @@ function ProposalCard({ token, proposal }: { token: string; proposal: Proposal }
               <span className="text-xs text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3" />{c.city}</span>
             )}
           </div>
-          {c.headline && <p className="text-sm text-slate-600 mt-1">{c.headline}</p>}
+          {c.cvContactRole && <p className="text-sm text-slate-600 mt-1">{c.cvContactRole}</p>}
           <div className="flex flex-wrap gap-1.5 mt-3">
             {c.skills.slice(0, 10).map((s) => (
               <span key={s} className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded">{s}</span>
