@@ -281,13 +281,13 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
   };
   const fallbackColor = "#4bc8ff"; // bleu Dasolabs pour les candidats sans séniorité renseignée
 
-  // Bandes de fond par tranche d'expérience — teintes très claires, alternées
+  // Bandes de fond par tranche d'expérience — alignées sur l'enum séniorité
+  // Candidate.seniority = JUNIOR / MEDIOR / SENIOR / EXPERT (voir cv-import.ts)
   const buckets = [
-    { min: 0,  max: 2,  color: "#fef3c7", label: "Junior" },         // amber-100
-    { min: 3,  max: 5,  color: "#dbeafe", label: "Confirmé" },       // blue-100
-    { min: 6,  max: 10, color: "#dcfce7", label: "Senior" },         // green-100
-    { min: 11, max: 15, color: "#f3e8ff", label: "Expert" },         // purple-100
-    { min: 16, max: xMax + 1, color: "#fce7f3", label: "Référent" }  // pink-100
+    { min: 0,  max: 2,          color: "#fef3c7", label: "Junior"  }, // amber-100
+    { min: 3,  max: 5,          color: "#dbeafe", label: "Medior"  }, // blue-100
+    { min: 6,  max: 9,          color: "#dcfce7", label: "Senior"  }, // green-100
+    { min: 10, max: xMax + 1,   color: "#f3e8ff", label: "Expert"  }  // purple-100
   ];
 
   return (
@@ -375,17 +375,7 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
         Salaire brut demandé (€/mois)
       </text>
 
-      {/* Légende séniorité */}
-      <g transform={`translate(${W - 220}, ${pad + 10})`}>
-        <rect x="0" y="0" width="200" height="110" fill="white" stroke="#e5e7eb" rx="4" />
-        <text x="10" y="18" fontSize="11" fill="#6b7280" fontWeight="600">SÉNIORITÉ</text>
-        {Object.entries(colorForSeniority).map(([key, color], i) => (
-          <g key={key} transform={`translate(10, ${30 + i * 18})`}>
-            <circle cx="7" cy="7" r="6" fill={color} fillOpacity="0.6" stroke={color} />
-            <text x="20" y="11" fontSize="12" fill="#374151">{key}</text>
-          </g>
-        ))}
-      </g>
+      {/* Pas de légende couleurs — les bandes titrées en haut font le job */}
     </svg>
   );
 }
