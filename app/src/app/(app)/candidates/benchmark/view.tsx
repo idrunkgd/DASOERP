@@ -260,15 +260,39 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
   const W = 1600, H = 700, pad = 70;
   const years = points.map((p) => p.years);
   const rates = points.map((p) => p.rate);
-  const xMin = 0, xMax = Math.max(...years, 20);
+  const xMax = Math.max(...years, 20);
   const yMin = 0, yMax = Math.max(...rates, 2000);
   const yRound = Math.ceil(yMax / 500) * 500;
 
-  const x = (v: number) => pad + ((v - xMin) / (xMax - xMin)) * (W - 2 * pad);
+  // Bandes de fond — bornes de chaque tranche (bornes exclusives à droite)
+  // Alignées sur l'enum séniorité (voir cv-import.ts).
+  const buckets = [
+    { min: 0,  max: 3,            color: "#fef3c7", label: "Junior" },
+    { min: 3,  max: 6,            color: "#dbeafe", label: "Medior" },
+    { min: 6,  max: 10,           color: "#dcfce7", label: "Senior" },
+    { min: 10, max: xMax + 1,     color: "#f3e8ff", label: "Expert" }
+  ];
+
+  // Échelle X piecewise : chaque bucket occupe la MÊME largeur visuelle,
+  // peu importe le nombre d'années qu'il couvre. Les points sont placés
+  // en linéaire DANS leur bucket.
+  const plotW = W - 2 * pad;
+  const bandW = plotW / buckets.length;
+  const x = (v: number) => {
+    for (let i = 0; i < buckets.length; i++) {
+      const b = buckets[i];
+      if (v < b.max || i === buckets.length - 1) {
+        const span = Math.max(1, b.max - b.min);
+        const ratio = Math.min(1, Math.max(0, (v - b.min) / span));
+        return pad + i * bandW + ratio * bandW;
+      }
+    }
+    return pad + plotW;
+  };
   const y = (v: number) => H - pad - ((v - yMin) / (yRound - yMin)) * (H - 2 * pad);
 
-  const xTicks: number[] = [];
-  for (let i = 0; i <= xMax; i += 1) xTicks.push(i);
+  // Ticks X : bornes des buckets uniquement (pas 0,1,2,…20)
+  const xTicks = buckets.map((b) => b.min).concat([xMax]);
   const step = yRound > 10000 ? 1000 : yRound > 5000 ? 500 : 250;
   const yTicks: number[] = [];
   for (let i = 0; i <= yRound; i += step) yTicks.push(i);
@@ -281,33 +305,23 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
   };
   const fallbackColor = "#4bc8ff"; // bleu Dasolabs pour les candidats sans séniorité renseignée
 
-  // Bandes de fond par tranche d'expérience — alignées sur l'enum séniorité
-  // Candidate.seniority = JUNIOR / MEDIOR / SENIOR / EXPERT (voir cv-import.ts)
-  const buckets = [
-    { min: 0,  max: 2,          color: "#fef3c7", label: "Junior"  }, // amber-100
-    { min: 3,  max: 5,          color: "#dbeafe", label: "Medior"  }, // blue-100
-    { min: 6,  max: 9,          color: "#dcfce7", label: "Senior"  }, // green-100
-    { min: 10, max: xMax + 1,   color: "#f3e8ff", label: "Expert"  }  // purple-100
-  ];
-
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
-      {/* Bandes de couleur fond par tranche d'XP */}
+      {/* Bandes de couleur fond — largeur strictement identique entre les 4 */}
       {buckets.map((b, i) => {
-        const xStart = x(b.min);
-        const xEnd = x(Math.min(b.max + 1, xMax + 1));
+        const xStart = pad + i * bandW;
         return (
           <g key={i}>
             <rect
               x={xStart}
               y={pad}
-              width={xEnd - xStart}
+              width={bandW}
               height={H - 2 * pad}
               fill={b.color}
               opacity="0.5"
             />
             <text
-              x={(xStart + xEnd) / 2}
+              x={xStart + bandW / 2}
               y={pad + 20}
               textAnchor="middle"
               fontSize="12"
@@ -325,7 +339,7 @@ function BigScatter({ points, onHover }: { points: Point[]; onHover: (p: Point |
       {yTicks.map((t) => (
         <line key={t} x1={pad} x2={W - pad} y1={y(t)} y2={y(t)} stroke="#ffffff" strokeOpacity="0.7" strokeDasharray="2 2" />
       ))}
-      {xTicks.filter((_, i) => i % 2 === 0).map((t) => (
+      {xTicks.map((t) => (
         <line key={t} x1={x(t)} x2={x(t)} y1={pad} y2={H - pad} stroke="#ffffff" strokeOpacity="0.5" />
       ))}
 
