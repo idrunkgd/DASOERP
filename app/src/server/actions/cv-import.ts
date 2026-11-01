@@ -249,3 +249,114 @@ export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSc
   revalidatePath("/candidates");
   return { ok: true as const, id: created.id, duplicate: false };
 }
+
+/**
+ * Met à jour un candidat EXISTANT depuis un CV parsé.
+ * Fusion non destructive : seuls les champs renseignés dans le CV écrasent
+ * les valeurs existantes. Les expériences et formations sont AJOUTÉES
+ * (pas de doublons sur même companyName + startDate).
+ */
+const UpdateFromCvSchema = z.object({
+  candidateId: z.string().min(1),
+  parsed: ParsedCandidateSchema,
+  overwriteBasics: z.boolean().optional().default(false)
+});
+
+export async function updateCandidateFromCv(input: z.infer<typeof UpdateFromCvSchema>) {
+  const session = await requirePermission("consulting.write");
+  const data = UpdateFromCvSchema.parse(input);
+  const p = data.parsed;
+
+  const existing = await prisma.candidate.findUnique({
+    where: { id: data.candidateId },
+    include: { experiences: true }
+  });
+  if (!existing) throw new Error("Candidat introuvable");
+
+  function parseDate(s: string | null | undefined): Date | null {
+    if (!s) return null;
+    const m = s.match(/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?/);
+    if (!m) return null;
+    const year = Number(m[1]);
+    const month = m[2] ? Number(m[2]) - 1 : 0;
+    const day = m[3] ? Number(m[3]) : 1;
+    const d = new Date(Date.UTC(year, month, day));
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  // Merge basics : si overwriteBasics=true, le CV écrase. Sinon, on ne touche
+  // qu'aux champs vides côté candidat existant.
+  const merge = <T,>(current: T | null | undefined, incoming: T | null | undefined): T | null => {
+    if (data.overwriteBasics) return (incoming ?? current ?? null) as any;
+    return (current ?? incoming ?? null) as any;
+  };
+
+  const mergedSkills = Array.from(new Set([...(existing.skills ?? []), ...p.skills]));
+  const mergedLangs  = Array.from(new Set([...(existing.spokenLanguages ?? []), ...p.spokenLanguages]));
+  const mergedInt    = Array.from(new Set([...((existing as any).interests ?? []), ...p.interests]));
+
+  await (prisma as any).candidate.update({
+    where: { id: data.candidateId },
+    data: {
+      firstName:       data.overwriteBasics ? (p.firstName || existing.firstName) : existing.firstName,
+      lastName:        data.overwriteBasics ? (p.lastName  || existing.lastName)  : existing.lastName,
+      email:           merge(existing.email, p.email),
+      phone:           merge(existing.phone, p.phone),
+      city:            merge(existing.city, p.city),
+      linkedinUrl:     merge(existing.linkedinUrl, p.linkedinUrl),
+      yearsExperience: data.overwriteBasics ? (p.yearsExperience ?? existing.yearsExperience) : (existing.yearsExperience ?? p.yearsExperience ?? null),
+      seniority:       merge(existing.seniority, p.seniority),
+      skills:          mergedSkills,
+      spokenLanguages: mergedLangs,
+      interests:       mergedInt
+    }
+  });
+
+  // Ajoute les expériences qui n'existent pas déjà (par companyName + startDate)
+  const existingKeys = new Set(existing.experiences.map((e) => `${e.companyName}|${e.startDate.toISOString().slice(0, 7)}`));
+  const toAdd = p.experiences
+    .filter((e) => !!e.companyName)
+    .filter((e) => {
+      const d = parseDate(e.startDate);
+      const key = `${e.companyName}|${d ? d.toISOString().slice(0, 7) : ""}`;
+      return !existingKeys.has(key);
+    });
+  if (toAdd.length > 0) {
+    await (prisma as any).candidateExperience.createMany({
+      data: toAdd.map((e) => ({
+        candidateId: data.candidateId,
+        companyName: e.companyName,
+        jobTitle: e.jobTitle || null,
+        startDate: parseDate(e.startDate) ?? new Date(),
+        endDate: parseDate(e.endDate),
+        description: e.description || null
+      }))
+    });
+  }
+
+  // Ajoute les formations
+  if (p.trainings.length > 0) {
+    try {
+      await (prisma as any).candidateTraining.createMany({
+        data: p.trainings.map((t) => ({
+          candidateId: data.candidateId,
+          institution: t.institution,
+          title: t.title,
+          period: t.period || null,
+          description: t.description || null
+        }))
+      });
+    } catch { /* table absente — silencieux */ }
+  }
+
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Candidate",
+    entityId: data.candidateId,
+    message: `CV réimporté : +${toAdd.length} exp, +${p.trainings.length} formations${data.overwriteBasics ? " · champs identité écrasés" : ""}`
+  });
+
+  revalidatePath(`/candidates/${data.candidateId}`);
+  return { ok: true as const, experiencesAdded: toAdd.length, trainingsAdded: p.trainings.length };
+}

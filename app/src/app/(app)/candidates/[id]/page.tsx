@@ -21,6 +21,7 @@ import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
 import { CandidateDocumentsPanel } from "./documents-panel";
 import { CandidateInteractionsPanel } from "./interactions-panel";
 import { RecruitmentPipeline } from "./recruitment-pipeline";
+import { CvReimportButton } from "./cv-reimport-button";
 
 type CandidateTab = "general" | "cv" | "recruitment" | "contracts" | "files" | "interactions";
 
@@ -144,6 +145,7 @@ export default async function CandidateDetail({ params, searchParams }: { params
         subtitle={c.seniority ?? undefined}
         actions={
           <>
+            <CvReimportButton candidateId={c.id} />
             {/* Aperçu CV — ouvre le PDF dans le navigateur sans télécharger,
                 pour vérifier le rendu avant envoi. */}
             <Link
