@@ -1,13 +1,12 @@
 "use client";
 import { useState, useTransition } from "react";
 import { respondToProposalPublic } from "@/server/actions/client-portal-public";
-import { Check, X, CalendarCheck, User, MapPin } from "lucide-react";
+import { Check, X, CalendarCheck, User, MapPin, FileDown, Eye } from "lucide-react";
 
 type Candidate = {
   id: string;
   firstName: string;
   lastName: string;
-  cvContactRole: string | null;
   yearsExperience: number | null;
   seniority: string | null;
   photoUrl: string | null;
@@ -120,7 +119,10 @@ function ProposalCard({ token, proposal }: { token: string; proposal: Proposal }
               <span className="text-xs text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3" />{c.city}</span>
             )}
           </div>
-          {c.cvContactRole && <p className="text-sm text-slate-600 mt-1">{c.cvContactRole}</p>}
+          {/* Le job title du candidat le plus récent (via experiences[0]) */}
+          {c.experiences && c.experiences[0]?.jobTitle && (
+            <p className="text-sm text-slate-600 mt-1">{c.experiences[0].jobTitle}</p>
+          )}
           <div className="flex flex-wrap gap-1.5 mt-3">
             {c.skills.slice(0, 10).map((s) => (
               <span key={s} className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded">{s}</span>
@@ -149,9 +151,26 @@ function ProposalCard({ token, proposal }: { token: string; proposal: Proposal }
             </>
           )}
         </div>
-        <div className="text-right shrink-0">
-          <div className="text-xs text-slate-500">TJM proposé</div>
-          <div className="text-2xl font-bold text-slate-900">{proposal.proposedDailyRate} €<span className="text-sm text-slate-500">/j HT</span></div>
+        <div className="text-right shrink-0 flex flex-col items-end gap-2">
+          <div>
+            <div className="text-xs text-slate-500">TJM proposé</div>
+            <div className="text-2xl font-bold text-slate-900">{proposal.proposedDailyRate} €<span className="text-sm text-slate-500">/j HT</span></div>
+          </div>
+          <div className="flex gap-1.5">
+            <a
+              href={`/api/portal/${token}/cv/${proposal.id}?inline=1`}
+              target="_blank" rel="noreferrer"
+              className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs flex items-center gap-1"
+            >
+              <Eye className="w-3 h-3" /> Aperçu
+            </a>
+            <a
+              href={`/api/portal/${token}/cv/${proposal.id}`}
+              className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs flex items-center gap-1"
+            >
+              <FileDown className="w-3 h-3" /> CV
+            </a>
+          </div>
         </div>
       </div>
 
