@@ -15,6 +15,9 @@ export default async function ClientPortalDetailPage({ params }: { params: { id:
     include: {
       company: { select: { id: true, name: true } },
       createdBy: { select: { id: true, firstName: true, lastName: true } },
+      personalLinks: {
+        orderBy: [{ isActive: "desc" }, { createdAt: "desc" }]
+      },
       proposals: {
         orderBy: [{ createdAt: "desc" }],
         include: {

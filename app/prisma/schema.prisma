@@ -414,6 +414,7 @@ model User {
   testAssignmentsCreated  TestAssignment[]  @relation("TestAssignmentCreator")
   // Portails client créés / propositions candidats poussées côté client
   clientPortalsCreated    ClientPortal[]      @relation("ClientPortalCreator")
+  portalContactsCreated   ClientPortalContact[] @relation("PortalContactCreator")
   candidateProposalsCreated CandidateProposal[] @relation("CandidateProposalCreator")
 }
 
@@ -3573,10 +3574,36 @@ model ClientPortal {
   updatedAt     DateTime @updatedAt
 
   proposals     CandidateProposal[]
+  /// Liens personnels par contact — même vue, token nominatif, pour tracer
+  /// qui laisse un commentaire ou agit sur une proposition.
+  personalLinks ClientPortalContact[]
 
   @@index([companyId])
   @@index([token])
   @@index([isActive])
+}
+
+/// Lien personnel donnant accès au même portail qu'un contact nominatif.
+/// L'URL /portal/[token] résout d'abord par ClientPortal.token (lien
+/// général), sinon par ClientPortalContact.token.
+model ClientPortalContact {
+  id            String       @id @default(cuid())
+  token         String       @unique @default(cuid())
+  portalId      String
+  portal        ClientPortal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  name          String
+  email         String?
+  jobTitle      String?
+  isActive      Boolean      @default(true)
+  lastViewedAt  DateTime?
+  viewCount     Int          @default(0)
+  createdById   String?
+  createdBy     User?        @relation("PortalContactCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([portalId, isActive])
+  @@index([token])
 }
 
 /// Proposition d'un candidat à un portail client spécifique.
@@ -3597,6 +3624,9 @@ model CandidateProposal {
   clientMessage     String?
   /// Horodatage de l'action client
   clientActedAt     DateTime?
+  /// Contact nominatif qui a agi (null si action depuis le lien général)
+  actedByContactId  String?
+  actedByContactName String?
   /// Note interne Dasolabs (NON visible côté client)
   internalNote      String?
   /// Si false, retiré de la vue côté client (historique conservé)

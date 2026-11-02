@@ -17,6 +17,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { prisma } from "@/lib/db";
 import { getCompanyInfo } from "@/lib/company-info";
 import { CvPdf, type CvProfile } from "@/lib/cv-pdf-template";
+import { resolvePortalByToken } from "@/server/actions/client-portal-public";
 
 export const dynamic = "force-dynamic";
 
@@ -28,11 +29,9 @@ export async function GET(
   if (!token || !proposalId) return new Response("Lien invalide.", { status: 400 });
   const inline = req.nextUrl.searchParams.get("inline") === "1";
 
-  const portal = await (prisma as any).clientPortal.findUnique({
-    where: { token },
-    select: { id: true, isActive: true }
-  });
-  if (!portal || !portal.isActive) return new Response("Lien expiré.", { status: 404 });
+  // Résolution par lien général OU par lien personnel contact
+  const resolved = await resolvePortalByToken(token);
+  if (!resolved) return new Response("Lien expiré.", { status: 404 });
 
   const proposal = await (prisma as any).candidateProposal.findUnique({
     where: { id: proposalId },
@@ -41,7 +40,7 @@ export async function GET(
       proposedDailyRate: true, candidateId: true
     }
   });
-  if (!proposal || proposal.portalId !== portal.id || !proposal.isVisible) {
+  if (!proposal || proposal.portalId !== resolved.portalId || !proposal.isVisible) {
     return new Response("Proposition introuvable.", { status: 404 });
   }
 

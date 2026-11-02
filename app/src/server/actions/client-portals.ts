@@ -180,6 +180,82 @@ export async function resetProposalStatus(id: string) {
   revalidatePath(`/candidates/${before.candidateId}`);
 }
 
+// ─── Contacts personnels (liens nominatifs par interlocuteur) ───────
+
+const ContactSchema = z.object({
+  portalId: z.string().min(1),
+  name:     z.string().min(1).max(120),
+  email:    z.string().email().optional().nullable().or(z.literal("").transform(() => null)),
+  jobTitle: z.string().optional().nullable().transform((v) => v?.trim() || null)
+});
+
+export async function createPortalContact(formData: FormData) {
+  const session = await requirePermission("consulting.write");
+  const data = ContactSchema.parse(Object.fromEntries(formData));
+  const contact = await (prisma as any).clientPortalContact.create({
+    data: { ...data, createdById: session.user.id }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "CREATE", entityType: "ClientPortalContact",
+    entityId: contact.id,
+    message: `Lien personnel créé pour « ${contact.name} »${contact.email ? ` (${contact.email})` : ""}`
+  });
+  revalidatePath(`/client-portals/${data.portalId}`);
+  return { ok: true, id: contact.id, token: contact.token };
+}
+
+export async function updatePortalContact(id: string, formData: FormData) {
+  const session = await requirePermission("consulting.write");
+  const data = ContactSchema.omit({ portalId: true }).parse(Object.fromEntries(formData));
+  const before = await (prisma as any).clientPortalContact.findUniqueOrThrow({ where: { id } });
+  const after = await (prisma as any).clientPortalContact.update({ where: { id }, data });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "ClientPortalContact",
+    entityId: id, message: `Contact personnel mis à jour`, before, after
+  });
+  revalidatePath(`/client-portals/${before.portalId}`);
+}
+
+export async function togglePortalContact(id: string) {
+  const session = await requirePermission("consulting.write");
+  const before = await (prisma as any).clientPortalContact.findUniqueOrThrow({ where: { id } });
+  await (prisma as any).clientPortalContact.update({
+    where: { id }, data: { isActive: !before.isActive }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "ClientPortalContact",
+    entityId: id,
+    message: `Lien personnel « ${before.name} » ${before.isActive ? "désactivé" : "réactivé"}`
+  });
+  revalidatePath(`/client-portals/${before.portalId}`);
+}
+
+export async function deletePortalContact(id: string) {
+  const session = await requirePermission("consulting.write");
+  const before = await (prisma as any).clientPortalContact.findUniqueOrThrow({ where: { id } });
+  await (prisma as any).clientPortalContact.delete({ where: { id } });
+  await logActivity({
+    actorId: session.user.id, action: "DELETE", entityType: "ClientPortalContact",
+    entityId: id, message: `Lien personnel « ${before.name} » supprimé`
+  });
+  revalidatePath(`/client-portals/${before.portalId}`);
+}
+
+export async function regeneratePortalContactToken(id: string) {
+  const session = await requirePermission("consulting.write");
+  const randomToken = `cpc${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}${Math.random().toString(36).slice(2, 10)}`;
+  const after = await (prisma as any).clientPortalContact.update({
+    where: { id }, data: { token: randomToken }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "ClientPortalContact",
+    entityId: id,
+    message: `Token personnel « ${after.name} » régénéré (ancien lien invalidé)`
+  });
+  revalidatePath(`/client-portals/${after.portalId}`);
+  return { ok: true, newToken: after.token };
+}
+
 export async function updateProposalRate(id: string, newRate: number, internalNote?: string) {
   const session = await requirePermission("consulting.write");
   if (newRate <= 0) throw new Error("Tarif invalide");

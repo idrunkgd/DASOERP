@@ -9,9 +9,13 @@ import {
   retractProposal,
   restoreProposal,
   updateProposalRate,
-  resetProposalStatus
+  resetProposalStatus,
+  createPortalContact,
+  togglePortalContact,
+  deletePortalContact,
+  regeneratePortalContactToken
 } from "@/server/actions/client-portals";
-import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw } from "lucide-react";
+import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw, UserPlus, UserCheck } from "lucide-react";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   PROPOSED:            { label: "En attente",      cls: "badge-muted" },
@@ -90,6 +94,9 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
         </div>
       </div>
 
+      {/* Liens personnels par contact */}
+      <PersonalLinksSection portalId={portal.id} contacts={portal.personalLinks || []} />
+
       {/* Propositions */}
       <div className="card p-4">
         <h2 className="font-semibold mb-3">Candidats proposés</h2>
@@ -122,6 +129,13 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
                       TJM proposé client : <strong>{Number(p.proposedDailyRate)} €/j HT</strong>
                       {p.candidate.yearsExperience ? ` · ${p.candidate.yearsExperience} ans d'XP` : ""}
                     </div>
+                    {p.actedByContactName && (
+                      <div className="mt-2 text-[11px] text-indigo-800 flex items-center gap-1">
+                        <UserCheck className="w-3 h-3" />
+                        Décision par <strong>{p.actedByContactName}</strong>
+                        {p.clientActedAt && <span className="text-midnight-500">· {new Date(p.clientActedAt).toLocaleString("fr-BE")}</span>}
+                      </div>
+                    )}
                     {p.clientMessage && (
                       <div className="mt-2 text-xs bg-indigo-50 border border-indigo-100 rounded p-2 text-indigo-900">
                         <strong>Message client :</strong> {p.clientMessage}
@@ -166,6 +180,134 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function PersonalLinksSection({ portalId, contacts }: { portalId: string; contacts: any[] }) {
+  const [open, setOpen] = useState(false);
+  const [pending, start] = useTransition();
+
+  async function copy(token: string) {
+    const url = `${window.location.origin}/portal/${token}`;
+    await navigator.clipboard.writeText(url);
+    toast.success("Lien copié");
+  }
+
+  async function create(fd: FormData) {
+    fd.set("portalId", portalId);
+    start(async () => {
+      try {
+        await createPortalContact(fd);
+        toast.success("Lien personnel créé");
+        setOpen(false);
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  return (
+    <div className="card p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-semibold">Liens personnels par contact</h2>
+        <button onClick={() => setOpen(!open)} className="btn-secondary btn-sm flex items-center gap-1">
+          <UserPlus className="w-3 h-3" /> {open ? "Annuler" : "Ajouter un contact"}
+        </button>
+      </div>
+
+      <p className="text-xs text-midnight-500 mb-3">
+        Chaque contact reçoit son propre lien. Même vue que le lien général,
+        mais toute action (accepter / refuser / commentaire) est tracée au contact.
+      </p>
+
+      {open && (
+        <form action={create} className="border border-indigoaccent/30 bg-indigoaccent/5 rounded p-3 mb-3 grid grid-cols-12 gap-2 items-end">
+          <div className="col-span-4">
+            <label className="label">Nom *</label>
+            <input name="name" required className="input" placeholder="Jean Dupont" />
+          </div>
+          <div className="col-span-4">
+            <label className="label">Email</label>
+            <input name="email" type="email" className="input" placeholder="jean@client.com" />
+          </div>
+          <div className="col-span-3">
+            <label className="label">Fonction</label>
+            <input name="jobTitle" className="input" placeholder="CTO" />
+          </div>
+          <div className="col-span-1">
+            <button disabled={pending} className="btn-primary w-full">OK</button>
+          </div>
+        </form>
+      )}
+
+      {contacts.length === 0 ? (
+        <p className="text-xs text-midnight-500 italic">Aucun contact personnel — tout passe par le lien général.</p>
+      ) : (
+        <div className="space-y-1.5">
+          {contacts.map((c: any) => (
+            <PersonalLinkRow key={c.id} contact={c} onCopy={() => copy(c.token)} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PersonalLinkRow({ contact, onCopy }: { contact: any; onCopy: () => void }) {
+  const [pending, start] = useTransition();
+  return (
+    <div className={`border rounded p-2.5 flex items-center gap-3 text-xs ${contact.isActive ? "" : "opacity-50 bg-midnight-50"}`}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <strong>{contact.name}</strong>
+          {contact.jobTitle && <span className="text-midnight-500">· {contact.jobTitle}</span>}
+          {contact.email && <span className="text-midnight-500">· {contact.email}</span>}
+          {!contact.isActive && <span className="badge-muted text-[10px]">Désactivé</span>}
+        </div>
+        <div className="text-[10px] text-midnight-500 mt-1 font-mono truncate">
+          /portal/{contact.token.slice(0, 10)}… · {contact.viewCount} vue{contact.viewCount > 1 ? "s" : ""}
+          {contact.lastViewedAt && ` · vue le ${new Date(contact.lastViewedAt).toLocaleDateString("fr-BE")}`}
+        </div>
+      </div>
+      <button onClick={onCopy} className="btn-ghost btn-sm flex items-center gap-1" title="Copier le lien">
+        <Copy className="w-3 h-3" /> Copier
+      </button>
+      <button
+        onClick={() => start(async () => {
+          try { await togglePortalContact(contact.id); toast.success(contact.isActive ? "Désactivé" : "Réactivé"); }
+          catch (e: any) { toast.error(e.message); }
+        })}
+        disabled={pending}
+        className="btn-ghost btn-sm"
+      >
+        {contact.isActive ? "Désactiver" : "Réactiver"}
+      </button>
+      <button
+        onClick={() => {
+          if (!window.confirm(`Régénérer le lien de « ${contact.name} » ? L'ancien lien ne fonctionnera plus.`)) return;
+          start(async () => {
+            try { await regeneratePortalContactToken(contact.id); toast.success("Nouveau lien généré"); }
+            catch (e: any) { toast.error(e.message); }
+          });
+        }}
+        disabled={pending}
+        className="btn-ghost btn-sm flex items-center gap-1 text-amber-700"
+        title="Régénérer le token"
+      >
+        <RefreshCw className="w-3 h-3" />
+      </button>
+      <button
+        onClick={() => {
+          if (!window.confirm(`Supprimer définitivement le lien de « ${contact.name} » ?`)) return;
+          start(async () => {
+            try { await deletePortalContact(contact.id); toast.success("Supprimé"); }
+            catch (e: any) { toast.error(e.message); }
+          });
+        }}
+        disabled={pending}
+        className="btn-ghost btn-sm text-rose-600"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
     </div>
   );
 }

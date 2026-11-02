@@ -26,6 +26,7 @@ type Proposal = {
   id: string;
   status: string;
   clientMessage: string | null;
+  actedByContactName: string | null;
   proposedDailyRate: number;
   candidate: Candidate;
 };
@@ -35,7 +36,8 @@ const SENIORITY_LABEL: Record<string, string> = {
   SENIOR: "Senior", EXPERT: "Expert", REFERENT: "Référent"
 };
 
-export function PortalClientView({ token, data }: { token: string; data: { name: string; logoUrl: string | null; proposals: Proposal[] } }) {
+export function PortalClientView({ token, data }: { token: string; data: { name: string; logoUrl: string | null; greetingName: string | null; proposals: Proposal[] } }) {
+  const firstName = data.greetingName?.split(/\s+/)[0];
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Header client (SON logo, pas Dasolabs) */}
@@ -50,7 +52,9 @@ export function PortalClientView({ token, data }: { token: string; data: { name:
         )}
         <div>
           <h1 className="text-2xl font-bold">{data.name}</h1>
-          <p className="text-sm text-slate-500">Profils proposés pour votre équipe</p>
+          <p className="text-sm text-slate-500">
+            {firstName ? `Bonjour ${firstName}, voici les profils proposés pour votre équipe.` : "Profils proposés pour votre équipe"}
+          </p>
         </div>
       </header>
 
@@ -179,8 +183,11 @@ function ProposalCard({ token, proposal }: { token: string; proposal: Proposal }
         {!isPending ? (
           <div className="text-sm">
             <StatusBadge status={acted} />
+            {proposal.actedByContactName && (
+              <p className="text-xs text-slate-500 mt-2">Décision prise par {proposal.actedByContactName}.</p>
+            )}
             {proposal.clientMessage && (
-              <p className="text-xs text-slate-500 mt-2">Votre message : « {proposal.clientMessage} »</p>
+              <p className="text-xs text-slate-500 mt-1">Message : « {proposal.clientMessage} »</p>
             )}
           </div>
         ) : showMessage ? (

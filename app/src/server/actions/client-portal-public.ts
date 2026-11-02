@@ -3,10 +3,9 @@
  * Actions côté PUBLIC du portail client (pas de login, uniquement par token).
  * À utiliser uniquement depuis /portal/[token].
  *
- * Règles de sécurité :
- *  - On vérifie TOUJOURS la validité et l'activité du portail à chaque appel.
- *  - On ne renvoie JAMAIS d'infos internes (notes internes, cost, autres clients).
- *  - L'action du client est journalisée (audit log + notification à l'owner).
+ * Résolution du token : d'abord ClientPortal.token (lien général), sinon
+ * ClientPortalContact.token (lien personnel nominatif). Dans les deux cas,
+ * la vue est identique côté client ; côté admin on sait qui a agi.
  */
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/audit";
@@ -15,6 +14,54 @@ import { sendMail } from "@/lib/email";
 import { revalidatePath } from "next/cache";
 
 type Action = "ACCEPT" | "REJECT" | "REQUEST_INTERVIEW";
+
+/**
+ * Résout un token en un portail actif + éventuellement un contact nominatif.
+ * Renvoie null si le token n'existe pas ou si tout est désactivé.
+ */
+export async function resolvePortalByToken(token: string): Promise<{
+  portalId: string;
+  isActive: boolean;
+  name: string;
+  companyName?: string | null;
+  contact: { id: string; name: string; email: string | null } | null;
+} | null> {
+  if (!token) return null;
+  // 1) Lien général
+  const portal = await (prisma as any).clientPortal.findUnique({
+    where: { token },
+    select: {
+      id: true, isActive: true, name: true,
+      company: { select: { name: true } }
+    }
+  });
+  if (portal) {
+    if (!portal.isActive) return null;
+    return {
+      portalId: portal.id, isActive: true, name: portal.name,
+      companyName: portal.company?.name ?? null, contact: null
+    };
+  }
+  // 2) Lien personnel
+  const contact = await (prisma as any).clientPortalContact.findUnique({
+    where: { token },
+    select: {
+      id: true, name: true, email: true, isActive: true,
+      portal: { select: {
+        id: true, isActive: true, name: true,
+        company: { select: { name: true } }
+      } }
+    }
+  });
+  if (!contact || !contact.isActive || !contact.portal?.isActive) return null;
+  return {
+    portalId: contact.portal.id,
+    isActive: true,
+    name: contact.portal.name,
+    companyName: contact.portal.company?.name ?? null,
+    contact: { id: contact.id, name: contact.name, email: contact.email }
+  };
+}
 
 export async function respondToProposalPublic(input: {
   token: string;
@@ -26,11 +73,8 @@ export async function respondToProposalPublic(input: {
   if (!["ACCEPT", "REJECT", "REQUEST_INTERVIEW"].includes(input.action))
     throw new Error("Action inconnue.");
 
-  const portal = await (prisma as any).clientPortal.findUnique({
-    where: { token: input.token },
-    select: { id: true, isActive: true, name: true, company: { select: { name: true } } }
-  });
-  if (!portal || !portal.isActive) throw new Error("Lien introuvable ou désactivé.");
+  const resolved = await resolvePortalByToken(input.token);
+  if (!resolved) throw new Error("Lien introuvable ou désactivé.");
 
   const proposal = await (prisma as any).candidateProposal.findUnique({
     where: { id: input.proposalId },
@@ -38,7 +82,7 @@ export async function respondToProposalPublic(input: {
       candidate: { select: { id: true, firstName: true, lastName: true } }
     }
   });
-  if (!proposal || proposal.portalId !== portal.id || !proposal.isVisible) {
+  if (!proposal || proposal.portalId !== resolved.portalId || !proposal.isVisible) {
     throw new Error("Proposition introuvable.");
   }
 
@@ -51,24 +95,27 @@ export async function respondToProposalPublic(input: {
     data: {
       status,
       clientMessage: input.clientMessage?.trim() || null,
-      clientActedAt: new Date()
+      clientActedAt: new Date(),
+      actedByContactId:   resolved.contact?.id   ?? null,
+      actedByContactName: resolved.contact?.name ?? null
     }
   });
 
+  const actor = resolved.contact ? `${resolved.contact.name}` : "lien général";
   await logActivity({
     actorId: null,
     action: "UPDATE",
     entityType: "CandidateProposal",
     entityId: proposal.id,
-    message: `[Portail ${portal.name}] Client a répondu : ${status}${input.clientMessage ? ` — « ${input.clientMessage.slice(0, 120)} »` : ""}`
+    message: `[Portail ${resolved.name}] ${actor} a répondu : ${status}${input.clientMessage ? ` — « ${input.clientMessage.slice(0, 120)} »` : ""}`
   });
 
-  // Notif in-app + email à l'owner du candidat
   if (proposal.ownerUserId) {
+    const actorSuffix = resolved.contact ? ` par ${resolved.contact.name}` : "";
     const title = {
-      ACCEPTED: `✅ ${portal.name} accepte ${proposal.candidate.firstName} ${proposal.candidate.lastName}`,
-      REJECTED: `❌ ${portal.name} refuse ${proposal.candidate.firstName} ${proposal.candidate.lastName}`,
-      INTERVIEW_REQUESTED: `📅 ${portal.name} veut rencontrer ${proposal.candidate.firstName} ${proposal.candidate.lastName}`
+      ACCEPTED:            `✅ ${resolved.name}${actorSuffix} accepte ${proposal.candidate.firstName} ${proposal.candidate.lastName}`,
+      REJECTED:            `❌ ${resolved.name}${actorSuffix} refuse ${proposal.candidate.firstName} ${proposal.candidate.lastName}`,
+      INTERVIEW_REQUESTED: `📅 ${resolved.name}${actorSuffix} veut rencontrer ${proposal.candidate.firstName} ${proposal.candidate.lastName}`
     }[status];
     await createNotification({
       userId: proposal.ownerUserId,
@@ -104,9 +151,17 @@ export async function respondToProposalPublic(input: {
 }
 
 export async function trackPortalView(token: string) {
-  // Appelé une fois au chargement de /portal/[token] pour le compteur.
-  await (prisma as any).clientPortal.updateMany({
-    where: { token, isActive: true },
-    data: { lastViewedAt: new Date(), viewCount: { increment: 1 } }
-  });
+  // Incrémente le compteur sur l'entité qui porte réellement le token
+  // (ClientPortal OU ClientPortalContact), pas forcément le portail.
+  const [portalUpdate, contactUpdate] = await Promise.all([
+    (prisma as any).clientPortal.updateMany({
+      where: { token, isActive: true },
+      data: { lastViewedAt: new Date(), viewCount: { increment: 1 } }
+    }),
+    (prisma as any).clientPortalContact.updateMany({
+      where: { token, isActive: true },
+      data: { lastViewedAt: new Date(), viewCount: { increment: 1 } }
+    })
+  ]);
+  // best-effort — silencieux
 }
