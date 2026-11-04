@@ -249,163 +249,220 @@ function ActionZone({ token, proposal, status, onStatus }: {
   token: string; proposal: Proposal; status: string;
   onStatus: (s: string) => void;
 }) {
-  switch (status) {
-    case "PROPOSED":
-      return <ProposedActions token={token} proposal={proposal} onStatus={onStatus} />;
-    case "INTERVIEW_1_REQUESTED":
-      return <InterviewRequestedPanel which={1} proposal={proposal} token={token} />;
-    case "INTERVIEW_1_DONE":
-      return <AfterInterviewActions token={token} proposal={proposal} onStatus={onStatus} which={1} />;
-    case "INTERVIEW_2_REQUESTED":
-      return <InterviewRequestedPanel which={2} proposal={proposal} token={token} />;
-    case "INTERVIEW_2_DONE":
-      return <AfterInterviewActions token={token} proposal={proposal} onStatus={onStatus} which={2} />;
-    case "SHORTLISTED":
-      return <ShortlistedActions token={token} proposal={proposal} onStatus={onStatus} />;
-    case "ACCEPTED":
-      return <AcceptedPanel />;
-    default:
-      return <ProposedActions token={token} proposal={proposal} onStatus={onStatus} />;
+  // Terminaux : pas d'actions possibles
+  if (status === "ACCEPTED") return <AcceptedPanel />;
+
+  // État initial
+  if (status === "PROPOSED") {
+    return <ActionsPanel
+      token={token} proposal={proposal} onStatus={onStatus}
+      stage="initial"
+    />;
   }
+
+  // Après avoir demandé l'entretien 1 (créneaux envoyés)
+  if (status === "INTERVIEW_1_REQUESTED") {
+    return <>
+      <InterviewRequestedPanel which={1} proposal={proposal} />
+      <div className="mt-4" />
+      <ActionsPanel
+        token={token} proposal={proposal} onStatus={onStatus}
+        stage="after-interview-1"
+      />
+    </>;
+  }
+
+  // Entretien 1 marqué effectué par Dasolabs
+  if (status === "INTERVIEW_1_DONE") {
+    return <ActionsPanel
+      token={token} proposal={proposal} onStatus={onStatus}
+      stage="after-interview-1"
+      showDoneBlock={1}
+    />;
+  }
+
+  // Après avoir demandé l'entretien 2
+  if (status === "INTERVIEW_2_REQUESTED") {
+    return <>
+      <InterviewRequestedPanel which={2} proposal={proposal} />
+      <div className="mt-4" />
+      <ActionsPanel
+        token={token} proposal={proposal} onStatus={onStatus}
+        stage="after-interview-2"
+      />
+    </>;
+  }
+
+  if (status === "INTERVIEW_2_DONE") {
+    return <ActionsPanel
+      token={token} proposal={proposal} onStatus={onStatus}
+      stage="after-interview-2"
+      showDoneBlock={2}
+    />;
+  }
+
+  if (status === "SHORTLISTED") {
+    return <ActionsPanel
+      token={token} proposal={proposal} onStatus={onStatus}
+      stage="shortlisted"
+    />;
+  }
+
+  return <ActionsPanel
+    token={token} proposal={proposal} onStatus={onStatus}
+    stage="initial"
+  />;
 }
 
 // ─── Panels d'actions ──────────────────────────────────────────────
 
-function ProposedActions({ token, proposal, onStatus }: {
-  token: string; proposal: Proposal; onStatus: (s: string) => void;
+/**
+ * Panel d'actions unifié — s'adapte au stade du candidat.
+ * Toujours visible : textarea commentaire + boutons. Pas d'attente du
+ * marquage admin : le client peut toujours progresser.
+ */
+function ActionsPanel({ token, proposal, onStatus, stage, showDoneBlock }: {
+  token: string;
+  proposal: Proposal;
+  onStatus: (s: string) => void;
+  stage: "initial" | "after-interview-1" | "after-interview-2" | "shortlisted";
+  showDoneBlock?: 1 | 2;
 }) {
-  const [picker, setPicker] = useState(false);
+  const [picker, setPicker] = useState<null | "REQUEST_INTERVIEW_1" | "REQUEST_INTERVIEW_2" | "REQUEST_ADDITIONAL_INTERVIEW">(null);
   const [pending, start] = useTransition();
   const [message, setMessage] = useState("");
-
-  function act(action: "ACCEPT" | "REJECT") {
-    start(async () => {
-      try {
-        const r = await respondToProposalV2({ token, proposalId: proposal.id, action: { kind: action }, clientMessage: message || undefined });
-        onStatus(r.status);
-      } catch (e: any) { alert(e.message); }
-    });
-  }
-
-  if (picker) {
-    return (
-      <SlotPicker
-        token={token}
-        proposal={proposal}
-        actionKind="REQUEST_INTERVIEW_1"
-        title="Planifier l'entretien 1"
-        onCancel={() => setPicker(false)}
-        onDone={(s) => { setPicker(false); onStatus(s); }}
-      />
-    );
-  }
-
-  return (
-    <div>
-      <p className="text-sm text-midnight-500 mb-3">Choisissez une action :</p>
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => act("ACCEPT")} disabled={pending} className="btn-success"><Check className="w-4 h-4" /> Accepter</button>
-        <button onClick={() => setPicker(true)} className="btn-primary"><CalendarCheck className="w-4 h-4" /> Planifier un entretien</button>
-        <button onClick={() => act("REJECT")} disabled={pending} className="btn-secondary"><X className="w-4 h-4" /> Refuser</button>
-      </div>
-    </div>
-  );
-}
-
-function AfterInterviewActions({ token, proposal, onStatus, which }: {
-  token: string; proposal: Proposal; onStatus: (s: string) => void; which: 1 | 2;
-}) {
-  const [picker, setPicker] = useState(false);
-  const [pending, start] = useTransition();
-  const notes = which === 1 ? proposal.interview1Notes : proposal.interview2Notes;
-  const doneAt = which === 1 ? proposal.interview1DoneAt : proposal.interview2DoneAt;
 
   function act(kind: "ACCEPT" | "REJECT" | "SHORTLIST") {
     start(async () => {
       try {
-        const r = await respondToProposalV2({ token, proposalId: proposal.id, action: { kind } });
+        const r = await respondToProposalV2({
+          token, proposalId: proposal.id,
+          action: { kind },
+          clientMessage: message || undefined
+        });
         onStatus(r.status);
       } catch (e: any) { alert(e.message); }
     });
   }
 
   if (picker) {
+    const title =
+      picker === "REQUEST_INTERVIEW_1"          ? "Planifier l'entretien 1" :
+      picker === "REQUEST_INTERVIEW_2"          ? "Planifier l'entretien 2" :
+                                                  "Entretien complémentaire";
     return (
       <SlotPicker
         token={token} proposal={proposal}
-        actionKind={which === 1 ? "REQUEST_INTERVIEW_2" : "REQUEST_ADDITIONAL_INTERVIEW"}
-        title={which === 1 ? "Planifier l'entretien 2" : "Planifier un entretien complémentaire"}
-        onCancel={() => setPicker(false)}
-        onDone={(s) => { setPicker(false); onStatus(s); }}
+        actionKind={picker}
+        title={title}
+        initialMessage={message}
+        onCancel={() => setPicker(null)}
+        onDone={(s) => { setPicker(null); onStatus(s); }}
       />
     );
   }
 
+  // Bloc notes Dasolabs (entretien effectué) — s'affiche en haut
+  const doneNotes =
+    showDoneBlock === 1 ? proposal.interview1Notes :
+    showDoneBlock === 2 ? proposal.interview2Notes : null;
+  const doneAt =
+    showDoneBlock === 1 ? proposal.interview1DoneAt :
+    showDoneBlock === 2 ? proposal.interview2DoneAt : null;
+
+  // Bloc shortlist
+  const shortlistBlock = stage === "shortlisted";
+
+  // Prompt contextuel
+  const prompt =
+    stage === "initial"             ? "Choisissez une action :" :
+    stage === "after-interview-1"   ? "Comment voulez-vous poursuivre ?" :
+    stage === "after-interview-2"   ? "Comment voulez-vous poursuivre ?" :
+                                       "Votre décision finale :";
+
+  // Quels boutons afficher ?
+  const showPlanInterview1    = stage === "initial";
+  const showPlanInterview2    = stage === "after-interview-1";
+  const showShortlist         = stage === "after-interview-1" || stage === "after-interview-2";
+  const showAdditionalInt     = stage === "shortlisted";
+
   return (
     <div>
-      <div className="mb-4 rounded-lg bg-emerald-50 border border-emerald-200 p-3">
-        <div className="flex items-center gap-2 text-emerald-800 font-semibold text-sm">
-          <Check className="w-4 h-4" /> Entretien {which} effectué
-          {doneAt && <span className="text-[11px] font-normal text-emerald-700">· {fmtDate(doneAt)}</span>}
+      {showDoneBlock && (
+        <div className="mb-4 rounded-lg bg-emerald-50 border border-emerald-200 p-3">
+          <div className="flex items-center gap-2 text-emerald-800 font-semibold text-sm">
+            <Check className="w-4 h-4" /> Entretien {showDoneBlock} effectué
+            {doneAt && <span className="text-[11px] font-normal text-emerald-700">· {fmtDate(doneAt)}</span>}
+          </div>
+          {doneNotes && (
+            <p className="text-sm text-emerald-900 mt-2 whitespace-pre-line">
+              <strong>Retour Dasolabs :</strong> {doneNotes}
+            </p>
+          )}
         </div>
-        {notes && (
-          <p className="text-sm text-emerald-900 mt-2 whitespace-pre-line">
-            <strong>Retour Dasolabs :</strong> {notes}
-          </p>
-        )}
+      )}
+
+      {shortlistBlock && (
+        <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 p-3 text-amber-900 text-sm">
+          <strong>Profil shortlisté</strong> depuis le {fmtDate(proposal.shortlistedAt)}.
+        </div>
+      )}
+
+      {/* Commentaire optionnel — toujours visible */}
+      <div className="mb-3">
+        <label className="text-xs text-midnight-500 block mb-1">Commentaire (optionnel) — sera envoyé à Dasolabs</label>
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={2}
+          placeholder="Vos impressions, remarques, contraintes…"
+          className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+        />
       </div>
-      <p className="text-sm text-midnight-500 mb-2">Comment voulez-vous poursuivre ?</p>
+
+      <p className="text-sm text-midnight-500 mb-2">{prompt}</p>
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => act("ACCEPT")} disabled={pending} className="btn-success"><Check className="w-4 h-4" /> Accepter</button>
-        <button onClick={() => act("SHORTLIST")} disabled={pending} className="btn-ghost text-amber-700 border border-amber-300"><UsersIcon className="w-4 h-4" /> Shortlister</button>
-        {which === 1 && (
-          <button onClick={() => setPicker(true)} className="btn-primary"><CalendarCheck className="w-4 h-4" /> Planifier entretien 2</button>
+        <GreenAcceptButton onClick={() => act("ACCEPT")} disabled={pending}
+          label={stage === "shortlisted" ? "Accepter ce profil" : "Accepter"} />
+        {showShortlist && (
+          <button onClick={() => act("SHORTLIST")} disabled={pending}
+            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
+            <UsersIcon className="w-4 h-4" /> Shortlister
+          </button>
         )}
-        <button onClick={() => act("REJECT")} disabled={pending} className="btn-secondary"><X className="w-4 h-4" /> Refuser</button>
+        {showPlanInterview1 && (
+          <button onClick={() => setPicker("REQUEST_INTERVIEW_1")} disabled={pending}
+            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
+            <CalendarCheck className="w-4 h-4" /> Planifier un entretien
+          </button>
+        )}
+        {showPlanInterview2 && (
+          <button onClick={() => setPicker("REQUEST_INTERVIEW_2")} disabled={pending}
+            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
+            <CalendarCheck className="w-4 h-4" /> Planifier entretien 2
+          </button>
+        )}
+        {showAdditionalInt && (
+          <button onClick={() => setPicker("REQUEST_ADDITIONAL_INTERVIEW")} disabled={pending}
+            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
+            <CalendarCheck className="w-4 h-4" /> Entretien complémentaire
+          </button>
+        )}
+        <button onClick={() => act("REJECT")} disabled={pending}
+          className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
+          <X className="w-4 h-4" /> {stage === "shortlisted" ? "Finalement non" : "Refuser"}
+        </button>
       </div>
     </div>
   );
 }
 
-function ShortlistedActions({ token, proposal, onStatus }: {
-  token: string; proposal: Proposal; onStatus: (s: string) => void;
-}) {
-  const [picker, setPicker] = useState(false);
-  const [pending, start] = useTransition();
-
-  function act(kind: "ACCEPT" | "REJECT") {
-    start(async () => {
-      try {
-        const r = await respondToProposalV2({ token, proposalId: proposal.id, action: { kind } });
-        onStatus(r.status);
-      } catch (e: any) { alert(e.message); }
-    });
-  }
-
-  if (picker) {
-    return (
-      <SlotPicker
-        token={token} proposal={proposal}
-        actionKind="REQUEST_ADDITIONAL_INTERVIEW"
-        title="Entretien complémentaire"
-        onCancel={() => setPicker(false)}
-        onDone={(s) => { setPicker(false); onStatus(s); }}
-      />
-    );
-  }
-
+function GreenAcceptButton({ onClick, disabled, label }: { onClick: () => void; disabled: boolean; label: string }) {
   return (
-    <div>
-      <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 p-3 text-amber-900 text-sm">
-        <strong>Profil shortlisté</strong> depuis le {fmtDate(proposal.shortlistedAt)}.
-      </div>
-      <p className="text-sm text-midnight-500 mb-2">Votre décision finale :</p>
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => act("ACCEPT")} disabled={pending} className="btn-success"><Check className="w-4 h-4" /> Accepter ce profil</button>
-        <button onClick={() => setPicker(true)} className="btn-primary"><CalendarCheck className="w-4 h-4" /> Entretien complémentaire</button>
-        <button onClick={() => act("REJECT")} disabled={pending} className="btn-secondary"><X className="w-4 h-4" /> Finalement non</button>
-      </div>
-    </div>
+    <button onClick={onClick} disabled={disabled}
+      className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
+      <Check className="w-4 h-4" /> {label}
+    </button>
   );
 }
 
@@ -432,7 +489,7 @@ function RejectedPanel({ proposal }: { proposal: Proposal }) {
   );
 }
 
-function InterviewRequestedPanel({ which, proposal, token }: { which: 1 | 2; proposal: Proposal; token: string }) {
+function InterviewRequestedPanel({ which, proposal }: { which: 1 | 2; proposal: Proposal }) {
   const slots = (which === 1 ? proposal.interview1Slots : proposal.interview2Slots) ?? [];
   const confirmedAt = which === 1 ? proposal.interview1ConfirmedAt : proposal.interview2ConfirmedAt;
   return (
@@ -463,11 +520,12 @@ function InterviewRequestedPanel({ which, proposal, token }: { which: 1 | 2; pro
 
 // ─── Slot picker (3 créneaux) ──────────────────────────────────────
 
-function SlotPicker({ token, proposal, actionKind, title, onCancel, onDone }: {
+function SlotPicker({ token, proposal, actionKind, title, initialMessage, onCancel, onDone }: {
   token: string;
   proposal: Proposal;
   actionKind: "REQUEST_INTERVIEW_1" | "REQUEST_INTERVIEW_2" | "REQUEST_ADDITIONAL_INTERVIEW";
   title: string;
+  initialMessage?: string;
   onCancel: () => void;
   onDone: (nextStatus: string) => void;
 }) {
@@ -476,7 +534,7 @@ function SlotPicker({ token, proposal, actionKind, title, onCancel, onDone }: {
     { date: todayIso, startTime: "10:00", endTime: "11:30", mode: "VISIO" }
   ]);
   const [pending, start] = useTransition();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(initialMessage || "");
 
   function update(i: number, patch: Partial<Slot>) {
     setSlots(slots.map((s, idx) => idx === i ? { ...s, ...patch } : s));

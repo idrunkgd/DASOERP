@@ -208,37 +208,46 @@ export async function respondToProposalV2(input: {
   };
   let nextStatus: string | null = null;
 
+  // Transitions assouplies : le client peut toujours progresser sans
+  // attendre le marquage admin "entretien effectué".
   switch (input.action.kind) {
     case "ACCEPT":
+      // Toujours possible tant qu'on n'est pas en état terminal
+      if (["ACCEPTED", "REJECTED"].includes(curr))
+        throw new Error("Décision déjà prise.");
       nextStatus = "ACCEPTED";
       break;
     case "REJECT":
+      if (["ACCEPTED", "REJECTED"].includes(curr))
+        throw new Error("Décision déjà prise.");
       nextStatus = "REJECTED";
       break;
     case "SHORTLIST":
-      if (!["INTERVIEW_1_DONE", "INTERVIEW_2_DONE"].includes(curr))
-        throw new Error("Shortlist disponible après un entretien effectué.");
+      // Shortlist possible dès qu'un entretien a été demandé/fait
+      if (!["INTERVIEW_1_REQUESTED", "INTERVIEW_1_DONE",
+            "INTERVIEW_2_REQUESTED", "INTERVIEW_2_DONE"].includes(curr))
+        throw new Error("Shortlist disponible après avoir demandé un entretien.");
       nextStatus = "SHORTLISTED";
       data.shortlistedAt = new Date();
       break;
-    case "REQUEST_INTERVIEW_1": {
-      if (!["PROPOSED"].includes(curr)) throw new Error("Entretien 1 déjà demandé.");
+    case "REQUEST_INTERVIEW_1":
+      if (curr !== "PROPOSED") throw new Error("Entretien 1 déjà demandé.");
       data.interview1Slots = validateSlots(input.action.slots);
       nextStatus = "INTERVIEW_1_REQUESTED";
       break;
-    }
-    case "REQUEST_INTERVIEW_2": {
-      if (!["INTERVIEW_1_DONE"].includes(curr)) throw new Error("Entretien 2 nécessite un entretien 1 effectué.");
+    case "REQUEST_INTERVIEW_2":
+      // Possible dès qu'on a demandé OU fait l'entretien 1
+      if (!["INTERVIEW_1_REQUESTED", "INTERVIEW_1_DONE"].includes(curr))
+        throw new Error("Entretien 2 nécessite d'avoir demandé l'entretien 1.");
       data.interview2Slots = validateSlots(input.action.slots);
       nextStatus = "INTERVIEW_2_REQUESTED";
       break;
-    }
-    case "REQUEST_ADDITIONAL_INTERVIEW": {
-      if (!["SHORTLISTED"].includes(curr)) throw new Error("Entretien complémentaire : réservé aux profils shortlistés.");
-      data.interview2Slots = validateSlots(input.action.slots); // réutilise slot2 slot
+    case "REQUEST_ADDITIONAL_INTERVIEW":
+      if (curr !== "SHORTLISTED")
+        throw new Error("Entretien complémentaire : réservé aux profils shortlistés.");
+      data.interview2Slots = validateSlots(input.action.slots);
       nextStatus = "INTERVIEW_2_REQUESTED";
       break;
-    }
   }
   if (!nextStatus) throw new Error("Transition inconnue.");
 
