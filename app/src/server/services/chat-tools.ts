@@ -125,15 +125,17 @@ export const TOOLS: ChatTool[] = [
   // ---------- Recherche candidats ----------
   {
     name: "search_candidates",
-    description: "Recherche dans le vivier de candidats externes par compétence, séniorité, ville et/ou disponibilité. Renvoie au max 20 profils.",
+    description: "Recherche dans le vivier de candidats externes. Filtres : compétence (case-insensitive, match partiel), séniorité, ville, disponibilité, fourchette de TJM (min/max en €/jour).",
     permission: "consulting.read",
     parameters: {
       type: "object",
       properties: {
-        skill:        { type: "string", description: "compétence à filtrer (ex: 'react', 'java')" },
-        seniority:    { type: "string", description: "séniorité (ex: 'Senior', 'Junior', 'Lead')" },
+        skill:        { type: "string", description: "compétence (ex: 'siemens', 'TIA Portal', 'java') — match case-insensitive partiel" },
+        seniority:    { type: "string", description: "séniorité (JUNIOR, MEDIOR, SENIOR, EXPERT)" },
         city:         { type: "string", description: "ville" },
-        availableOnly:{ type: "boolean", description: "uniquement les candidats avec status ACTIVE" }
+        availableOnly:{ type: "boolean", description: "uniquement les candidats ACTIVE (défaut true)" },
+        tjmMin:       { type: "number", description: "TJM minimum en €/jour" },
+        tjmMax:       { type: "number", description: "TJM maximum en €/jour" }
       },
       required: []
     },
@@ -141,20 +143,36 @@ export const TOOLS: ChatTool[] = [
       if (!ctx.perms.includes("consulting.read")) return deny("consulting.read");
       const where: any = { convertedToUser: { is: null } };
       if (args.availableOnly !== false) where.status = "ACTIVE";
-      if (args.skill) where.skills = { has: args.skill.toLowerCase() };
       if (args.seniority) where.seniority = { contains: args.seniority, mode: "insensitive" };
       if (args.city) where.city = { contains: args.city, mode: "insensitive" };
-      const list = await prisma.candidate.findMany({
-        where, take: 20, orderBy: [{ status: "asc" }, { lastName: "asc" }],
-        select: { id: true, firstName: true, lastName: true, seniority: true, yearsExperience: true, city: true, skills: true, dailyCost: true, availableFrom: true, status: true }
+      // Filtre TJM : on utilise minDailyRate (ce que le candidat demande min) + dailyRate (facturable)
+      if (args.tjmMin != null || args.tjmMax != null) {
+        const range: any = {};
+        if (args.tjmMin != null) range.gte = args.tjmMin;
+        if (args.tjmMax != null) range.lte = args.tjmMax;
+        where.OR = [{ dailyRate: range }, { minDailyRate: range }];
+      }
+      // On fetch un peu plus large car le filtre skill est case-insensitive en JS
+      const raw = await prisma.candidate.findMany({
+        where, take: args.skill ? 200 : 20,
+        orderBy: [{ status: "asc" }, { lastName: "asc" }],
+        select: { id: true, firstName: true, lastName: true, seniority: true, yearsExperience: true, city: true, skills: true, dailyCost: true, dailyRate: true, minDailyRate: true, availableFrom: true, status: true }
       });
+      const needle = args.skill?.toLowerCase().trim();
+      const list = needle
+        ? raw.filter(c => (c.skills ?? []).some(s => s.toLowerCase().includes(needle)))
+             .slice(0, 20)
+        : raw;
       return {
         count: list.length,
         candidates: list.map(c => ({
           id: c.id,
           name: `${c.firstName} ${c.lastName}`,
           seniority: c.seniority, yearsExperience: c.yearsExperience,
-          city: c.city, skills: c.skills, dailyCost: c.dailyCost ? Number(c.dailyCost) : null,
+          city: c.city, skills: c.skills,
+          tjmMin: c.minDailyRate ? Number(c.minDailyRate) : null,
+          tjmFacturable: c.dailyRate ? Number(c.dailyRate) : null,
+          dailyCost: c.dailyCost ? Number(c.dailyCost) : null,
           availableFrom: c.availableFrom?.toISOString().slice(0, 10) ?? null,
           status: c.status,
           link: `/candidates/${c.id}`
