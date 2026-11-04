@@ -13,15 +13,23 @@ import {
   createPortalContact,
   togglePortalContact,
   deletePortalContact,
-  regeneratePortalContactToken
+  regeneratePortalContactToken,
+  markInterviewDone,
+  confirmInterviewSlot,
+  setPortalWorkflow
 } from "@/server/actions/client-portals";
 import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw, UserPlus, UserCheck } from "lucide-react";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  PROPOSED:            { label: "En attente",      cls: "badge-muted" },
-  ACCEPTED:            { label: "Accepté",         cls: "badge-success" },
-  REJECTED:            { label: "Refusé",          cls: "badge-rose" },
-  INTERVIEW_REQUESTED: { label: "Entretien demandé", cls: "badge-indigo" }
+  PROPOSED:              { label: "En attente",      cls: "badge-muted" },
+  ACCEPTED:              { label: "Accepté",         cls: "badge-success" },
+  REJECTED:              { label: "Refusé",          cls: "badge-rose" },
+  INTERVIEW_REQUESTED:   { label: "Entretien demandé", cls: "badge-indigo" },
+  INTERVIEW_1_REQUESTED: { label: "Entretien 1 demandé", cls: "badge-indigo" },
+  INTERVIEW_1_DONE:      { label: "Entretien 1 effectué", cls: "badge-emerald" },
+  INTERVIEW_2_REQUESTED: { label: "Entretien 2 demandé", cls: "badge-indigo" },
+  INTERVIEW_2_DONE:      { label: "Entretien 2 effectué", cls: "badge-emerald" },
+  SHORTLISTED:           { label: "Shortlisté",      cls: "badge-amber" }
 };
 
 export function PortalDetailPanel({ portal }: { portal: any }) {
@@ -73,7 +81,27 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
     <div className="space-y-6">
       {/* Lien public */}
       <div className="card p-4">
-        <div className="text-xs text-midnight-500 mb-1">Lien unique du portail (à envoyer au client)</div>
+        <div className="flex items-center justify-between mb-1">
+          <div className="text-xs text-midnight-500">Lien unique du portail (à envoyer au client)</div>
+          <div className="flex items-center gap-2">
+            <span className={`badge-${portal.workflowVersion === "V2" ? "success" : "muted"} text-[10px]`}>
+              Workflow {portal.workflowVersion ?? "LEGACY"}
+            </span>
+            <button
+              onClick={() => {
+                const next = portal.workflowVersion === "V2" ? "LEGACY" : "V2";
+                if (!window.confirm(`Basculer ce portail vers le workflow ${next} ?`)) return;
+                start(async () => {
+                  try { await setPortalWorkflow(portal.id, next); toast.success(`Workflow ${next}`); }
+                  catch (e: any) { toast.error(e.message); }
+                });
+              }}
+              disabled={pending}
+              className="btn-ghost btn-sm text-[10px]"
+              title="Bascule workflow LEGACY ↔ V2"
+            >Basculer</button>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <code className="flex-1 bg-midnight-50 border rounded px-3 py-2 text-xs font-mono truncate">{publicUrl}</code>
           <button onClick={copyLink} className="btn-secondary btn-sm flex items-center gap-1"><Copy className="w-3 h-3" /> Copier</button>
@@ -143,6 +171,10 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
                     )}
                     {p.internalNote && (
                       <div className="mt-1 text-[11px] text-midnight-500">Note interne : {p.internalNote}</div>
+                    )}
+                    {/* ─── Workflow V2 : créneaux + marquer effectué ─── */}
+                    {portal.workflowVersion === "V2" && (
+                      <V2InterviewBlock proposal={p} />
                     )}
                   </div>
                   <div className="flex flex-col gap-1">
@@ -308,6 +340,95 @@ function PersonalLinkRow({ contact, onCopy }: { contact: any; onCopy: () => void
       >
         <Trash2 className="w-3 h-3" />
       </button>
+    </div>
+  );
+}
+
+function V2InterviewBlock({ proposal }: { proposal: any }) {
+  const [pending, start] = useTransition();
+  const [notesOpen, setNotesOpen] = useState<null | 1 | 2>(null);
+  const [notes, setNotes] = useState("");
+
+  const which: 1 | 2 | null =
+    proposal.status === "INTERVIEW_1_REQUESTED" ? 1 :
+    proposal.status === "INTERVIEW_2_REQUESTED" ? 2 : null;
+
+  const slots: any[] | null =
+    which === 1 ? proposal.interview1Slots :
+    which === 2 ? proposal.interview2Slots : null;
+
+  const confirmedAt =
+    which === 1 ? proposal.interview1ConfirmedAt :
+    which === 2 ? proposal.interview2ConfirmedAt : null;
+
+  if (!which) {
+    // En statut DONE : juste rappel des notes
+    const doneNotes =
+      proposal.status === "INTERVIEW_1_DONE" ? proposal.interview1Notes :
+      proposal.status === "INTERVIEW_2_DONE" ? proposal.interview2Notes : null;
+    if (!doneNotes) return null;
+    return (
+      <div className="mt-2 text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded p-2">
+        <strong>Retour partagé au client :</strong> {doneNotes}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 text-xs bg-indigoaccent/5 border border-indigoaccent/30 rounded p-2 space-y-2">
+      <div className="font-semibold text-indigoaccent">Créneaux proposés par le client (entretien {which})</div>
+      <ul className="space-y-1">
+        {(slots ?? []).map((s, i) => (
+          <li key={i} className="flex items-center justify-between gap-2">
+            <span className="text-midnight-700">
+              {s.date} · {s.startTime}–{s.endTime} · {s.mode === "VISIO" ? "Visio" : "Sur site"}
+            </span>
+            {!confirmedAt && (
+              <button
+                onClick={() => start(async () => {
+                  try { await confirmInterviewSlot({ proposalId: proposal.id, which, slotIndex: i }); toast.success("Créneau confirmé"); }
+                  catch (e: any) { toast.error(e.message); }
+                })}
+                disabled={pending}
+                className="btn-ghost btn-sm text-emerald-700"
+              >Confirmer</button>
+            )}
+            {confirmedAt && i === 0 && (
+              <span className="text-[10px] text-emerald-700">Confirmé le {new Date(confirmedAt).toLocaleString("fr-BE")}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+      {!notesOpen ? (
+        <button
+          onClick={() => setNotesOpen(which)}
+          className="btn-primary btn-sm"
+        >Marquer l'entretien effectué</button>
+      ) : (
+        <div className="space-y-1">
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            placeholder="Retour partagé au client (visible côté client)…"
+            className="input w-full text-xs"
+          />
+          <div className="flex gap-1">
+            <button
+              onClick={() => start(async () => {
+                try {
+                  await markInterviewDone({ proposalId: proposal.id, which: notesOpen!, notes });
+                  toast.success("Entretien marqué effectué");
+                  setNotesOpen(null); setNotes("");
+                } catch (e: any) { toast.error(e.message); }
+              })}
+              disabled={pending}
+              className="btn-primary btn-sm"
+            >Valider</button>
+            <button onClick={() => { setNotesOpen(null); setNotes(""); }} className="btn-ghost btn-sm">Annuler</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

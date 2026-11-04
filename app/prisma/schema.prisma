@@ -3565,6 +3565,12 @@ model ClientPortal {
   /// Si false, l'URL retourne 404 côté client (désactivé)
   isActive      Boolean  @default(true)
   notes         String?
+  /// "LEGACY" (3 boutons : accepter / entretien / refuser) ou "V2" (flow
+  /// multi-étapes : entretien 1 → entretien 2 → shortlist → accepté, avec
+  /// 3 créneaux proposables par entretien). Les nouveaux portails créés
+  /// après deploy démarrent en V2. Les anciens restent LEGACY sauf si on
+  /// bascule explicitement depuis l'admin.
+  workflowVersion String @default("LEGACY")
   createdById   String?
   createdBy     User?    @relation("ClientPortalCreator", fields: [createdById], references: [id], onDelete: SetNull)
   /// Statistiques de visite (incrémentées sur chaque chargement portail)
@@ -3627,6 +3633,20 @@ model CandidateProposal {
   /// Contact nominatif qui a agi (null si action depuis le lien général)
   actedByContactId  String?
   actedByContactName String?
+
+  // ─── Workflow V2 (portails isAdvanced) ───────────────────────────
+  /// Créneaux proposés pour l'entretien 1 (JSON array de 3 objets
+  /// {date, startTime, endTime, mode: 'VISIO'|'ONSITE'})
+  interview1Slots       Json?
+  /// Date de confirmation du créneau par Dasolabs
+  interview1ConfirmedAt DateTime?
+  interview1DoneAt      DateTime?
+  interview1Notes       String?   // notes Dasolabs partagées au client
+  interview2Slots       Json?
+  interview2ConfirmedAt DateTime?
+  interview2DoneAt      DateTime?
+  interview2Notes       String?
+  shortlistedAt         DateTime?
   /// Note interne Dasolabs (NON visible côté client)
   internalNote      String?
   /// Si false, retiré de la vue côté client (historique conservé)

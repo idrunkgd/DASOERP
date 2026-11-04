@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { PortalClientView } from "./view";
+import { PortalClientViewV2 } from "./view-v2";
 import { trackPortalView, resolvePortalByToken } from "@/server/actions/client-portal-public";
 
 export const dynamic = "force-dynamic";
@@ -45,7 +46,7 @@ export default async function PublicPortalPage({ params }: { params: { token: st
   const payload = JSON.parse(JSON.stringify({
     name: portal.name,
     logoUrl: portal.logoUrl,
-    // Si le token est nominatif, on affiche "Bonjour <prénom>" au client
+    workflowVersion: portal.workflowVersion ?? "LEGACY",
     greetingName: resolved.contact?.name ?? null,
     proposals: portal.proposals.map((p: any) => ({
       id: p.id,
@@ -53,6 +54,16 @@ export default async function PublicPortalPage({ params }: { params: { token: st
       clientMessage: p.clientMessage,
       actedByContactName: p.actedByContactName ?? null,
       proposedDailyRate: Number(p.proposedDailyRate),
+      // Champs V2
+      interview1Slots:       p.interview1Slots ?? null,
+      interview1ConfirmedAt: p.interview1ConfirmedAt ?? null,
+      interview1DoneAt:      p.interview1DoneAt ?? null,
+      interview1Notes:       p.interview1Notes ?? null,
+      interview2Slots:       p.interview2Slots ?? null,
+      interview2ConfirmedAt: p.interview2ConfirmedAt ?? null,
+      interview2DoneAt:      p.interview2DoneAt ?? null,
+      interview2Notes:       p.interview2Notes ?? null,
+      shortlistedAt:         p.shortlistedAt ?? null,
       candidate: {
         ...p.candidate,
         skills: Array.isArray(p.candidate.skills) ? p.candidate.skills : []
@@ -60,5 +71,8 @@ export default async function PublicPortalPage({ params }: { params: { token: st
     }))
   }));
 
+  if ((portal.workflowVersion ?? "LEGACY") === "V2") {
+    return <PortalClientViewV2 token={params.token} data={payload} />;
+  }
   return <PortalClientView token={params.token} data={payload} />;
 }

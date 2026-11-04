@@ -30,7 +30,9 @@ export async function createClientPortal(formData: FormData) {
   const session = await requirePermission("consulting.write");
   const data = PortalSchema.parse(Object.fromEntries(formData));
   const portal = await (prisma as any).clientPortal.create({
-    data: { ...data, createdById: session.user.id }
+    // Nouveaux portails en V2 par défaut : flow multi-étapes avec créneaux.
+    // Les portails pré-existants restent en LEGACY tant qu'on ne bascule pas.
+    data: { ...data, createdById: session.user.id, workflowVersion: "V2" }
   });
   await logActivity({
     actorId: session.user.id, action: "CREATE", entityType: "ClientPortal",
@@ -149,6 +151,92 @@ export async function restoreProposal(id: string) {
   });
   revalidatePath(`/client-portals/${before.portalId}`);
   revalidatePath(`/candidates/${before.candidateId}`);
+}
+
+/**
+ * Marque un entretien comme effectué (côté admin). Enregistre notes + heure.
+ * Débloque la décision suivante côté client (accept / shortlist / ent. 2 / reject).
+ */
+export async function markInterviewDone(input: {
+  proposalId: string;
+  which: 1 | 2;
+  notes?: string;
+}) {
+  const session = await requirePermission("consulting.write");
+  const p = await (prisma as any).candidateProposal.findUniqueOrThrow({
+    where: { id: input.proposalId }
+  });
+
+  const expected = input.which === 1 ? "INTERVIEW_1_REQUESTED" : "INTERVIEW_2_REQUESTED";
+  const next     = input.which === 1 ? "INTERVIEW_1_DONE"      : "INTERVIEW_2_DONE";
+  if (p.status !== expected) {
+    throw new Error(`Statut inattendu (${p.status}). Un entretien doit d'abord être demandé.`);
+  }
+
+  const data: Record<string, any> = { status: next };
+  if (input.which === 1) {
+    data.interview1DoneAt = new Date();
+    data.interview1Notes  = input.notes?.trim() || null;
+  } else {
+    data.interview2DoneAt = new Date();
+    data.interview2Notes  = input.notes?.trim() || null;
+  }
+  await (prisma as any).candidateProposal.update({ where: { id: p.id }, data });
+
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "CandidateProposal",
+    entityId: p.id,
+    message: `Entretien ${input.which} effectué — notes partagées au client`
+  });
+  revalidatePath(`/client-portals/${p.portalId}`);
+}
+
+/**
+ * Confirme un créneau précis parmi ceux proposés par le client.
+ * Garde la date pour affichage côté client.
+ */
+export async function confirmInterviewSlot(input: {
+  proposalId: string;
+  which: 1 | 2;
+  slotIndex: number;
+}) {
+  const session = await requirePermission("consulting.write");
+  const p = await (prisma as any).candidateProposal.findUniqueOrThrow({
+    where: { id: input.proposalId }
+  });
+  const slotsField = input.which === 1 ? "interview1Slots" : "interview2Slots";
+  const confirmField = input.which === 1 ? "interview1ConfirmedAt" : "interview2ConfirmedAt";
+  const slots = (p as any)[slotsField] as Array<any> | null;
+  if (!slots || !slots[input.slotIndex]) throw new Error("Créneau introuvable.");
+  const chosen = slots[input.slotIndex];
+  const iso = new Date(`${chosen.date}T${chosen.startTime}:00`);
+  await (prisma as any).candidateProposal.update({
+    where: { id: p.id },
+    data: { [confirmField]: iso }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "CandidateProposal",
+    entityId: p.id,
+    message: `Créneau entretien ${input.which} confirmé : ${chosen.date} ${chosen.startTime}–${chosen.endTime} (${chosen.mode})`
+  });
+  revalidatePath(`/client-portals/${p.portalId}`);
+}
+
+/**
+ * Bascule le workflow du portail (LEGACY ↔ V2). Réservé pour migration.
+ */
+export async function setPortalWorkflow(portalId: string, version: "LEGACY" | "V2") {
+  const session = await requirePermission("consulting.write");
+  const before = await (prisma as any).clientPortal.findUniqueOrThrow({ where: { id: portalId } });
+  await (prisma as any).clientPortal.update({
+    where: { id: portalId }, data: { workflowVersion: version }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "ClientPortal",
+    entityId: portalId,
+    message: `Portail basculé en workflow ${version} (ancien : ${before.workflowVersion})`
+  });
+  revalidatePath(`/client-portals/${portalId}`);
 }
 
 /**

@@ -150,6 +150,129 @@ export async function respondToProposalPublic(input: {
   return { ok: true, status };
 }
 
+// ─── Workflow V2 ────────────────────────────────────────────────────
+
+type Slot = { date: string; startTime: string; endTime: string; mode: "VISIO" | "ONSITE" };
+
+function validateSlots(slots: Slot[]): Slot[] {
+  if (!Array.isArray(slots)) throw new Error("Créneaux invalides.");
+  if (slots.length < 1 || slots.length > 3) throw new Error("Proposez entre 1 et 3 créneaux.");
+  const clean: Slot[] = [];
+  for (const s of slots) {
+    if (!s || typeof s !== "object") throw new Error("Créneau invalide.");
+    const { date, startTime, endTime, mode } = s;
+    if (!date || !startTime || !endTime) throw new Error("Chaque créneau doit avoir date + heure début + heure fin.");
+    if (mode !== "VISIO" && mode !== "ONSITE") throw new Error("Mode d'entretien invalide.");
+    clean.push({ date, startTime, endTime, mode });
+  }
+  return clean;
+}
+
+type V2Action =
+  | { kind: "ACCEPT" }
+  | { kind: "REJECT" }
+  | { kind: "SHORTLIST" }
+  | { kind: "REQUEST_INTERVIEW_1"; slots: Slot[] }
+  | { kind: "REQUEST_INTERVIEW_2"; slots: Slot[] }
+  | { kind: "REQUEST_ADDITIONAL_INTERVIEW"; slots: Slot[] };
+
+/**
+ * Applique une action V2 sur une proposition. Vérifie que la transition
+ * d'état est valide.
+ */
+export async function respondToProposalV2(input: {
+  token: string;
+  proposalId: string;
+  action: V2Action;
+  clientMessage?: string;
+}) {
+  const resolved = await resolvePortalByToken(input.token);
+  if (!resolved) throw new Error("Lien introuvable ou désactivé.");
+
+  const p = await (prisma as any).candidateProposal.findUnique({
+    where: { id: input.proposalId },
+    include: {
+      candidate: { select: { id: true, firstName: true, lastName: true } },
+      portal:    { select: { workflowVersion: true } }
+    }
+  });
+  if (!p || p.portalId !== resolved.portalId || !p.isVisible) throw new Error("Proposition introuvable.");
+  if (p.portal.workflowVersion !== "V2") throw new Error("Ce portail est en mode classique.");
+
+  const curr = p.status as string;
+  const data: Record<string, any> = {
+    clientMessage: input.clientMessage?.trim() || null,
+    clientActedAt: new Date(),
+    actedByContactId:   resolved.contact?.id   ?? null,
+    actedByContactName: resolved.contact?.name ?? null
+  };
+  let nextStatus: string | null = null;
+
+  switch (input.action.kind) {
+    case "ACCEPT":
+      nextStatus = "ACCEPTED";
+      break;
+    case "REJECT":
+      nextStatus = "REJECTED";
+      break;
+    case "SHORTLIST":
+      if (!["INTERVIEW_1_DONE", "INTERVIEW_2_DONE"].includes(curr))
+        throw new Error("Shortlist disponible après un entretien effectué.");
+      nextStatus = "SHORTLISTED";
+      data.shortlistedAt = new Date();
+      break;
+    case "REQUEST_INTERVIEW_1": {
+      if (!["PROPOSED"].includes(curr)) throw new Error("Entretien 1 déjà demandé.");
+      data.interview1Slots = validateSlots(input.action.slots);
+      nextStatus = "INTERVIEW_1_REQUESTED";
+      break;
+    }
+    case "REQUEST_INTERVIEW_2": {
+      if (!["INTERVIEW_1_DONE"].includes(curr)) throw new Error("Entretien 2 nécessite un entretien 1 effectué.");
+      data.interview2Slots = validateSlots(input.action.slots);
+      nextStatus = "INTERVIEW_2_REQUESTED";
+      break;
+    }
+    case "REQUEST_ADDITIONAL_INTERVIEW": {
+      if (!["SHORTLISTED"].includes(curr)) throw new Error("Entretien complémentaire : réservé aux profils shortlistés.");
+      data.interview2Slots = validateSlots(input.action.slots); // réutilise slot2 slot
+      nextStatus = "INTERVIEW_2_REQUESTED";
+      break;
+    }
+  }
+  if (!nextStatus) throw new Error("Transition inconnue.");
+
+  data.status = nextStatus;
+  await (prisma as any).candidateProposal.update({ where: { id: p.id }, data });
+
+  const actor = resolved.contact?.name ?? "lien général";
+  await logActivity({
+    actorId: null, action: "UPDATE", entityType: "CandidateProposal", entityId: p.id,
+    message: `[Portail ${resolved.name}] ${actor} → ${nextStatus}`
+  });
+
+  if (p.ownerUserId) {
+    const label: Record<string, string> = {
+      ACCEPTED:              `✅ accepte`,
+      REJECTED:              `❌ refuse`,
+      SHORTLISTED:           `👥 shortliste`,
+      INTERVIEW_1_REQUESTED: `📅 propose 3 créneaux pour entretien 1 avec`,
+      INTERVIEW_2_REQUESTED: `📅 propose 3 créneaux pour entretien 2 avec`
+    };
+    const actorSuffix = resolved.contact ? ` (par ${resolved.contact.name})` : "";
+    const title = `${resolved.name}${actorSuffix} ${label[nextStatus] ?? "→ " + nextStatus} ${p.candidate.firstName} ${p.candidate.lastName}`;
+    await createNotification({
+      userId: p.ownerUserId, type: "OTHER", title,
+      message: input.clientMessage?.trim() || null,
+      href: `/candidates/${p.candidate.id}`,
+      entityType: "CandidateProposal", entityId: p.id
+    });
+  }
+
+  revalidatePath(`/portal/${input.token}`);
+  return { ok: true, status: nextStatus };
+}
+
 export async function trackPortalView(token: string) {
   // Incrémente le compteur sur l'entité qui porte réellement le token
   // (ClientPortal OU ClientPortalContact), pas forcément le portail.
