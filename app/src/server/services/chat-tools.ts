@@ -392,6 +392,390 @@ export const TOOLS: ChatTool[] = [
 
   // ---------- Charge équipe ----------
   {
+    name: "my_hub_summary",
+    description: "Synthèse personnelle de l'utilisateur connecté : solde congés, timesheet du mois en cours, missions actives, notes de frais en attente. Toujours disponible, répond sur l'user courant.",
+    permission: "any",
+    parameters: { type: "object", properties: {}, required: [] },
+    run: async (_a, ctx) => {
+      const u = await prisma.user.findUnique({
+        where: { id: ctx.userId },
+        select: {
+          id: true, firstName: true, lastName: true,
+          rttDays: true, weeklyCapacityH: true,
+          leaveBalances: {
+            where: { year: new Date().getFullYear() },
+            select: { entitled: true, type: true, year: true }
+          }
+        }
+      });
+      if (!u) return { error: "Utilisateur introuvable" };
+      const balancesByType = (u.leaveBalances ?? []).reduce((acc: any, b: any) => {
+        acc[b.type] = Number(b.entitled);
+        return acc;
+      }, {});
+
+      const now = new Date();
+      const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+      const [missions, expenses, timesheetHours, pendingLeaves] = await Promise.all([
+        (prisma as any).mission.count({
+          where: { consultantId: u.id, status: "ACTIVE" }
+        }).catch(() => 0),
+        prisma.expense.count({
+          where: { userId: u.id, status: { in: ["SUBMITTED", "APPROVED"] } }
+        }).catch(() => 0),
+        prisma.timesheetEntry.aggregate({
+          where: { userId: u.id, date: { gte: startMonth, lte: endMonth } },
+          _sum: { hours: true }
+        }).then(r => Number(r._sum?.hours ?? 0)).catch(() => 0),
+        prisma.leave.count({
+          where: { userId: u.id, status: "SUBMITTED" }
+        }).catch(() => 0)
+      ]);
+
+      return {
+        user: `${u.firstName} ${u.lastName}`,
+        leave: {
+          year: new Date().getFullYear(),
+          entitledByType: balancesByType, // ex: { LEGAL: 20, EXTRA: 2 }
+          rttDays: u.rttDays != null ? Number(u.rttDays) : null,
+          pendingRequests: pendingLeaves
+        },
+        timesheet: {
+          hoursThisMonth: timesheetHours,
+          link: "/timesheet"
+        },
+        missions: { active: missions, link: "/missions" },
+        expenses: { openCount: expenses, link: "/expenses" }
+      };
+    }
+  },
+
+  {
+    name: "list_my_expenses",
+    description: "Liste les notes de frais DE L'UTILISATEUR CONNECTÉ (soumises, approuvées, payées). Max 30.",
+    permission: "any",
+    parameters: {
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["DRAFT","SUBMITTED","APPROVED","REJECTED","PAID"], description: "Filtre statut" }
+      },
+      required: []
+    },
+    run: async (args, ctx) => {
+      const where: any = { userId: ctx.userId };
+      if (args.status) where.status = args.status;
+      const list = await prisma.expense.findMany({
+        where, orderBy: { createdAt: "desc" }, take: 30,
+        select: { id: true, reference: true, title: true, amount: true, status: true, createdAt: true }
+      });
+      return {
+        count: list.length,
+        expenses: list.map((e: any) => ({
+          reference: e.reference, title: e.title,
+          amount: Number(e.amount), status: e.status,
+          createdAt: e.createdAt.toISOString().slice(0, 10),
+          link: `/expenses/${e.id}`
+        }))
+      };
+    }
+  },
+
+  {
+    name: "list_expenses_to_approve",
+    description: "Liste les notes de frais soumises en attente d'approbation (ADMIN/MANAGER). Max 30.",
+    permission: "expenses.read",
+    parameters: { type: "object", properties: {}, required: [] },
+    run: async (_a, ctx) => {
+      if (!ctx.perms.includes("expenses.read")) return deny("expenses.read");
+      const list = await prisma.expense.findMany({
+        where: { status: "SUBMITTED" }, orderBy: { createdAt: "asc" }, take: 30,
+        select: {
+          id: true, reference: true, title: true, amount: true, createdAt: true,
+          user: { select: { firstName: true, lastName: true } }
+        }
+      });
+      return {
+        count: list.length,
+        expenses: list.map((e: any) => ({
+          reference: e.reference, title: e.title,
+          amount: Number(e.amount),
+          by: `${e.user?.firstName ?? ""} ${e.user?.lastName ?? ""}`.trim(),
+          createdAt: e.createdAt.toISOString().slice(0, 10),
+          link: `/expenses/${e.id}`
+        }))
+      };
+    }
+  },
+
+  {
+    name: "list_my_leaves",
+    description: "Liste les congés de l'utilisateur connecté avec leur statut.",
+    permission: "any",
+    parameters: {
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["DRAFT","SUBMITTED","APPROVED","REJECTED"], description: "Filtre statut" }
+      },
+      required: []
+    },
+    run: async (args, ctx) => {
+      const where: any = { userId: ctx.userId };
+      if (args.status) where.status = args.status;
+      const list = await prisma.leave.findMany({
+        where, orderBy: { startDate: "desc" }, take: 50,
+        select: { id: true, startDate: true, endDate: true, days: true, type: true, status: true, reason: true }
+      });
+      return {
+        count: list.length,
+        leaves: list.map((l: any) => ({
+          type: l.type, status: l.status,
+          startDate: l.startDate.toISOString().slice(0,10),
+          endDate:   l.endDate.toISOString().slice(0,10),
+          days: Number(l.days), reason: l.reason,
+          link: `/leaves/${l.id}`
+        }))
+      };
+    }
+  },
+
+  {
+    name: "list_leaves_to_approve",
+    description: "Congés soumis en attente d'approbation (manager). Max 30.",
+    permission: "leaves.read",
+    parameters: { type: "object", properties: {}, required: [] },
+    run: async (_a, ctx) => {
+      if (!ctx.perms.includes("leaves.read")) return deny("leaves.read");
+      const list = await prisma.leave.findMany({
+        where: { status: "SUBMITTED" }, orderBy: { startDate: "asc" }, take: 30,
+        select: {
+          id: true, startDate: true, endDate: true, days: true, type: true,
+          user: { select: { firstName: true, lastName: true } }
+        }
+      });
+      return {
+        count: list.length,
+        leaves: list.map((l: any) => ({
+          by: `${l.user?.firstName ?? ""} ${l.user?.lastName ?? ""}`.trim(),
+          type: l.type,
+          startDate: l.startDate.toISOString().slice(0,10),
+          endDate:   l.endDate.toISOString().slice(0,10),
+          days: Number(l.days),
+          link: `/leaves/${l.id}`
+        }))
+      };
+    }
+  },
+
+  {
+    name: "list_recent_sick_leaves",
+    description: "Arrêts maladie récents (6 derniers mois). Admin/manager uniquement.",
+    permission: "users.manage",
+    parameters: { type: "object", properties: {}, required: [] },
+    run: async (_a, ctx) => {
+      if (!ctx.perms.includes("users.manage")) return deny("users.manage");
+      const since = new Date(); since.setMonth(since.getMonth() - 6);
+      const list = await (prisma as any).sickLeave.findMany({
+        where: { startDate: { gte: since } }, orderBy: { startDate: "desc" }, take: 30,
+        include: { user: { select: { firstName: true, lastName: true } } }
+      });
+      return {
+        count: list.length,
+        sickLeaves: list.map((s: any) => {
+          const ms = (s.endDate?.getTime() ?? s.startDate.getTime()) - s.startDate.getTime();
+          const days = Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)) + 1);
+          return {
+            by: `${s.user?.firstName ?? ""} ${s.user?.lastName ?? ""}`.trim(),
+            startDate: s.startDate.toISOString().slice(0,10),
+            endDate:   s.endDate?.toISOString?.()?.slice(0,10) ?? null,
+            days,
+            link: `/sick-leaves/${s.id}`
+          };
+        })
+      };
+    }
+  },
+
+  {
+    name: "get_salary_summary",
+    description: "Résumé salarial d'un employé (brut, net en main, package). SENSIBLE — réservé admin/finance. Si pas de nom précisé, renvoie tous les employés actifs avec leur brut.",
+    permission: "finance.write",
+    parameters: {
+      type: "object",
+      properties: {
+        employeeName: { type: "string", description: "Nom (ou partie du nom) de l'employé" }
+      },
+      required: []
+    },
+    run: async (args, ctx) => {
+      if (!ctx.perms.includes("finance.write")) return deny("finance.write");
+      const where: any = { endDate: null };
+      if (args.employeeName) where.OR = [
+        { firstName: { contains: args.employeeName, mode: "insensitive" } },
+        { lastName:  { contains: args.employeeName, mode: "insensitive" } }
+      ];
+      const list = await (prisma as any).payrollEmployee.findMany({
+        where, take: 20,
+        orderBy: [{ lastName: "asc" }]
+      });
+      return {
+        count: list.length,
+        employees: list.map((p: any) => ({
+          name: `${p.firstName} ${p.lastName}`,
+          role: p.role,
+          brut: Number(p.monthlyGrossReference ?? 0),
+          net:  Number(p.monthlyNetPay ?? 0),
+          precompte: Number(p.monthlyWithholdingTax ?? 0),
+          onss: Number(p.monthlyOnss ?? 0),
+          car:  Number(p.carMonthlyTco ?? 0),
+          fraisNet: Number(p.netExpensesMonthly ?? 0),
+          phone: Number(p.phoneInternetMonthly ?? 0),
+          hospi: Number(p.hospitalInsuranceMonthly ?? 0),
+          link: `/employees`
+        }))
+      };
+    }
+  },
+
+  {
+    name: "my_timesheet_status",
+    description: "État du timesheet de l'utilisateur connecté : heures saisies vs attendu pour le mois courant.",
+    permission: "any",
+    parameters: {
+      type: "object",
+      properties: {
+        month: { type: "string", description: "Mois au format YYYY-MM (défaut : mois en cours)" }
+      },
+      required: []
+    },
+    run: async (args, ctx) => {
+      const now = args.month ? new Date(args.month + "-01") : new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const [agg, u] = await Promise.all([
+        prisma.timesheetEntry.aggregate({
+          where: { userId: ctx.userId, date: { gte: start, lte: end } },
+          _sum: { hours: true }
+        }),
+        prisma.user.findUnique({
+          where: { id: ctx.userId },
+          select: { weeklyCapacityH: true }
+        })
+      ]);
+      const weeksInMonth = 4.33;
+      const expected = Number(u?.weeklyCapacityH ?? 38) * weeksInMonth;
+      const logged = Number(agg._sum?.hours ?? 0);
+      return {
+        month: now.toISOString().slice(0, 7),
+        hoursLogged: logged,
+        hoursExpected: Math.round(expected),
+        completion: Math.round((logged / expected) * 100),
+        link: "/timesheet"
+      };
+    }
+  },
+
+  {
+    name: "list_client_portals_status",
+    description: "Liste tous les portails clients avec le nombre de propositions en attente de décision client.",
+    permission: "consulting.read",
+    parameters: { type: "object", properties: {}, required: [] },
+    run: async (_a, ctx) => {
+      if (!ctx.perms.includes("consulting.read")) return deny("consulting.read");
+      const portals = await (prisma as any).clientPortal.findMany({
+        where: { isActive: true }, take: 30,
+        orderBy: [{ company: { name: "asc" } }, { name: "asc" }],
+        include: {
+          company: { select: { name: true } },
+          _count: { select: { proposals: { where: { isVisible: true } } } },
+          proposals: {
+            where: {
+              isVisible: true,
+              status: { in: ["PROPOSED", "INTERVIEW_1_REQUESTED", "INTERVIEW_2_REQUESTED", "SHORTLISTED"] }
+            },
+            select: { id: true }
+          }
+        }
+      });
+      return {
+        count: portals.length,
+        portals: portals.map((p: any) => ({
+          name: p.name,
+          company: p.company?.name ?? "—",
+          visibleCount: p._count.proposals,
+          waitingForClient: p.proposals.length,
+          workflow: p.workflowVersion,
+          link: `/client-portals/${p.id}`
+        }))
+      };
+    }
+  },
+
+  {
+    name: "list_candidate_proposals",
+    description: "Propositions candidat en cours sur les portails clients, filtrables par statut ou société.",
+    permission: "consulting.read",
+    parameters: {
+      type: "object",
+      properties: {
+        status: {
+          type: "string",
+          description: "PROPOSED / INTERVIEW_1_REQUESTED / INTERVIEW_1_DONE / INTERVIEW_2_REQUESTED / INTERVIEW_2_DONE / SHORTLISTED / ACCEPTED / REJECTED"
+        },
+        companyName: { type: "string", description: "Nom (partiel) de la société cliente" }
+      },
+      required: []
+    },
+    run: async (args, ctx) => {
+      if (!ctx.perms.includes("consulting.read")) return deny("consulting.read");
+      const where: any = { isVisible: true };
+      if (args.status) where.status = args.status;
+      if (args.companyName) where.portal = { company: { name: { contains: args.companyName, mode: "insensitive" } } };
+      const list = await (prisma as any).candidateProposal.findMany({
+        where, orderBy: { updatedAt: "desc" }, take: 30,
+        include: {
+          candidate: { select: { firstName: true, lastName: true } },
+          portal:    { select: { name: true, company: { select: { name: true } } } }
+        }
+      });
+      return {
+        count: list.length,
+        proposals: list.map((p: any) => ({
+          candidate: `${p.candidate.firstName} ${p.candidate.lastName}`,
+          company: p.portal.company?.name,
+          portal: p.portal.name,
+          status: p.status,
+          tjm: Number(p.proposedDailyRate),
+          actedBy: p.actedByContactName ?? null,
+          link: `/client-portals/${p.portalId}`
+        }))
+      };
+    }
+  },
+
+  {
+    name: "list_my_documents",
+    description: "Documents de l'utilisateur connecté (contrats, fiches paie, etc.).",
+    permission: "any",
+    parameters: { type: "object", properties: {}, required: [] },
+    run: async (_a, ctx) => {
+      const list = await (prisma as any).document.findMany({
+        where: { userId: ctx.userId }, orderBy: { createdAt: "desc" }, take: 30,
+        select: { id: true, title: true, kind: true, createdAt: true }
+      }).catch(() => []);
+      return {
+        count: list.length,
+        documents: list.map((d: any) => ({
+          title: d.title, kind: d.kind,
+          createdAt: d.createdAt?.toISOString()?.slice(0, 10),
+          link: `/me/documents/${d.id}`
+        }))
+      };
+    }
+  },
+
+  {
     name: "team_workload",
     description: "Donne la charge planifiée vs capacité de chaque consultant interne pour cette semaine.",
     permission: "planning.read",
