@@ -11,7 +11,7 @@ import { logActivity } from "@/lib/audit";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
-const GEMINI_MODEL = "gemini-2.0-flash"; // stable, free tier généreux (gemini-1.5-flash-latest déprécié nov 2025)
+const GEMINI_MODEL = "gemini-2.5-flash"; // 2.0-flash déprécié nov 2026, bascule 2.5-flash (free tier identique)
 const MAX_LOOPS = 5;
 
 const SYSTEM_PROMPT = `Tu es Huberte 🦉, la mémoire d'entreprise du Hub Dasolabs — une startup IT/industrielle belge.
@@ -37,6 +37,7 @@ ESPACE PERSO DE L'UTILISATEUR :
 ADMIN / MANAGER :
 - Congés à approuver → list_leaves_to_approve. Notes de frais à approuver → list_expenses_to_approve. Arrêts maladie récents → list_recent_sick_leaves.
 - Résumé salarial d'un employé (brut, package, voiture) → get_salary_summary (SENSIBLE : refuse si pas de droit finance).
+- "Combien sur le compte en banque ?" / "Solde actuel" → get_bank_balance (somme les transactions importées, pas une requête live GoCardless).
 
 Règles strictes :
 - Réponds TOUJOURS en français.

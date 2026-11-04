@@ -392,6 +392,45 @@ export const TOOLS: ChatTool[] = [
 
   // ---------- Charge équipe ----------
   {
+    name: "get_bank_balance",
+    description: "Donne le solde actuel du/des compte(s) bancaire(s) Dasolabs. Le solde est estimé en sommant toutes les transactions importées depuis GoCardless. Réservé finance/admin.",
+    permission: "finance.read",
+    parameters: { type: "object", properties: {}, required: [] },
+    run: async (_a, ctx) => {
+      if (!ctx.perms.includes("finance.read")) return deny("finance.read");
+      const accounts = await (prisma as any).bankAccount.findMany({
+        select: {
+          id: true, iban: true, currency: true, name: true, ownerName: true,
+          _count: { select: { transactions: true } }
+        }
+      });
+      const balances = await Promise.all(accounts.map(async (a: any) => {
+        const agg = await (prisma as any).bankTransaction.aggregate({
+          where: { accountId: a.id },
+          _sum: { amount: true },
+          _max: { bookingDate: true }
+        }).catch(() => ({ _sum: { amount: null }, _max: { bookingDate: null } }));
+        return {
+          account: a.name ?? a.ownerName ?? (a.iban ? `IBAN ••${a.iban.slice(-4)}` : "Compte"),
+          iban: a.iban,
+          currency: a.currency,
+          estimatedBalance: Number(agg._sum?.amount ?? 0),
+          lastTransactionDate: agg._max?.bookingDate?.toISOString?.()?.slice(0, 10) ?? null,
+          transactionsCount: a._count.transactions,
+          link: "/cashflow"
+        };
+      }));
+      const total = balances.reduce((s, b) => s + b.estimatedBalance, 0);
+      return {
+        accountsCount: accounts.length,
+        totalEstimatedBalance: Math.round(total * 100) / 100,
+        note: "Solde estimé en sommant les transactions importées (pas une requête live auprès de la banque).",
+        accounts: balances
+      };
+    }
+  },
+
+  {
     name: "my_hub_summary",
     description: "Synthèse personnelle de l'utilisateur connecté : solde congés, timesheet du mois en cours, missions actives, notes de frais en attente. Toujours disponible, répond sur l'user courant.",
     permission: "any",
