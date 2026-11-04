@@ -8,13 +8,22 @@
  * Hub autour.
  */
 import { useState, useTransition } from "react";
-import { respondToProposalV2 } from "@/server/actions/client-portal-public";
+import { respondToProposalV2, addClientComment } from "@/server/actions/client-portal-public";
 import {
   User, MapPin, Check, X, CalendarCheck, Users as UsersIcon,
-  Clock, Video, Building2, Plus, Trash2, FileDown, Eye
+  Clock, Video, Building2, Plus, Trash2, FileDown, Eye,
+  MessageSquare, Send, AlertTriangle
 } from "lucide-react";
 
 type Slot = { date: string; startTime: string; endTime: string; mode: "VISIO" | "ONSITE" };
+
+type Comment = {
+  id: string;
+  authorKind: "CLIENT" | "DASOLABS";
+  authorName: string;
+  content: string;
+  createdAt: string;
+};
 
 type Proposal = {
   id: string;
@@ -22,6 +31,7 @@ type Proposal = {
   proposedDailyRate: number;
   clientMessage: string | null;
   actedByContactName: string | null;
+  comments: Comment[];
   interview1Slots: Slot[] | null;
   interview1ConfirmedAt: string | null;
   interview1DoneAt: string | null;
@@ -70,11 +80,27 @@ function stepIndex(status: string) {
 
 export function PortalClientViewV2({ token, data }: {
   token: string;
-  data: { name: string; logoUrl: string | null; greetingName: string | null; proposals: Proposal[] };
+  data: {
+    name: string; logoUrl: string | null;
+    greetingName: string | null;
+    isDasolabsPreview?: boolean;
+    proposals: Proposal[];
+  };
 }) {
   const firstName = data.greetingName?.split(/\s+/)[0];
   return (
     <div className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      {data.isDasolabsPreview && (
+        <div className="mb-4 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-3 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <div className="font-semibold text-amber-900">Vue interne Dasolabs — prévisualisation</div>
+            <div className="text-xs text-amber-800">
+              Ce lien est votre lien général. Ne l'envoyez PAS au client — créez un lien personnel nominatif dans l'admin et partagez celui-ci.
+            </div>
+          </div>
+        </div>
+      )}
       <header className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-slate-200">
         {data.logoUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
@@ -214,7 +240,8 @@ function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal
         </div>
       </div>
 
-      <div className="mt-5 pt-4 border-t border-border">
+      <div className="mt-5 pt-4 border-t border-border space-y-4">
+        <CommentsThread token={token} proposal={proposal} />
         {isRejected ? (
           <RejectedPanel proposal={proposal} />
         ) : (
@@ -227,6 +254,82 @@ function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal
         )}
       </div>
     </article>
+  );
+}
+
+function CommentsThread({ token, proposal }: { token: string; proposal: Proposal }) {
+  const [draft, setDraft] = useState("");
+  const [pending, start] = useTransition();
+  const [showForm, setShowForm] = useState(false);
+
+  function submit() {
+    const content = draft.trim();
+    if (!content) return;
+    start(async () => {
+      try {
+        await addClientComment({ token, proposalId: proposal.id, content });
+        setDraft(""); setShowForm(false);
+      } catch (e: any) { alert(e.message); }
+    });
+  }
+
+  if (!proposal.comments?.length && !showForm) {
+    return (
+      <button
+        onClick={() => setShowForm(true)}
+        className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
+      >
+        <MessageSquare className="w-3 h-3" /> Ajouter un commentaire
+      </button>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="text-xs uppercase tracking-wider text-midnight-500 font-semibold flex items-center gap-1">
+        <MessageSquare className="w-3 h-3" /> Discussion
+      </div>
+      {proposal.comments.map((c) => {
+        const isDaso = c.authorKind === "DASOLABS";
+        return (
+          <div key={c.id} className={`flex ${isDaso ? "justify-start" : "justify-end"}`}>
+            <div className={`max-w-[85%] rounded-lg px-3 py-2 ${
+              isDaso
+                ? "bg-indigo-50 border border-indigo-200 text-indigo-900"
+                : "bg-slate-100 border border-slate-200 text-slate-800"
+            }`}>
+              <div className={`text-[10px] font-semibold ${isDaso ? "text-indigo-700" : "text-slate-500"}`}>
+                {isDaso ? "Dasolabs · " : ""}{c.authorName} · {new Date(c.createdAt).toLocaleString("fr-BE", { dateStyle: "short", timeStyle: "short" })}
+              </div>
+              <div className="text-sm whitespace-pre-line mt-0.5">{c.content}</div>
+            </div>
+          </div>
+        );
+      })}
+
+      {showForm ? (
+        <div className="flex gap-2 items-end mt-2">
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={2}
+            placeholder="Écrire un commentaire…"
+            className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+          />
+          <button onClick={submit} disabled={pending || !draft.trim()}
+            className="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded-md text-sm shrink-0">
+            <Send className="w-3.5 h-3.5" /> Envoyer
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowForm(true)}
+          className="text-xs text-indigo-600 hover:underline flex items-center gap-1 mt-1"
+        >
+          <MessageSquare className="w-3 h-3" /> Répondre
+        </button>
+      )}
+    </div>
   );
 }
 

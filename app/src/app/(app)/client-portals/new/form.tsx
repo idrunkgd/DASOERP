@@ -61,14 +61,30 @@ export function NewPortalForm({ companies }: { companies: { id: string; name: st
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* Premier contact client OBLIGATOIRE — le portail ne peut pas être
+          partagé au client sans au moins un lien personnel nominatif.
+          Le lien général reste réservé à Dasolabs (prévisualisation). */}
+      <div className="rounded-lg border-2 border-indigoaccent/30 bg-indigoaccent/5 p-4 space-y-3">
         <div>
-          <label className="label">Contact (optionnel)</label>
-          <input name="contactName" className="input" placeholder="Nom du contact" />
+          <div className="text-sm font-semibold text-midnight-900">Premier contact client (obligatoire)</div>
+          <p className="text-[11px] text-midnight-600 mt-0.5">
+            Le lien envoyé au client doit être nominatif — on saura qui agit et commente.
+            Le lien général du portail reste réservé à Dasolabs comme prévisualisation.
+          </p>
         </div>
-        <div>
-          <label className="label">Email contact</label>
-          <input name="contactEmail" type="email" className="input" placeholder="contact@client.com" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div>
+            <label className="label text-xs">Nom *</label>
+            <input name="firstContactName" required className="input" placeholder="Jean Dupont" />
+          </div>
+          <div>
+            <label className="label text-xs">Email</label>
+            <input name="firstContactEmail" type="email" className="input" placeholder="jean@client.com" />
+          </div>
+          <div>
+            <label className="label text-xs">Fonction</label>
+            <input name="firstContactJobTitle" className="input" placeholder="CTO, Head of Ops…" />
+          </div>
         </div>
       </div>
 

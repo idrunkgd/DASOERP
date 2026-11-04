@@ -254,6 +254,20 @@ export async function respondToProposalV2(input: {
   data.status = nextStatus;
   await (prisma as any).candidateProposal.update({ where: { id: p.id }, data });
 
+  // Chaque action avec commentaire est aussi archivée dans le fil de discussion.
+  if (input.clientMessage?.trim()) {
+    const authorName = resolved.contact?.name || "Client (lien général)";
+    await (prisma as any).candidateProposalComment.create({
+      data: {
+        proposalId: p.id,
+        authorKind: "CLIENT",
+        authorName,
+        authorContactId: resolved.contact?.id ?? null,
+        content: input.clientMessage.trim()
+      }
+    });
+  }
+
   const actor = resolved.contact?.name ?? "lien général";
   await logActivity({
     actorId: null, action: "UPDATE", entityType: "CandidateProposal", entityId: p.id,
@@ -280,6 +294,58 @@ export async function respondToProposalV2(input: {
 
   revalidatePath(`/portal/${input.token}`);
   return { ok: true, status: nextStatus };
+}
+
+/**
+ * Ajoute un commentaire client sans changer le statut. Permet une vraie
+ * discussion : le client peut relancer / préciser sans devoir ré-agir.
+ */
+export async function addClientComment(input: {
+  token: string;
+  proposalId: string;
+  content: string;
+}) {
+  const content = input.content?.trim();
+  if (!content) throw new Error("Commentaire vide.");
+  const resolved = await resolvePortalByToken(input.token);
+  if (!resolved) throw new Error("Lien introuvable ou désactivé.");
+
+  const p = await (prisma as any).candidateProposal.findUnique({
+    where: { id: input.proposalId },
+    include: { candidate: { select: { id: true, firstName: true, lastName: true } } }
+  });
+  if (!p || p.portalId !== resolved.portalId || !p.isVisible)
+    throw new Error("Proposition introuvable.");
+
+  const authorName = resolved.contact?.name || "Client (lien général)";
+  await (prisma as any).candidateProposalComment.create({
+    data: {
+      proposalId: p.id,
+      authorKind: "CLIENT",
+      authorName,
+      authorContactId: resolved.contact?.id ?? null,
+      content
+    }
+  });
+
+  await logActivity({
+    actorId: null, action: "UPDATE", entityType: "CandidateProposal", entityId: p.id,
+    message: `[Portail ${resolved.name}] ${authorName} a commenté : « ${content.slice(0, 120)} »`
+  });
+
+  // Notif owner (best effort)
+  if (p.ownerUserId) {
+    await createNotification({
+      userId: p.ownerUserId, type: "OTHER",
+      title: `💬 ${authorName} commente ${p.candidate.firstName} ${p.candidate.lastName}`,
+      message: content.slice(0, 200),
+      href: `/candidates/${p.candidate.id}`,
+      entityType: "CandidateProposal", entityId: p.id
+    });
+  }
+
+  revalidatePath(`/portal/${input.token}`);
+  return { ok: true };
 }
 
 export async function trackPortalView(token: string) {

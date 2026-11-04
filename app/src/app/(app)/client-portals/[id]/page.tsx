@@ -27,6 +27,13 @@ export default async function ClientPortalDetailPage({ params }: { params: { id:
               yearsExperience: true, seniority: true, status: true, photoUrl: true,
               skills: true
             }
+          },
+          comments: {
+            orderBy: { createdAt: "asc" },
+            select: {
+              id: true, authorKind: true, authorName: true,
+              content: true, createdAt: true
+            }
           }
         }
       }

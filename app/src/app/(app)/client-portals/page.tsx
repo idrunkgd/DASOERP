@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { Plus, ExternalLink, Eye, Power } from "lucide-react";
+import { MigrateAllToV2Button } from "./migrate-all-button";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export default async function ClientPortalsPage() {
       _count: { select: { proposals: { where: { isVisible: true } } } }
     }
   });
+  const legacyActiveCount = portals.filter((p: any) => p.workflowVersion === "LEGACY" && p.isActive).length;
 
   // Grouper par société
   const byCompany: Record<string, { company: any; portals: any[] }> = {};
@@ -31,9 +33,12 @@ export default async function ClientPortalsPage() {
         subtitle={`${portals.length} lien${portals.length > 1 ? "s" : ""} — chaque client/équipe reçoit un lien unique, immuable, sans login`}
         breadcrumb={[{ label: "Portails clients" }]}
         actions={
-          <Link href="/client-portals/new" className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Nouveau portail
-          </Link>
+          <div className="flex items-center gap-2">
+            {legacyActiveCount > 0 && <MigrateAllToV2Button count={legacyActiveCount} />}
+            <Link href="/client-portals/new" className="btn-primary flex items-center gap-2">
+              <Plus className="w-4 h-4" /> Nouveau portail
+            </Link>
+          </div>
         }
       />
 

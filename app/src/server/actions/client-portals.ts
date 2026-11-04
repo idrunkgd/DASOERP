@@ -28,18 +28,44 @@ const PortalSchema = z.object({
 
 export async function createClientPortal(formData: FormData) {
   const session = await requirePermission("consulting.write");
-  const data = PortalSchema.parse(Object.fromEntries(formData));
-  const portal = await (prisma as any).clientPortal.create({
-    // Nouveaux portails en V2 par défaut : flow multi-étapes avec créneaux.
-    // Les portails pré-existants restent en LEGACY tant qu'on ne bascule pas.
-    data: { ...data, createdById: session.user.id, workflowVersion: "V2" }
+  const raw = Object.fromEntries(formData) as Record<string, any>;
+  const data = PortalSchema.parse(raw);
+
+  // Premier contact obligatoire — on refuse la création sans.
+  const firstContactName  = (raw.firstContactName  as string | undefined)?.trim();
+  const firstContactEmail = (raw.firstContactEmail as string | undefined)?.trim() || null;
+  const firstContactJobTitle = (raw.firstContactJobTitle as string | undefined)?.trim() || null;
+  if (!firstContactName) {
+    throw new Error("Un premier contact client est obligatoire pour créer le portail.");
+  }
+  if (firstContactEmail && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(firstContactEmail)) {
+    throw new Error("Email du premier contact invalide.");
+  }
+
+  const portalId = await prisma.$transaction(async (tx) => {
+    const portal = await (tx as any).clientPortal.create({
+      // Nouveaux portails en V2 par défaut.
+      data: { ...data, createdById: session.user.id, workflowVersion: "V2" }
+    });
+    await (tx as any).clientPortalContact.create({
+      data: {
+        portalId: portal.id,
+        name: firstContactName,
+        email: firstContactEmail,
+        jobTitle: firstContactJobTitle,
+        createdById: session.user.id
+      }
+    });
+    return portal.id;
   });
+
   await logActivity({
     actorId: session.user.id, action: "CREATE", entityType: "ClientPortal",
-    entityId: portal.id, message: `Portail client « ${portal.name} » créé`
+    entityId: portalId,
+    message: `Portail client « ${data.name} » créé avec contact initial « ${firstContactName} »`
   });
   revalidatePath("/client-portals");
-  redirect(`/client-portals/${portal.id}`);
+  redirect(`/client-portals/${portalId}`);
 }
 
 export async function updateClientPortal(id: string, formData: FormData) {
@@ -154,6 +180,45 @@ export async function restoreProposal(id: string) {
 }
 
 /**
+ * Ajoute une réponse Dasolabs au fil de discussion d'une proposition.
+ * Visible côté client dans le portail.
+ */
+export async function addDasolabsReply(input: {
+  proposalId: string;
+  content: string;
+}) {
+  const session = await requirePermission("consulting.write");
+  const content = input.content?.trim();
+  if (!content) throw new Error("Message vide.");
+  const u = await prisma.user.findUniqueOrThrow({
+    where: { id: session.user.id },
+    select: { firstName: true, lastName: true }
+  });
+  const authorName = `${u.firstName} ${u.lastName}`.trim();
+
+  const p = await (prisma as any).candidateProposal.findUniqueOrThrow({
+    where: { id: input.proposalId },
+    select: { portalId: true }
+  });
+
+  await (prisma as any).candidateProposalComment.create({
+    data: {
+      proposalId: input.proposalId,
+      authorKind: "DASOLABS",
+      authorName,
+      authorUserId: session.user.id,
+      content
+    }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "CandidateProposal",
+    entityId: input.proposalId,
+    message: `Réponse Dasolabs : « ${content.slice(0, 120)} »`
+  });
+  revalidatePath(`/client-portals/${p.portalId}`);
+}
+
+/**
  * Marque un entretien comme effectué (côté admin). Enregistre notes + heure.
  * Débloque la décision suivante côté client (accept / shortlist / ent. 2 / reject).
  */
@@ -223,20 +288,90 @@ export async function confirmInterviewSlot(input: {
 }
 
 /**
- * Bascule le workflow du portail (LEGACY ↔ V2). Réservé pour migration.
+ * Bascule le workflow du portail (LEGACY ↔ V2).
+ * Lors de LEGACY → V2, convertit les statuts des propositions existantes :
+ *   INTERVIEW_REQUESTED  → INTERVIEW_1_REQUESTED
+ *   (PROPOSED / ACCEPTED / REJECTED restent identiques, ils sont communs)
+ * Lors de V2 → LEGACY, convertit dans l'autre sens (perte d'info sur le
+ * numéro d'entretien, mais la bascule reste réversible).
  */
 export async function setPortalWorkflow(portalId: string, version: "LEGACY" | "V2") {
   const session = await requirePermission("consulting.write");
   const before = await (prisma as any).clientPortal.findUniqueOrThrow({ where: { id: portalId } });
-  await (prisma as any).clientPortal.update({
-    where: { id: portalId }, data: { workflowVersion: version }
+
+  let migrated = 0;
+  await prisma.$transaction(async (tx) => {
+    await (tx as any).clientPortal.update({
+      where: { id: portalId }, data: { workflowVersion: version }
+    });
+
+    if (version === "V2" && before.workflowVersion === "LEGACY") {
+      // LEGACY → V2 : mappe l'ancien statut vers le nouveau
+      const legacyProposals = await (tx as any).candidateProposal.findMany({
+        where: { portalId, status: "INTERVIEW_REQUESTED" },
+        select: { id: true }
+      });
+      for (const p of legacyProposals) {
+        await (tx as any).candidateProposal.update({
+          where: { id: p.id },
+          data: { status: "INTERVIEW_1_REQUESTED" }
+        });
+        migrated++;
+      }
+    } else if (version === "LEGACY" && before.workflowVersion === "V2") {
+      // V2 → LEGACY : regroupe tous les statuts intermédiaires vers INTERVIEW_REQUESTED
+      const v2InFlight = await (tx as any).candidateProposal.findMany({
+        where: {
+          portalId,
+          status: {
+            in: ["INTERVIEW_1_REQUESTED", "INTERVIEW_1_DONE",
+                 "INTERVIEW_2_REQUESTED", "INTERVIEW_2_DONE", "SHORTLISTED"]
+          }
+        },
+        select: { id: true }
+      });
+      for (const p of v2InFlight) {
+        await (tx as any).candidateProposal.update({
+          where: { id: p.id },
+          data: { status: "INTERVIEW_REQUESTED" }
+        });
+        migrated++;
+      }
+    }
   });
+
   await logActivity({
     actorId: session.user.id, action: "UPDATE", entityType: "ClientPortal",
     entityId: portalId,
-    message: `Portail basculé en workflow ${version} (ancien : ${before.workflowVersion})`
+    message: `Portail basculé ${before.workflowVersion} → ${version}${migrated ? ` (${migrated} proposition${migrated > 1 ? "s" : ""} migrée${migrated > 1 ? "s" : ""})` : ""}`
   });
   revalidatePath(`/client-portals/${portalId}`);
+  return { ok: true, migrated };
+}
+
+/**
+ * Migration en masse : bascule TOUS les portails LEGACY actifs en V2.
+ * Pratique pour la bascule globale après validation sur un portail test.
+ */
+export async function migrateAllPortalsToV2() {
+  const session = await requirePermission("consulting.write");
+  const legacyPortals = await (prisma as any).clientPortal.findMany({
+    where: { workflowVersion: "LEGACY", isActive: true },
+    select: { id: true, name: true }
+  });
+
+  const results: Array<{ portalId: string; name: string; migrated: number }> = [];
+  for (const portal of legacyPortals) {
+    const { migrated } = await setPortalWorkflow(portal.id, "V2");
+    results.push({ portalId: portal.id, name: portal.name, migrated });
+  }
+
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "ClientPortal",
+    message: `Migration en masse : ${results.length} portail(s) basculé(s) en V2`
+  });
+
+  return { ok: true, portals: results };
 }
 
 /**

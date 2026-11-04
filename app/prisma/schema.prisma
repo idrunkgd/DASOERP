@@ -415,6 +415,7 @@ model User {
   // Portails client créés / propositions candidats poussées côté client
   clientPortalsCreated    ClientPortal[]      @relation("ClientPortalCreator")
   portalContactsCreated   ClientPortalContact[] @relation("PortalContactCreator")
+  proposalCommentsAuthored CandidateProposalComment[] @relation("ProposalCommentAuthor")
   candidateProposalsCreated CandidateProposal[] @relation("CandidateProposalCreator")
 }
 
@@ -3647,6 +3648,9 @@ model CandidateProposal {
   interview2DoneAt      DateTime?
   interview2Notes       String?
   shortlistedAt         DateTime?
+
+  // Fil de discussion client ↔ Dasolabs sur la proposition
+  comments              CandidateProposalComment[]
   /// Note interne Dasolabs (NON visible côté client)
   internalNote      String?
   /// Si false, retiré de la vue côté client (historique conservé)
@@ -3662,4 +3666,21 @@ model CandidateProposal {
   @@index([portalId, isVisible])
   @@index([candidateId])
   @@index([status])
+}
+
+/// Fil de discussion sur une proposition de candidat.
+/// CLIENT = commentaire côté client (via portal), DASOLABS = réponse interne.
+model CandidateProposalComment {
+  id            String            @id @default(cuid())
+  proposalId    String
+  proposal      CandidateProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  authorKind    String            // "CLIENT" ou "DASOLABS"
+  authorName    String
+  authorUserId  String?           // User Dasolabs (si DASOLABS)
+  authorUser    User?             @relation("ProposalCommentAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+  authorContactId String?         // ClientPortalContact (si CLIENT via lien perso)
+  content       String
+  createdAt     DateTime          @default(now())
+
+  @@index([proposalId, createdAt])
 }

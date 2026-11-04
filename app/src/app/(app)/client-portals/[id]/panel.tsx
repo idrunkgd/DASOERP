@@ -16,9 +16,10 @@ import {
   regeneratePortalContactToken,
   markInterviewDone,
   confirmInterviewSlot,
-  setPortalWorkflow
+  setPortalWorkflow,
+  addDasolabsReply
 } from "@/server/actions/client-portals";
-import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw, UserPlus, UserCheck } from "lucide-react";
+import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw, UserPlus, UserCheck, MessageSquare, Send } from "lucide-react";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   PROPOSED:              { label: "En attente",      cls: "badge-muted" },
@@ -176,6 +177,8 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
                     {portal.workflowVersion === "V2" && (
                       <V2InterviewBlock proposal={p} />
                     )}
+                    {/* ─── Fil de discussion ─── */}
+                    <ProposalCommentsAdmin proposal={p} />
                   </div>
                   <div className="flex flex-col gap-1">
                     <RateEditor id={p.id} current={Number(p.proposedDailyRate)} internalNote={p.internalNote} />
@@ -340,6 +343,77 @@ function PersonalLinkRow({ contact, onCopy }: { contact: any; onCopy: () => void
       >
         <Trash2 className="w-3 h-3" />
       </button>
+    </div>
+  );
+}
+
+function ProposalCommentsAdmin({ proposal }: { proposal: any }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [pending, start] = useTransition();
+  const comments = proposal.comments || [];
+
+  function submit() {
+    const content = draft.trim();
+    if (!content) return;
+    start(async () => {
+      try {
+        await addDasolabsReply({ proposalId: proposal.id, content });
+        toast.success("Réponse envoyée au client");
+        setDraft("");
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  const clientCount = comments.filter((c: any) => c.authorKind === "CLIENT").length;
+
+  return (
+    <div className="mt-2 text-xs">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 text-indigoaccent hover:underline font-medium"
+      >
+        <MessageSquare className="w-3 h-3" />
+        Discussion ({comments.length}){clientCount > 0 && ` · ${clientCount} côté client`}
+        <span className="text-midnight-500">{open ? " ▲" : " ▼"}</span>
+      </button>
+      {open && (
+        <div className="mt-2 bg-midnight-50 border border-border rounded p-2 space-y-2 max-h-80 overflow-y-auto">
+          {comments.length === 0 && (
+            <p className="text-[11px] text-midnight-500 italic">Aucun commentaire pour l'instant.</p>
+          )}
+          {comments.map((c: any) => {
+            const isDaso = c.authorKind === "DASOLABS";
+            return (
+              <div key={c.id} className={`flex ${isDaso ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[85%] rounded px-2 py-1.5 ${
+                  isDaso
+                    ? "bg-indigoaccent/10 border border-indigoaccent/30 text-indigoaccent"
+                    : "bg-white border border-border text-midnight-900"
+                }`}>
+                  <div className={`text-[10px] font-semibold ${isDaso ? "text-indigoaccent" : "text-midnight-500"}`}>
+                    {isDaso ? "Dasolabs · " : "Client · "}{c.authorName} · {new Date(c.createdAt).toLocaleString("fr-BE", { dateStyle: "short", timeStyle: "short" })}
+                  </div>
+                  <div className="text-[11px] whitespace-pre-line mt-0.5">{c.content}</div>
+                </div>
+              </div>
+            );
+          })}
+          <div className="flex gap-1 items-end pt-1">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={2}
+              placeholder="Répondre au client…"
+              className="input flex-1 text-xs"
+            />
+            <button onClick={submit} disabled={pending || !draft.trim()}
+              className="btn-primary btn-sm shrink-0">
+              <Send className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

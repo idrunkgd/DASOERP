@@ -34,6 +34,13 @@ export default async function PublicPortalPage({ params }: { params: { token: st
                 }
               }
             }
+          },
+          comments: {
+            orderBy: { createdAt: "asc" },
+            select: {
+              id: true, authorKind: true, authorName: true,
+              content: true, createdAt: true
+            }
           }
         }
       }
@@ -48,13 +55,14 @@ export default async function PublicPortalPage({ params }: { params: { token: st
     logoUrl: portal.logoUrl,
     workflowVersion: portal.workflowVersion ?? "LEGACY",
     greetingName: resolved.contact?.name ?? null,
+    // true si le token utilisé est celui du portail général (= vue interne Dasolabs)
+    isDasolabsPreview: resolved.contact === null,
     proposals: portal.proposals.map((p: any) => ({
       id: p.id,
       status: p.status,
       clientMessage: p.clientMessage,
       actedByContactName: p.actedByContactName ?? null,
       proposedDailyRate: Number(p.proposedDailyRate),
-      // Champs V2
       interview1Slots:       p.interview1Slots ?? null,
       interview1ConfirmedAt: p.interview1ConfirmedAt ?? null,
       interview1DoneAt:      p.interview1DoneAt ?? null,
@@ -64,6 +72,10 @@ export default async function PublicPortalPage({ params }: { params: { token: st
       interview2DoneAt:      p.interview2DoneAt ?? null,
       interview2Notes:       p.interview2Notes ?? null,
       shortlistedAt:         p.shortlistedAt ?? null,
+      comments: (p.comments ?? []).map((c: any) => ({
+        id: c.id, authorKind: c.authorKind, authorName: c.authorName,
+        content: c.content, createdAt: c.createdAt
+      })),
       candidate: {
         ...p.candidate,
         skills: Array.isArray(p.candidate.skills) ? p.candidate.skills : []
