@@ -74,19 +74,19 @@ export function PortalClientViewV2({ token, data }: {
 }) {
   const firstName = data.greetingName?.split(/\s+/)[0];
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <header className="flex items-center gap-4 mb-8 pb-6 border-b border-slate-200">
+    <div className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <header className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-slate-200">
         {data.logoUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={data.logoUrl} alt="" className="h-14 object-contain" />
+          <img src={data.logoUrl} alt="" className="h-10 sm:h-14 object-contain shrink-0" />
         ) : (
-          <div className="h-14 w-14 rounded-lg bg-slate-200 grid place-items-center text-slate-500 font-semibold">
+          <div className="h-10 w-10 sm:h-14 sm:w-14 shrink-0 rounded-lg bg-slate-200 grid place-items-center text-slate-500 font-semibold text-sm">
             {data.name.slice(0, 2).toUpperCase()}
           </div>
         )}
-        <div>
-          <h1 className="text-2xl font-bold text-midnight-900">{data.name}</h1>
-          <p className="text-sm text-midnight-500">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold text-midnight-900 truncate">{data.name}</h1>
+          <p className="text-xs sm:text-sm text-midnight-500">
             {firstName ? `Bonjour ${firstName}, voici les profils proposés pour votre équipe.` : "Profils proposés pour votre équipe"}
           </p>
         </div>
@@ -114,21 +114,31 @@ function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal
   const isRejected = status === "REJECTED";
 
   return (
-    <article className="bg-white border border-border rounded-xl p-5 shadow-sm">
+    <article className="bg-white border border-border rounded-xl p-4 sm:p-5 shadow-sm">
       <StepTimeline status={status} />
 
-      <div className="flex gap-4 mt-4">
-        {c.photoUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={c.photoUrl} alt="" className="w-20 h-20 rounded-full object-cover" />
-        ) : (
-          <div className="w-20 h-20 rounded-full bg-midnight-100 grid place-items-center text-midnight-500">
-            <User className="w-8 h-8" />
+      <div className="flex flex-col sm:flex-row gap-4 mt-4">
+        {/* Photo */}
+        <div className="flex items-center gap-4 sm:block">
+          {c.photoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={c.photoUrl} alt="" className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-midnight-100 grid place-items-center text-midnight-500 shrink-0">
+              <User className="w-7 h-7 sm:w-8 sm:h-8" />
+            </div>
+          )}
+          {/* TJM visible à droite de la photo sur mobile */}
+          <div className="sm:hidden flex-1 text-right">
+            <div className="text-[10px] text-midnight-500 uppercase tracking-wider">TJM proposé</div>
+            <div className="text-xl font-bold text-midnight-900">{proposal.proposedDailyRate} €<span className="text-xs font-normal text-midnight-500">/j HT</span></div>
           </div>
-        )}
+        </div>
+
+        {/* Infos candidat */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h2 className="text-lg font-semibold text-midnight-900">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <h2 className="text-base sm:text-lg font-semibold text-midnight-900">
               {c.firstName} {c.lastName.slice(0, 1)}.
             </h2>
             {c.seniority && (
@@ -171,8 +181,21 @@ function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal
               ))}
             </div>
           )}
+          {/* Boutons CV accessibles en bas des infos sur mobile */}
+          <div className="flex gap-2 mt-4 sm:hidden">
+            <a href={`/api/portal/${token}/cv/${proposal.id}?inline=1`} target="_blank" rel="noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-1 text-xs bg-slate-100 text-slate-700 px-3 py-2 rounded-md">
+              <Eye className="w-3 h-3" /> Aperçu
+            </a>
+            <a href={`/api/portal/${token}/cv/${proposal.id}`}
+              className="flex-1 inline-flex items-center justify-center gap-1 text-xs bg-indigo-600 text-white px-3 py-2 rounded-md">
+              <FileDown className="w-3 h-3" /> Télécharger CV
+            </a>
+          </div>
         </div>
-        <div className="text-right shrink-0 flex flex-col items-end gap-2">
+
+        {/* TJM + CV — visibles uniquement sur desktop */}
+        <div className="hidden sm:flex text-right shrink-0 flex-col items-end gap-2">
           <div>
             <div className="text-xs text-midnight-500">TJM proposé</div>
             <div className="text-2xl font-bold text-midnight-900">{proposal.proposedDailyRate} €</div>
@@ -180,11 +203,11 @@ function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal
           </div>
           <div className="flex gap-1.5">
             <a href={`/api/portal/${token}/cv/${proposal.id}?inline=1`} target="_blank" rel="noreferrer"
-              className="btn-ghost text-xs flex items-center gap-1">
+              className="inline-flex items-center gap-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-md">
               <Eye className="w-3 h-3" /> Aperçu
             </a>
             <a href={`/api/portal/${token}/cv/${proposal.id}`}
-              className="btn-primary text-xs flex items-center gap-1">
+              className="inline-flex items-center gap-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-md">
               <FileDown className="w-3 h-3" /> CV
             </a>
           </div>
@@ -218,6 +241,7 @@ function StepTimeline({ status }: { status: string }) {
     );
   }
   const current = stepIndex(status);
+  const currentStep = STEPS[current];
   return (
     <div className="flex items-center justify-center gap-1 flex-wrap text-xs">
       {STEPS.map((s, i) => {
@@ -229,16 +253,23 @@ function StepTimeline({ status }: { status: string }) {
                  "bg-midnight-200 text-midnight-500";
         return (
           <div key={s.key} className="flex items-center gap-1">
-            <span className={`${cls} w-6 h-6 rounded-full grid place-items-center font-bold`}>{i + 1}</span>
-            <span className={now ? "text-midnight-900 font-semibold" : past ? "text-midnight-700" : "text-midnight-400"}>
+            <span className={`${cls} w-6 h-6 rounded-full grid place-items-center font-bold shrink-0`}>{i + 1}</span>
+            {/* Labels visibles seulement sur sm et + */}
+            <span className={`hidden sm:inline ${now ? "text-midnight-900 font-semibold" : past ? "text-midnight-700" : "text-midnight-400"}`}>
               {s.label}
             </span>
             {i < STEPS.length - 1 && (
-              <span className={`w-6 h-px ${past ? "bg-emerald-600" : "bg-midnight-200"}`} />
+              <span className={`w-3 sm:w-6 h-px ${past ? "bg-emerald-600" : "bg-midnight-200"}`} />
             )}
           </div>
         );
       })}
+      {/* Sur mobile : le label de l'étape courante seul, centré en-dessous */}
+      {currentStep && (
+        <div className="sm:hidden basis-full text-center mt-1 font-semibold text-indigoaccent">
+          Étape {current + 1} : {currentStep.label}
+        </div>
+      )}
     </div>
   );
 }
@@ -421,47 +452,52 @@ function ActionsPanel({ token, proposal, onStatus, stage, showDoneBlock }: {
       </div>
 
       <p className="text-sm text-midnight-500 mb-2">{prompt}</p>
-      <div className="flex flex-wrap gap-2">
-        <GreenAcceptButton onClick={() => act("ACCEPT")} disabled={pending}
-          label={stage === "shortlisted" ? "Accepter ce profil" : "Accepter"} />
+      <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2">
+        <ActionBtn onClick={() => act("ACCEPT")} disabled={pending}
+          icon={<Check className="w-4 h-4" />}
+          label={stage === "shortlisted" ? "Accepter ce profil" : "Accepter"}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white" />
         {showShortlist && (
-          <button onClick={() => act("SHORTLIST")} disabled={pending}
-            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
-            <UsersIcon className="w-4 h-4" /> Shortlister
-          </button>
+          <ActionBtn onClick={() => act("SHORTLIST")} disabled={pending}
+            icon={<UsersIcon className="w-4 h-4" />}
+            label="Shortlister"
+            className="bg-amber-500 hover:bg-amber-600 text-white" />
         )}
         {showPlanInterview1 && (
-          <button onClick={() => setPicker("REQUEST_INTERVIEW_1")} disabled={pending}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
-            <CalendarCheck className="w-4 h-4" /> Planifier un entretien
-          </button>
+          <ActionBtn onClick={() => setPicker("REQUEST_INTERVIEW_1")} disabled={pending}
+            icon={<CalendarCheck className="w-4 h-4" />}
+            label="Planifier un entretien"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white" />
         )}
         {showPlanInterview2 && (
-          <button onClick={() => setPicker("REQUEST_INTERVIEW_2")} disabled={pending}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
-            <CalendarCheck className="w-4 h-4" /> Planifier entretien 2
-          </button>
+          <ActionBtn onClick={() => setPicker("REQUEST_INTERVIEW_2")} disabled={pending}
+            icon={<CalendarCheck className="w-4 h-4" />}
+            label="Planifier entretien 2"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white" />
         )}
         {showAdditionalInt && (
-          <button onClick={() => setPicker("REQUEST_ADDITIONAL_INTERVIEW")} disabled={pending}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
-            <CalendarCheck className="w-4 h-4" /> Entretien complémentaire
-          </button>
+          <ActionBtn onClick={() => setPicker("REQUEST_ADDITIONAL_INTERVIEW")} disabled={pending}
+            icon={<CalendarCheck className="w-4 h-4" />}
+            label="Entretien complémentaire"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white" />
         )}
-        <button onClick={() => act("REJECT")} disabled={pending}
-          className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
-          <X className="w-4 h-4" /> {stage === "shortlisted" ? "Finalement non" : "Refuser"}
-        </button>
+        <ActionBtn onClick={() => act("REJECT")} disabled={pending}
+          icon={<X className="w-4 h-4" />}
+          label={stage === "shortlisted" ? "Finalement non" : "Refuser"}
+          className="bg-slate-800 hover:bg-slate-900 text-white" />
       </div>
     </div>
   );
 }
 
-function GreenAcceptButton({ onClick, disabled, label }: { onClick: () => void; disabled: boolean; label: string }) {
+function ActionBtn({ onClick, disabled, icon, label, className }: {
+  onClick: () => void; disabled: boolean; icon: React.ReactNode;
+  label: string; className: string;
+}) {
   return (
     <button onClick={onClick} disabled={disabled}
-      className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-lg shadow-sm">
-      <Check className="w-4 h-4" /> {label}
+      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 disabled:opacity-50 font-semibold px-4 py-2.5 rounded-lg shadow-sm ${className}`}>
+      {icon} {label}
     </button>
   );
 }
@@ -568,39 +604,42 @@ function SlotPicker({ token, proposal, actionKind, title, initialMessage, onCanc
 
       <div className="space-y-2">
         {slots.map((s, i) => (
-          <div key={i} className="grid grid-cols-12 gap-2 items-end bg-midnight-50 border border-border rounded-lg p-2">
-            <div className="col-span-3">
-              <label className="text-[10px] uppercase tracking-wider text-midnight-500">Date</label>
-              <input type="date" value={s.date} min={todayIso}
-                onChange={(e) => update(i, { date: e.target.value })}
-                className="input input-sm w-full" />
-            </div>
-            <div className="col-span-2">
-              <label className="text-[10px] uppercase tracking-wider text-midnight-500">Début</label>
-              <input type="time" value={s.startTime}
-                onChange={(e) => update(i, { startTime: e.target.value })}
-                className="input input-sm w-full" />
-            </div>
-            <div className="col-span-2">
-              <label className="text-[10px] uppercase tracking-wider text-midnight-500">Fin</label>
-              <input type="time" value={s.endTime}
-                onChange={(e) => update(i, { endTime: e.target.value })}
-                className="input input-sm w-full" />
-            </div>
-            <div className="col-span-3">
-              <label className="text-[10px] uppercase tracking-wider text-midnight-500">Mode</label>
-              <select value={s.mode} onChange={(e) => update(i, { mode: e.target.value as any })}
-                className="input input-sm w-full">
-                <option value="VISIO">Visio</option>
-                <option value="ONSITE">Sur site</option>
-              </select>
-            </div>
-            <div className="col-span-2 flex justify-end">
-              {slots.length > 1 && (
-                <button onClick={() => remove(i)} className="btn-ghost text-rose-600 btn-sm">
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              )}
+          <div key={i} className="bg-midnight-50 border border-border rounded-lg p-3 relative">
+            {/* Bouton supprimer en haut à droite */}
+            {slots.length > 1 && (
+              <button onClick={() => remove(i)}
+                className="absolute top-2 right-2 text-rose-600 hover:bg-rose-50 rounded p-1"
+                title="Supprimer ce créneau">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <div className="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end pr-6 sm:pr-0">
+              <div className="col-span-2 sm:col-span-4">
+                <label className="text-[10px] uppercase tracking-wider text-midnight-500">Date</label>
+                <input type="date" value={s.date} min={todayIso}
+                  onChange={(e) => update(i, { date: e.target.value })}
+                  className="w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-[10px] uppercase tracking-wider text-midnight-500">Début</label>
+                <input type="time" value={s.startTime}
+                  onChange={(e) => update(i, { startTime: e.target.value })}
+                  className="w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-[10px] uppercase tracking-wider text-midnight-500">Fin</label>
+                <input type="time" value={s.endTime}
+                  onChange={(e) => update(i, { endTime: e.target.value })}
+                  className="w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm" />
+              </div>
+              <div className="col-span-2 sm:col-span-4">
+                <label className="text-[10px] uppercase tracking-wider text-midnight-500">Mode</label>
+                <select value={s.mode} onChange={(e) => update(i, { mode: e.target.value as any })}
+                  className="w-full border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-white">
+                  <option value="VISIO">Visio</option>
+                  <option value="ONSITE">Sur site</option>
+                </select>
+              </div>
             </div>
           </div>
         ))}
