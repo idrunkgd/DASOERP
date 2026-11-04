@@ -464,15 +464,13 @@ function ActionsPanel({ token, proposal, onStatus, stage, showDoneBlock }: {
 }) {
   const [picker, setPicker] = useState<null | "REQUEST_INTERVIEW_1" | "REQUEST_INTERVIEW_2" | "REQUEST_ADDITIONAL_INTERVIEW">(null);
   const [pending, start] = useTransition();
-  const [message, setMessage] = useState("");
 
   function act(kind: "ACCEPT" | "REJECT" | "SHORTLIST") {
     start(async () => {
       try {
         const r = await respondToProposalV2({
           token, proposalId: proposal.id,
-          action: { kind },
-          clientMessage: message || undefined
+          action: { kind }
         });
         onStatus(r.status);
       } catch (e: any) { alert(e.message); }
@@ -489,7 +487,6 @@ function ActionsPanel({ token, proposal, onStatus, stage, showDoneBlock }: {
         token={token} proposal={proposal}
         actionKind={picker}
         title={title}
-        initialMessage={message}
         onCancel={() => setPicker(null)}
         onDone={(s) => { setPicker(null); onStatus(s); }}
       />
@@ -541,18 +538,6 @@ function ActionsPanel({ token, proposal, onStatus, stage, showDoneBlock }: {
           <strong>Profil shortlisté</strong> depuis le {fmtDate(proposal.shortlistedAt)}.
         </div>
       )}
-
-      {/* Commentaire optionnel — toujours visible */}
-      <div className="mb-3">
-        <label className="text-xs text-midnight-500 block mb-1">Commentaire (optionnel) — sera envoyé à Dasolabs</label>
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={2}
-          placeholder="Vos impressions, remarques, contraintes…"
-          className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
-        />
-      </div>
 
       <p className="text-sm text-midnight-500 mb-2">{prompt}</p>
       <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2">
@@ -659,12 +644,11 @@ function InterviewRequestedPanel({ which, proposal }: { which: 1 | 2; proposal: 
 
 // ─── Slot picker (3 créneaux) ──────────────────────────────────────
 
-function SlotPicker({ token, proposal, actionKind, title, initialMessage, onCancel, onDone }: {
+function SlotPicker({ token, proposal, actionKind, title, onCancel, onDone }: {
   token: string;
   proposal: Proposal;
   actionKind: "REQUEST_INTERVIEW_1" | "REQUEST_INTERVIEW_2" | "REQUEST_ADDITIONAL_INTERVIEW";
   title: string;
-  initialMessage?: string;
   onCancel: () => void;
   onDone: (nextStatus: string) => void;
 }) {
@@ -673,7 +657,6 @@ function SlotPicker({ token, proposal, actionKind, title, initialMessage, onCanc
     { date: todayIso, startTime: "10:00", endTime: "11:30", mode: "VISIO" }
   ]);
   const [pending, start] = useTransition();
-  const [message, setMessage] = useState(initialMessage || "");
 
   function update(i: number, patch: Partial<Slot>) {
     setSlots(slots.map((s, idx) => idx === i ? { ...s, ...patch } : s));
@@ -692,8 +675,7 @@ function SlotPicker({ token, proposal, actionKind, title, initialMessage, onCanc
       try {
         const r = await respondToProposalV2({
           token, proposalId: proposal.id,
-          action: { kind: actionKind, slots },
-          clientMessage: message || undefined
+          action: { kind: actionKind, slots }
         });
         onDone(r.status);
       } catch (e: any) { alert(e.message); }
@@ -753,12 +735,9 @@ function SlotPicker({ token, proposal, actionKind, title, initialMessage, onCanc
         )}
       </div>
 
-      <div className="mt-3">
-        <label className="text-xs text-midnight-500">Message pour Dasolabs (optionnel)</label>
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2}
-          placeholder="Contraintes, préférences…"
-          className="input w-full text-sm" />
-      </div>
+      <p className="text-[11px] text-midnight-500 mt-3 italic">
+        Pour toute précision (contraintes, préférences…), utilisez la discussion sous la carte.
+      </p>
 
       <div className="flex justify-end gap-2 mt-4">
         <button onClick={onCancel} className="btn-ghost">Annuler</button>
