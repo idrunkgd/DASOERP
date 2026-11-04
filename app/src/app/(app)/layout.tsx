@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { LayoutShell } from "@/components/layout/layout-shell";
-import { ChatWidget } from "@/components/layout/chat-widget";
 import { Providers } from "@/components/providers";
 import { getUserEffectivePermissions, getUserAccessGroupName, DEFAULT_GROUP_NAME } from "@/lib/rbac";
 import { prisma } from "@/lib/db";
@@ -50,8 +49,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         )}
         {children}
-        {/* Assistant IA flottant — réservé aux users avec au moins une permission */}
-        {!isRestricted && <ChatWidget />}
       </LayoutShell>
     </Providers>
   );
