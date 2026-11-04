@@ -46,33 +46,40 @@ export function ChatWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 z-40 w-12 h-12 rounded-full bg-midnight-900 text-white grid place-items-center shadow-lg hover:scale-105 transition-transform"
-          title="Assistant Dasolabs"
+          className="fixed bottom-5 right-5 z-40 w-12 h-12 rounded-full bg-midnight-900 text-white grid place-items-center shadow-lg hover:scale-105 transition-transform text-xl"
+          title="Huberte — votre mémoire du Hub"
+          aria-label="Huberte"
         >
-          <MessageCircle className="w-5 h-5" />
+          🦉
         </button>
       )}
       {open && (
         <div className="fixed bottom-5 right-5 z-40 w-[380px] max-w-[calc(100vw-40px)] h-[540px] max-h-[calc(100vh-40px)] bg-white border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
           <header className="bg-midnight-900 text-white p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigoaccent" />
-              <span className="text-sm font-semibold">Assistant Dasolabs</span>
+              <span className="text-lg leading-none">🦉</span>
+              <div className="leading-tight">
+                <div className="text-sm font-semibold">Huberte</div>
+                <div className="text-[10px] text-midnight-300">votre mémoire du Hub</div>
+              </div>
             </div>
             <button onClick={() => setOpen(false)} className="text-midnight-300 hover:text-white"><X className="w-4 h-4" /></button>
           </header>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 bg-midnight-50/30">
             {messages.length === 0 && (
-              <div className="text-xs text-midnight-500 space-y-2">
-                <p className="font-medium">Posez-moi une question sur vos données :</p>
+              <div className="text-xs text-midnight-500 space-y-3">
+                <p className="text-sm text-midnight-700">
+                  <span className="font-medium">Bonjour, je suis Huberte.</span> Je connais tout du Hub — missions, candidats, congés, frais, salaires (si vous y avez droit)… Posez-moi vos questions.
+                </p>
+                <p className="font-medium text-midnight-600">Quelques idées pour commencer :</p>
                 <ul className="space-y-1 text-midnight-700">
-                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Donne-moi un aperçu chiffré global de l'ERP")}>→ Aperçu chiffré global</li>
-                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Liste mes entreprises clientes")}>→ Mes entreprises</li>
-                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Trouve les contacts dont la fonction est CTO")}>→ Trouver des contacts</li>
-                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Liste mes consultants Dasolabs avec leur statut mission")}>→ Mes consultants</li>
-                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Quels candidats externes ont la compétence java ?")}>→ Candidats avec compétence X</li>
-                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Quelles missions T&M sont en cours ?")}>→ Missions T&M en cours</li>
+                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Donne-moi un aperçu de ma situation : congés, timesheet, frais")}>→ Ma situation personnelle</li>
+                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Combien il me reste de jours de congé ?")}>→ Mon solde congés</li>
+                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Mes notes de frais en cours")}>→ Mes notes de frais</li>
+                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Quelles propositions candidat sont en attente côté client ?")}>→ Portails clients en attente</li>
+                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Quelles missions T&M sont en cours ?")}>→ Missions T&M actives</li>
+                  <li className="cursor-pointer hover:text-indigoaccent" onClick={() => setInput("Aperçu chiffré global de l'ERP")}>→ Aperçu chiffré global</li>
                 </ul>
               </div>
             )}
@@ -85,7 +92,7 @@ export function ChatWidget() {
             ))}
             {busy && (
               <div className="text-xs text-midnight-500 flex items-center gap-2">
-                <Loader2 className="w-3 h-3 animate-spin" /> L'assistant réfléchit...
+                <Loader2 className="w-3 h-3 animate-spin" /> Huberte réfléchit…
               </div>
             )}
             {error && (
@@ -100,7 +107,7 @@ export function ChatWidget() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Votre question..."
+              placeholder="Demandez à Huberte…"
               disabled={busy}
               className="flex-1 h-9 px-3 rounded-md border border-border bg-muted/40 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigoaccent/30"
             />
