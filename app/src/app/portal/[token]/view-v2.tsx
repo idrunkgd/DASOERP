@@ -268,6 +268,8 @@ function CommentsThread({ token, proposal, isDasolabsSide }: {
   const [draft, setDraft] = useState("");
   const [pending, start] = useTransition();
   const [showForm, setShowForm] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const count = proposal.comments?.length ?? 0;
 
   function submit() {
     const content = draft.trim();
@@ -280,7 +282,7 @@ function CommentsThread({ token, proposal, isDasolabsSide }: {
     });
   }
 
-  if (!proposal.comments?.length && !showForm) {
+  if (count === 0 && !showForm) {
     return (
       <button
         onClick={() => setShowForm(true)}
@@ -293,55 +295,65 @@ function CommentsThread({ token, proposal, isDasolabsSide }: {
 
   return (
     <div className="space-y-2">
-      <div className="text-xs uppercase tracking-wider text-midnight-500 font-semibold flex items-center gap-1">
-        <MessageSquare className="w-3 h-3" /> Discussion
-      </div>
-      {proposal.comments.map((c) => {
-        const isDaso = c.authorKind === "DASOLABS";
-        return (
-          <div key={c.id} className={`flex ${isDaso ? "justify-start" : "justify-end"}`}>
-            <div className={`max-w-[85%] rounded-lg px-3 py-2 ${
-              isDaso
-                ? "bg-indigo-50 border border-indigo-200 text-indigo-900"
-                : "bg-slate-100 border border-slate-200 text-slate-800"
-            }`}>
-              <div className={`text-[10px] font-semibold ${isDaso ? "text-indigo-700" : "text-slate-500"}`}>
-                {isDaso ? "Dasolabs · " : ""}{c.authorName} · {new Date(c.createdAt).toLocaleString("fr-BE", { dateStyle: "short", timeStyle: "short" })}
-              </div>
-              <div className="text-sm whitespace-pre-line mt-0.5">{c.content}</div>
-            </div>
-          </div>
-        );
-      })}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="text-xs uppercase tracking-wider text-midnight-500 font-semibold flex items-center gap-1 hover:text-midnight-700"
+      >
+        <MessageSquare className="w-3 h-3" />
+        Discussion {count > 0 && `(${count})`}
+        <span className="text-[10px]">{collapsed ? "▼" : "▲"}</span>
+      </button>
 
-      {showForm ? (
-        <div className="space-y-1 mt-2">
-          {isDasolabsSide && (
-            <div className="text-[10px] uppercase tracking-wider text-indigoaccent font-semibold">
-              Vous écrivez en tant que Dasolabs (vue interne)
+      {!collapsed && (
+        <>
+          {proposal.comments.map((c) => {
+            const isDaso = c.authorKind === "DASOLABS";
+            return (
+              <div key={c.id} className={`flex ${isDaso ? "justify-start" : "justify-end"}`}>
+                <div className={`max-w-[85%] rounded-lg px-3 py-2 ${
+                  isDaso
+                    ? "bg-indigo-50 border border-indigo-200 text-indigo-900"
+                    : "bg-slate-100 border border-slate-200 text-slate-800"
+                }`}>
+                  <div className={`text-[10px] font-semibold ${isDaso ? "text-indigo-700" : "text-slate-500"}`}>
+                    {isDaso ? "Dasolabs · " : ""}{c.authorName} · {new Date(c.createdAt).toLocaleString("fr-BE", { dateStyle: "short", timeStyle: "short" })}
+                  </div>
+                  <div className="text-sm whitespace-pre-line mt-0.5">{c.content}</div>
+                </div>
+              </div>
+            );
+          })}
+
+          {showForm ? (
+            <div className="space-y-1 mt-2">
+              {isDasolabsSide && (
+                <div className="text-[10px] uppercase tracking-wider text-indigoaccent font-semibold">
+                  Vous écrivez en tant que Dasolabs (vue interne)
+                </div>
+              )}
+              <div className="flex gap-2 items-end">
+                <textarea
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  rows={2}
+                  placeholder={isDasolabsSide ? "Répondre au client…" : "Écrire un commentaire…"}
+                  className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                />
+                <button onClick={submit} disabled={pending || !draft.trim()}
+                  className="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded-md text-sm shrink-0">
+                  <Send className="w-3.5 h-3.5" /> Envoyer
+                </button>
+              </div>
             </div>
-          )}
-          <div className="flex gap-2 items-end">
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              rows={2}
-              placeholder={isDasolabsSide ? "Répondre au client…" : "Écrire un commentaire…"}
-              className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            />
-            <button onClick={submit} disabled={pending || !draft.trim()}
-              className="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded-md text-sm shrink-0">
-              <Send className="w-3.5 h-3.5" /> Envoyer
+          ) : (
+            <button
+              onClick={() => setShowForm(true)}
+              className="text-xs text-indigo-600 hover:underline flex items-center gap-1 mt-1"
+            >
+              <MessageSquare className="w-3 h-3" /> {isDasolabsSide ? "Répondre au client" : "Répondre"}
             </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          onClick={() => setShowForm(true)}
-          className="text-xs text-indigo-600 hover:underline flex items-center gap-1 mt-1"
-        >
-          <MessageSquare className="w-3 h-3" /> {isDasolabsSide ? "Répondre au client" : "Répondre"}
-        </button>
+          )}
+        </>
       )}
     </div>
   );
