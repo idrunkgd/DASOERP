@@ -125,7 +125,7 @@ export function PortalClientViewV2({ token, data }: {
       ) : (
         <div className="space-y-6">
           {data.proposals.map((p) => (
-            <ProposalCardV2 key={p.id} token={token} proposal={p} />
+            <ProposalCardV2 key={p.id} token={token} proposal={p} readOnly={data.isDasolabsPreview ?? false} />
           ))}
         </div>
       )}
@@ -133,7 +133,7 @@ export function PortalClientViewV2({ token, data }: {
   );
 }
 
-function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal }) {
+function ProposalCardV2({ token, proposal, readOnly }: { token: string; proposal: Proposal; readOnly: boolean }) {
   const c = proposal.candidate;
   const [expanded, setExpanded] = useState(false);
   const [status, setStatus] = useState(proposal.status);
@@ -241,9 +241,14 @@ function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal
       </div>
 
       <div className="mt-5 pt-4 border-t border-border space-y-4">
-        <CommentsThread token={token} proposal={proposal} />
+        {/* Thread toujours actif — Dasolabs peut répondre au client depuis le lien général */}
+        <CommentsThread token={token} proposal={proposal} isDasolabsSide={readOnly} />
         {isRejected ? (
           <RejectedPanel proposal={proposal} />
+        ) : readOnly ? (
+          <div className="text-xs text-midnight-500 italic flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" /> Vue interne — seules les actions client sont bloquées. Vous pouvez répondre au client dans la discussion ci-dessus.
+          </div>
         ) : (
           <ActionZone
             token={token}
@@ -257,7 +262,9 @@ function ProposalCardV2({ token, proposal }: { token: string; proposal: Proposal
   );
 }
 
-function CommentsThread({ token, proposal }: { token: string; proposal: Proposal }) {
+function CommentsThread({ token, proposal, isDasolabsSide }: {
+  token: string; proposal: Proposal; isDasolabsSide: boolean;
+}) {
   const [draft, setDraft] = useState("");
   const [pending, start] = useTransition();
   const [showForm, setShowForm] = useState(false);
@@ -279,7 +286,7 @@ function CommentsThread({ token, proposal }: { token: string; proposal: Proposal
         onClick={() => setShowForm(true)}
         className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
       >
-        <MessageSquare className="w-3 h-3" /> Ajouter un commentaire
+        <MessageSquare className="w-3 h-3" /> {isDasolabsSide ? "Écrire au client" : "Ajouter un commentaire"}
       </button>
     );
   }
@@ -308,25 +315,32 @@ function CommentsThread({ token, proposal }: { token: string; proposal: Proposal
       })}
 
       {showForm ? (
-        <div className="flex gap-2 items-end mt-2">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={2}
-            placeholder="Écrire un commentaire…"
-            className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          />
-          <button onClick={submit} disabled={pending || !draft.trim()}
-            className="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded-md text-sm shrink-0">
-            <Send className="w-3.5 h-3.5" /> Envoyer
-          </button>
+        <div className="space-y-1 mt-2">
+          {isDasolabsSide && (
+            <div className="text-[10px] uppercase tracking-wider text-indigoaccent font-semibold">
+              Vous écrivez en tant que Dasolabs (vue interne)
+            </div>
+          )}
+          <div className="flex gap-2 items-end">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={2}
+              placeholder={isDasolabsSide ? "Répondre au client…" : "Écrire un commentaire…"}
+              className="flex-1 border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            />
+            <button onClick={submit} disabled={pending || !draft.trim()}
+              className="inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded-md text-sm shrink-0">
+              <Send className="w-3.5 h-3.5" /> Envoyer
+            </button>
+          </div>
         </div>
       ) : (
         <button
           onClick={() => setShowForm(true)}
           className="text-xs text-indigo-600 hover:underline flex items-center gap-1 mt-1"
         >
-          <MessageSquare className="w-3 h-3" /> Répondre
+          <MessageSquare className="w-3 h-3" /> {isDasolabsSide ? "Répondre au client" : "Répondre"}
         </button>
       )}
     </div>

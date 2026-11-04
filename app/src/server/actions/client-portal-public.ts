@@ -188,6 +188,9 @@ export async function respondToProposalV2(input: {
 }) {
   const resolved = await resolvePortalByToken(input.token);
   if (!resolved) throw new Error("Lien introuvable ou désactivé.");
+  if (!resolved.contact) {
+    throw new Error("Le lien général est réservé à la prévisualisation Dasolabs — utilisez votre lien personnel.");
+  }
 
   const p = await (prisma as any).candidateProposal.findUnique({
     where: { id: input.proposalId },
@@ -255,14 +258,14 @@ export async function respondToProposalV2(input: {
   await (prisma as any).candidateProposal.update({ where: { id: p.id }, data });
 
   // Chaque action avec commentaire est aussi archivée dans le fil de discussion.
-  if (input.clientMessage?.trim()) {
-    const authorName = resolved.contact?.name || "Client (lien général)";
+  // À ce stade, resolved.contact est non null (actions bloquées sur lien général).
+  if (input.clientMessage?.trim() && resolved.contact) {
     await (prisma as any).candidateProposalComment.create({
       data: {
         proposalId: p.id,
         authorKind: "CLIENT",
-        authorName,
-        authorContactId: resolved.contact?.id ?? null,
+        authorName: resolved.contact.name,
+        authorContactId: resolved.contact.id,
         content: input.clientMessage.trim()
       }
     });
@@ -317,11 +320,16 @@ export async function addClientComment(input: {
   if (!p || p.portalId !== resolved.portalId || !p.isVisible)
     throw new Error("Proposition introuvable.");
 
-  const authorName = resolved.contact?.name || "Client (lien général)";
+  // Si le token résolu est le lien général (pas un contact), c'est Dasolabs
+  // qui écrit depuis la vue interne. On tague le commentaire en conséquence.
+  const isDasolabs = !resolved.contact;
+  const authorKind = isDasolabs ? "DASOLABS" : "CLIENT";
+  const authorName = isDasolabs ? "Dasolabs" : resolved.contact!.name;
+
   await (prisma as any).candidateProposalComment.create({
     data: {
       proposalId: p.id,
-      authorKind: "CLIENT",
+      authorKind,
       authorName,
       authorContactId: resolved.contact?.id ?? null,
       content
@@ -333,8 +341,9 @@ export async function addClientComment(input: {
     message: `[Portail ${resolved.name}] ${authorName} a commenté : « ${content.slice(0, 120)} »`
   });
 
-  // Notif owner (best effort)
-  if (p.ownerUserId) {
+  // Notif owner uniquement si c'est le client qui a commenté (pas si c'est
+  // Dasolabs qui répond depuis la vue interne — l'owner c'est déjà nous).
+  if (!isDasolabs && p.ownerUserId) {
     await createNotification({
       userId: p.ownerUserId, type: "OTHER",
       title: `💬 ${authorName} commente ${p.candidate.firstName} ${p.candidate.lastName}`,
