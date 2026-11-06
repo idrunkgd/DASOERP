@@ -17,12 +17,18 @@ export function CvImportButton() {
   const [step, setStep] = useState<"upload" | "preview">("upload");
   const [file, setFile] = useState<File | null>(null);
   const [parsed, setParsed] = useState<ParsedCvCandidate | null>(null);
+  // On conserve le data URI du fichier parsé pour le renvoyer à la création
+  // (sans ré-encoder) afin de l'ajouter en pièce jointe sur la fiche candidat.
+  const [cvDataUri, setCvDataUri] = useState<string | null>(null);
+  const [cvFileName, setCvFileName] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function reset() {
     setStep("upload");
     setFile(null);
     setParsed(null);
+    setCvDataUri(null);
+    setCvFileName(null);
     if (inputRef.current) inputRef.current.value = "";
   }
 
@@ -52,6 +58,8 @@ export function CvImportButton() {
         const r = await parseCvFile(dataUri);
         if (!r.ok) { toast.error(r.error); return; }
         setParsed(r.data);
+        setCvDataUri(dataUri);
+        setCvFileName(file.name);
         setStep("preview");
         toast.success(`CV analysé (${r.provider}) — vérifie et confirme`);
       } catch (e: any) {
@@ -64,7 +72,10 @@ export function CvImportButton() {
     if (!parsed) return;
     start(async () => {
       try {
-        const r = await createCandidateFromCv({ parsed });
+        const r = await createCandidateFromCv({
+          parsed,
+          cvFile: cvDataUri ? { dataUri: cvDataUri, originalName: cvFileName } : null
+        });
         if (r.duplicate) toast.info("Candidat déjà existant — ouverture de sa fiche");
         else toast.success("Candidat créé depuis le CV");
         setOpen(false);

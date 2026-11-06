@@ -5,6 +5,7 @@ import { useState, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, X, FileIcon } from "lucide-react";
 import { uploadDocument } from "@/server/actions/documents";
+import { DOC_CATEGORIES } from "./categories";
 
 type Option = { id: string; name?: string; firstName?: string; lastName?: string; reference?: string; title?: string };
 
@@ -134,12 +135,23 @@ export function UploadDocumentForm({
         </div>
         <div>
           <label className="text-xs font-medium text-midnight-700">
+            Catégorie
+          </label>
+          <select name="category" className="input mt-1" defaultValue="">
+            <option value="">— Non classé —</option>
+            {DOC_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-midnight-700">
             Tags (CSV)
           </label>
           <input
             name="tags"
             list="existing-tags"
-            placeholder="Contrat, NDA, RH..."
+            placeholder="Mots-clés libres (facultatif)"
             className="input mt-1"
           />
           <datalist id="existing-tags">

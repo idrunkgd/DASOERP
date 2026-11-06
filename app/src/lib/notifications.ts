@@ -8,7 +8,8 @@ export type NotificationType =
   | "SICK_LEAVE_DECLARED"
   | "TIMESHEET_SUBMITTED" | "TIMESHEET_APPROVED" | "TIMESHEET_REJECTED"
   | "POLICY_TO_SIGN" | "CONTRACT_READY"
-  | "MISSION_ENDING" | "MISSION_ASSIGNED" | "MENTIONED" | "OTHER";
+  | "MISSION_ENDING" | "MISSION_ASSIGNED" | "MENTIONED"
+  | "CALENDAR_REMINDER" | "CANDIDATE_INACTIVE" | "OTHER";
 
 /**
  * Helper serveur pour créer des notifications à un ou plusieurs users.

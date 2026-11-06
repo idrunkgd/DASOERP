@@ -16,10 +16,93 @@
  */
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { promises as fs } from "fs";
+import path from "path";
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { callLlmWithMedia, extractJson } from "@/lib/llm";
+
+// ─── Helpers de stockage du fichier CV dans la section "Fichiers" ────────
+// On recopie ici la logique minimale de documents.ts (storage disque local
+// + ligne Document en DB) pour éviter une dépendance croisée.
+const DOC_STORAGE_ROOT = process.env.DOCS_STORAGE_PATH || "/data/documents";
+const CV_MAX_SIZE = 10 * 1024 * 1024; // 10 MB (aligné sur la limite d'upload CV)
+
+function _cuid(): string {
+  return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+}
+function _sanitize(name: string): string {
+  return name.replace(/[\/\\]/g, "_").replace(/\.\./g, "_").replace(/[^a-zA-Z0-9._\- ]/g, "_").slice(0, 200);
+}
+function _mimeFromDataUri(dataUri: string): string {
+  const m = dataUri.match(/^data:([^;]+);base64,/);
+  return m?.[1] ?? "application/octet-stream";
+}
+function _extForMime(mime: string, fallback = "pdf"): string {
+  const map: Record<string, string> = {
+    "application/pdf": "pdf",
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/webp": "webp"
+  };
+  return map[mime] ?? fallback;
+}
+
+/**
+ * Enregistre le fichier CV (data URI base64) dans la section Fichiers du
+ * candidat : écrit le binaire sur disque puis crée une ligne Document liée.
+ * Silencieux en cas d'erreur — ne bloque pas la création du candidat.
+ */
+async function _saveCvAsCandidateDocument(opts: {
+  candidateId: string;
+  candidateName: string;
+  dataUri: string;
+  originalName?: string | null;
+  uploadedById: string;
+}): Promise<void> {
+  try {
+    const m = opts.dataUri.match(/^data:([^;]+);base64,(.+)$/);
+    if (!m) return;
+    const mime = m[1];
+    const buffer = Buffer.from(m[2], "base64");
+    if (buffer.length === 0 || buffer.length > CV_MAX_SIZE) return;
+
+    const ext = _extForMime(mime);
+    const fallback = `CV_${opts.candidateName.replace(/\s+/g, "_")}.${ext}`;
+    const originalName = opts.originalName?.trim() || fallback;
+    const safeName = _sanitize(originalName);
+
+    const documentId = _cuid();
+    const relativePath = `${documentId}/${safeName}`;
+    const absolutePath = path.join(DOC_STORAGE_ROOT, relativePath);
+    await fs.mkdir(path.dirname(absolutePath), { recursive: true });
+    await fs.writeFile(absolutePath, buffer);
+
+    try {
+      await (prisma as any).document.create({
+        data: {
+          id: documentId,
+          title: `CV — ${opts.candidateName}`,
+          originalName,
+          mimeType: mime,
+          size: buffer.length,
+          storagePath: relativePath,
+          description: "Importé automatiquement depuis l'import CV",
+          tags: ["CV"],
+          candidateId: opts.candidateId,
+          uploadedById: opts.uploadedById
+        }
+      });
+    } catch (e) {
+      // DB en erreur → on nettoie le fichier pour éviter un orphelin
+      await fs.rm(path.dirname(absolutePath), { recursive: true, force: true });
+    }
+  } catch {
+    // On avale toute erreur : l'ajout du fichier ne doit pas casser l'import CV
+  }
+}
 
 // ─── Schéma attendu du LLM ──────────────────────────────────────────────
 
@@ -169,7 +252,13 @@ export async function parseCvFile(dataUri: string) {
 // ─── Création effective ──────────────────────────────────────────────────
 
 const CreateFromCvSchema = z.object({
-  parsed: ParsedCandidateSchema
+  parsed: ParsedCandidateSchema,
+  // Fichier CV original (data URI base64) à sauvegarder dans la section
+  // Fichiers du candidat. Optionnel pour rester compat avec d'anciens appels.
+  cvFile: z.object({
+    dataUri: z.string().min(1),
+    originalName: z.string().optional().nullable()
+  }).optional().nullable()
 });
 
 export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSchema>) {
@@ -188,6 +277,17 @@ export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSc
       select: { id: true }
     });
     if (existing) {
+      // Doublon détecté — on attache quand même le CV au candidat existant
+      if (data.cvFile?.dataUri) {
+        await _saveCvAsCandidateDocument({
+          candidateId: existing.id,
+          candidateName: `${p.firstName} ${p.lastName}`.trim(),
+          dataUri: data.cvFile.dataUri,
+          originalName: data.cvFile.originalName ?? null,
+          uploadedById: session.user.id
+        });
+        revalidatePath(`/candidates/${existing.id}`);
+      }
       return { ok: true as const, id: existing.id, duplicate: true };
     }
     const collidingUser = await prisma.user.findUnique({ where: { email: p.email.toLowerCase() } });
@@ -254,6 +354,17 @@ export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSc
     } catch { /* ignore si table absente */ }
   }
 
+  // Sauvegarde du fichier CV original dans la section Fichiers du candidat
+  if (data.cvFile?.dataUri) {
+    await _saveCvAsCandidateDocument({
+      candidateId: created.id,
+      candidateName: `${p.firstName} ${p.lastName}`.trim(),
+      dataUri: data.cvFile.dataUri,
+      originalName: data.cvFile.originalName ?? null,
+      uploadedById: session.user.id
+    });
+  }
+
   await logActivity({
     actorId: session.user.id,
     action: "CREATE",
@@ -274,7 +385,11 @@ export async function createCandidateFromCv(input: z.infer<typeof CreateFromCvSc
 const UpdateFromCvSchema = z.object({
   candidateId: z.string().min(1),
   parsed: ParsedCandidateSchema,
-  overwriteBasics: z.boolean().optional().default(false)
+  overwriteBasics: z.boolean().optional().default(false),
+  cvFile: z.object({
+    dataUri: z.string().min(1),
+    originalName: z.string().optional().nullable()
+  }).optional().nullable()
 });
 
 export async function updateCandidateFromCv(input: z.infer<typeof UpdateFromCvSchema>) {
@@ -363,6 +478,17 @@ export async function updateCandidateFromCv(input: z.infer<typeof UpdateFromCvSc
         }))
       });
     } catch { /* table absente — silencieux */ }
+  }
+
+  // Fichier CV original sauvegardé dans la section Fichiers
+  if (data.cvFile?.dataUri) {
+    await _saveCvAsCandidateDocument({
+      candidateId: data.candidateId,
+      candidateName: `${existing.firstName} ${existing.lastName}`.trim(),
+      dataUri: data.cvFile.dataUri,
+      originalName: data.cvFile.originalName ?? null,
+      uploadedById: session.user.id
+    });
   }
 
   await logActivity({

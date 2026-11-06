@@ -74,7 +74,8 @@ export async function computeLeaveBalance(
   // Entitled — depuis LeaveBalance si présent, sinon fallback sur User
   // (utile la première année, avant qu'un rollover ait été fait).
   const balanceByType = new Map(balances.map((b) => [b.type, Number(b.entitled)]));
-  annualLegal.entitled = balanceByType.get("ANNUAL_LEGAL") ?? user?.annualLeaveDays ?? 20;
+  // Défaut 21 = 20 jours légaux Belgique + 1 jour anniversaire Dasolabs.
+  annualLegal.entitled = balanceByType.get("ANNUAL_LEGAL") ?? user?.annualLeaveDays ?? 21;
   rtt.entitled         = balanceByType.get("RTT")          ?? user?.rttDays ?? 12;
   carriedOver.entitled = balanceByType.get("CARRIED_OVER") ?? 0;
 

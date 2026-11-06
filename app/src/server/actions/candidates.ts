@@ -5,6 +5,47 @@ import { requirePermission } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { geocodeCity } from "@/lib/geocoding";
+
+/**
+ * Enrichit les données candidat avec postalCode + lat/lng géocodés quand c'est
+ * pertinent : si une ville est fournie et que (postalCode absent OU lat/lng
+ * absents). Best-effort, silencieux en cas d'échec Nominatim.
+ */
+async function enrichWithGeocode<T extends { city?: string | null; postalCode?: string | null; latitude?: number | null; longitude?: number | null }>(
+  data: T
+): Promise<T> {
+  if (!data.city) return data;
+  const needsPostal = !data.postalCode;
+  const needsCoords = data.latitude == null || data.longitude == null;
+  if (!needsPostal && !needsCoords) return data;
+  const g = await geocodeCity(data.city);
+  if (!g) return data;
+  return {
+    ...data,
+    postalCode: data.postalCode ?? g.postalCode,
+    latitude:   data.latitude   ?? g.latitude,
+    longitude:  data.longitude  ?? g.longitude
+  };
+}
+
+/**
+ * Géocode un candidat existant (ou tous les candidats sans coords) à la main.
+ * Appelable depuis la fiche candidat ou un bouton admin.
+ */
+export async function geocodeCandidate(id: string) {
+  await requirePermission("consulting.write");
+  const c = await prisma.candidate.findUniqueOrThrow({ where: { id }, select: { id: true, city: true } });
+  if (!c.city) return { ok: false as const, reason: "Pas de ville renseignée" };
+  const g = await geocodeCity(c.city);
+  if (!g) return { ok: false as const, reason: "Ville introuvable via Nominatim" };
+  await (prisma as any).candidate.update({
+    where: { id },
+    data: { postalCode: g.postalCode, latitude: g.latitude, longitude: g.longitude }
+  });
+  revalidatePath(`/candidates/${id}`);
+  return { ok: true as const, postalCode: g.postalCode, latitude: g.latitude, longitude: g.longitude };
+}
 
 const Schema = z.object({
   firstName: z.string().min(1),
@@ -20,6 +61,7 @@ const Schema = z.object({
     return t;
   }),
   city: z.string().optional().nullable(),
+  postalCode: z.string().optional().nullable().transform(v => (v?.trim() || null)),
   source: z.string().optional().nullable(),
   skills: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
   interests: z.string().optional().transform(v => v ? v.split(",").map(s => s.trim()).filter(Boolean) : []),
@@ -71,7 +113,8 @@ export async function createCandidate(formData: FormData) {
       throw new Error(`Un consultant actif (${collidingUser.firstName} ${collidingUser.lastName}) utilise déjà cet email. Une personne ne peut pas être à la fois consultant interne et candidat externe.`);
     }
   }
-  const c = await (prisma as any).candidate.create({ data: { ...data, ownerId: session.user.id } });
+  const enriched = await enrichWithGeocode(data as any);
+  const c = await (prisma as any).candidate.create({ data: { ...enriched, ownerId: session.user.id } });
   if (trainings.length > 0) {
     try {
       await (prisma as any).candidateTraining.createMany({
@@ -89,7 +132,14 @@ export async function updateCandidate(id: string, formData: FormData) {
   const before = await prisma.candidate.findUniqueOrThrow({ where: { id } });
   const parsed = Schema.parse(Object.fromEntries(formData));
   const { trainings, ...data } = parsed;
-  const after = await (prisma as any).candidate.update({ where: { id }, data });
+  // Si la ville a changé → on efface les anciennes coords/CP pour forcer un
+  // re-géocodage. L'admin peut aussi fournir un CP à la main dans le form.
+  let patch: any = { ...data };
+  if (before.city && data.city && before.city !== data.city) {
+    patch = { ...patch, postalCode: patch.postalCode ?? null, latitude: null, longitude: null };
+  }
+  const enriched = await enrichWithGeocode(patch);
+  const after = await (prisma as any).candidate.update({ where: { id }, data: enriched });
   try {
     await (prisma as any).candidateTraining.deleteMany({ where: { candidateId: id } });
     if (trainings.length > 0) {

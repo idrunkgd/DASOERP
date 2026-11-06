@@ -36,7 +36,9 @@ const MetaSchema = z.object({
   vehicleId: z.string().optional().nullable(),
   candidateId: z.string().optional().nullable(),
   missionId: z.string().optional().nullable(),
-  audience: z.string().optional().nullable()
+  audience: z.string().optional().nullable(),
+  /// Catégorie de rangement (CONTRACT, RH, PROJECT…). Voir documents/categories.ts
+  category: z.string().optional().nullable()
 });
 
 /**
@@ -70,7 +72,8 @@ export async function uploadDocument(formData: FormData) {
     vehicleId: raw.vehicleId || null,
     candidateId: raw.candidateId || null,
     missionId: raw.missionId || null,
-    audience: raw.audience || null
+    audience: raw.audience || null,
+    category: raw.category || null
   });
 
   const tags = parseTags(meta.tags);
@@ -112,6 +115,7 @@ export async function uploadDocument(formData: FormData) {
         candidateId: meta.candidateId,
         missionId: meta.missionId,
         audience: meta.audience,
+        category: meta.category,
         uploadedById: session.user.id
       } as any
     });

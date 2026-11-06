@@ -11,7 +11,7 @@ import {
   Gauge, Calculator, X, TrendingUp,
   FlaskConical, Percent, Wallet, Workflow, FileScan, GitCompareArrows, Inbox,
   AppWindow, GraduationCap, Files, ReceiptText, HeartPulse, ChevronDown, BookOpen,
-  Car, FileSignature, PiggyBank
+  Car, FileSignature, PiggyBank, ArrowUp, ArrowDown, Pencil, Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@prisma/client";
@@ -26,7 +26,7 @@ const SECTIONS: Section[] = [
     items: [
       { href: "/dashboard",         label: "Tableau de bord",      icon: LayoutDashboard, perm: "dashboard.read" },
       { href: "/my-hub",             label: "Mon espace",           icon: UserIcon },
-      { href: "/project-status",    label: "Statut projet",        icon: Gauge,         perm: "projects.read" },
+      { href: "/calendar",          label: "Calendrier",           icon: CalendarDays,  perm: "consulting.read" },
       { href: "/commercial",        label: "Activité",             icon: MessageSquare, perm: "contacts.read" },
       { href: "/salary-simulator",  label: "Simulateur package",   icon: Calculator,    perm: "consulting.read" },
       { href: "/cashflow",          label: "Cashflow",             icon: TrendingUp,    perm: "finance.read" },
@@ -52,8 +52,7 @@ const SECTIONS: Section[] = [
       { href: "/consultants",      label: "Consultants",          icon: Users,           perm: "consulting.read" },
       { href: "/mission-requests", label: "Demandes de mission",  icon: Headset,         perm: "consulting.read" },
       { href: "/missions",         label: "Missions",             icon: Plane,           perm: ["consulting.read", "self.read"] as Permission[] },
-      { href: "/timesheet",        label: "Timesheets",           icon: Clock,           perm: "timesheet.self.write" },
-      { href: "/calendar",         label: "Calendrier",           icon: CalendarDays,    perm: "consulting.read" }
+      { href: "/timesheet",        label: "Timesheets",           icon: Clock,           perm: "timesheet.self.write" }
     ]
   },
   {
@@ -108,6 +107,39 @@ const SECTIONS: Section[] = [
  *  laisser le nouveau défaut (seulement Pilotage ouvert) prendre le relais. */
 const COLLAPSED_KEY = "dasohub-sidebar-collapsed-v2";
 
+/** Clé localStorage — ordre custom des items par section (optionnel, utilisateur).
+ *  Forme : { "Pilotage": ["/my-hub", "/dashboard", ...], "Commerciale": [...] }
+ *  Les hrefs manquants sont placés à la fin dans l'ordre du code source. */
+const ORDER_KEY = "dasohub-sidebar-order-v1";
+
+/** Clé localStorage — mode édition actif (passage en mode drag/réorder). */
+const EDITMODE_KEY = "dasohub-sidebar-editmode-v1";
+
+function loadOrder(): Record<string, string[]> {
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem(ORDER_KEY) : null;
+    return raw ? (JSON.parse(raw) as Record<string, string[]>) : {};
+  } catch { return {}; }
+}
+function saveOrder(order: Record<string, string[]>) {
+  try { localStorage.setItem(ORDER_KEY, JSON.stringify(order)); } catch { /* noop */ }
+}
+/** Retourne les items réordonnés selon la préférence user. Les items absents
+ *  de la liste persistée (nouveautés ajoutées plus tard dans le code) sont
+ *  concaténés à la fin dans l'ordre d'origine. */
+function applyOrder<T extends { href: string }>(items: T[], saved: string[] | undefined): T[] {
+  if (!saved || saved.length === 0) return items;
+  const byHref = new Map(items.map((i) => [i.href, i]));
+  const out: T[] = [];
+  for (const href of saved) {
+    const found = byHref.get(href);
+    if (found) { out.push(found); byHref.delete(href); }
+  }
+  // Les nouveautés pas encore dans la pref user → à la fin
+  for (const it of items) if (byHref.has(it.href)) out.push(it);
+  return out;
+}
+
 export function Sidebar({
   role,
   permissions,
@@ -129,6 +161,32 @@ export function Sidebar({
 }) {
   const path = usePathname();
   const permSet = useMemo(() => new Set(permissions), [permissions]);
+
+  // ─── Ordre custom des items (persisté localStorage par user) ───
+  const [order, setOrder] = useState<Record<string, string[]>>({});
+  const [editMode, setEditMode] = useState(false);
+  useEffect(() => {
+    setOrder(loadOrder());
+    try {
+      if (localStorage.getItem(EDITMODE_KEY) === "1") setEditMode(true);
+    } catch { /* noop */ }
+  }, []);
+  function toggleEditMode() {
+    const next = !editMode;
+    setEditMode(next);
+    try { localStorage.setItem(EDITMODE_KEY, next ? "1" : "0"); } catch { /* noop */ }
+  }
+  function moveItem(sectionLabel: string, visibleHrefs: string[], href: string, dir: -1 | 1) {
+    const idx = visibleHrefs.indexOf(href);
+    if (idx < 0) return;
+    const target = idx + dir;
+    if (target < 0 || target >= visibleHrefs.length) return;
+    const next = [...visibleHrefs];
+    [next[idx], next[target]] = [next[target], next[idx]];
+    const updated = { ...order, [sectionLabel]: next };
+    setOrder(updated);
+    saveOrder(updated);
+  }
 
   // Badges dynamiques par route (docs à signer, tâches, demandes, factures…).
   // Une seule requête GET /api/nav-badges renvoie la map complète, rafraîchie
@@ -198,7 +256,19 @@ export function Sidebar({
           orange à côté du nom) — retiré d'ici pour ne pas doubler l'UI. */}
       <div className="px-4 py-3 text-[11px] text-indigo-200/70 flex items-center justify-between">
         <span>v0.2</span>
-        <span className="text-indigo-300/50">© {new Date().getFullYear()}</span>
+        <button
+          type="button"
+          onClick={toggleEditMode}
+          className={cn(
+            "flex items-center gap-1 px-2 py-0.5 rounded transition-colors",
+            editMode
+              ? "bg-emerald-500/30 text-emerald-100 hover:bg-emerald-500/40"
+              : "text-indigo-300/70 hover:bg-white/10 hover:text-indigo-100"
+          )}
+          title={editMode ? "Terminer la réorganisation" : "Réorganiser le menu"}
+        >
+          {editMode ? <><Check className="w-3 h-3" /> Terminer</> : <><Pencil className="w-3 h-3" /> Réorganiser</>}
+        </button>
       </div>
     </div>
   );
@@ -224,7 +294,7 @@ export function Sidebar({
           native (webkit + firefox) tout en conservant le scroll. */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 nav-scroll">
         {SECTIONS.map((section) => {
-          const visibleItems = section.items.filter((item) => {
+          const filtered = section.items.filter((item) => {
             if (item.allowedRoles && !item.allowedRoles.includes(role)) return false;
             if (item.perm) {
               const needed = Array.isArray(item.perm) ? item.perm : [item.perm];
@@ -232,19 +302,24 @@ export function Sidebar({
             }
             return true;
           });
-          if (visibleItems.length === 0) return null;
+          if (filtered.length === 0) return null;
+          // Applique l'ordre custom (si défini pour cette section)
+          const visibleItems = applyOrder(filtered, order[section.label]);
           // Une section reste dépliée d'office si la route active tombe dedans
           const containsActive = visibleItems.some(
             (i) => path === i.href || path.startsWith(i.href + "/")
           );
+          const visibleHrefs = visibleItems.map((i) => i.href);
           return (
             <SidebarSection
               key={section.label}
               label={section.label}
               items={visibleItems}
               path={path}
-              forceOpen={containsActive}
+              forceOpen={containsActive || editMode}
               badges={badges}
+              editMode={editMode}
+              onMove={(href, dir) => moveItem(section.label, visibleHrefs, href, dir)}
             />
           );
         })}
@@ -262,13 +337,17 @@ function SidebarSection({
   items,
   path,
   forceOpen,
-  badges = {}
+  badges = {},
+  editMode = false,
+  onMove
 }: {
   label: string;
   items: NavItem[];
   path: string;
   forceOpen: boolean;
   badges?: Record<string, number>;
+  editMode?: boolean;
+  onMove?: (href: string, dir: -1 | 1) => void;
 }) {
   // Par défaut : TOUT REPLIÉ sauf "Pilotage" (section principale, toujours
   // ouverte au premier rendu). L'état est ensuite écrasé par localStorage
@@ -335,7 +414,7 @@ function SidebarSection({
       {/* Rendu conditionnel — évite d'insérer des <a> cachés qui polluent le DOM */}
       {(open || !hydrated) && (
         <div className="mt-0.5 space-y-0.5">
-          {items.map((item) => {
+          {items.map((item, idx) => {
             const active = path === item.href || path.startsWith(item.href + "/");
             return (
               <NavLink
@@ -345,6 +424,10 @@ function SidebarSection({
                 label={item.label}
                 active={active}
                 badge={badges[item.href] ?? 0}
+                editMode={editMode}
+                canMoveUp={idx > 0}
+                canMoveDown={idx < items.length - 1}
+                onMove={onMove ? (dir) => onMove(item.href, dir) : undefined}
               />
             );
           })}
@@ -358,28 +441,21 @@ function SidebarSection({
 // Item de nav — indicateur actif : barre gauche + fond léger
 
 function NavLink({
-  href, icon: Icon, label, active, badge = 0
+  href, icon: Icon, label, active, badge = 0,
+  editMode = false, canMoveUp = false, canMoveDown = false, onMove
 }: {
   href: string;
   icon: any;
   label: string;
   active: boolean;
   badge?: number;
+  editMode?: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMove?: (dir: -1 | 1) => void;
 }) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-100",
-        // Items sur le fond sombre principal : texte mauve clair (indigo-300)
-        // — c'est le 2ème ton de mauve, en écho au bandeau catégorie mauve
-        // intense (indigoaccent). Actif = mauve plus lumineux (indigo-100) +
-        // léger fond mauve translucide.
-        active
-          ? "bg-indigoaccent/20 text-indigo-100 font-medium"
-          : "text-indigo-300 hover:bg-indigoaccent/10 hover:text-indigo-100"
-      )}
-    >
+  const content = (
+    <>
       {/* Barre indicatrice a gauche */}
       <span
         className={cn(
@@ -394,14 +470,47 @@ function NavLink({
         )}
       />
       <span className="truncate flex-1">{label}</span>
-      {badge > 0 && (
+      {editMode ? (
+        <span className="flex items-center gap-0.5 ml-auto">
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMove?.(-1); }}
+            disabled={!canMoveUp}
+            className="p-0.5 rounded hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Monter"
+          >
+            <ArrowUp className="w-3 h-3" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onMove?.(1); }}
+            disabled={!canMoveDown}
+            className="p-0.5 rounded hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Descendre"
+          >
+            <ArrowDown className="w-3 h-3" />
+          </button>
+        </span>
+      ) : badge > 0 ? (
         <span
           className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500 text-white min-w-[1.25rem] text-center leading-tight"
           title={`${badge} en attente`}
         >
           {badge > 99 ? "99+" : badge}
         </span>
-      )}
-    </Link>
+      ) : null}
+    </>
   );
+  const cls = cn(
+    "group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-100",
+    active
+      ? "bg-indigoaccent/20 text-indigo-100 font-medium"
+      : "text-indigo-300 hover:bg-indigoaccent/10 hover:text-indigo-100",
+    editMode && "ring-1 ring-indigo-400/30 bg-indigoaccent/5"
+  );
+  // En mode édition : pas de navigation (les flèches gèrent le move)
+  if (editMode) {
+    return <div className={cls}>{content}</div>;
+  }
+  return <Link href={href} className={cls}>{content}</Link>;
 }

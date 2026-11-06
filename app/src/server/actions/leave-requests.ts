@@ -190,12 +190,24 @@ export async function updateLeaveRequest(id: string, formData: FormData) {
   const session = await requirePermission("leaves.write");
   const existing = await prisma.leaveRequest.findUnique({ where: { id } });
   if (!existing) throw new Error("Demande introuvable");
-  if (existing.userId !== session.user.id) {
-    throw new Error("Modification réservée à l'auteur.");
+
+  // Autorisations :
+  //   - auteur : peut modifier UNIQUEMENT ses demandes en DRAFT (comme avant)
+  //   - manager RH (leaves.approve) ou admin (users.manage) : peut modifier
+  //     N'IMPORTE QUELLE demande, y compris APPROVED (correction a posteriori).
+  //     Les jours restaurés/consommés sont recalculés automatiquement par
+  //     computeLeaveBalance() — pas de solde à corriger manuellement.
+  const isOwner = existing.userId === session.user.id;
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const isManager = perms.includes("leaves.approve") || perms.includes("users.manage");
+
+  if (!isOwner && !isManager) {
+    throw new Error("Modification réservée à l'auteur ou à un manager RH.");
   }
-  if (existing.status !== "DRAFT") {
-    throw new Error("La demande n'est plus en brouillon — annule la soumission d'abord.");
+  if (isOwner && !isManager && existing.status !== "DRAFT") {
+    throw new Error("La demande n'est plus en brouillon — annule la soumission d'abord, ou demande à un manager de la modifier.");
   }
+
   const data = Schema.parse(Object.fromEntries(formData));
   const start = new Date(data.startDate);
   const end = new Date(data.endDate);
@@ -210,6 +222,16 @@ export async function updateLeaveRequest(id: string, formData: FormData) {
       clientApprovalNotes: data.clientApprovalNotes
     }
   });
+
+  // Trace spéciale si c'est un manager qui modifie la demande de quelqu'un d'autre
+  if (!isOwner) {
+    await logActivity({
+      actorId: session.user.id, action: "UPDATE",
+      entityType: "LeaveRequest", entityId: id,
+      message: `Congé modifié par un manager RH (${data.days}j du ${data.startDate} au ${data.endDate}, type ${data.type}, statut ${existing.status})`
+    });
+  }
+
   revalidatePath("/me");
   revalidatePath("/leaves");
   return { ok: true };

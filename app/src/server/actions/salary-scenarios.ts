@@ -104,12 +104,18 @@ export async function applyScenarioToCandidate(scenarioId: string) {
   if (!sc.candidateId) {
     throw new Error("Cette simulation n'est rattachée à aucun candidat.");
   }
+  // dailyRate (taux facturable affiché sur le CV) = taux vendu si défini,
+  // sinon le taux facturable suggéré par la simulation.
+  const soldRate = Number(sc.soldDailyRate ?? 0);
+  const billableRate = Number(sc.billableRate);
+  const appliedDailyRate = soldRate > 0 ? soldRate : billableRate;
   await prisma.candidate.update({
     where: { id: sc.candidateId },
     data: {
       dailyCost: sc.costPerDay,
       hourlyCost: Number(sc.costPerDay) / 8,
-      minDailyRate: sc.billableRate
+      minDailyRate: sc.billableRate,
+      dailyRate: appliedDailyRate
     }
   });
   await logActivity({
@@ -117,7 +123,7 @@ export async function applyScenarioToCandidate(scenarioId: string) {
     action: "UPDATE",
     entityType: "Candidate",
     entityId: sc.candidateId,
-    message: `Tarifs appliqués depuis simulation « ${sc.label} » (coût ${Number(sc.costPerDay).toFixed(0)}€, TJM ${Number(sc.billableRate).toFixed(0)}€)`
+    message: `Tarifs appliqués depuis simulation « ${sc.label} » (coût ${Number(sc.costPerDay).toFixed(0)}€, min ${billableRate.toFixed(0)}€, facturable ${appliedDailyRate.toFixed(0)}€)`
   });
   revalidatePath(`/candidates/${sc.candidateId}`);
   revalidatePath("/salary-simulator");

@@ -3,11 +3,13 @@ import { prisma } from "@/lib/db";
 export type CalendarEventType =
   | "INTERVIEW_HIRING"        // entretien d'embauche Dasolabs (sans application)
   | "INTERVIEW_PLACEMENT"     // entretien client (rattaché à une application)
+  | "INTERVIEW_PORTAL"        // créneau confirmé via le portail client (CandidateProposal)
   | "REVIEW_INTERNAL"         // entretien interne consultant (ConsultantReview)
   | "MISSION_START"           // début mission T&M
   | "MISSION_END"             // fin mission T&M (prévue ou réelle)
   | "BIRTHDAY"                // anniversaire d'un consultant (récurrent annuel)
-  | "WORK_ANNIVERSARY";       // date d'entrée chez Dasolabs (récurrent annuel)
+  | "WORK_ANNIVERSARY"        // date d'entrée chez Dasolabs (récurrent annuel)
+  | "CANDIDATE_INACTIVE";     // candidat silencieux depuis >4 mois (relance à prévoir)
 
 export type CalendarEvent = {
   id: string;
@@ -23,22 +25,26 @@ export type CalendarEvent = {
 const TONES: Record<CalendarEventType, string> = {
   INTERVIEW_HIRING:    "bg-indigo-200 text-indigo-900 border-indigo-300",
   INTERVIEW_PLACEMENT: "bg-blue-200 text-blue-900 border-blue-300",
+  INTERVIEW_PORTAL:    "bg-cyan-200 text-cyan-900 border-cyan-300",
   REVIEW_INTERNAL:     "bg-violet-200 text-violet-900 border-violet-300",
   MISSION_START:       "bg-emerald-200 text-emerald-900 border-emerald-300",
   MISSION_END:         "bg-amber-200 text-amber-900 border-amber-300",
   BIRTHDAY:            "bg-pink-200 text-pink-900 border-pink-300",
-  WORK_ANNIVERSARY:    "bg-fuchsia-200 text-fuchsia-900 border-fuchsia-300"
+  WORK_ANNIVERSARY:    "bg-fuchsia-200 text-fuchsia-900 border-fuchsia-300",
+  CANDIDATE_INACTIVE:  "bg-orange-200 text-orange-900 border-orange-300"
 };
 export function eventTone(t: CalendarEventType): string { return TONES[t]; }
 
 const LABELS: Record<CalendarEventType, string> = {
   INTERVIEW_HIRING:    "Entretien embauche",
   INTERVIEW_PLACEMENT: "Entretien client",
+  INTERVIEW_PORTAL:    "Entretien portail client",
   REVIEW_INTERNAL:     "Entretien interne",
   MISSION_START:       "Début mission",
   MISSION_END:         "Fin mission",
   BIRTHDAY:            "Anniversaire",
-  WORK_ANNIVERSARY:    "Date d'entrée"
+  WORK_ANNIVERSARY:    "Date d'entrée",
+  CANDIDATE_INACTIVE:  "Candidat à relancer"
 };
 export function eventLabel(t: CalendarEventType): string { return LABELS[t]; }
 
@@ -47,7 +53,7 @@ export function eventLabel(t: CalendarEventType): string { return LABELS[t]; }
  * Une seule fonction → utilisée par la page /calendar.
  */
 export async function getCalendarEvents(from: Date, to: Date): Promise<CalendarEvent[]> {
-  const [interviews, reviews, missionsStarting, missionsEnding, teamDates] = await Promise.all([
+  const [interviews, reviews, missionsStarting, missionsEnding, teamDates, inactiveCandidates, portalProposals] = await Promise.all([
     // Entretiens (recrutement direct OU placement client)
     prisma.interview.findMany({
       where: { scheduledAt: { gte: from, lte: to } },
@@ -93,6 +99,51 @@ export async function getCalendarEvents(from: Date, to: Date): Promise<CalendarE
         OR: [{ birthDate: { not: null } }, { joinedAt: { not: null } }]
       },
       select: { id: true, firstName: true, lastName: true, birthDate: true, joinedAt: true }
+    }),
+    // Candidats sans interaction depuis >4 mois — event posé à la date où ils
+    // ont franchi le seuil (dernière interaction + 4 mois). Placé dans la
+    // fenêtre uniquement si ce seuil y tombe.
+    (async () => {
+      const fourMonthsMs = 4 * 30 * 24 * 60 * 60 * 1000;
+      const cutoffFrom = new Date(from.getTime() - fourMonthsMs);
+      const cutoffTo   = new Date(to.getTime()   - fourMonthsMs);
+      // Candidats actifs avec au moins 1 interaction ; on ne garde que ceux
+      // dont la DERNIÈRE interaction tombe entre [to - 4mois ; from - 4mois]
+      // (inversé car on veut un event à "lastInteraction + 4mois" dans [from, to]).
+      const cands = await (prisma as any).candidate.findMany({
+        where: { status: "ACTIVE" },
+        select: {
+          id: true, firstName: true, lastName: true,
+          interactions: {
+            orderBy: { occurredAt: "desc" },
+            take: 1,
+            select: { occurredAt: true }
+          }
+        }
+      });
+      return cands.filter((c: any) => {
+        const last = c.interactions?.[0]?.occurredAt;
+        if (!last) return false;
+        const trigger = new Date(new Date(last).getTime() + fourMonthsMs);
+        return trigger >= from && trigger <= to;
+      });
+    })(),
+    // Créneaux confirmés depuis le portail client (CandidateProposal.interview1/2ConfirmedAt)
+    (prisma as any).candidateProposal.findMany({
+      where: {
+        OR: [
+          { interview1ConfirmedAt: { gte: from, lte: to } },
+          { interview2ConfirmedAt: { gte: from, lte: to } }
+        ]
+      },
+      select: {
+        id: true,
+        interview1ConfirmedAt: true, interview1Slots: true,
+        interview2ConfirmedAt: true, interview2Slots: true,
+        portalId: true,
+        candidate: { select: { id: true, firstName: true, lastName: true } },
+        portal:    { select: { id: true, name: true } }
+      }
     })
   ]);
 
@@ -121,6 +172,53 @@ export async function getCalendarEvents(from: Date, to: Date): Promise<CalendarE
         subtitle: `${iv.kind}${iv.interviewers ? ` · ${iv.interviewers}` : ""} · ${iv.application.missionRequest.company.name}`,
         href: `/mission-requests/${iv.application.missionRequest.id}`,
         participants: iv.interviewers ? iv.interviewers.split(",").map(s => s.trim()) : []
+      });
+    }
+  }
+
+  // ─── Candidats inactifs >4 mois ─────────────────────────────────────────
+  const fourMonthsMs = 4 * 30 * 24 * 60 * 60 * 1000;
+  for (const c of inactiveCandidates as any[]) {
+    const last = c.interactions?.[0]?.occurredAt;
+    if (!last) continue;
+    const trigger = new Date(new Date(last).getTime() + fourMonthsMs);
+    out.push({
+      id: `inac-${c.id}`,
+      type: "CANDIDATE_INACTIVE",
+      date: trigger,
+      title: `À relancer · ${c.firstName} ${c.lastName}`,
+      subtitle: `Dernière interaction le ${new Date(last).toLocaleDateString("fr-BE")}`,
+      href: `/candidates/${c.id}`
+    });
+  }
+
+  // ─── Créneaux portail confirmés ─────────────────────────────────────────
+  // On projette chaque date confirmée en event, en reprenant le mode (VISIO/
+  // ONSITE) depuis le slot d'origine quand on le retrouve.
+  function findSlotMode(slots: any, confirmedAt: Date | null): string | null {
+    if (!slots || !Array.isArray(slots) || !confirmedAt) return null;
+    const stamp = new Date(confirmedAt).toISOString().slice(0, 16);
+    for (const s of slots) {
+      if (!s?.date || !s?.startTime) continue;
+      const ts = `${s.date}T${s.startTime}`.slice(0, 16);
+      if (ts === stamp) return s.mode ?? null;
+    }
+    return null;
+  }
+  for (const p of portalProposals as any[]) {
+    for (const which of [1, 2] as const) {
+      const confirmedAt: Date | null = which === 1 ? p.interview1ConfirmedAt : p.interview2ConfirmedAt;
+      if (!confirmedAt) continue;
+      const slots = which === 1 ? p.interview1Slots : p.interview2Slots;
+      const mode = findSlotMode(slots, confirmedAt);
+      const cName = p.candidate ? `${p.candidate.firstName} ${p.candidate.lastName}` : "?";
+      out.push({
+        id: `pp-${p.id}-${which}`,
+        type: "INTERVIEW_PORTAL",
+        date: new Date(confirmedAt),
+        title: `Entretien ${which} · ${cName}`,
+        subtitle: `${p.portal?.name ?? "Portail client"}${mode ? ` · ${mode === "VISIO" ? "Visio" : "Sur site"}` : ""}`,
+        href: `/client-portals/${p.portalId}`
       });
     }
   }

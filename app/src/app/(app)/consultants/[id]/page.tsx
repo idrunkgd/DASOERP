@@ -14,12 +14,13 @@ import { Plane, CalendarCheck, CalendarClock as CalIcon, Pencil, FileText, Messa
 import { differenceInCalendarDays } from "date-fns";
 import { computeLeaveBalance } from "@/lib/leave-balance";
 import { PersonTabsNav, type PersonTab } from "@/components/ui/person-tabs-nav";
+import { ConsultantDocumentsPanel } from "./documents-panel";
 
-type ConsultantTab = "profile" | "compensation" | "rh";
+type ConsultantTab = "profile" | "compensation" | "rh" | "documents";
 
 export default async function ConsultantDetail({ params, searchParams }: { params: { id: string }; searchParams: { tab?: string } }) {
   const session = await requireSession();
-  const tab: ConsultantTab = (["profile", "compensation", "rh"].includes(searchParams.tab ?? "")
+  const tab: ConsultantTab = (["profile", "compensation", "rh", "documents"].includes(searchParams.tab ?? "")
     ? searchParams.tab
     : "profile") as ConsultantTab;
   const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
@@ -89,6 +90,22 @@ export default async function ConsultantDetail({ params, searchParams }: { param
     }) : []
   ]);
 
+  // Documents rattachés au consultant (CV, contrats, annexes RH, …)
+  // Toujours chargés si le user peut voir cet onglet (canManage). Les versions
+  // (parentDocumentId != null) sont exclues : on n'affiche que les docs racine.
+  let consultantDocuments: any[] = [];
+  if (canManage) {
+    try {
+      consultantDocuments = await (prisma as any).document.findMany({
+        where: { consultantId: user.id, parentDocumentId: null },
+        orderBy: { createdAt: "desc" },
+        include: { uploadedBy: { select: { firstName: true, lastName: true } } }
+      });
+    } catch {
+      /* table absente avant migration */
+    }
+  }
+
   const activeProjects = user.projectMemberships.filter(m => ["TO_START","ACTIVE","ON_HOLD"].includes(m.project.status));
 
   // Aplatit tous les entretiens client à travers toutes les missions (vue globale)
@@ -148,7 +165,9 @@ export default async function ConsultantDetail({ params, searchParams }: { param
             { key: "compensation", label: "Rémunération", icon: "briefcase",
               badge: (salaryScenario || activeVehicle) ? "•" : undefined },
             { key: "rh",           label: "Congés & maladie", icon: "check",
-              badge: (recentLeaves.length + recentSickLeaves.length) || undefined }
+              badge: (recentLeaves.length + recentSickLeaves.length) || undefined },
+            { key: "documents",    label: "Documents",    icon: "folder",
+              badge: consultantDocuments.length || undefined }
           ]}
         />
       )}
@@ -521,6 +540,26 @@ export default async function ConsultantDetail({ params, searchParams }: { param
                 </div>
               </section>
             </>
+          )}
+
+          {/* ═══════ Onglet DOCUMENTS — CV, contrats, annexes RH ═══════ */}
+          {tab === "documents" && canManage && (
+            <ConsultantDocumentsPanel
+              consultantId={user.id}
+              canManage={canManage}
+              documents={consultantDocuments.map((d: any) => ({
+                id: d.id,
+                title: d.title,
+                originalName: d.originalName,
+                mimeType: d.mimeType,
+                size: d.size,
+                tags: d.tags ?? [],
+                createdAt: d.createdAt.toISOString(),
+                uploadedBy: d.uploadedBy
+                  ? { firstName: d.uploadedBy.firstName, lastName: d.uploadedBy.lastName }
+                  : null
+              }))}
+            />
           )}
         </div>
       </div>

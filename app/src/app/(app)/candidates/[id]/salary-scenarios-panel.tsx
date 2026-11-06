@@ -174,8 +174,8 @@ export function SalaryScenariosPanel({
       {scenarios.length > 0 && canApply && (
         <p className="text-[11px] text-midnight-500 mt-3 flex items-center gap-1.5">
           <CheckCircle2 className="w-3 h-3" />
-          Le bouton ✓ applique le TJM coût et le TJM facturable de la simulation
-          comme tarifs officiels du candidat (Coût/j et Tarif min souhaité).
+          Le bouton ✓ met à jour la fiche candidat : Coût/j, Tarif min souhaité
+          et Taux facturable (TJM vendu si défini, sinon TJM suggéré).
         </p>
       )}
     </section>

@@ -11,19 +11,42 @@ import { CvImportButton } from "./cv-import-button";
 import { FilterChips } from "@/components/ui/filter-chips";
 import { PreservedSearchForm } from "@/components/ui/preserved-search-form";
 import { parseMulti, inFilter } from "@/lib/filters";
+import { geocodeCity, haversineKm } from "@/lib/geocoding";
 
 export const dynamic = "force-dynamic";
 
-export default async function CandidatesPage({ searchParams }: { searchParams: { q?: string; status?: string; skill?: string; view?: string } }) {
+type CandidateSearchParams = {
+  q?: string;
+  status?: string;
+  skill?: string;          // multi "a,b,c" OU simple "a"
+  seniority?: string;      // multi
+  title?: string;          // filtre texte sur jobTitle
+  costMin?: string;        // €/j coût min
+  costMax?: string;        // €/j coût max
+  rateMin?: string;        // €/j tarif facturable min
+  rateMax?: string;        // €/j tarif facturable max
+  loc?: string;            // ville de référence
+  km?: string;             // rayon en km autour de loc
+  view?: string;
+};
+
+export default async function CandidatesPage({ searchParams }: { searchParams: CandidateSearchParams }) {
   await requirePermission("consulting.read");
   const statuses = parseMulti(searchParams.status);
+  const skills = parseMulti(searchParams.skill);
+  const seniorities = parseMulti(searchParams.seniority);
+  const title = (searchParams.title || "").trim();
+  const costMin = Number(searchParams.costMin) || null;
+  const costMax = Number(searchParams.costMax) || null;
+  const rateMin = Number(searchParams.rateMin) || null;
+  const rateMax = Number(searchParams.rateMax) || null;
+  const loc = (searchParams.loc || "").trim();
+  const km = Math.max(0, Math.min(2000, Number(searchParams.km) || 0));
+
   const where: any = {};
   if (statuses.length > 0) {
     where.status = inFilter(statuses);
   } else {
-    // Exclusivité Candidat / Consultant : par défaut, on masque
-    //  - les candidats ARCHIVED (déjà recrutés en interne)
-    //  - les candidats déjà liés à un User actif (sécurité belt-and-braces)
     where.status = { in: ["ACTIVE", "UNAVAILABLE"] };
     where.convertedToUser = { is: null };
   }
@@ -32,8 +55,24 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
     { lastName:  { contains: searchParams.q, mode: "insensitive" } },
     { email:     { contains: searchParams.q, mode: "insensitive" } }
   ];
-  if (searchParams.skill) where.skills = { has: searchParams.skill };
-  const list = await prisma.candidate.findMany({
+  // Compétences : AND de has — un candidat doit avoir TOUTES les skills cochées
+  if (skills.length > 0) where.AND = skills.map((s) => ({ skills: { has: s } }));
+  if (seniorities.length > 0) where.seniority = { in: seniorities };
+  if (title) {
+    where.jobTitle = { contains: title, mode: "insensitive" };
+  }
+  if (costMin != null || costMax != null) {
+    where.dailyCost = {};
+    if (costMin != null) where.dailyCost.gte = costMin;
+    if (costMax != null) where.dailyCost.lte = costMax;
+  }
+  if (rateMin != null || rateMax != null) {
+    where.dailyRate = {};
+    if (rateMin != null) where.dailyRate.gte = rateMin;
+    if (rateMax != null) where.dailyRate.lte = rateMax;
+  }
+
+  let list: any[] = await prisma.candidate.findMany({
     where, orderBy: [{ status: "asc" }, { lastName: "asc" }],
     include: {
       _count: { select: { applications: true } },
@@ -43,6 +82,20 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
       }
     }
   });
+
+  // Filtre rayon : géocode le point de recherche puis filtre JS par Haversine.
+  // Les candidats sans coords sont EXCLUS quand ce filtre est actif.
+  let locGeo: { lat: number; lng: number; display: string } | null = null;
+  if (loc && km > 0) {
+    const g = await geocodeCity(loc);
+    if (g) {
+      locGeo = { lat: g.latitude, lng: g.longitude, display: g.displayName };
+      list = list.filter((c) =>
+        c.latitude != null && c.longitude != null &&
+        haversineKm(locGeo!.lat, locGeo!.lng, c.latitude, c.longitude) <= km
+      );
+    }
+  }
   const view: "grid" | "list" = searchParams?.view === "list" ? "list" : "grid";
   function buildViewHref(targetView: "grid" | "list") {
     const params = new URLSearchParams();
@@ -89,17 +142,54 @@ export default async function CandidatesPage({ searchParams }: { searchParams: {
             { value: "ARCHIVED",    label: "Archivé/recruté", tone: "neutral" }
           ]}
         />
+        <FilterChips
+          paramName="seniority"
+          label="Séniorité"
+          multi={true}
+          options={[
+            { value: "JUNIOR",    label: "Junior" },
+            { value: "MEDIOR",    label: "Medior" },
+            { value: "CONFIRMED", label: "Confirmé" },
+            { value: "SENIOR",    label: "Senior" },
+            { value: "EXPERT",    label: "Expert" }
+          ]}
+        />
         <PreservedSearchForm
           searchParams={searchParams as Record<string, string | undefined>}
-          except={["q", "skill", "page"]}
-          className="flex gap-2 flex-wrap items-center"
+          except={["q", "skill", "title", "costMin", "costMax", "rateMin", "rateMax", "loc", "km", "page"]}
+          className="space-y-2"
         >
-          <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Nom, email..." className="input max-w-xs text-sm" />
-          <input name="skill" defaultValue={searchParams.skill ?? ""} placeholder="Compétence (ex: react)" className="input max-w-xs text-sm" />
-          <button className="btn-secondary btn-sm">Rechercher</button>
-          {(searchParams.q || searchParams.status || searchParams.skill) && (
-            <Link href="/candidates" className="btn-ghost btn-sm">Réinitialiser tous</Link>
-          )}
+          {/* Ligne 1 : texte libre */}
+          <div className="flex gap-2 flex-wrap items-center">
+            <input name="q"     defaultValue={searchParams.q ?? ""}     placeholder="Nom, email..."         className="input max-w-[200px] text-sm" />
+            <input name="title" defaultValue={searchParams.title ?? ""} placeholder="Titre (ex: Automation)" className="input max-w-[200px] text-sm" />
+            <input name="skill" defaultValue={searchParams.skill ?? ""} placeholder="Compétences (CSV : TIA Portal, Siemens…)" className="input max-w-[320px] text-sm" />
+          </div>
+          {/* Ligne 2 : localisation + rayon */}
+          <div className="flex gap-2 flex-wrap items-center">
+            <MapPin className="w-4 h-4 text-midnight-500" />
+            <input name="loc" defaultValue={searchParams.loc ?? ""} placeholder="Ville (ex: Bruxelles)" className="input max-w-[200px] text-sm" />
+            <span className="text-xs text-midnight-500">rayon</span>
+            <input name="km" type="number" min="0" max="2000" defaultValue={searchParams.km ?? ""} placeholder="km" className="input max-w-[80px] text-sm" />
+            {locGeo && (
+              <span className="text-[11px] text-midnight-500 italic">📍 {locGeo.display}</span>
+            )}
+          </div>
+          {/* Ligne 3 : fourchettes tarifs */}
+          <div className="flex gap-2 flex-wrap items-center">
+            <span className="text-xs text-midnight-500">Coût/j</span>
+            <input name="costMin" type="number" min="0" step="10" defaultValue={searchParams.costMin ?? ""} placeholder="min" className="input max-w-[90px] text-sm" />
+            <input name="costMax" type="number" min="0" step="10" defaultValue={searchParams.costMax ?? ""} placeholder="max" className="input max-w-[90px] text-sm" />
+            <span className="text-xs text-midnight-500 ml-3">Tarif facturable</span>
+            <input name="rateMin" type="number" min="0" step="10" defaultValue={searchParams.rateMin ?? ""} placeholder="min" className="input max-w-[90px] text-sm" />
+            <input name="rateMax" type="number" min="0" step="10" defaultValue={searchParams.rateMax ?? ""} placeholder="max" className="input max-w-[90px] text-sm" />
+          </div>
+          <div className="flex gap-2 items-center">
+            <button className="btn-secondary btn-sm">Rechercher</button>
+            {(searchParams.q || searchParams.status || searchParams.skill || searchParams.seniority || searchParams.title || searchParams.loc || searchParams.km || searchParams.costMin || searchParams.costMax || searchParams.rateMin || searchParams.rateMax) && (
+              <Link href="/candidates" className="btn-ghost btn-sm">Réinitialiser tous</Link>
+            )}
+          </div>
         </PreservedSearchForm>
       </div>
 

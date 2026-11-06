@@ -21,6 +21,8 @@ export function CvReimportButton({ candidateId }: { candidateId: string }) {
   const [step, setStep] = useState<"upload" | "preview">("upload");
   const [file, setFile] = useState<File | null>(null);
   const [parsed, setParsed] = useState<ParsedCvCandidate | null>(null);
+  const [cvDataUri, setCvDataUri] = useState<string | null>(null);
+  const [cvFileName, setCvFileName] = useState<string | null>(null);
   const [overwriteBasics, setOverwriteBasics] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -28,6 +30,7 @@ export function CvReimportButton({ candidateId }: { candidateId: string }) {
 
   function reset() {
     setStep("upload"); setFile(null); setParsed(null); setOverwriteBasics(false);
+    setCvDataUri(null); setCvFileName(null);
     if (inputRef.current) inputRef.current.value = "";
   }
 
@@ -49,6 +52,8 @@ export function CvReimportButton({ candidateId }: { candidateId: string }) {
         const r = await parseCvFile(dataUri);
         if (!r.ok) { toast.error(r.error); return; }
         setParsed(r.data);
+        setCvDataUri(dataUri);
+        setCvFileName(file.name);
         setStep("preview");
         toast.success(`CV analysé (${r.provider})`);
       } catch (e: any) {
@@ -61,7 +66,12 @@ export function CvReimportButton({ candidateId }: { candidateId: string }) {
     if (!parsed) return;
     start(async () => {
       try {
-        const r = await updateCandidateFromCv({ candidateId, parsed, overwriteBasics });
+        const r = await updateCandidateFromCv({
+          candidateId,
+          parsed,
+          overwriteBasics,
+          cvFile: cvDataUri ? { dataUri: cvDataUri, originalName: cvFileName } : null
+        });
         toast.success(`+${r.experiencesAdded} expériences · +${r.trainingsAdded} formations`);
         setOpen(false);
         reset();

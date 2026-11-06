@@ -17,6 +17,7 @@ import { formatDate } from "@/lib/utils";
 import { DocumentMetaForm } from "./meta-form";
 import { VersionsPanel } from "./versions-panel";
 import { DeleteDocumentButton } from "./delete-button";
+import { DocumentPreviewPanel } from "./preview-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -87,9 +88,9 @@ export default async function DocumentDetail({
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Métadonnées éditables */}
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        {/* Colonne gauche : métadonnées + liens */}
+        <div className="xl:col-span-2 space-y-4">
           <div className="card">
             <div className="card-header font-semibold">Informations</div>
             <div className="p-4">
@@ -113,7 +114,7 @@ export default async function DocumentDetail({
             </div>
           </div>
 
-          <div className="card mt-4">
+          <div className="card">
             <div className="card-header font-semibold">Liens</div>
             <div className="p-4 text-sm space-y-2">
               {doc.company && (
@@ -161,8 +162,8 @@ export default async function DocumentDetail({
           </div>
         </div>
 
-        {/* Versions */}
-        <div className="lg:col-span-1">
+        {/* Colonne centrale : versions + suppression */}
+        <div className="xl:col-span-1">
           <VersionsPanel
             documentId={doc.id}
             currentVersion={{
@@ -194,6 +195,17 @@ export default async function DocumentDetail({
               versionCount={doc.versions.length}
             />
           </div>
+        </div>
+
+        {/* Colonne droite : preview inline du fichier (PDF / image / texte) */}
+        <div className="xl:col-span-2">
+          <DocumentPreviewPanel
+            documentId={doc.id}
+            originalName={doc.originalName}
+            mimeType={doc.mimeType}
+            size={doc.size}
+            title={doc.title}
+          />
         </div>
       </div>
     </div>

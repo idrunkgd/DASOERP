@@ -115,7 +115,12 @@ export function CandidateForm({ initial, skillCatalog = [], cvContactChoices = [
         <div className="col-span-6"><label className="label">Email</label><input name="email" type="email" defaultValue={initial?.email ?? ""} className="input" /></div>
         <div className="col-span-6"><label className="label">Téléphone</label><input name="phone" defaultValue={initial?.phone ?? ""} className="input" /></div>
         <div className="col-span-6"><label className="label">LinkedIn</label><input name="linkedinUrl" defaultValue={initial?.linkedinUrl ?? ""} className="input" placeholder="https://linkedin.com/in/..." /></div>
-        <div className="col-span-3"><label className="label">Ville</label><input name="city" defaultValue={initial?.city ?? ""} className="input" /></div>
+        <div className="col-span-3"><label className="label">Ville</label><input name="city" defaultValue={initial?.city ?? ""} className="input" placeholder="Ex: Bruxelles, Namur..." /></div>
+        <div className="col-span-3">
+          <label className="label">Code postal</label>
+          <input name="postalCode" defaultValue={initial?.postalCode ?? ""} className="input" placeholder="Auto depuis la ville" />
+          <p className="text-[10px] text-midnight-500 mt-0.5">Complété auto depuis la ville à la sauvegarde.</p>
+        </div>
         <div className="col-span-3"><label className="label">Source</label><input name="source" defaultValue={initial?.source ?? ""} className="input" placeholder="LinkedIn, recommandation..." /></div>
         <div className="col-span-6"><label className="label">Titre</label><input name="jobTitle" defaultValue={initial?.jobTitle ?? ""} className="input" placeholder="Ex: Automation Engineer, Roboticien, QA Expert..." /></div>
         <div className="col-span-3"><label className="label">Séniorité</label><input name="seniority" defaultValue={initial?.seniority ?? ""} className="input" placeholder="Junior / Senior / Lead" /></div>

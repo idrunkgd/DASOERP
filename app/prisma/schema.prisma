@@ -396,9 +396,10 @@ model User {
   // Demandes de congés + solde annuel (en jours ouvrés)
   leaveRequests       LeaveRequest[]        @relation("UserLeaveRequests")
   leaveApprovals      LeaveRequest[]        @relation("LeaveRequestApprover")
-  /// Quota annuel de jours de congé LÉGAUX (défaut 20 pour la Belgique — 4
-  /// semaines légales). Modifiable individuellement (ancienneté, temps partiel).
-  annualLeaveDays     Int                   @default(20)
+  /// Quota annuel de jours de congé LÉGAUX (défaut 21 pour la Belgique — 4
+  /// semaines légales + 1 jour anniversaire offert par Dasolabs).
+  /// Modifiable individuellement (ancienneté, temps partiel).
+  annualLeaveDays     Int                   @default(21)
   /// Quota annuel de RTT (Réduction du Temps de Travail). Défaut 12.
   rttDays             Int                   @default(12)
   /// Soldes par année et par catégorie — alimentés par le bouton "Ajouter
@@ -1321,6 +1322,14 @@ model Candidate {
   // Affiché sur le portail client à la place de la dernière expérience CV.
   jobTitle        String?
 
+  // Code postal — complété automatiquement sur base de `city` via Nominatim
+  // (OSM). Permet un filtrage précis + le calcul d'un rayon en km.
+  postalCode      String?
+  /// Latitude / longitude géocodées depuis city+postalCode. Utilisées pour le
+  /// filtre "localisation + rayon en km" sur /candidates.
+  latitude        Float?
+  longitude       Float?
+
   skills          String[]        @default([])
   // Centres d'intérêt (hobbies, passions) — affichés sur le CV
   interests       String[]        @default([])
@@ -1349,6 +1358,10 @@ model Candidate {
   status          CandidateStatus @default(ACTIVE)
   availableFrom   DateTime?       @db.Date
   notes           String?
+
+  /// Dernier rappel "inactif depuis 4 mois" envoyé — permet d'éviter le spam.
+  /// Mis à jour par le cron /api/cron/candidate-inactivity.
+  lastInactivityReminderAt DateTime?
 
   // ─── Données personnelles pour la génération de contrats ───
   birthDate       DateTime?       @db.Date
@@ -2296,6 +2309,10 @@ model Document {
   /// Audience du document (CLIENT, CONSULTANT, INTERNAL) — utilisé pour
   /// filtrer les documents partagés dans le suivi mission (2 onglets).
   audience     String?
+  /// Catégorie principale pour rangement et filtrage dans /documents.
+  /// Valeurs libres mais contraintes par l'UI :
+  ///   CONTRACT, RH, PROJECT, CLIENT, OFFER, POLICY, FINANCE, TECH, OTHER
+  category     String?
 
   // Versioning : V1 = parent=null, V2/V3/Vn = parent=V1.id
   parentDocumentId String?
@@ -3058,6 +3075,8 @@ enum NotificationType {
   MISSION_ENDING          // Ta mission finit dans < 60 jours
   MISSION_ASSIGNED        // Tu as été assigné à une nouvelle mission
   MENTIONED               // Tu as été mentionné (@)
+  CALENDAR_REMINDER       // Rappel : un événement du calendrier a lieu demain (ou aujourd'hui)
+  CANDIDATE_INACTIVE      // Candidat inactif depuis >4 mois (relance à prévoir)
   OTHER
 }
 

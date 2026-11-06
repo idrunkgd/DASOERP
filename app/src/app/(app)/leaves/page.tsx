@@ -4,6 +4,7 @@ import { requirePermissionOrRedirect, getUserEffectivePermissions } from "@/lib/
 import { PageHeader } from "@/components/ui/page-header";
 import { Plane, CheckCircle2, Users as UsersIcon } from "lucide-react";
 import { ApproveActions, DeleteLeaveButton } from "./approve-actions";
+import { EditLeaveButton } from "./edit-leave-button";
 import { RolloverOneButton, RolloverAllButton } from "./rollover-buttons";
 import { computeLeaveBalance } from "@/lib/leave-balance";
 
@@ -205,6 +206,20 @@ export default async function LeavesPage({
                       <div className="flex items-center gap-1 justify-end">
                         {canApprove && l.status === "SUBMITTED" && (
                           <ApproveActions id={l.id} />
+                        )}
+                        {/* Un manager RH peut modifier n'importe quelle demande
+                            (dates, jours, type). Le solde est recalculé auto. */}
+                        {canApprove && (
+                          <EditLeaveButton
+                            id={l.id}
+                            userLabel={`${l.user.firstName} ${l.user.lastName}`}
+                            startDate={l.startDate.toISOString().slice(0, 10)}
+                            endDate={l.endDate.toISOString().slice(0, 10)}
+                            days={Number(l.days)}
+                            type={l.type as any}
+                            reason={l.reason}
+                            notes={l.notes}
+                          />
                         )}
                         {/* Bouton corbeille : un manager RH peut supprimer une
                             demande à tout statut, y compris APPROVED — les
