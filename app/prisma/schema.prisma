@@ -1322,11 +1322,9 @@ model Candidate {
   // Affiché sur le portail client à la place de la dernière expérience CV.
   jobTitle        String?
 
-  // Code postal — complété automatiquement sur base de `city` via Nominatim
-  // (OSM). Permet un filtrage précis + le calcul d'un rayon en km.
-  postalCode      String?
-  /// Latitude / longitude géocodées depuis city+postalCode. Utilisées pour le
-  /// filtre "localisation + rayon en km" sur /candidates.
+  /// Latitude / longitude géocodées depuis city+postalCode via Nominatim (OSM).
+  /// Utilisées pour le filtre "localisation + rayon en km" sur /candidates.
+  /// Le code postal lui-même existe plus bas dans la section contrats.
   latitude        Float?
   longitude       Float?
 
