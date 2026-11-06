@@ -12,7 +12,7 @@ import { respondToProposalV2, addClientComment } from "@/server/actions/client-p
 import {
   User, MapPin, Check, X, CalendarCheck, Users as UsersIcon,
   Clock, Video, Building2, Plus, Trash2, FileDown, Eye,
-  MessageSquare, Send, AlertTriangle
+  MessageSquare, Send, AlertTriangle, ChevronDown, ChevronRight
 } from "lucide-react";
 
 type Slot = { date: string; startTime: string; endTime: string; mode: "VISIO" | "ONSITE" };
@@ -154,43 +154,11 @@ export function PortalClientViewV2({ token, data }: {
           <p>Aucun profil proposé pour l'instant.</p>
         </div>
       ) : hasAnyNeed ? (
-        <div className="space-y-10">
-          {needSectionsOrder.map(({ need, proposals }) => (
-            <section key={need?.id ?? "orphan"}>
-              <div className="mb-4 pb-3 border-b border-slate-200">
-                {need ? (
-                  <>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-xl sm:text-2xl font-bold text-midnight-900">{need.title}</h2>
-                      <NeedStatusBadge status={need.status} />
-                      <span className="text-xs text-midnight-500 ml-auto">
-                        {proposals.length} profil{proposals.length > 1 ? "s" : ""} proposé{proposals.length > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    {need.description && (
-                      <p className="text-sm text-midnight-600 mt-1 whitespace-pre-line">{need.description}</p>
-                    )}
-                  </>
-                ) : (
-                  <h2 className="text-lg font-semibold text-midnight-700">Autres profils proposés</h2>
-                )}
-              </div>
-              {need?.status === "FILLED" ? (
-                <div className="rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-sm px-4 py-3">
-                  Ce poste est désormais <strong>pourvu</strong>. Les profils précédemment proposés ne sont plus visibles ici.
-                </div>
-              ) : proposals.length === 0 ? (
-                <p className="text-sm text-midnight-500 italic py-4">Aucun candidat proposé pour ce poste pour le moment.</p>
-              ) : (
-                <div className="space-y-6">
-                  {proposals.map((p) => (
-                    <ProposalCardV2 key={p.id} token={token} proposal={p} readOnly={data.isDasolabsPreview ?? false} />
-                  ))}
-                </div>
-              )}
-            </section>
-          ))}
-        </div>
+        <NeedSections
+          sections={needSectionsOrder}
+          token={token}
+          readOnly={data.isDasolabsPreview ?? false}
+        />
       ) : (
         <div className="space-y-6">
           {data.proposals.map((p) => (
@@ -470,6 +438,122 @@ function StepTimeline({ status }: { status: string }) {
           Étape {current + 1} : {currentStep.label}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Liste repliable des besoins côté client ────────────────────────
+// Permet au client de replier les sections qui ne l'intéressent pas et de
+// se concentrer sur les candidats d'un seul besoin via "Afficher seulement".
+function NeedSections({
+  sections, token, readOnly
+}: {
+  sections: Array<{ need: PortalNeed | null; proposals: Proposal[] }>;
+  token: string;
+  readOnly: boolean;
+}) {
+  // Par défaut : tout ouvert. State est un Set d'IDs REPLIÉS (plus simple).
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const allKeys = sections.map((s) => s.need?.id ?? "orphan");
+
+  function toggle(key: string) {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }
+  function showOnly(key: string) {
+    setCollapsed(new Set(allKeys.filter((k) => k !== key)));
+    // Scroll doux vers la section ciblée
+    setTimeout(() => {
+      const el = document.getElementById(`need-sec-${key}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }
+  function expandAll() { setCollapsed(new Set()); }
+  function collapseAll() { setCollapsed(new Set(allKeys)); }
+  const nbCollapsed = collapsed.size;
+
+  return (
+    <div className="space-y-6">
+      {sections.length > 1 && (
+        <div className="flex items-center justify-end gap-3 text-xs text-midnight-500">
+          {nbCollapsed > 0 ? (
+            <button onClick={expandAll} className="hover:text-indigoaccent hover:underline">
+              Tout déplier
+            </button>
+          ) : (
+            <button onClick={collapseAll} className="hover:text-indigoaccent hover:underline">
+              Tout replier
+            </button>
+          )}
+        </div>
+      )}
+      {sections.map(({ need, proposals }) => {
+        const key = need?.id ?? "orphan";
+        const isCollapsed = collapsed.has(key);
+        return (
+          <section key={key} id={`need-sec-${key}`}>
+            <button
+              type="button"
+              onClick={() => toggle(key)}
+              className="w-full text-left mb-4 pb-3 border-b border-slate-200 flex items-start gap-2 hover:bg-slate-50/60 rounded-t px-1"
+              aria-expanded={!isCollapsed}
+            >
+              <span className="shrink-0 mt-1 text-midnight-500">
+                {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+              <div className="flex-1 min-w-0">
+                {need ? (
+                  <>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-xl sm:text-2xl font-bold text-midnight-900">{need.title}</h2>
+                      <NeedStatusBadge status={need.status} />
+                      <span className="text-xs text-midnight-500 ml-auto">
+                        {proposals.length} profil{proposals.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    {need.description && !isCollapsed && (
+                      <p className="text-sm text-midnight-600 mt-1 whitespace-pre-line">{need.description}</p>
+                    )}
+                  </>
+                ) : (
+                  <h2 className="text-lg font-semibold text-midnight-700">
+                    Autres profils proposés <span className="text-xs text-midnight-500 font-normal">({proposals.length})</span>
+                  </h2>
+                )}
+              </div>
+              {sections.length > 1 && !isCollapsed && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); showOnly(key); }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); showOnly(key); } }}
+                  className="text-[11px] text-indigoaccent hover:underline shrink-0 mt-1 cursor-pointer"
+                >
+                  Afficher seulement ce besoin
+                </span>
+              )}
+            </button>
+            {!isCollapsed && (
+              need?.status === "FILLED" ? (
+                <div className="rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-sm px-4 py-3">
+                  Ce poste est désormais <strong>pourvu</strong>. Les profils précédemment proposés ne sont plus visibles ici.
+                </div>
+              ) : proposals.length === 0 ? (
+                <p className="text-sm text-midnight-500 italic py-4">Aucun candidat proposé pour ce poste pour le moment.</p>
+              ) : (
+                <div className="space-y-6">
+                  {proposals.map((p) => (
+                    <ProposalCardV2 key={p.id} token={token} proposal={p} readOnly={readOnly} />
+                  ))}
+                </div>
+              )
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
