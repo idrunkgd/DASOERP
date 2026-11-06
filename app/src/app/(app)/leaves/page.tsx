@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Plane, CheckCircle2, Users as UsersIcon } from "lucide-react";
 import { ApproveActions, DeleteLeaveButton } from "./approve-actions";
 import { EditLeaveButton } from "./edit-leave-button";
+import { EditBalanceButton } from "./edit-balance-button";
 import { RolloverOneButton, RolloverAllButton } from "./rollover-buttons";
 import { computeLeaveBalance } from "@/lib/leave-balance";
 
@@ -42,6 +43,7 @@ export default async function LeavesPage({
   const nextYear = currentYear + 1;
   let balances: Array<{
     userId: string; firstName: string; lastName: string; email: string;
+    legalEntitled: number; rttEntitled: number; carriedEntitled: number;
     legalRemaining: number; rttRemaining: number; carriedRemaining: number;
     totalRemaining: number;
     hasNextYear: boolean;   // True si LeaveBalance pour nextYear existe déjà
@@ -65,6 +67,9 @@ export default async function LeavesPage({
           firstName: u.firstName,
           lastName: u.lastName,
           email: u.email,
+          legalEntitled: b.annualLegal.entitled,
+          rttEntitled:   b.rtt.entitled,
+          carriedEntitled: b.carriedOver.entitled,
           legalRemaining: b.annualLegal.remaining,
           rttRemaining: b.rtt.remaining,
           carriedRemaining: b.carriedOver.remaining,
@@ -251,6 +256,7 @@ function BalancesTable({
 }: {
   balances: Array<{
     userId: string; firstName: string; lastName: string; email: string;
+    legalEntitled: number; rttEntitled: number; carriedEntitled: number;
     legalRemaining: number; rttRemaining: number; carriedRemaining: number;
     totalRemaining: number; hasNextYear: boolean;
   }>;
@@ -308,9 +314,14 @@ function BalancesTable({
                   </span>
                 </td>
                 <td>
-                  <Link href={`/users/${b.userId}`} className="text-xs text-indigoaccent hover:underline">
-                    Éditer quota
-                  </Link>
+                  <EditBalanceButton
+                    userId={b.userId}
+                    userLabel={`${b.firstName} ${b.lastName}`}
+                    year={currentYear}
+                    legalEntitled={b.legalEntitled}
+                    rttEntitled={b.rttEntitled}
+                    carriedEntitled={b.carriedEntitled}
+                  />
                 </td>
                 <td>
                   <RolloverOneButton

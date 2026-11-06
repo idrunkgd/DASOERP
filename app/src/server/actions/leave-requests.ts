@@ -90,6 +90,39 @@ export async function rolloverLeaveYear(userId: string, targetYear?: number) {
     newCarriedOver, entitledLegal: user.annualLeaveDays, entitledRtt: user.rttDays };
 }
 
+/**
+ * Édition directe du solde annuel d'un utilisateur par un manager RH.
+ * Met à jour `LeaveBalance.entitled` pour un bucket (ANNUAL_LEGAL / RTT /
+ * CARRIED_OVER) de l'année donnée. Crée la ligne si absente.
+ *
+ * NB : le solde restant est recalculé automatiquement (entitled - approved).
+ */
+export async function setLeaveBalanceEntitled(input: {
+  userId: string;
+  year?: number;
+  type: "ANNUAL_LEGAL" | "RTT" | "CARRIED_OVER";
+  entitled: number;
+}) {
+  const session = await requirePermission("leaves.approve");
+  const year = input.year ?? new Date().getUTCFullYear();
+  if (input.entitled < 0 || input.entitled > 100) {
+    throw new Error("Valeur de solde invalide (0-100 jours).");
+  }
+  await prisma.leaveBalance.upsert({
+    where: { userId_year_type: { userId: input.userId, year, type: input.type } },
+    update: { entitled: input.entitled },
+    create: { userId: input.userId, year, type: input.type, entitled: input.entitled }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE",
+    entityType: "LeaveBalance", entityId: `${input.userId}-${year}-${input.type}`,
+    message: `Solde ${input.type} ${year} mis à ${input.entitled}j (edit admin RH)`
+  });
+  revalidatePath("/leaves");
+  revalidatePath(`/consultants/${input.userId}`);
+  return { ok: true };
+}
+
 /** Rollover pour TOUS les users actifs — un simple bouton RH. */
 export async function rolloverLeaveYearAll(targetYear?: number) {
   await requirePermission("leaves.approve");

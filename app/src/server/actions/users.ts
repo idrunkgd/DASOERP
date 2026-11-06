@@ -78,6 +78,31 @@ export async function updateUserAction(id: string, formData: FormData) {
     passwordChanged = true;
   }
   const after = await prisma.user.update({ where: { id }, data: updateData });
+
+  // ─── Sync LeaveBalance de l'année en cours ─────────────────────────────
+  // User.annualLeaveDays / rttDays sont les valeurs de RÉFÉRENCE (nouveau
+  // quota pour l'année prochaine). Mais le solde affiché côté /leaves lit
+  // d'abord LeaveBalance, créé au rollover. Si l'admin modifie le quota ici,
+  // on veut que ça se répercute IMMÉDIATEMENT sur l'année en cours — sinon
+  // l'édition semble inopérante. Idempotent via upsert.
+  const year = new Date().getUTCFullYear();
+  const annualChanged = before.annualLeaveDays !== after.annualLeaveDays;
+  const rttChanged    = before.rttDays        !== after.rttDays;
+  if (annualChanged) {
+    await prisma.leaveBalance.upsert({
+      where: { userId_year_type: { userId: id, year, type: "ANNUAL_LEGAL" } },
+      update: { entitled: after.annualLeaveDays },
+      create: { userId: id, year, type: "ANNUAL_LEGAL", entitled: after.annualLeaveDays }
+    });
+  }
+  if (rttChanged) {
+    await prisma.leaveBalance.upsert({
+      where: { userId_year_type: { userId: id, year, type: "RTT" } },
+      update: { entitled: after.rttDays },
+      create: { userId: id, year, type: "RTT", entitled: after.rttDays }
+    });
+  }
+
   // On retire les hashes du diff
   const { passwordHash: _b, ...beforeSafe } = before as any;
   const { passwordHash: _a, ...afterSafe } = after as any;
@@ -86,10 +111,13 @@ export async function updateUserAction(id: string, formData: FormData) {
     entityType: "User", entityId: id,
     message: passwordChanged
       ? `Utilisateur mis à jour (mot de passe changé)`
-      : "Utilisateur mis à jour",
+      : (annualChanged || rttChanged
+          ? `Utilisateur mis à jour (soldes ${year} synchronisés : légaux ${after.annualLeaveDays}j, RTT ${after.rttDays}j)`
+          : "Utilisateur mis à jour"),
     before: beforeSafe, after: afterSafe
   });
   revalidatePath(`/users/${id}`); revalidatePath("/users");
+  revalidatePath("/leaves");
   return { ok: true, passwordChanged };
 }
 
