@@ -25,8 +25,16 @@ type Comment = {
   createdAt: string;
 };
 
+type PortalNeed = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+};
+
 type Proposal = {
   id: string;
+  needId: string | null;
   status: string;
   proposedDailyRate: number;
   clientMessage: string | null;
@@ -85,9 +93,27 @@ export function PortalClientViewV2({ token, data }: {
     name: string; logoUrl: string | null;
     greetingName: string | null;
     isDasolabsPreview?: boolean;
+    needs?: PortalNeed[];
     proposals: Proposal[];
   };
 }) {
+  const needs: PortalNeed[] = data.needs ?? [];
+  // Groupe les propositions par besoin. Les propositions sans needId → bucket "null"
+  const grouped = new Map<string | null, Proposal[]>();
+  for (const p of data.proposals) {
+    const k = p.needId ?? null;
+    if (!grouped.has(k)) grouped.set(k, []);
+    grouped.get(k)!.push(p);
+  }
+  const needSectionsOrder: Array<{ need: PortalNeed | null; proposals: Proposal[] }> = [];
+  for (const n of needs) {
+    needSectionsOrder.push({ need: n, proposals: grouped.get(n.id) ?? [] });
+  }
+  const orphanProps = grouped.get(null) ?? [];
+  if (orphanProps.length > 0) {
+    needSectionsOrder.push({ need: null, proposals: orphanProps });
+  }
+  const hasAnyNeed = needs.length > 0;
   const firstName = data.greetingName?.split(/\s+/)[0];
   return (
     <div className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
@@ -119,9 +145,43 @@ export function PortalClientViewV2({ token, data }: {
         </div>
       </header>
 
-      {data.proposals.length === 0 ? (
+      {data.proposals.length === 0 && !hasAnyNeed ? (
         <div className="text-center py-16 text-midnight-500">
           <p>Aucun profil proposé pour l'instant.</p>
+        </div>
+      ) : hasAnyNeed ? (
+        <div className="space-y-10">
+          {needSectionsOrder.map(({ need, proposals }) => (
+            <section key={need?.id ?? "orphan"}>
+              <div className="mb-4 pb-3 border-b border-slate-200">
+                {need ? (
+                  <>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-xl sm:text-2xl font-bold text-midnight-900">{need.title}</h2>
+                      <NeedStatusBadge status={need.status} />
+                      <span className="text-xs text-midnight-500 ml-auto">
+                        {proposals.length} profil{proposals.length > 1 ? "s" : ""} proposé{proposals.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    {need.description && (
+                      <p className="text-sm text-midnight-600 mt-1 whitespace-pre-line">{need.description}</p>
+                    )}
+                  </>
+                ) : (
+                  <h2 className="text-lg font-semibold text-midnight-700">Autres profils proposés</h2>
+                )}
+              </div>
+              {proposals.length === 0 ? (
+                <p className="text-sm text-midnight-500 italic py-4">Aucun candidat proposé pour ce poste pour le moment.</p>
+              ) : (
+                <div className="space-y-6">
+                  {proposals.map((p) => (
+                    <ProposalCardV2 key={p.id} token={token} proposal={p} readOnly={data.isDasolabsPreview ?? false} />
+                  ))}
+                </div>
+              )}
+            </section>
+          ))}
         </div>
       ) : (
         <div className="space-y-6">
@@ -403,6 +463,21 @@ function StepTimeline({ status }: { status: string }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Badge statut d'un besoin (OPEN / FILLED / CLOSED) ──────────────
+function NeedStatusBadge({ status }: { status: string }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    OPEN:   { label: "Poste ouvert", cls: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+    FILLED: { label: "Pourvu",       cls: "bg-blue-100 text-blue-800 border-blue-200" },
+    CLOSED: { label: "Clôturé",      cls: "bg-slate-200 text-slate-700 border-slate-300" }
+  };
+  const m = map[status] ?? map.OPEN;
+  return (
+    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${m.cls}`}>
+      {m.label}
+    </span>
   );
 }
 

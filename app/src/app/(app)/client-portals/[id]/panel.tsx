@@ -17,7 +17,11 @@ import {
   markInterviewDone,
   confirmInterviewSlot,
   setPortalWorkflow,
-  addDasolabsReply
+  addDasolabsReply,
+  createPortalNeed,
+  updatePortalNeed,
+  deletePortalNeed,
+  assignProposalToNeed
 } from "@/server/actions/client-portals";
 import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw, UserPlus, UserCheck, MessageSquare, Send } from "lucide-react";
 
@@ -126,6 +130,9 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
       {/* Liens personnels par contact */}
       <PersonalLinksSection portalId={portal.id} contacts={portal.personalLinks || []} />
 
+      {/* Besoins / postes ouverts du portail */}
+      <PortalNeedsSection portalId={portal.id} needs={portal.needs || []} />
+
       {/* Propositions */}
       <div className="card p-4">
         <h2 className="font-semibold mb-3">Candidats proposés</h2>
@@ -158,6 +165,17 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
                       TJM proposé client : <strong>{Number(p.proposedDailyRate)} €/j HT</strong>
                       {p.candidate.yearsExperience ? ` · ${p.candidate.yearsExperience} ans d'XP` : ""}
                     </div>
+                    {/* Rattachement à un besoin du portail (dropdown rapide) */}
+                    <ProposalNeedSelect
+                      proposalId={p.id}
+                      currentNeedId={p.needId ?? null}
+                      needs={portal.needs || []}
+                    />
+                    {!p.needId && (portal.needs?.length ?? 0) > 0 && (
+                      <div className="mt-1 text-[11px] text-amber-700">
+                        ⚠ Pas de besoin assigné — le candidat apparaîtra sous « Autres profils » côté client.
+                      </div>
+                    )}
                     {p.actedByContactName && (
                       <div className="mt-2 text-[11px] text-indigo-800 flex items-center gap-1">
                         <UserCheck className="w-3 h-3" />
@@ -215,6 +233,169 @@ export function PortalDetailPanel({ portal }: { portal: any }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Besoins du portail (ex: "Senior Automation", "Roboticien") ──────────
+const NEED_STATUS: Record<string, { label: string; cls: string }> = {
+  OPEN:   { label: "Ouvert",   cls: "bg-emerald-100 text-emerald-800" },
+  FILLED: { label: "Pourvu",   cls: "bg-blue-100 text-blue-800" },
+  CLOSED: { label: "Clôturé",  cls: "bg-slate-200 text-slate-700" }
+};
+
+function PortalNeedsSection({ portalId, needs }: { portalId: string; needs: any[] }) {
+  const [open, setOpen] = useState(false);
+  const [pending, start] = useTransition();
+
+  async function create(fd: FormData) {
+    fd.set("portalId", portalId);
+    start(async () => {
+      try {
+        await createPortalNeed(fd);
+        toast.success("Besoin ajouté");
+        setOpen(false);
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  return (
+    <div className="card p-4">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <div>
+          <h2 className="font-semibold">Besoins ouverts ({needs.length})</h2>
+          <p className="text-xs text-midnight-500 mt-0.5">
+            Postes à pourvoir pour ce client. Chaque candidat proposé est rattaché à un besoin pour que le client voie clairement qui est proposé pour quoi.
+          </p>
+        </div>
+        <button className="btn-primary btn-sm" onClick={() => setOpen(!open)}>
+          + Ajouter un besoin
+        </button>
+      </div>
+
+      {open && (
+        <form action={create} className="mb-3 p-3 border border-indigo-200 bg-indigo-50/40 rounded space-y-2">
+          <input name="title" required placeholder="Ex: Senior Automation Engineer" className="input text-sm" maxLength={200} />
+          <textarea name="description" placeholder="Contexte, stack, lieu, urgence… (optionnel)" className="input text-sm min-h-[60px] py-2" />
+          <div className="flex items-center justify-end gap-2">
+            <button type="button" className="btn-ghost btn-sm" onClick={() => setOpen(false)}>Annuler</button>
+            <button type="submit" className="btn-primary btn-sm" disabled={pending}>Ajouter</button>
+          </div>
+        </form>
+      )}
+
+      {needs.length === 0 ? (
+        <p className="text-sm text-midnight-500 italic">Aucun besoin pour l'instant. Ajoute-en pour organiser les candidats proposés.</p>
+      ) : (
+        <div className="space-y-2">
+          {needs.map((n) => <NeedRow key={n.id} need={n} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NeedRow({ need }: { need: any }) {
+  const [editing, setEditing] = useState(false);
+  const [pending, start] = useTransition();
+  const [title, setTitle] = useState(need.title);
+  const [description, setDescription] = useState(need.description ?? "");
+
+  async function saveStatus(status: "OPEN" | "FILLED" | "CLOSED") {
+    start(async () => {
+      try { await updatePortalNeed(need.id, { status }); toast.success(`Statut → ${NEED_STATUS[status].label}`); }
+      catch (e: any) { toast.error(e.message); }
+    });
+  }
+  async function saveEdit() {
+    start(async () => {
+      try {
+        await updatePortalNeed(need.id, { title, description: description || null });
+        toast.success("Besoin mis à jour");
+        setEditing(false);
+      } catch (e: any) { toast.error(e.message); }
+    });
+  }
+  async function remove() {
+    if (!confirm(`Supprimer le besoin « ${need.title} » ? Les candidats liés seront détachés mais pas supprimés.`)) return;
+    start(async () => {
+      try { await deletePortalNeed(need.id); toast.success("Besoin supprimé"); }
+      catch (e: any) { toast.error(e.message); }
+    });
+  }
+
+  const st = NEED_STATUS[need.status] ?? NEED_STATUS.OPEN;
+  return (
+    <div className="border border-border rounded p-3 bg-white">
+      {!editing ? (
+        <div className="flex items-start gap-2 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <strong className="text-midnight-900">{need.title}</strong>
+              <span className={`text-[10px] px-2 py-0.5 rounded ${st.cls}`}>{st.label}</span>
+            </div>
+            {need.description && <div className="text-xs text-midnight-600 mt-1 whitespace-pre-line">{need.description}</div>}
+          </div>
+          <div className="flex items-center gap-1">
+            <select
+              value={need.status}
+              onChange={(e) => saveStatus(e.target.value as any)}
+              disabled={pending}
+              className="input input-sm text-xs max-w-[110px]"
+            >
+              <option value="OPEN">Ouvert</option>
+              <option value="FILLED">Pourvu</option>
+              <option value="CLOSED">Clôturé</option>
+            </select>
+            <button onClick={() => setEditing(true)} className="btn-ghost btn-sm">
+              <Pencil className="w-3 h-3" />
+            </button>
+            <button onClick={remove} disabled={pending} className="btn-ghost btn-sm text-rose-600">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} className="input text-sm" />
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="input text-sm min-h-[60px] py-2" />
+          <div className="flex items-center justify-end gap-2">
+            <button onClick={() => { setEditing(false); setTitle(need.title); setDescription(need.description ?? ""); }} className="btn-ghost btn-sm">Annuler</button>
+            <button onClick={saveEdit} disabled={pending} className="btn-primary btn-sm">Enregistrer</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProposalNeedSelect({ proposalId, currentNeedId, needs }: {
+  proposalId: string; currentNeedId: string | null; needs: any[];
+}) {
+  const [pending, start] = useTransition();
+  if (needs.length === 0) return null;
+  return (
+    <div className="mt-2 flex items-center gap-2 text-xs">
+      <span className="text-midnight-500">Besoin :</span>
+      <select
+        value={currentNeedId ?? ""}
+        onChange={(e) => {
+          const next = e.target.value || null;
+          start(async () => {
+            try { await assignProposalToNeed(proposalId, next); toast.success(next ? "Candidat rattaché au besoin" : "Candidat détaché"); }
+            catch (err: any) { toast.error(err.message); }
+          });
+        }}
+        disabled={pending}
+        className="input input-sm text-xs max-w-[280px]"
+      >
+        <option value="">— Aucun besoin (sous « Autres profils ») —</option>
+        {needs.map((n) => (
+          <option key={n.id} value={n.id}>
+            {n.title}{n.status !== "OPEN" ? ` · ${NEED_STATUS[n.status]?.label ?? n.status}` : ""}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

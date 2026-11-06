@@ -3602,6 +3602,10 @@ model ClientPortal {
   updatedAt     DateTime @updatedAt
 
   proposals     CandidateProposal[]
+  /// Besoins/postes ouverts pour ce client (ex: "Senior Automation",
+  /// "Roboticien"). Les propositions de candidats sont rattachées à un besoin
+  /// spécifique pour que le client voit clairement qui est proposé pour quel poste.
+  needs         ClientPortalNeed[]
   /// Liens personnels par contact — même vue, token nominatif, pour tracer
   /// qui laisse un commentaire ou agit sur une proposition.
   personalLinks ClientPortalContact[]
@@ -3636,10 +3640,35 @@ model ClientPortalContact {
 
 /// Proposition d'un candidat à un portail client spécifique.
 /// Un même candidat peut être proposé à plusieurs portails en parallèle.
+model ClientPortalNeed {
+  id          String       @id @default(cuid())
+  portalId    String
+  portal      ClientPortal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  /// Titre du poste (ex: "Senior Automation", "Roboticien", "QA process")
+  title       String
+  /// Description libre (contexte, stack, lieu, urgence…)
+  description String?
+  /// OPEN (ouvert), FILLED (pourvu), CLOSED (annulé/clos)
+  status      String       @default("OPEN")
+  /// Priorité d'affichage côté client (numérique croissante = en haut)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  proposals   CandidateProposal[] @relation("NeedProposals")
+
+  @@index([portalId, sortOrder])
+}
+
 model CandidateProposal {
   id                String       @id @default(cuid())
   portalId          String
   portal            ClientPortal @relation(fields: [portalId], references: [id], onDelete: Cascade)
+  /// Besoin spécifique du portail auquel ce candidat est proposé. Optionnel
+  /// pour rétrocompat avec les anciennes propositions non rattachées. Côté
+  /// client, les propositions sont regroupées par besoin.
+  needId            String?
+  need              ClientPortalNeed? @relation("NeedProposals", fields: [needId], references: [id], onDelete: SetNull)
   candidateId       String
   candidate         Candidate    @relation("CandidateClientProposals", fields: [candidateId], references: [id], onDelete: Cascade)
   /// Mission optionnellement liée (si proposition dans le cadre d'une mission)

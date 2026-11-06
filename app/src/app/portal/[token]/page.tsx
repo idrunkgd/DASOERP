@@ -15,6 +15,11 @@ export default async function PublicPortalPage({ params }: { params: { token: st
   const portal = await (prisma as any).clientPortal.findUnique({
     where: { id: resolved.portalId },
     include: {
+      // Besoins du portail affichés en sections côté client
+      needs: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+        select: { id: true, title: true, description: true, status: true, sortOrder: true }
+      },
       proposals: {
         where: { isVisible: true },
         orderBy: [{ createdAt: "desc" }],
@@ -58,8 +63,12 @@ export default async function PublicPortalPage({ params }: { params: { token: st
     greetingName: resolved.contact?.name ?? null,
     // true si le token utilisé est celui du portail général (= vue interne Dasolabs)
     isDasolabsPreview: resolved.contact === null,
+    needs: (portal.needs ?? []).map((n: any) => ({
+      id: n.id, title: n.title, description: n.description, status: n.status
+    })),
     proposals: portal.proposals.map((p: any) => ({
       id: p.id,
+      needId: p.needId ?? null,
       status: p.status,
       clientMessage: p.clientMessage,
       actedByContactName: p.actedByContactName ?? null,

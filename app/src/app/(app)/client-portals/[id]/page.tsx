@@ -18,6 +18,9 @@ export default async function ClientPortalDetailPage({ params }: { params: { id:
       personalLinks: {
         orderBy: [{ isActive: "desc" }, { createdAt: "desc" }]
       },
+      needs: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }]
+      },
       proposals: {
         orderBy: [{ createdAt: "desc" }],
         include: {

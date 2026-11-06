@@ -114,6 +114,8 @@ const ProposalSchema = z.object({
   portalId: z.string().min(1),
   candidateId: z.string().min(1),
   missionRequestId: z.string().optional().nullable().transform((v) => v || null),
+  /// Besoin du portail auquel rattacher cette proposition (recommandé).
+  needId: z.string().optional().nullable().transform((v) => v?.trim() || null),
   proposedDailyRate: z.coerce.number().positive(),
   internalNote: z.string().optional().nullable().transform((v) => v?.trim() || null)
 });
@@ -149,6 +151,79 @@ export async function createProposal(formData: FormData) {
   revalidatePath(`/candidates/${data.candidateId}`);
   revalidatePath(`/client-portals/${data.portalId}`);
   return { ok: true, id: proposal.id };
+}
+
+// ─── Besoins du portail (ClientPortalNeed) ─────────────────────────────
+
+const NeedSchema = z.object({
+  portalId: z.string().min(1),
+  title: z.string().min(1).max(200),
+  description: z.string().optional().nullable().transform((v) => v?.trim() || null),
+  status: z.enum(["OPEN", "FILLED", "CLOSED"]).default("OPEN"),
+  sortOrder: z.coerce.number().int().optional().default(0)
+});
+
+export async function createPortalNeed(formData: FormData) {
+  const session = await requirePermission("consulting.write");
+  const data = NeedSchema.parse(Object.fromEntries(formData));
+  const need = await (prisma as any).clientPortalNeed.create({ data });
+  await logActivity({
+    actorId: session.user.id, action: "CREATE", entityType: "ClientPortalNeed",
+    entityId: need.id, message: `Besoin « ${data.title} » ajouté au portail`
+  });
+  revalidatePath(`/client-portals/${data.portalId}`);
+  return { ok: true, id: need.id };
+}
+
+export async function updatePortalNeed(id: string, patch: {
+  title?: string; description?: string | null; status?: "OPEN" | "FILLED" | "CLOSED"; sortOrder?: number;
+}) {
+  const session = await requirePermission("consulting.write");
+  const existing = await (prisma as any).clientPortalNeed.findUniqueOrThrow({ where: { id } });
+  await (prisma as any).clientPortalNeed.update({ where: { id }, data: patch });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "ClientPortalNeed",
+    entityId: id, message: `Besoin mis à jour (${patch.status ? "statut " + patch.status : "métadonnées"})`
+  });
+  revalidatePath(`/client-portals/${existing.portalId}`);
+  return { ok: true };
+}
+
+export async function deletePortalNeed(id: string) {
+  const session = await requirePermission("consulting.write");
+  const existing = await (prisma as any).clientPortalNeed.findUniqueOrThrow({ where: { id } });
+  await (prisma as any).clientPortalNeed.delete({ where: { id } });
+  await logActivity({
+    actorId: session.user.id, action: "DELETE", entityType: "ClientPortalNeed",
+    entityId: id, message: `Besoin supprimé — les propositions liées sont conservées sans rattachement`
+  });
+  revalidatePath(`/client-portals/${existing.portalId}`);
+  return { ok: true };
+}
+
+/** Rattache / détache une proposition d'un besoin spécifique du portail. */
+export async function assignProposalToNeed(proposalId: string, needId: string | null) {
+  const session = await requirePermission("consulting.write");
+  const p = await (prisma as any).candidateProposal.findUniqueOrThrow({
+    where: { id: proposalId }, select: { portalId: true, candidateId: true }
+  });
+  // Si needId non null, on vérifie que le besoin appartient bien au même portail
+  if (needId) {
+    const n = await (prisma as any).clientPortalNeed.findUniqueOrThrow({
+      where: { id: needId }, select: { portalId: true }
+    });
+    if (n.portalId !== p.portalId) throw new Error("Ce besoin n'appartient pas à ce portail.");
+  }
+  await (prisma as any).candidateProposal.update({
+    where: { id: proposalId }, data: { needId }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "CandidateProposal",
+    entityId: proposalId,
+    message: needId ? `Candidat rattaché à un besoin` : `Candidat détaché du besoin`
+  });
+  revalidatePath(`/client-portals/${p.portalId}`);
+  return { ok: true };
 }
 
 export async function retractProposal(id: string) {
