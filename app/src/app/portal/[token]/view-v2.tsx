@@ -105,15 +105,19 @@ export function PortalClientViewV2({ token, data }: {
     if (!grouped.has(k)) grouped.set(k, []);
     grouped.get(k)!.push(p);
   }
+  // Un besoin CLOSED est entièrement masqué côté client.
+  // Un besoin FILLED (pourvu) reste visible mais les candidats ne sont plus listés.
   const needSectionsOrder: Array<{ need: PortalNeed | null; proposals: Proposal[] }> = [];
   for (const n of needs) {
-    needSectionsOrder.push({ need: n, proposals: grouped.get(n.id) ?? [] });
+    if (n.status === "CLOSED") continue;
+    const kept = n.status === "FILLED" ? [] : (grouped.get(n.id) ?? []);
+    needSectionsOrder.push({ need: n, proposals: kept });
   }
   const orphanProps = grouped.get(null) ?? [];
   if (orphanProps.length > 0) {
     needSectionsOrder.push({ need: null, proposals: orphanProps });
   }
-  const hasAnyNeed = needs.length > 0;
+  const hasAnyNeed = needs.some((n) => n.status !== "CLOSED");
   const firstName = data.greetingName?.split(/\s+/)[0];
   return (
     <div className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
@@ -171,7 +175,11 @@ export function PortalClientViewV2({ token, data }: {
                   <h2 className="text-lg font-semibold text-midnight-700">Autres profils proposés</h2>
                 )}
               </div>
-              {proposals.length === 0 ? (
+              {need?.status === "FILLED" ? (
+                <div className="rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-sm px-4 py-3">
+                  Ce poste est désormais <strong>pourvu</strong>. Les profils précédemment proposés ne sont plus visibles ici.
+                </div>
+              ) : proposals.length === 0 ? (
                 <p className="text-sm text-midnight-500 italic py-4">Aucun candidat proposé pour ce poste pour le moment.</p>
               ) : (
                 <div className="space-y-6">
