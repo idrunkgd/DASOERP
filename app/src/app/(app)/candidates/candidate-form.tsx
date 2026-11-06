@@ -117,6 +117,7 @@ export function CandidateForm({ initial, skillCatalog = [], cvContactChoices = [
         <div className="col-span-6"><label className="label">LinkedIn</label><input name="linkedinUrl" defaultValue={initial?.linkedinUrl ?? ""} className="input" placeholder="https://linkedin.com/in/..." /></div>
         <div className="col-span-3"><label className="label">Ville</label><input name="city" defaultValue={initial?.city ?? ""} className="input" /></div>
         <div className="col-span-3"><label className="label">Source</label><input name="source" defaultValue={initial?.source ?? ""} className="input" placeholder="LinkedIn, recommandation..." /></div>
+        <div className="col-span-6"><label className="label">Titre</label><input name="jobTitle" defaultValue={initial?.jobTitle ?? ""} className="input" placeholder="Ex: Automation Engineer, Roboticien, QA Expert..." /></div>
         <div className="col-span-3"><label className="label">Séniorité</label><input name="seniority" defaultValue={initial?.seniority ?? ""} className="input" placeholder="Junior / Senior / Lead" /></div>
         <div className="col-span-3"><label className="label">Années d'expérience</label><input name="yearsExperience" type="number" defaultValue={initial?.yearsExperience ?? ""} className="input" /></div>
         <div className="col-span-12">

@@ -11,7 +11,7 @@ import { logActivity } from "@/lib/audit";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
-const GEMINI_MODEL = "gemini-2.5-flash"; // 2.0-flash déprécié nov 2026, bascule 2.5-flash (free tier identique)
+const GEMINI_MODEL = "gemini-2.5-flash-lite"; // 2.5-flash a un free tier trop bas (10 RPM/500 RPD) → lite = 15 RPM / 1000 RPD + suffisant pour notre usage tool-calling
 const MAX_LOOPS = 5;
 
 const SYSTEM_PROMPT = `Tu es Huberte 🦉, la mémoire d'entreprise du Hub Dasolabs — une startup IT/industrielle belge.

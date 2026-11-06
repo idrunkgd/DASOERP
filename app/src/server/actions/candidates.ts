@@ -43,6 +43,7 @@ const Schema = z.object({
   }),
   yearsExperience: z.coerce.number().int().nonnegative().optional().nullable(),
   seniority: z.string().optional().nullable(),
+  jobTitle: z.string().optional().nullable().transform(v => (v?.trim() || null)),
   dailyCost: z.coerce.number().nonnegative().optional().nullable(),
   hourlyCost: z.coerce.number().nonnegative().optional().nullable(),
   minDailyRate: z.coerce.number().nonnegative().optional().nullable(),

@@ -1317,6 +1317,10 @@ model Candidate {
   city            String?
   source          String?         // LinkedIn, recommandation, plateforme...
 
+  // Titre du candidat (ex: "Automation Engineer", "Roboticien").
+  // Affiché sur le portail client à la place de la dernière expérience CV.
+  jobTitle        String?
+
   skills          String[]        @default([])
   // Centres d'intérêt (hobbies, passions) — affichés sur le CV
   interests       String[]        @default([])

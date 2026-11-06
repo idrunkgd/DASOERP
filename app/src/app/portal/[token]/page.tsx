@@ -23,6 +23,7 @@ export default async function PublicPortalPage({ params }: { params: { token: st
             select: {
               id: true, firstName: true, lastName: true,
               yearsExperience: true, seniority: true,
+              jobTitle: true,
               photoUrl: true, city: true,
               skills: true,
               experiences: {

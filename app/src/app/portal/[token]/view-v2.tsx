@@ -47,6 +47,7 @@ type Proposal = {
     lastName: string;
     yearsExperience: number | null;
     seniority: string | null;
+    jobTitle: string | null;
     photoUrl: string | null;
     city: string | null;
     skills: string[];
@@ -181,8 +182,10 @@ function ProposalCardV2({ token, proposal, readOnly }: { token: string; proposal
               </span>
             )}
           </div>
-          {c.experiences?.[0]?.jobTitle && (
-            <p className="text-sm text-midnight-600 mt-1">{c.experiences[0].jobTitle}</p>
+          {(c.jobTitle || c.experiences?.[0]?.jobTitle) && (
+            <p className="text-sm text-midnight-600 mt-1 font-medium">
+              {c.jobTitle ?? c.experiences[0].jobTitle}
+            </p>
           )}
           <div className="flex flex-wrap gap-1.5 mt-3">
             {c.skills.slice(0, 10).map((s) => (
