@@ -265,35 +265,55 @@ export function extractJson(text: string): string {
  *  3. Ferme les structures ouvertes avec les bons caractères
  */
 function attemptJsonRepair(body: string): string {
-  // Enlève tout suffixe incomplet (ex: `"description": "quelque chose à moi` → coupe la string ouverte)
-  let s = body;
-  // Supprime le dernier élément incomplet si la ligne finit sans guillemet fermé
-  // On cherche la dernière occurrence sûre : "," ou "}" ou "]"
-  const lastSafe = Math.max(
-    s.lastIndexOf('",'),
-    s.lastIndexOf('}'),
-    s.lastIndexOf(']')
-  );
-  if (lastSafe > 0) {
-    s = s.slice(0, lastSafe + 1);
-    // Si on a terminé par une virgule, c'est OK, on la supprimera après
-    if (s.endsWith(",")) s = s.slice(0, -1);
-  }
+  // Nettoyage initial : retire un éventuel suffixe markdown orphelin (``` ou ```json)
+  let s = body.replace(/```(?:json)?\s*$/i, "").trimEnd();
 
-  // Compte les ouvertures/fermetures NON escapées et hors strings
+  // 1. Si le dernier caractère est une virgule, on la retire (pending element)
+  if (s.endsWith(",")) s = s.slice(0, -1);
+
+  // 2. Scan caractère par caractère pour :
+  //    - détecter si on finit DANS une string ouverte (truncation mid-value)
+  //    - détecter si on finit juste après une clé sans valeur ("key":)
+  //    - compter les accolades/crochets ouverts
   let depthObj = 0, depthArr = 0, inStr = false, escape = false;
-  for (const ch of s) {
+  let lastSafeIdx = -1; // dernier index où le JSON est "propre" (fin de valeur hors string)
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
     if (escape) { escape = false; continue; }
     if (ch === "\\") { escape = true; continue; }
     if (ch === '"') { inStr = !inStr; continue; }
     if (inStr) continue;
     if (ch === "{") depthObj++;
-    else if (ch === "}") depthObj--;
+    else if (ch === "}") { depthObj--; lastSafeIdx = i; }
     else if (ch === "[") depthArr++;
-    else if (ch === "]") depthArr--;
+    else if (ch === "]") { depthArr--; lastSafeIdx = i; }
+    else if (ch === ",") lastSafeIdx = i - 1; // virgule : dernier item complet est juste avant
   }
 
-  // Ferme les structures ouvertes restantes (dans l'ordre inverse d'ouverture)
+  // 3. Si truncation au milieu d'une string → retrouve le dernier état "safe"
+  //    (dernière virgule ou dernier close bracket/brace) et coupe là.
+  if (inStr && lastSafeIdx > 0) {
+    s = s.slice(0, lastSafeIdx + 1);
+    if (s.endsWith(",")) s = s.slice(0, -1);
+    // Recalcule la profondeur sur le s coupé
+    depthObj = 0; depthArr = 0; inStr = false; escape = false;
+    for (const ch of s) {
+      if (escape) { escape = false; continue; }
+      if (ch === "\\") { escape = true; continue; }
+      if (ch === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if (ch === "{") depthObj++;
+      else if (ch === "}") depthObj--;
+      else if (ch === "[") depthArr++;
+      else if (ch === "]") depthArr--;
+    }
+  }
+
+  // 4. Trailing "key": sans valeur → retire la paire
+  const danglingKey = s.match(/,\s*"[^"]+"\s*:\s*$/);
+  if (danglingKey) s = s.slice(0, -danglingKey[0].length);
+
+  // 5. Ferme les structures ouvertes restantes dans l'ordre inverse
   while (depthArr-- > 0) s += "]";
   while (depthObj-- > 0) s += "}";
 
