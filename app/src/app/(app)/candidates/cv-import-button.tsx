@@ -57,7 +57,39 @@ export function CvImportButton() {
         const dataUri = await fileToDataUri(file);
         const r = await parseCvFile(dataUri);
         if (!r.ok) { toast.error(r.error); return; }
-        setParsed(r.data);
+        // Normalise défensivement : le LLM renvoie parfois null pour des champs
+        // array / string, ce qui crashait le rendu de la preview (`.join`,
+        // `.map`, `value={null}`). On force les shapes attendues.
+        const d: any = r.data || {};
+        const safe = {
+          firstName:       String(d.firstName ?? ""),
+          lastName:        String(d.lastName ?? ""),
+          email:           d.email ?? null,
+          phone:           d.phone ?? null,
+          city:            d.city ?? null,
+          linkedinUrl:     d.linkedinUrl ?? null,
+          currentTitle:    d.currentTitle ?? null,
+          yearsExperience: typeof d.yearsExperience === "number" ? d.yearsExperience : null,
+          seniority:       d.seniority ?? null,
+          summary:         d.summary ?? null,
+          skills:          Array.isArray(d.skills) ? d.skills.filter((x: any) => typeof x === "string") : [],
+          spokenLanguages: Array.isArray(d.spokenLanguages) ? d.spokenLanguages.filter((x: any) => typeof x === "string") : [],
+          interests:       Array.isArray(d.interests) ? d.interests.filter((x: any) => typeof x === "string") : [],
+          experiences:     Array.isArray(d.experiences) ? d.experiences.filter(Boolean).map((e: any) => ({
+            companyName: String(e?.companyName ?? ""),
+            jobTitle:    e?.jobTitle ?? null,
+            startDate:   e?.startDate ?? null,
+            endDate:     e?.endDate ?? null,
+            description: e?.description ?? null
+          })) : [],
+          trainings:       Array.isArray(d.trainings) ? d.trainings.filter(Boolean).map((t: any) => ({
+            institution: String(t?.institution ?? ""),
+            title:       String(t?.title ?? ""),
+            period:      t?.period ?? null,
+            description: t?.description ?? null
+          })) : []
+        };
+        setParsed(safe as any);
         setCvDataUri(dataUri);
         setCvFileName(file.name);
         setStep("preview");
@@ -233,7 +265,7 @@ export function CvImportButton() {
                   <div className="space-y-2">
                     {parsed.experiences.map((exp, i) => (
                       <div key={i} className="card p-3 bg-midnight-50/40 border-border/60 grid grid-cols-12 gap-2 items-start text-xs">
-                        <input className="input col-span-4 h-8" placeholder="Entreprise" value={exp.companyName} onChange={(e) => {
+                        <input className="input col-span-4 h-8" placeholder="Entreprise" value={exp.companyName ?? ""} onChange={(e) => {
                           const next = [...parsed.experiences]; next[i] = { ...exp, companyName: e.target.value }; updateParsed("experiences", next);
                         }} />
                         <input className="input col-span-4 h-8" placeholder="Poste" value={exp.jobTitle ?? ""} onChange={(e) => {
@@ -264,10 +296,10 @@ export function CvImportButton() {
                   <div className="space-y-2">
                     {parsed.trainings.map((t, i) => (
                       <div key={i} className="card p-3 bg-midnight-50/40 border-border/60 grid grid-cols-12 gap-2 items-start text-xs">
-                        <input className="input col-span-5 h-8" placeholder="Diplôme / titre" value={t.title} onChange={(e) => {
+                        <input className="input col-span-5 h-8" placeholder="Diplôme / titre" value={t.title ?? ""} onChange={(e) => {
                           const next = [...parsed.trainings]; next[i] = { ...t, title: e.target.value }; updateParsed("trainings", next);
                         }} />
-                        <input className="input col-span-4 h-8" placeholder="École / organisme" value={t.institution} onChange={(e) => {
+                        <input className="input col-span-4 h-8" placeholder="École / organisme" value={t.institution ?? ""} onChange={(e) => {
                           const next = [...parsed.trainings]; next[i] = { ...t, institution: e.target.value }; updateParsed("trainings", next);
                         }} />
                         <input className="input col-span-2 h-8" placeholder="Période" value={t.period ?? ""} onChange={(e) => {

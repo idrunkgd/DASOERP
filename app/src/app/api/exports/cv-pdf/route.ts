@@ -59,9 +59,11 @@ export async function GET(req: NextRequest) {
           select: { firstName: true, lastName: true, email: true, phone: true, seniority: true }
         });
         if (contact) {
+          // On n'affiche PAS la séniorité interne du responsable Dasolabs.
+          // Seule l'override explicite (cvContactRole) devient un rôle visible.
           cvContact = {
             name:  `${contact.firstName} ${contact.lastName}`,
-            role:  c.cvContactRole ?? contact.seniority ?? null,
+            role:  c.cvContactRole ?? null,
             email: contact.email ?? null,
             phone: contact.phone ?? null
           };
@@ -119,9 +121,10 @@ export async function GET(req: NextRequest) {
           select: { firstName: true, lastName: true, email: true, phone: true, seniority: true }
         });
         if (contact) {
+          // Pas de séniorité du responsable sur le CV imprimé.
           cvContact = {
             name:  `${contact.firstName} ${contact.lastName}`,
-            role:  u.cvContactRole ?? contact.seniority ?? null,
+            role:  u.cvContactRole ?? null,
             email: contact.email ?? null,
             phone: contact.phone ?? null
           };
