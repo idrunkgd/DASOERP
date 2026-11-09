@@ -232,11 +232,28 @@ export async function parseCvFile(dataUri: string) {
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(cleaned);
-  } catch {
-    const preview = llmResp.text.slice(0, 300).replace(/\n/g, " ");
+  } catch (parseErr: any) {
+    // Diagnostic détaillé pour comprendre d'où vient l'échec :
+    //  - longueur de la réponse brute (détecte truncation maxTokens)
+    //  - début + fin de la réponse brute (voir où ça coupe)
+    //  - début + fin du cleaned (voir si attemptJsonRepair a fait du bon boulot)
+    //  - message d'erreur JSON.parse (position exacte du souci)
+    const raw = llmResp.text;
+    const rawStart = raw.slice(0, 150).replace(/\n/g, " ");
+    const rawEnd = raw.slice(-150).replace(/\n/g, " ");
+    const cleanedStart = cleaned.slice(0, 120).replace(/\n/g, " ");
+    const cleanedEnd = cleaned.slice(-120).replace(/\n/g, " ");
+    const msg = String(parseErr?.message ?? parseErr);
+    // eslint-disable-next-line no-console
+    console.error("[cv-import] JSON.parse a échoué", {
+      provider: llmResp.provider,
+      rawLength: raw.length,
+      cleanedLength: cleaned.length,
+      rawStart, rawEnd, cleanedStart, cleanedEnd, parseErrMsg: msg
+    });
     return {
       ok: false as const,
-      error: `Réponse IA non parsable. Début : « ${preview}… »`
+      error: `Réponse IA non parsable (${llmResp.provider}, ${raw.length} chars). Parse: ${msg}. Début cleaned : « ${cleanedStart} » / Fin cleaned : « ${cleanedEnd} »`
     };
   }
   if (parsedJson && typeof parsedJson === "object" && "error" in parsedJson) {
