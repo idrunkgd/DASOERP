@@ -140,23 +140,32 @@ async function callGemini(p: {
   maxTokens?: number;
   apiKey: string;
 }): Promise<LlmCallResult> {
-  // Ordre de fallback : du plus récent au plus ancien. Les modèles 1.5
-  // sont parfois 404 en 2026 selon la région ; 2.5-flash est le plus
-  // stable actuellement et conserve un free tier généreux.
+  // Ordre de fallback : flash-lite d'abord (moins de congestion + meilleur
+  // free tier), puis flash standard, puis versions plus anciennes. On enchaîne
+  // sur 429 (quota), 404 (modèle retiré) ET 503 (surcharge Google temporaire).
   const models = [
+    "gemini-2.5-flash-lite",
     "gemini-2.5-flash",
     "gemini-2.0-flash",
     "gemini-2.0-flash-001",
     "gemini-1.5-flash-latest"
   ];
+  const isRetryable = (err: string) =>
+    err.includes("429") || err.includes("404") || err.includes("503") || err.includes("UNAVAILABLE");
+
   let lastErr = "";
   for (const model of models) {
-    const r = await callGeminiModel({ ...p, model });
+    // 1er essai immédiat
+    let r = await callGeminiModel({ ...p, model });
+    // Si 503 (surcharge Google), on fait UN seul retry après 800ms sur le même
+    // modèle avant de bascule — ça règle 80% des pics transitoires.
+    if (!r.ok && r.error.includes("503")) {
+      await new Promise((res) => setTimeout(res, 800));
+      r = await callGeminiModel({ ...p, model });
+    }
     if (r.ok) return r;
     lastErr = r.error;
-    // Si c'est une erreur de quota (429), on tente le modèle suivant qui a peut-être
-    // son propre quota dans le free tier.
-    if (!r.error.includes("429") && !r.error.includes("404")) return r;
+    if (!isRetryable(r.error)) return r;
   }
   return { ok: false, error: lastErr || "Gemini indisponible sur tous les modèles" };
 }
