@@ -255,7 +255,7 @@ export function Sidebar({
       {/* Le toggle mode démo est maintenant dans le topbar (petit bouton play
           orange à côté du nom) — retiré d'ici pour ne pas doubler l'UI. */}
       <div className="px-4 py-3 text-[11px] text-indigo-200/70 flex items-center justify-between">
-        <span>v0.2</span>
+        <span>v0.2.1</span>
         <button
           type="button"
           onClick={toggleEditMode}
