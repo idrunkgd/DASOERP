@@ -16,6 +16,7 @@ import {
   regeneratePortalContactToken,
   markInterviewDone,
   confirmInterviewSlot,
+  scheduleInterviewDirectly,
   setPortalWorkflow,
   addDasolabsReply,
   createPortalNeed,
@@ -23,7 +24,7 @@ import {
   deletePortalNeed,
   assignProposalToNeed
 } from "@/server/actions/client-portals";
-import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw, UserPlus, UserCheck, MessageSquare, Send } from "lucide-react";
+import { Copy, RefreshCw, Trash2, EyeOff, Eye as EyeIcon, ExternalLink, Pencil, RotateCcw, UserPlus, UserCheck, MessageSquare, Send, CalendarCheck } from "lucide-react";
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   PROPOSED:              { label: "En attente",      cls: "badge-muted" },
@@ -617,14 +618,25 @@ function V2InterviewBlock({ proposal }: { proposal: any }) {
     which === 2 ? proposal.interview2ConfirmedAt : null;
 
   if (!which) {
-    // En statut DONE : juste rappel des notes
+    // Statut PROPOSED → bouton planifier entretien 1 directement
+    // Statut INTERVIEW_1_DONE → notes + bouton planifier entretien 2 directement
+    const canScheduleW1 = proposal.status === "PROPOSED";
+    const canScheduleW2 = proposal.status === "INTERVIEW_1_DONE";
     const doneNotes =
       proposal.status === "INTERVIEW_1_DONE" ? proposal.interview1Notes :
       proposal.status === "INTERVIEW_2_DONE" ? proposal.interview2Notes : null;
-    if (!doneNotes) return null;
+
+    if (!canScheduleW1 && !canScheduleW2 && !doneNotes) return null;
+
     return (
-      <div className="mt-2 text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded p-2">
-        <strong>Retour partagé au client :</strong> {doneNotes}
+      <div className="mt-2 space-y-2">
+        {doneNotes && (
+          <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded p-2">
+            <strong>Retour partagé au client :</strong> {doneNotes}
+          </div>
+        )}
+        {canScheduleW1 && <DirectScheduleForm proposalId={proposal.id} which={1} />}
+        {canScheduleW2 && <DirectScheduleForm proposalId={proposal.id} which={2} />}
       </div>
     );
   }
@@ -684,6 +696,72 @@ function V2InterviewBlock({ proposal }: { proposal: any }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Planification directe d'un entretien (bypass créneaux client) ──────
+function DirectScheduleForm({ proposalId, which }: { proposalId: string; which: 1 | 2 }) {
+  const [open, setOpen] = useState(false);
+  const [pending, start] = useTransition();
+  const [date, setDate] = useState("");
+  const [startTime, setStartTime] = useState("10:00");
+  const [endTime, setEndTime] = useState("11:00");
+  const [mode, setMode] = useState<"VISIO" | "ONSITE">("VISIO");
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="btn-secondary btn-sm text-xs flex items-center gap-1"
+        type="button"
+      >
+        <CalendarCheck className="w-3 h-3" />
+        Planifier entretien {which} directement
+      </button>
+    );
+  }
+  return (
+    <div className="bg-indigoaccent/5 border border-indigoaccent/30 rounded p-2 space-y-2">
+      <div className="text-[11px] font-semibold text-indigoaccent">
+        Planifier l'entretien {which} directement (date déjà convenue avec le client)
+      </div>
+      <div className="grid grid-cols-12 gap-2 items-end">
+        <div className="col-span-4">
+          <label className="text-[10px] text-midnight-500">Date</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input input-sm text-xs w-full" />
+        </div>
+        <div className="col-span-3">
+          <label className="text-[10px] text-midnight-500">Début</label>
+          <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="input input-sm text-xs w-full" />
+        </div>
+        <div className="col-span-3">
+          <label className="text-[10px] text-midnight-500">Fin</label>
+          <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="input input-sm text-xs w-full" />
+        </div>
+        <div className="col-span-2">
+          <label className="text-[10px] text-midnight-500">Mode</label>
+          <select value={mode} onChange={(e) => setMode(e.target.value as any)} className="input input-sm text-xs w-full">
+            <option value="VISIO">Visio</option>
+            <option value="ONSITE">Sur site</option>
+          </select>
+        </div>
+      </div>
+      <div className="flex gap-1 justify-end">
+        <button onClick={() => setOpen(false)} className="btn-ghost btn-sm text-xs" type="button">Annuler</button>
+        <button
+          disabled={pending || !date}
+          onClick={() => start(async () => {
+            try {
+              await scheduleInterviewDirectly({ proposalId, which, date, startTime, endTime, mode });
+              toast.success(`Entretien ${which} planifié`);
+              setOpen(false);
+            } catch (e: any) { toast.error(e.message); }
+          })}
+          className="btn-primary btn-sm text-xs"
+          type="button"
+        >Planifier</button>
+      </div>
     </div>
   );
 }

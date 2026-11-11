@@ -332,6 +332,66 @@ export async function markInterviewDone(input: {
 }
 
 /**
+ * Planifie DIRECTEMENT un entretien (V2) en bypassant l'étape des créneaux
+ * proposés. Utile quand Dasolabs a déjà callé le client par un autre canal
+ * et veut juste enregistrer la date convenue.
+ *
+ * Effets :
+ *  - status passe à INTERVIEW_1_REQUESTED (ou _2)
+ *  - interviewXConfirmedAt = date fournie
+ *  - interviewXSlots = tableau à 1 entrée (la date retenue) pour que l'UI
+ *    client affiche l'heure confirmée
+ *  - un event INTERVIEW_PORTAL apparaît dans le calendrier via la lecture
+ *    standard des proposals confirmées.
+ */
+export async function scheduleInterviewDirectly(input: {
+  proposalId: string;
+  which: 1 | 2;
+  date: string;       // "YYYY-MM-DD"
+  startTime: string;  // "HH:MM"
+  endTime: string;    // "HH:MM"
+  mode: "VISIO" | "ONSITE";
+}) {
+  const session = await requirePermission("consulting.write");
+  const p = await (prisma as any).candidateProposal.findUniqueOrThrow({
+    where: { id: input.proposalId }
+  });
+  // Entretien 2 ne peut être planifié que si le 1 est effectué (sécurité workflow)
+  if (input.which === 2 && p.status !== "INTERVIEW_1_DONE" && !p.interview1DoneAt) {
+    throw new Error("L'entretien 2 nécessite que l'entretien 1 soit marqué effectué.");
+  }
+  const iso = new Date(`${input.date}T${input.startTime}:00`);
+  if (isNaN(iso.getTime())) throw new Error("Date ou heure invalide.");
+
+  const nextStatus      = input.which === 1 ? "INTERVIEW_1_REQUESTED" : "INTERVIEW_2_REQUESTED";
+  const slotsField      = input.which === 1 ? "interview1Slots" : "interview2Slots";
+  const confirmedField  = input.which === 1 ? "interview1ConfirmedAt" : "interview2ConfirmedAt";
+
+  const singleSlot = [{
+    date: input.date,
+    startTime: input.startTime,
+    endTime: input.endTime,
+    mode: input.mode
+  }];
+
+  await (prisma as any).candidateProposal.update({
+    where: { id: p.id },
+    data: {
+      status: nextStatus,
+      [slotsField]: singleSlot,
+      [confirmedField]: iso
+    }
+  });
+  await logActivity({
+    actorId: session.user.id, action: "UPDATE", entityType: "CandidateProposal",
+    entityId: p.id,
+    message: `Entretien ${input.which} planifié directement par Dasolabs : ${input.date} ${input.startTime}–${input.endTime} (${input.mode})`
+  });
+  revalidatePath(`/client-portals/${p.portalId}`);
+  return { ok: true };
+}
+
+/**
  * Confirme un créneau précis parmi ceux proposés par le client.
  * Garde la date pour affichage côté client.
  */
