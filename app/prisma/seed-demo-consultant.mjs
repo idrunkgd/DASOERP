@@ -32,6 +32,13 @@ function daysFromNow(n) {
 }
 
 async function seedDemoConsultant() {
+  // Skip complet si on n'est pas en démo explicite — sinon le seed recrée
+  // Jean Démo à chaque deploy, même après suppression manuelle en prod.
+  // Activer avec ENABLE_DEMO_SEED=true dans l'env (dev local ou démo publique).
+  if (process.env.ENABLE_DEMO_SEED !== "true") {
+    console.log("[seed-demo] skip (ENABLE_DEMO_SEED!=true) — pas de seed Jean Démo en prod");
+    return;
+  }
   console.log("[seed-demo] démarrage");
 
   // ─── 1. Upsert user Jean Démo ─────────────────────────────────────────
