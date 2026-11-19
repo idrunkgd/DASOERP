@@ -1,7 +1,7 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { toast } from "sonner";
-import { Loader2, CheckCircle2, Send } from "lucide-react";
+import { Loader2, CheckCircle2, Send, ArrowRight } from "lucide-react";
 import { saveAnswer, submitTest } from "@/server/actions/tests";
 
 type Choice = { id: string; position: number; text: string };
@@ -13,6 +13,12 @@ type Question = {
   choices: Choice[];
 };
 
+/**
+ * Mode "une question à la fois" : le candidat ne voit QUE la question courante,
+ * aucun accès aux suivantes, aucun retour en arrière possible une fois une
+ * question dépassée. On démarre sur la première question non répondue
+ * (reprise après rechargement).
+ */
 export function TakeTestClient({
   token,
   questions,
@@ -24,25 +30,47 @@ export function TakeTestClient({
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>(initialAnswers);
   const [submitting, startSubmit] = useTransition();
+  const [saving, startSave] = useTransition();
   const [submitted, setSubmitted] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<Record<string, "saving" | "saved" | "error">>({});
 
-  function pick(questionId: string, choiceId: string) {
-    setAnswers((a) => ({ ...a, [questionId]: choiceId }));
-    setSaveStatus((s) => ({ ...s, [questionId]: "saving" }));
-    saveAnswer({ token, questionId, choiceId })
-      .then(() => setSaveStatus((s) => ({ ...s, [questionId]: "saved" })))
-      .catch(() => setSaveStatus((s) => ({ ...s, [questionId]: "error" })));
+  // Index de départ : première question non répondue (reprise de session)
+  const initialIdx = useMemo(() => {
+    const i = questions.findIndex((q) => !initialAnswers[q.id]);
+    return i === -1 ? questions.length - 1 : i;
+  }, [questions, initialAnswers]);
+  const [currentIdx, setCurrentIdx] = useState(initialIdx);
+  // Sélection locale (pas encore enregistrée) pour la question courante.
+  // Volontairement non pré-remplie depuis `answers` : on n'affiche jamais la
+  // réponse précédente d'une question déjà passée.
+  const [picked, setPicked] = useState<string | null>(null);
+
+  const current = questions[currentIdx];
+  const isLast = currentIdx === questions.length - 1;
+
+  function goNext() {
+    if (!current || !picked) return;
+    const qid = current.id;
+    const choiceId = picked;
+    // Enregistre le choix côté serveur, puis avance. Si le save plante, on
+    // bloque l'avancée pour ne pas perdre la réponse.
+    startSave(async () => {
+      try {
+        await saveAnswer({ token, questionId: qid, choiceId });
+        setAnswers((a) => ({ ...a, [qid]: choiceId }));
+        if (!isLast) {
+          setCurrentIdx((i) => i + 1);
+          setPicked(null);
+        } else {
+          // Dernière question : on soumet directement
+          doSubmit();
+        }
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur lors de l'enregistrement — réessaie.");
+      }
+    });
   }
 
-  function submit() {
-    const unanswered = questions.filter((q) => !answers[q.id]);
-    if (unanswered.length > 0) {
-      const ok = confirm(
-        `${unanswered.length} question${unanswered.length > 1 ? "s sont non répondues" : " est non répondue"}. Soumettre quand même ?`
-      );
-      if (!ok) return;
-    }
+  function doSubmit() {
     startSubmit(async () => {
       try {
         await submitTest(token);
@@ -66,16 +94,21 @@ export function TakeTestClient({
     );
   }
 
+  if (!current) {
+    return <p className="text-sm text-midnight-500">Aucune question dans ce test.</p>;
+  }
+
   const answeredCount = Object.keys(answers).length;
   const progress = Math.round((answeredCount / questions.length) * 100);
+  const busy = saving || submitting;
 
   return (
     <div>
       {/* Barre de progression */}
-      <div className="sticky top-0 -mx-6 sm:-mx-10 px-6 sm:px-10 py-3 mb-6 bg-white/95 backdrop-blur border-b border-border z-10">
+      <div className="sticky top-0 -mx-6 sm:-mx-10 px-6 sm:px-10 py-3 mb-8 bg-white/95 backdrop-blur border-b border-border z-10">
         <div className="flex items-center justify-between text-xs mb-1.5">
           <span className="font-medium text-midnight-700">
-            {answeredCount} / {questions.length} questions répondues
+            Question {currentIdx + 1} / {questions.length}
           </span>
           <span className="text-midnight-500">{progress} %</span>
         </div>
@@ -87,75 +120,72 @@ export function TakeTestClient({
         </div>
       </div>
 
-      <ol className="space-y-6">
-        {questions.map((q) => {
-          const sel = answers[q.id];
-          const status = saveStatus[q.id];
-          return (
-            <li key={q.id} className="border border-border rounded-lg p-5">
-              <div className="flex items-start gap-3 mb-3">
-                <span className="text-xs font-mono text-midnight-400 mt-0.5">
-                  {q.position}.
+      {/* Question courante — rendue avec key={id} pour forcer le reset du DOM
+          entre deux questions (évite tout leak d'état radio React). */}
+      <div key={current.id} className="border border-border rounded-lg p-5 sm:p-6 bg-white">
+        <div className="flex items-start gap-3 mb-4">
+          <span className="text-xs font-mono text-midnight-400 mt-1">
+            {current.position}.
+          </span>
+          <div className="flex-1">
+            {current.isScenario && (
+              <span className="badge-info text-[10px] mb-2 inline-block">
+                Mise en situation
+              </span>
+            )}
+            <p className="text-base text-midnight-900 leading-relaxed">
+              {current.text}
+            </p>
+          </div>
+        </div>
+        <ul className="space-y-2 pl-7">
+          {current.choices.map((c, i) => (
+            <li key={c.id}>
+              <label
+                className={
+                  "flex items-start gap-3 p-3 rounded-md cursor-pointer transition-colors border " +
+                  (picked === c.id
+                    ? "bg-indigoaccent/10 border-indigoaccent"
+                    : "border-transparent hover:bg-midnight-50")
+                }
+              >
+                <input
+                  type="radio"
+                  name={current.id}
+                  checked={picked === c.id}
+                  onChange={() => setPicked(c.id)}
+                  disabled={busy}
+                  className="mt-1"
+                />
+                <span className="text-sm">
+                  <span className="font-medium text-midnight-700 mr-2">
+                    {String.fromCharCode(65 + i)})
+                  </span>
+                  {c.text}
                 </span>
-                <div className="flex-1">
-                  {q.isScenario && (
-                    <span className="badge-info text-[10px] mb-1.5 inline-block">
-                      Mise en situation
-                    </span>
-                  )}
-                  <p className="text-sm text-midnight-900 leading-relaxed">{q.text}</p>
-                </div>
-                {status === "saving" && (
-                  <Loader2 className="w-3 h-3 text-midnight-400 animate-spin" />
-                )}
-                {status === "saved" && (
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                )}
-              </div>
-              <ul className="space-y-1.5 pl-7">
-                {q.choices.map((c, i) => (
-                  <li key={c.id}>
-                    <label
-                      className={
-                        "flex items-start gap-2.5 p-2.5 rounded-md cursor-pointer transition-colors " +
-                        (sel === c.id
-                          ? "bg-indigoaccent/10 border border-indigoaccent"
-                          : "border border-transparent hover:bg-midnight-50")
-                      }
-                    >
-                      <input
-                        type="radio"
-                        name={q.id}
-                        checked={sel === c.id}
-                        onChange={() => pick(q.id, c.id)}
-                        className="mt-0.5"
-                      />
-                      <span className="text-sm">
-                        <span className="font-medium text-midnight-700 mr-2">
-                          {String.fromCharCode(65 + i)})
-                        </span>
-                        {c.text}
-                      </span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
+              </label>
             </li>
-          );
-        })}
-      </ol>
+          ))}
+        </ul>
+      </div>
 
-      <div className="mt-8 pt-6 border-t border-border flex items-center justify-between gap-4">
+      <div className="mt-6 flex items-center justify-between gap-4">
         <p className="text-xs text-midnight-500">
-          Vos réponses sont enregistrées au fur et à mesure. Cliquez sur Soumettre quand vous avez terminé.
+          Une fois validée, vous ne pourrez plus revenir en arrière.
         </p>
         <button
-          onClick={submit}
-          disabled={submitting}
+          onClick={goNext}
+          disabled={!picked || busy}
           className="btn-primary"
         >
-          {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          Soumettre mes réponses
+          {busy ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : isLast ? (
+            <Send className="w-4 h-4" />
+          ) : (
+            <ArrowRight className="w-4 h-4" />
+          )}
+          {isLast ? "Valider et soumettre" : "Valider et passer à la suivante"}
         </button>
       </div>
     </div>
