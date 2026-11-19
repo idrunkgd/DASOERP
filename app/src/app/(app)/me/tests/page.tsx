@@ -81,7 +81,7 @@ export default async function MyTestsPage() {
                   <DeleteAssignmentButton
                     assignmentId={a.id}
                     targetName={`vous (${a.test.title})`}
-                    canDelete={!completed}
+                    canDelete={true}
                     canReset={inProgress || completed}
                   />
                 )}

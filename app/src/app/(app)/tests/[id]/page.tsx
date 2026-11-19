@@ -191,7 +191,7 @@ export default async function TestDetailPage({ params }: { params: { id: string 
                           <DeleteAssignmentButton
                             assignmentId={a.id}
                             targetName={target.name}
-                            canDelete={status !== "COMPLETED" /* soumis → utiliser reset */}
+                            canDelete={true /* toujours autorisé — admin peut tout supprimer */}
                             canReset={status === "COMPLETED" || status === "IN_PROGRESS"}
                           />
                         </div>

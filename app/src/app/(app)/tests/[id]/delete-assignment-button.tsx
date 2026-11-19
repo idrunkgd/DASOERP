@@ -13,11 +13,11 @@ import { deleteTestAssignment, resetTestAssignment } from "@/server/actions/test
  *    a été soumis — l'admin doit reset ou passer par /tests/submissions.
  */
 export function DeleteAssignmentButton({
-  assignmentId, targetName, canDelete, canReset
+  assignmentId, targetName, canDelete = true, canReset
 }: {
   assignmentId: string;
   targetName: string;
-  canDelete: boolean;
+  canDelete?: boolean;
   canReset?: boolean;
 }) {
   const [pending, start] = useTransition();
@@ -25,7 +25,7 @@ export function DeleteAssignmentButton({
 
   function doDelete() {
     if (!canDelete) return;
-    if (!confirm(`Supprimer l'affectation de ${targetName} ? Les éventuelles réponses partielles seront perdues.`)) return;
+    if (!confirm(`Supprimer l'affectation de ${targetName} ? Toutes les réponses et le score éventuel seront perdus.`)) return;
     start(async () => {
       try {
         await deleteTestAssignment(assignmentId);

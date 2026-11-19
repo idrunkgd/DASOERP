@@ -133,21 +133,31 @@ export async function assignTest(formData: FormData) {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + data.expiresInDays);
 
-  const created = await prisma.testAssignment.create({
-    data: {
-      testId: data.testId,
-      userId: data.userId ?? null,
-      candidateId: data.candidateId ?? null,
-      assignedById: session.user.id,
-      expiresAt,
-      status: "PENDING"
-    },
-    include: {
-      test: { select: { title: true } },
-      user: { select: { firstName: true, lastName: true } },
-      candidate: { select: { firstName: true, lastName: true } }
-    }
-  });
+  let created;
+  try {
+    created = await prisma.testAssignment.create({
+      data: {
+        testId: data.testId,
+        userId: data.userId ?? null,
+        candidateId: data.candidateId ?? null,
+        assignedById: session.user.id,
+        expiresAt,
+        status: "PENDING"
+      },
+      include: {
+        test: { select: { title: true } },
+        user: { select: { firstName: true, lastName: true } },
+        candidate: { select: { firstName: true, lastName: true } }
+      }
+    });
+  } catch (e: any) {
+    console.error("[assignTest] create a échoué", {
+      testId: data.testId, userId: data.userId, candidateId: data.candidateId,
+      assignedById: session.user.id, err: e?.message
+    });
+    // Remonte le vrai message Prisma au toast
+    throw new Error(`Assignation impossible : ${e?.message?.slice(0, 300) ?? "erreur inconnue"}`);
+  }
 
   const target = created.user
     ? `${created.user.firstName} ${created.user.lastName}`
@@ -184,12 +194,16 @@ export async function deleteTestAssignment(assignmentId: string) {
       candidate: { select: { id: true, firstName: true, lastName: true } }
     }
   });
-  if (existing.status === "COMPLETED") {
-    throw new Error(
-      "Cette affectation a été soumise — utilise le bouton Reset pour permettre un nouvel essai, ou passe par /tests/submissions."
-    );
+  // On AUTORISE la suppression même si le test est soumis (COMPLETED) — un
+  // admin RH peut vouloir faire disparaître une affectation entièrement. Le
+  // score et les réponses sont effacés en cascade. Si on veut préserver, on
+  // passe par Reset.
+  try {
+    await (prisma as any).testAssignment.delete({ where: { id: assignmentId } });
+  } catch (e: any) {
+    console.error("[deleteTestAssignment] delete a échoué", e);
+    throw new Error(`Suppression impossible : ${e?.message?.slice(0, 300) ?? "erreur inconnue"}`);
   }
-  await (prisma as any).testAssignment.delete({ where: { id: assignmentId } });
   const target = existing.user
     ? `${existing.user.firstName} ${existing.user.lastName}`
     : existing.candidate
@@ -901,7 +915,14 @@ export async function deleteTest(testId: string) {
   // Suppression en cascade : assignations + soumissions + réponses sont
   // supprimées avec le Test via les onDelete du schéma. On trace juste le
   // volume impacté dans l'audit log pour que ce soit clair à la relecture.
-  await prisma.test.delete({ where: { id: testId } });
+  try {
+    await prisma.test.delete({ where: { id: testId } });
+  } catch (e: any) {
+    // Remonte le vrai message Prisma au client (toast) au lieu de laisser
+    // Next.js masquer l'erreur avec son message générique Server Components.
+    console.error("[deleteTest] prisma.test.delete a échoué", e);
+    throw new Error(`Suppression impossible : ${e?.message?.slice(0, 300) ?? "erreur inconnue"}`);
+  }
   await logActivity({
     actorId: session.user.id,
     action: "DELETE",
