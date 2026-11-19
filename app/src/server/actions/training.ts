@@ -401,16 +401,27 @@ export async function deleteCourse(courseId: string) {
   //                       → UserQuizAttempt (via CourseSlide onDelete Cascade)
   // Les Documents (certificats) NE sont PAS cascadés → archives préservées.
   //
-  // ⚡ On enregistre AUSSI le slug dans le cimetière DeletedCourseSlug pour
-  // que le seed Docker ne le ressuscite pas au prochain reboot.
-  await prisma.$transaction([
-    prisma.course.delete({ where: { id: courseId } }),
-    prisma.deletedCourseSlug.upsert({
+  // Pas de $transaction : les 2 ops ne dépendent pas atomiquement l'une de
+  // l'autre et un échec de l'upsert slug tombstone ne doit pas annuler la
+  // suppression. On gère chacune indépendamment.
+  try {
+    await prisma.course.delete({ where: { id: courseId } });
+  } catch (e: any) {
+    // Diagnostic utile : si cascade ou autre FK bloque, on remonte le vrai msg
+    throw new Error(`Suppression du cours impossible : ${e?.message ?? "erreur inconnue"}`);
+  }
+  // Enregistre le slug dans le cimetière pour que le seed Docker ne le
+  // ressuscite pas au prochain reboot. Silencieux si la table n'existe pas
+  // (migration en retard) — pas de raison de bloquer la delete.
+  try {
+    await (prisma as any).deletedCourseSlug.upsert({
       where: { slug: course.slug },
       create: { slug: course.slug, deletedBy: session.user.id, reason: "Deleted from HUB catalog" },
       update: { deletedAt: new Date(), deletedBy: session.user.id }
-    })
-  ]);
+    });
+  } catch (e) {
+    console.error("[deleteCourse] upsert tombstone slug ignoré:", (e as any)?.message);
+  }
 
   await logActivity({
     actorId: session.user.id,
