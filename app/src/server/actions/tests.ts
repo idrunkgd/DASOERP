@@ -117,7 +117,9 @@ export async function assignTest(formData: FormData) {
     candidateId: raw.candidateId || null
   });
 
-  // Anti-doublon : pas deux assignations actives sur même test + même cible
+  // Anti-doublon : pas deux assignations actives sur même test + même cible.
+  // On RETOURNE {ok:false,error} au lieu de throw : Next.js en prod masque
+  // les messages d'exception des Server Actions, on perdrait l'info.
   const exists = await prisma.testAssignment.findFirst({
     where: {
       testId: data.testId,
@@ -127,7 +129,10 @@ export async function assignTest(formData: FormData) {
     }
   });
   if (exists) {
-    throw new Error("Une assignation est déjà en cours pour cette personne sur ce test.");
+    return {
+      ok: false as const,
+      error: "Cette personne a déjà une assignation en cours sur ce test. Reset ou supprime l'existante d'abord."
+    };
   }
 
   const expiresAt = new Date();
@@ -155,8 +160,10 @@ export async function assignTest(formData: FormData) {
       testId: data.testId, userId: data.userId, candidateId: data.candidateId,
       assignedById: session.user.id, err: e?.message
     });
-    // Remonte le vrai message Prisma au toast
-    throw new Error(`Assignation impossible : ${e?.message?.slice(0, 300) ?? "erreur inconnue"}`);
+    return {
+      ok: false as const,
+      error: `Assignation impossible : ${e?.message?.slice(0, 300) ?? "erreur inconnue"}`
+    };
   }
 
   const target = created.user
@@ -174,7 +181,7 @@ export async function assignTest(formData: FormData) {
   revalidatePath(`/tests/${data.testId}`);
   if (data.candidateId) revalidatePath(`/candidates/${data.candidateId}`);
   if (data.userId) revalidatePath(`/users/${data.userId}`);
-  return { ok: true, assignmentId: created.id, magicToken: created.magicToken };
+  return { ok: true as const, assignmentId: created.id, magicToken: created.magicToken };
 }
 
 /**

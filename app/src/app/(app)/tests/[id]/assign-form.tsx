@@ -34,6 +34,10 @@ export function AssignForm({
     start(async () => {
       try {
         const r = await assignTest(fd);
+        if (!r.ok) {
+          toast.error(r.error);
+          return;
+        }
         toast.success("Assignation créée");
         if (mode === "candidate") {
           const origin = typeof window !== "undefined" ? window.location.origin : "";
