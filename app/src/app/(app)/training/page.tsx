@@ -41,6 +41,8 @@ export default async function TrainingPage() {
       slug: c.slug,
       title: c.title,
       subtitle: c.subtitle,
+      level: c.level,
+      duration: c.duration,
       active: c.active,
       slideCount: c._count.slides,
       layerKey: (c as any).layerKey as string | null,

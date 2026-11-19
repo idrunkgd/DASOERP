@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { GraduationCap, CheckCircle2, PlayCircle, EyeOff, Lock, Cloud, Layers, Server, Cpu, Zap, GripVertical, Compass } from "lucide-react";
 import { ToggleCourseVisibility } from "./toggle-visibility";
 import { DeleteCourse } from "./delete-course";
+import { RenameCourseButton } from "./rename-course";
 import { PrerequisiteManager } from "./prerequisite-manager";
 import { setCourseLayer } from "@/server/actions/training";
 
@@ -13,6 +14,8 @@ type CourseCard = {
   slug: string;
   title: string;
   subtitle: string | null;
+  level: string | null;
+  duration: string | null;
   active: boolean;
   slideCount: number;
   layerKey: string | null;
@@ -162,6 +165,10 @@ function CourseCardView({
             allCourses={allCourses}
           />
           <ToggleCourseVisibility courseId={c.id} active={c.active} />
+          <RenameCourseButton
+            courseId={c.id}
+            initial={{ title: c.title, subtitle: c.subtitle, level: c.level, duration: c.duration }}
+          />
           <DeleteCourse
             courseId={c.id}
             courseTitle={c.title}

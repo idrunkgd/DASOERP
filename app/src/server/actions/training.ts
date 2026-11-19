@@ -272,6 +272,52 @@ export async function toggleCourseVisibility(courseId: string) {
  * historique des consultants qui ont réussi.
  * Réservé aux admins avec training.manage.
  */
+
+/**
+ * Renomme un cours (titre et sous-titre). Réservé à training.manage.
+ * Le slug n'est PAS changé — il reste l'identifiant stable utilisé dans
+ * les URLs, certificats émis et tags documents. Pour changer le slug,
+ * il faudrait une migration dédiée (DeletedCourseSlug, redirects, etc.).
+ */
+export async function renameCourse(courseId: string, input: {
+  title: string;
+  subtitle?: string | null;
+  level?: string | null;
+  duration?: string | null;
+}) {
+  const session = await requirePermission("training.manage");
+  const title = input.title?.trim();
+  if (!title) throw new Error("Le titre est obligatoire.");
+  if (title.length > 200) throw new Error("Titre trop long (max 200 caractères).");
+
+  const existing = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { id: true, title: true, subtitle: true, slug: true }
+  });
+  if (!existing) throw new Error("Cours introuvable");
+
+  const updated = await prisma.course.update({
+    where: { id: courseId },
+    data: {
+      title,
+      subtitle: input.subtitle?.trim() || null,
+      level:    input.level?.trim()    ?? undefined,
+      duration: input.duration?.trim() ?? undefined
+    },
+    select: { id: true, title: true, subtitle: true, slug: true, level: true, duration: true }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Course",
+    entityId: courseId,
+    message: `Cours renommé « ${existing.title} » → « ${updated.title} » (slug ${existing.slug} conservé)`
+  });
+  revalidatePath("/training");
+  revalidatePath(`/training/${existing.slug}`);
+  return { ok: true, course: updated };
+}
+
 /**
  * Définit (ou supprime) le cours prérequis d'un autre cours.
  * Passe null pour supprimer la dépendance.
