@@ -831,19 +831,19 @@ export async function deleteTest(testId: string) {
   const session = await requirePermission("tests.manage");
   const t = await prisma.test.findUnique({
     where: { id: testId },
-    select: { title: true, _count: { select: { assignments: true } } }
+    select: { title: true, _count: { select: { assignments: true, submissions: true } } }
   });
   if (!t) throw new Error("Test introuvable");
-  if (t._count.assignments > 0) {
-    throw new Error(`Ce test a ${t._count.assignments} assignation(s). Supprime-les d'abord ou désactive le test.`);
-  }
+  // Suppression en cascade : assignations + soumissions + réponses sont
+  // supprimées avec le Test via les onDelete du schéma. On trace juste le
+  // volume impacté dans l'audit log pour que ce soit clair à la relecture.
   await prisma.test.delete({ where: { id: testId } });
   await logActivity({
     actorId: session.user.id,
     action: "DELETE",
     entityType: "Test",
     entityId: testId,
-    message: `Test « ${t.title} » supprimé`
+    message: `Test « ${t.title} » supprimé en cascade (${t._count.assignments} assignation(s), ${t._count.submissions} soumission(s))`
   });
   revalidatePath("/tests");
   return { ok: true };

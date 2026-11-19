@@ -11,8 +11,11 @@ export function DeleteTestButton({ testId, title }: { testId: string; title: str
   function go() {
     const ok = confirm(
       `Supprimer définitivement le test « ${title} » ?\n\n` +
-      `Cette action est irréversible. Tu ne peux supprimer un test que s'il n'a aucune assignation. ` +
-      `Sinon désassigne les candidats d'abord ou désactive le test.`
+      `Cette action est irréversible et supprime EN CASCADE :\n` +
+      `  • toutes les questions et choix du test\n` +
+      `  • toutes les affectations à des candidats / consultants\n` +
+      `  • toutes les soumissions et leurs scores\n\n` +
+      `Confirmer la suppression ?`
     );
     if (!ok) return;
     start(async () => {
