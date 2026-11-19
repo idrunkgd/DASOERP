@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { logActivity } from "@/lib/audit";
 import { SEED_TESTS } from "@/lib/test-seed-data";
-import type { TestAssignmentStatus, TestDifficulty } from "@prisma/client";
+import type { TestAssignmentStatus, TestDifficulty, TestDomain } from "@prisma/client";
 
 // ─── Seed : initialise les 5 tests si la table est vide ──────────────────
 // Idempotent — exécuté une seule fois à la demande depuis la page /tests.
@@ -825,6 +825,70 @@ export async function resequenceTestQuestions(testId: string) {
   revalidatePath(`/tests/${testId}/edit`);
   revalidatePath(`/tests/${testId}`);
   return { ok: true, count: rows.length };
+}
+
+/**
+ * Supprime en masse toutes les affectations d'un test (sauf celles soumises
+ * — les COMPLETED sont ignorées pour ne pas effacer un score sans trace).
+ * Utile pour nettoyer un test avant de le supprimer ou le réassigner.
+ */
+export async function deleteAllPendingAssignments(testId: string) {
+  const session = await requirePermission("tests.manage");
+  const t = await prisma.test.findUnique({ where: { id: testId }, select: { title: true } });
+  if (!t) throw new Error("Test introuvable");
+  const r = await (prisma as any).testAssignment.deleteMany({
+    where: { testId, status: { not: "COMPLETED" } }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "Test",
+    entityId: testId,
+    message: `${r.count} affectation(s) non soumises supprimées en masse pour le test « ${t.title} »`
+  });
+  revalidatePath(`/tests/${testId}`);
+  revalidatePath("/tests");
+  return { ok: true, count: r.count };
+}
+
+/**
+ * Renomme un test (titre, description, domaine, actif/inactif).
+ * Réservé à tests.manage.
+ */
+export async function renameTest(testId: string, input: {
+  title: string;
+  description?: string | null;
+  domain?: TestDomain;
+  isActive?: boolean;
+}) {
+  const session = await requirePermission("tests.manage");
+  const title = input.title?.trim();
+  if (!title) throw new Error("Le titre est obligatoire.");
+  if (title.length > 200) throw new Error("Titre trop long (max 200 caractères).");
+  const before = await prisma.test.findUniqueOrThrow({
+    where: { id: testId },
+    select: { title: true }
+  });
+  const after = await prisma.test.update({
+    where: { id: testId },
+    data: {
+      title,
+      description: input.description?.trim() ?? undefined,
+      domain:      input.domain              ?? undefined,
+      isActive:    input.isActive            ?? undefined
+    },
+    select: { id: true, title: true, domain: true, isActive: true, description: true }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Test",
+    entityId: testId,
+    message: `Test renommé « ${before.title} » → « ${after.title} »`
+  });
+  revalidatePath("/tests");
+  revalidatePath(`/tests/${testId}`);
+  return { ok: true, test: after };
 }
 
 export async function deleteTest(testId: string) {

@@ -9,6 +9,8 @@ import { AssignForm } from "./assign-form";
 import { CopyTokenButton } from "./copy-token-button";
 import { DeleteTestButton } from "./delete-test-button";
 import { DeleteAssignmentButton } from "./delete-assignment-button";
+import { DeleteAllAssignmentsButton } from "./delete-all-assignments-button";
+import { RenameTestButton } from "./rename-test-button";
 import { CheckCircle2, AlertCircle, Clock, GraduationCap } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -47,10 +49,19 @@ export default async function TestDetailPage({ params }: { params: { id: string 
         subtitle={`${domainLabel(test.domain)} · ${test.questions.length} questions dont ${scenarioCount} mise${scenarioCount > 1 ? "s" : ""} en situation`}
         breadcrumb={[{ label: "Tests", href: "/tests" }, { label: test.title }]}
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Link href={`/tests/${test.id}/edit`} className="btn-secondary">
               ✏️ Éditer les questions
             </Link>
+            <RenameTestButton
+              testId={test.id}
+              initial={{
+                title: test.title,
+                description: test.description,
+                domain: test.domain,
+                isActive: test.isActive
+              }}
+            />
             <DeleteTestButton testId={test.id} title={test.title} />
           </div>
         }
@@ -132,10 +143,14 @@ export default async function TestDetailPage({ params }: { params: { id: string 
           </section>
 
           <section className="card overflow-hidden">
-            <div className="p-5 border-b border-border">
+            <div className="p-5 border-b border-border flex items-center justify-between gap-2 flex-wrap">
               <h2 className="font-semibold">
                 Assignations ({test.assignments.length})
               </h2>
+              <DeleteAllAssignmentsButton
+                testId={test.id}
+                pendingCount={test.assignments.filter((a: any) => a.status !== "COMPLETED").length}
+              />
             </div>
             {test.assignments.length === 0 ? (
               <p className="p-5 text-sm text-midnight-500">
