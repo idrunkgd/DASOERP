@@ -7,6 +7,7 @@ import { listTestsForAdmin } from "@/server/actions/tests";
 import { domainLabel } from "@/lib/test-display";
 import { SeedButton } from "./seed-button";
 import { CreateTestButton } from "./create-test-button";
+import { EnsureDontKnowButton } from "./ensure-dont-know-button";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +21,9 @@ export default async function TestsPage() {
         title="Tests techniques"
         subtitle="Évaluation des candidats et consultants — tests métier avec cartographie de niveau (Junior → Expert)."
         actions={
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {empty && <SeedButton />}
+            {!empty && <EnsureDontKnowButton />}
             <CreateTestButton />
           </div>
         }

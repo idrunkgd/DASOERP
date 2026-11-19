@@ -636,12 +636,14 @@ const UpdateQuestionSchema = z.object({
   difficulty: z.enum(["JUNIOR", "MEDIOR", "SENIOR", "EXPERT"]),
   isScenario: z.coerce.boolean().default(false),
   points: z.coerce.number().int().min(1).max(10).default(1),
-  /// Indices des 4 textes des choix dans l'ordre (A, B, C, D)
+  /// Textes des choix dans l'ordre (A, B, C, D, [E]). Accepte 4 OU 5 pour
+  /// supporter le 5e choix implicite "Je ne sais pas" ajouté à toutes les
+  /// questions. Au-delà, on refuse (UI pas conçue pour).
   choices: z.array(z.object({
     id: z.string().min(1),
     text: z.string().min(1),
     isCorrect: z.boolean()
-  })).length(4)
+  })).min(4).max(5)
 });
 
 export async function updateQuestion(input: z.infer<typeof UpdateQuestionSchema>) {
@@ -736,9 +738,12 @@ export async function createTest(input: z.infer<typeof CreateTestSchema>) {
 }
 
 /**
- * Ajoute une question vide (avec 4 choix neutres) à un test existant.
- * Le client doit ensuite l'éditer.
+ * Ajoute une question vide (avec 4 choix neutres + un 5e "Je ne sais pas").
+ * Le "Je ne sais pas" est toujours présent, en dernière position, jamais
+ * considéré comme bonne réponse. Idempotent avec le backfill côté bas.
  */
+const DONT_KNOW_TEXT = "Je ne sais pas";
+
 export async function addQuestion(testId: string) {
   const session = await requirePermission("tests.manage");
   const last = await prisma.testQuestion.findFirst({
@@ -756,11 +761,14 @@ export async function addQuestion(testId: string) {
       points: 1,
       isScenario: false,
       choices: {
-        create: [1, 2, 3, 4].map((i) => ({
-          position: i,
-          text: `Choix ${String.fromCharCode(64 + i)} — à rédiger`,
-          isCorrect: i === 1
-        }))
+        create: [
+          ...[1, 2, 3, 4].map((i) => ({
+            position: i,
+            text: `Choix ${String.fromCharCode(64 + i)} — à rédiger`,
+            isCorrect: i === 1
+          })),
+          { position: 5, text: DONT_KNOW_TEXT, isCorrect: false }
+        ]
       }
     },
     include: { choices: { orderBy: { position: "asc" } } }
@@ -775,6 +783,52 @@ export async function addQuestion(testId: string) {
   revalidatePath(`/tests/${testId}/edit`);
   revalidatePath(`/tests/${testId}`);
   return { ok: true, question };
+}
+
+/**
+ * Backfill : s'assure que CHAQUE question du HUB a un choix "Je ne sais pas"
+ * en dernière position, isCorrect=false. Idempotent — ne recrée pas si déjà
+ * présent (détection par texte exact).
+ *
+ * Appelable manuellement une fois après deploy par un admin tests.manage, ou
+ * limitable à un test donné via l'argument.
+ */
+export async function ensureDontKnowChoiceEverywhere(testId?: string) {
+  const session = await requirePermission("tests.manage");
+  const questions = await prisma.testQuestion.findMany({
+    where: testId ? { testId } : {},
+    include: { choices: { select: { id: true, text: true, position: true } } }
+  });
+  let added = 0;
+  let skipped = 0;
+  for (const q of questions) {
+    const already = q.choices.some((c) => c.text.trim().toLowerCase() === DONT_KNOW_TEXT.toLowerCase());
+    if (already) { skipped++; continue; }
+    const nextPos = Math.max(0, ...q.choices.map((c) => c.position)) + 1;
+    await prisma.testChoice.create({
+      data: {
+        questionId: q.id,
+        position: nextPos,
+        text: DONT_KNOW_TEXT,
+        isCorrect: false
+      }
+    });
+    added++;
+  }
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Test",
+    entityId: testId ?? "ALL",
+    message: `Backfill « Je ne sais pas » : ${added} questions complétées, ${skipped} déjà OK`
+  });
+  if (testId) {
+    revalidatePath(`/tests/${testId}`);
+    revalidatePath(`/tests/${testId}/edit`);
+  } else {
+    revalidatePath("/tests");
+  }
+  return { ok: true as const, added, skipped };
 }
 
 export async function deleteQuestion(questionId: string) {
