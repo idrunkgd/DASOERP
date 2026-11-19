@@ -916,9 +916,14 @@ export async function deleteTest(testId: string) {
   const session = await requirePermission("tests.manage");
   const t = await prisma.test.findUnique({
     where: { id: testId },
-    select: { title: true, _count: { select: { assignments: true, submissions: true } } }
+    select: { title: true, _count: { select: { assignments: true, questions: true } } }
   });
   if (!t) throw new Error("Test introuvable");
+  // Compte des soumissions : TestSubmission n'est pas accessible directement
+  // depuis Test (relation via TestAssignment). On fait une 2e requête rapide.
+  const submissionsCount = await (prisma as any).testSubmission.count({
+    where: { assignment: { testId } }
+  });
   // Suppression en cascade : assignations + soumissions + réponses sont
   // supprimées avec le Test via les onDelete du schéma. On trace juste le
   // volume impacté dans l'audit log pour que ce soit clair à la relecture.
@@ -935,7 +940,7 @@ export async function deleteTest(testId: string) {
     action: "DELETE",
     entityType: "Test",
     entityId: testId,
-    message: `Test « ${t.title} » supprimé en cascade (${t._count.assignments} assignation(s), ${t._count.submissions} soumission(s))`
+    message: `Test « ${t.title} » supprimé en cascade (${t._count.assignments} assignation(s), ${submissionsCount} soumission(s), ${t._count.questions} question(s))`
   });
   revalidatePath("/tests");
   return { ok: true };
