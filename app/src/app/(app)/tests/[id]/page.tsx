@@ -8,6 +8,7 @@ import { domainLabel, difficultyLabel, profileFromScores } from "@/lib/test-disp
 import { AssignForm } from "./assign-form";
 import { CopyTokenButton } from "./copy-token-button";
 import { DeleteTestButton } from "./delete-test-button";
+import { DeleteAssignmentButton } from "./delete-assignment-button";
 import { CheckCircle2, AlertCircle, Clock, GraduationCap } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -168,9 +169,17 @@ export default async function TestDetailPage({ params }: { params: { id: string 
                           </Link>
                           <span className="text-[10px] text-midnight-400 ml-1">· {target.type}</span>
                         </div>
-                        <span className={statusInfo.cls}>
-                          <Icon className="w-3 h-3" /> {statusInfo.label}
-                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className={statusInfo.cls}>
+                            <Icon className="w-3 h-3" /> {statusInfo.label}
+                          </span>
+                          <DeleteAssignmentButton
+                            assignmentId={a.id}
+                            targetName={target.name}
+                            canDelete={status !== "COMPLETED" /* soumis → utiliser reset */}
+                            canReset={status === "COMPLETED" || status === "IN_PROGRESS"}
+                          />
+                        </div>
                       </div>
                       <div className="text-[11px] text-midnight-500">
                         Assigné le {formatDate(a.assignedAt)}

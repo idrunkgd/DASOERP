@@ -167,6 +167,91 @@ export async function assignTest(formData: FormData) {
   return { ok: true, assignmentId: created.id, magicToken: created.magicToken };
 }
 
+/**
+ * Supprime une affectation (assignation) d'un test à une personne.
+ *  - Autorisé tant que le candidat n'a pas déjà soumis (SUBMITTED) — sinon on
+ *    perdrait la copie et le score, ce qui ouvre la porte à des manipulations.
+ *    Dans ce cas précis l'admin doit passer par /tests/submissions.
+ *  - Supprime en cascade les réponses enregistrées (TestSubmission → ses rows).
+ */
+export async function deleteTestAssignment(assignmentId: string) {
+  const session = await requirePermission("tests.manage");
+  const existing = await (prisma as any).testAssignment.findUniqueOrThrow({
+    where: { id: assignmentId },
+    include: {
+      test: { select: { id: true, title: true } },
+      user:      { select: { firstName: true, lastName: true } },
+      candidate: { select: { id: true, firstName: true, lastName: true } }
+    }
+  });
+  if (existing.status === "COMPLETED") {
+    throw new Error(
+      "Cette affectation a été soumise — utilise le bouton Reset pour permettre un nouvel essai, ou passe par /tests/submissions."
+    );
+  }
+  await (prisma as any).testAssignment.delete({ where: { id: assignmentId } });
+  const target = existing.user
+    ? `${existing.user.firstName} ${existing.user.lastName}`
+    : existing.candidate
+      ? `${existing.candidate.firstName} ${existing.candidate.lastName}`
+      : "inconnu";
+  await logActivity({
+    actorId: session.user.id,
+    action: "DELETE",
+    entityType: "TestAssignment",
+    entityId: assignmentId,
+    message: `Affectation du test « ${existing.test.title} » à ${target} supprimée`
+  });
+  revalidatePath("/tests");
+  revalidatePath(`/tests/${existing.test.id}`);
+  if (existing.candidate?.id) revalidatePath(`/candidates/${existing.candidate.id}`);
+  return { ok: true };
+}
+
+/**
+ * Remet une affectation à zéro pour que la personne puisse refaire le test :
+ *  - Supprime la soumission (TestSubmission) et toutes les réponses associées
+ *  - Repasse le statut à PENDING
+ *  - Conserve le magicToken pour que le lien déjà transmis fonctionne toujours
+ */
+export async function resetTestAssignment(assignmentId: string) {
+  const session = await requirePermission("tests.manage");
+  const existing = await (prisma as any).testAssignment.findUniqueOrThrow({
+    where: { id: assignmentId },
+    include: {
+      test: { select: { id: true, title: true } },
+      user:      { select: { firstName: true, lastName: true } },
+      candidate: { select: { id: true, firstName: true, lastName: true } },
+      submission: { select: { id: true } }
+    }
+  });
+  await prisma.$transaction(async (tx) => {
+    if (existing.submission) {
+      await (tx as any).testSubmission.delete({ where: { id: existing.submission.id } });
+    }
+    await (tx as any).testAssignment.update({
+      where: { id: assignmentId },
+      data: { status: "PENDING", startedAt: null, completedAt: null }
+    });
+  });
+  const target = existing.user
+    ? `${existing.user.firstName} ${existing.user.lastName}`
+    : existing.candidate
+      ? `${existing.candidate.firstName} ${existing.candidate.lastName}`
+      : "inconnu";
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "TestAssignment",
+    entityId: assignmentId,
+    message: `Test « ${existing.test.title} » réinitialisé pour ${target} — la personne peut recommencer`
+  });
+  revalidatePath("/tests");
+  revalidatePath(`/tests/${existing.test.id}`);
+  if (existing.candidate?.id) revalidatePath(`/candidates/${existing.candidate.id}`);
+  return { ok: true };
+}
+
 // ─── Tests assignés à un user (perspective consultant /me/tests) ─────────
 
 export async function getMyAssignments(userId: string) {
