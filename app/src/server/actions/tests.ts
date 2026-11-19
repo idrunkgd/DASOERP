@@ -763,17 +763,68 @@ export async function deleteQuestion(questionId: string) {
     select: { testId: true, position: true, text: true }
   });
   if (!q) throw new Error("Question introuvable");
-  await prisma.testQuestion.delete({ where: { id: questionId } });
+
+  // Suppression + compactage des positions dans la même transaction pour
+  // éviter les trous dans la numérotation (Q1, Q2, Q4 → Q1, Q2, Q3).
+  // Le @@unique([testId, position]) est vérifié en fin de statement SQL,
+  // donc un updateMany global avec decrement passe sans conflit.
+  await prisma.$transaction(async (tx) => {
+    await tx.testQuestion.delete({ where: { id: questionId } });
+    await tx.testQuestion.updateMany({
+      where: { testId: q.testId, position: { gt: q.position } },
+      data:  { position: { decrement: 1 } }
+    });
+  });
+
   await logActivity({
     actorId: session.user.id,
     action: "DELETE",
     entityType: "TestQuestion",
     entityId: questionId,
-    message: `Question ${q.position} (${q.text.slice(0, 60)}…) supprimée`
+    message: `Question ${q.position} (${q.text.slice(0, 60)}…) supprimée — positions recompactées`
   });
   revalidatePath(`/tests/${q.testId}/edit`);
   revalidatePath(`/tests/${q.testId}`);
   return { ok: true };
+}
+
+/**
+ * Normalise les positions d'un test (1, 2, 3, …). Utile en one-shot pour les
+ * tests où des suppressions antérieures ont laissé des trous.
+ */
+export async function resequenceTestQuestions(testId: string) {
+  const session = await requirePermission("tests.manage");
+  const rows = await prisma.testQuestion.findMany({
+    where: { testId },
+    orderBy: { position: "asc" },
+    select: { id: true, position: true }
+  });
+  // Bascule d'abord en positions NÉGATIVES pour éviter les collisions avec
+  // le @@unique pendant la bascule finale.
+  await prisma.$transaction(async (tx) => {
+    for (let i = 0; i < rows.length; i++) {
+      await tx.testQuestion.update({
+        where: { id: rows[i].id },
+        data:  { position: -(i + 1) }
+      });
+    }
+    for (let i = 0; i < rows.length; i++) {
+      await tx.testQuestion.update({
+        where: { id: rows[i].id },
+        data:  { position: i + 1 }
+      });
+    }
+  });
+  await logActivity({
+    actorId: session.user.id,
+    action: "UPDATE",
+    entityType: "Test",
+    entityId: testId,
+    message: `Positions des questions renumérotées (1..${rows.length})`
+  });
+  revalidatePath(`/tests/${testId}/edit`);
+  revalidatePath(`/tests/${testId}`);
+  return { ok: true, count: rows.length };
 }
 
 export async function deleteTest(testId: string) {

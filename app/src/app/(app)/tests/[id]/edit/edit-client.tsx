@@ -47,7 +47,15 @@ export function EditQuestionsClient({
     startAdd(async () => {
       try {
         await deleteQuestion(id);
-        setQuestions((prev) => prev.filter((q) => q.id !== id));
+        setQuestions((prev) => {
+          const removed = prev.find((q) => q.id === id);
+          if (!removed) return prev;
+          // Mirror côté UI du compactage serveur : décrémente les positions
+          // > celle supprimée pour qu'on voit immédiatement Q1, Q2, Q3, …
+          return prev
+            .filter((q) => q.id !== id)
+            .map((q) => (q.position > removed.position ? { ...q, position: q.position - 1 } : q));
+        });
         if (editingId === id) setEditingId(null);
         toast.success("Question supprimée");
       } catch (e: any) {

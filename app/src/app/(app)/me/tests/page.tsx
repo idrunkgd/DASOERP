@@ -1,17 +1,20 @@
 import Link from "next/link";
-import { requireSession } from "@/lib/rbac";
+import { requireSession, getUserEffectivePermissions } from "@/lib/rbac";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GraduationCap, CheckCircle2, Clock, AlertCircle, Play } from "lucide-react";
 import { getMyAssignments } from "@/server/actions/tests";
 import { domainLabel } from "@/lib/test-display";
 import { formatDate } from "@/lib/utils";
+import { DeleteAssignmentButton } from "../../tests/[id]/delete-assignment-button";
 
 export const dynamic = "force-dynamic";
 
 export default async function MyTestsPage() {
   const session = await requireSession();
   const assignments = await getMyAssignments(session.user.id);
+  const perms = await getUserEffectivePermissions(session.user.id, session.user.role);
+  const canManage = perms.includes("tests.manage");
 
   return (
     <div>
@@ -73,6 +76,14 @@ export default async function MyTestsPage() {
                 )}
                 {expired && (
                   <span className="badge-danger">Expiré</span>
+                )}
+                {canManage && (
+                  <DeleteAssignmentButton
+                    assignmentId={a.id}
+                    targetName={`vous (${a.test.title})`}
+                    canDelete={!completed}
+                    canReset={inProgress || completed}
+                  />
                 )}
               </li>
             );
