@@ -2,8 +2,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Save, Loader2, Pencil, Check, X, Plus, Trash2 } from "lucide-react";
-import { updateQuestion, addQuestion, deleteQuestion } from "@/server/actions/tests";
+import { Save, Loader2, Pencil, Check, X, Plus, Trash2, ListOrdered } from "lucide-react";
+import { updateQuestion, addQuestion, deleteQuestion, resequenceTestQuestions } from "@/server/actions/tests";
 
 type Choice = { id: string; position: number; text: string; isCorrect: boolean };
 type Question = {
@@ -42,6 +42,27 @@ export function EditQuestionsClient({
     });
   }
 
+  // Détecte s'il y a des trous dans la numérotation (ex: 1,2,4,5 → trou en 3).
+  // Permet de proposer le bouton "Renuméroter" uniquement quand utile.
+  const hasGaps = (() => {
+    if (questions.length === 0) return false;
+    const sorted = [...questions].sort((a, b) => a.position - b.position);
+    return sorted.some((q, i) => q.position !== i + 1);
+  })();
+
+  function resequence() {
+    if (!confirm("Renuméroter toutes les questions 1, 2, 3… ?")) return;
+    startAdd(async () => {
+      try {
+        const r = await resequenceTestQuestions(testId);
+        toast.success(`${r.count} questions renumérotées`);
+        router.refresh();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Erreur");
+      }
+    });
+  }
+
   function removeQuestion(id: string) {
     if (!confirm("Supprimer cette question définitivement ?")) return;
     startAdd(async () => {
@@ -66,6 +87,22 @@ export function EditQuestionsClient({
 
   return (
     <>
+      {hasGaps && (
+        <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-sm text-amber-900">
+            La numérotation des questions a des trous (suppressions antérieures). Tu peux la compacter.
+          </p>
+          <button
+            type="button"
+            onClick={resequence}
+            disabled={addPending}
+            className="btn-secondary btn-sm flex items-center gap-1"
+          >
+            {addPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ListOrdered className="w-3.5 h-3.5" />}
+            Renuméroter 1..{questions.length}
+          </button>
+        </div>
+      )}
       <ol className="space-y-3">
         {questions.map((q) => (
           <QuestionEditor
