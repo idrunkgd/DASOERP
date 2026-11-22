@@ -77,6 +77,36 @@ export default async function CashflowPage({
   const focusMonthStart = new Date(Date.UTC(year, focusMonth - 1, 1));
   const focusMonthEnd = new Date(Date.UTC(year, focusMonth, 0, 23, 59, 59));
 
+  // Contrats de leasing → même source que le tableau annuel pour aligner les
+  // libellés des lignes voiture ("Plaque — Prénom Nom", avec la plaque et le
+  // consultant assigné ACTUELS, pas les valeurs figées du label stocké).
+  const leasingContractsForMonth = await prisma.leasingContract.findMany({
+    where: { recurringExpenseId: { not: null } },
+    select: {
+      recurringExpenseId: true,
+      vehicle: {
+        select: {
+          id: true,
+          plate: true,
+          assignments: {
+            where: { endDate: null },
+            take: 1,
+            select: {
+              user: { select: { firstName: true, lastName: true } }
+            }
+          }
+        }
+      }
+    }
+  });
+  const dynamicVehicleLabels = new Map<string, string>();
+  for (const lc of leasingContractsForMonth) {
+    if (!lc.recurringExpenseId || !lc.vehicle) continue;
+    const u = lc.vehicle.assignments[0]?.user;
+    const who = u ? `${u.firstName} ${u.lastName}` : "Non attribué";
+    dynamicVehicleLabels.set(lc.recurringExpenseId, `${lc.vehicle.plate} — ${who}`);
+  }
+
   const [milestonesThisMonth, recurringForMonth, recurringMonthEntries, oneOffsThisMonth] =
     await Promise.all([
       prisma.billingMilestone.findMany({
@@ -305,7 +335,9 @@ export default async function CashflowPage({
             return {
               recurring: {
                 id: r.id,
-                label: r.label,
+                // Même libellé que le tableau annuel : "Plaque — Prénom Nom"
+                // calculé dynamiquement depuis le contrat leasing + assignment actif.
+                label: dynamicVehicleLabels.get(r.id) ?? r.label,
                 category: r.category,
                 defaultAmount: Number(r.defaultAmount),
                 isIncome: r.isIncome,
